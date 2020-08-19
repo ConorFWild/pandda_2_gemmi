@@ -239,38 +239,32 @@ class Config:
                             default="",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--exclude_from_z_map_analysis",
                             default="",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--exclude_from_characterisation",
                             default="",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--only_datasets",
                             default="",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--ignore_datasets",
                             default="",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # Output
         parser.add_argument("--out_dir",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # params
@@ -279,37 +273,31 @@ class Config:
                             default=True,
                             type=bool,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--high_res_upper_limit",
                             default=0.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--high_res_lower_limit",
                             default=4.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--high_res_increment",
                             default=0.05,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--max_shell_datasets",
                             default=60,
                             type=int,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--min_characterisation_datasets",
                             default=60,
                             type=int,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
 
@@ -318,19 +306,16 @@ class Config:
                             default="FWT,PHWT",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--all_data_are_valid_values",
                             default=True,
                             type=bool,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--low_resolution_completeness",
                             default=4.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # Filters
@@ -338,13 +323,11 @@ class Config:
                             default=1.5,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--max_rfree",
                             default=0.4,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # Maps
@@ -352,25 +335,21 @@ class Config:
                             default=0.25,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--grid_spacing",
                             default=0.5,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--padding",
                             default=3,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--density_scaling",
                             default="sigma",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # masks
@@ -378,31 +357,26 @@ class Config:
                             default=1.8,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--inner_mask",
                             default=1.8,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--inner_mask_symmetry",
                             default=3.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--contour_level",
                             default=2.5,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--negative_values",
                             default=False,
                             type=bool,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # blob finding
@@ -410,19 +384,16 @@ class Config:
                             default=10.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--min_blob_z_peak",
                             default=3.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--clustering_cutoff",
                             default=1.732,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # background correction
@@ -430,25 +401,21 @@ class Config:
                             default=0.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--max_bdc",
                             default=1.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--increment",
                             default=0.01,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--output_multiplier",
                             default=1.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         # processing
@@ -456,25 +423,21 @@ class Config:
                             default=12,
                             type=int,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--process_shells",
                             default="luigi",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--h_vmem",
                             default=100,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
         parser.add_argument("--m_mem_free",
                             default=5,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
-                            required=True
                             )
 
         args = parser.parse_args()
