@@ -531,13 +531,17 @@ class Alignment:
                     prev_res = chain.previous_residue(res)
                     next_res = chain.next_residue(res)
 
-                    prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    if prev_res:
+                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
                     current_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
-                    next_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    if next_res:
+                        next_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
 
-                    prev_res_ref = reference.structure[prev_res_id]
+                    if prev_res:
+                        prev_res_ref = reference.structure[prev_res_id]
                     current_res_ref = reference.structure[current_res_id]
-                    next_res_ref = reference.structure[next_res_id]
+                    if next_res:
+                        next_res_ref = reference.structure[next_res_id]
 
                     if not prev_res:
                         transform = Transform.from_start_residues(res, next_res,

@@ -27,12 +27,12 @@ def main():
     print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
     print("\tAfter filters {} datasets".format(len(datasets.datasets)))
-    
     datasets: Datasets = datasets.scale_reflections()  # TODO
     print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
 
     reference: Reference = Reference.from_datasets(datasets)
     print(reference)
+
     datasets: Datasets = datasets.remove_dissimilar_models(reference,
                                                            config.params.filtering.max_rmsd_to_reference,
                                                            )
