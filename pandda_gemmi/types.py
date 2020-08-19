@@ -1053,8 +1053,13 @@ class RMSD:
         array_1_mean = np.mean(array_1, axis=0)
         array_2_mean = np.mean(array_2, axis=0)
 
+        print("#################################")
+        print(array_1)
+        print(array_1_mean)
+
         array_1_demeaned = array_1-array_1_mean
         array_2_demeaned = array_2-array_2_mean
+        print(array_1_demeaned)
 
         print(array_1_demeaned-array_2_demeaned)
 
