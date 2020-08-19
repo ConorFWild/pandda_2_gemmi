@@ -69,6 +69,9 @@ class RFree:
                 print(item.loop.tags)
             elif item.frame is not None:
                 print('frame', item.frame)
+
+        print(structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free"))
+        document = structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")
         # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
         regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
