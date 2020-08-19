@@ -203,7 +203,6 @@ class Datasets:
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
         print(max_rmsd_to_reference)
 
-
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.structure,
                                                               )).to_float() < max_rmsd_to_reference,
@@ -1015,6 +1014,9 @@ class RMSD:
     def from_structures(structure_1: Structure, structure_2: Structure):
         distances = []
 
+        positions_1 = []
+        positions_2 = []
+
         for residues_id in structure_1.residue_ids():
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
@@ -1027,16 +1029,37 @@ class RMSD:
             print(res_1_ca_pos)
             print(res_2_ca_pos)
 
+            positions_1.append(res_1_ca_pos)
+            positions_2.append(res_2_ca_pos)
+
             distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
-        distances_array = np.array(distances)
-        print(distances_array)
-        print((1.0 / distances_array.size) )
-        rmsd = np.sqrt((1.0 / distances_array.size) * np.sum(np.square(distances_array)))
+        positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
+        positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
 
-        print(rmsd)
+        return RMSD.from_arrays(positions_1_array, positions_2_array)
+        #
+        # distances_array = np.array(distances)
+        # print(distances_array)
+        # print((1.0 / distances_array.size) )
+        # rmsd = np.sqrt((1.0 / distances_array.size) * np.sum(np.square(distances_array)))
+        #
+        # print(rmsd)
+        #
+        # return RMSD(rmsd)
 
-        return RMSD(rmsd)
+    @staticmethod
+    def from_arrays(array_1, array_2):
+        array_1_mean = np.mean(array_1, axis=0)
+        array_2_mean = np.mean(array_2, axis=0)
+
+        array_1_demeaned = array_1-array_1_mean
+        array_2_demeaned = array_2-array_2_mean
+
+        alignment = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
+
+        return RMSD(alignment.rmsd)
+
 
     def to_float(self):
         return self.rmsd
