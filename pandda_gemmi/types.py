@@ -55,6 +55,7 @@ class RFree:
 
     @staticmethod
     def from_structure(structure: Structure):
+        print(dir(structure.structure))
         regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
         string = structure.structure.raw_remarks
         matches = re.findall(regex,
@@ -1013,11 +1014,9 @@ class RMSD:
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
 
-            print(res_1)
             res_1_ca = res_1["CA"][0]
             res_2_ca = res_2["CA"][0]
 
-            print(res_2_ca)
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
 
