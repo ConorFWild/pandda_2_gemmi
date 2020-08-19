@@ -201,6 +201,9 @@ class Datasets:
         return self.datasets[item]
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
+        print(max_rmsd_to_reference)
+
+
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.structure,
                                                               )).to_float() < max_rmsd_to_reference,
@@ -1026,6 +1029,8 @@ class RMSD:
 
         distances_array = np.array(distances)
         rmsd = np.sqrt((1 / distances_array.size) * np.sum(np.square(distances_array)))
+
+        print(rmsd)
 
         return RMSD(rmsd)
 
