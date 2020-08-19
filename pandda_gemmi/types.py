@@ -904,6 +904,7 @@ class DataDirs:
 
     @staticmethod
     def from_dir(directory: Path):
+        print(directory)
         dataset_dir_paths = list(directory.glob("*"))
         print(dataset_dir_paths)
 
