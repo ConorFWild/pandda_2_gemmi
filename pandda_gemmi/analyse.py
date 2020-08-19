@@ -13,6 +13,7 @@ def main():
                                                             )
 
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
+    print(datasets)
     reference: Reference = Reference.from_datasets(datasets)
 
     datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
