@@ -23,6 +23,11 @@ def main():
     datasets: Datasets = datasets.remove_low_resolution_datasets(
         config.params.diffraction_data.low_resolution_completeness)
     print("\tAfter filters (low resolution) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
+    print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
+    print("\tAfter filters {} datasets".format(len(datasets.datasets)))
+    
     datasets: Datasets = datasets.scale_reflections()  # TODO
     print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
 
@@ -33,12 +38,10 @@ def main():
                                                            )
     print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
 
-    datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
-    print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
+
     datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
     print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
-    datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
-    print("\tAfter filters {} datasets".format(len(datasets.datasets)))
+
 
 
     grid: Grid = Grid.from_reference(reference)
