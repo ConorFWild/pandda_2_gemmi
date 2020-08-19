@@ -285,6 +285,7 @@ class Datasets:
 
 @dataclasses.dataclass()
 class Reference:
+    dtag: Dtag
     structure: Structure
     reflections: Reflections
 
@@ -301,7 +302,8 @@ class Reference:
         min_resolution_structure = datasets[min_resolution_dtag].structure
         min_resolution_reflections = datasets[min_resolution_dtag].reflections
 
-        return Reference(min_resolution_structure,
+        return Reference(min_resolution_dtag,
+                         min_resolution_structure,
                          min_resolution_reflections,
                          )
 

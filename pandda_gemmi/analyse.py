@@ -16,6 +16,8 @@ def main():
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
     print("\tGot {} datasets".format(len(datasets.datasets)))
     reference: Reference = Reference.from_datasets(datasets)
+    print(reference)
+    exit()
 
     datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
