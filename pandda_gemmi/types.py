@@ -56,16 +56,15 @@ class RFree:
     @staticmethod
     def from_structure(structure: Structure):
         print(list(structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free"))[0])
-        document = structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")
+        rfree = structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")
         # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
-        regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
-        string = structure.structure.raw_remarks
-        matches = re.findall(regex,
-                             string,
-                             )
-
-        rfree = float(matches[0])
+        # regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
+        # matches = re.findall(regex,
+        #                      string,
+        #                      )
+        #
+        # rfree = float(matches[0])
 
         return RFree(rfree)
 
