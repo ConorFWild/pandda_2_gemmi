@@ -66,7 +66,7 @@ class RFree:
                 print('pair', item.pair)
             elif item.loop is not None:
                 print('loop', item.loop)
-                print([x for x in item.loop])
+                print(item.loop.tags)
             elif item.frame is not None:
                 print('frame', item.frame)
         # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
