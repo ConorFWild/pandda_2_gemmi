@@ -964,16 +964,16 @@ class PanDDAFSModel:
     processed_datasets: ProcessedDatasets
 
     @staticmethod
-    def from_dir(pandda_dir: Path,
-                 data_dirs_path: Path,
+    def from_dir(input_data_dirs: Path,
+                 output_out_dir: Path,
                  ):
-        analyses = Analyses.from_pandda_dir(pandda_dir)
-        data_dirs = DataDirs.from_dir(data_dirs_path)
+        analyses = Analyses.from_pandda_dir(output_out_dir)
+        data_dirs = DataDirs.from_dir(input_data_dirs)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
-                                                              pandda_dir / PANDDA_PROCESSED_DATASETS_DIR,
+                                                              output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )
 
-        return PanDDAFSModel(pandda_dir=pandda_dir,
+        return PanDDAFSModel(pandda_dir=output_out_dir,
                              data_dirs=data_dirs,
                              analyses=analyses,
                              processed_datasets=processed_datasets,
