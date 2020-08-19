@@ -20,10 +20,16 @@ from pandda_gemmi.config import *
 class Dtag:
     dtag: str
 
+    def __hash__(self):
+        return hash(self.dtag)
+
 
 @dataclasses.dataclass()
 class EventIDX:
     event_idx: int
+    
+    def __hash__(self):
+        return hash(self.event_idx)
 
 
 @dataclasses.dataclass()
@@ -37,6 +43,8 @@ class ResidueID:
                          chain.name,
                          )
 
+    def __hash__(self):
+        return hash((self.chain, self.insertion))
 
 @dataclasses.dataclass()
 class RFree:
