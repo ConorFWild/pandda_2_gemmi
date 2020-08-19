@@ -277,7 +277,7 @@ class Reference:
             resolutions[dtag] = datasets[dtag].reflections.resolution()
 
         min_resolution_dtag = min(resolutions,
-                                  key=lambda x: x.to_float(),
+                                  key=lambda dtag: resolutions[dtag].to_float(),
                                   )
 
         min_resolution_structure = datasets[min_resolution_dtag].structure
