@@ -11,6 +11,7 @@ def main():
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
                                                             )
+    print(pandda_fs_model)
 
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
     print(datasets)
