@@ -895,9 +895,9 @@ class DatasetDir:
     ligand_dir: LigandDir
 
     @staticmethod
-    def from_path(path: Path):
-        input_pdb_file: Path = path / PANDDA_PDB_FILE
-        input_mtz_file: Path = path / PANDDA_MTZ_FILE
+    def from_path(path: Path, input_settings: Input):
+        input_pdb_file: Path = next(path.glob(input_settings.pdb_regex))
+        input_mtz_file: Path = next(path.glob(input_settings.mtz_regex))
         ligand_dir: LigandDir = LigandDir.from_path(path / PANDDA_LIGAND_FILES_DIR)
 
         return DatasetDir(input_pdb_file=input_pdb_file,
