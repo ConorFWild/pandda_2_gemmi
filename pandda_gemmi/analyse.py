@@ -31,6 +31,7 @@ def main():
     datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
     print("\tAfter filters {} datasets".format(len(datasets.datasets)))
 
+
     grid: Grid = Grid.from_reference(reference)
 
     alignments: Alignments = Alignments.from_datasets(reference,
