@@ -15,9 +15,7 @@ def main():
 
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
     print("\tGot {} datasets".format(len(datasets.datasets)))
-    reference: Reference = Reference.from_datasets(datasets)
-    print(reference)
-    exit()
+
 
     datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
@@ -27,6 +25,9 @@ def main():
     print("\tAfter filters (low resolution) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.scale_reflections()  # TODO
     print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
+
+    reference: Reference = Reference.from_datasets(datasets)
+    print(reference)
     datasets: Datasets = datasets.remove_dissimilar_models(reference,
                                                            config.params.filtering.max_rmsd_to_reference,
                                                            )
