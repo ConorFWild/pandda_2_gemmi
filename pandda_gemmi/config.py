@@ -306,8 +306,8 @@ class Config:
                             required=True
                             )
         parser.add_argument("--min_characterisation_datasets",
-                            default=int,
-                            type=60,
+                            default=60,
+                            type=int,
                             help="The directory for output and intermediate files to be saved to",
                             required=True
                             )
