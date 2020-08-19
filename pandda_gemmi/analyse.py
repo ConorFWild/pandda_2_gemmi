@@ -44,8 +44,8 @@ def main():
         zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                         xmaps=xmaps,
                                         )
-        clusters: Clusters = Clusters.from_Zmaps(zmaps)
 
+        clusters: Clusters = Clusters.from_Zmaps(zmaps)
         clusters: Clusters = clusters.filter_size_and_peak()
         clusters: Clusters = clusters.filter_distance_from_protein()
         clusters: Clusters = clusters.group_close()
