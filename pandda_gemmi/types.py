@@ -56,6 +56,8 @@ class RFree:
     @staticmethod
     def from_structure(structure: Structure):
         print(dir(structure.structure))
+        print(structure.structure.info)
+        print(structure.structure.make_mmcif_document())
         regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
         string = structure.structure.raw_remarks
         matches = re.findall(regex,
