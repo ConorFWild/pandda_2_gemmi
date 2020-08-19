@@ -1010,11 +1010,11 @@ class RMSD:
         distances = []
 
         for residues_id in structure_1.residue_ids():
-            res_1 = structure_1[residues_id]
-            res_2 = structure_2[residues_id]
+            res_1 = structure_1[residues_id][0]
+            res_2 = structure_2[residues_id][0]
 
-            res_1_ca = res_1["ca"]
-            res_2_ca = res_2["ca"]
+            res_1_ca = res_1["CA"]
+            res_2_ca = res_2["CA"]
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
