@@ -133,13 +133,13 @@ class Reflections:
         return self.reflections.spacegroup
 
     def columns(self):
-        return self.reflections.columns()
+        return self.reflections.column_labels()
 
     def missing(self, structure_factors: StructureFactors, resolution: Resolution) -> pd.DataFrame:
         all_data = np.array(self.reflections, copy=False)
         resolution_array = self.reflections.make_d_array()
 
-        table = pd.DataFrame(data=all_data, columns=self.columns())
+        table = pd.DataFrame(data=all_data, columns=self.reflections.column_labels())
 
         reflections_in_resolution = table[resolution_array >= resolution.to_float()]
 
@@ -199,7 +199,7 @@ class Datasets:
                                                  structure_factors: StructureFactors,
                                                  ) -> Datasets:
         new_dtags = filter(lambda dtag: (structure_factors.f in self.datasets[dtag].reflections.columns()) and (
-                structure_factors.phi in self.datasets[dtag].reflections.columns),
+                structure_factors.phi in self.datasets[dtag].reflections.columns()),
                            self.datasets,
                            )
 
