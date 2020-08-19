@@ -6,6 +6,7 @@ from pandda_gemmi.types import *
 def main():
     config: Config = Config.from_args()
     log: Log = Log.from_dir(config.output.out_dir)
+    print(config)
 
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
