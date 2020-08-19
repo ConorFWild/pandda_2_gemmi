@@ -59,8 +59,12 @@ class RFree:
         print(structure.structure.info)
         print(structure.structure.make_mmcif_document())
         print(structure.structure.make_mmcif_headers())
-        print([x for x in structure.structure.make_mmcif_document()])
-        print([[item for item in x] for x in structure.structure.make_mmcif_document()])
+
+
+        for item in structure.structure.make_mmcif_document()[0]:
+            if item.pair is not None:
+                print('pair', item.pair)
+        # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
         regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
         string = structure.structure.raw_remarks
