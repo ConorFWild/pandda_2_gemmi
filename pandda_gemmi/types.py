@@ -302,7 +302,7 @@ class Partitioning:
 
         array = np.array(grid, copy=False)
 
-        spacing = np.array([grid.nu.grid.nv, grid.nw])
+        spacing = np.array([grid.nu, grid.nv, grid.nw])
 
         poss = []
         res_indexes = {}
