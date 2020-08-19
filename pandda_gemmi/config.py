@@ -205,7 +205,7 @@ class Output:
 
     @classmethod
     def from_args(cls, args):
-        return cls(out_dir=args.out_dir)
+        return cls(out_dir=Path(args.out_dir))
 
 
 @dataclasses.dataclass()
@@ -265,6 +265,7 @@ class Config:
         parser.add_argument("--out_dir",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
+                            required=True,
                             )
 
         # params
