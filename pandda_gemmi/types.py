@@ -42,7 +42,7 @@ class ResidueID:
     def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
         return ResidueID(model.name,
                          chain.name,
-                         res.seqid.num,
+                         str(res.seqid.num),
                          )
 
     def __hash__(self):
@@ -1018,7 +1018,7 @@ class RMSD:
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
-    
+
             distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
         distances_array = np.array(distances)
