@@ -329,6 +329,22 @@ class Config:
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
+        parser.add_argument("--max_wilson_plot_z_score",
+                            default=5.0,
+                            type=float,
+                            help="The directory for output and intermediate files to be saved to",
+                            )
+        parser.add_argument("--same_space_group_only",
+                            default=True,
+                            type=bool,
+                            help="The directory for output and intermediate files to be saved to",
+                            )
+        parser.add_argument("--similar_models_only",
+                            default=False,
+                            type=bool,
+                            help="The directory for output and intermediate files to be saved to",
+                            )
+
 
         # Maps
         parser.add_argument("--resolution_factor",
