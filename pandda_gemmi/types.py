@@ -1056,9 +1056,9 @@ class RMSD:
         array_1_demeaned = array_1-array_1_mean
         array_2_demeaned = array_2-array_2_mean
 
-        alignment = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
+        rotation, rmsd, sensitivity = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
 
-        return RMSD(alignment.rmsd)
+        return RMSD(rmsd)
 
 
     def to_float(self):
