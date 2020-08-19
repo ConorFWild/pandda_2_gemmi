@@ -66,7 +66,7 @@ class RFree:
         #
         # rfree = float(matches[0])
 
-        return RFree(rfree)
+        return RFree(float(rfree))
 
     def to_float(self):
         return self.rfree
