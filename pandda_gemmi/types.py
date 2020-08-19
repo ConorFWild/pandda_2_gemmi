@@ -911,7 +911,7 @@ class DataDirs:
     dataset_dirs: typing.Dict[Dtag, DatasetDir]
 
     @staticmethod
-    def from_dir(directory: Path):
+    def from_dir(directory: Path, input_settings: Input):
         print(directory)
         dataset_dir_paths = list(directory.glob("*"))
         print(dataset_dir_paths)
@@ -920,7 +920,7 @@ class DataDirs:
 
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
-            dataset_dir = DatasetDir.from_path(dataset_dir_path)
+            dataset_dir = DatasetDir.from_path(dataset_dir_path, input_settings)
             dataset_dirs[dtag] = dataset_dir
 
         return DataDirs(dataset_dirs)
@@ -974,9 +974,10 @@ class PanDDAFSModel:
     @staticmethod
     def from_dir(input_data_dirs: Path,
                  output_out_dir: Path,
+                 input_settings: Input,
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
-        data_dirs = DataDirs.from_dir(input_data_dirs)
+        data_dirs = DataDirs.from_dir(input_data_dirs, input_settings)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )

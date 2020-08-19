@@ -10,6 +10,7 @@ def main():
 
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
+                                                            config.input,
                                                             )
     print(pandda_fs_model)
 
