@@ -64,6 +64,10 @@ class RFree:
         for item in structure.structure.make_mmcif_document()[0]:
             if item.pair is not None:
                 print('pair', item.pair)
+            elif item.loop is not None:
+                print('loop', item.loop)
+            elif item.frame is not None:
+                print('frame', item.frame)
         # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
         regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
