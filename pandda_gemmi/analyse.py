@@ -1,5 +1,5 @@
 from pandda_gemmi.config import Config
-from pandda_gemmi.logging import Log
+from pandda_gemmi.logs import Log
 from pandda_gemmi.types import *
 
 
