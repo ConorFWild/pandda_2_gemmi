@@ -1024,6 +1024,8 @@ class RMSD:
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
+            print(res_1_ca_pos)
+            print(res_2_ca_pos)
 
             distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
