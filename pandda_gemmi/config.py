@@ -65,7 +65,7 @@ class ResolutionBinning:
 
 @dataclasses.dataclass()
 class DiffractionData:
-    structure_factors: StructureFactors = StructureFactors.from_string("FWT,PHWT"),
+    structure_factors: StructureFactors = StructureFactors.from_string("FWT,PHWT")
     low_resolution_completeness: float = 4.0
     all_data_are_valid_values: bool = True
 
