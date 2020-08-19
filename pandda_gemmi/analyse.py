@@ -12,7 +12,6 @@ def main():
                                                             config.output.out_dir,
                                                             config.input,
                                                             )
-    print(pandda_fs_model)
 
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
     print("\tGot {} datasets".format(len(datasets.datasets)))

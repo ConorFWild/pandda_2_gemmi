@@ -27,24 +27,27 @@ class Dtag:
 @dataclasses.dataclass()
 class EventIDX:
     event_idx: int
-    
+
     def __hash__(self):
         return hash(self.event_idx)
 
 
 @dataclasses.dataclass()
 class ResidueID:
+    model: str
     chain: str
     insertion: str
 
     @staticmethod
-    def from_residue_chain(res: gemmi.Residue, chain: gemmi.Chain):
-        return ResidueID(res.seqid.num,
+    def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
+        return ResidueID(model.name,
                          chain.name,
+                         res.seqid.num,
                          )
 
     def __hash__(self):
-        return hash((self.chain, self.insertion))
+        return hash((self.model, self.chain, self.insertion))
+
 
 @dataclasses.dataclass()
 class RFree:
@@ -79,7 +82,17 @@ class Structure:
         return RFree.from_structure(self)
 
     def __getitem__(self, item: ResidueID):
-        return self.structure[item.chain][item.insertion]
+        return self.structure[item.model][item.chain][item.insertion]
+
+    def residue_ids(self):
+        residue_ids = []
+        for model in self.structure:
+            for chain in model:
+                for residue in chain.get_polymer():
+                    resid = ResidueID.from_residue_chain(model, chain, residue)
+                    residue_ids.append(resid)
+
+        return residue_ids
 
 
 @dataclasses.dataclass()
@@ -318,7 +331,7 @@ class Partitioning:
 
                     poss.append(fractional)
 
-                    res_indexes[i] = ResidueID.from_residue_chain(res, chain)
+                    res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
                     i = i + 1
 
         ca_position_array = np.array([[x for x in pos] for pos in poss])
@@ -511,9 +524,9 @@ class Alignment:
                     prev_res = chain.previous_residue(res)
                     next_res = chain.next_residue(res)
 
-                    prev_res_id = ResidueID.from_residue_chain(prev_res, chain)
-                    current_res_id = ResidueID.from_residue_chain(prev_res, chain)
-                    next_res_id = ResidueID.from_residue_chain(prev_res, chain)
+                    prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    current_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    next_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
 
                     prev_res_ref = reference.structure[prev_res_id]
                     current_res_ref = reference.structure[current_res_id]
@@ -598,7 +611,8 @@ class Shells:
         for dtag in sorted_dtags:
             res = datasets[dtag].reflections.resolution().resolution
 
-            if (len(shell_dtags) > resolution_binning.max_shell_datasets) or (res - shell_res > resolution_binning.high_res_increment):
+            if (len(shell_dtags) > resolution_binning.max_shell_datasets) or (
+                    res - shell_res > resolution_binning.high_res_increment):
                 shell = Shell(shell_dtags,
                               train_dtags,
                               Datasets({dtag: datasets[dtag] for dtag in datasets
@@ -992,21 +1006,20 @@ class RMSD:
     rmsd: float
 
     @staticmethod
-    def from_structures(structure_1, structure_2):
+    def from_structures(structure_1: Structure, structure_2: Structure):
         distances = []
 
-        for model_1, model_2 in zip(structure_1, structure_2):
+        for residues_id in structure_1.residue_ids():
+            res_1 = structure_1[residues_id]
+            res_2 = structure_2[residues_id]
 
-            for chain_1, chain_2 in zip(model_1, model_2):
+            res_1_ca = res_1["ca"]
+            res_2_ca = res_2["ca"]
 
-                for res_1, res_2 in zip(chain_1.get_polymer(), chain_2.get_polymer()):
-                    res_1_ca = res_1["ca"]
-                    res_2_ca = res_2["ca"]
-
-                    res_1_ca_pos = res_1.pos
-                    res_2_ca_pos = res_2.pos
-
-                    distances.append(res_1_ca_pos.dist(res_2_ca_pos))
+            res_1_ca_pos = res_1_ca.pos
+            res_2_ca_pos = res_2_ca.pos
+    
+            distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
         distances_array = np.array(distances)
         rmsd = np.sqrt((1 / distances_array.size) * np.sum(np.square(distances_array)))
