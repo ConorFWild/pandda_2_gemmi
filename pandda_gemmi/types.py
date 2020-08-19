@@ -1014,8 +1014,8 @@ class RMSD:
             res_2 = structure_2[residues_id][0]
 
             print(res_1)
-            res_1_ca = res_1["CA"]
-            res_2_ca = res_2["CA"]
+            res_1_ca = res_1["CA"][0]
+            res_2_ca = res_2["CA"][0]
 
             print(res_2_ca)
             res_1_ca_pos = res_1_ca.pos
