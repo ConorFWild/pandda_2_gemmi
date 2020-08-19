@@ -29,6 +29,7 @@ def main():
     datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
     datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
     datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
+    print("\tAfter filters {} datasets".format(len(datasets.datasets)))
 
     grid: Grid = Grid.from_reference(reference)
 
