@@ -1028,7 +1028,9 @@ class RMSD:
             distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
         distances_array = np.array(distances)
-        rmsd = np.sqrt((1 / distances_array.size) * np.sum(np.square(distances_array)))
+        print(distances_array)
+        print((1.0 / distances_array.size) )
+        rmsd = np.sqrt((1.0 / distances_array.size) * np.sum(np.square(distances_array)))
 
         print(rmsd)
 
