@@ -20,9 +20,12 @@ def main():
 
     datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
+    print("\tAfter filters (structure factors) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.remove_low_resolution_datasets(
         config.params.diffraction_data.low_resolution_completeness)
+    print("\tAfter filters (low resolution) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.scale_reflections()  # TODO
+    print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.remove_dissimilar_models(reference,
                                                            config.params.filtering.max_rmsd_to_reference,
                                                            )
