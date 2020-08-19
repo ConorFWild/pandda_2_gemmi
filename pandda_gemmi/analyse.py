@@ -32,6 +32,7 @@ def main():
                                                            config.params.filtering.max_rmsd_to_reference,
                                                            )
     print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
+
     datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
     print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
     datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)

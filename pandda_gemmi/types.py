@@ -1028,8 +1028,8 @@ class RMSD:
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
-            print(res_1_ca_pos)
-            print(res_2_ca_pos)
+            # print(res_1_ca_pos)
+            # print(res_2_ca_pos)
 
             positions_1.append(res_1_ca_pos)
             positions_2.append(res_2_ca_pos)
@@ -1055,19 +1055,19 @@ class RMSD:
         array_1_mean = np.mean(array_1, axis=0)
         array_2_mean = np.mean(array_2, axis=0)
 
-        print("#################################")
-        print(array_1)
-        print(array_1_mean)
+        # print("#################################")
+        # print(array_1)
+        # print(array_1_mean)
 
         array_1_demeaned = array_1-array_1_mean
         array_2_demeaned = array_2-array_2_mean
-        print(array_1_demeaned)
-
-        print(array_1_demeaned-array_2_demeaned)
+        # print(array_1_demeaned)
+        #
+        # print(array_1_demeaned-array_2_demeaned)
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
 
-        print(rotation)
+        # print(rotation)
         print(rmsd)
 
         return RMSD(rmsd)
