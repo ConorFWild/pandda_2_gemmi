@@ -535,7 +535,7 @@ class Alignment:
                         prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
                     current_res_id = ResidueID.from_residue_chain(model, chain, res)
                     if next_res:
-                        next_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
 
 
                     if prev_res:
