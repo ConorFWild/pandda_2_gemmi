@@ -643,6 +643,10 @@ class Shells:
 
         return Shells(shells)
 
+    def __iter__(self):
+        for shell_num in self.shells:
+            yield self.shells[shell_num]
+
 
 @dataclasses.dataclass()
 class Xmap:
