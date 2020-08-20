@@ -537,6 +537,7 @@ class Alignment:
                     if next_res:
                         next_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
 
+
                     if prev_res:
                         prev_res_ref = reference.structure[prev_res_id]
                     current_res_ref = reference.structure[current_res_id]
