@@ -444,6 +444,7 @@ class Transform:
                       Transform.pos_to_list(current_ref_ca_pos),
                       Transform.pos_to_list(next_ref_ca_pos), ])
 
+
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
 
