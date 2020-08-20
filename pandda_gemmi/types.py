@@ -529,8 +529,9 @@ class Alignment:
         for model in dataset.structure.structure:
             for chain in model:
                 for res in chain.get_polymer():
-                    prev_res = chain.previous_residue(res)[0]
-                    next_res = chain.next_residue(res)[0]
+                    prev_res = chain.previous_residue(res)
+                    next_res = chain.next_residue(res)
+
 
                     if prev_res:
                         prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
