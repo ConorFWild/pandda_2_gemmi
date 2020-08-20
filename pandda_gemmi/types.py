@@ -617,7 +617,7 @@ class Shells:
 
         train_dtags = sorted_dtags[:resolution_binning.min_characterisation_datasets]
 
-        shells = []
+        shells = {}
         shell_num = 0
         shell_dtags = []
         shell_res = datasets[sorted_dtags[0]].reflections.resolution().resolution
@@ -640,6 +640,8 @@ class Shells:
                 shell_num = shell_num + 1
 
             shell_dtags.append(dtag)
+
+        return Shells(shells)
 
 
 @dataclasses.dataclass()
