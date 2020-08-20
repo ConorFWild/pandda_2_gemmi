@@ -552,7 +552,7 @@ class Alignment:
                         transform = Transform.from_finish_residues(prev_res, res,
                                                                    prev_res_ref, current_res_ref)
 
-                    else:
+                    if prev_res and next_res:
                         transform = Transform.from_residues(prev_res, res, next_res,
                                                             prev_res_ref, current_res_ref, next_res_ref,
                                                             )

@@ -43,13 +43,17 @@ def main():
     print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
 
 
-
+    print("Getting grid")
     grid: Grid = Grid.from_reference(reference)
+    print("\tGot grid")
 
+    print("Getting alignments")
     alignments: Alignments = Alignments.from_datasets(reference,
                                                       datasets)
+    print("\tGot alignments")
 
     # Shells
+    print("Getting shells...")
     for shell in Shells.from_datasets(datasets, config.params.resolution_binning):
         truncated_datasets: Datasets = datasets.truncate(resolution=shell.resolution)
         reference_map: ReferenceMap = ReferenceMap.from_reference(reference)
