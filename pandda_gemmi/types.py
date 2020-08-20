@@ -509,7 +509,7 @@ class Transform:
         de_meaned = matrix - mean
         de_meaned_ref = matrix_ref - mean_ref
 
-        rotation = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref).rotation
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref).rotation
 
         return Transform.from_translation_rotation(vec, rotation)
 
