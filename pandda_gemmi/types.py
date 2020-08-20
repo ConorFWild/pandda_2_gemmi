@@ -85,7 +85,7 @@ class Structure:
         return RFree.from_structure(self)
 
     def __getitem__(self, item: ResidueID):
-        return self.structure[item.model][item.chain][item.insertion][0]
+        return self.structure[item.model][item.chain][item.insertion]
 
     def residue_ids(self):
         residue_ids = []
@@ -528,7 +528,7 @@ class Alignment:
 
         for model in dataset.structure.structure:
             for chain in model:
-                for res_group in chain.get_polymer():
+                for res in chain.get_polymer():
                     prev_res = chain.previous_residue(res)[0]
                     next_res = chain.next_residue(res)[0]
 
@@ -540,10 +540,10 @@ class Alignment:
 
 
                     if prev_res:
-                        prev_res_ref = reference.structure[prev_res_id]
-                    current_res_ref = reference.structure[current_res_id]
+                        prev_res_ref = reference.structure[prev_res_id][0]
+                    current_res_ref = reference.structure[current_res_id][0]
                     if next_res:
-                        next_res_ref = reference.structure[next_res_id]
+                        next_res_ref = reference.structure[next_res_id][0]
 
                     if not prev_res:
                         transform = Transform.from_start_residues(res, next_res,
