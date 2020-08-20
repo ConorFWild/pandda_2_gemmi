@@ -42,14 +42,14 @@ def main():
     datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
     print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
 
-
     print("Getting grid")
     grid: Grid = Grid.from_reference(reference)
     print("\tGot grid")
 
     print("Getting alignments")
     alignments: Alignments = Alignments.from_datasets(reference,
-                                                      datasets)
+                                                      datasets,
+                                                      )
     print("\tGot alignments")
 
     # Shells
