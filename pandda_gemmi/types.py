@@ -429,20 +429,20 @@ class Transform:
 
     @staticmethod
     def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
-        previous_ca_pos = previous_res["ca"][0].pos
-        current_ca_pos = current_res["ca"][0].pos
-        next_ca_pos = next_res["ca"][0].pos
+        previous_ca_pos = previous_res["CA"][0].pos
+        current_ca_pos = current_res["CA"][0].pos
+        next_ca_pos = next_res["CA"][0].pos
 
-        previous_ref_ca_pos = previous_ref["ca"][0].pos
-        current_ref_ca_pos = current_ref["ca"][0].pos
-        next_ref_ca_pos = next_ref["ca"][0].pos
+        previous_ref_ca_pos = previous_ref["CA"][0].pos
+        current_ref_ca_pos = current_ref["CA"][0].pos
+        next_ref_ca_pos = next_ref["CA"][0].pos
 
-        matrix = [Transform.pos_to_list(previous_ca_pos),
+        matrix = np.array([Transform.pos_to_list(previous_ca_pos),
                   Transform.pos_to_list(current_ca_pos),
-                  Transform.pos_to_list(next_ca_pos), ]
-        matrix_ref = [Transform.pos_to_list(previous_ref_ca_pos),
+                  Transform.pos_to_list(next_ca_pos), ])
+        matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
                       Transform.pos_to_list(current_ref_ca_pos),
-                      Transform.pos_to_list(next_ref_ca_pos), ]
+                      Transform.pos_to_list(next_ref_ca_pos), ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -462,18 +462,19 @@ class Transform:
 
     @staticmethod
     def from_start_residues(current_res, next_res, current_ref, next_ref):
-        current_ca_pos = current_res["ca"][0].pos
-        next_ca_pos = next_res["ca"][0].pos
+        print(current_res)
+        current_ca_pos = current_res["CA"][0].pos
+        next_ca_pos = next_res["CA"][0].pos
 
-        current_ref_ca_pos = current_ref["ca"][0].pos
-        next_ref_ca_pos = next_ref["ca"][0].pos
+        current_ref_ca_pos = current_ref["CA"][0].pos
+        next_ref_ca_pos = next_ref["CA"][0].pos
 
-        matrix = [
+        matrix = np.array([
             Transform.pos_to_list(current_ca_pos),
-            Transform.pos_to_list(next_ca_pos), ]
-        matrix_ref = [
+            Transform.pos_to_list(next_ca_pos), ])
+        matrix_ref = np.array([
             Transform.pos_to_list(current_ref_ca_pos),
-            Transform.pos_to_list(next_ref_ca_pos), ]
+            Transform.pos_to_list(next_ref_ca_pos), ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -489,16 +490,16 @@ class Transform:
 
     @staticmethod
     def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
-        previous_ca_pos = previous_res["ca"][0].pos
-        current_ca_pos = current_res["ca"][0].pos
+        previous_ca_pos = previous_res["CA"][0].pos
+        current_ca_pos = current_res["CA"][0].pos
 
-        previous_ref_ca_pos = previous_ref["ca"][0].pos
-        current_ref_ca_pos = current_ref["ca"][0].pos
+        previous_ref_ca_pos = previous_ref["CA"][0].pos
+        current_ref_ca_pos = current_ref["CA"][0].pos
 
-        matrix = [Transform.pos_to_list(previous_ca_pos),
-                  Transform.pos_to_list(current_ca_pos), ]
-        matrix_ref = [Transform.pos_to_list(previous_ref_ca_pos),
-                      Transform.pos_to_list(current_ref_ca_pos), ]
+        matrix = np.array([Transform.pos_to_list(previous_ca_pos),
+                  Transform.pos_to_list(current_ca_pos), ])
+        matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
+                      Transform.pos_to_list(current_ref_ca_pos), ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
