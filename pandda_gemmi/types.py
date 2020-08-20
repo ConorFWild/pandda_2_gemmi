@@ -423,7 +423,7 @@ class Transform:
     def from_translation_rotation(translation, rotation):
         transform = gemmi.Transform()
         transform.vec.fromlist(translation.tolist())
-        transform.mat.fromlist(rotation.tolist())
+        transform.mat.fromlist(rotation.as_matrix().tolist())
 
         return Transform(transform)
 
@@ -1073,7 +1073,7 @@ class RMSD:
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
 
         # print(rotation)
-        print(rmsd)
+        # print(rmsd)
 
         return RMSD(rmsd)
 
