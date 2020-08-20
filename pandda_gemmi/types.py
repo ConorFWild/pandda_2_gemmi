@@ -55,7 +55,7 @@ class RFree:
 
     @staticmethod
     def from_structure(structure: Structure):
-        print(list(structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free"))[0])
+        # print(list(structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free"))[0])
         rfree = structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0]
         # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
