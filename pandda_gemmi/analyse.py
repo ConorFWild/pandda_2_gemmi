@@ -55,8 +55,12 @@ def main():
     # Shells
     print("Getting shells...")
     for shell in Shells.from_datasets(datasets, config.params.resolution_binning):
-        truncated_datasets: Datasets = datasets.truncate(resolution=shell.resolution)
-        reference_map: ReferenceMap = ReferenceMap.from_reference(reference)
+        truncated_datasets: Datasets = datasets.truncate(resolution=shell.res_min)
+        reference_map: ReferenceMap = ReferenceMap.from_reference(reference,
+                                                                  alignments[reference.dtag],
+                                                                  grid,
+                                                                  config.params.diffraction_data.structure_factors,
+                                                                  )
         xmaps: Xmaps = Xmaps.from_aligned_datasets(truncated_datasets,
                                                    alignments,
                                                    grid,

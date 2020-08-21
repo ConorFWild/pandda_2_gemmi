@@ -204,7 +204,7 @@ class Datasets:
         print(max_rmsd_to_reference)
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
-                                                              reference.structure,
+                                                              reference.dataset.structure,
                                                               )).to_float() < max_rmsd_to_reference,
                            self.datasets,
                            )
@@ -264,7 +264,7 @@ class Datasets:
 
     def remove_dissimilar_space_groups(self, reference: Reference):
         same_spacegroup_datasets = filter(
-            lambda dtag: self.datasets[dtag].reflections.spacegroup() == reference.reflections.spacegroup(),
+            lambda dtag: self.datasets[dtag].reflections.spacegroup() == reference.dataset.reflections.spacegroup(),
             self.datasets,
         )
 
@@ -286,8 +286,7 @@ class Datasets:
 @dataclasses.dataclass()
 class Reference:
     dtag: Dtag
-    structure: Structure
-    reflections: Reflections
+    dataset: Dataset
 
     @staticmethod
     def from_datasets(datasets: Datasets):
@@ -303,8 +302,7 @@ class Reference:
         min_resolution_reflections = datasets[min_resolution_dtag].reflections
 
         return Reference(min_resolution_dtag,
-                         min_resolution_structure,
-                         min_resolution_reflections,
+                         datasets[min_resolution_dtag]
                          )
 
 
@@ -327,7 +325,7 @@ class Partitioning:
         poss = []
         res_indexes = {}
         i = 0
-        for model in reference.structure.structure:
+        for model in reference.dataset.structure.structure:
             for chain in model:
                 for res in chain.get_polymer():
                     ca = res["CA"][0]
@@ -397,12 +395,12 @@ class Grid:
 
     @staticmethod
     def spacing_from_reference(reference: Reference):
-        spacing = reference.reflections.reflections.get_size_for_hkl()
+        spacing = reference.dataset.reflections.reflections.get_size_for_hkl()
         return spacing
 
     @staticmethod
     def unit_cell_from_reference(reference: Reference):
-        return reference.reflections.reflections.cell
+        return reference.dataset.reflections.reflections.cell
 
     def __getitem__(self, item):
         return self.grid[item]
@@ -438,12 +436,11 @@ class Transform:
         next_ref_ca_pos = next_ref["CA"][0].pos
 
         matrix = np.array([Transform.pos_to_list(previous_ca_pos),
-                  Transform.pos_to_list(current_ca_pos),
-                  Transform.pos_to_list(next_ca_pos), ])
+                           Transform.pos_to_list(current_ca_pos),
+                           Transform.pos_to_list(next_ca_pos), ])
         matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
-                      Transform.pos_to_list(current_ref_ca_pos),
-                      Transform.pos_to_list(next_ref_ca_pos), ])
-
+                               Transform.pos_to_list(current_ref_ca_pos),
+                               Transform.pos_to_list(next_ref_ca_pos), ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -498,9 +495,9 @@ class Transform:
         current_ref_ca_pos = current_ref["CA"][0].pos
 
         matrix = np.array([Transform.pos_to_list(previous_ca_pos),
-                  Transform.pos_to_list(current_ca_pos), ])
+                           Transform.pos_to_list(current_ca_pos), ])
         matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
-                      Transform.pos_to_list(current_ref_ca_pos), ])
+                               Transform.pos_to_list(current_ref_ca_pos), ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -540,10 +537,10 @@ class Alignment:
                         next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
 
                     if prev_res:
-                        prev_res_ref = reference.structure[prev_res_id][0]
-                    current_res_ref = reference.structure[current_res_id][0]
+                        prev_res_ref = reference.dataset.structure[prev_res_id][0]
+                    current_res_ref = reference.dataset.structure[current_res_id][0]
                     if next_res:
-                        next_res_ref = reference.structure[next_res_id][0]
+                        next_res_ref = reference.dataset.structure[next_res_id][0]
 
                     if not prev_res:
                         transform = Transform.from_start_residues(res, next_res,
@@ -735,9 +732,19 @@ class Zmaps:
 
 @dataclasses.dataclass()
 class ReferenceMap:
+    dtag: Dtag
+    xmap: Xmap
+
     @staticmethod
-    def from_reference(reference: Reference):
-        pass
+    def from_reference(reference: Reference, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
+        xmap = Xmap.from_aligned_dataset(reference.dataset,
+                                         alignment,
+                                         grid,
+                                         structure_factors,
+                                         )
+
+        return ReferenceMap(reference.dtag,
+                            xmap)
 
 
 @dataclasses.dataclass()
@@ -1071,8 +1078,8 @@ class RMSD:
         # print(array_1)
         # print(array_1_mean)
 
-        array_1_demeaned = array_1-array_1_mean
-        array_2_demeaned = array_2-array_2_mean
+        array_1_demeaned = array_1 - array_1_mean
+        array_2_demeaned = array_2 - array_2_mean
         # print(array_1_demeaned)
         #
         # print(array_1_demeaned-array_2_demeaned)
@@ -1083,7 +1090,6 @@ class RMSD:
         # print(rmsd)
 
         return RMSD(rmsd)
-
 
     def to_float(self):
         return self.rmsd
