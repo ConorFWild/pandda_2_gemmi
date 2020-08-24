@@ -201,7 +201,6 @@ class Datasets:
         return self.datasets[item]
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
-        print(max_rmsd_to_reference)
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.dataset.structure,
@@ -460,7 +459,6 @@ class Transform:
 
     @staticmethod
     def from_start_residues(current_res, next_res, current_ref, next_ref):
-        print(current_res)
         current_ca_pos = current_res["CA"][0].pos
         next_ca_pos = next_res["CA"][0].pos
 

@@ -55,23 +55,36 @@ def main():
     # Shells
     print("Getting shells...")
     for shell in Shells.from_datasets(datasets, config.params.resolution_binning):
+        print("\tWorking on shell {}".format(shell.res_min))
+
+        print("\tTruncating datasets...")
         truncated_datasets: Datasets = datasets.truncate(resolution=shell.res_min)
+
+        print("\tGetting reference map...")
         reference_map: ReferenceMap = ReferenceMap.from_reference(reference,
                                                                   alignments[reference.dtag],
                                                                   grid,
                                                                   config.params.diffraction_data.structure_factors,
                                                                   )
+
+        print("\tGetting maps...")
         xmaps: Xmaps = Xmaps.from_aligned_datasets(truncated_datasets,
                                                    alignments,
                                                    grid,
                                                    config.params.diffraction_data.structure_factors,
                                                    )
+
+        print("\tDetermining model...")
         model: Model = Model.from_xmaps(xmaps)
+
+        print("\tGetting zmaps...")
         zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                         xmaps=xmaps,
                                         )
 
+        print("\tGetting clusters from zmaps...")
         clusters: Clusters = Clusters.from_Zmaps(zmaps)
+        print("\t\tGot {} initial clusters!".format(len(clusters)))
         clusters: Clusters = clusters.filter_size_and_peak()
         clusters: Clusters = clusters.filter_distance_from_protein()
         clusters: Clusters = clusters.group_close()
