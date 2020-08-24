@@ -409,7 +409,7 @@ class Grid:
 class Transform:
     transform: gemmi.Transform
 
-    def transform(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]):
+    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]):
         transformed_positions = {}
         for index, position in positions.items():
             transformed_positions[index] = self.transform.apply(position)
@@ -663,7 +663,7 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].transform.apply(
+                                               gemmi.Position] = alignment[residue_id].apply(
                 alignment_positions)
 
             interpolated_values: typing.Dict[typing.Tuple[int],
