@@ -665,7 +665,8 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].transform(alignment_positions)
+                                               gemmi.Position] = alignment[residue_id].transform.apply(
+                alignment_positions)
 
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = unaligned_xmap.interpolate(transformed_positions)
