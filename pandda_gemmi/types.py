@@ -686,7 +686,7 @@ class Xmap:
     def interpolate_grid(grid: gemmi.FloatGrid, positions: typing.Dict[typing.Tuple[int],
                                                gemmi.Position]) -> typing.Dict[typing.Tuple[int],
                                              float]:
-        return {coord: grid.interpolate(pos) for coord, pos in positions.items()}
+        return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
 
 @dataclasses.dataclass()
 class Xmaps:
