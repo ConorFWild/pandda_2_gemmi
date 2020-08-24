@@ -409,7 +409,7 @@ class Grid:
 class Transform:
     transform: gemmi.Transform
 
-    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]):
+    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) ->typing.Dict[typing.Tuple[int], gemmi.Position]:
         transformed_positions = {}
         for index, position in positions.items():
             transformed_positions[index] = self.transform.apply(position)
@@ -653,7 +653,7 @@ class Xmap:
 
     @staticmethod
     def from_aligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
-        unaligned_xmap = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                 structure_factors.phi,
                                                                                 )
 
@@ -682,6 +682,11 @@ class Xmap:
 
         return Xmap(new_grid)
 
+    @staticmethod
+    def interpolate_grid(grid: gemmi.FloatGrid, positions: typing.Dict[typing.Tuple[int],
+                                               gemmi.Position]) -> typing.Dict[typing.Tuple[int],
+                                             float]:
+        return {coord: grid.interpolate(pos) for coord, pos in positions.items()}
 
 @dataclasses.dataclass()
 class Xmaps:
