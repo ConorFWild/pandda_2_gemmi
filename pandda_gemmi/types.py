@@ -667,7 +667,8 @@ class Xmap:
                 alignment_positions)
 
             interpolated_values: typing.Dict[typing.Tuple[int],
-                                             float] = unaligned_xmap.interpolate(transformed_positions)
+                                             float] = Xmap.interpolate_grid(unaligned_xmap,
+                                                                            transformed_positions)
 
             interpolated_values_tuple = (interpolated_values[0] + [index[0] for index in interpolated_values],
                                          interpolated_values[1] + [index[1] for index in interpolated_values],
