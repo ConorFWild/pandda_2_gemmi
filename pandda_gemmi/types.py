@@ -684,7 +684,9 @@ class Xmap:
 
         new_grid = grid.new_grid()
 
-        new_grid[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
+        grid_array = np.array(new_grid, copy=False)
+
+        grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
 
         return Xmap(new_grid)
 
