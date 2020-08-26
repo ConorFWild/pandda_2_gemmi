@@ -409,7 +409,8 @@ class Grid:
 class Transform:
     transform: gemmi.Transform
 
-    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[typing.Tuple[int], gemmi.Position]:
+    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
+        typing.Tuple[int], gemmi.Position]:
         transformed_positions = {}
         for index, position in positions.items():
             transformed_vector = self.transform.apply(position)
@@ -658,8 +659,8 @@ class Xmap:
     @staticmethod
     def from_aligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                structure_factors.phi,
-                                                                                )
+                                                                                                 structure_factors.phi,
+                                                                                                 )
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -674,11 +675,11 @@ class Xmap:
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
                                                                             transformed_positions)
 
-            interpolated_values_tuple = (interpolated_values[0] + [index[0] for index in interpolated_values],
-                                         interpolated_values[1] + [index[1] for index in interpolated_values],
-                                         interpolated_values[2] + [index[2] for index in interpolated_values],
-                                         interpolated_values[3] + [interpolated_values[index] for index in
-                                                                   interpolated_values],
+            interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
+                                         interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
+                                         interpolated_values_tuple[2] + [index[2] for index in interpolated_values],
+                                         interpolated_values_tuple[3] + [interpolated_values[index] for index in
+                                                                         interpolated_values],
                                          )
 
         new_grid = grid.new_grid()
@@ -689,9 +690,11 @@ class Xmap:
 
     @staticmethod
     def interpolate_grid(grid: gemmi.FloatGrid, positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position]) -> typing.Dict[typing.Tuple[int],
-                                             float]:
+                                                                       gemmi.Position]) -> typing.Dict[
+        typing.Tuple[int],
+        float]:
         return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
+
 
 @dataclasses.dataclass()
 class Xmaps:
