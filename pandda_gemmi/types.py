@@ -710,10 +710,13 @@ class Xmap:
         float]:
         return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
 
+    def to_array(self):
+        return np.array(self.xmap, copy=False)
+
 
 @dataclasses.dataclass()
 class Xmaps:
-    Xmaps: typing.Dict[Dtag, Xmap]
+    xmaps: typing.Dict[Dtag, Xmap]
 
     @staticmethod
     def from_datasets(datasets: Datasets):
@@ -733,12 +736,39 @@ class Xmaps:
 
         return Xmaps(xmaps)
 
+    def __len__(self):
+        return len(self.xmaps)
+
+    def __getitem__(self, item):
+        return self.xmaps[item]
+
 
 @dataclasses.dataclass()
 class Model:
+    std: np.array
+    stds: typing.Dict[Dtag, float]
+
     @staticmethod
     def from_xmaps(xmaps: Xmaps):
-        pass
+
+        arrays = {}
+        for dtag in xmaps:
+            xmap = xmaps[dtag]
+            xmap_array = xmap.to_array()
+            arrays[dtag] = xmap_array
+
+        stacked_arrays = np.stack(list(arrays.values()))
+        std = np.std(stacked_arrays, axis=0)
+
+        stds = {dtag: np.std(array) for dtag, array in arrays.items()}
+
+        return Model(std,
+                     stds,
+                     )
+
+
+
+
 
 
 @dataclasses.dataclass()
@@ -750,11 +780,14 @@ class Zmap:
 
 @dataclasses.dataclass()
 class Zmaps:
-    Zmaps: typing.Dict[Dtag, Zmap]
+    zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
     def from_xmaps(model: Model, xmaps: Xmaps):
         pass
+
+    def __len__(self):
+        return len(self.zmaps)
 
 
 @dataclasses.dataclass()

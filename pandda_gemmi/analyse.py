@@ -73,14 +73,17 @@ def main():
                                                    grid,
                                                    config.params.diffraction_data.structure_factors,
                                                    )
+        print("\t\tGot {} xmaps".format(len(xmaps)))
 
         print("\tDetermining model...")
         model: Model = Model.from_xmaps(xmaps)
+        print("\t\tGot model")
 
         print("\tGetting zmaps...")
         zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                         xmaps=xmaps,
                                         )
+        print("\t\tGot {} zmaps".format(len(zmaps)))
 
         print("\tGetting clusters from zmaps...")
         clusters: Clusters = Clusters.from_Zmaps(zmaps)
