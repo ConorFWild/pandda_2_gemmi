@@ -745,12 +745,12 @@ class Xmaps:
 
 @dataclasses.dataclass()
 class Model:
+    mean: np.array
     std: np.array
     stds: typing.Dict[Dtag, float]
 
     @staticmethod
     def from_xmaps(xmaps: Xmaps):
-
         arrays = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
@@ -758,17 +758,15 @@ class Model:
             arrays[dtag] = xmap_array
 
         stacked_arrays = np.stack(list(arrays.values()))
+        mean = np.mean(stacked_arrays, axis=0)
         std = np.std(stacked_arrays, axis=0)
 
         stds = {dtag: np.std(array) for dtag, array in arrays.items()}
 
-        return Model(std,
+        return Model(mean,
+                     std,
                      stds,
                      )
-
-
-
-
 
 
 @dataclasses.dataclass()
