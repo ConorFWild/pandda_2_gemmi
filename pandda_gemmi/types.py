@@ -409,10 +409,10 @@ class Grid:
 class Transform:
     transform: gemmi.Transform
 
-    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) ->typing.Dict[typing.Tuple[int], gemmi.Position]:
+    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[typing.Tuple[int], gemmi.Position]:
         transformed_positions = {}
         for index, position in positions.items():
-            transformed_positions[index] = self.transform.apply(position)
+            transformed_positions[index] = gemmi.Position(self.transform.apply(position))
 
         return transformed_positions
 
