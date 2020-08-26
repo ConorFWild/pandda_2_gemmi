@@ -124,7 +124,7 @@ class Reflections:
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
 
-    def truncate(self, resolution: Resolution):
+    def truncate(self, resolution: Resolution) -> Reflections:
         new_reflections = gemmi.MTZ()
 
         # Set dataset properties
@@ -144,6 +144,8 @@ class Reflections:
 
         # Update resolution
         new_reflections.update_reso()
+
+        return Reflections(new_reflections)
 
     def spacegroup(self):
         return self.reflections.spacegroup
@@ -179,6 +181,10 @@ class Dataset:
         return Dataset(structure=strucure,
                        reflections=reflections,
                        )
+
+    def truncate(self, resolution: Resolution) -> Dataset:
+        return Dataset(self.structure,
+                       self.reflections.truncate(resolution))
 
 
 @dataclasses.dataclass()
@@ -274,8 +280,15 @@ class Datasets:
     def remove_bad_wilson(self, max_wilson_plot_z_score: float):
         return self
 
-    def truncate(self, resolution):
-        pass
+    def truncate(self, resolution: Resolution) -> Datasets:
+        new_datasets = {}
+
+        for dtag in self.datasets:
+            truncated_dataset = self.datasets[dtag].truncate(resolution)
+
+            new_datasets[dtag] = truncated_dataset
+
+        return Datasets(new_datasets)
 
     def __iter__(self):
         for dtag in self.datasets:
