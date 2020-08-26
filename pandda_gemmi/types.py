@@ -412,7 +412,11 @@ class Transform:
     def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[typing.Tuple[int], gemmi.Position]:
         transformed_positions = {}
         for index, position in positions.items():
-            transformed_positions[index] = gemmi.Position(self.transform.apply(position))
+            transformed_vector = self.transform.apply(position)
+            transformed_positions[index] = gemmi.Position(transformed_vector[0],
+                                                          transformed_vector[1],
+                                                          transformed_vector[2],
+                                                          )
 
         return transformed_positions
 
