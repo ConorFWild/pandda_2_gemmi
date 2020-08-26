@@ -114,7 +114,7 @@ class StructureFactors:
 
 @dataclasses.dataclass()
 class Reflections:
-    reflections: gemmi.MTZ
+    reflections: gemmi.Mtz
 
     @staticmethod
     def from_file(file: Path) -> Reflections:
@@ -125,7 +125,7 @@ class Reflections:
         return Resolution.from_float(self.reflections.resolution_high())
 
     def truncate(self, resolution: Resolution) -> Reflections:
-        new_reflections = gemmi.MTZ()
+        new_reflections = gemmi.Mtz(with_base=False)
 
         # Set dataset properties
         new_reflections.spacegroup = self.reflections.spacegroup
