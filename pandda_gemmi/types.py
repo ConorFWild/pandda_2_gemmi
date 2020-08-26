@@ -129,7 +129,7 @@ class Reflections:
 
         # Set dataset properties
         new_reflections.spacegroup = self.reflections.spacegroup
-        new_reflections.set_cell_for_all(self.reflections.unit_cell)
+        new_reflections.set_cell_for_all(self.reflections.cell)
 
         # Add dataset
         new_reflections.add_dataset("truncated")
