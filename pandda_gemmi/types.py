@@ -742,6 +742,10 @@ class Xmaps:
     def __getitem__(self, item):
         return self.xmaps[item]
 
+    def __iter__(self):
+        for dtag in self.xmaps:
+            yield dtag
+
 
 @dataclasses.dataclass()
 class Model:
@@ -759,21 +763,91 @@ class Model:
 
         stacked_arrays = np.stack(list(arrays.values()))
         mean = np.mean(stacked_arrays, axis=0)
-        std = np.std(stacked_arrays, axis=0)
 
-        stds = {dtag: np.std(array) for dtag, array in arrays.items()}
+        # Estimate the dataset residual variability
+        sigma_is = {}
+        for dtag in xmaps:
+            sigma_i = Model.calculate_sigma_i(mean, arrays[dtag])
+            sigma_is[dtag] = sigma_i
+
+        # Estimate the adjusted pointwise variance 
+        sigma_s_m = Model.calculate_sigma_s_m(mean, arrays, sigma_is)
 
         return Model(mean,
-                     std,
-                     stds,
+                     sigma_is,
+                     sigma_s_m,
                      )
+
+    @staticmethod
+    def calculate_sigma_i(mean: np.array, array: np.array):
+        # TODO: Make sure this is actually equivilent
+        # Calculated from slope of array - mean distribution against normal(0,1)
+        residual = array - mean
+        sigma_i = np.std(residual)
+        return sigma_i
+
+    @staticmethod
+    def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is: typing.Dict[Dtag, float]):
+        # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
+
+        sigma_i_array = np.array(sigma_is.values())
+        func = lambda sigma_s_m: Model.log_liklihood(sigma_s_m, mean, arrays, sigma_i_array)
+        sigma_is = Model.vectorised_optimisation_bf(func,
+                                                    0,
+                                                    10,
+                                                    1000,
+                                                    )
+
+        return sigma_is
+
+    @staticmethod
+    def vectorised_optimisation_bf(func, start, stop, num):
+        xs = np.linspace(start, stop, num)
+
+        y_max = func(xs[0])
+
+        for x in xs[1:]:
+            y = func(x)
+            y_above_y_max_mask = y > y_max
+            y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
+
+        return y_max
+
+    @staticmethod
+    def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
+        """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
+        term1 = (obs_vals - est_mu) ** 2 / ((est_sigma ** 2 + obs_error ** 2) ** 2)
+        term2 = 1 / (est_sigma ** 2 + obs_error ** 2)
+        return np.sum(term1, axis=0) - np.sum(term2, axis=0)
+
+    def evaluate(self, xmap: Xmap, dtag: Dtag):
+        xmap_array = np.copy(xmap.to_array())
+
+        xmap_array = (xmap_array - self.mean) / (np.srt(np.square(self.std) + np.square(self.stds[dtag])))
+
+        return xmap_array
 
 
 @dataclasses.dataclass()
 class Zmap:
+    zmap: gemmi.FloatGrid
+
     @staticmethod
-    def from_xmap(model: Model, cmap: Xmap):
-        pass
+    def from_xmap(model: Model, xmap: Xmap):
+        zmap_array = model.evaluate(xmap)
+        zmap = Zmap.grid_from_template(xmap, zmap_array)
+        return Zmap(zmap)
+
+    @staticmethod
+    def grid_from_template(xmap: Xmap, zmap_array: np.array):
+        spacing = [xmap.xmap.nu, xmap.xmap.nv, xmap.xmap.nw, ]
+        new_grid = gemmi.FloatGrid(*spacing)
+        new_grid.unit_cell = xmap.xmap.unit_cell
+
+        new_grid_array = np.array(new_grid, copy=False)
+        new_grid_array[:, :, :] = zmap_array[:, :, :]
+
+        return new_grid
 
 
 @dataclasses.dataclass()
@@ -782,7 +856,13 @@ class Zmaps:
 
     @staticmethod
     def from_xmaps(model: Model, xmaps: Xmaps):
-        pass
+        zmaps = {}
+        for dtag in xmaps:
+            xmap = xmaps[dtag]
+            zmap = Zmap.from_xmap(model, xmap)
+            zmaps[dtag] = zmap
+
+        return Zmaps(zmaps)
 
     def __len__(self):
         return len(self.zmaps)
