@@ -797,7 +797,8 @@ class Model:
     def calculate_sigma_i(mean: np.array, array: np.array):
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
-        residual = array - mean
+        # residual = array - mean
+        residual = np.subtract(array, mean)
 
         print(array.shape)
         print(mean.shape)
