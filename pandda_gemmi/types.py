@@ -783,7 +783,6 @@ class Model:
         sigma_is = {}
         for dtag in xmaps:
             sigma_i = Model.calculate_sigma_i(mean, arrays[dtag])
-            print(sigma_is)
             sigma_is[dtag] = sigma_i
 
         # Estimate the adjusted pointwise variance
@@ -799,6 +798,20 @@ class Model:
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = array - mean
+
+        print("array")
+        print(np.sum(np.isnan(residual)))
+        print(np.sum(np.isinf(residual)))
+
+        print("mean")
+        print(np.sum(np.isnan(mean)))
+        print(np.sum(np.isinf(mean)))
+
+        print("residual")
+        print(np.sum(np.isnan(residual)))
+        print(np.sum(np.isinf(residual)))
+
+
         sigma_i = np.std(residual)
         return sigma_i
 
