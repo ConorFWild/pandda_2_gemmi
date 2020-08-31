@@ -776,8 +776,8 @@ class Model:
             xmap_array = xmap.to_array()
             arrays[dtag] = xmap_array
 
-        stacked_arrays = np.stack(list(arrays.values()), axis=-1)
-        mean = np.mean(stacked_arrays, axis=-1)
+        stacked_arrays = np.stack(list(arrays.values()), axis=0)
+        mean = np.mean(stacked_arrays, axis=0)
 
         # Estimate the dataset residual variability
         sigma_is = {}
@@ -804,24 +804,37 @@ class Model:
     @staticmethod
     def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is: typing.Dict[Dtag, float]):
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
-
+        # mean[x,y,z]
+        # arrays[n,x,y,z]
+        # sigma_i_array[n]
+        #
         sigma_i_array = np.array(list(sigma_is.values()))
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
+
+        shape = mean.shape
+        num = len(sigma_is)
+
         sigma_is = Model.vectorised_optimisation_bf(func,
                                                     0,
                                                     10,
                                                     1000,
+                                                    (num, shape[0], shape[1], shape[2])
                                                     )
 
         return sigma_is
 
     @staticmethod
-    def vectorised_optimisation_bf(func, start, stop, num):
+    def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        y_max = func(xs[0])
+        val = np.ones(shape)*xs[0]
+
+        y_max = func(val)
 
         for x in xs[1:]:
+            val[:,:,:,:] = 1
+            val = val*x
+
             y = func(x)
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
@@ -831,6 +844,13 @@ class Model:
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
+        # obs_bals[n,x,y,z]
+        # est_mu[x,y,z]
+        # est_sigma[x,y,z]
+        # obs_error[n]
+        # term_1[n, x, y, z]
+        # term_2[n]
+        # return[x,y,z]
         term1 = (obs_vals - est_mu) ** 2 / ((est_sigma ** 2 + obs_error ** 2) ** 2)
         term2 = 1 / (est_sigma ** 2 + obs_error ** 2)
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
