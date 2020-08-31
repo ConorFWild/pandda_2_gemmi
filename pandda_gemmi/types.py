@@ -776,8 +776,8 @@ class Model:
             xmap_array = xmap.to_array()
             arrays[dtag] = xmap_array
 
-        stacked_arrays = np.stack(list(arrays.values()))
-        mean = np.mean(stacked_arrays, axis=0)
+        stacked_arrays = np.stack(list(arrays.values()), axis=-1)
+        mean = np.mean(stacked_arrays, axis=-1)
 
         # Estimate the dataset residual variability
         sigma_is = {}
