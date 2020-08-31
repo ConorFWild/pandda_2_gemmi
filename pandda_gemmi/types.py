@@ -809,6 +809,14 @@ class Model:
         # sigma_i_array[n]
         #
         sigma_i_array = np.array(list(sigma_is.values())).reshape((len(sigma_is), 1, 1, 1))
+        print("\tIs nans?")
+        print(np.sum(np.isnan(sigma_i_array)))
+        print(np.sum(np.isnan(mean)))
+        print(np.sum(np.isnan(arrays)))
+        print(np.sum(np.isinf(sigma_i_array)))
+        print(np.sum(np.isinf(mean)))
+        print(np.sum(np.isinf(arrays)))
+
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
 
         shape = mean.shape
