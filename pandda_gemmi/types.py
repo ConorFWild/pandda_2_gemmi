@@ -798,7 +798,15 @@ class Model:
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = array - mean
+
+
+
         print(residual.shape)
+        print(np.max(array))
+        print(np.max(mean))
+        
+
+
         print(residual)
         print(np.allclose(array, mean))
         print(np.allclose(array, np.zeros(mean.shape)))
