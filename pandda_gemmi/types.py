@@ -382,7 +382,9 @@ class Partitioning:
         distances, indexes = kdtree.query(query_points)
 
         partitions = {}
-        for i, coord in enumerate(coord_array):
+        for i, coord_as_array in enumerate(coord_array):
+            coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
+
             res_num = indexes[i]
 
             res_id = res_indexes[res_num]
