@@ -455,6 +455,8 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
 
+        return parser
+
     @staticmethod
     def from_args():
         parser = Config.get_parser()
