@@ -813,6 +813,10 @@ class Model:
 
 
         sigma_i = np.std(residual)
+        print("sigmai")
+        print(sigma_i)
+
+
         return sigma_i
 
     @staticmethod
