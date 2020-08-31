@@ -717,6 +717,7 @@ class Xmap:
                     print(interpolated_values[key])
                     print(alignment_positions[key])
                     print(transformed_positions[key])
+                    print(transformed_positions_fractional[key])
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
