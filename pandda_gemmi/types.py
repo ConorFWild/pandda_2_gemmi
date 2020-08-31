@@ -808,7 +808,7 @@ class Model:
         # arrays[n,x,y,z]
         # sigma_i_array[n]
         #
-        sigma_i_array = np.array(list(sigma_is.values()))
+        sigma_i_array = np.array(list(sigma_is.values())).reshape((len(sigma_is), 1, 1, 1))
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
 
         shape = mean.shape
@@ -827,13 +827,13 @@ class Model:
     def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape)*xs[0]
+        val = np.ones(shape) * xs[0]
 
         y_max = func(val)
 
         for x in xs[1:]:
-            val[:,:,:,:] = 1
-            val = val*x
+            val[:, :, :, :] = 1
+            val = val * x
 
             y = func(x)
             y_above_y_max_mask = y > y_max
