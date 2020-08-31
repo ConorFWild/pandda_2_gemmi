@@ -783,6 +783,7 @@ class Model:
         sigma_is = {}
         for dtag in xmaps:
             sigma_i = Model.calculate_sigma_i(mean, arrays[dtag])
+            print(sigma_is)
             sigma_is[dtag] = sigma_i
 
         # Estimate the adjusted pointwise variance
