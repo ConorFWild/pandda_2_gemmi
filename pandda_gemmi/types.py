@@ -832,10 +832,12 @@ class Model:
         y_max = func(val)
 
         for x in xs[1:]:
+            print("\tX equals {}".format(x))
             val[:, :, :, :] = 1
             val = val * x
 
             y = func(x)
+
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
 
