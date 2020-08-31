@@ -827,7 +827,7 @@ class Model:
     def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape) * xs[0] + 1.0/100000000.0
+        val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
 
         y_max = func(val)
 
@@ -842,7 +842,6 @@ class Model:
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
             print("\tMean y is {}".format(np.mean(y_max)))
 
-
         return y_max
 
     @staticmethod
@@ -855,8 +854,8 @@ class Model:
         # term_1[n, x, y, z]
         # term_2[n]
         # return[x,y,z]
-        term1 = (obs_vals - est_mu) ** 2 / ((est_sigma ** 2 + obs_error ** 2) ** 2)
-        term2 = 1 / (est_sigma ** 2 + obs_error ** 2)
+        term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
+        term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
