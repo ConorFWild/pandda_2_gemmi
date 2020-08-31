@@ -705,9 +705,6 @@ class Xmap:
                                                                                                  structure_factors.phi,
                                                                                                  )
         # TODO: remove
-        array = np.array(unaligned_xmap, copy=False)
-        print(np.max(array))
-        print(np.min(array))
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -725,14 +722,6 @@ class Xmap:
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
                                                                             transformed_positions)
 
-            # TODO: remove
-            for key in interpolated_values:
-                if interpolated_values[key] > 10:
-                    print("######{}".format(residue_id))
-                    print(interpolated_values[key])
-                    print(alignment_positions[key])
-                    print(transformed_positions[key])
-                    print(transformed_positions_fractional[key])
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
@@ -828,45 +817,8 @@ class Model:
     def calculate_sigma_i(mean: np.array, array: np.array):
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
-        # residual = array - mean
         residual = np.subtract(array, mean)
-
-        print(array.shape)
-        print(mean.shape)
-
-        print(residual.shape)
-        print(np.max(array))
-        print(np.max(mean))
-        print(np.max(residual))
-
-        print(np.min(array))
-        print(np.min(mean))
-        print(np.min(residual))
-
-        print(residual)
-        print(np.allclose(array, mean))
-        print(np.allclose(array, np.zeros(mean.shape)))
-        print(np.allclose(mean, np.zeros(mean.shape)))
-
-        print("array")
-        print(np.sum(np.isnan(residual)))
-        print(np.sum(np.isinf(residual)))
-
-        print("mean")
-        print(np.sum(np.isnan(mean)))
-        print(np.sum(np.isinf(mean)))
-
-        print("residual")
-        print(np.sum(np.isnan(residual)))
-        print(np.sum(np.isinf(residual)))
-
-        print(np.var(residual))
-        print(np.mean(residual))
-        print(np.max(residual))
-        print(np.min(residual))
         sigma_i = np.std(residual)
-        print("sigmai")
-        print(sigma_i)
 
         return sigma_i
 
@@ -878,13 +830,6 @@ class Model:
         # sigma_i_array[n]
         #
         sigma_i_array = np.array(list(sigma_is.values())).reshape((len(sigma_is), 1, 1, 1))
-        print("\tIs nans?")
-        print(np.sum(np.isnan(sigma_i_array)))
-        print(np.sum(np.isnan(mean)))
-        print(np.sum(np.isnan(arrays)))
-        print(np.sum(np.isinf(sigma_i_array)))
-        print(np.sum(np.isinf(mean)))
-        print(np.sum(np.isinf(arrays)))
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
 
@@ -905,6 +850,7 @@ class Model:
         xs = np.linspace(start, stop, num)
 
         val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
+        res = xs[0]
 
         y_max = func(val)
 
@@ -917,9 +863,10 @@ class Model:
 
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
-            print("\tMean y is {}".format(np.mean(y_max)))
+            res[y_above_y_max_mask] = x
+            print("\tUpdated {} ress".format(np.sum(y_above_y_max_mask)))
 
-        return y_max
+        return res
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
