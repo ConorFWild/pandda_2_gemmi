@@ -837,6 +837,7 @@ class Model:
             val = val * x
 
             y = func(x)
+            print("\tMean y is {}".format(np.mean(y)))
 
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
