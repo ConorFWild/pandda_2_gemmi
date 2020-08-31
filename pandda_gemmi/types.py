@@ -804,8 +804,7 @@ class Model:
         print(residual.shape)
         print(np.max(array))
         print(np.max(mean))
-        
-
+        print(np.max(residual))
 
         print(residual)
         print(np.allclose(array, mean))
