@@ -808,6 +808,10 @@ class Model:
         print(np.max(mean))
         print(np.max(residual))
 
+        print(np.min(array))
+        print(np.min(mean))
+        print(np.min(residual))
+
         print(residual)
         print(np.allclose(array, mean))
         print(np.allclose(array, np.zeros(mean.shape)))
