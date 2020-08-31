@@ -805,7 +805,7 @@ class Model:
     def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is: typing.Dict[Dtag, float]):
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
 
-        sigma_i_array = np.array(sigma_is.values())
+        sigma_i_array = np.array(list(sigma_is.values()))
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
         sigma_is = Model.vectorised_optimisation_bf(func,
                                                     0,
