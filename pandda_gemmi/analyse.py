@@ -1,3 +1,6 @@
+from pprint import PrettyPrinter
+printer = PrettyPrinter()
+
 from pandda_gemmi.config import Config
 from pandda_gemmi.logs import Log
 from pandda_gemmi.types import *
@@ -6,7 +9,7 @@ from pandda_gemmi.types import *
 def main():
     config: Config = Config.from_args()
     log: Log = Log.from_dir(config.output.out_dir)
-    print(config)
+    printer.pprint(config)
 
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
@@ -15,7 +18,6 @@ def main():
 
     datasets: Datasets = Datasets.from_dir(pandda_fs_model)
     print("\tGot {} datasets".format(len(datasets.datasets)))
-
 
     datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
@@ -37,7 +39,6 @@ def main():
                                                            config.params.filtering.max_rmsd_to_reference,
                                                            )
     print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
-
 
     datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
     print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
@@ -93,7 +94,6 @@ def main():
                                                            config.params.blob_finding.min_blob_volume)
         clusterings: Clusterings = clusterings.filter_peak(grid,
                                                            config.params.blob_finding.min_blob_z_peak)
-
 
         events: Events = Events.from_clusters(clusterings)
 
