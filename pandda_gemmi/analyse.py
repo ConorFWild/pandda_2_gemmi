@@ -48,7 +48,8 @@ def main():
         print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
 
         print("Getting grid")
-        grid: Grid = Grid.from_reference(reference)
+        grid: Grid = Grid.from_reference(reference,
+                                         config.params.masks)
         print("\tGot grid")
 
         print("Getting alignments")

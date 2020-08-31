@@ -335,6 +335,7 @@ class Partitioning:
     @staticmethod
     def from_reference(reference: Reference,
                        grid: gemmi.FloatGrid,
+                       masks: Masks,
                        ):
 
         array = np.array(grid, copy=False)
@@ -362,7 +363,19 @@ class Partitioning:
 
         kdtree = spatial.KDTree(ca_position_array)
 
-        coord_array = [coord for coord, val in np.ndenumerate(array)]
+        mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        mask.spacegroup = grid.spacegroup
+        mask.set_unit_cell(grid.unit_cell)
+        for atom in reference.dataset.structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(pos,
+                                   radius=masks.inner_mask,
+                                   value=1,
+                                   )
+
+        mask_array = np.array(mask, copy=False)
+
+        coord_array = [coord for coord in np.nonzero(mask_array)]
 
         query_points = np.array([[x / spacing[i] for i, x in enumerate(coord)] for coord in coord_array])
 
@@ -392,7 +405,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference):
+    def from_reference(reference: Reference, masks: Masks):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference)
 
@@ -401,7 +414,7 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
-                                                   )
+                                                   masks,)
 
         return Grid(grid, partitioning)
 
