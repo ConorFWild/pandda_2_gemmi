@@ -689,6 +689,12 @@ class Xmap:
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
+        # TODO: remove
+        array = np.array(unaligned_xmap, copy=False)
+        print(np.max(array))
+        print(np.min(array))
+
+
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -702,6 +708,11 @@ class Xmap:
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
                                                                             transformed_positions)
+
+            # TODO: remove
+            for key in interpolated_values:
+                if interpolated_values[key] > 10:
+                    print(residue_id)
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
