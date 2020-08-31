@@ -818,7 +818,10 @@ class Model:
         print(np.sum(np.isinf(residual)))
 
         print(np.var(residual))
-        sigma_i = np.std(residual, dtype=np.float64)
+        print(np.mean(residual))
+        print(np.max(residual))
+        print(np.min(residual))
+        sigma_i = np.std(residual)
         print("sigmai")
         print(sigma_i)
 
