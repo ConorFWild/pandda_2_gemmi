@@ -799,7 +799,8 @@ class Model:
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = array - mean
 
-
+        print(array.shape)
+        print(mean.shape)
 
         print(residual.shape)
         print(np.max(array))
