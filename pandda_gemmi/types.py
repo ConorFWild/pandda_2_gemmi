@@ -97,6 +97,13 @@ class Structure:
 
         return residue_ids
 
+    def protein_atoms(self):
+        for model in self.structure:
+            for chain in model:
+                for residue in chain.get_polymer():
+                    for atom in residue:
+                        yield atom
+
 
 @dataclasses.dataclass()
 class StructureFactors:
@@ -154,7 +161,7 @@ class Reflections:
         return self.reflections.column_labels()
 
     def missing(self, structure_factors: StructureFactors, resolution: Resolution) -> pd.DataFrame:
-        all_data = np.array(self.reflections, copy=False)
+        all_data = np.array(self.reflections, copy=True)
         resolution_array = self.reflections.make_d_array()
 
         table = pd.DataFrame(data=all_data, columns=self.reflections.column_labels())
@@ -416,6 +423,14 @@ class Grid:
 
     def __getitem__(self, item):
         return self.grid[item]
+
+    def volume(self) -> float:
+        unit_cell = self.grid.unit_cell
+        return unit_cell.a * unit_cell.b * unit_cell.c
+
+    def size(self) -> int:
+        grid = self.grid
+        return grid.nu * grid.nv * grid.nw
 
 
 @dataclasses.dataclass()
@@ -710,8 +725,8 @@ class Xmap:
         float]:
         return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
 
-    def to_array(self):
-        return np.array(self.xmap, copy=False)
+    def to_array(self, copy=True):
+        return np.array(self.xmap, copy=copy)
 
 
 @dataclasses.dataclass()
@@ -770,7 +785,7 @@ class Model:
             sigma_i = Model.calculate_sigma_i(mean, arrays[dtag])
             sigma_is[dtag] = sigma_i
 
-        # Estimate the adjusted pointwise variance 
+        # Estimate the adjusted pointwise variance
         sigma_s_m = Model.calculate_sigma_s_m(mean, arrays, sigma_is)
 
         return Model(mean,
@@ -833,8 +848,8 @@ class Zmap:
     zmap: gemmi.FloatGrid
 
     @staticmethod
-    def from_xmap(model: Model, xmap: Xmap):
-        zmap_array = model.evaluate(xmap)
+    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
+        zmap_array = model.evaluate(xmap, dtag)
         zmap = Zmap.grid_from_template(xmap, zmap_array)
         return Zmap(zmap)
 
@@ -844,10 +859,22 @@ class Zmap:
         new_grid = gemmi.FloatGrid(*spacing)
         new_grid.unit_cell = xmap.xmap.unit_cell
 
-        new_grid_array = np.array(new_grid, copy=False)
+        new_grid_array = np.array(new_grid, copy=True)
         new_grid_array[:, :, :] = zmap_array[:, :, :]
 
         return new_grid
+
+    def to_array(self):
+        return np.array(self.zmap, copy=True)
+
+    def shape(self):
+        return [self.zmap.nu, self.zmap.nv, self.zmap.nw]
+
+    def spacegroup(self):
+        return self.zmap.spacegroup
+
+    def unit_cell(self):
+        return self.zmap.unit_cell
 
 
 @dataclasses.dataclass()
@@ -859,13 +886,20 @@ class Zmaps:
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
-            zmap = Zmap.from_xmap(model, xmap)
+            zmap = Zmap.from_xmap(model, xmap, dtag)
             zmaps[dtag] = zmap
 
         return Zmaps(zmaps)
 
     def __len__(self):
         return len(self.zmaps)
+
+    def __iter__(self):
+        for dtag in self.zmaps:
+            yield dtag
+
+    def __getitem__(self, item):
+        return self.zmaps[item]
 
 
 @dataclasses.dataclass()
@@ -893,21 +927,200 @@ class ClusterID:
 
 @dataclasses.dataclass()
 class Cluster:
-    @staticmethod
-    def from_zmap(zmap: Zmap):
-        pass
+    indexes: typing.Tuple[np.ndarray]
+    values: np.ndarray
+
+    def size(self, grid: Grid):
+        grid_volume = grid.volume()
+        grid_size = grid.size()
+        grid_voxel_volume = grid_volume / grid_size
+        return self.values.size * grid_voxel_volume
+
+    def peak(self):
+        return np.max(self.values)
 
 
 @dataclasses.dataclass()
-class Clusters:
-    clusters: typing.Dict[ClusterID, Cluster]
+class Symops:
+    symops: typing.List[gemmi.Op]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps):
-        pass
+    def from_grid(grid: gemmi.FloatGrid):
+        spacegroup = grid.spacegroup
+        operations = list(spacegroup.operations())
+        return Symops(operations)
 
-    def filter_size_and_peak(self):
-        pass
+    def __iter__(self):
+        for symop in self.symops:
+            yield symop
+
+
+@dataclasses.dataclass()
+class Clustering:
+    clustering: typing.Dict[int, Cluster]
+
+    @staticmethod
+    def from_zmap(zmap: Zmap, reference: Reference, blob_finding: BlobFinding, masks: Masks):
+        zmap_array = zmap.to_array()
+
+        protein_mask = Clustering.get_protein_mask(zmap,
+                                                   reference,
+                                                   masks.inner_mask,
+                                                   )
+        symmetry_contact_mask = Clustering.get_symmetry_contact_mask(zmap,
+                                                                     reference,
+                                                                     protein_mask,
+                                                                     symmetry_mask_radius=masks.inner_mask_symmetry,
+                                                                     )
+
+        # Don't consider outlying points away from the protein
+        zmap_array[~protein_mask] = 0
+
+        # Don't consider outlying points at symmetry contacts
+        zmap_array[symmetry_contact_mask] = 0
+
+        extrema_mask_array = zmap_array > masks.contour_level
+        extrema_grid_coords_array = np.argwhere(extrema_mask_array)
+
+        grid_dimensions_array = np.array(zmap.zmap.unit_cell.a,
+                                         zmap.zmap.unit_cell.b,
+                                         zmap.zmap.unit_cell.c,
+                                         )
+
+        extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
+
+        transform_array = zmap.zmap.unit_cell.orthogonalization_matrix
+
+        extrema_cart_coords_array = np.matmul(transform_array, extrema_fractional_coords_array)
+
+        cluster_ids_array = scipy.cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
+                                                                 t=blob_finding.clustering_cutoff,
+                                                                 criterion='distance',
+                                                                 metric='euclidean',
+                                                                 method='single',
+                                                                 )
+
+        clusters = {}
+        for unique_cluster in np.unique(cluster_ids_array):
+            cluster_mask = cluster_ids_array == unique_cluster
+
+            cluster_indicies = np.nonzero(cluster_mask)
+
+            indexes = np.unravel_index(cluster_indicies,
+                                       zmap_array.shape,
+                                       )
+
+            values = zmap_array[indexes]
+
+            cluster = Cluster(indexes,
+                              values,
+                              )
+            clusters[unique_cluster] = cluster
+
+        return Clustering(clusters)
+
+    def __iter__(self):
+        for cluster_num in self.clustering:
+            yield cluster_num
+
+    @staticmethod
+    def get_protein_mask(zmap: Zmap, reference: Reference, masks_radius: float):
+        mask = gemmi.Int8Grid(*zmap.shape())
+        mask.spacegroup = zmap.spacegroup()
+        mask.set_unit_cell(zmap.unit_cell())
+
+        for atom in reference.dataset.structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(pos,
+                                   radius=masks_radius,
+                                   value=1,
+                                   )
+
+        mask_array = np.array(mask, copy=False)
+
+        return mask_array
+
+    @staticmethod
+    def get_symmetry_contact_mask(zmap: Zmap, reference: Reference, protein_mask: np.array,
+                                  symmetry_mask_radius: float = 3):
+        mask = gemmi.Int8Grid(*zmap.shape())
+        mask.spacegroup = zmap.spacegroup()
+        mask.set_unit_cell(zmap.unit_cell())
+
+        symops = Symops.from_grid(mask)
+
+        for atom in reference.dataset.structure.protein_atoms():
+            for symmetry_operation in symops:
+                position = atom.pos
+                fractional_position = mask.unit_cell.fractionalize(position)
+                symmetry_position = symmetry_operation.apply_to_xyz(fractional_position)
+                orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
+
+                mask.set_points_around(orthogonal_symmetry_position,
+                                       radius=symmetry_mask_radius,
+                                       value=1,
+                                       )
+
+        mask_array = np.array(mask, copy=False)
+
+        mask_array = mask_array * protein_mask
+
+        return mask_array
+
+    def __getitem__(self, item):
+        return self.clustering[item]
+
+
+@dataclasses.dataclass()
+class Clusterings:
+    clusters: typing.Dict[Dtag, Clustering]
+
+    @staticmethod
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, blob_finding: BlobFinding, masks: Masks):
+        clusterings = {}
+        for dtag in zmaps:
+            clustering = Clustering.from_zmap(zmaps[dtag], reference, blob_finding, masks)
+            clusterings[dtag] = clustering
+
+        return Clusterings(clusterings)
+
+    def filter_size(self, grid: Grid, min_cluster_size: float):
+        new_clusterings = {}
+        for dtag in self.clusters:
+            clustering = self.clusters[dtag]
+            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].size() > min_cluster_size,
+                                       clustering,
+                                       )
+                                )
+
+            if len(new_clusters) == 0:
+                continue
+
+            else:
+                new_clusters_dict = {i: cluster for i, cluster in enumerate(new_clusters)}
+                new_clustering = Clustering(new_clusters_dict)
+                new_clusterings[dtag] = new_clustering
+
+        return Clusterings(new_clusterings)
+
+    def filter_peak(self, grid: Grid, z_peak: float):
+        new_clusterings = {}
+        for dtag in self.clusters:
+            clustering = self.clusters[dtag]
+            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
+                                       clustering,
+                                       )
+                                )
+
+            if len(new_clusters) == 0:
+                continue
+
+            else:
+                new_clusters_dict = {i: cluster for i, cluster in enumerate(new_clusters)}
+                new_clustering = Clustering(new_clusters_dict)
+                new_clusterings[dtag] = new_clustering
+
+        return Clusterings(new_clusterings)
 
     def filter_distance_from_protein(self):
         pass
@@ -917,6 +1130,12 @@ class Clusters:
 
     def remove_symetry_pairs(self):
         pass
+
+    def __getitem__(self, item):
+        return self.clusters[item]
+
+    def __len__(self):
+        return len(self.clusters)
 
 
 @dataclasses.dataclass()
@@ -928,7 +1147,7 @@ class BDC:
         pass
 
     @staticmethod
-    def From_cluster(xmap: Xmap, cluster: Cluster):
+    def from_cluster(xmap: Xmap, cluster: Clustering):
         pass
 
 
@@ -949,7 +1168,7 @@ class Sites:
     sites: typing.Dict[int, Site]
 
     @staticmethod
-    def from_clusters(clusters: Clusters):
+    def from_clusters(clusterings: Clusterings):
         pass
 
 
@@ -972,7 +1191,7 @@ class Events:
     events: typing.Dict[EventID, Event]
 
     @staticmethod
-    def from_clusters(clusters: Clusters):
+    def from_clusters(clusters: Clusterings):
         pass
 
 

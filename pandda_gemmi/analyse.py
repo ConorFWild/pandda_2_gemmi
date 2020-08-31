@@ -86,14 +86,16 @@ def main():
         print("\t\tGot {} zmaps".format(len(zmaps)))
 
         print("\tGetting clusters from zmaps...")
-        clusters: Clusters = Clusters.from_Zmaps(zmaps)
-        print("\t\tGot {} initial clusters!".format(len(clusters)))
-        clusters: Clusters = clusters.filter_size_and_peak()
-        clusters: Clusters = clusters.filter_distance_from_protein()
-        clusters: Clusters = clusters.group_close()
-        clusters: Clusters = clusters.remove_symetry_pairs()
+        clusterings: Clusterings = Clusterings.from_Zmaps(zmaps, reference, config.params.blob_finding,
+                                                          config.params.masks)
+        print("\t\tGot {} initial clusters!".format(len(clusterings)))
+        clusterings: Clusterings = clusterings.filter_size(grid,
+                                                           config.params.blob_finding.min_blob_volume)
+        clusterings: Clusterings = clusterings.filter_peak(grid,
+                                                           config.params.blob_finding.min_blob_z_peak)
 
-        events: Events = Events.from_clusters(clusters)
+
+        events: Events = Events.from_clusters(clusterings)
 
         z_map_files: ZMapFiles = ZMapFiles.from_zmaps(zmaps)
         event_map_files: EventMapFiles = EventMapFiles.from_events(events,
