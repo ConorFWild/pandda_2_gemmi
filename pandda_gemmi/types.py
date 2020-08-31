@@ -694,8 +694,6 @@ class Xmap:
         print(np.max(array))
         print(np.min(array))
 
-
-
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
@@ -705,6 +703,9 @@ class Xmap:
                                                gemmi.Position] = alignment[residue_id].apply(
                 alignment_positions)
 
+            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+                point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
                                                                             transformed_positions)
@@ -712,7 +713,10 @@ class Xmap:
             # TODO: remove
             for key in interpolated_values:
                 if interpolated_values[key] > 10:
-                    print(residue_id)
+                    print("######{}".format(residue_id))
+                    print(interpolated_values[key])
+                    print(alignment_positions[key])
+                    print(transformed_positions[key])
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
@@ -828,7 +832,6 @@ class Model:
         print(np.allclose(array, np.zeros(mean.shape)))
         print(np.allclose(mean, np.zeros(mean.shape)))
 
-
         print("array")
         print(np.sum(np.isnan(residual)))
         print(np.sum(np.isinf(residual)))
@@ -848,7 +851,6 @@ class Model:
         sigma_i = np.std(residual)
         print("sigmai")
         print(sigma_i)
-
 
         return sigma_i
 
