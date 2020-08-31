@@ -375,9 +375,9 @@ class Partitioning:
 
         mask_array = np.array(mask, copy=False)
 
-        coord_array = [coord for coord in np.nonzero(mask_array)]
+        coord_array = np.nonzero(mask_array)
 
-        query_points = np.array([[x / spacing[i] for i, x in enumerate(coord)] for coord in coord_array])
+        query_points = np.array([coord / spacing for coord in coord_array])
 
         distances, indexes = kdtree.query(query_points)
 
