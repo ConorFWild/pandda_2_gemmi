@@ -786,7 +786,7 @@ class Model:
             sigma_is[dtag] = sigma_i
 
         # Estimate the adjusted pointwise variance
-        sigma_s_m = Model.calculate_sigma_s_m(mean, arrays, sigma_is)
+        sigma_s_m = Model.calculate_sigma_s_m(mean, stacked_arrays, sigma_is)
 
         return Model(mean,
                      sigma_is,
@@ -806,7 +806,7 @@ class Model:
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
 
         sigma_i_array = np.array(sigma_is.values())
-        func = lambda sigma_s_m: Model.log_liklihood(sigma_s_m, mean, arrays, sigma_i_array)
+        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
         sigma_is = Model.vectorised_optimisation_bf(func,
                                                     0,
                                                     10,
