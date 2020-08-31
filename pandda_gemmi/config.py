@@ -215,7 +215,7 @@ class Config:
     params: Params
 
     @staticmethod
-    def from_args():
+    def get_parser():
         parser = argparse.ArgumentParser()
 
         # Input
@@ -301,7 +301,6 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
 
-
         # Diffraction data
         parser.add_argument("--structure_factors",
                             default="FWT,PHWT",
@@ -345,7 +344,6 @@ class Config:
                             type=bool,
                             help="The directory for output and intermediate files to be saved to",
                             )
-
 
         # Maps
         parser.add_argument("--resolution_factor",
@@ -457,7 +455,26 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
 
+    @staticmethod
+    def from_args():
+        parser = Config.get_parser()
+
         args = parser.parse_args()
+
+        input: Input = Input.from_args(args)
+        output: Output = Output.from_args(args)
+        params: Params = Params.from_args(args)
+
+        return Config(input=input,
+                      output=output,
+                      params=params,
+                      )
+
+    @staticmethod
+    def from_args_list(args_list):
+        parser = Config.get_parser()
+
+        args = parser.parse_args(args_list)
 
         input: Input = Input.from_args(args)
         output: Output = Output.from_args(args)
