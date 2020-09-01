@@ -836,7 +836,7 @@ class Model:
         shape = mean.shape
         num = len(sigma_is)
 
-        sigma_is = Model.vectorised_optimisation_bf(func,
+        sigma_is = Model.vectorised_optimisation_bisect(func,
                                                     0,
                                                     10,
                                                     1000,
@@ -847,6 +847,67 @@ class Model:
 
     @staticmethod
     def vectorised_optimisation_bf(func, start, stop, num, shape):
+        xs = np.linspace(start, stop, num)
+
+        val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
+        res = np.ones((shape[1], shape[2], shape[3])) * xs[0]
+
+        y_max = func(val)
+
+        for x in xs[1:]:
+            print("\tX equals {}".format(x))
+            val[:, :, :, :] = 1
+            val = val * x
+
+            y = func(x)
+            print(np.max(y))
+
+            y_above_y_max_mask = y > y_max
+            y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
+            res[y_above_y_max_mask] = x
+            print("\tUpdated {} ress".format(np.sum(y_above_y_max_mask)))
+
+        return res
+
+    @staticmethod
+    def vectorised_optimisation_bisect(func, start, stop, num, shape):
+        # Define step 0
+        x_lower = np.ones(shape) * start
+        x_upper = np.ones(shape) * stop
+
+        f_lower = func(x_lower)
+        f_upper = func(x_upper)
+
+        test_mat = f_lower * f_upper
+        test_mat_mask = test_mat > 0
+        print("Number of points that fail bisection is: {}".format(np.sum(test_mat_mask)))
+
+        for i in range(num):
+
+            x_bisect = x_lower + ((x_upper - x_lower) / 2)
+
+            f_lower = func(x_lower)
+            f_bisect = func(x_bisect)
+
+            f_lower_positive = f_lower >= 0
+            f_lower_negative = f_lower < 0
+
+            f_bisect_positive = f_bisect >= 0
+            f_bisect_negative = f_bisect < 0
+
+            f_lower_positive_bisect_negative = f_lower_positive * f_bisect_negative
+            f_lower_negative_bisect_positive = f_lower_negative * f_bisect_positive
+
+            f_lower_positive_bisect_positive = f_lower_positive * f_bisect_positive
+            f_lower_negative_bisect_negative = f_lower_negative * f_bisect_negative
+
+            x_upper[f_lower_positive_bisect_negative] = x_bisect[f_lower_positive_bisect_negative]
+            x_upper[f_lower_negative_bisect_positive] = x_bisect[f_lower_negative_bisect_positive]
+
+            x_lower[f_lower_positive_bisect_positive] = x_bisect[f_lower_positive_bisect_positive]
+            x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
+            
+
         xs = np.linspace(start, stop, num)
 
         val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
