@@ -844,6 +844,7 @@ class Model:
         print("\tMean shape: {}".format(mean.shape))
         print("\tarrays shape: {}".format(arrays.shape))
         print("\tsigma_is_array shape: {}".format(sigma_is_array.shape))
+        print(arrays[:, 0])
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
@@ -905,6 +906,7 @@ class Model:
         print(func(x_lower + 1.0/1000.0))
         print(f_upper)
         print(func(x_upper + 1.0/1000.0))
+
 
 
         for i in range(num):
