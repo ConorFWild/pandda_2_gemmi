@@ -847,6 +847,9 @@ class Model:
         print(arrays[:, 0])
         print(mean[0])
         print(sigma_is_array[0, :])
+        print(arrays[:, -1])
+        print(mean[-1])
+        print(sigma_is_array[-1, :])
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
