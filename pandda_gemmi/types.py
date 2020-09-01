@@ -897,6 +897,7 @@ class Model:
 
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
+        print("fshape is {}".format(f_upper.shape))
 
         print([start,stop])
         print(f_lower)
