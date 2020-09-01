@@ -852,7 +852,7 @@ class Model:
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
                                                     0,
-                                                    10,
+                                                    100,
                                                     1000,
                                                     arrays.shape
                                                     )
