@@ -809,7 +809,7 @@ class Model:
         # Estimate the dataset residual variability
         sigma_is = {}
         for dtag in xmaps:
-            sigma_i = Model.calculate_sigma_i(mean[mask_array],
+            sigma_i = Model.calculate_sigma_i(mean,
                                               arrays[dtag])
             sigma_is[dtag] = sigma_i
 
