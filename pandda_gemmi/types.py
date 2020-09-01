@@ -328,6 +328,8 @@ class Reference:
 @dataclasses.dataclass()
 class Partitioning:
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], gemmi.Position]]
+    protein_mask: gemmi.Int8Grid
+
 
     def __getitem__(self, item: ResidueID):
         return self.partitioning[item]
@@ -398,7 +400,7 @@ class Partitioning:
                                                                                       )
                                                                      )
 
-        return Partitioning(partitions)
+        return Partitioning(partitions, mask)
 
 
 @dataclasses.dataclass()
@@ -789,12 +791,15 @@ class Model:
     stds: typing.Dict[Dtag, float]
 
     @staticmethod
-    def from_xmaps(xmaps: Xmaps):
+    def from_xmaps(xmaps: Xmaps, grid: Grid):
+        mask = grid.partitioning.protein_mask
+        mask_array = np.array(mask, copy=False)
+
         arrays = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
-            arrays[dtag] = xmap_array
+            arrays[dtag] = xmap_array[mask_array]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
         mean = np.mean(stacked_arrays, axis=0)
@@ -802,11 +807,16 @@ class Model:
         # Estimate the dataset residual variability
         sigma_is = {}
         for dtag in xmaps:
-            sigma_i = Model.calculate_sigma_i(mean, arrays[dtag])
+            sigma_i = Model.calculate_sigma_i(mean[mask_array],
+                                              arrays[dtag])
             sigma_is[dtag] = sigma_i
 
         # Estimate the adjusted pointwise variance
-        sigma_s_m = Model.calculate_sigma_s_m(mean, stacked_arrays, sigma_is)
+        sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
+        sigma_s_m = Model.calculate_sigma_s_m(mean[mask_array],
+                                              stacked_arrays,
+                                              sigma_is_array,
+                                              )
 
         return Model(mean,
                      sigma_is,
@@ -823,24 +833,26 @@ class Model:
         return sigma_i
 
     @staticmethod
-    def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is: typing.Dict[Dtag, float]):
+    def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is_array: typing.Dict[Dtag, float]):
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
-        # mean[x,y,z]
-        # arrays[n,x,y,z]
+        # mean[m]
+        # arrays[n,m]
         # sigma_i_array[n]
         #
-        sigma_i_array = np.array(list(sigma_is.values())).reshape((len(sigma_is), 1, 1, 1))
+        print("\tMean shape: {}".format(mean.shape))
+        print("\tarrays shape: {}".format(arrays.shape))
+        print("\tsigma_is_array shape: {}".format(sigma_is_array.shape))
 
-        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_i_array)
+        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
         shape = mean.shape
-        num = len(sigma_is)
+        num = len(sigma_is_array)
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
                                                     0,
                                                     10,
                                                     1000,
-                                                    (num, shape[0], shape[1], shape[2])
+                                                    arrays.shape
                                                     )
 
         return sigma_is
@@ -880,7 +892,10 @@ class Model:
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
+
+
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
+
         print([start,stop])
         print(f_lower)
         print(f_upper)
@@ -936,11 +951,11 @@ class Model:
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
-        # obs_bals[n,x,y,z]
-        # est_mu[x,y,z]
-        # est_sigma[x,y,z]
-        # obs_error[n]
-        # term_1[n, x, y, z]
+        # obs_bals[n,m]
+        # est_mu[m]
+        # est_sigma[n,m]
+        # obs_error[n,1]
+        # term_1[n, m]
         # term_2[n]
         # return[x,y,z]
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
