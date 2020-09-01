@@ -887,6 +887,7 @@ class Model:
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
         x_lower = (np.ones(shape) * start) + (1.0 / 100000000.0)
+
         x_upper = np.ones(shape) * stop
 
         f_lower = func(x_lower)
@@ -901,7 +902,10 @@ class Model:
 
         print([start,stop])
         print(f_lower)
+        print(func(x_lower + 1.0/1000.0))
         print(f_upper)
+        print(func(x_upper + 1.0/1000.0))
+
 
         for i in range(num):
 
