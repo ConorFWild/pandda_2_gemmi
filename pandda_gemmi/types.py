@@ -799,6 +799,8 @@ class Model:
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
+            print(xmap_array.shape)
+            print(mask_array.shape)
             arrays[dtag] = xmap_array[mask_array]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
