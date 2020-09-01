@@ -793,7 +793,7 @@ class Model:
     @staticmethod
     def from_xmaps(xmaps: Xmaps, grid: Grid):
         mask = grid.partitioning.protein_mask
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=False, dtype=np.bool)
 
         arrays = {}
         for dtag in xmaps:
