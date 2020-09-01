@@ -881,6 +881,9 @@ class Model:
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
         print("Number of points that fail bisection is: {}".format(np.sum(test_mat_mask)))
+        print([start,stop])
+        print(f_lower)
+        print(f_upper)
 
         for i in range(num):
 
