@@ -863,7 +863,7 @@ class Model:
     def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
+        val = np.ones(shape) * xs[0] + 1.0 / 1000000000000000.0
         res = np.ones((shape[1], shape[2], shape[3])) * xs[0]
 
         y_max = func(val)
