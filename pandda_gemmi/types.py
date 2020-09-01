@@ -831,6 +831,7 @@ class Model:
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = np.subtract(array, mean)
         sigma_i = np.std(residual)
+        sigma_i = 0.01
 
         return sigma_i
 
