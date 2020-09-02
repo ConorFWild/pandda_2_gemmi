@@ -886,8 +886,6 @@ class Model:
                                                     arrays.shape
                                                     )
 
-        print(sigma_ms)
-        print(sigma_ms.shape)
 
         return sigma_ms
 
