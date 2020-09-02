@@ -1277,16 +1277,16 @@ class Clusterings:
         new_clusterings = {}
         for dtag in self.clusters:
             clustering = self.clusters[dtag]
-            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
+            new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
                                        clustering,
                                        )
                                 )
 
-            if len(new_clusters) == 0:
+            if len(new_cluster_nums) == 0:
                 continue
 
             else:
-                new_clusters_dict = {i: cluster for i, cluster in enumerate(new_clusters)}
+                new_clusters_dict = {new_cluster_num: self.clusters[new_cluster_nums] for new_cluster_num in new_cluster_nums}
                 new_clustering = Clustering(new_clusters_dict)
                 new_clusterings[dtag] = new_clustering
 
