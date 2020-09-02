@@ -813,6 +813,7 @@ class Model:
             sigma_i = Model.calculate_sigma_i(mean,
                                               arrays[dtag])
             sigma_is[dtag] = sigma_i
+            print([dtag, sigma_i])
 
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
@@ -988,7 +989,7 @@ class Model:
         # obs_error[n,1]
         # term_1[n, m]
         # term_2[n]
-        # return[x,y,z]
+        # return[m]
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
         term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
