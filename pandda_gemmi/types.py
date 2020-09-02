@@ -1302,7 +1302,7 @@ class Clusterings:
         new_clusterings = {}
         for dtag in self.clusters:
             clustering = self.clusters[dtag]
-            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
+            new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
                                        clustering,
                                        )
                                 )
@@ -1311,7 +1311,7 @@ class Clusterings:
                 continue
 
             else:
-                new_clusters_dict = {i: cluster for i, cluster in enumerate(new_clusters)}
+                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in new_cluster_nums}
                 new_clustering = Clustering(new_clusters_dict)
                 new_clusterings[dtag] = new_clustering
 
