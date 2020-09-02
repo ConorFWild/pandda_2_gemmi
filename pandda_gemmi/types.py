@@ -869,7 +869,11 @@ class Model:
         print(mean[-1])
         print(sigma_is_array[-1, :])
 
+        print("First log liklihood")
+        print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0]))
+
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
+
 
         shape = mean.shape
         num = len(sigma_is_array)
@@ -912,6 +916,7 @@ class Model:
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
         x_lower = (np.ones(shape) * start) + 1e-16
+
 
         x_upper = np.ones(shape) * stop
 
