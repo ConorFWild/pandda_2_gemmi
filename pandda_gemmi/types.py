@@ -1124,10 +1124,10 @@ class Clustering:
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
 
         # Don't consider outlying points away from the protein
-        zmap_array[~protein_mask] = 0
+        zmap_array[~protein_mask] = 0.0
 
         # Don't consider outlying points at symmetry contacts
-        zmap_array[symmetry_contact_mask] = 0
+        zmap_array[symmetry_contact_mask] = 0.0
 
         print(np.sum(protein_mask))
         print(np.sum(symmetry_contact_mask))
@@ -1143,7 +1143,7 @@ class Clustering:
         # extrema_mask_array = zmap_array > 0.5
         # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
 
-        extrema_grid_coords_array = np.argwhere(extrema_mask_array)
+        extrema_grid_coords_array = np.argwhere(extrema_mask_array)  # n,3
         print("\toutlier array shape: {}".format(extrema_grid_coords_array.shape))
 
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
@@ -1151,7 +1151,7 @@ class Clustering:
                                           zmap.zmap.unit_cell.c,
                                           ])
 
-        extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
+        extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array  # n,3
 
         positions = []
         for point in extrema_fractional_coords_array:
@@ -1162,7 +1162,7 @@ class Clustering:
                               pos_orth[2], ]
             positions.append(pos_orth_array)
 
-        extrema_cart_coords_array = np.array(positions)
+        extrema_cart_coords_array = np.array(positions)  # n, 3
         print("\tshape: {}".format(extrema_cart_coords_array.shape))
 
         print("\tClustering")
@@ -1175,13 +1175,19 @@ class Clustering:
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
-            cluster_mask = cluster_ids_array == unique_cluster
+            cluster_mask = cluster_ids_array == unique_cluster  # n
 
-            cluster_indicies = np.nonzero(cluster_mask)
+            cluster_indicies = np.nonzero(cluster_mask)  # (n')
 
-            indexes = np.unravel_index(cluster_indicies,
+            cluster_points_array = extrema_grid_coords_array[cluster_indicies]
+
+            cluster_points_tuple = (cluster_points_array[:,0],
+                                   cluster_points_array[:,1],
+                                   cluster_points_array[:,2],)
+
+            indexes = np.unravel_index(cluster_points_tuple,
                                        zmap_array.shape,
-                                       )
+                                       )  # (n',n',n')
 
             values = zmap_array[indexes]
 
