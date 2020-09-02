@@ -907,10 +907,11 @@ class Model:
 
         return res
 
+
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower = (np.ones(shape) * start) + (1.0 / 100000000.0)
+        x_lower = (np.ones(shape) * start) # + (1.0 / 100000000.0)
 
         x_upper = np.ones(shape) * stop
 
@@ -956,11 +957,10 @@ class Model:
 
             x_lower[f_lower_positive_bisect_positive] = x_bisect[f_lower_positive_bisect_positive]
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
-            
 
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape) * xs[0] + 1.0 / 100000000.0
+        val = np.ones(shape) * xs[0] # + 1.0 / 100000000.0
         res = np.ones((shape[1], shape[2], shape[3])) * xs[0]
 
         y_max = func(val)
