@@ -1108,11 +1108,13 @@ class Clustering:
                                                    reference,
                                                    masks.inner_mask,
                                                    )
+        print("\tGor protein mask")
         symmetry_contact_mask = Clustering.get_symmetry_contact_mask(zmap,
                                                                      reference,
                                                                      protein_mask,
                                                                      symmetry_mask_radius=masks.inner_mask_symmetry,
                                                                      )
+        print("\tGot symmetry mask")
 
         # Don't consider outlying points away from the protein
         zmap_array[~protein_mask] = 0
@@ -1134,6 +1136,7 @@ class Clustering:
 
         extrema_cart_coords_array = np.matmul(transform_array, extrema_fractional_coords_array)
 
+        print("\tClustering")
         cluster_ids_array = scipy.cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
                                                                  t=blob_finding.clustering_cutoff,
                                                                  criterion='distance',
