@@ -883,10 +883,12 @@ class Model:
         f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
-        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)), mean[np.newaxis,:][:,0].reshape((1,1)),
-                                      arrays[:,0].reshape((-1,1)), sigma_is_array[:,:])
-        print("First log liklihood vectorised reduced")
-        print(f_lower)
+        for i in np.linspace(0,1,100):
+            x_lower = x_lower + i
+            f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)), mean[np.newaxis,:][:,0].reshape((1,1)),
+                                          arrays[:,0].reshape((-1,1)), sigma_is_array[:,:])
+            print("First log liklihood vectorised reduced: {}".format(x_lower[0,0]))
+            print(f_lower)
 
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
@@ -1007,15 +1009,15 @@ class Model:
         # term_1[n, m]
         # term_2[n]
         # return[m]
-        print("\test_sigma shape: {}".format(est_sigma.shape))
-        print("\test_mu shape: {}".format(est_mu.shape))
-        print("\tobs_vals shape: {}".format(obs_vals.shape))
-        print("\tobs_error shape: {}".format(obs_error.shape))
+        # print("\test_sigma shape: {}".format(est_sigma.shape))
+        # print("\test_mu shape: {}".format(est_mu.shape))
+        # print("\tobs_vals shape: {}".format(obs_vals.shape))
+        # print("\tobs_error shape: {}".format(obs_error.shape))
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
-        print("\tterm1: {}".format(term1))
+        # print("\tterm1: {}".format(term1))
         term2 = np.ones(est_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
-        print("\tterm2: {}".format(term2))
+        # print("\tterm2: {}".format(term2))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
 
