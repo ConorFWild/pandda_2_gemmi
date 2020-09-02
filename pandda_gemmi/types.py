@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import scipy
 from scipy import spatial
+from scipy import stats
 import pandas as pd
 import gemmi
 
@@ -834,7 +835,7 @@ class Model:
         # sigma_i = 0.01
         
         percentiles = np.linspace(0, 1, array.size + 2)
-        normal_quantiles = np.stats.normal.ppf(percentiles)
+        normal_quantiles = stats.normal.ppf(percentiles)
         observed_quantile_estimates = np.sort(residual)
 
         above_min_mask = normal_quantiles > -1
