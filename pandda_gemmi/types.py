@@ -883,7 +883,7 @@ class Model:
         f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
-        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0], mean[np.newaxis,:][:,0], arrays[:,0], sigma_is_array[0,:])
+        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0], mean[np.newaxis,:][:,0], arrays[:,0], sigma_is_array[:,:])
         print("First log liklihood vectorised reduced")
         print(f_lower)
 
