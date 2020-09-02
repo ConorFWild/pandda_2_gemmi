@@ -1328,7 +1328,7 @@ class Clusterings:
 
     def __iter__(self):
         for dtag in self.clusters:
-            return dtag
+            yield dtag
 
 
 @dataclasses.dataclass()
