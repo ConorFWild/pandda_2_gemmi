@@ -934,7 +934,7 @@ class Model:
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
 
-        mask = test_mat_mask + np.zeros(x_lower_orig.shape)
+        mask = np.tile(test_mat_mask, (x_lower_orig.shape[0], 1))
 
         x_lower = x_lower_orig[~mask]
         x_upper = x_upper_orig[~mask]
