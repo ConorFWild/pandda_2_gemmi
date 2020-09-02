@@ -834,7 +834,7 @@ class Model:
         # sigma_i = np.std(residual)
         # sigma_i = 0.01
         
-        percentiles = np.linspace(0, 1, array.size + 2)[1:-2]
+        percentiles = np.linspace(0, 1, array.size + 2)[1:-1]
         normal_quantiles = stats.norm.ppf(percentiles)
         observed_quantile_estimates = np.sort(residual)
 
