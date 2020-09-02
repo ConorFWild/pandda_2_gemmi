@@ -883,12 +883,13 @@ class Model:
         f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
-        for i in np.linspace(0,1,100):
-            x_lower = x_lower + i
+        while True:
+            x_lower = x_lower + 0.01
             f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)), mean[np.newaxis,:][:,0].reshape((1,1)),
                                           arrays[:,0].reshape((-1,1)), sigma_is_array[:,:])
-            print("First log liklihood vectorised reduced: {}".format(x_lower[0,0]))
+            # print("First log liklihood vectorised reduced: {}".format(x_lower[0,0]))
             print(f_lower)
+
 
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
