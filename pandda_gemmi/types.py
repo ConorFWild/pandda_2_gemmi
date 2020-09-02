@@ -936,8 +936,8 @@ class Model:
 
         mask = np.tile(test_mat_mask, (x_lower_orig.shape[0], 1))
 
-        x_lower = x_lower_orig[~mask]
-        x_upper = x_upper_orig[~mask]
+        x_lower = x_lower_orig
+        x_upper = x_upper_orig
 
         for i in range(num):
 
@@ -965,9 +965,9 @@ class Model:
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
 
         # Replace original vals
-        x_lower_orig[~mask] = x_lower
+        x_lower[~mask] = 0.0
 
-        return x_lower_orig[0,:]
+        return x_lower[0,:]
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
