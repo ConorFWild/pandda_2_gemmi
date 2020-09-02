@@ -1206,7 +1206,7 @@ class Clustering:
             for symmetry_operation in symops:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
-                symmetry_position = gemmi.Position(*symmetry_operation.apply_to_xyz([fractional_position[0],
+                symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
                                                                      fractional_position[1],
                                                                      fractional_position[2],
                                                                      ]))
