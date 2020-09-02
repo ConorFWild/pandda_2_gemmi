@@ -986,7 +986,7 @@ class Model:
         xmap_array = np.copy(xmap.to_array())
 
         residuals = (xmap_array - self.mean)
-        denominator = (np.srt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
+        denominator = (np.sqrt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
 
 
         return residuals / denominator
