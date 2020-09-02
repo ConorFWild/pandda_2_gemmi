@@ -1104,17 +1104,20 @@ class Clustering:
     def from_zmap(zmap: Zmap, reference: Reference, blob_finding: BlobFinding, masks: Masks):
         zmap_array = zmap.to_array()
 
-        protein_mask = Clustering.get_protein_mask(zmap,
+        protein_mask_grid = Clustering.get_protein_mask(zmap,
                                                    reference,
                                                    masks.inner_mask,
                                                    )
         print("\tGor protein mask")
-        symmetry_contact_mask = Clustering.get_symmetry_contact_mask(zmap,
+        symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
                                                                      reference,
                                                                      protein_mask,
                                                                      symmetry_mask_radius=masks.inner_mask_symmetry,
                                                                      )
         print("\tGot symmetry mask")
+
+        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
+        symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
 
         # Don't consider outlying points away from the protein
         zmap_array[~protein_mask] = 0
@@ -1130,6 +1133,7 @@ class Clustering:
                                          zmap.zmap.unit_cell.c,
                                          )
 
+        
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
 
         transform_array = zmap.zmap.unit_cell.orthogonalization_matrix
@@ -1180,24 +1184,29 @@ class Clustering:
                                    value=1,
                                    )
 
-        mask_array = np.array(mask, copy=True)
+        mask_array = np.array(mask, copy=False)
 
-        return mask_array
+        return mask
 
     @staticmethod
-    def get_symmetry_contact_mask(zmap: Zmap, reference: Reference, protein_mask: np.array,
+    def get_symmetry_contact_mask(zmap: Zmap, reference: Reference, protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
         mask = gemmi.Int8Grid(*zmap.shape())
         mask.spacegroup = zmap.spacegroup()
         mask.set_unit_cell(zmap.unit_cell())
 
+        print("\tGetting symops")
         symops = Symops.from_grid(mask)
 
+        print("\tIterating")
         for atom in reference.dataset.structure.protein_atoms():
             for symmetry_operation in symops:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
-                symmetry_position = symmetry_operation.apply_to_xyz(fractional_position)
+                symmetry_position = gemmi.Position(*symmetry_operation.apply_to_xyz([fractional_position[0],
+                                                                     fractional_position[1],
+                                                                     fractional_position[2],
+                                                                     ]))
                 orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
 
                 mask.set_points_around(orthogonal_symmetry_position,
@@ -1205,11 +1214,11 @@ class Clustering:
                                        value=1,
                                        )
 
-        mask_array = np.array(mask, copy=True)
+        mask_array = np.array(mask, copy=False)
 
-        mask_array = mask_array * protein_mask
+        mask_array[:,:,:] = mask_array * np.array(protein_mask, copy=False)
 
-        return mask_array
+        return mask
 
     def __getitem__(self, item):
         return self.clustering[item]
