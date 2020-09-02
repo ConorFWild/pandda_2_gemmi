@@ -1286,7 +1286,7 @@ class Clusterings:
                 continue
 
             else:
-                new_clusters_dict = {new_cluster_num: self.clusters[new_cluster_num] for new_cluster_num in new_cluster_nums}
+                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in new_cluster_nums}
                 new_clustering = Clustering(new_clusters_dict)
                 new_clusterings[dtag] = new_clustering
 
