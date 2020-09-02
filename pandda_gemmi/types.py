@@ -1108,7 +1108,7 @@ class Clustering:
 
         protein_mask_grid = Clustering.get_protein_mask(zmap,
                                                         reference,
-                                                        masks.inner_mask,
+                                                        masks.outer_mask,
                                                         )
         print("\tGor protein mask")
 
@@ -1117,7 +1117,7 @@ class Clustering:
         symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
                                                                           reference,
                                                                           protein_mask,
-                                                                          symmetry_mask_radius=masks.inner_mask_symmetry,
+                                                                          symmetry_mask_radius=masks.outer_mask,
                                                                           )
         print("\tGot symmetry mask")
 
