@@ -885,6 +885,7 @@ class Model:
                                       arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
+        print(arrays[:,0].reshape((-1,1)))
         while True:
             x_lower = x_lower + 0.01
             f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)),
