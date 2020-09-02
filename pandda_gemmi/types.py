@@ -830,10 +830,23 @@ class Model:
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = np.subtract(array, mean)
-        sigma_i = np.std(residual)
-        sigma_i = 0.01
+        # sigma_i = np.std(residual)
+        # sigma_i = 0.01
+        
+        percentiles = np.linspace(0, 1, array.size + 2)
+        normal_quantiles = np.stats.normal.ppf(percentiles)
+        observed_quantile_estimates = np.sort(residual)
 
-        return sigma_i
+        above_min_mask = normal_quantiles > -1
+        below_max_mask = normal_quantiles < 1
+        centre_mask = above_min_mask*below_max_mask
+
+        central_theoretical_quantiles = normal_quantiles[centre_mask]
+        central_observed_quantiles = observed_quantile_estimates[centre_mask]
+
+        map_unc, map_off = np.polyfit(x=central_theoretical_quantiles, y=central_observed_quantiles, deg=1)
+
+        return map_unc
 
     @staticmethod
     def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is_array: typing.Dict[Dtag, float]):
