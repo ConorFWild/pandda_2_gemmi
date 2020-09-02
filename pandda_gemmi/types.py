@@ -10,7 +10,7 @@ import numpy as np
 import scipy
 from scipy import spatial
 from scipy import stats
-from scipy import cluster
+from scipy.cluster.hierarchy import fclusterdata
 
 import pandas as pd
 import gemmi
@@ -1107,19 +1107,18 @@ class Clustering:
         zmap_array = zmap.to_array()
 
         protein_mask_grid = Clustering.get_protein_mask(zmap,
-                                                   reference,
-                                                   masks.inner_mask,
-                                                   )
+                                                        reference,
+                                                        masks.inner_mask,
+                                                        )
         print("\tGor protein mask")
 
         protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
 
-
         symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
-                                                                     reference,
-                                                                     protein_mask,
-                                                                     symmetry_mask_radius=masks.inner_mask_symmetry,
-                                                                     )
+                                                                          reference,
+                                                                          protein_mask,
+                                                                          symmetry_mask_radius=masks.inner_mask_symmetry,
+                                                                          )
         print("\tGot symmetry mask")
 
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
@@ -1132,8 +1131,7 @@ class Clustering:
 
         print(np.sum(protein_mask))
         print(np.sum(symmetry_contact_mask))
-        print(np.sum(protein_mask*symmetry_contact_mask))
-
+        print(np.sum(protein_mask * symmetry_contact_mask))
 
         print("\tMask contour level is: {}".format(masks.contour_level))
         extrema_mask_array = zmap_array > masks.contour_level
@@ -1145,38 +1143,35 @@ class Clustering:
         # extrema_mask_array = zmap_array > 0.5
         # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
 
-
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
         print("\toutlier array shape: {}".format(extrema_grid_coords_array))
 
-
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
-                                         zmap.zmap.unit_cell.b,
-                                         zmap.zmap.unit_cell.c,
-                                         ])
+                                          zmap.zmap.unit_cell.b,
+                                          zmap.zmap.unit_cell.c,
+                                          ])
 
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
 
         positions = []
         for point in extrema_fractional_coords_array:
-
             position = gemmi.Fractional(*point)
             pos_orth = zmap.zmap.unit_cell.orthogonalize(position)
             pos_orth_array = [pos_orth[0],
                               pos_orth[1],
-                              pos_orth[2],]
+                              pos_orth[2], ]
             positions.append(pos_orth_array)
 
         extrema_cart_coords_array = np.array(positions)
         print("\tshape: {}".format(extrema_cart_coords_array))
 
         print("\tClustering")
-        cluster_ids_array = cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
-                                                                 t=blob_finding.clustering_cutoff,
-                                                                 criterion='distance',
-                                                                 metric='euclidean',
-                                                                 method='single',
-                                                                 )
+        cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
+                                                           t=blob_finding.clustering_cutoff,
+                                                           criterion='distance',
+                                                           metric='euclidean',
+                                                           method='single',
+                                                           )
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
@@ -1235,16 +1230,15 @@ class Clustering:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
                 symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
-                                                                     fractional_position[1],
-                                                                     fractional_position[2],
-                                                                     ]))
+                                                                                       fractional_position[1],
+                                                                                       fractional_position[2],
+                                                                                       ]))
                 orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
 
                 mask.set_points_around(orthogonal_symmetry_position,
                                        radius=symmetry_mask_radius,
                                        value=1,
                                        )
-
 
         mask_array = np.array(mask, copy=False)
         print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
@@ -1255,7 +1249,7 @@ class Clustering:
 
         print("\tequal mask of size {}".format(np.sum(equal_mask)))
 
-        mask_array[:,:,:] = mask_array * protein_mask_array
+        mask_array[:, :, :] = mask_array * protein_mask_array
 
         return mask
 
