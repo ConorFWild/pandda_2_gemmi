@@ -1256,6 +1256,9 @@ class Clustering:
     def __getitem__(self, item):
         return self.clustering[item]
 
+    def __len__(self):
+        return len(self.clustering)
+
 
 @dataclasses.dataclass()
 class Clusterings:
