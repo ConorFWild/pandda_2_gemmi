@@ -1218,7 +1218,7 @@ class Clustering:
 
         print("\tIterating")
         for atom in reference.dataset.structure.protein_atoms():
-            for symmetry_operation in symops:
+            for symmetry_operation in symops[1:]:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
                 symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
