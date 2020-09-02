@@ -205,6 +205,7 @@ class Datasets:
     def from_dir(pandda_fs_model: PanDDAFSModel):
         datasets = {}
         for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
+            print([dtag, dataset_dir])
             dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
                                                   dataset_dir.input_mtz_file,
                                                   )
