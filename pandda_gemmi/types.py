@@ -879,33 +879,19 @@ class Model:
         shape = mean.shape
         num = len(sigma_is_array)
 
-        x_lower = (np.ones(shape) * 0.0) -2.0
-        f_lower = Model.log_liklihood(x_lower[np.newaxis,:],
-                                      mean[np.newaxis,:],
-                                      arrays, sigma_is_array)
-        print("First log liklihood vectorised")
-        print(f_lower[0])
-        print(arrays[:,0].reshape((-1,1)))
-        while True:
-            x_lower = x_lower + 0.01
-            f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)),
-                                          mean[np.newaxis,:][:,0].reshape((1,1)),
-                                          arrays[:,0].reshape((-1,1)),
-                                          sigma_is_array[:,:])
-            # print("First log liklihood vectorised reduced: {}".format(x_lower[0,0]))
-            print(f_lower)
-            print("\t{} {}".format(mean[np.newaxis,:][:,0].reshape((1,1)), np.mean(arrays[:,0].reshape((-1,1)))))
-
-
-
-        sigma_is = Model.vectorised_optimisation_bisect(func,
+        sigma_ms = Model.vectorised_optimisation_bisect(func,
                                                     0,
                                                     10,
-                                                    1000,
+                                                    30,
                                                     arrays.shape
                                                     )
 
-        return sigma_is
+        print(sigma_ms)
+        print(sigma_ms.shape)
+
+        raise Exception()
+
+        return sigma_ms
 
     @staticmethod
     def vectorised_optimisation_bf(func, start, stop, num, shape):
@@ -935,29 +921,21 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower = (np.ones(shape) * start) + 1e-16
+        x_lower_orig = (np.ones(shape) * start) + 1e-16
 
+        x_upper_orig = np.ones(shape) * stop
 
-        x_upper = np.ones(shape) * stop
-
-        f_lower = func(x_lower)
-        f_upper = func(x_upper)
+        f_lower = func(x_lower_orig)
+        f_upper = func(x_upper_orig)
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
 
-
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
 
-        print([start,stop])
-        print("Vectorised log liklohood in bisect")
-        print(f_lower)
-        print(func(x_lower + 1.0/1000.0))
-        print(f_upper)
-        print(func(x_upper + 1.0/1000.0))
-
-
+        x_lower = x_lower_orig[~test_mat_mask]
+        x_upper = x_upper_orig[~test_mat_mask]
 
         for i in range(num):
 
@@ -984,47 +962,17 @@ class Model:
             x_lower[f_lower_positive_bisect_positive] = x_bisect[f_lower_positive_bisect_positive]
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
 
-        xs = np.linspace(start, stop, num)
+        # Replace original vals
+        x_lower_orig[~test_mat_mask] = x_lower
 
-        val = np.ones(shape) * xs[0] # + 1.0 / 100000000.0
-        res = np.ones((shape[1], shape[2], shape[3])) * xs[0]
-
-        y_max = func(val)
-
-        for x in xs[1:]:
-            print("\tX equals {}".format(x))
-            val[:, :, :, :] = 1
-            val = val * x
-
-            y = func(x)
-            print(np.max(y))
-
-            y_above_y_max_mask = y > y_max
-            y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
-            res[y_above_y_max_mask] = x
-            print("\tUpdated {} ress".format(np.sum(y_above_y_max_mask)))
-
-        return res
+        return x_lower_orig
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
-        # obs_bals[n,m]
-        # est_mu[m]
-        # est_sigma[n,m]
-        # obs_error[n,1]
-        # term_1[n, m]
-        # term_2[n]
-        # return[m]
-        # print("\test_sigma shape: {}".format(est_sigma.shape))
-        # print("\test_mu shape: {}".format(est_mu.shape))
-        # print("\tobs_vals shape: {}".format(obs_vals.shape))
-        # print("\tobs_error shape: {}".format(obs_error.shape))
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
-        # print("\tterm1: {}".format(term1))
         term2 = np.ones(est_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
-        # print("\tterm2: {}".format(term2))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
 
