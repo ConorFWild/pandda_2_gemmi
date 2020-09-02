@@ -869,8 +869,8 @@ class Model:
         print(mean[-1])
         print(sigma_is_array[-1, :])
 
-        # print("First log liklihood")
-        # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
+        print("First log liklihood")
+        print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
         #
 
 
@@ -882,6 +882,9 @@ class Model:
         x_lower = (np.ones(shape) * 0.0) + 1e-16
         f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
+        print(f_lower[0])
+        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0], mean[np.newaxis,:][:,0], arrays[:,0], sigma_is_array[0,:])
+        print("First log liklihood vectorised reduced")
         print(f_lower[0])
 
 
