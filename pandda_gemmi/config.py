@@ -369,7 +369,7 @@ class Config:
 
         # masks
         parser.add_argument("--outer_mask",
-                            default=1.8,
+                            default=6.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
