@@ -883,7 +883,8 @@ class Model:
         f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
-        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0], mean[np.newaxis,:][:,0], arrays[:,0], sigma_is_array[:,:])
+        f_lower = Model.log_liklihood(x_lower[np.newaxis,:][:,0].reshape((1,1)), mean[np.newaxis,:][:,0].reshape((1,1)),
+                                      arrays[:,0].reshape((-1,1)), sigma_is_array[:,:])
         print("First log liklihood vectorised reduced")
         print(f_lower)
 
@@ -1013,7 +1014,7 @@ class Model:
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
         print("\tterm1: {}".format(term1))
-        term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
+        term2 = np.ones(obs_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
         print("\tterm2: {}".format(term2))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
