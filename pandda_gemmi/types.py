@@ -415,6 +415,7 @@ class Grid:
 
         grid = gemmi.FloatGrid(*spacing)
         grid.unit_cell = unit_cell
+        grid.spacegroup = reference.dataset.reflections.spacegroup()
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
