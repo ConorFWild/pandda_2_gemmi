@@ -788,8 +788,8 @@ class Xmaps:
 @dataclasses.dataclass()
 class Model:
     mean: np.array
-    std: np.array
-    stds: typing.Dict[Dtag, float]
+    sigma_is: typing.Dict[Dtag, float]
+    sigma_s_m: np.ndarray
 
     @staticmethod
     def from_xmaps(xmaps: Xmaps, grid: Grid):
@@ -984,9 +984,11 @@ class Model:
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
 
-        xmap_array = (xmap_array - self.mean) / (np.srt(np.square(self.std) + np.square(self.stds[dtag])))
+        residuals = (xmap_array - self.mean)
+        denominator = (np.srt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
 
-        return xmap_array
+
+        return residuals / denominator
 
 
 @dataclasses.dataclass()
