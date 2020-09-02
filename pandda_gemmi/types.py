@@ -880,7 +880,7 @@ class Model:
         num = len(sigma_is_array)
 
         x_lower = (np.ones(shape) * 0.0) + 1e-16
-        f_lower = Model.log_liklihood(x_lower, mean, arrays, sigma_is_array)
+        f_lower = Model.log_liklihood(x_lower[np.newaxis,:], mean[np.newaxis,:], arrays, sigma_is_array)
         print("First log liklihood vectorised")
         print(f_lower[0])
 
