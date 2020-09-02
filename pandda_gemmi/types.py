@@ -869,9 +869,9 @@ class Model:
         print(mean[-1])
         print(sigma_is_array[-1, :])
 
-        print("First log liklihood")
-        print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
-
+        # print("First log liklihood")
+        # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
+        #
 
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
@@ -932,7 +932,7 @@ class Model:
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
-        
+
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
@@ -1003,6 +1003,11 @@ class Model:
         # term_1[n, m]
         # term_2[n]
         # return[m]
+        print("\test_sigma shape: {}".format(est_sigma.shape))
+        print("\test_mu shape: {}".format(est_mu.shape))
+        print("\tobs_vals shape: {}".format(obs_vals.shape))
+        print("\tobs_error shape: {}".format(obs_error.shape))
+
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
         print(term1.shape)
         term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
