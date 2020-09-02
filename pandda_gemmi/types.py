@@ -1137,6 +1137,12 @@ class Clustering:
         extrema_mask_array = zmap_array > masks.contour_level
         print("\t{} non extra points".format(np.sum(extrema_mask_array)))
 
+        extrema_mask_array = zmap_array > 1.0
+        print("\t{} non extra points".format(np.sum(extrema_mask_array)))
+
+        extrema_mask_array = zmap_array > 0.5
+        print("\t{} non extra points".format(np.sum(extrema_mask_array)))
+
 
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
         print("\toutlier array shape: {}".format(extrema_grid_coords_array))
