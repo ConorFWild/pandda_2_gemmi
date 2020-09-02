@@ -921,12 +921,12 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower_orig = (np.ones(shape) * start) + 1e-16
+        x_lower_orig = (np.ones(shape[1]) * start) + 1e-16
 
-        x_upper_orig = np.ones(shape) * stop
+        x_upper_orig = np.ones(shape[1]) * stop
 
-        f_lower = func(x_lower_orig)
-        f_upper = func(x_upper_orig)
+        f_lower = func(x_lower_orig[np.newaxis, :])
+        f_upper = func(x_upper_orig[np.newaxis, :])
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
@@ -934,7 +934,7 @@ class Model:
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
 
-        mask = np.tile(test_mat_mask, (x_lower_orig.shape[0], 1))
+        # mask = np.tile(test_mat_mask, (x_lower_orig.shape[0], 1))
 
         x_lower = x_lower_orig
         x_upper = x_upper_orig
@@ -943,8 +943,8 @@ class Model:
 
             x_bisect = x_lower + ((x_upper - x_lower) / 2)
 
-            f_lower = func(x_lower)
-            f_bisect = func(x_bisect)
+            f_lower = func(x_lower[np.newaxis, :])
+            f_bisect = func(x_bisect[np.newaxis, :])
 
             f_lower_positive = f_lower >= 0
             f_lower_negative = f_lower < 0
@@ -965,7 +965,7 @@ class Model:
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
 
         # Replace original vals
-        x_lower[~mask] = 0.0
+        x_lower[~test_mat_mask] = 0.0
 
         return x_lower[0,:]
 
