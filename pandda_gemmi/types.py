@@ -1214,6 +1214,7 @@ class Clustering:
 
         print("\tGetting symops")
         symops = Symops.from_grid(mask)
+        print([symmetry_operation for symmetry_operation in symops])
 
         print("\tIterating")
         for atom in reference.dataset.structure.protein_atoms():
@@ -1231,7 +1232,9 @@ class Clustering:
                                        value=1,
                                        )
 
+
         mask_array = np.array(mask, copy=False)
+        print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
         mask_array[:,:,:] = mask_array * np.array(protein_mask, copy=False)
 
