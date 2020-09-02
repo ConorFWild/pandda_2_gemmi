@@ -218,10 +218,10 @@ class Datasets:
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
         for dtag in self.datasets:
+            print(dtag)
             print(RMSD.from_structures(self.datasets[dtag].structure,
-                                                              reference.dataset.structure,
-                                                              )).to_float()
-
+                                       reference.dataset.structure,
+                                       )).to_float()
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.dataset.structure,
@@ -1173,11 +1173,11 @@ class Clustering:
 
         print("\tClustering")
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
-                                                           t=blob_finding.clustering_cutoff,
-                                                           criterion='distance',
-                                                           metric='euclidean',
-                                                           method='single',
-                                                           )
+                                         t=blob_finding.clustering_cutoff,
+                                         criterion='distance',
+                                         metric='euclidean',
+                                         method='single',
+                                         )
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
@@ -1187,9 +1187,9 @@ class Clustering:
 
             cluster_points_array = extrema_grid_coords_array[cluster_indicies]
 
-            cluster_points_tuple = (cluster_points_array[:,0],
-                                   cluster_points_array[:,1],
-                                   cluster_points_array[:,2],)
+            cluster_points_tuple = (cluster_points_array[:, 0],
+                                    cluster_points_array[:, 1],
+                                    cluster_points_array[:, 2],)
 
             # indexes = np.unravel_index(cluster_points_tuple,
             #                            zmap_array.shape,
@@ -1290,15 +1290,16 @@ class Clusterings:
         for dtag in self.clusters:
             clustering = self.clusters[dtag]
             new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
-                                       clustering,
-                                       )
-                                )
+                                           clustering,
+                                           )
+                                    )
 
             if len(new_cluster_nums) == 0:
                 continue
 
             else:
-                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in new_cluster_nums}
+                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in
+                                     new_cluster_nums}
                 new_clustering = Clustering(new_clusters_dict)
                 new_clusterings[dtag] = new_clustering
 
@@ -1309,15 +1310,16 @@ class Clusterings:
         for dtag in self.clusters:
             clustering = self.clusters[dtag]
             new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
-                                       clustering,
-                                       )
-                                )
+                                           clustering,
+                                           )
+                                    )
 
             if len(new_cluster_nums) == 0:
                 continue
 
             else:
-                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in new_cluster_nums}
+                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in
+                                     new_cluster_nums}
                 new_clustering = Clustering(new_clusters_dict)
                 new_clusterings[dtag] = new_clustering
 
