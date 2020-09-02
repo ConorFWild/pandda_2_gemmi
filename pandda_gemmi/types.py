@@ -967,7 +967,7 @@ class Model:
         # Replace original vals
         x_lower[~test_mat_mask] = 0.0
 
-        return x_lower[0,:]
+        return x_lower
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
