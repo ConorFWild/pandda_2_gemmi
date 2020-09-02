@@ -1128,8 +1128,13 @@ class Clustering:
         # Don't consider outlying points at symmetry contacts
         zmap_array[symmetry_contact_mask] = 0
 
+        print(np.sum(protein_mask))
+        print(np.sum(symmetry_contact_mask))
+        print(np.sum(protein_mask*symmetry_contact_mask))
+
         extrema_mask_array = zmap_array > masks.contour_level
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
+        print("\toutlier array shape: {}".format(extrema_grid_coords_array))
 
 
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
@@ -1140,7 +1145,7 @@ class Clustering:
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
 
         positions = []
-        for point in extrema_grid_coords_array:
+        for point in extrema_fractional_coords_array:
 
             position = gemmi.Fractional(*point)
             pos_orth = zmap.zmap.unit_cell.orthogonalize(position)
