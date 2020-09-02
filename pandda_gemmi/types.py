@@ -1000,7 +1000,7 @@ class Zmap:
         new_grid.spacegroup = xmap.xmap.spacegroup
         new_grid.unit_cell = xmap.xmap.unit_cell
 
-        new_grid_array = np.array(new_grid, copy=True)
+        new_grid_array = np.array(new_grid, copy=False)
         new_grid_array[:, :, :] = zmap_array[:, :, :]
 
         return new_grid
