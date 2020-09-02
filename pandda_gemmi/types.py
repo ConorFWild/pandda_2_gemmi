@@ -934,8 +934,10 @@ class Model:
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
 
-        x_lower = x_lower_orig[~test_mat_mask]
-        x_upper = x_upper_orig[~test_mat_mask]
+        mask = test_mat_mask + np.zeros(x_lower_orig.shape)
+
+        x_lower = x_lower_orig[~mask]
+        x_upper = x_upper_orig[~mask]
 
         for i in range(num):
 
@@ -963,9 +965,9 @@ class Model:
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
 
         # Replace original vals
-        x_lower_orig[~test_mat_mask] = x_lower
+        x_lower_orig[~mask] = x_lower
 
-        return x_lower_orig
+        return x_lower_orig[0,:]
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
