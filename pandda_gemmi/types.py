@@ -1014,7 +1014,7 @@ class Model:
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
         print("\tterm1: {}".format(term1))
-        term2 = np.ones(obs_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
+        term2 = np.ones(est_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
         print("\tterm2: {}".format(term2))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
