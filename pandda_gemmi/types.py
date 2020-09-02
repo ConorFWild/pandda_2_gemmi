@@ -339,7 +339,7 @@ class Partitioning:
     @staticmethod
     def from_reference(reference: Reference,
                        grid: gemmi.FloatGrid,
-                       masks: Masks,
+                       mask_radius: float,
                        ):
 
         array = np.array(grid, copy=False)
@@ -373,7 +373,7 @@ class Partitioning:
         for atom in reference.dataset.structure.protein_atoms():
             pos = atom.pos
             mask.set_points_around(pos,
-                                   radius=masks.inner_mask,
+                                   radius=mask_radius,
                                    value=1,
                                    )
 
@@ -411,7 +411,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, masks: Masks):
+    def from_reference(reference: Reference, mask_radius: float):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference)
 
@@ -421,7 +421,7 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
-                                                   masks, )
+                                                   mask_radius, )
 
         return Grid(grid, partitioning)
 

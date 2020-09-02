@@ -49,7 +49,7 @@ def main():
 
         print("Getting grid")
         grid: Grid = Grid.from_reference(reference,
-                                         config.params.masks)
+                                         config.params.masks.outer_mask)
         print("\tGot grid")
 
         print("Getting alignments")
@@ -82,7 +82,7 @@ def main():
             print("\t\tGot {} xmaps".format(len(xmaps)))
 
             print("\tDetermining model...")
-            model: Model = Model.from_xmaps(xmaps)
+            model: Model = Model.from_xmaps(xmaps, grid)
             print("\t\tGot model")
             print(ModelLogs.from_model(model))
 
