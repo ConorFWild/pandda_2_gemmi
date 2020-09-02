@@ -1012,10 +1012,11 @@ class Model:
         print("\tobs_error shape: {}".format(obs_error.shape))
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
-        print(term1.shape)
+        print("\tterm1: {}".format(term1))
         term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
-        print(term2.shape)
-        return np.sum(term1- term2, axis=0)
+        print("\tterm2: {}".format(term2))
+        return np.sum(term1, axis=0) - np.sum(term2, axis=0)
+
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
