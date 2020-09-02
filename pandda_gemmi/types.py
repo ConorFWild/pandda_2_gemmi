@@ -10,6 +10,8 @@ import numpy as np
 import scipy
 from scipy import spatial
 from scipy import stats
+from scipy import cluster
+
 import pandas as pd
 import gemmi
 
@@ -1169,7 +1171,7 @@ class Clustering:
         print("\tshape: {}".format(extrema_cart_coords_array))
 
         print("\tClustering")
-        cluster_ids_array = scipy.cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
+        cluster_ids_array = cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
                                                                  t=blob_finding.clustering_cutoff,
                                                                  criterion='distance',
                                                                  metric='euclidean',
