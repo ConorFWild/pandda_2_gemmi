@@ -217,6 +217,11 @@ class Datasets:
         return self.datasets[item]
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
+        for dtag in self.datasets:
+            print(RMSD.from_structures(self.datasets[dtag].structure,
+                                                              reference.dataset.structure,
+                                                              )).to_float()
+
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.dataset.structure,
@@ -1119,7 +1124,7 @@ class Clustering:
                                                                           protein_mask,
                                                                           symmetry_mask_radius=masks.inner_mask,
                                                                           )
-        
+
         print("\tGot symmetry mask")
 
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
