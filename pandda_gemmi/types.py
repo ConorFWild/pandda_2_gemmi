@@ -823,10 +823,10 @@ class Model:
                                               )
 
         mean = np.zeros(mask.shape)
-        mean[mask] = mean_flat
+        mean[mask_array] = mean_flat
 
         sigma_s_m = np.zeros(mask.shape)
-        sigma_s_m[mask] = sigma_s_m_flat
+        sigma_s_m[mask_array] = sigma_s_m_flat
 
         return Model(mean,
                      sigma_is,
