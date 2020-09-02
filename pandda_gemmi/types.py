@@ -1117,8 +1117,9 @@ class Clustering:
         symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
                                                                           reference,
                                                                           protein_mask,
-                                                                          symmetry_mask_radius=masks.outer_mask,
+                                                                          symmetry_mask_radius=masks.inner_mask,
                                                                           )
+        
         print("\tGot symmetry mask")
 
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
