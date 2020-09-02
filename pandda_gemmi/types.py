@@ -428,6 +428,7 @@ class Grid:
         unit_cell = self.grid.unit_cell
         grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
         grid.unit_cell = unit_cell
+        grid.spacegroup = self.grid.spacegroup
         return grid
 
     @staticmethod
@@ -707,6 +708,7 @@ class Xmap:
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
+
         # TODO: remove
 
         interpolated_values_tuple = ([], [], [], [])
