@@ -1326,6 +1326,10 @@ class Clusterings:
     def __len__(self):
         return len(self.clusters)
 
+    def __iter__(self):
+        for dtag in self.clusters:
+            return dtag
+
 
 @dataclasses.dataclass()
 class BDC:
