@@ -1180,7 +1180,7 @@ class Clustering:
                                    value=1,
                                    )
 
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=True)
 
         return mask_array
 
@@ -1205,7 +1205,7 @@ class Clustering:
                                        value=1,
                                        )
 
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=True)
 
         mask_array = mask_array * protein_mask
 
