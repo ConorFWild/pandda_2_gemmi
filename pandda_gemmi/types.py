@@ -1132,7 +1132,12 @@ class Clustering:
         print(np.sum(symmetry_contact_mask))
         print(np.sum(protein_mask*symmetry_contact_mask))
 
+
+        print("\tMask contour level is: {}".format(masks.contour_level))
         extrema_mask_array = zmap_array > masks.contour_level
+        print("\t{} non extra points".format(np.sum(extrema_mask_array)))
+
+
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
         print("\toutlier array shape: {}".format(extrema_grid_coords_array))
 
