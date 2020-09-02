@@ -1131,17 +1131,26 @@ class Clustering:
         extrema_mask_array = zmap_array > masks.contour_level
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
 
+
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
                                          zmap.zmap.unit_cell.b,
                                          zmap.zmap.unit_cell.c,
                                          ])
 
-
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
 
-        transform_array = zmap.zmap.unit_cell.orthogonalization_matrix
+        positions = []
+        for point in extrema_grid_coords_array:
 
-        extrema_cart_coords_array = np.matmul(transform_array, extrema_fractional_coords_array)
+            position = gemmi.Fractional(*point)
+            pos_orth = zmap.zmap.unit_cell.orthogonalize(position)
+            pos_orth_array = [pos_orth[0],
+                              pos_orth[1],
+                              pos_orth[2],]
+            positions.append(pos_orth_array)
+
+        extrema_cart_coords_array = np.array(positions)
+        print("\tshape: {}".format(extrema_cart_coords_array))
 
         print("\tClustering")
         cluster_ids_array = scipy.cluster.hierarchy.fclusterdata(X=extrema_cart_coords_array,
