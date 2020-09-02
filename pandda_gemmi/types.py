@@ -1236,7 +1236,13 @@ class Clustering:
         mask_array = np.array(mask, copy=False)
         print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
-        mask_array[:,:,:] = mask_array * np.array(protein_mask, copy=False)
+        protein_mask_array = np.array(protein_mask, copy=False)
+
+        equal_mask = protein_mask_array == mask_array
+
+        print("\tequal mask of size {}".format(np.sum(equal_mask)))
+
+        mask_array[:,:,:] = mask_array * protein_mask_array
 
         return mask
 
