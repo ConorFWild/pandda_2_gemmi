@@ -876,7 +876,7 @@ class Model:
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
                                                     0,
-                                                    100,
+                                                    10,
                                                     1000,
                                                     arrays.shape
                                                     )
@@ -911,7 +911,7 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower = (np.ones(shape) * start) # + (1.0 / 100000000.0)
+        x_lower = (np.ones(shape) * start) + 1e-16
 
         x_upper = np.ones(shape) * stop
 
@@ -920,7 +920,6 @@ class Model:
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
-
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
