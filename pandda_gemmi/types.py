@@ -331,7 +331,6 @@ class Partitioning:
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], gemmi.Position]]
     protein_mask: gemmi.Int8Grid
 
-
     def __getitem__(self, item: ResidueID):
         return self.partitioning[item]
 
@@ -378,9 +377,9 @@ class Partitioning:
 
         mask_array = np.array(mask, copy=False)
 
-        coord_array = np.argwhere(mask_array==1)
+        coord_array = np.argwhere(mask_array == 1)
 
-        query_points = coord_array/spacing
+        query_points = coord_array / spacing
 
         distances, indexes = kdtree.query(query_points)
 
@@ -419,7 +418,7 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
-                                                   masks,)
+                                                   masks, )
 
         return Grid(grid, partitioning)
 
@@ -725,7 +724,6 @@ class Xmap:
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
                                                                             transformed_positions)
 
-
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
                                          interpolated_values_tuple[2] + [index[2] for index in interpolated_values],
@@ -818,13 +816,12 @@ class Model:
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
         sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
-                                              stacked_arrays,
-                                              sigma_is_array,
-                                              )
+                                                   stacked_arrays,
+                                                   sigma_is_array,
+                                                   )
 
         mean = np.zeros(mask_array.shape)
         mean[mask_array] = mean_flat
-
 
         sigma_s_m = np.zeros(mask_array.shape)
         sigma_s_m[mask_array] = sigma_s_m_flat
@@ -841,16 +838,14 @@ class Model:
         residual = np.subtract(array, mean)
         # sigma_i = np.std(residual)
         # sigma_i = 0.01
-        
+
         percentiles = np.linspace(0, 1, array.size + 2)[1:-1]
         normal_quantiles = stats.norm.ppf(percentiles)
         observed_quantile_estimates = np.sort(residual)
 
-
         above_min_mask = normal_quantiles > -1
         below_max_mask = normal_quantiles < 1
-        centre_mask = above_min_mask*below_max_mask
-
+        centre_mask = above_min_mask * below_max_mask
 
         central_theoretical_quantiles = normal_quantiles[centre_mask]
         central_observed_quantiles = observed_quantile_estimates[centre_mask]
@@ -880,20 +875,17 @@ class Model:
         # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
         #
 
-
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
 
         sigma_ms = Model.vectorised_optimisation_bisect(func,
-                                                    0,
-                                                    10,
-                                                    30,
-                                                    arrays.shape
-                                                    )
-
-
+                                                        0,
+                                                        10,
+                                                        30,
+                                                        arrays.shape
+                                                        )
 
         return sigma_ms
 
@@ -921,7 +913,6 @@ class Model:
 
         return res
 
-
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
@@ -944,7 +935,6 @@ class Model:
         x_upper = x_upper_orig
 
         for i in range(num):
-
             x_bisect = x_lower + ((x_upper - x_lower) / 2)
 
             f_lower = func(x_lower[np.newaxis, :])
@@ -981,13 +971,11 @@ class Model:
         term2 = np.ones(est_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
-
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
 
         residuals = (xmap_array - self.mean)
         denominator = (np.sqrt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
-
 
         return residuals / denominator
 
@@ -1006,6 +994,7 @@ class Zmap:
     def grid_from_template(xmap: Xmap, zmap_array: np.array):
         spacing = [xmap.xmap.nu, xmap.xmap.nv, xmap.xmap.nw, ]
         new_grid = gemmi.FloatGrid(*spacing)
+        new_grid.spacegroup = xmap.xmap.spacegroup
         new_grid.unit_cell = xmap.xmap.unit_cell
 
         new_grid_array = np.array(new_grid, copy=True)
@@ -1237,7 +1226,7 @@ class Clusterings:
         new_clusterings = {}
         for dtag in self.clusters:
             clustering = self.clusters[dtag]
-            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].size() > min_cluster_size,
+            new_clusters = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
                                        clustering,
                                        )
                                 )
