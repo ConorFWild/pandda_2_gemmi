@@ -1131,10 +1131,10 @@ class Clustering:
         extrema_mask_array = zmap_array > masks.contour_level
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
 
-        grid_dimensions_array = np.array(zmap.zmap.unit_cell.a,
+        grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
                                          zmap.zmap.unit_cell.b,
                                          zmap.zmap.unit_cell.c,
-                                         )
+                                         ])
 
 
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
