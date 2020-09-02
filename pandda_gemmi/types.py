@@ -835,12 +835,14 @@ class Model:
         # sigma_i = 0.01
         
         percentiles = np.linspace(0, 1, array.size + 2)
-        normal_quantiles = stats.normal.ppf(percentiles)
+        normal_quantiles = stats.norm.ppf(percentiles)
         observed_quantile_estimates = np.sort(residual)
+
 
         above_min_mask = normal_quantiles > -1
         below_max_mask = normal_quantiles < 1
         centre_mask = above_min_mask*below_max_mask
+
 
         central_theoretical_quantiles = normal_quantiles[centre_mask]
         central_observed_quantiles = observed_quantile_estimates[centre_mask]
