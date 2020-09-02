@@ -872,11 +872,18 @@ class Model:
         print("First log liklihood")
         print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
 
-        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
+
+        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
+
+        x_lower = (np.ones(shape) * 0.0) + 1e-16
+        f_lower = Model.log_liklihood(x_lower, mean, arrays, sigma_is_array)
+        print("First log liklihood vectorised")
+        print(f_lower[0])
+
 
         sigma_is = Model.vectorised_optimisation_bisect(func,
                                                     0,
@@ -925,11 +932,13 @@ class Model:
 
         test_mat = f_lower * f_upper
         test_mat_mask = test_mat > 0
+        
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
 
         print([start,stop])
+        print("Vectorised log liklohood in bisect")
         print(f_lower)
         print(func(x_lower + 1.0/1000.0))
         print(f_upper)
@@ -995,7 +1004,9 @@ class Model:
         # term_2[n]
         # return[m]
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
+        print(term1.shape)
         term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
+        print(term2.shape)
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
