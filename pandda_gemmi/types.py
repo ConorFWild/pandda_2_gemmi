@@ -1109,6 +1109,10 @@ class Clustering:
                                                    masks.inner_mask,
                                                    )
         print("\tGor protein mask")
+
+        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
+
+
         symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
                                                                      reference,
                                                                      protein_mask,
@@ -1116,7 +1120,6 @@ class Clustering:
                                                                      )
         print("\tGot symmetry mask")
 
-        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
 
         # Don't consider outlying points away from the protein
@@ -1133,7 +1136,7 @@ class Clustering:
                                          zmap.zmap.unit_cell.c,
                                          )
 
-        
+
         extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array
 
         transform_array = zmap.zmap.unit_cell.orthogonalization_matrix
