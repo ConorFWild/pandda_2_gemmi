@@ -869,8 +869,8 @@ class Model:
         print(mean[-1])
         print(sigma_is_array[-1, :])
 
-        print("First log liklihood")
-        print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
+        # print("First log liklihood")
+        # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
         #
 
 
