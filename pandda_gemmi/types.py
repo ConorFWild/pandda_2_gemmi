@@ -1185,13 +1185,13 @@ class Clustering:
                                    cluster_points_array[:,1],
                                    cluster_points_array[:,2],)
 
-            indexes = np.unravel_index(cluster_points_tuple,
-                                       zmap_array.shape,
-                                       )  # (n',n',n')
+            # indexes = np.unravel_index(cluster_points_tuple,
+            #                            zmap_array.shape,
+            #                            )  # (n',n',n')
 
-            values = zmap_array[indexes]
+            values = zmap_array[cluster_points_tuple]
 
-            cluster = Cluster(indexes,
+            cluster = Cluster(cluster_points_tuple,
                               values,
                               )
             clusters[unique_cluster] = cluster
