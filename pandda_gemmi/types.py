@@ -1307,7 +1307,7 @@ class Clusterings:
                                        )
                                 )
 
-            if len(new_clusters) == 0:
+            if len(new_cluster_nums) == 0:
                 continue
 
             else:
