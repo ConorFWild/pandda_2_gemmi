@@ -889,8 +889,6 @@ class Model:
         print(sigma_ms)
         print(sigma_ms.shape)
 
-        raise Exception()
-
         return sigma_ms
 
     @staticmethod
