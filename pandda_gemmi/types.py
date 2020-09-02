@@ -965,7 +965,7 @@ class Model:
             x_lower[f_lower_negative_bisect_negative] = x_bisect[f_lower_negative_bisect_negative]
 
         # Replace original vals
-        x_lower[~test_mat_mask] = 0.0
+        x_lower[test_mat_mask] = 0.0
 
         return x_lower
 
