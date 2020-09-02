@@ -221,7 +221,7 @@ class Datasets:
             print(dtag)
             print(RMSD.from_structures(self.datasets[dtag].structure,
                                        reference.dataset.structure,
-                                       )).to_float()
+                                       ).to_float())
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.dataset.structure,
