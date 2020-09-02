@@ -1135,7 +1135,7 @@ class Clustering:
 
         print("\tMask contour level is: {}".format(masks.contour_level))
         extrema_mask_array = zmap_array > masks.contour_level
-        print("\t{} non extra points".format(np.sum(extrema_mask_array)))
+        print("\t{} non extra points".format(np.sum(extrema_mask_array.shape)))
 
         # extrema_mask_array = zmap_array > 1.0
         # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
@@ -1144,7 +1144,7 @@ class Clustering:
         # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
 
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)
-        print("\toutlier array shape: {}".format(extrema_grid_coords_array))
+        print("\toutlier array shape: {}".format(extrema_grid_coords_array.shape))
 
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
                                           zmap.zmap.unit_cell.b,
@@ -1163,7 +1163,7 @@ class Clustering:
             positions.append(pos_orth_array)
 
         extrema_cart_coords_array = np.array(positions)
-        print("\tshape: {}".format(extrema_cart_coords_array))
+        print("\tshape: {}".format(extrema_cart_coords_array.shape))
 
         print("\tClustering")
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
