@@ -1015,7 +1015,7 @@ class Model:
         print(term1.shape)
         term2 = 1 / (np.square(est_sigma) + np.square(obs_error))
         print(term2.shape)
-        return np.sum(term1, axis=0) - np.sum(term2, axis=0)
+        return np.sum(term1- term2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
