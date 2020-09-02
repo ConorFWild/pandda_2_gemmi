@@ -805,22 +805,28 @@ class Model:
             arrays[dtag] = xmap_array[mask_array]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
-        mean = np.mean(stacked_arrays, axis=0)
+        mean_flat = np.mean(stacked_arrays, axis=0)
 
         # Estimate the dataset residual variability
         sigma_is = {}
         for dtag in xmaps:
-            sigma_i = Model.calculate_sigma_i(mean,
+            sigma_i = Model.calculate_sigma_i(mean_flat,
                                               arrays[dtag])
             sigma_is[dtag] = sigma_i
             print([dtag, sigma_i])
 
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
-        sigma_s_m = Model.calculate_sigma_s_m(mean,
+        sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
                                               stacked_arrays,
                                               sigma_is_array,
                                               )
+
+        mean = np.zeros(mask.shape)
+        mean[mask] = mean_flat
+
+        sigma_s_m = np.zeros(mask.shape)
+        sigma_s_m[mask] = sigma_s_m_flat
 
         return Model(mean,
                      sigma_is,
@@ -885,6 +891,7 @@ class Model:
                                                     30,
                                                     arrays.shape
                                                     )
+
 
 
         return sigma_ms
