@@ -562,7 +562,10 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        return Transform.from_translation_rotation(vec, rotation)
+
+        com = de_meaned_ref
+
+        return Transform.from_translation_rotation(vec, rotation, com)
 
     @staticmethod
     def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
@@ -587,7 +590,9 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        return Transform.from_translation_rotation(vec, rotation)
+        com = de_meaned_ref
+
+        return Transform.from_translation_rotation(vec, rotation, com)
 
 
 @dataclasses.dataclass()
