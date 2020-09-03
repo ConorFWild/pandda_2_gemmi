@@ -717,7 +717,8 @@ class Xmap:
                                                                                                  structure_factors.phi,
                                                                                                  )
 
-        # TODO: remove
+
+
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -1024,6 +1025,12 @@ class Zmap:
 
     def unit_cell(self):
         return self.zmap.unit_cell
+
+    def save(self, path: Path):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = self.zmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.write_ccp4_map(str(path))
 
 
 @dataclasses.dataclass()
