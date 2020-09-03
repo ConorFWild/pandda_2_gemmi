@@ -338,6 +338,7 @@ class Reference:
 class Partitioning:
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], gemmi.Position]]
     protein_mask: gemmi.Int8Grid
+    symmetry_mask: gemmi.Int8Grid
 
     def __getitem__(self, item: ResidueID):
         return self.partitioning[item]
@@ -408,7 +409,51 @@ class Partitioning:
                                                                                       )
                                                                      )
 
-        return Partitioning(partitions, mask)
+        symmetry_mask = Partitioning.get_symmetry_contact_mask(reference, mask, mask_radius)
+
+        return Partitioning(partitions, mask, symmetry_mask)
+
+    @staticmethod
+    def get_symmetry_contact_mask(reference: Reference, protein_mask: gemmi.Int8Grid,
+                                  symmetry_mask_radius: float = 3):
+        protein_mask_array = np.array(protein_mask, copy=False)
+
+        mask = gemmi.Int8Grid(*protein_mask_array.shape)
+        mask.spacegroup = protein_mask.spacegroup
+        mask.set_unit_cell(protein_mask.unit_cell)
+
+        print("\tGetting symops")
+        symops = Symops.from_grid(mask)
+        print([symmetry_operation for symmetry_operation in symops])
+
+        print("\tIterating")
+        for atom in reference.dataset.structure.protein_atoms():
+            for symmetry_operation in symops.symops[1:]:
+                position = atom.pos
+                fractional_position = mask.unit_cell.fractionalize(position)
+                symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
+                                                                                       fractional_position[1],
+                                                                                       fractional_position[2],
+                                                                                       ]))
+                orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
+
+                mask.set_points_around(orthogonal_symmetry_position,
+                                       radius=symmetry_mask_radius,
+                                       value=1,
+                                       )
+
+        mask_array = np.array(mask, copy=False)
+        print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
+
+        protein_mask_array = np.array(protein_mask, copy=False)
+
+        equal_mask = protein_mask_array == mask_array
+
+        print("\tequal mask of size {}".format(np.sum(equal_mask)))
+
+        mask_array[:, :, :] = mask_array * protein_mask_array
+
+        return mask
 
 
 @dataclasses.dataclass()
@@ -760,8 +805,8 @@ class Xmap:
                                                gemmi.Position] = alignment[residue_id].apply_inverse(
                 alignment_positions)
 
-            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
-                point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+            # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+            #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
