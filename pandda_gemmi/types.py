@@ -1622,6 +1622,8 @@ class RMSD:
 
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
+        
+        print(positions_1_array)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
         #
