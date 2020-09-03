@@ -1622,8 +1622,9 @@ class RMSD:
 
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
+
         
-        print(positions_1_array)
+        # print(positions_1_array)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
         #
@@ -1645,6 +1646,7 @@ class RMSD:
         # print(array_1)
         # print(array_1_mean)
 
+        print([array_1.shape, array_1_mean.shape])
         array_1_demeaned = array_1 - array_1_mean
         array_2_demeaned = array_2 - array_2_mean
         # print(array_1_demeaned)
