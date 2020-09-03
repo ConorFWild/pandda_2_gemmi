@@ -585,8 +585,8 @@ class Transform:
             Transform.pos_to_list(current_ca_pos),
         ])
         matrix_ref = np.array([
-            [Transform.pos_to_list(previous_ref_ca_pos)],
-            [Transform.pos_to_list(current_ref_ca_pos)],
+            Transform.pos_to_list(previous_ref_ca_pos),
+            Transform.pos_to_list(current_ref_ca_pos),
         ])
 
         mean = np.mean(matrix, axis=0)
