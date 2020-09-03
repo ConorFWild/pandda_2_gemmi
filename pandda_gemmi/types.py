@@ -1659,14 +1659,17 @@ class RMSD:
         print("rmsd is: {}".format(np.sqrt(np.sum(np.square(np.linalg.norm(array_1_demeaned-array_2_demeaned, axis=1)), axis=0)/array_1.shape[0])))
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
         rotated_vecs = rotation.apply(array_2_demeaned)
-        print("rmsd after rotation is: {}".format(np.sqrt(
-            np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])))
-        print("scipy thinks rmsd is: {}".format(rmsd))
+        # print("rmsd after rotation is: {}".format(np.sqrt(
+        #     np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])))
+        # print("scipy thinks rmsd is: {}".format(rmsd))
+        #
+        true_rmsd = np.sqrt(
+            np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])
 
         # print(rotation)
         # print(rmsd)
 
-        return RMSD(rmsd)
+        return RMSD(true_rmsd)
 
     def to_float(self):
         return self.rmsd
