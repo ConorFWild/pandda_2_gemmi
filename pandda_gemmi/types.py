@@ -1300,6 +1300,23 @@ class Clustering:
         for cluster_num in self.clustering:
             yield cluster_num
 
+    def cluster_mask(self, grid: Grid):
+        grid_array = np.array(grid.grid, copy=False)
+        mask = gemmi.Int8Grid(*grid_array.shape)
+        mask.spacegroup = grid.grid.spacegroup
+        mask.set_unit_cell(grid.grid.unit_cell)
+
+        mask_array = np.array(mask, copy=False)
+
+        for cluster_id in self.clustering:
+            cluster = self.clustering[cluster_id]
+            indexes = cluster.indexes
+            mask_array[indexes] = 1
+
+        return mask
+
+
+
     @staticmethod
     def get_protein_mask(zmap: Zmap, reference: Reference, masks_radius: float):
         mask = gemmi.Int8Grid(*zmap.shape())
