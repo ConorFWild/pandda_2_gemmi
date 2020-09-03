@@ -466,9 +466,23 @@ class Transform:
 
     def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
         typing.Tuple[int], gemmi.Position]:
+        transform = self.transform
         transformed_positions = {}
         for index, position in positions.items():
-            transformed_vector = self.transform.apply(position)
+            transformed_vector = transform.apply(position)
+            transformed_positions[index] = gemmi.Position(transformed_vector[0],
+                                                          transformed_vector[1],
+                                                          transformed_vector[2],
+                                                          )
+
+        return transformed_positions
+
+    def apply_inverse(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
+        typing.Tuple[int], gemmi.Position]:
+        inverse_transform = self.transform.inverse()
+        transformed_positions = {}
+        for index, position in positions.items():
+            transformed_vector = inverse_transform.apply(position)
             transformed_positions[index] = gemmi.Position(transformed_vector[0],
                                                           transformed_vector[1],
                                                           transformed_vector[2],
@@ -726,7 +740,7 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply(
+                                               gemmi.Position] = alignment[residue_id].apply_inverse(
                 alignment_positions)
 
             transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
