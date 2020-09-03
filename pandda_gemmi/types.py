@@ -1603,27 +1603,31 @@ class RMSD:
         positions_1 = []
         positions_2 = []
 
-        for residues_id in structure_1.residue_ids():
-            res_1 = structure_1[residues_id][0]
-            res_2 = structure_2[residues_id][0]
+        positions_1 = [ atom.pos for atom in structure_1.protein_atoms()]
+        positions_2 = [ atom.pos for atom in structure_2.protein_atoms()]
+        
 
-            res_1_ca = res_1["CA"][0]
-            res_2_ca = res_2["CA"][0]
-
-            res_1_ca_pos = res_1_ca.pos
-            res_2_ca_pos = res_2_ca.pos
-            # print(res_1_ca_pos)
-            # print(res_2_ca_pos)
-
-            positions_1.append(res_1_ca_pos)
-            positions_2.append(res_2_ca_pos)
-
-            distances.append(res_1_ca_pos.dist(res_2_ca_pos))
+        # for residues_id in structure_1.residue_ids():
+        #     res_1 = structure_1[residues_id][0]
+        #     res_2 = structure_2[residues_id][0]
+        #
+        #     res_1_ca = res_1["CA"][0]
+        #     res_2_ca = res_2["CA"][0]
+        #
+        #     res_1_ca_pos = res_1_ca.pos
+        #     res_2_ca_pos = res_2_ca.pos
+        #     # print(res_1_ca_pos)
+        #     # print(res_2_ca_pos)
+        #
+        #     positions_1.append(res_1_ca_pos)
+        #     positions_2.append(res_2_ca_pos)
+        #
+        #     distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
 
-        
+
         # print(positions_1_array)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
@@ -1639,8 +1643,8 @@ class RMSD:
 
     @staticmethod
     def from_arrays(array_1, array_2):
-        array_1_mean = np.mean(array_1, axis=0)
-        array_2_mean = np.mean(array_2, axis=0)
+        array_1_mean = np.mean(array_1, axis=0).reshape((1,3))
+        array_2_mean = np.mean(array_2, axis=0).reshape((1,3))
 
         # print("#################################")
         # print(array_1)
