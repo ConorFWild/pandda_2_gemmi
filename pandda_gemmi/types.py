@@ -1656,7 +1656,7 @@ class RMSD:
         # print(array_1_demeaned)
         #
         # print(array_1_demeaned-array_2_demeaned)
-        print("rmsd is: {}".format(np.sqrt(np.sum(np.square(array_1_demeaned-array_2_demeaned), axis=1)/array_1.shape[0])))
+        print("rmsd is: {}".format(np.sqrt(np.sum(np.square(np.linalg.norm(array_1_demeaned-array_2_demeaned, axis=1)), axis=0)/array_1.shape[0])))
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
 
         # print(rotation)
