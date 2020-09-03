@@ -761,6 +761,14 @@ class Xmap:
     def to_array(self, copy=True):
         return np.array(self.xmap, copy=copy)
 
+    def save(self, path: Path):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = self.xmap
+        ccp4.grid.symmetrize_max()
+        ccp4.update_ccp4_header(2, True)
+        ccp4.write_ccp4_map(str(path))
+
+
 
 @dataclasses.dataclass()
 class Xmaps:
