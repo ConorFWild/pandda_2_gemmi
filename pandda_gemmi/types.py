@@ -1603,26 +1603,26 @@ class RMSD:
         positions_1 = []
         positions_2 = []
 
-        positions_1 = [ atom.pos for atom in structure_1.protein_atoms()]
-        positions_2 = [ atom.pos for atom in structure_2.protein_atoms()]
-        
+        # positions_1 = [ atom.pos for atom in structure_1.protein_atoms()]
+        # positions_2 = [ atom.pos for atom in structure_2.protein_atoms()]
+        #
 
-        # for residues_id in structure_1.residue_ids():
-        #     res_1 = structure_1[residues_id][0]
-        #     res_2 = structure_2[residues_id][0]
-        #
-        #     res_1_ca = res_1["CA"][0]
-        #     res_2_ca = res_2["CA"][0]
-        #
-        #     res_1_ca_pos = res_1_ca.pos
-        #     res_2_ca_pos = res_2_ca.pos
-        #     # print(res_1_ca_pos)
-        #     # print(res_2_ca_pos)
-        #
-        #     positions_1.append(res_1_ca_pos)
-        #     positions_2.append(res_2_ca_pos)
-        #
-        #     distances.append(res_1_ca_pos.dist(res_2_ca_pos))
+        for residues_id in structure_1.residue_ids():
+            res_1 = structure_1[residues_id][0]
+            res_2 = structure_2[residues_id][0]
+
+            res_1_ca = res_1["CA"][0]
+            res_2_ca = res_2["CA"][0]
+
+            res_1_ca_pos = res_1_ca.pos
+            res_2_ca_pos = res_2_ca.pos
+            # print(res_1_ca_pos)
+            # print(res_2_ca_pos)
+
+            positions_1.append(res_1_ca_pos)
+            positions_2.append(res_2_ca_pos)
+
+            distances.append(res_1_ca_pos.dist(res_2_ca_pos))
 
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
@@ -1656,7 +1656,7 @@ class RMSD:
         # print(array_1_demeaned)
         #
         # print(array_1_demeaned-array_2_demeaned)
-
+        print("rmsd is: {}".format(np.sqrt(np.sum(np.square(array_1_demeaned-array_2_demeaned), axis=1)/array_1.shape[0])))
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
 
         # print(rotation)
