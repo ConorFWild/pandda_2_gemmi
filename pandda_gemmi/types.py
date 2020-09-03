@@ -1029,6 +1029,7 @@ class Zmap:
     def save(self, path: Path):
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.zmap
+        ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
 
