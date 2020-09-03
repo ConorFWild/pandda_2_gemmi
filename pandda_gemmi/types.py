@@ -512,12 +512,16 @@ class Transform:
         current_ref_ca_pos = current_ref["CA"][0].pos
         next_ref_ca_pos = next_ref["CA"][0].pos
 
-        matrix = np.array([Transform.pos_to_list(previous_ca_pos),
-                           Transform.pos_to_list(current_ca_pos),
-                           Transform.pos_to_list(next_ca_pos), ])
-        matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
-                               Transform.pos_to_list(current_ref_ca_pos),
-                               Transform.pos_to_list(next_ref_ca_pos), ])
+        matrix = np.array([
+            Transform.pos_to_list(previous_ca_pos),
+            Transform.pos_to_list(current_ca_pos),
+            Transform.pos_to_list(next_ca_pos),
+        ])
+        matrix_ref = np.array([
+            Transform.pos_to_list(previous_ref_ca_pos),
+            Transform.pos_to_list(current_ref_ca_pos),
+            Transform.pos_to_list(next_ref_ca_pos),
+        ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -547,10 +551,12 @@ class Transform:
 
         matrix = np.array([
             Transform.pos_to_list(current_ca_pos),
-            Transform.pos_to_list(next_ca_pos), ])
+            Transform.pos_to_list(next_ca_pos),
+        ])
         matrix_ref = np.array([
             Transform.pos_to_list(current_ref_ca_pos),
-            Transform.pos_to_list(next_ref_ca_pos), ])
+            Transform.pos_to_list(next_ref_ca_pos),
+        ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -562,8 +568,7 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-
-        com = de_meaned_ref
+        com = mean_ref
 
         return Transform.from_translation_rotation(vec, rotation, com)
 
@@ -575,10 +580,14 @@ class Transform:
         previous_ref_ca_pos = previous_ref["CA"][0].pos
         current_ref_ca_pos = current_ref["CA"][0].pos
 
-        matrix = np.array([Transform.pos_to_list(previous_ca_pos),
-                           Transform.pos_to_list(current_ca_pos), ])
-        matrix_ref = np.array([Transform.pos_to_list(previous_ref_ca_pos),
-                               Transform.pos_to_list(current_ref_ca_pos), ])
+        matrix = np.array([
+            Transform.pos_to_list(previous_ca_pos),
+            Transform.pos_to_list(current_ca_pos),
+        ])
+        matrix_ref = np.array([
+            [Transform.pos_to_list(previous_ref_ca_pos)],
+            [Transform.pos_to_list(current_ref_ca_pos)],
+        ])
 
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
@@ -590,7 +599,7 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com = de_meaned_ref
+        com = mean_ref
 
         return Transform.from_translation_rotation(vec, rotation, com)
 
