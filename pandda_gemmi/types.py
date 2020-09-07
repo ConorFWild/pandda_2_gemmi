@@ -1631,7 +1631,7 @@ class Events:
     sites: Sites
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, cutoff: float):
+    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float):
         events: typing.Dict[EventID, Event] = {}
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
@@ -1644,7 +1644,7 @@ class Events:
 
                 cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
-                bdc = BDC.from_cluster(xmap, model, cluster, dtag)
+                bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
                 print([event_id, bdc])
 
                 site: SiteID = sites.event_to_site[event_id]
