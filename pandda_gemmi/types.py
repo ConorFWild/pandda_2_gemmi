@@ -1299,9 +1299,9 @@ class Clustering:
             event_mask.set_unit_cell(zmap.unit_cell())
             for position in positions:
                 event_mask.set_points_around(position,
-                                       radius=2.0,
-                                       value=1,
-                                       )
+                                             radius=2.0,
+                                             value=1,
+                                             )
 
             # event_mask.symmetrize_max()
 
@@ -1504,18 +1504,17 @@ class BDC:
         # print(np.sum(cluster_mask))
         # print(cluster_mask.shape)
 
-
         vals = {}
         for val in np.linspace(0, 1, steps):
             subtracted_map = xmap_masked - val * mean_masked
             cluster_vals = subtracted_map[cluster_mask]
             local_correlation = stats.pearsonr(mean_masked[cluster_mask],
-                                                    cluster_vals)[0]
+                                               cluster_vals)[0]
 
             global_correlation = stats.pearsonr(mean_masked,
-                                                     subtracted_map)[0]
+                                                subtracted_map)[0]
 
-            vals[val] = np.abs(global_correlation-local_correlation)
+            vals[val] = np.abs(global_correlation - local_correlation)
 
         # print(vals)
 
@@ -1564,7 +1563,7 @@ class PositionsArray:
         for row in self.array:
             pos = gemmi.Position(row[0],
                                  row[1],
-                                 row[2],)
+                                 row[2], )
             positions.append(pos)
 
         return positions
@@ -1682,35 +1681,94 @@ class Events:
 
 @dataclasses.dataclass()
 class ZMapFile:
+    path: Path
 
     @staticmethod
     def from_zmap(zmap: Zmap):
         pass
+
+    @staticmethod
+    def from_dir(dir: Path):
+        return ZMapFile(dir / PANDDA_Z_MAP_FILE)
+
+    def save(self, zmap: Zmap):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = zmap.zmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.grid.symmetrize_max()
+        ccp4.write_ccp4_map(str(self.path))
 
 
 @dataclasses.dataclass()
 class ZMapFiles:
 
     @staticmethod
-    def from_zmaps(zmaps: Zmaps):
-        pass
+    def from_zmaps(zmaps: Zmaps, pandda_fs_model: PanDDAFSModel):
+        for dtag in zmaps:
+            processed_dataset = pandda_fs_model.processed_datasets[dtag]
+
+            zmaps[dtag].save()
 
 
 @dataclasses.dataclass()
 class EventMapFile:
+    path: Path
 
     @staticmethod
-    def from_event(event: Event, xmap: Xmap):
-        pass
+    def from_event(event: Event, path: Path):
+        event_map_path = path / PANDDA_EVENT_MAP_FILE.format(dtag=event.event_id.dtag.dtag,
+                                                             event_idx=event.event_id.event_idx.event_idx,
+                                                             bdc=event.bdc.bdc,
+                                                             )
+        return EventMapFile(event_map_path)
+
+    def save(self, xmap: Xmap, model: Model, event: Event):
+        xmap_array = xmap.to_array(copy=False)
+        mean_array = model.mean
+
+        grid = gemmi.FloatGrid(*xmap_array.shape)
+        grid.spacegroup = xmap.xmap.spacegroup
+        grid.set_unit_cell(xmap.xmap.unit_cell)
+
+        grid_array = np.array(grid, copy=False)
+        grid_array[:,:,:] = (xmap_array - event.bdc.bdc*model.mean)/(1-event.bdc.bdc)
+
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = grid
+        ccp4.update_ccp4_header(2, True)
+        ccp4.grid.symmetrize_max()
+        ccp4.write_ccp4_map(str(self.path))
 
 
 @dataclasses.dataclass()
 class EventMapFiles:
+    path: Path
+    event_map_files: typing.Dict[EventIDX, EventMapFile]
+
+    # @staticmethod
+    # def from_events(events: Events, xmaps: Xmaps):
+    #     pass
 
     @staticmethod
-    def from_events(events: Events, xmaps: Xmaps):
-        pass
+    def from_dir(dir: Path):
+        return EventMapFiles(dir, {})
 
+    def get_events(self, events: typing.Dict[EventIDX, Event]):
+        event_map_files = {}
+        for event_idx in events:
+            event_map_files[event_idx] = EventMapFile.from_event(events[event_idx], self.path)
+
+        self.event_map_files = event_map_files
+
+    def add_event(self, event: Event):
+        self.event_map_files[event.event_id.event_idx] = EventMapFile.from_event(event, self.path)
+
+    def __iter__(self):
+        for event_idx in self.event_map_files:
+            yield event_idx
+
+    def __getitem__(self, item):
+        return self.event_map_files[item]
 
 @dataclasses.dataclass()
 class SiteTableFile:
@@ -1815,18 +1873,26 @@ class ProcessedDataset:
     dataset_models: DatasetModels
     input_mtz: Path
     input_pdb: Path
+    zmap_file: ZMapFile
+    event_map_files: EventMapFiles
 
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
         input_mtz = dataset_dir.input_mtz_file
         input_pdb = dataset_dir.input_pdb_file
+        zmap_file = ZMapFile.from_dir(dataset_models_dir)
+        event_map_files = EventMapFiles.from_dir(dataset_models_dir)
 
         return ProcessedDataset(path=processed_dataset_dir,
                                 dataset_models=DatasetModels.from_dir(dataset_models_dir),
                                 input_mtz=input_mtz,
                                 input_pdb=input_pdb,
+                                z_map_file=zmap_file,
+                                event_map_files=event_map_files,
                                 )
+
+
 
 
 @dataclasses.dataclass()
@@ -1842,6 +1908,13 @@ class ProcessedDatasets:
                                                                          )
 
         return ProcessedDatasets(processed_datasets)
+
+    def __getitem__(self, item):
+        return self.processed_datasets[item]
+
+    def __iter__(self):
+        for dtag in self.processed_datasets:
+            yield dtag
 
 
 @dataclasses.dataclass()
