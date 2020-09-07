@@ -1174,6 +1174,9 @@ class ClusterID:
     dtag: Dtag
     number: EventIDX
 
+    def __hash__(self):
+        return hash((self.dtag, self.number))
+
 
 @dataclasses.dataclass()
 class Cluster:
