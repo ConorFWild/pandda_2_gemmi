@@ -1299,7 +1299,7 @@ class Clustering:
                                        value=1,
                                        )
 
-            event_mask.symmetrize_max()
+            # event_mask.symmetrize_max()
 
             event_mask_array = np.array(event_mask, copy=True, dtype=np.bool)
             event_mask_indicies = np.nonzero(event_mask_array)
