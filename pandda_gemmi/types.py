@@ -1496,7 +1496,7 @@ class BDC:
         print(cluster_array.shape)
         cluster_array[cluster_indexes] = True
         print(cluster_array.shape)
-        print(sum(cluster_array))
+        print(np.sum(cluster_array))
         cluster_mask = cluster_array[protein_mask]
 
         vals = {}
