@@ -1483,7 +1483,7 @@ class BDC:
     def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
-        cluster_indexes = cluster.indexes
+        cluster_indexes = cluster.event_mask_indicies
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.bool)
 
         xmap_masked = xmap_array[protein_mask]
