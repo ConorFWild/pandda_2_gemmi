@@ -1215,22 +1215,24 @@ class Clustering:
     clustering: typing.Dict[int, Cluster]
 
     @staticmethod
-    def from_zmap(zmap: Zmap, reference: Reference, blob_finding: BlobFinding, masks: Masks):
+    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, blob_finding: BlobFinding, masks: Masks):
         zmap_array = zmap.to_array()
 
-        protein_mask_grid = Clustering.get_protein_mask(zmap,
-                                                        reference,
-                                                        masks.outer_mask,
-                                                        )
+        # protein_mask_grid = Clustering.get_protein_mask(zmap,
+        #                                                 reference,
+        #                                                 masks.outer_mask,
+        #                                                 )
+        protein_mask_grid = grid.partitioning.protein_mask
         print("\tGor protein mask")
 
         protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
 
-        symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
-                                                                          reference,
-                                                                          protein_mask,
-                                                                          symmetry_mask_radius=masks.inner_mask,
-                                                                          )
+        # symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
+        #                                                                   reference,
+        #                                                                   protein_mask,
+        #                                                                   symmetry_mask_radius=masks.inner_mask,
+        #                                                                   )
+        symmetry_contact_mask_grid = grid.partitioning.symmetry_mask
 
         print("\tGot symmetry mask")
 
