@@ -1503,6 +1503,8 @@ class BDC:
                   key=lambda x: vals[x],
                   )
 
+        print(bdc)
+
         return BDC(bdc)
 
 
