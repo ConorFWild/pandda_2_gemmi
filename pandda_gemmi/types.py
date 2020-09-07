@@ -1507,13 +1507,13 @@ class BDC:
 
             vals[val] = log_liklihood
 
-        print(vals)
+        # print(vals)
 
         bdc = max(vals,
                   key=lambda x: vals[x],
                   )
 
-        print(bdc)
+        # print(bdc)
 
         return BDC(bdc)
 
@@ -1644,6 +1644,7 @@ class Events:
                 cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
                 bdc = BDC.from_cluster(xmap, model, cluster, dtag)
+                print([event_idx, bdc])
 
                 site: SiteID = sites.event_to_site[event_id]
 
