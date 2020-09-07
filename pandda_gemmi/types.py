@@ -1572,7 +1572,7 @@ class Sites:
         event_to_site = {}
 
         for cluster_id, site_id in zip(flat_clusters, site_ids_array):
-            site_id = SiteID(site_id)
+            site_id = SiteID(int(site_id))
 
             if not site_id in site_to_event:
                 site_to_event[site_id] = []
