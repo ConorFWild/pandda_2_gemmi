@@ -1665,7 +1665,7 @@ class Events:
                 cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
                 bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
-                print([event_id, bdc, cluster.centroid])
+                print([event_id, bdc, cluster.centroid, cluster.values.size])
 
                 site: SiteID = sites.event_to_site[event_id]
 
