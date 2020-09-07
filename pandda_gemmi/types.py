@@ -1183,6 +1183,7 @@ class Cluster:
     indexes: typing.Tuple[np.ndarray]
     values: np.ndarray
     centroid: gemmi.Position
+    event_mask_indicies: np.ndarray
 
     def size(self, grid: Grid):
         grid_volume = grid.volume()
@@ -1241,22 +1242,9 @@ class Clustering:
         # Don't consider outlying points at symmetry contacts
         zmap_array[symmetry_contact_mask] = 0.0
 
-        print(np.sum(protein_mask))
-        print(np.sum(symmetry_contact_mask))
-        print(np.sum(protein_mask * symmetry_contact_mask))
-
-        print("\tMask contour level is: {}".format(masks.contour_level))
         extrema_mask_array = zmap_array > masks.contour_level
-        print("\t{} non extra points".format(np.sum(extrema_mask_array.shape)))
-
-        # extrema_mask_array = zmap_array > 1.0
-        # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
-        #
-        # extrema_mask_array = zmap_array > 0.5
-        # print("\t{} non extra points".format(np.sum(extrema_mask_array)))
 
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)  # n,3
-        print("\toutlier array shape: {}".format(extrema_grid_coords_array.shape))
 
         grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
                                           zmap.zmap.unit_cell.b,
@@ -1288,22 +1276,30 @@ class Clustering:
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
             cluster_mask = cluster_ids_array == unique_cluster  # n
-
             cluster_indicies = np.nonzero(cluster_mask)  # (n')
-
             cluster_points_array = extrema_grid_coords_array[cluster_indicies]
 
             cluster_points_tuple = (cluster_points_array[:, 0],
                                     cluster_points_array[:, 1],
                                     cluster_points_array[:, 2],)
 
-            # indexes = np.unravel_index(cluster_points_tuple,
-            #                            zmap_array.shape,
-            #                            )  # (n',n',n')
-
             values = zmap_array[cluster_points_tuple]
 
+            # Generate event mask
             cluster_positions_array = extrema_cart_coords_array[cluster_mask]
+            positions = PositionsArray(cluster_positions_array).to_positions()
+            event_mask = gemmi.Int8Grid(*zmap.shape())
+            event_mask.spacegroup = zmap.spacegroup()
+            event_mask.set_unit_cell(zmap.unit_cell())
+            for position in positions:
+                event_mask.set_points_around(position,
+                                       radius=2.0,
+                                       value=1,
+                                       )
+
+            event_mask_array = np.array(event_mask, copy=True)
+            event_mask_indicies = np.nonzero(event_mask_array)
+
             centroid_array = np.mean(cluster_positions_array,
                                      axis=0)
             centroid = gemmi.Position(centroid_array[0],
@@ -1313,6 +1309,7 @@ class Clustering:
             cluster = Cluster(cluster_points_tuple,
                               values,
                               centroid,
+                              event_mask_indicies,
                               )
             clusters[unique_cluster] = cluster
 
@@ -1548,6 +1545,17 @@ class PositionsArray:
 
     def to_array(self):
         return self.array
+
+    def to_positions(self):
+        positions = []
+
+        for row in self.array:
+            pos = gemmi.Position(row[0],
+                                 row[1],
+                                 row[2],)
+            positions.append(pos)
+
+        return positions
 
 
 @dataclasses.dataclass()
