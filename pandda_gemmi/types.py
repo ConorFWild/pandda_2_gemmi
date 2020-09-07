@@ -1248,17 +1248,19 @@ class Clustering:
 
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)  # n,3
 
-        grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
-                                          zmap.zmap.unit_cell.b,
-                                          zmap.zmap.unit_cell.c,
-                                          ])
+        # grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
+        #                                   zmap.zmap.unit_cell.b,
+        #                                   zmap.zmap.unit_cell.c,
+        #                                   ])
 
-        extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array  # n,3
+        # extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array  # n,3
 
         positions = []
-        for point in extrema_fractional_coords_array:
-            position = gemmi.Fractional(*point)
-            pos_orth = zmap.zmap.unit_cell.orthogonalize(position)
+        for point in extrema_grid_coords_array:
+            # position = gemmi.Fractional(*point)
+            point = grid.grid.get_point(*point)
+            fractional = grid.grid.point_to_fractional(point)
+            pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
             pos_orth_array = [pos_orth[0],
                               pos_orth[1],
                               pos_orth[2], ]
@@ -1495,6 +1497,7 @@ class BDC:
         mean_masked = model.mean[protein_mask]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
+        print(np.sum(cluster_array))
         cluster_mask = cluster_array[protein_mask]
         print(np.sum(cluster_mask))
         print(cluster_mask.shape)
