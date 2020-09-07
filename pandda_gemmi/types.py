@@ -1624,7 +1624,7 @@ class Events:
                 event_idx = EventIDX(event_idx)
                 event_id = EventID(dtag, event_idx)
 
-                cluster = clustering[event_idx]
+                cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
                 bdc = BDC.from_cluster(xmap, model, cluster, dtag)
 
