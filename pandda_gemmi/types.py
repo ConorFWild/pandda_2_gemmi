@@ -1501,7 +1501,7 @@ class BDC:
             xmap_array_cluster = xmap_array_cluster - val*mean_array_cluster / steps
             log_liklihood = model.liklihood(sigma_array_cluster,
                                             zeros_array_cluster,
-                                            xmap_array,
+                                            xmap_array_cluster,
                                             model.sigma_is[dtag],
                                             )
 
