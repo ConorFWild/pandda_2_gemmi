@@ -1873,7 +1873,7 @@ class ProcessedDataset:
     dataset_models: DatasetModels
     input_mtz: Path
     input_pdb: Path
-    zmap_file: ZMapFile
+    z_map_file: ZMapFile
     event_map_files: EventMapFiles
 
     @staticmethod
@@ -1881,14 +1881,14 @@ class ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
         input_mtz = dataset_dir.input_mtz_file
         input_pdb = dataset_dir.input_pdb_file
-        zmap_file = ZMapFile.from_dir(dataset_models_dir)
+        z_map_file = ZMapFile.from_dir(dataset_models_dir)
         event_map_files = EventMapFiles.from_dir(dataset_models_dir)
 
         return ProcessedDataset(path=processed_dataset_dir,
                                 dataset_models=DatasetModels.from_dir(dataset_models_dir),
                                 input_mtz=input_mtz,
                                 input_pdb=input_pdb,
-                                z_map_file=zmap_file,
+                                z_map_file=z_map_file,
                                 event_map_files=event_map_files,
                                 )
 
