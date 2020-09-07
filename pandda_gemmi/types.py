@@ -1592,7 +1592,7 @@ class Sites:
                 site_to_event[site_id] = []
 
             site_to_event[site_id].append(cluster_id)
-            event_to_site[cluster_id] = site_id
+            event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
 
         return Sites(site_to_event, event_to_site)
 
