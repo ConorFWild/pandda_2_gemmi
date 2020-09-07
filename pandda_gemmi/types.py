@@ -1486,11 +1486,21 @@ class BDC:
     def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
+        cluster_indexes = cluster.indexes
+
+        xmap_array_cluster = xmap_array[cluster_indexes]
+
+        mean_array_cluster = model.mean[cluster_indexes]
+
+        zeros_array_cluster = np.zeros(xmap_array.shape)[cluster_indexes]
+
+        sigma_array_cluster = model.sigma_s_m[cluster_indexes]
+
         vals = {}
         for val in np.linspace(0, 1, steps):
-            xmap_array = xmap_array - val*model.mean / steps
-            log_liklihood = model.liklihood(model.sigma_s_m,
-                                            model.mean,
+            xmap_array_cluster = xmap_array_cluster - val*mean_array_cluster / steps
+            log_liklihood = model.liklihood(sigma_array_cluster,
+                                            zeros_array_cluster,
                                             xmap_array,
                                             model.sigma_is[dtag],
                                             )
