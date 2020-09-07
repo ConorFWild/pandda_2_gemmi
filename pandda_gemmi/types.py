@@ -1816,7 +1816,7 @@ class ZMapFile:
 
     @staticmethod
     def from_dir(path: Path, dtag: str):
-        return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag))
+        return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag=dtag))
 
     def save(self, zmap: Zmap):
         ccp4 = gemmi.Ccp4Map()
