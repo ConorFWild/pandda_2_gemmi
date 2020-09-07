@@ -1620,6 +1620,9 @@ class EventID:
     dtag: Dtag
     event_idx: EventIDX
 
+    def __hash__(self):
+        return hash((self.dtag, self.event_idx))
+
 
 @dataclasses.dataclass()
 class Events:
