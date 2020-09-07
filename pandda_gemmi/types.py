@@ -1487,7 +1487,7 @@ class BDC:
         xmap_array = xmap.to_array(copy=True)
 
         cluster_indexes = cluster.indexes
-        protein_mask = np.array(grid.partitioning.protein_mask, copy=False)
+        protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.bool)
 
         xmap_masked = xmap_array[protein_mask]
         sigma_sm_masked = model.sigma_s_m[protein_mask]
