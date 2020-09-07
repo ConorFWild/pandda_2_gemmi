@@ -1506,7 +1506,7 @@ class BDC:
             global_correlation = stats.pearsonr(mean_masked,
                                                      subtracted_map)[0]
 
-            vals[val] = global_correlation-local_correlation
+            vals[val] = np.abs(global_correlation-local_correlation)
 
         # print(vals)
 
