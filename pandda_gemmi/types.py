@@ -1497,6 +1497,8 @@ class BDC:
 
             vals[val] = log_liklihood
 
+        print(vals)
+
         bdc = max(vals,
                   key=lambda x: vals[x],
                   )
