@@ -1483,29 +1483,30 @@ class BDC:
         pass
 
     @staticmethod
-    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, steps=1000):
+    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
         cluster_indexes = cluster.indexes
+        protein_mask = np.array(grid.partitioning.protein_mask, copy=False)
 
-        xmap_array_cluster = xmap_array[cluster_indexes]
-
-        mean_array_cluster = model.mean[cluster_indexes]
-
-        zeros_array_cluster = np.zeros(xmap_array.shape)[cluster_indexes]
-
-        sigma_array_cluster = model.sigma_s_m[cluster_indexes]
+        xmap_masked = xmap_array[protein_mask]
+        sigma_sm_masked = model.sigma_s_m[protein_mask]
+        mean_masked = model.mean[protein_mask]
+        cluster_array = np.full(protein_mask.shape, False)
+        cluster_array[cluster_indexes] = True
+        cluster_mask = cluster_array[protein_mask]
 
         vals = {}
         for val in np.linspace(0, 1, steps):
-            xmap_array_cluster = xmap_array_cluster - val*mean_array_cluster / steps
-            log_liklihood = model.liklihood(sigma_array_cluster,
-                                            zeros_array_cluster,
-                                            xmap_array_cluster,
-                                            model.sigma_is[dtag],
-                                            )
+            subtracted_map = xmap_masked - val * mean_masked
+            cluster_vals = subtracted_map[cluster_mask]
+            local_correlation = scipy.stats.pearson(mean_masked[cluster_mask],
+                                                    cluster_vals[cluster_mask])
 
-            vals[val] = log_liklihood
+            global_correlation = scipy.stats.pearson(mean_masked,
+                                                     subtracted_map)
+
+            vals[val] = global_correlation-local_correlation
 
         # print(vals)
 
