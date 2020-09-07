@@ -388,6 +388,10 @@ class Partitioning:
 
         coord_array = np.argwhere(mask_array == 1)
 
+        # points_array = PointsArray.from_array(coord_array)
+        #
+        # position_array = PositionsArray.from_points_array(points_array)
+
         query_points = coord_array / spacing
 
         distances, indexes = kdtree.query(query_points)
@@ -1074,6 +1078,12 @@ class Model:
 
         return residuals / denominator
 
+    @staticmethod
+    def liklihood(est_sigma, est_mu, obs_vals, obs_error):
+        term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
+        term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
+        return term1 + term2
+
 
 @dataclasses.dataclass()
 class Zmap:
@@ -1162,13 +1172,14 @@ class ReferenceMap:
 @dataclasses.dataclass()
 class ClusterID:
     dtag: Dtag
-    number: int
+    number: EventIDX
 
 
 @dataclasses.dataclass()
 class Cluster:
     indexes: typing.Tuple[np.ndarray]
     values: np.ndarray
+    centroid: gemmi.Position
 
     def size(self, grid: Grid):
         grid_volume = grid.volume()
@@ -1289,8 +1300,16 @@ class Clustering:
 
             values = zmap_array[cluster_points_tuple]
 
+            cluster_positions_array = extrema_cart_coords_array[cluster_mask]
+            centroid_array = np.mean(cluster_positions_array,
+                                     axis=0)
+            centroid = gemmi.Position(centroid_array[0],
+                                      centroid_array[1],
+                                      centroid_array[2], )
+
             cluster = Cluster(cluster_points_tuple,
                               values,
+                              centroid,
                               )
             clusters[unique_cluster] = cluster
 
@@ -1314,8 +1333,6 @@ class Clustering:
             mask_array[indexes] = 1
 
         return mask
-
-
 
     @staticmethod
     def get_protein_mask(zmap: Zmap, reference: Reference, masks_radius: float):
@@ -1463,8 +1480,25 @@ class BDC:
         pass
 
     @staticmethod
-    def from_cluster(xmap: Xmap, cluster: Clustering):
-        pass
+    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, steps=100):
+        xmap_array = xmap.to_array(copy=True)
+
+        vals = {}
+        for val in np.linspace(0, 1, steps):
+            xmap_array = xmap_array - model.mean / steps
+            log_liklihood = model.liklihood(model.sigma_s_m,
+                                            model.mean,
+                                            xmap_array,
+                                            model.sigma_is[dtag],
+                                            )
+
+            vals[val] = log_liklihood
+
+        bdc = max(vals,
+                  key=lambda x: vals[x],
+                  )
+
+        return BDC(bdc)
 
 
 @dataclasses.dataclass()
@@ -1480,35 +1514,126 @@ class Site:
 
 
 @dataclasses.dataclass()
-class Sites:
-    sites: typing.Dict[int, Site]
+class PositionsArray:
+    array: np.ndarray
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings):
-        pass
+    def from_positions(positions: typing.List[gemmi.Position]):
+        accumulator = []
+        for position in positions:
+            pos = [position.x, position.y, position.z]
+            accumulator.append(pos)
+
+        array = np.array(accumulator)
+
+        return PositionsArray(array)
+
+    def to_array(self):
+        return self.array
+
+
+@dataclasses.dataclass()
+class SiteID:
+    site_id: int
+
+    def __hash__(self):
+        return self.site_id
+
+
+@dataclasses.dataclass()
+class Sites:
+    site_to_event: typing.Dict[SiteID, typing.List[EventID]]
+    event_to_site: typing.Dict[EventID, SiteID]
+
+    @staticmethod
+    def from_clusters(clusterings: Clusterings, cutoff: float):
+        flat_clusters = {}
+        for dtag in clusterings:
+            for event_idx in clusterings[dtag]:
+                event_idx = EventIDX(event_idx)
+                flat_clusters = {ClusterID(dtag, event_idx): clusterings[dtag][event_idx]}
+
+        centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
+        positions_array = PositionsArray.from_positions(centroids)
+
+        site_ids_array = fclusterdata(X=positions_array.to_array(),
+                                      t=cutoff,
+                                      criterion='distance',
+                                      metric='euclidean',
+                                      method='average',
+                                      )
+
+        site_to_event = {}
+        event_to_site = {}
+
+        for cluster_id, site_id in zip(flat_clusters, site_ids_array):
+            site_id = SiteID(site_id)
+
+            if not site_id in site_to_event:
+                site_to_event[site_id] = []
+
+            site_to_event[site_id].append(cluster_id)
+            event_to_site[cluster_id] = site_id
+
+        return Sites(site_to_event, event_to_site)
 
 
 @dataclasses.dataclass()
 class Event:
-    Site: Site
-    Bdc: BDC
-    Cluster: Cluster
-    Coordinate: Euclidean3Coord
+    event_id: EventID
+    site: SiteID
+    bdc: BDC
+    cluster: Cluster
+
+    @staticmethod
+    def from_cluster(event_id: EventID,
+                     cluster: Cluster,
+                     site: SiteID,
+                     bdc: BDC, ):
+        return Event(event_id=event_id,
+                     site=site,
+                     bdc=bdc,
+                     cluster=cluster)
 
 
 @dataclasses.dataclass()
 class EventID:
-    Dtag: Dtag
-    Event_idx: EventIDX
+    dtag: Dtag
+    event_idx: EventIDX
 
 
 @dataclasses.dataclass()
 class Events:
     events: typing.Dict[EventID, Event]
+    sites: Sites
 
     @staticmethod
-    def from_clusters(clusters: Clusterings):
-        pass
+    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, cutoff: float):
+        events: typing.Dict[EventID, Event] = {}
+
+        sites: Sites = Sites.from_clusters(clusterings, cutoff)
+
+        for dtag in clusterings:
+            clustering = clusterings[dtag]
+            for event_idx in clustering:
+                event_idx = EventIDX(event_idx)
+                event_id = EventID(dtag, event_idx)
+
+                cluster = clustering[event_idx]
+                xmap = xmaps[dtag]
+                bdc = BDC.from_cluster(xmap, model, cluster, dtag)
+
+                site: SiteID = sites.event_to_site[event_id]
+
+                event = Event.from_cluster(event_id,
+                                           cluster,
+                                           site,
+                                           bdc,
+                                           )
+
+                events[event_id] = event
+
+        return Events(events, sites)
 
 
 @dataclasses.dataclass()
