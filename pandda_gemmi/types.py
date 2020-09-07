@@ -1488,7 +1488,7 @@ class BDC:
 
         vals = {}
         for val in np.linspace(0, 1, steps):
-            xmap_array = xmap_array - model.mean / steps
+            xmap_array = xmap_array - val*model.mean / steps
             log_liklihood = model.liklihood(model.sigma_s_m,
                                             model.mean,
                                             xmap_array,
