@@ -1493,7 +1493,9 @@ class BDC:
         sigma_sm_masked = model.sigma_s_m[protein_mask]
         mean_masked = model.mean[protein_mask]
         cluster_array = np.full(protein_mask.shape, False)
+        print(cluster_array.shape)
         cluster_array[cluster_indexes] = True
+        print(cluster_array.shape)
         print(sum(cluster_array))
         cluster_mask = cluster_array[protein_mask]
 
