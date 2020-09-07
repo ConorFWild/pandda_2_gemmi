@@ -1483,7 +1483,7 @@ class BDC:
         pass
 
     @staticmethod
-    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, steps=100):
+    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, steps=1000):
         xmap_array = xmap.to_array(copy=True)
 
         cluster_indexes = cluster.indexes
