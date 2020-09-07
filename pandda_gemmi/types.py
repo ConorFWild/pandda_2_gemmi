@@ -1500,10 +1500,10 @@ class BDC:
         for val in np.linspace(0, 1, steps):
             subtracted_map = xmap_masked - val * mean_masked
             cluster_vals = subtracted_map[cluster_mask]
-            local_correlation = scipy.stats.pearson(mean_masked[cluster_mask],
+            local_correlation = stats.pearson(mean_masked[cluster_mask],
                                                     cluster_vals[cluster_mask])
 
-            global_correlation = scipy.stats.pearson(mean_masked,
+            global_correlation = stats.pearson(mean_masked,
                                                      subtracted_map)
 
             vals[val] = global_correlation-local_correlation
