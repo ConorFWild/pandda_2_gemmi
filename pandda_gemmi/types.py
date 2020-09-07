@@ -1559,6 +1559,8 @@ class Sites:
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
 
+        print("SHape {}".format(positions_array.to_array().shape))
+
         site_ids_array = fclusterdata(X=positions_array.to_array(),
                                       t=cutoff,
                                       criterion='distance',
