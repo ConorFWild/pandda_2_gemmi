@@ -1490,12 +1490,13 @@ class BDC:
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.bool)
 
         xmap_masked = xmap_array[protein_mask]
-        sigma_sm_masked = model.sigma_s_m[protein_mask]
         mean_masked = model.mean[protein_mask]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
         cluster_mask = cluster_array[protein_mask]
         print(np.sum(cluster_mask))
+        print(cluster_mask.shape)
+
 
         vals = {}
         for val in np.linspace(0, 1, steps):
