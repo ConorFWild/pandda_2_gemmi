@@ -1501,10 +1501,10 @@ class BDC:
             subtracted_map = xmap_masked - val * mean_masked
             cluster_vals = subtracted_map[cluster_mask]
             local_correlation = stats.pearsonr(mean_masked[cluster_mask],
-                                                    cluster_vals)
+                                                    cluster_vals)[0]
 
             global_correlation = stats.pearsonr(mean_masked,
-                                                     subtracted_map)
+                                                     subtracted_map)[0]
 
             vals[val] = global_correlation-local_correlation
 
