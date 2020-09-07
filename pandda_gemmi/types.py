@@ -1288,7 +1288,7 @@ class Clustering:
             values = zmap_array[cluster_points_tuple]
 
             # Generate event mask
-            cluster_positions_array = extrema_cart_coords_array[cluster_mask]
+            cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
             positions = PositionsArray(cluster_positions_array).to_positions()
             event_mask = gemmi.Int8Grid(*zmap.shape())
             event_mask.spacegroup = zmap.spacegroup()
