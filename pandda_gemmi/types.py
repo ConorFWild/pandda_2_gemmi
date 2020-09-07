@@ -413,12 +413,92 @@ class Partitioning:
                                                                                       )
                                                                      )
 
-        symmetry_mask = Partitioning.get_symmetry_contact_mask(reference, mask, mask_radius)
+        symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
 
         return Partitioning(partitions, mask, symmetry_mask)
 
     @staticmethod
-    def get_symmetry_contact_mask(reference: Reference, protein_mask: gemmi.Int8Grid,
+    def from_structure(structure: Structure,
+                       grid: gemmi.FloatGrid,
+                       mask_radius: float,
+                       ):
+
+        array = np.array(grid, copy=False)
+
+        spacing = np.array([grid.nu, grid.nv, grid.nw])
+
+        poss = []
+        res_indexes = {}
+        i = 0
+        for model in structure.structure:
+            for chain in model:
+                for res in chain.get_polymer():
+                    ca = res["CA"][0]
+
+                    position = ca.pos
+
+                    fractional = grid.unit_cell.fractionalize(position)
+
+                    poss.append(fractional)
+
+                    res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
+                    i = i + 1
+
+        ca_position_array = np.array([[x for x in pos] for pos in poss])
+
+        kdtree = spatial.KDTree(ca_position_array)
+
+        mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        mask.spacegroup = grid.spacegroup
+        mask.set_unit_cell(grid.unit_cell)
+        for atom in structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(pos,
+                                   radius=mask_radius,
+                                   value=1,
+                                   )
+
+        mask_array = np.array(mask, copy=False)
+
+        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius)
+
+        coord_array = np.argwhere(mask_array == 1)
+
+        positions = []
+        for coord in coord_array:
+            point = grid.get_point(*coord)
+            position = grid.point_to_position(point)
+            positions.append([position[0],
+                              position[1],
+                              position[2],
+                              ]
+                             )
+
+        position_array = np.array(positions)
+
+        distances, indexes = kdtree.query(position_array)
+
+        partitions = {}
+        for i, coord_as_array in enumerate(coord_array):
+            coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
+
+            res_num = indexes[i]
+
+            res_id = res_indexes[res_num]
+
+            if res_id not in partitions:
+                partitions[res_id] = {}
+
+            partitions[res_id][coord] = grid.unit_cell.orthogonalize(gemmi.Fractional(coord[0] / spacing[0],
+                                                                                      coord[1] / spacing[1],
+                                                                                      coord[2] / spacing[2],
+                                                                                      )
+                                                                     )
+
+        return Partitioning(partitions, mask, symmetry_mask)
+
+    @staticmethod
+    def get_symmetry_contact_mask(structure: Structure, protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
         protein_mask_array = np.array(protein_mask, copy=False)
 
@@ -431,7 +511,7 @@ class Partitioning:
         print([symmetry_operation for symmetry_operation in symops])
 
         print("\tIterating")
-        for atom in reference.dataset.structure.protein_atoms():
+        for atom in structure.protein_atoms():
             for symmetry_operation in symops.symops[1:]:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
@@ -513,17 +593,20 @@ class Grid:
 class Transform:
     transform: gemmi.Transform
     com: np.array
+    com_forward: np.array
 
     def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
         typing.Tuple[int], gemmi.Position]:
-        transform = self.transform
         transformed_positions = {}
         for index, position in positions.items():
-            transformed_vector = transform.apply(position)
-            transformed_positions[index] = gemmi.Position(transformed_vector[0],
-                                                          transformed_vector[1],
-                                                          transformed_vector[2],
-                                                          )
+            rotation_frame_position = gemmi.Position(position[0] - self.com_forward[0],
+                                                     position[1] - self.com_forward[1],
+                                                     position[2] - self.com_forward[2])
+            transformed_vector = self.transform.apply(rotation_frame_position)
+
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_forward[0],
+                                                          transformed_vector[1] + self.com_forward[1],
+                                                          transformed_vector[2] + self.com_forward[2])
 
         return transformed_positions
 
@@ -544,12 +627,12 @@ class Transform:
         return transformed_positions
 
     @staticmethod
-    def from_translation_rotation(translation, rotation, com):
+    def from_translation_rotation(translation, rotation, com, com_forward):
         transform = gemmi.Transform()
         transform.vec.fromlist(translation.tolist())
         transform.mat.fromlist(rotation.as_matrix().tolist())
 
-        return Transform(transform, com)
+        return Transform(transform, com, com_forward)
 
     @staticmethod
     def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
@@ -583,8 +666,9 @@ class Transform:
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
         com = mean_ref
+        com_forward = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com)
+        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
 
     @staticmethod
     def pos_to_list(pos: gemmi.Position):
@@ -619,7 +703,9 @@ class Transform:
 
         com = mean_ref
 
-        return Transform.from_translation_rotation(vec, rotation, com)
+        com_forward = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
 
     @staticmethod
     def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
@@ -650,7 +736,9 @@ class Transform:
 
         com = mean_ref
 
-        return Transform.from_translation_rotation(vec, rotation, com)
+        com_forward = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
 
 
 @dataclasses.dataclass()
@@ -795,7 +883,7 @@ class Xmap:
         pass
 
     @staticmethod
-    def from_aligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
+    def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
@@ -807,6 +895,45 @@ class Xmap:
 
             transformed_positions: typing.Dict[typing.Tuple[int],
                                                gemmi.Position] = alignment[residue_id].apply_inverse(
+                alignment_positions)
+
+            # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+            #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+
+            interpolated_values: typing.Dict[typing.Tuple[int],
+                                             float] = Xmap.interpolate_grid(unaligned_xmap,
+                                                                            transformed_positions)
+
+            interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
+                                         interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
+                                         interpolated_values_tuple[2] + [index[2] for index in interpolated_values],
+                                         interpolated_values_tuple[3] + [interpolated_values[index] for index in
+                                                                         interpolated_values],
+                                         )
+
+        new_grid = grid.new_grid()
+
+        grid_array = np.array(new_grid, copy=False)
+
+        grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
+
+        return Xmap(new_grid)
+
+    @staticmethod
+    def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors, mask_radius: float):
+        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                                 structure_factors.phi,
+                                                                                                 )
+
+        partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius)
+
+        interpolated_values_tuple = ([], [], [], [])
+
+        for residue_id in alignment:
+            alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = partitioning[residue_id]
+
+            transformed_positions: typing.Dict[typing.Tuple[int],
+                                               gemmi.Position] = alignment[residue_id].apply(
                 alignment_positions)
 
             # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
@@ -862,7 +989,7 @@ class Xmaps:
                               structure_factors: StructureFactors):
         xmaps = {}
         for dtag in datasets:
-            xmap = Xmap.from_aligned_dataset(datasets[dtag],
+            xmap = Xmap.from_unaligned_dataset(datasets[dtag],
                                              alignments[dtag],
                                              grid,
                                              structure_factors)
@@ -1159,7 +1286,7 @@ class ReferenceMap:
 
     @staticmethod
     def from_reference(reference: Reference, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
-        xmap = Xmap.from_aligned_dataset(reference.dataset,
+        xmap = Xmap.from_unaligned_dataset(reference.dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
@@ -1688,8 +1815,8 @@ class ZMapFile:
         pass
 
     @staticmethod
-    def from_dir(dir: Path):
-        return ZMapFile(dir / PANDDA_Z_MAP_FILE)
+    def from_dir(path: Path, dtag: str):
+        return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag))
 
     def save(self, zmap: Zmap):
         ccp4 = gemmi.Ccp4Map()
@@ -1699,15 +1826,15 @@ class ZMapFile:
         ccp4.write_ccp4_map(str(self.path))
 
 
-@dataclasses.dataclass()
-class ZMapFiles:
-
-    @staticmethod
-    def from_zmaps(zmaps: Zmaps, pandda_fs_model: PanDDAFSModel):
-        for dtag in zmaps:
-            processed_dataset = pandda_fs_model.processed_datasets[dtag]
-
-            zmaps[dtag].save()
+# @dataclasses.dataclass()
+# class ZMapFiles:
+#
+#     @staticmethod
+#     def from_zmaps(zmaps: Zmaps, pandda_fs_model: PanDDAFSModel):
+#         for dtag in zmaps:
+#             processed_dataset = pandda_fs_model.processed_datasets[dtag]
+#
+#             zmaps[dtag].save()
 
 
 @dataclasses.dataclass()
@@ -1722,8 +1849,13 @@ class EventMapFile:
                                                              )
         return EventMapFile(event_map_path)
 
-    def save(self, xmap: Xmap, model: Model, event: Event):
-        xmap_array = xmap.to_array(copy=False)
+    def save(self, xmap: Xmap, model: Model, event: Event, dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors, mask_radius: float, ):
+        event_map = Xmap.from_aligned_map(xmap,
+                                          dataset,
+                                          alignment,
+                                          grid, structure_factors, mask_radius, )
+
+        xmap_array = np.array(event_map, copy=False)
         mean_array = model.mean
 
         grid = gemmi.FloatGrid(*xmap_array.shape)
@@ -1731,7 +1863,7 @@ class EventMapFile:
         grid.set_unit_cell(xmap.xmap.unit_cell)
 
         grid_array = np.array(grid, copy=False)
-        grid_array[:,:,:] = (xmap_array - event.bdc.bdc*model.mean)/(1-event.bdc.bdc)
+        grid_array[:,:,:] = (xmap_array - event.bdc.bdc*mean_array)/(1-event.bdc.bdc)
 
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = grid
@@ -1881,8 +2013,8 @@ class ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
         input_mtz = dataset_dir.input_mtz_file
         input_pdb = dataset_dir.input_pdb_file
-        z_map_file = ZMapFile.from_dir(dataset_models_dir)
-        event_map_files = EventMapFiles.from_dir(dataset_models_dir)
+        z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
+        event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
 
         return ProcessedDataset(path=processed_dataset_dir,
                                 dataset_models=DatasetModels.from_dir(dataset_models_dir),
