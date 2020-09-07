@@ -1405,10 +1405,10 @@ class Clusterings:
     clusters: typing.Dict[Dtag, Clustering]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps, reference: Reference, blob_finding: BlobFinding, masks: Masks):
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, blob_finding: BlobFinding, masks: Masks):
         clusterings = {}
         for dtag in zmaps:
-            clustering = Clustering.from_zmap(zmaps[dtag], reference, blob_finding, masks)
+            clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, blob_finding, masks)
             clusterings[dtag] = clustering
 
         return Clusterings(clusterings)
