@@ -1486,6 +1486,7 @@ class BDC:
         xmap_array = xmap.to_array(copy=True)
 
         cluster_indexes = cluster.event_mask_indicies
+
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.bool)
 
         xmap_masked = xmap_array[protein_mask]
@@ -1493,6 +1494,7 @@ class BDC:
         mean_masked = model.mean[protein_mask]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
+        print(sum(cluster_array))
         cluster_mask = cluster_array[protein_mask]
 
         vals = {}
