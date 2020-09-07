@@ -1259,11 +1259,13 @@ class Clustering:
         for point in extrema_grid_coords_array:
             # position = gemmi.Fractional(*point)
             point = grid.grid.get_point(*point)
-            fractional = grid.grid.point_to_fractional(point)
-            pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
-            pos_orth_array = [pos_orth[0],
-                              pos_orth[1],
-                              pos_orth[2], ]
+            # fractional = grid.grid.point_to_fractional(point)
+            # pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
+            orthogonal = grid.grid.point_to_position(point)
+
+            pos_orth_array = [orthogonal[0],
+                              orthogonal[1],
+                              orthogonal[2], ]
             positions.append(pos_orth_array)
 
         extrema_cart_coords_array = np.array(positions)  # n, 3
@@ -1497,10 +1499,10 @@ class BDC:
         mean_masked = model.mean[protein_mask]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
-        print(np.sum(cluster_array))
+        # print(np.sum(cluster_array))
         cluster_mask = cluster_array[protein_mask]
-        print(np.sum(cluster_mask))
-        print(cluster_mask.shape)
+        # print(np.sum(cluster_mask))
+        # print(cluster_mask.shape)
 
 
         vals = {}
@@ -1663,7 +1665,7 @@ class Events:
                 cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
                 bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
-                print([event_id, bdc])
+                print([event_id, bdc, cluster.centroid])
 
                 site: SiteID = sites.event_to_site[event_id]
 
