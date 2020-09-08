@@ -1618,6 +1618,7 @@ class Clusterings:
 @dataclasses.dataclass()
 class BDC:
     bdc: float
+    fraction: float
 
     @staticmethod
     def from_float(bdc: float):
@@ -1654,13 +1655,13 @@ class BDC:
 
         # print(vals)
 
-        bdc = max(vals,
+        fraction = max(vals,
                   key=lambda x: vals[x],
                   )
 
         # print(bdc)
 
-        return BDC(bdc)
+        return BDC(1-fraction, fraction)
 
 
 @dataclasses.dataclass()
