@@ -422,9 +422,8 @@ class Partitioning:
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
+                       mask_radius_symmetry: float,
                        ):
-
-        array = np.array(grid, copy=False)
 
         spacing = np.array([grid.nu, grid.nv, grid.nw])
 
@@ -459,17 +458,15 @@ class Partitioning:
                                    radius=mask_radius,
                                    value=1,
                                    )
-
         mask_array = np.array(mask, copy=False)
-
-        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius)
+        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius_symmetry)
 
         coord_array = np.argwhere(mask_array == 1)
 
         positions = []
         for coord in coord_array:
-            point = grid.get_point(*coord)
-            position = grid.point_to_position(point)
+            point = mask.get_point(*coord)
+            position = mask.point_to_position(point)
             positions.append([position[0],
                               position[1],
                               position[2],
@@ -478,7 +475,7 @@ class Partitioning:
 
         position_array = np.array(positions)
 
-        print("\tQueerying {} grid points".format(len(coord_array)))
+        print("\tQueerying {} grid points".format(len(positions)))
         distances, indexes = kdtree.query(position_array)
 
         print("\tAssigning partitions...")
@@ -493,11 +490,7 @@ class Partitioning:
             if res_id not in partitions:
                 partitions[res_id] = {}
 
-            partitions[res_id][coord] = grid.unit_cell.orthogonalize(gemmi.Fractional(coord[0] / spacing[0],
-                                                                                      coord[1] / spacing[1],
-                                                                                      coord[2] / spacing[2],
-                                                                                      )
-                                                                     )
+            partitions[res_id][coord] = gemmi.Position(*coord)
 
         print("\tFound {} partitions".format(len(partitions)))
 
@@ -927,12 +920,14 @@ class Xmap:
 
     @staticmethod
     def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid,
-                         structure_factors: StructureFactors, mask_radius: float):
+                         structure_factors: StructureFactors, mask_radius: float,
+                         mask_radius_symmetry: float):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
 
-        partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius)
+        partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius,
+                                                   mask_radius_symmetry)
         print(partitioning.partitioning.keys())
 
         interpolated_values_tuple = ([], [], [], [])
