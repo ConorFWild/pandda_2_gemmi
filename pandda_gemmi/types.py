@@ -928,7 +928,7 @@ class Xmap:
                                                                                                  )
 
         partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius)
-        print(partitioning)
+        print(partitioning.partitioning.keys())
 
         interpolated_values_tuple = ([], [], [], [])
 
