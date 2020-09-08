@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing
 import dataclasses
 
+import os
 import re
 from pathlib import Path
 
@@ -1932,6 +1933,10 @@ class Analyses:
                         pandda_analyse_events_file=pandda_analyse_events_file,
                         )
 
+    def build(self):
+        if not self.analyses_dir.exists():
+            os.mkdir(str(self.analyses_dir))
+
 
 @dataclasses.dataclass()
 class DatasetModels:
@@ -2024,11 +2029,16 @@ class ProcessedDataset:
                                 event_map_files=event_map_files,
                                 )
 
+    def build(self):
+        if not self.path.exists():
+            os.mkdir(str(self.path))
+
 
 
 
 @dataclasses.dataclass()
 class ProcessedDatasets:
+    path: Path
     processed_datasets: typing.Dict[Dtag, ProcessedDataset]
 
     @staticmethod
@@ -2039,7 +2049,8 @@ class ProcessedDatasets:
                                                                          processed_datasets_dir / dtag.dtag,
                                                                          )
 
-        return ProcessedDatasets(processed_datasets)
+        return ProcessedDatasets(processed_datasets_dir,
+                                 processed_datasets)
 
     def __getitem__(self, item):
         return self.processed_datasets[item]
@@ -2048,6 +2059,12 @@ class ProcessedDatasets:
         for dtag in self.processed_datasets:
             yield dtag
 
+    def build(self):
+        if not self.path.exists():
+            os.mkdir(str(self.path))
+
+        for dtag in self.processed_datasets:
+            self.processed_datasets[dtag].build()
 
 @dataclasses.dataclass()
 class PanDDAFSModel:
@@ -2072,6 +2089,14 @@ class PanDDAFSModel:
                              analyses=analyses,
                              processed_datasets=processed_datasets,
                              )
+
+    def build(self, overwrite=False):
+
+        if not self.pandda_dir.exists():
+            os.mkdir(str(self.pandda_dir))
+
+        self.processed_datasets.build()
+        self.analyses.build()
 
 
 @dataclasses.dataclass()
