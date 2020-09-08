@@ -1872,7 +1872,7 @@ class EventMapFile:
                                           alignment,
                                           grid, structure_factors, mask_radius, mask_radius_symmetry)
 
-        xmap_array = np.array(event_map, copy=False)
+        xmap_array = event_map.to_array(copy=False)
         mean_array = model.mean
 
         grid = gemmi.FloatGrid(*xmap_array.shape)
