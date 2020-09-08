@@ -1860,11 +1860,11 @@ class EventMapFile:
         return EventMapFile(event_map_path)
 
     def save(self, xmap: Xmap, model: Model, event: Event, dataset: Dataset, alignment: Alignment, grid: Grid,
-             structure_factors: StructureFactors, mask_radius: float, ):
+             structure_factors: StructureFactors, mask_radius: float, mask_radius_symmetry: float):
         event_map = Xmap.from_aligned_map(xmap,
                                           dataset,
                                           alignment,
-                                          grid, structure_factors, mask_radius, )
+                                          grid, structure_factors, mask_radius, mask_radius_symmetry)
 
         xmap_array = np.array(event_map, copy=False)
         mean_array = model.mean
