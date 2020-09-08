@@ -425,8 +425,6 @@ class Partitioning:
                        mask_radius_symmetry: float,
                        ):
 
-        spacing = np.array([grid.nu, grid.nv, grid.nw])
-
         poss = []
         res_indexes = {}
         i = 0
@@ -435,11 +433,9 @@ class Partitioning:
                 for res in chain.get_polymer():
                     ca = res["CA"][0]
 
-                    position = ca.pos
+                    orthogonal = ca.pos
 
-                    fractional = grid.unit_cell.fractionalize(position)
-
-                    poss.append(fractional)
+                    poss.append(orthogonal)
 
                     res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
                     i = i + 1
