@@ -449,6 +449,7 @@ class Partitioning:
 
         kdtree = spatial.KDTree(ca_position_array)
 
+        print("\tMasking {} atoms".format(len(ca_position_array)))
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = grid.spacegroup
         mask.set_unit_cell(grid.unit_cell)
@@ -477,8 +478,10 @@ class Partitioning:
 
         position_array = np.array(positions)
 
+        print("\tQueerying {} grid points".format(len(coord_array)))
         distances, indexes = kdtree.query(position_array)
 
+        print("\tAssigning partitions...")
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
             coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
