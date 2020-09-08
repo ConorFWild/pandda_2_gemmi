@@ -1810,6 +1810,9 @@ class Events:
         for event_id in self.events:
             yield event_id
 
+    def __getitem__(self, item):
+        return self.events[item]
+
 @dataclasses.dataclass()
 class ZMapFile:
     path: Path
