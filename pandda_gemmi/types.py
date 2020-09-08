@@ -419,13 +419,13 @@ class Partitioning:
         #
         # symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
 
-        partitions, mask, symmetry_mask = Partitioning.from_structure(reference.dataset.structure,
+        return Partitioning.from_structure(reference.dataset.structure,
                                                                       grid,
                                                                       mask_radius,
                                                                       mask_radius_symmetry,
                                                                       )
 
-        return Partitioning(partitions, mask, symmetry_mask)
+        # return Partitioning(partitions, mask, symmetry_mask)
 
     @staticmethod
     def from_structure(structure: Structure,
