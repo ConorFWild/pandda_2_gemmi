@@ -348,73 +348,82 @@ class Partitioning:
     def from_reference(reference: Reference,
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
+                       mask_radius_symmetry: float,
                        ):
 
-        array = np.array(grid, copy=False)
 
-        spacing = np.array([grid.nu, grid.nv, grid.nw])
-
-        poss = []
-        res_indexes = {}
-        i = 0
-        for model in reference.dataset.structure.structure:
-            for chain in model:
-                for res in chain.get_polymer():
-                    ca = res["CA"][0]
-
-                    position = ca.pos
-
-                    fractional = grid.unit_cell.fractionalize(position)
-
-                    poss.append(fractional)
-
-                    res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
-                    i = i + 1
-
-        ca_position_array = np.array([[x for x in pos] for pos in poss])
-
-        kdtree = spatial.KDTree(ca_position_array)
-
-        mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
-        mask.spacegroup = grid.spacegroup
-        mask.set_unit_cell(grid.unit_cell)
-        for atom in reference.dataset.structure.protein_atoms():
-            pos = atom.pos
-            mask.set_points_around(pos,
-                                   radius=mask_radius,
-                                   value=1,
-                                   )
-
-        mask_array = np.array(mask, copy=False)
-
-        coord_array = np.argwhere(mask_array == 1)
-
-        # points_array = PointsArray.from_array(coord_array)
         #
-        # position_array = PositionsArray.from_points_array(points_array)
+        # array = np.array(grid, copy=False)
+        #
+        # spacing = np.array([grid.nu, grid.nv, grid.nw])
+        #
+        # poss = []
+        # res_indexes = {}
+        # i = 0
+        # for model in reference.dataset.structure.structure:
+        #     for chain in model:
+        #         for res in chain.get_polymer():
+        #             ca = res["CA"][0]
+        #
+        #             position = ca.pos
+        #
+        #             fractional = grid.unit_cell.fractionalize(position)
+        #
+        #             poss.append(fractional)
+        #
+        #             res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
+        #             i = i + 1
+        #
+        # ca_position_array = np.array([[x for x in pos] for pos in poss])
+        #
+        # kdtree = spatial.KDTree(ca_position_array)
+        #
+        # mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        # mask.spacegroup = grid.spacegroup
+        # mask.set_unit_cell(grid.unit_cell)
+        # for atom in reference.dataset.structure.protein_atoms():
+        #     pos = atom.pos
+        #     mask.set_points_around(pos,
+        #                            radius=mask_radius,
+        #                            value=1,
+        #                            )
+        #
+        # mask_array = np.array(mask, copy=False)
+        #
+        # coord_array = np.argwhere(mask_array == 1)
+        #
+        # # points_array = PointsArray.from_array(coord_array)
+        # #
+        # # position_array = PositionsArray.from_points_array(points_array)
+        #
+        # query_points = coord_array / spacing
+        #
+        # distances, indexes = kdtree.query(query_points)
+        #
+        # partitions = {}
+        # for i, coord_as_array in enumerate(coord_array):
+        #     coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
+        #
+        #     res_num = indexes[i]
+        #
+        #     res_id = res_indexes[res_num]
+        #
+        #     if res_id not in partitions:
+        #         partitions[res_id] = {}
+        #
+        #     partitions[res_id][coord] = grid.unit_cell.orthogonalize(gemmi.Fractional(coord[0] / spacing[0],
+        #                                                                               coord[1] / spacing[1],
+        #                                                                               coord[2] / spacing[2],
+        #                                                                               )
+        #                                                              )
+        #
+        # symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
 
-        query_points = coord_array / spacing
-
-        distances, indexes = kdtree.query(query_points)
-
-        partitions = {}
-        for i, coord_as_array in enumerate(coord_array):
-            coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
-
-            res_num = indexes[i]
-
-            res_id = res_indexes[res_num]
-
-            if res_id not in partitions:
-                partitions[res_id] = {}
-
-            partitions[res_id][coord] = grid.unit_cell.orthogonalize(gemmi.Fractional(coord[0] / spacing[0],
-                                                                                      coord[1] / spacing[1],
-                                                                                      coord[2] / spacing[2],
-                                                                                      )
-                                                                     )
-
-        symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
+        partitions, mask, symmetry_mask = Partitioning.from_structure(reference.dataset.structure,
+                                                                      grid,
+                                                                      mask_radius,
+                                                                      mask_radius_symmetry,
+                                                                      )
 
         return Partitioning(partitions, mask, symmetry_mask)
 
@@ -541,7 +550,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float):
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference)
 
@@ -551,7 +560,8 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
-                                                   mask_radius, )
+                                                   mask_radius,
+                                                   mask_radius_symmetry)
 
         return Grid(grid, partitioning)
 
