@@ -921,12 +921,14 @@ class Xmap:
         return Xmap(new_grid)
 
     @staticmethod
-    def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors, mask_radius: float):
+    def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid,
+                         structure_factors: StructureFactors, mask_radius: float):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
 
         partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius)
+        print(partitioning)
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -991,9 +993,9 @@ class Xmaps:
         xmaps = {}
         for dtag in datasets:
             xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                             alignments[dtag],
-                                             grid,
-                                             structure_factors)
+                                               alignments[dtag],
+                                               grid,
+                                               structure_factors)
 
             xmaps[dtag] = xmap
 
@@ -1288,10 +1290,10 @@ class ReferenceMap:
     @staticmethod
     def from_reference(reference: Reference, alignment: Alignment, grid: Grid, structure_factors: StructureFactors):
         xmap = Xmap.from_unaligned_dataset(reference.dataset,
-                                         alignment,
-                                         grid,
-                                         structure_factors,
-                                         )
+                                           alignment,
+                                           grid,
+                                           structure_factors,
+                                           )
 
         return ReferenceMap(reference.dtag,
                             xmap)
@@ -1813,6 +1815,7 @@ class Events:
     def __getitem__(self, item):
         return self.events[item]
 
+
 @dataclasses.dataclass()
 class ZMapFile:
     path: Path
@@ -1856,7 +1859,8 @@ class EventMapFile:
                                                              )
         return EventMapFile(event_map_path)
 
-    def save(self, xmap: Xmap, model: Model, event: Event, dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors, mask_radius: float, ):
+    def save(self, xmap: Xmap, model: Model, event: Event, dataset: Dataset, alignment: Alignment, grid: Grid,
+             structure_factors: StructureFactors, mask_radius: float, ):
         event_map = Xmap.from_aligned_map(xmap,
                                           dataset,
                                           alignment,
@@ -1870,7 +1874,7 @@ class EventMapFile:
         grid.set_unit_cell(xmap.xmap.unit_cell)
 
         grid_array = np.array(grid, copy=False)
-        grid_array[:,:,:] = (xmap_array - event.bdc.bdc*mean_array)/(1-event.bdc.bdc)
+        grid_array[:, :, :] = (xmap_array - event.bdc.bdc * mean_array) / (1 - event.bdc.bdc)
 
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = grid
@@ -1908,6 +1912,7 @@ class EventMapFiles:
 
     def __getitem__(self, item):
         return self.event_map_files[item]
+
 
 @dataclasses.dataclass()
 class SiteTableFile:
@@ -2040,8 +2045,6 @@ class ProcessedDataset:
             os.mkdir(str(self.path))
 
 
-
-
 @dataclasses.dataclass()
 class ProcessedDatasets:
     path: Path
@@ -2072,6 +2075,7 @@ class ProcessedDatasets:
         for dtag in self.processed_datasets:
             self.processed_datasets[dtag].build()
 
+
 @dataclasses.dataclass()
 class PanDDAFSModel:
     pandda_dir: Path
@@ -2097,7 +2101,6 @@ class PanDDAFSModel:
                              )
 
     def build(self, overwrite=False):
-
         if not self.pandda_dir.exists():
             os.mkdir(str(self.pandda_dir))
 
