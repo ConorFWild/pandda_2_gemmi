@@ -499,6 +499,8 @@ class Partitioning:
                                                                                       )
                                                                      )
 
+        print("\tFound {} partitions".format(len(partitions)))
+
         return Partitioning(partitions, mask, symmetry_mask)
 
     @staticmethod
