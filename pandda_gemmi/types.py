@@ -487,6 +487,7 @@ class Partitioning:
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
             coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
+            position = positions[i]
 
             res_num = indexes[i]
 
@@ -495,7 +496,7 @@ class Partitioning:
             if res_id not in partitions:
                 partitions[res_id] = {}
 
-            partitions[res_id][coord] = gemmi.Position(*coord)
+            partitions[res_id][coord] = gemmi.Position(*position)
 
         print("\tFound {} partitions".format(len(partitions)))
 
