@@ -351,7 +351,6 @@ class Partitioning:
                        mask_radius_symmetry: float,
                        ):
 
-
         #
         # array = np.array(grid, copy=False)
         #
@@ -420,10 +419,10 @@ class Partitioning:
         # symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
 
         return Partitioning.from_structure(reference.dataset.structure,
-                                                                      grid,
-                                                                      mask_radius,
-                                                                      mask_radius_symmetry,
-                                                                      )
+                                           grid,
+                                           mask_radius,
+                                           mask_radius_symmetry,
+                                           )
 
         # return Partitioning(partitions, mask, symmetry_mask)
 
@@ -464,6 +463,7 @@ class Partitioning:
                                    value=1,
                                    )
         mask_array = np.array(mask, copy=False)
+
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius_symmetry)
 
         coord_array = np.argwhere(mask_array == 1)
@@ -597,47 +597,47 @@ class Grid:
 @dataclasses.dataclass()
 class Transform:
     transform: gemmi.Transform
-    com: np.array
-    com_forward: np.array
+    com_moving: np.array
+    com_reference: np.array
 
-    def apply(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
+    def apply_moving_to_reference(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
         typing.Tuple[int], gemmi.Position]:
         transformed_positions = {}
         for index, position in positions.items():
-            rotation_frame_position = gemmi.Position(position[0] - self.com_forward[0],
-                                                     position[1] - self.com_forward[1],
-                                                     position[2] - self.com_forward[2])
+            rotation_frame_position = gemmi.Position(position[0] - self.com_moving[0],
+                                                     position[1] - self.com_moving[1],
+                                                     position[2] - self.com_moving[2])
             transformed_vector = self.transform.apply(rotation_frame_position)
 
-            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_forward[0],
-                                                          transformed_vector[1] + self.com_forward[1],
-                                                          transformed_vector[2] + self.com_forward[2])
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_moving[0],
+                                                          transformed_vector[1] + self.com_moving[1],
+                                                          transformed_vector[2] + self.com_moving[2])
 
         return transformed_positions
 
-    def apply_inverse(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
+    def apply_reference_to_moving(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
         typing.Tuple[int], gemmi.Position]:
         inverse_transform = self.transform.inverse()
         transformed_positions = {}
         for index, position in positions.items():
-            rotation_frame_position = gemmi.Position(position[0] - self.com[0],
-                                                     position[1] - self.com[1],
-                                                     position[2] - self.com[2])
+            rotation_frame_position = gemmi.Position(position[0] - self.com_reference[0],
+                                                     position[1] - self.com_reference[1],
+                                                     position[2] - self.com_reference[2])
             transformed_vector = inverse_transform.apply(rotation_frame_position)
 
-            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com[0],
-                                                          transformed_vector[1] + self.com[1],
-                                                          transformed_vector[2] + self.com[2])
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_reference[0],
+                                                          transformed_vector[1] + self.com_reference[1],
+                                                          transformed_vector[2] + self.com_reference[2])
 
         return transformed_positions
 
     @staticmethod
-    def from_translation_rotation(translation, rotation, com, com_forward):
+    def from_translation_rotation(translation, rotation, com_reference, com_moving):
         transform = gemmi.Transform()
         transform.vec.fromlist(translation.tolist())
         transform.mat.fromlist(rotation.as_matrix().tolist())
 
-        return Transform(transform, com, com_forward)
+        return Transform(transform, com_reference, com_moving)
 
     @staticmethod
     def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
@@ -670,10 +670,10 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com = mean_ref
-        com_forward = mean
+        com_reference = mean_ref
+        com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
     @staticmethod
     def pos_to_list(pos: gemmi.Position):
@@ -706,11 +706,11 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com = mean_ref
+        com_reference = mean_ref
 
-        com_forward = mean
+        com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
     @staticmethod
     def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
@@ -739,11 +739,11 @@ class Transform:
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com = mean_ref
+        com_reference = mean_ref
 
-        com_forward = mean
+        com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com, com_forward)
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
 
 @dataclasses.dataclass()
@@ -899,15 +899,15 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply_inverse(
+                                               gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
                 alignment_positions)
 
-            # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
-            #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+                point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(unaligned_xmap,
-                                                                            transformed_positions)
+                                                                            transformed_positions_fractional)
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
@@ -1656,12 +1656,12 @@ class BDC:
         # print(vals)
 
         fraction = max(vals,
-                  key=lambda x: vals[x],
-                  )
+                       key=lambda x: vals[x],
+                       )
 
         # print(bdc)
 
-        return BDC(1-fraction, fraction)
+        return BDC(1 - fraction, fraction)
 
 
 @dataclasses.dataclass()
