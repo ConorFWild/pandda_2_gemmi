@@ -505,7 +505,7 @@ class Partitioning:
     @staticmethod
     def get_symmetry_contact_mask(structure: Structure, protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
-        protein_mask_array = np.array(protein_mask, copy=False)
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.bool)
 
         mask = gemmi.Int8Grid(*protein_mask_array.shape)
         mask.spacegroup = protein_mask.spacegroup
@@ -531,10 +531,10 @@ class Partitioning:
                                        value=1,
                                        )
 
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=False, dtype=np.bool)
         print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
-        protein_mask_array = np.array(protein_mask, copy=False)
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.bool)
 
         equal_mask = protein_mask_array == mask_array
 
@@ -1244,8 +1244,8 @@ class Zmap:
 
         return new_grid
 
-    def to_array(self):
-        return np.array(self.zmap, copy=True)
+    def to_array(self, copy=True):
+        return np.array(self.zmap, copy=copy)
 
     def shape(self):
         return [self.zmap.nu, self.zmap.nv, self.zmap.nw]
@@ -1353,7 +1353,7 @@ class Clustering:
 
     @staticmethod
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, blob_finding: BlobFinding, masks: Masks):
-        zmap_array = zmap.to_array()
+        zmap_array = zmap.to_array(copy=True)
 
         # protein_mask_grid = Clustering.get_protein_mask(zmap,
         #                                                 reference,
