@@ -610,9 +610,9 @@ class Transform:
                                                      position[2] - self.com_moving[2])
             transformed_vector = self.transform.apply(rotation_frame_position)
 
-            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_moving[0],
-                                                          transformed_vector[1] + self.com_moving[1],
-                                                          transformed_vector[2] + self.com_moving[2])
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_reference[0],
+                                                          transformed_vector[1] + self.com_reference[1],
+                                                          transformed_vector[2] + self.com_reference[2])
 
         return transformed_positions
 
@@ -626,9 +626,9 @@ class Transform:
                                                      position[2] - self.com_reference[2])
             transformed_vector = inverse_transform.apply(rotation_frame_position)
 
-            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_reference[0],
-                                                          transformed_vector[1] + self.com_reference[1],
-                                                          transformed_vector[2] + self.com_reference[2])
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_moving[0],
+                                                          transformed_vector[1] + self.com_moving[1],
+                                                          transformed_vector[2] + self.com_moving[2])
 
         return transformed_positions
 
