@@ -531,16 +531,19 @@ class Partitioning:
                                        value=1,
                                        )
 
-        mask_array = np.array(mask, copy=False, dtype=np.bool)
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
         print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
-        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.bool)
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
 
         equal_mask = protein_mask_array == mask_array
 
         print("\tequal mask of size {}".format(np.sum(equal_mask)))
+        protein_mask_indicies = np.nonzero(protein_mask_array)
+        protein_mask_bool = np.full(protein_mask_array.shape, False)
+        protein_mask_bool[protein_mask_indicies] = True
 
-        mask_array[:, :, :] = mask_array * protein_mask_array
+        mask_array[~protein_mask_bool] = 0
 
         return mask
 
@@ -1498,48 +1501,48 @@ class Clustering:
 
         return mask
 
-    @staticmethod
-    def get_symmetry_contact_mask(zmap: Zmap, reference: Reference, protein_mask: gemmi.Int8Grid,
-                                  symmetry_mask_radius: float = 3):
-        mask = gemmi.Int8Grid(*zmap.shape())
-        mask.spacegroup = zmap.spacegroup()
-        mask.set_unit_cell(zmap.unit_cell())
-
-        print("\tGetting symops")
-        symops = Symops.from_grid(mask)
-        print([symmetry_operation for symmetry_operation in symops])
-
-        print("\tIterating")
-        for atom in reference.dataset.structure.protein_atoms():
-            for symmetry_operation in symops.symops[1:]:
-                position = atom.pos
-                fractional_position = mask.unit_cell.fractionalize(position)
-                symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
-                                                                                       fractional_position[1],
-                                                                                       fractional_position[2],
-                                                                                       ]))
-                orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
-
-                mask.set_points_around(orthogonal_symmetry_position,
-                                       radius=symmetry_mask_radius,
-                                       value=1,
-                                       )
-
-        mask_array = np.array(mask, copy=False, dtype=np.int8)
-        print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
-
-        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
-
-        equal_mask = protein_mask_array == mask_array
-
-        print("\tequal mask of size {}".format(np.sum(equal_mask)))
-        protein_mask_indicies = np.nonzero(protein_mask_array)
-        protein_mask_bool = np.full(protein_mask_array.shape, False)
-        protein_mask_bool[protein_mask_indicies] = True
-
-        mask_array[~protein_mask_bool] = 0
-
-        return mask
+    # @staticmethod
+    # def get_symmetry_contact_mask(zmap: Zmap, reference: Reference, protein_mask: gemmi.Int8Grid,
+    #                               symmetry_mask_radius: float = 3):
+    #     mask = gemmi.Int8Grid(*zmap.shape())
+    #     mask.spacegroup = zmap.spacegroup()
+    #     mask.set_unit_cell(zmap.unit_cell())
+    #
+    #     print("\tGetting symops")
+    #     symops = Symops.from_grid(mask)
+    #     print([symmetry_operation for symmetry_operation in symops])
+    #
+    #     print("\tIterating")
+    #     for atom in reference.dataset.structure.protein_atoms():
+    #         for symmetry_operation in symops.symops[1:]:
+    #             position = atom.pos
+    #             fractional_position = mask.unit_cell.fractionalize(position)
+    #             symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
+    #                                                                                    fractional_position[1],
+    #                                                                                    fractional_position[2],
+    #                                                                                    ]))
+    #             orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
+    #
+    #             mask.set_points_around(orthogonal_symmetry_position,
+    #                                    radius=symmetry_mask_radius,
+    #                                    value=1,
+    #                                    )
+    #
+    #     mask_array = np.array(mask, copy=False, dtype=np.int8)
+    #     print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
+    #
+    #     protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
+    #
+    #     equal_mask = protein_mask_array == mask_array
+    #
+    #     print("\tequal mask of size {}".format(np.sum(equal_mask)))
+    #     protein_mask_indicies = np.nonzero(protein_mask_array)
+    #     protein_mask_bool = np.full(protein_mask_array.shape, False)
+    #     protein_mask_bool[protein_mask_indicies] = True
+    #
+    #     mask_array[~protein_mask_bool] = 0
+    #
+    #     return mask
 
     def __getitem__(self, item):
         return self.clustering[item]
