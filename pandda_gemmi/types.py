@@ -1362,7 +1362,7 @@ class Clustering:
         protein_mask_grid = grid.partitioning.protein_mask
         print("\tGor protein mask")
 
-        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.bool)
+        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.int8)
 
         # symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
         #                                                                   reference,
@@ -1373,13 +1373,15 @@ class Clustering:
 
         print("\tGot symmetry mask")
 
-        symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.bool)
+        symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.int8)
 
         # Don't consider outlying points away from the protein
-        zmap_array[~protein_mask] = 0.0
+        protein_mask_bool = np.zeros(protein_mask.shape, dtpye=np.bool)
+        protein_mask_bool[np.nonzero(protein_mask)] = True
+        zmap_array[~protein_mask_bool] = 0.0
 
         # Don't consider outlying points at symmetry contacts
-        zmap_array[symmetry_contact_mask] = 0.0
+        zmap_array[np.nonzero(symmetry_contact_mask)] = 0.0
 
         extrema_mask_array = zmap_array > masks.contour_level
 
@@ -1631,14 +1633,15 @@ class BDC:
 
         cluster_indexes = cluster.event_mask_indicies
 
-        protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.bool)
+        protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.int8)
+        protein_mask_indicies = np.nonzero(protein_mask)
 
-        xmap_masked = xmap_array[protein_mask]
-        mean_masked = model.mean[protein_mask]
+        xmap_masked = xmap_array[protein_mask_indicies]
+        mean_masked = model.mean[protein_mask_indicies]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
         # print(np.sum(cluster_array))
-        cluster_mask = cluster_array[protein_mask]
+        cluster_mask = cluster_array[protein_mask_indicies]
         # print(np.sum(cluster_mask))
         # print(cluster_mask.shape)
 
