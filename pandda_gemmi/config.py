@@ -99,7 +99,8 @@ class Filtering:
 class BlobFinding:
     min_blob_volume: float = 10.0
     min_blob_z_peak: float = 3.0
-    clustering_cutoff: float = 1.732
+    # clustering_cutoff: float = 1.732
+    clustering_cutoff: float = 1.0
 
     @classmethod
     def from_args(cls, args):
@@ -406,7 +407,8 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
         parser.add_argument("--clustering_cutoff",
-                            default=1.732,
+                            # default=1.732,
+                            default=1.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
