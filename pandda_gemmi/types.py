@@ -1411,9 +1411,17 @@ class Clustering:
         extrema_cart_coords_array = np.array(positions)  # n, 3
         print("\tshape: {}".format(extrema_cart_coords_array.shape))
 
+        point_000 = grid.grid.get_point(0,0,0)
+        point_111 = grid.grid.get_point(1, 1, 1)
+        position_000 = grid.grid.point_to_position(point_000)
+        position_111 = grid.grid.point_to_position(point_111)
+        clustering_cutoff = position_000.distance(position_111)
+        print("\tClustering cutoff is: {}".format(clustering_cutoff))
+
         print("\tClustering")
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
-                                         t=blob_finding.clustering_cutoff,
+                                         # t=blob_finding.clustering_cutoff,
+                                         t=clustering_cutoff,
                                          criterion='distance',
                                          metric='euclidean',
                                          method='single',
