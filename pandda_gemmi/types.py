@@ -1031,7 +1031,7 @@ class Model:
     @staticmethod
     def from_xmaps(xmaps: Xmaps, grid: Grid):
         mask = grid.partitioning.protein_mask
-        mask_array = np.array(mask, copy=False, dtype=np.bool)
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         arrays = {}
         for dtag in xmaps:
@@ -1039,7 +1039,7 @@ class Model:
             xmap_array = xmap.to_array()
             # print(xmap_array.shape)
             # print(mask_array.shape)
-            arrays[dtag] = xmap_array[mask_array]
+            arrays[dtag] = xmap_array[np.nonzero(mask_array)]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
         mean_flat = np.mean(stacked_arrays, axis=0)
@@ -1060,10 +1060,10 @@ class Model:
                                                    )
 
         mean = np.zeros(mask_array.shape)
-        mean[mask_array] = mean_flat
+        mean[np.nonzero(mask_array)] = mean_flat
 
         sigma_s_m = np.zeros(mask_array.shape)
-        sigma_s_m[mask_array] = sigma_s_m_flat
+        sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
 
         return Model(mean,
                      sigma_is,
