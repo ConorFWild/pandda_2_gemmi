@@ -1029,7 +1029,7 @@ class Model:
     sigma_s_m: np.ndarray
 
     @staticmethod
-    def from_xmaps(xmaps: Xmaps, grid: Grid):
+    def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
         mask = grid.partitioning.protein_mask
         mask_array = np.array(mask, copy=False, dtype=np.int8)
 
@@ -1048,7 +1048,8 @@ class Model:
         sigma_is = {}
         for dtag in xmaps:
             sigma_i = Model.calculate_sigma_i(mean_flat,
-                                              arrays[dtag])
+                                              arrays[dtag],
+                                              cut)
             sigma_is[dtag] = sigma_i
             print([dtag, sigma_i])
 
@@ -1071,7 +1072,7 @@ class Model:
                      )
 
     @staticmethod
-    def calculate_sigma_i(mean: np.array, array: np.array):
+    def calculate_sigma_i(mean: np.array, array: np.array, cut: float):
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = np.subtract(array, mean)
