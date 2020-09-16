@@ -1525,16 +1525,19 @@ class Clustering:
                                        value=1,
                                        )
 
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
         print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
-        protein_mask_array = np.array(protein_mask, copy=False)
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
 
         equal_mask = protein_mask_array == mask_array
 
         print("\tequal mask of size {}".format(np.sum(equal_mask)))
+        protein_mask_indicies = np.nonzero(protein_mask_array)
+        protein_mask_bool = np.full(protein_mask_array.shape, False)
+        protein_mask_bool[protein_mask_indicies] = True
 
-        mask_array[:, :, :] = mask_array * protein_mask_array
+        mask_array[~protein_mask_bool] = 0
 
         return mask
 
