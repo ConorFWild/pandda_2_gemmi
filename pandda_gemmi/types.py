@@ -1076,18 +1076,22 @@ class Model:
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = np.subtract(array, mean)
+        print(residual)
+        observed_quantile_estimates = np.sort(residual)
+        print(observed_quantile_estimates)
         # sigma_i = np.std(residual)
         # sigma_i = 0.01
 
         percentiles = np.linspace(0, 1, array.size + 2)[1:-1]
         normal_quantiles = stats.norm.ppf(percentiles)
-        observed_quantile_estimates = np.sort(residual)
+        print(normal_quantiles)
 
         below_min_mask = normal_quantiles < (-1.0*cut)
         above_max_mask = normal_quantiles > cut
         centre_mask = np.full(below_min_mask.shape, True)
         centre_mask[below_min_mask] = False
         centre_mask[above_max_mask] = False
+        print(np.nonzero(centre_mask))
 
         central_theoretical_quantiles = normal_quantiles[centre_mask]
         central_observed_quantiles = observed_quantile_estimates[centre_mask]
