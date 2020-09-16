@@ -1083,9 +1083,11 @@ class Model:
         normal_quantiles = stats.norm.ppf(percentiles)
         observed_quantile_estimates = np.sort(residual)
 
-        above_min_mask = normal_quantiles > -1
-        below_max_mask = normal_quantiles < 1
-        centre_mask = above_min_mask * below_max_mask
+        below_min_mask = normal_quantiles < (-1.0*cut)
+        above_max_mask = normal_quantiles > cut
+        centre_mask = np.full(below_min_mask.shape, True)
+        centre_mask[below_min_mask] = False
+        centre_mask[above_max_mask] = False
 
         central_theoretical_quantiles = normal_quantiles[centre_mask]
         central_observed_quantiles = observed_quantile_estimates[centre_mask]
