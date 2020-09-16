@@ -1376,7 +1376,7 @@ class Clustering:
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.int8)
 
         # Don't consider outlying points away from the protein
-        protein_mask_bool = np.zeros(protein_mask.shape, dtpye=np.bool)
+        protein_mask_bool = np.full(protein_mask.shape, False)
         protein_mask_bool[np.nonzero(protein_mask)] = True
         zmap_array[~protein_mask_bool] = 0.0
 
