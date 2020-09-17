@@ -1145,21 +1145,19 @@ class Model:
     def maximise_over_range(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        x_opt = np.ones((shape[1], shape[2], shape[3]))*xs[0]
-        val = np.ones(shape)*xs[0]
+        x_opt = np.ones(shape[1])*xs[0] # n
+        x_current = np.ones(shape[1])*xs[0] #n
 
-        y_max = func(val)
+        y_max = func(x_current[np.newaxis, :])  # n -> 1,n -> n
+
         for x in xs[1:]:
-            val[:,:,:,:] = x
-            y = func(val)
-            y_above_y_max_mask = y > y_max
-            y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
+            x_current[:] = x  # n
+            y = func(x_current[np.newaxis, :])  # n -> 1,n -> n
+            y_above_y_max_mask = y > y_max  # n
+            # y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
             x_opt[y_above_y_max_mask] = x
 
         return x_opt
-
-
-
 
     @staticmethod
     def vectorised_optimisation_bf(func, start, stop, num, shape):
