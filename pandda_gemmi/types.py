@@ -1056,8 +1056,8 @@ class Model:
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
         sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
-                                                   stacked_arrays,
-                                                   sigma_is_array,
+                                                   stacked_arrays[:60],
+                                                   sigma_is_array[:60],
                                                    )
 
         mean = np.zeros(mask_array.shape)
