@@ -1121,19 +1121,42 @@ class Model:
         # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
         #
 
-        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
+        func = lambda est_sigma: Model.log_liklihood_normal(est_sigma, mean, arrays, sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
 
-        sigma_ms = Model.vectorised_optimisation_bisect(func,
-                                                        0,
-                                                        10,
-                                                        30,
-                                                        arrays.shape
-                                                        )
+        # sigma_ms = Model.vectorised_optimisation_bisect(func,
+        #                                                 0,
+        #                                                 10,
+        #                                                 30,
+        #                                                 arrays.shape
+        #                                                 )
+
+        sigma_ms = Model.maximise_over_range(func,
+                                             0,
+                                             3,
+                                             30,
+                                             arrays.shape)
 
         return sigma_ms
+
+    @staticmethod
+    def maximise_over_range(func, start, stop, num, shape):
+        xs = np.linspace(start, stop, num)
+
+        x_opt = np.ones(shape)*xs[0]
+        y_max = func(xs[0])
+        for x in xs[1:]:
+            y = func(x)
+            y_above_y_max_mask = y > y_max
+            y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
+            x_opt[y_above_y_max_mask] = x
+
+        return x
+
+
+
 
     @staticmethod
     def vectorised_optimisation_bf(func, start, stop, num, shape):
@@ -1227,6 +1250,12 @@ class Model:
 
     @staticmethod
     def liklihood(est_sigma, est_mu, obs_vals, obs_error):
+        term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
+        term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
+        return np.sum(term1 + term2)
+
+    @staticmethod
+    def log_liklihood_normal(est_sigma, est_mu, obs_vals, obs_error):
         term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
         term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
         return np.sum(term1 + term2)
