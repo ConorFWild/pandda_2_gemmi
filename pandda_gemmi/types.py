@@ -1067,10 +1067,10 @@ class Model:
                                                    sigma_is_array[:60],
                                                    )
 
-        mean = np.zeros(mask_array.shape)
+        mean = np.zeros(mask_array.shape, dtype=np.float32)
         mean[np.nonzero(mask_array)] = mean_flat
 
-        sigma_s_m = np.zeros(mask_array.shape)
+        sigma_s_m = np.zeros(mask_array.shape, dtype=np.float32)
         sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
 
         return Model(mean,
