@@ -1128,18 +1128,18 @@ class Model:
         shape = mean.shape
         num = len(sigma_is_array)
 
-        # sigma_ms = Model.vectorised_optimisation_bisect(func,
-        #                                                 0,
-        #                                                 10,
-        #                                                 30,
-        #                                                 arrays.shape
-        #                                                 )
+        sigma_ms = Model.vectorised_optimisation_bisect(func,
+                                                        0,
+                                                        10,
+                                                        30,
+                                                        arrays.shape
+                                                        )
 
-        sigma_ms = Model.maximise_over_range(func,
-                                             0,
-                                             6,
-                                             150,
-                                             arrays.shape)
+        # sigma_ms = Model.maximise_over_range(func,
+        #                                      0,
+        #                                      6,
+        #                                      150,
+        #                                      arrays.shape)
 
         return sigma_ms
 
