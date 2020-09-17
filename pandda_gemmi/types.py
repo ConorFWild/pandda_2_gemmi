@@ -1145,10 +1145,13 @@ class Model:
     def maximise_over_range(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        x_opt = np.ones(shape)*xs[0]
-        y_max = func(xs[0])
+        x_opt = np.ones((shape[1], shape[2], shape[3]))*xs[0]
+        val = np.ones(shape)*xs[0]
+
+        y_max = func(val)
         for x in xs[1:]:
-            y = func(x)
+            val[:,:,:,:] = x
+            y = func(val)
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
             x_opt[y_above_y_max_mask] = x
