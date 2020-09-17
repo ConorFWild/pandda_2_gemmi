@@ -1257,9 +1257,16 @@ class Model:
 
     @staticmethod
     def log_liklihood_normal(est_sigma, est_mu, obs_vals, obs_error):
-        term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
-        term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
-        return np.sum(term1 + term2, axis=0)
+        n = obs_error.size
+
+        # term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
+        # term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
+
+        term1 = -1*(n/2)*np.ln(2*np.pi)
+        term2 = -1*(1/2)*np.ln(np.square(est_sigma) + np.square(obs_error))  # n, m
+        term3 = -1*(1/2)*(1/(np.square(est_sigma) + np.square(obs_error)))*np.square(obs_vals - est_mu)  # n,m
+
+        return term1 + np.sum(term2+term3, axis=0)  # 1 + m
 
 
 @dataclasses.dataclass()
