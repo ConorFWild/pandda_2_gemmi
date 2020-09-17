@@ -1039,7 +1039,7 @@ class Model:
             xmap_array = xmap.to_array()
             # print(xmap_array.shape)
             # print(mask_array.shape)
-            arrays[dtag] = xmap_array[np.nonzero(mask_array)]
+            arrays[dtag] = xmap_array  # [np.nonzero(mask_array)]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
         mean_flat = np.mean(stacked_arrays, axis=0)
@@ -1060,11 +1060,14 @@ class Model:
                                                    sigma_is_array,
                                                    )
 
-        mean = np.zeros(mask_array.shape)
-        mean[np.nonzero(mask_array)] = mean_flat
+        # mean = np.zeros(mask_array.shape)
+        # mean[np.nonzero(mask_array)] = mean_flat
+        #
+        # sigma_s_m = np.zeros(mask_array.shape)
+        # sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
 
-        sigma_s_m = np.zeros(mask_array.shape)
-        sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
+        mean_masked = mean_flat[np.nonzero(mask_array)]
+        sigma_s_m_masked = sigma_s_m_flat[np.nonzero()]
 
         return Model(mean,
                      sigma_is,
