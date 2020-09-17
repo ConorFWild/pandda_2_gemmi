@@ -1135,8 +1135,8 @@ class Model:
 
         sigma_ms = Model.maximise_over_range(func,
                                              0,
-                                             3,
-                                             60,
+                                             6,
+                                             150,
                                              arrays.shape)
 
         return sigma_ms
