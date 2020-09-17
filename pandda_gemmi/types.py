@@ -1061,11 +1061,12 @@ class Model:
             print([dtag, sigma_i])
 
         # Estimate the adjusted pointwise variance
-        sigma_is_array = np.array(list(sigma_is.values()))[:, np.newaxis]
+        sigma_is_array = np.array(list(sigma_is.values()),  dtype=np.float32)[:, np.newaxis]
         sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
                                                    stacked_arrays[:60],
                                                    sigma_is_array[:60],
                                                    )
+
 
         mean = np.zeros(mask_array.shape, dtype=np.float32)
         mean[np.nonzero(mask_array)] = mean_flat
@@ -1152,8 +1153,8 @@ class Model:
     def maximise_over_range(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        x_opt = np.ones(shape[1])*xs[0] # n
-        x_current = np.ones(shape[1])*xs[0] #n
+        x_opt = np.ones(shape[1], dtype=np.float32)*xs[0] # n
+        x_current = np.ones(shape[1], dtype=np.float32)*xs[0] #n
 
         y_max = func(x_current[np.newaxis, :])  # n -> 1,n -> n
 
@@ -1170,8 +1171,8 @@ class Model:
     def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape) * xs[0] + 1.0 / 10000000000000000000000.0
-        res = np.ones((shape[1], shape[2], shape[3])) * xs[0]
+        val = np.ones(shape,  dtype=np.float32) * xs[0] + 1.0 / 10000000000000000000000.0
+        res = np.ones((shape[1], shape[2], shape[3]),  dtype=np.float32) * xs[0]
 
         y_max = func(val)
 
@@ -1193,9 +1194,9 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower_orig = (np.ones(shape[1]) * start) + 1e-16
+        x_lower_orig = (np.ones(shape[1],  dtype=np.float32) * start) + 1e-16
 
-        x_upper_orig = np.ones(shape[1]) * stop
+        x_upper_orig = np.ones(shape[1],  dtype=np.float32) * stop
 
         f_lower = func(x_lower_orig[np.newaxis, :])
         f_upper = func(x_upper_orig[np.newaxis, :])
@@ -1245,7 +1246,7 @@ class Model:
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
-        term2 = np.ones(est_sigma.shape) / (np.square(est_sigma) + np.square(obs_error))
+        term2 = np.ones(est_sigma.shape,  dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
@@ -1259,7 +1260,7 @@ class Model:
     @staticmethod
     def liklihood(est_sigma, est_mu, obs_vals, obs_error):
         term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
-        term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
+        term2 = np.log(np.ones(est_sigma.shape,  dtype=np.float32) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
         return np.sum(term1 + term2)
 
     @staticmethod
