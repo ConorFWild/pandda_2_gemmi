@@ -1136,7 +1136,7 @@ class Model:
         sigma_ms = Model.maximise_over_range(func,
                                              0,
                                              3,
-                                             30,
+                                             60,
                                              arrays.shape)
 
         return sigma_ms
@@ -1153,7 +1153,7 @@ class Model:
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
             x_opt[y_above_y_max_mask] = x
 
-        return x
+        return x_opt
 
 
 
