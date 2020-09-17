@@ -1258,7 +1258,7 @@ class Model:
     def log_liklihood_normal(est_sigma, est_mu, obs_vals, obs_error):
         term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
         term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
-        return np.sum(term1 + term2)
+        return np.sum(term1 + term2, axis=0)
 
 
 @dataclasses.dataclass()
