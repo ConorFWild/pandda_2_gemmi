@@ -1129,7 +1129,7 @@ class Model:
         # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
         #
 
-        func = lambda est_sigma: Model.log_liklihood_normal(est_sigma, mean, arrays, sigma_is_array)
+        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
