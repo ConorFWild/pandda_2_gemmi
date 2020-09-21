@@ -1201,10 +1201,10 @@ class Model:
         print(f"x_upper_orig: {x_upper_orig}")
 
         f_lower = func(x_lower_orig[np.newaxis, :])
-        print(f"f_lower: {x_upper_orig}")
+        print(f"f_lower: {f_lower}")
 
         f_upper = func(x_upper_orig[np.newaxis, :])
-        print(f"f_upper: {x_upper_orig}")
+        print(f"f_upper: {f_upper}")
 
         test_mat = f_lower * f_upper
         print(f"test_mat: {test_mat}")
