@@ -552,7 +552,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, sample_rate:float = 3.0):
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, sample_rate:float = 4.0):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -576,7 +576,7 @@ class Grid:
         return grid
 
     @staticmethod
-    def spacing_from_reference(reference: Reference, sample_rate:float=3.0):
+    def spacing_from_reference(reference: Reference, sample_rate: float=4.0):
         spacing = reference.dataset.reflections.reflections.get_size_for_hkl(sample_rate=sample_rate)
         return spacing
 
@@ -891,7 +891,7 @@ class Xmap:
 
     @staticmethod
     def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors,
-                               sample_rate: float=3.0):
+                               sample_rate: float=4.0):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
@@ -1109,7 +1109,7 @@ class Model:
         return map_unc
 
     @staticmethod
-    def calculate_sigma_s_m(mean: np.array, arrays: np.arrays, sigma_is_array: typing.Dict[Dtag, float]):
+    def calculate_sigma_s_m(mean: np.array, arrays: np.array, sigma_is_array: np.array):
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
         # mean[m]
         # arrays[n,m]
