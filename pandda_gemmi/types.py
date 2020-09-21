@@ -1195,14 +1195,23 @@ class Model:
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
         x_lower_orig = (np.ones(shape[1],  dtype=np.float32) * start) + 1e-16
+        print(f"x_lower_orig: {x_lower_orig}")
 
         x_upper_orig = np.ones(shape[1],  dtype=np.float32) * stop
+        print(f"x_upper_orig: {x_upper_orig}")
 
         f_lower = func(x_lower_orig[np.newaxis, :])
+        print(f"f_lower: {x_upper_orig}")
+
         f_upper = func(x_upper_orig[np.newaxis, :])
+        print(f"f_upper: {x_upper_orig}")
 
         test_mat = f_lower * f_upper
+        print(f"test_mat: {test_mat}")
+
         test_mat_mask = test_mat > 0
+        print(f"test_mat_mask: {test_mat_mask}")
+
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
