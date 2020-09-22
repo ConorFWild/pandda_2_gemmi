@@ -898,11 +898,8 @@ class Xmap:
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
         std = np.std(unaligned_xmap_array)
-        print(std)
-        print(np.mean(unaligned_xmap_array))
-        unaligned_xmap_array[:,:,:] = unaligned_xmap_array[:,:,:] / std
 
-        print(np.std(unaligned_xmap_array))
+        unaligned_xmap_array[:,:,:] = unaligned_xmap_array[:,:,:] / std
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -910,7 +907,7 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
+                                               gemmi.Position] = alignment[residue_id].apply_reference_to_moving(
                 alignment_positions)
 
             transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
@@ -939,6 +936,7 @@ class Xmap:
     def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
                          mask_radius_symmetry: float):
+        xmap_grid = xmap.xmap
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
@@ -953,15 +951,16 @@ class Xmap:
             alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = partitioning[residue_id]
 
             transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply(
+                                               gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
                 alignment_positions)
 
             # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
             #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
-                                             float] = Xmap.interpolate_grid(unaligned_xmap,
-                                                                            transformed_positions)
+                                             float] = Xmap.interpolate_grid(xmap_grid,
+                                                                            transformed_positions,
+                                                                            )
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
