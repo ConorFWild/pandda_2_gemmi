@@ -1006,13 +1006,14 @@ class Xmaps:
 
     @staticmethod
     def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
-                              structure_factors: StructureFactors):
+                              structure_factors: StructureFactors, sample_rate=3.0):
         xmaps = {}
         for dtag in datasets:
             xmap = Xmap.from_unaligned_dataset(datasets[dtag],
                                                alignments[dtag],
                                                grid,
-                                               structure_factors)
+                                               structure_factors,
+                                               sample_rate)
 
             xmaps[dtag] = xmap
 
@@ -1066,7 +1067,6 @@ class Model:
                                                    stacked_arrays[:60],
                                                    sigma_is_array[:60],
                                                    )
-
 
         mean = np.zeros(mask_array.shape, dtype=np.float32)
         mean[np.nonzero(mask_array)] = mean_flat
@@ -1136,8 +1136,8 @@ class Model:
 
         sigma_ms = Model.vectorised_optimisation_bisect(func,
                                                         0,
-                                                        10,
-                                                        30,
+                                                        20,
+                                                        31,
                                                         arrays.shape
                                                         )
 
@@ -1194,7 +1194,7 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower_orig = (np.ones(shape[1],  dtype=np.float32) * start) + 1e-16
+        x_lower_orig = (np.ones(shape[1],  dtype=np.float32) * start)
         print(f"x_lower_orig: {x_lower_orig}")
 
         x_upper_orig = np.ones(shape[1],  dtype=np.float32) * stop
