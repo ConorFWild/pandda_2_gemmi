@@ -599,8 +599,8 @@ class Grid:
 @dataclasses.dataclass()
 class Transform:
     transform: gemmi.Transform
-    com_moving: np.array
     com_reference: np.array
+    com_moving: np.array
 
     def apply_moving_to_reference(self, positions: typing.Dict[typing.Tuple[int], gemmi.Position]) -> typing.Dict[
         typing.Tuple[int], gemmi.Position]:
