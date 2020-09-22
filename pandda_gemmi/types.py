@@ -901,6 +901,7 @@ class Xmap:
 
         unaligned_xmap_array[:,:,:] = unaligned_xmap_array[:,:,:] / std
 
+
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
