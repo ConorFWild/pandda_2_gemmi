@@ -665,7 +665,8 @@ class Transform:
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
 
-        vec = mean_ref - mean
+        # vec = mean_ref - mean
+        vec = np.array([0.0,0.0,0.0])
 
         de_meaned = matrix - mean
         de_meaned_ref = matrix_ref - mean_ref
@@ -701,7 +702,8 @@ class Transform:
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
 
-        vec = mean_ref - mean
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
 
         de_meaned = matrix - mean
         de_meaned_ref = matrix_ref - mean_ref
@@ -734,7 +736,8 @@ class Transform:
         mean = np.mean(matrix, axis=0)
         mean_ref = np.mean(matrix_ref, axis=0)
 
-        vec = mean_ref - mean
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
 
         de_meaned = matrix - mean
         de_meaned_ref = matrix_ref - mean_ref
