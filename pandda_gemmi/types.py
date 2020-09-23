@@ -936,15 +936,12 @@ class Xmap:
         return Xmap(new_grid)
 
     @staticmethod
-    def from_aligned_map(xmap: Xmap, dataset: Dataset, alignment: Alignment, grid: Grid,
+    def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
+                         moving_xmap_grid: gemmi.FloatGrid, dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
                          mask_radius_symmetry: float):
-        xmap_grid = xmap.xmap
-        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                                 structure_factors.phi,
-                                                                                                 )
 
-        partitioning = Partitioning.from_structure(dataset.structure, unaligned_xmap, mask_radius,
+        partitioning = Partitioning.from_structure(dataset.structure, moving_xmap_grid, mask_radius,
                                                    mask_radius_symmetry)
         print(partitioning.partitioning.keys())
 
@@ -961,7 +958,7 @@ class Xmap:
             #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
-                                             float] = Xmap.interpolate_grid(xmap_grid,
+                                             float] = Xmap.interpolate_grid(event_map_reference_grid,
                                                                             transformed_positions,
                                                                             )
 
@@ -972,13 +969,15 @@ class Xmap:
                                                                          interpolated_values],
                                          )
 
-        new_grid = grid.new_grid()
+        new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu, moving_xmap_grid.nv, moving_xmap_grid.nw])
+        new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        new_grid.set_unit_cell(moving_xmap_grid.unit_cell)
 
         grid_array = np.array(new_grid, copy=False)
 
         grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
 
-        return Xmap(new_grid)
+        return new_grid
 
     @staticmethod
     def interpolate_grid(grid: gemmi.FloatGrid,
@@ -1956,27 +1955,34 @@ class EventMapFile:
              mask_radius: float,
              mask_radius_symmetry: float,
              ):
-        event_map = Xmap.from_aligned_map(xmap,
-                                          dataset,
-                                          alignment,
-                                          grid,
-                                          structure_factors,
-                                          mask_radius,
-                                          mask_radius_symmetry,
-                                          )
+        xmap_grid = xmap.xmap
+        xmap_grid_array = np.array(xmap_grid, copy=False)
 
-        xmap_array = event_map.to_array(copy=True)
+        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                                 structure_factors.phi,
+                                                                                                 )
+
+        event_map_reference_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu, moving_xmap_grid.nv, moving_xmap_grid.nw])
+        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        event_map_reference_grid.set_unit_cell(moving_xmap_grid.unit_cell)
+
+        event_map_reference_grid_array = np.array(event_map_reference_grid, copy=False)
+
         mean_array = model.mean
+        event_map_reference_grid_array[:, :, :] = (xmap_grid_array - event.bdc.bdc * mean_array) / (1 - event.bdc.bdc)
 
-        grid = gemmi.FloatGrid(*xmap_array.shape)
-        grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  #  xmap.xmap.spacegroup
-        grid.set_unit_cell(xmap.xmap.unit_cell)
-
-        grid_array = np.array(grid, copy=False)
-        grid_array[:, :, :] = (xmap_array - event.bdc.bdc * mean_array) / (1 - event.bdc.bdc)
+        event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
+                                               moving_xmap_grid,
+                                               dataset,
+                                               alignment,
+                                               grid,
+                                               structure_factors,
+                                               mask_radius,
+                                               mask_radius_symmetry,
+                                               )
 
         ccp4 = gemmi.Ccp4Map()
-        ccp4.grid = grid
+        ccp4.grid = event_map_grid
         ccp4.update_ccp4_header(2, True)
         # ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
