@@ -937,13 +937,14 @@ class Xmap:
 
     @staticmethod
     def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
-                         moving_xmap_grid: gemmi.FloatGrid, dataset: Dataset, alignment: Alignment, grid: Grid,
+                         moving_xmap_grid: gemmi.FloatGrid,
+                         dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
                          mask_radius_symmetry: float):
 
         partitioning = Partitioning.from_structure(dataset.structure, moving_xmap_grid, mask_radius,
                                                    mask_radius_symmetry)
-        print(partitioning.partitioning.keys())
+        # print(partitioning.partitioning.keys())
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -1955,21 +1956,21 @@ class EventMapFile:
              mask_radius: float,
              mask_radius_symmetry: float,
              ):
-        xmap_grid = xmap.xmap
-        xmap_grid_array = np.array(xmap_grid, copy=False)
+        reference_xmap_grid = xmap.xmap
+        reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
         moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  )
 
-        event_map_reference_grid = gemmi.FloatGrid(*[xmap_grid.nu, xmap_grid.nv, xmap_grid.nw])
+        event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu, reference_xmap_grid.nv, reference_xmap_grid.nw])
         event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-        event_map_reference_grid.set_unit_cell(xmap_grid.unit_cell)
+        event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
 
         event_map_reference_grid_array = np.array(event_map_reference_grid, copy=False)
 
         mean_array = model.mean
-        event_map_reference_grid_array[:, :, :] = (xmap_grid_array - (event.bdc.bdc * mean_array)) / (1 - event.bdc.bdc)
+        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (1 - event.bdc.bdc)
 
         event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
                                                moving_xmap_grid,
