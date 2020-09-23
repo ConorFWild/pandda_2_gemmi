@@ -800,6 +800,22 @@ class Alignment:
 
                     transforms[current_res_id] = transform
 
+                for res in chain.get_polymer():
+                    prev_res = chain.previous_residue(res)
+                    next_res = chain.next_residue(res)
+
+                    if prev_res:
+                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    current_res_id = ResidueID.from_residue_chain(model, chain, res)
+                    if next_res:
+                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
+
+                    if not prev_res:
+                        transforms[current_res_id].transform.mat = transforms[next_res_id].transform.mat
+
+                    if not next_res:
+                        transforms[current_res_id].transform.mat = transforms[prev_res_id].transform.mat
+
         return Alignment(transforms)
 
     def __iter__(self):
