@@ -811,10 +811,10 @@ class Alignment:
                         next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
 
                     if not prev_res:
-                        transforms[current_res_id].transform.mat.from_list(transforms[next_res_id].transform.mat.to_list())
+                        transforms[current_res_id].transform.mat.fromlist(transforms[next_res_id].transform.mat.tolist())
 
                     if not next_res:
-                        transforms[current_res_id].transform.mat.from_list(transforms[prev_res_id].transform.mat.to_list())
+                        transforms[current_res_id].transform.mat.fromlist(transforms[prev_res_id].transform.mat.tolist())
 
         return Alignment(transforms)
 
