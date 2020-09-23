@@ -1962,14 +1962,14 @@ class EventMapFile:
                                                                                                  structure_factors.phi,
                                                                                                  )
 
-        event_map_reference_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu, moving_xmap_grid.nv, moving_xmap_grid.nw])
+        event_map_reference_grid = gemmi.FloatGrid(*[xmap_grid.nu, xmap_grid.nv, xmap_grid.nw])
         event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-        event_map_reference_grid.set_unit_cell(moving_xmap_grid.unit_cell)
+        event_map_reference_grid.set_unit_cell(xmap_grid.unit_cell)
 
         event_map_reference_grid_array = np.array(event_map_reference_grid, copy=False)
 
         mean_array = model.mean
-        event_map_reference_grid_array[:, :, :] = (xmap_grid_array - event.bdc.bdc * mean_array) / (1 - event.bdc.bdc)
+        event_map_reference_grid_array[:, :, :] = (xmap_grid_array - (event.bdc.bdc * mean_array)) / (1 - event.bdc.bdc)
 
         event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
                                                moving_xmap_grid,
