@@ -962,12 +962,12 @@ class Xmap:
                                                gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
                 alignment_positions)
 
-            # transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
-            #     point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+                point: event_map_reference_grid.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(event_map_reference_grid,
-                                                                            transformed_positions,
+                                                                            transformed_positions_fractional,
                                                                             )
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
