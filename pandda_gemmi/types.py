@@ -552,7 +552,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, sample_rate:float = 3.0):
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, sample_rate: float = 3.0):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -576,7 +576,7 @@ class Grid:
         return grid
 
     @staticmethod
-    def spacing_from_reference(reference: Reference, sample_rate: float=3.0):
+    def spacing_from_reference(reference: Reference, sample_rate: float = 3.0):
         spacing = reference.dataset.reflections.reflections.get_size_for_hkl(sample_rate=sample_rate)
         return spacing
 
@@ -666,7 +666,7 @@ class Transform:
         mean_ref = np.mean(matrix_ref, axis=0)
 
         # vec = mean_ref - mean
-        vec = np.array([0.0,0.0,0.0])
+        vec = np.array([0.0, 0.0, 0.0])
 
         de_meaned = matrix - mean
         de_meaned_ref = matrix_ref - mean_ref
@@ -894,7 +894,7 @@ class Xmap:
 
     @staticmethod
     def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors,
-                               sample_rate: float=3.0):
+                               sample_rate: float = 3.0):
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
@@ -902,8 +902,7 @@ class Xmap:
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
         std = np.std(unaligned_xmap_array)
 
-        unaligned_xmap_array[:,:,:] = unaligned_xmap_array[:,:,:] / std
-
+        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -982,10 +981,9 @@ class Xmap:
         return Xmap(new_grid)
 
     @staticmethod
-    def interpolate_grid(grid: gemmi.FloatGrid, positions: typing.Dict[typing.Tuple[int],
-                                                                       gemmi.Position]) -> typing.Dict[
-        typing.Tuple[int],
-        float]:
+    def interpolate_grid(grid: gemmi.FloatGrid,
+                         positions: typing.Dict[typing.Tuple[int],
+                                                gemmi.Position]) -> typing.Dict[typing.Tuple[int], float]:
         return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
 
     def to_array(self, copy=True):
@@ -1065,7 +1063,7 @@ class Model:
             print([dtag, sigma_i])
 
         # Estimate the adjusted pointwise variance
-        sigma_is_array = np.array(list(sigma_is.values()),  dtype=np.float32)[:, np.newaxis]
+        sigma_is_array = np.array(list(sigma_is.values()), dtype=np.float32)[:, np.newaxis]
         sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
                                                    stacked_arrays[:60],
                                                    sigma_is_array[:60],
@@ -1097,7 +1095,7 @@ class Model:
         normal_quantiles = stats.norm.ppf(percentiles)
         print(normal_quantiles)
 
-        below_min_mask = normal_quantiles < (-1.0*cut)
+        below_min_mask = normal_quantiles < (-1.0 * cut)
         above_max_mask = normal_quantiles > cut
         centre_mask = np.full(below_min_mask.shape, True)
         centre_mask[below_min_mask] = False
@@ -1156,8 +1154,8 @@ class Model:
     def maximise_over_range(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        x_opt = np.ones(shape[1], dtype=np.float32)*xs[0] # n
-        x_current = np.ones(shape[1], dtype=np.float32)*xs[0] #n
+        x_opt = np.ones(shape[1], dtype=np.float32) * xs[0]  # n
+        x_current = np.ones(shape[1], dtype=np.float32) * xs[0]  # n
 
         y_max = func(x_current[np.newaxis, :])  # n -> 1,n -> n
 
@@ -1174,8 +1172,8 @@ class Model:
     def vectorised_optimisation_bf(func, start, stop, num, shape):
         xs = np.linspace(start, stop, num)
 
-        val = np.ones(shape,  dtype=np.float32) * xs[0] + 1.0 / 10000000000000000000000.0
-        res = np.ones((shape[1], shape[2], shape[3]),  dtype=np.float32) * xs[0]
+        val = np.ones(shape, dtype=np.float32) * xs[0] + 1.0 / 10000000000000000000000.0
+        res = np.ones((shape[1], shape[2], shape[3]), dtype=np.float32) * xs[0]
 
         y_max = func(val)
 
@@ -1197,10 +1195,10 @@ class Model:
     @staticmethod
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
-        x_lower_orig = (np.ones(shape[1],  dtype=np.float32) * start)
+        x_lower_orig = (np.ones(shape[1], dtype=np.float32) * start)
         print(f"x_lower_orig: {x_lower_orig}")
 
-        x_upper_orig = np.ones(shape[1],  dtype=np.float32) * stop
+        x_upper_orig = np.ones(shape[1], dtype=np.float32) * stop
         print(f"x_upper_orig: {x_upper_orig}")
 
         f_lower = func(x_lower_orig[np.newaxis, :])
@@ -1214,7 +1212,6 @@ class Model:
 
         test_mat_mask = test_mat > 0
         print(f"test_mat_mask: {test_mat_mask}")
-
 
         print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
         print("fshape is {}".format(f_upper.shape))
@@ -1258,7 +1255,7 @@ class Model:
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
-        term2 = np.ones(est_sigma.shape,  dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
+        term2 = np.ones(est_sigma.shape, dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
@@ -1272,7 +1269,8 @@ class Model:
     @staticmethod
     def liklihood(est_sigma, est_mu, obs_vals, obs_error):
         term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
-        term2 = np.log(np.ones(est_sigma.shape,  dtype=np.float32) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
+        term2 = np.log(np.ones(est_sigma.shape, dtype=np.float32) / np.sqrt(
+            2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
         return np.sum(term1 + term2)
 
     @staticmethod
@@ -1282,11 +1280,11 @@ class Model:
         # term1 = -np.square(obs_vals - est_mu) / (2 * (np.square(est_sigma) + np.square(obs_error)))
         # term2 = np.log(np.ones(est_sigma.shape) / np.sqrt(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
 
-        term1 = -1*(n/2)*np.log(2*np.pi)
-        term2 = -1*(1/2)*np.log(np.square(est_sigma) + np.square(obs_error))  # n, m
-        term3 = -1*(1/2)*(1/(np.square(est_sigma) + np.square(obs_error)))*np.square(obs_vals - est_mu)  # n,m
+        term1 = -1 * (n / 2) * np.log(2 * np.pi)
+        term2 = -1 * (1 / 2) * np.log(np.square(est_sigma) + np.square(obs_error))  # n, m
+        term3 = -1 * (1 / 2) * (1 / (np.square(est_sigma) + np.square(obs_error))) * np.square(obs_vals - est_mu)  # n,m
 
-        return term1 + np.sum(term2+term3, axis=0)  # 1 + m
+        return term1 + np.sum(term2 + term3, axis=0)  # 1 + m
 
 
 @dataclasses.dataclass()
@@ -1477,7 +1475,7 @@ class Clustering:
         extrema_cart_coords_array = np.array(positions)  # n, 3
         print("\tshape: {}".format(extrema_cart_coords_array.shape))
 
-        point_000 = grid.grid.get_point(0,0,0)
+        point_000 = grid.grid.get_point(0, 0, 0)
         point_111 = grid.grid.get_point(1, 1, 1)
         position_000 = grid.grid.point_to_position(point_000)
         position_111 = grid.grid.point_to_position(point_111)
@@ -1948,18 +1946,30 @@ class EventMapFile:
                                                              )
         return EventMapFile(event_map_path)
 
-    def save(self, xmap: Xmap, model: Model, event: Event, dataset: Dataset, alignment: Alignment, grid: Grid,
-             structure_factors: StructureFactors, mask_radius: float, mask_radius_symmetry: float):
+    def save(self, xmap: Xmap,
+             model: Model,
+             event: Event,
+             dataset: Dataset,
+             alignment: Alignment,
+             grid: Grid,
+             structure_factors: StructureFactors,
+             mask_radius: float,
+             mask_radius_symmetry: float,
+             ):
         event_map = Xmap.from_aligned_map(xmap,
                                           dataset,
                                           alignment,
-                                          grid, structure_factors, mask_radius, mask_radius_symmetry)
+                                          grid,
+                                          structure_factors,
+                                          mask_radius,
+                                          mask_radius_symmetry,
+                                          )
 
-        xmap_array = event_map.to_array(copy=False)
+        xmap_array = event_map.to_array(copy=True)
         mean_array = model.mean
 
         grid = gemmi.FloatGrid(*xmap_array.shape)
-        grid.spacegroup = xmap.xmap.spacegroup
+        grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  #  xmap.xmap.spacegroup
         grid.set_unit_cell(xmap.xmap.unit_cell)
 
         grid_array = np.array(grid, copy=False)
@@ -1968,7 +1978,7 @@ class EventMapFile:
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = grid
         ccp4.update_ccp4_header(2, True)
-        ccp4.grid.symmetrize_max()
+        # ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
 
 
