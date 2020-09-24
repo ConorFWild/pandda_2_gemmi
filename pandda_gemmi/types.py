@@ -108,6 +108,13 @@ class Structure:
                     for atom in residue:
                         yield atom
 
+    def all_atoms(self):
+        for model in self.structure:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        yield atom
+
 
 @dataclasses.dataclass()
 class StructureFactors:
@@ -516,7 +523,7 @@ class Partitioning:
         print([symmetry_operation for symmetry_operation in symops])
 
         print("\tIterating")
-        for atom in structure.protein_atoms():
+        for atom in structure.all_atoms():
             for symmetry_operation in symops.symops[1:]:
                 position = atom.pos
                 fractional_position = mask.unit_cell.fractionalize(position)
