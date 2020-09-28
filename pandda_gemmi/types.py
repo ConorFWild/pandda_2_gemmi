@@ -883,7 +883,7 @@ class Shells:
         shells = {}
         shell_num = 0
         shell_dtags = []
-        shell_res = datasets[sorted_dtags[0]].reflections.resolution().resolution
+        shell_res = datasets[sorted_dtags[-1]].reflections.resolution().resolution
         for dtag in sorted_dtags:
             res = datasets[dtag].reflections.resolution().resolution
 
