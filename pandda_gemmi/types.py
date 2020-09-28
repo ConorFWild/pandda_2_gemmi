@@ -1149,6 +1149,7 @@ class Model:
     @staticmethod
     def sigma_is_from_xmap_array(masked_train_xmap_array: XmapArray,
                                  mean_array: np.ndarray,
+                                 cut: float,
                                  ):
         # Estimate the dataset residual variability
         sigma_is = {}
