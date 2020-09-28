@@ -27,6 +27,15 @@ class Dtag:
     def __hash__(self):
         return hash(self.dtag)
 
+    def __eq__(self, other):
+        try:
+            if self.dtag == other.dtag:
+                return True
+            else:
+                return False
+        except Exception as e:
+            return False
+
 
 @dataclasses.dataclass()
 class EventIDX:
@@ -317,6 +326,10 @@ class Datasets:
     def __iter__(self):
         for dtag in self.datasets:
             yield dtag
+
+    def from_dtags(self, dtags: typing.List[Dtag]):
+        new_datasets = {dtag: self.datasets[dtag] for dtag in dtags}
+        return Datasets(new_datasets)
 
 
 @dataclasses.dataclass()
@@ -818,10 +831,12 @@ class Alignment:
                         next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
 
                     if not prev_res:
-                        transforms[current_res_id].transform.mat.fromlist(transforms[next_res_id].transform.mat.tolist())
+                        transforms[current_res_id].transform.mat.fromlist(
+                            transforms[next_res_id].transform.mat.tolist())
 
                     if not next_res:
-                        transforms[current_res_id].transform.mat.fromlist(transforms[prev_res_id].transform.mat.tolist())
+                        transforms[current_res_id].transform.mat.fromlist(
+                            transforms[prev_res_id].transform.mat.tolist())
 
         return Alignment(transforms)
 
@@ -862,6 +877,7 @@ class Resolution:
 class Shell:
     test_dtags: typing.List[Dtag]
     train_dtags: typing.List[Dtag]
+    all_dtags: typing.List[Dtag]
     datasets: Datasets
     res_max: Resolution
     res_min: Resolution
@@ -889,8 +905,10 @@ class Shells:
 
             if (len(shell_dtags) >= resolution_binning.max_shell_datasets) or (
                     res - shell_res >= resolution_binning.high_res_increment):
+                all_dtags = list(set(shell_dtags).union(set(train_dtag)))
                 shell = Shell(shell_dtags,
                               train_dtags,
+                              all_dtags,
                               Datasets({dtag: datasets[dtag] for dtag in datasets
                                         if dtag in shell_dtags or train_dtags}),
                               res_max=Resolution.from_float(shell_res),
@@ -973,7 +991,6 @@ class Xmap:
                                                    mask_radius,
                                                    mask_radius_symmetry)
 
-
         # print(partitioning.partitioning.keys())
 
         interpolated_values_tuple = ([], [], [], [])
@@ -986,7 +1003,8 @@ class Xmap:
                 alignment_positions)
 
             transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
-                point: event_map_reference_grid.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
+                point: event_map_reference_grid.unit_cell.fractionalize(pos) for point, pos in
+                transformed_positions.items()}
 
             interpolated_values: typing.Dict[typing.Tuple[int],
                                              float] = Xmap.interpolate_grid(event_map_reference_grid,
@@ -1052,6 +1070,10 @@ class Xmaps:
 
         return Xmaps(xmaps)
 
+    def from_dtags(self, dtags: typing.List[Dtag]):
+        new_xmaps = {dtag: self.xmaps[dtag] for dtag in dtags}
+        return Xmaps(new_xmaps)
+
     def __len__(self):
         return len(self.xmaps)
 
@@ -1064,10 +1086,117 @@ class Xmaps:
 
 
 @dataclasses.dataclass()
+class XmapArray:
+    dtag_list: typing.List[Dtag]
+    xmap_array: np.ndarray
+
+    def __iter__(self):
+        for dtag in self.dtag_list:
+            yield dtag
+
+    def __getitem__(self, item):
+        index = self.dtag_list.index(item)
+        return self.xmap_array[index, :]
+
+    @staticmethod
+    def from_xmaps(xmaps: Xmaps,
+                   grid: Grid,
+                   ):
+
+        mask = grid.partitioning.protein_mask
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+
+        arrays = {}
+        for dtag in xmaps:
+            xmap = xmaps[dtag]
+            xmap_array = xmap.to_array()
+            # print(xmap_array.shape)
+            # print(mask_array.shape)
+            arrays[dtag] = xmap_array[np.nonzero(mask_array)]
+
+        dtag_list = list(arrays.keys())
+        xmap_array = np.stack(list(arrays.values()), axis=0)
+
+        return XmapArray(dtag_list, xmap_array)
+
+    def from_dtags(self, dtags: typing.List[Dtag]):
+        bool_mask = []
+        for dtag in self.dtag_list:
+            if dtag in dtags:
+                bool_mask.append(True)
+            else:
+                bool_mask.append(False)
+
+        mask_array = np.array(bool_mask)
+
+        view = self.xmap_array[mask_array]
+
+        return XmapArray(dtags, view)
+
+
+@dataclasses.dataclass()
 class Model:
     mean: np.array
     sigma_is: typing.Dict[Dtag, float]
     sigma_s_m: np.ndarray
+
+    @staticmethod
+    def mean_from_xmap_array(masked_train_xmap_array: XmapArray):
+        mean_flat = np.mean(masked_train_xmap_array.xmap_array, axis=0)
+
+        return mean_flat
+
+    @staticmethod
+    def sigma_is_from_xmap_array(masked_train_xmap_array: XmapArray,
+                                 mean_array: np.ndarray,
+                                 ):
+        # Estimate the dataset residual variability
+        sigma_is = {}
+        for dtag in masked_train_xmap_array:
+            sigma_i = Model.calculate_sigma_i(mean_array,
+                                              masked_train_xmap_array[dtag],
+                                              cut,
+                                              )
+            sigma_is[dtag] = sigma_i
+
+        return sigma_is
+
+    @staticmethod
+    def sigma_sms_from_xmaps(masked_train_xmap_array: XmapArray,
+                             mean_array: np.ndarray,
+                             sigma_is: typing.Dict[Dtag, float],
+                             ):
+        # Estimate the adjusted pointwise variance
+        sigma_is_array = np.array([sigma_is[dtag] for dtag in masked_train_xmap_array],
+                                  dtype=np.float32)[:, np.newaxis]
+        sigma_s_m_flat = Model.calculate_sigma_s_m(mean_array,
+                                                   masked_train_xmap_array.xmap_array,
+                                                   sigma_is_array,
+                                                   )
+
+        return sigma_s_m_flat
+
+    @staticmethod
+    def from_mean_is_sms(mean_flat,
+                         sigma_is,
+                         sigma_s_m_flat,
+                         grid: Grid, ):
+
+        mask = grid.partitioning.protein_mask
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+
+        mean = np.zeros(mask_array.shape, dtype=np.float32)
+        mean[np.nonzero(mask_array)] = mean_flat
+
+        sigma_s_m = np.zeros(mask_array.shape, dtype=np.float32)
+        sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
+
+        return Model(mean,
+                     sigma_is,
+                     sigma_s_m,
+                     )
+
+
 
     @staticmethod
     def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
@@ -1111,6 +1240,9 @@ class Model:
                      sigma_is,
                      sigma_s_m,
                      )
+
+
+
 
     @staticmethod
     def calculate_sigma_i(mean: np.array, array: np.array, cut: float):
@@ -1511,7 +1643,7 @@ class Clustering:
         point_111 = grid.grid.get_point(1, 1, 1)
         position_000 = grid.grid.point_to_position(point_000)
         position_111 = grid.grid.point_to_position(point_111)
-        clustering_cutoff = position_000.dist(position_111)*1.5
+        clustering_cutoff = position_000.dist(position_111) * 1.5
         print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
         print("\tClustering")
@@ -2008,7 +2140,8 @@ class EventMapFile:
                                                   )
 
         mean_array = model.mean
-        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (1 - event.bdc.bdc)
+        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+                    1 - event.bdc.bdc)
 
         event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
                                                dataset,
