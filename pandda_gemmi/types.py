@@ -905,7 +905,7 @@ class Shells:
 
             if (len(shell_dtags) >= resolution_binning.max_shell_datasets) or (
                     res - shell_res >= resolution_binning.high_res_increment):
-                all_dtags = list(set(shell_dtags).union(set(train_dtag)))
+                all_dtags = list(set(shell_dtags).union(set(train_dtags)))
                 shell = Shell(shell_dtags,
                               train_dtags,
                               all_dtags,
