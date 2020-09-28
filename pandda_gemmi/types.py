@@ -887,8 +887,8 @@ class Shells:
         for dtag in sorted_dtags:
             res = datasets[dtag].reflections.resolution().resolution
 
-            if (len(shell_dtags) > resolution_binning.max_shell_datasets) or (
-                    res - shell_res > resolution_binning.high_res_increment):
+            if (len(shell_dtags) >= resolution_binning.max_shell_datasets) or (
+                    res - shell_res >= resolution_binning.high_res_increment):
                 shell = Shell(shell_dtags,
                               train_dtags,
                               Datasets({dtag: datasets[dtag] for dtag in datasets
