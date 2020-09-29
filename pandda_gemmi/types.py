@@ -214,11 +214,11 @@ class Reflections:
                 other_hkl_dict[hkl] = i
 
         # Allocate the masks
-        self_mask = np.zeros(reflections_array.size,
+        self_mask = np.zeros(reflections_array.shape[0],
                              dtype=np.bool,
                              )
 
-        other_mask = np.zeros(other_reflections_array.size,
+        other_mask = np.zeros(other_reflections_array.shape[0],
                              dtype=np.bool,
                              )
 
