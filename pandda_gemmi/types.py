@@ -198,16 +198,20 @@ class Reflections:
         # Index own reflections
         reflections_array = np.array(self.reflections, copy=False,)
         hkl_dict = {}
+        f_index = self.reflections.reflections.column_labels().index("F")
         for i, row in enumerate(reflections_array):
             hkl = (row[0], row[1], row[2])
-            hkl_dict[hkl] = i
+            if not np.isnan(row[f_index]):
+                hkl_dict[hkl] = i
 
         # Index the other array
         other_reflections_array = np.array(other_reflections.reflections, copy=False,)
         other_hkl_dict = {}
+        f_other_index = other_reflections.reflections.column_labels().index("F")
         for i, row in enumerate(other_reflections_array):
             hkl = (row[0], row[1], row[2])
-            other_hkl_dict[hkl] = i
+            if not np.isnan(row[f_other_index]):
+                other_hkl_dict[hkl] = i
 
         # Allocate the masks
         self_mask = np.zeros(len(hkl_dict),
