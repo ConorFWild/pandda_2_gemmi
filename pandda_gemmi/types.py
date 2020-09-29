@@ -1647,6 +1647,10 @@ class Clustering:
         clustering_cutoff = position_000.dist(position_111) * 1.5
         print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
+        if extrema_cart_coords_array.size == 0:
+            clusters = {}
+            return Clustering(clusters)
+
         print("\tClustering")
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
                                          # t=blob_finding.clustering_cutoff,
