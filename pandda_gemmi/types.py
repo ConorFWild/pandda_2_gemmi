@@ -207,7 +207,7 @@ class Reflections:
         other_hkl_dict = {}
         for i, row in enumerate(other_reflections_array):
             hkl = (row[0], row[1], row[2])
-            index_dict[hkl] = i
+            other_hkl_dict[hkl] = i
 
         # Allocate the masks
         self_mask = np.zeros(len(hkl_dict),
