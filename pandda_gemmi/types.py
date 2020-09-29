@@ -194,6 +194,43 @@ class Reflections:
 
         return missing
 
+    def common_set(self, other_reflections: Reflections):
+        # Index own reflections
+        reflections_array = np.array(self.reflections, copy=False,)
+        hkl_dict = {}
+        for i, row in enumerate(reflections_array):
+            hkl = (row[0], row[1], row[2])
+            hkl_dict[hkl] = i
+
+        # Index the other array
+        other_reflections_array = np.array(other_reflections.reflections, copy=False,)
+        other_hkl_dict = {}
+        for i, row in enumerate(other_reflections_array):
+            hkl = (row[0], row[1], row[2])
+            index_dict[hkl] = i
+
+        # Allocate the masks
+        self_mask = np.zeros(len(index_dict),
+                             dtype=np.bool,
+                             )
+
+        other_mask = np.zeros(len(index_dict),
+                             dtype=np.bool,
+                             )
+
+        # Fill the masks
+        for hkl, index in hkl_dict.items():
+            try:
+                other_index = other_hkl_dict[hkl]
+                self_mask[index] = True
+                other_mask[other_index] = True
+
+            except:
+                continue
+
+        return self_mask, other_mask
+
+
 
 @dataclasses.dataclass()
 class Dataset:
