@@ -210,11 +210,11 @@ class Reflections:
             index_dict[hkl] = i
 
         # Allocate the masks
-        self_mask = np.zeros(len(index_dict),
+        self_mask = np.zeros(len(hkl_dict),
                              dtype=np.bool,
                              )
 
-        other_mask = np.zeros(len(index_dict),
+        other_mask = np.zeros(len(other_hkl_dict),
                              dtype=np.bool,
                              )
 
