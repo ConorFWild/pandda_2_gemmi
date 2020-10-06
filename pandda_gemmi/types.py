@@ -1180,10 +1180,13 @@ class Xmap:
     def to_array(self, copy=True):
         return np.array(self.xmap, copy=copy)
 
-    def save(self, path: Path):
+    def save(self, path: Path, p1=True):
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.xmap
-        ccp4.grid.symmetrize_max()
+        if p1:
+            ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        else:
+            ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
 
