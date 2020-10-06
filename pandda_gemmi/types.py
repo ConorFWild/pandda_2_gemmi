@@ -236,11 +236,11 @@ class Reflections:
 
     def scale_reflections(self, other: Reflections, cut: float = 99.6):
 
-        data_table = pandas.DataFrame(data=np.array(self.reflections),
+        data_table = pd.DataFrame(data=np.array(self.reflections),
                                       columns=self.reflections.column_labels(),
                                       index=["H", "K", "L"],
                                       )
-        data_other_table = pandas.DataFrame(data=np.array(other.reflections),
+        data_other_table = pd.DataFrame(data=np.array(other.reflections),
                                             columns=other.reflections.column_labels(),
                                             index=["H", "K", "L"],
                                             )
@@ -268,7 +268,7 @@ class Reflections:
         res_other_array = data_other_common_table["1_d2"].to_numpy()
 
         min_scale_list = []
-        for i in range(60):
+        for i in range(6):
 
             # Trunate outliers
             diff_array = np.abs(f_array - f_other_array)
