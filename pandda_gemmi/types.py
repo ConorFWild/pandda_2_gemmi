@@ -196,7 +196,7 @@ class Reflections:
 
     def common_set(self, other_reflections: Reflections):
         # Index own reflections
-        reflections_array = np.array(self.reflections, copy=False,)
+        reflections_array = np.array(self.reflections, copy=False, )
         hkl_dict = {}
         f_index = self.reflections.column_labels().index("F")
         for i, row in enumerate(reflections_array):
@@ -205,7 +205,7 @@ class Reflections:
                 hkl_dict[hkl] = i
 
         # Index the other array
-        other_reflections_array = np.array(other_reflections.reflections, copy=False,)
+        other_reflections_array = np.array(other_reflections.reflections, copy=False, )
         other_hkl_dict = {}
         f_other_index = other_reflections.reflections.column_labels().index("F")
         for i, row in enumerate(other_reflections_array):
@@ -219,8 +219,8 @@ class Reflections:
                              )
 
         other_mask = np.zeros(other_reflections_array.shape[0],
-                             dtype=np.bool,
-                             )
+                              dtype=np.bool,
+                              )
 
         # Fill the masks
         for hkl, index in hkl_dict.items():
@@ -234,6 +234,93 @@ class Reflections:
 
         return self_mask, other_mask
 
+    def scale_reflections(self, other: Reflections, cut: float = 99.6):
+
+        data_table = pandas.DataFrame(data=np.array(self.reflections),
+                                      columns=self.reflections.column_labels(),
+                                      index=["H", "K", "L"],
+                                      )
+        data_other_table = pandas.DataFrame(data=np.array(other.reflections),
+                                            columns=other.reflections.column_labels(),
+                                            index=["H", "K", "L"],
+                                            )
+
+        # Set resolutions
+        data_table["1_d2"] = self.reflections.make_1_d2_array()
+        data_other_table["1_d2"] = other.reflections.make_1_d2_array()
+
+        # Get common indexes
+        data_index = data_table[~data_table["F"].isna()].index.to_flat_index()
+        data_other_index = data_other_table[~data_other_table["F"].isna()].to_flat_index()
+        intersection_index = data_index.intersection(data_other_index)
+        intersection_list = intersection_index.to_list()
+
+        # Select common data
+        data_common_table = data_table[intersection_list]
+        data_other_common_table = data_other_table[intersection_list]
+
+        # Select common amplitudes
+        f_array = data_common_table["F"].to_numpy()
+        f_other_array = data_other_common_table["F"].to_numpy()
+
+        # Select common resolutions
+        res_array = data_common_table["1_d2"].to_numpy()
+        res_other_array = data_other_common_table["1_d2"].to_numpy()
+
+        min_scale_list = []
+        for i in range(60):
+
+            # Trunate outliers
+            diff_array = np.abs(f_array - f_other_array)
+            high_diff = np.percentile(diff_array, cut)
+
+            print(high_diff)
+
+            x_truncated = f_array[diff_array < high_diff]
+            y_truncated = f_other_array[diff_array < high_diff]
+
+            x_r_truncated = res_array[diff_array < high_diff]
+            y_r_truncated = res_other_array[diff_array < high_diff]
+
+            # Interpolate
+            knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+            knn_y.fit(y_r_truncated.reshape(-1, 1),
+                      y_truncated.reshape(-1, 1),
+                      )
+
+            knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+            knn_x.fit(x_r_truncated.reshape(-1, 1),
+                      x_truncated.reshape(-1, 1),
+                      )
+
+            sample_grid = np.linspace(min(y_r_truncated), max(y_r_truncated), 100)
+
+            x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+            y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+
+            # optimise scale
+            scales = []
+            rmsds = []
+
+            for scale in np.linspace(-4, 4, 280):
+
+                x = x_f
+                y_s = y_f * np.exp(scale * sample_grid)
+
+                rmsd = np.sum(np.square(x - y_s))
+
+                scales.append(scale)
+                rmsds.append(rmsd)
+
+            min_scale = scales[np.argmin(np.log(rmsds))] / -0.5
+            min_scale_list.append(min_scale)
+
+            x_all = x_truncated
+            y_all = y_truncated
+
+            x_r_all = x_r_truncated
+            y_r_all = y_r_truncated
 
 
 @dataclasses.dataclass()
@@ -253,6 +340,12 @@ class Dataset:
     def truncate(self, resolution: Resolution) -> Dataset:
         return Dataset(self.structure,
                        self.reflections.truncate(resolution))
+
+    def scale_reflections(self, reference: Reference):
+        new_reflections = self.reflections.scale_reflections(reference)
+        return Dataset(self.structure,
+                       new_reflections,
+                       )
 
 
 @dataclasses.dataclass()
@@ -327,9 +420,16 @@ class Datasets:
 
         return Datasets(new_datasets)
 
-    def scale_reflections(self):
+    def scale_reflections(self, reference: Reference):
         # Scale to the reference dataset
-        return self
+
+        new_datasets = {}
+        for dtag in self.datasets:
+            dataset = self.datasets[dtag]
+            new_dataset = dataset.scale_refelections()
+            new_datasets[dtag] = new_dataset
+
+        return Dataset(new_dataset)
 
     def remove_bad_rfree(self, max_rfree: float):
         good_rfree_dtags = filter(
@@ -1238,8 +1338,6 @@ class Model:
                      sigma_s_m,
                      )
 
-
-
     @staticmethod
     def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
         mask = grid.partitioning.protein_mask
@@ -1282,9 +1380,6 @@ class Model:
                      sigma_is,
                      sigma_s_m,
                      )
-
-
-
 
     @staticmethod
     def calculate_sigma_i(mean: np.array, array: np.array, cut: float):
@@ -2187,7 +2282,7 @@ class EventMapFile:
 
         mean_array = model.mean
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
-                    1 - event.bdc.bdc)
+                1 - event.bdc.bdc)
 
         event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
                                                dataset,
