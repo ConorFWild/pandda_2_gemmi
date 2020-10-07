@@ -193,6 +193,7 @@ class Reflections:
         # Rem,ove res colum
         data_dropped = data_truncated.drop("res", "columns")
         
+        
         # To numpy
         data_dropped_array = data_dropped.to_numpy()
         
@@ -203,7 +204,7 @@ class Reflections:
                              )
         
         # Update
-        new_reflections.set_data(data_dropped_array)
+        new_reflections.set_data(new_data)
 
         # Update resolution
         new_reflections.update_reso()
