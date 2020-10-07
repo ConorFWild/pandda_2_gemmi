@@ -13,6 +13,8 @@ from scipy import spatial
 from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
 
+from sklearn import neighbors
+
 import pandas as pd
 import gemmi
 
@@ -572,6 +574,135 @@ class Datasets:
             new_datasets_reflections[dtag] = truncated_dataset
 
         return Datasets(new_datasets_reflections)
+    
+    def smooth(self, reference_reflections: Reflections, 
+               structure_factors: StructureFactors,
+               cut = 97.5,
+               ):
+        
+        reference_reflections_array = np.array(reference_reflections,
+                                               copy=False,
+                                               )
+        
+        resolution_array = reference_reflections.make_1_d2_array()
+
+        new_reflections_dict = {}
+        for dtag in self.datasets:
+
+            dtag_reflections = self.datasets[dtag].reflections,
+                                        
+                                        
+            dtag_reflections_array = np.array(dtag_reflections,
+                                              copy=False,
+                                        )
+
+            min_scale_list = []
+
+            selected = np.full(reference_reflections_array.shape, 
+                               True,
+                            )
+
+            for i in range(6):
+                x = reference_reflections_array[selected]
+                y = dtag_reflections_array[selected]
+                
+                x_r = resolution_array
+                y_r = resolution_array
+
+                scales = []
+                rmsds = []
+
+                for scale in np.linspace(-4,4,280):
+                    
+                    y_s = y * np.exp(scale * y_r)
+                    knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+                    knn_y.fit(y_r.reshape(-1,1), 
+                            y_s.reshape(-1,1),
+                            )
+
+                    knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+                    knn_x.fit(x_r.reshape(-1,1), 
+                            x.reshape(-1,1),
+                                                    )
+
+                    sample_grid = np.linspace(min(y_r), max(y_r), 100)
+
+                    x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+                    y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+                    rmsd = np.sum(np.square(x_f-y_f)) 
+
+                    scales.append(scale)
+                    rmsds.append(rmsd)
+                    
+                min_scale = scales[np.argmin(rmsds)]
+                min_scale_list.append(min_scale)
+                
+           
+                selected_copy = selected.copy()
+                
+                diff_array = np.abs(x-(y*np.exp(min_scale*y_r)))
+
+                high_diff = np.percentile(diff_array, 
+                                        cut,
+                                        )
+                
+                diff_mask = diff_array > high_diff
+                
+                selected_index_tuple = np.nonzero(selected)
+                high_diff_mask = selected_index_tuple[0][diff_mask]  
+                
+                selected[high_diff_mask] = False
+                
+            min_scale = min_scale_list[-1]
+            print([dtag, min_scale])
+            
+            dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+                                                  columns=dtag_reflections.column_labels(),
+                                                  )
+            
+            f_array = dtag_reflections_table[structure_factors.f]
+            
+            f_scaled_array = f_array * np.exp(min_scale*resolution_array)
+            
+            dtag_reflections_table[structure_factors.f] = f_scaled_array
+            
+            # New reflections
+            new_reflections = gemmi.Mtz(with_base=False)
+
+            # Set dataset properties
+            new_reflections.spacegroup = dtag_reflections.spacegroup
+            new_reflections.set_cell_for_all(dtag_reflections.cell)
+
+            # Add dataset
+            new_reflections.add_dataset("truncated")
+
+            # Add columns
+            for column in dtag_reflections.columns:
+                new_reflections.add_column(column.label, column.type)
+            
+            # Update
+            new_reflections.set_data(dtag_reflections_table.to_numpy())
+
+            # Update resolution
+            new_reflections.update_reso() 
+                       
+            new_reflections_dict[dtag] = new_reflections
+            
+            
+        # Create new dataset
+        new_datasets_dict = {}
+        for dtag in self.datasets:
+            dataset = self.datasets[dtag]
+            structure = dataset.structure
+            reflections = new_reflections_dict[dtag]
+            new_dataset = Dataset(structure,
+                                  reflections,
+                                  )    
+        
+        return Datasets(new_datasets_dict)
+                
+                
 
     def __iter__(self):
         for dtag in self.datasets:
