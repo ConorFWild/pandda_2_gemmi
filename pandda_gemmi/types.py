@@ -584,6 +584,12 @@ class Datasets:
                                                copy=False,
                                                )
         
+        reference_reflections_table = pd.DataFrame(reference_reflections_array,
+                                                  columns=reference_reflections_array.column_labels(),
+                                                  )
+            
+        reference_f_array = reference_reflections_table[structure_factors.f]
+        
         resolution_array = reference_reflections.make_1_d2_array()
 
         new_reflections_dict = {}
@@ -595,6 +601,11 @@ class Datasets:
             dtag_reflections_array = np.array(dtag_reflections,
                                               copy=False,
                                         )
+            dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+                                                  columns=dtag_reflections.column_labels(),
+                                                  )
+            
+            dtag_f_array = dtag_reflections_table[structure_factors.f]
             print(dtag_reflections_array.shape)
             print(reference_reflections_array.shape)
 
@@ -606,8 +617,8 @@ class Datasets:
                             )
 
             for i in range(6):
-                x = reference_reflections_array[selected]
-                y = dtag_reflections_array[selected]
+                x = dtag_f_array[selected]
+                y = reference_f_array[selected]
                 
                 x_r = resolution_array
                 y_r = resolution_array
@@ -660,9 +671,6 @@ class Datasets:
             min_scale = min_scale_list[-1]
             print([dtag, min_scale])
             
-            dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                                  columns=dtag_reflections.column_labels(),
-                                                  )
             
             f_array = dtag_reflections_table[structure_factors.f]
             
