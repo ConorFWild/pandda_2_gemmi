@@ -407,15 +407,14 @@ class Dataset:
     def truncate_resolution(self, resolution: Resolution) -> Dataset:
         return Dataset(self.structure,
                        self.reflections.truncate_resolution(resolution,
-                                                            index,
                                                             )
                        )
         
-        def truncate_reflections(self, index=None) -> Dataset:
-            return Dataset(self.structure,
-                           self.reflections.truncate_reflections( index,
-                                                              )
-                        )
+    def truncate_reflections(self, index=None) -> Dataset:
+        return Dataset(self.structure,
+                        self.reflections.truncate_reflections( index,
+                                                            )
+                    )
 
     def scale_reflections(self, reference: Reference):
         new_reflections = self.reflections.scale_reflections(reference)
