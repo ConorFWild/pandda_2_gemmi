@@ -585,7 +585,7 @@ class Datasets:
                                                )
         
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                                  columns=reference_reflections_array.column_labels(),
+                                                  columns=reference_reflections.column_labels(),
                                                   )
             
         reference_f_array = reference_reflections_table[structure_factors.f]
