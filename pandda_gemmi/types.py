@@ -168,8 +168,8 @@ class Reflections:
         # Get data
         data = pd.DataFrame(self.reflections,
                             columns=self.reflections.column_labels(),
-                            index=["H", "K", "L"],
                             )
+        data.set_index(["H", "K", "L"], inplace=True)
         
         # Truncate by index
         if index:
