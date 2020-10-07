@@ -481,7 +481,7 @@ class Datasets:
                                              )
             reflections_table.set_index(["H", "K", "L"], inplace=True)
             flattened_index = reflections_table[~reflections_table[structure_factors.f].isna()].index.to_flat_index()
-            if not running_index:
+            if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
 
