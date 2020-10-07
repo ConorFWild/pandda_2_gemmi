@@ -588,7 +588,7 @@ class Datasets:
                                                   columns=reference_reflections.column_labels(),
                                                   )
             
-        reference_f_array = reference_reflections_table[structure_factors.f]
+        reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
         
         resolution_array = reference_reflections.make_1_d2_array()
 
@@ -605,11 +605,12 @@ class Datasets:
                                                   columns=dtag_reflections.column_labels(),
                                                   )
             
-            dtag_f_array = dtag_reflections_table[structure_factors.f]
+            dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
             print(dtag_reflections_array.shape)
             print(reference_reflections_array.shape)
             print(resolution_array.shape)
             print(dtag_f_array.shape)
+
 
 
             min_scale_list = []
