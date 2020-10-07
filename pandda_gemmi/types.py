@@ -475,7 +475,8 @@ class Datasets:
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             reflections = dataset.reflections.reflections
-            reflections_table = pd.DataFrame(reflections,
+            reflections_array = np.array(reflections, copy=False)
+            reflections_table = pd.DataFrame(reflections_array,
                                              columns=reflections.column_labels(),
                                              index=["H", "K", "L"],
                                              )
