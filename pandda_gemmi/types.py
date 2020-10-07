@@ -246,6 +246,7 @@ class Reflections:
 
         return self_mask, other_mask
 
+    # TODO: Make this work reasonably?
     def scale_reflections(self, other: Reflections, cut: float = 99.6):
 
         data_table = pd.DataFrame(data=np.array(self.reflections),
@@ -486,11 +487,11 @@ class Datasets:
         return running_index.to_list()
 
 
-    def truncate(self, resolution: Resolution) -> Datasets:
+    def truncate(self, resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
         new_datasets = {}
 
         # Get common set of reflections
-        common_reflections = Datasets.common_reflections()
+        common_reflections = self.common_reflections(structure_factors)
 
         # Truncate by common reflections and resolution
         for dtag in self.datasets:
