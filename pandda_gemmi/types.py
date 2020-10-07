@@ -608,11 +608,14 @@ class Datasets:
             dtag_f_array = dtag_reflections_table[structure_factors.f]
             print(dtag_reflections_array.shape)
             print(reference_reflections_array.shape)
+            print(resolution_array.shape)
+            print(f_array.shape)
+
 
 
             min_scale_list = []
 
-            selected = np.full(reference_reflections_array.shape, 
+            selected = np.full(dtag_f_array.shape, 
                                True,
                             )
 
