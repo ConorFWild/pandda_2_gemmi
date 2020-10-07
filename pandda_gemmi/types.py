@@ -478,8 +478,8 @@ class Datasets:
             reflections_array = np.array(reflections, copy=True)
             reflections_table = pd.DataFrame(reflections_array,
                                              columns=reflections.column_labels(),
-                                             index=("H", "K", "L"),
                                              )
+            reflections_table.set_index(["H", "K", "L"], inplace=True)
             flattened_index = reflections_table[~reflections_table[structure_factors.f].isna()].index.to_flat_index()
             if not running_index:
                 running_index = flattened_index
