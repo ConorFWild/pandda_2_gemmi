@@ -151,7 +151,7 @@ class Reflections:
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
 
-    def truncate(self, resolution: Resolution, index=None) -> Reflections:
+    def truncate_resolution(self, resolution: Resolution) -> Reflections:
         new_reflections = gemmi.Mtz(with_base=False)
 
         # Set dataset properties
@@ -174,12 +174,9 @@ class Reflections:
 
         # add resolutions
         data["res"] = self.reflections.make_d_array() 
-        
-        # Truncate by index
-        data_indexed = data.loc[index]
 
         # Truncate by resolution
-        data_truncated = data_indexed[data_indexed["res"] >= resolution.resolution]
+        data_truncated = data[data["res"] >= resolution.resolution]
         
         # Rem,ove res colum
         data_dropped = data_truncated.drop("res", "columns")
@@ -190,6 +187,47 @@ class Reflections:
         
         # new data
         new_data = np.hstack([data_dropped.index.to_frame().to_numpy(),
+                              data_dropped_array,
+                              ]
+                             )
+        
+        # Update
+        new_reflections.set_data(new_data)
+
+        # Update resolution
+        new_reflections.update_reso()
+
+        return Reflections(new_reflections)
+    
+    def truncate_reflections(self, index=None) -> Reflections:
+        new_reflections = gemmi.Mtz(with_base=False)
+
+        # Set dataset properties
+        new_reflections.spacegroup = self.reflections.spacegroup
+        new_reflections.set_cell_for_all(self.reflections.cell)
+
+        # Add dataset
+        new_reflections.add_dataset("truncated")
+
+        # Add columns
+        for column in self.reflections.columns:
+            new_reflections.add_column(column.label, column.type)
+
+        # Get data
+        data_array = np.array(self.reflections, copy=True)
+        data = pd.DataFrame(data_array,
+                            columns=self.reflections.column_labels(),
+                            )
+        data.set_index(["H", "K", "L"], inplace=True)
+
+        # Truncate by index
+        data_indexed = data.loc[index]
+
+        # To numpy
+        data_dropped_array = data_indexed.to_numpy()
+        
+        # new data
+        new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
                               data_dropped_array,
                               ]
                              )
@@ -366,11 +404,18 @@ class Dataset:
                        reflections=reflections,
                        )
 
-    def truncate(self, resolution: Resolution, index=None) -> Dataset:
+    def truncate_resolution(self, resolution: Resolution) -> Dataset:
         return Dataset(self.structure,
-                       self.reflections.truncate(resolution,
-                                                 index,
-                                                 ))
+                       self.reflections.truncate_resolution(resolution,
+                                                            index,
+                                                            )
+                       )
+        
+        def truncate_reflections(self, index=None) -> Dataset:
+            return Dataset(self.structure,
+                           self.reflections.truncate_reflections( index,
+                                                              )
+                        )
 
     def scale_reflections(self, reference: Reference):
         new_reflections = self.reflections.scale_reflections(reference)
@@ -506,21 +551,28 @@ class Datasets:
 
 
     def truncate(self, resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
-        new_datasets = {}
-
-        # Get common set of reflections
-        common_reflections = self.common_reflections(structure_factors)
+        new_datasets_resolution = {}
         
-
-        # Truncate by common reflections and resolution
+        # Truncate by common resolution
         for dtag in self.datasets:
-            truncated_dataset = self.datasets[dtag].truncate(resolution,
-                                                             common_reflections,
+            truncated_dataset = self.datasets[dtag].truncate_resolution(resolution,)
+
+            new_datasets_resolution[dtag] = truncated_dataset
+            
+        dataset_resolution_truncated = Datasets(new_datasets_resolution)
+            
+        # Get common set of reflections
+        common_reflections = dataset_resolution_truncated.common_reflections(structure_factors)
+        
+        # truncate on reflections
+        new_datasets_reflections = {}
+        for dtag in dataset_resolution_truncated:
+            truncated_dataset = new_datasets_reflections[dtag].truncate_reflections(common_reflections,
                                                              )
 
-            new_datasets[dtag] = truncated_dataset
+            new_datasets_reflections[dtag] = truncated_dataset
 
-        return Datasets(new_datasets)
+        return Datasets(new_datasets_reflections)
 
     def __iter__(self):
         for dtag in self.datasets:
