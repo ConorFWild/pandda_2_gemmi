@@ -494,6 +494,7 @@ class Datasets:
 
         # Get common set of reflections
         common_reflections = self.common_reflections(structure_factors)
+        print(common_reflections)
 
         # Truncate by common reflections and resolution
         for dtag in self.datasets:
