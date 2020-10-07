@@ -595,6 +595,9 @@ class Datasets:
             dtag_reflections_array = np.array(dtag_reflections,
                                               copy=False,
                                         )
+            print(dtag_reflections_array.shape)
+            print(reference_reflections_array.shape)
+
 
             min_scale_list = []
 
