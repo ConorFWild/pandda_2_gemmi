@@ -171,16 +171,19 @@ class Reflections:
                             columns=self.reflections.column_labels(),
                             )
         data.set_index(["H", "K", "L"], inplace=True)
+        print(data)
+        
+        # add resolutions
+        data["res"] = self.reflections.make_d_array() 
         
         # Truncate by index
-        if index:
-            data = data[index]
+        data_indexed = data[index]
 
         # Truncate by resolution
-        data = data[self.reflections.make_d_array() >= resolution.resolution]
+        data_truncated = data_indexed[data_indexed["res"] >= resolution.resolution]
         
         # Update
-        new_reflections.set_data(data)
+        new_reflections.set_data(data_truncated)
 
         # Update resolution
         new_reflections.update_reso()
