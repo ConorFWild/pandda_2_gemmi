@@ -166,7 +166,8 @@ class Reflections:
             new_reflections.add_column(column.label, column.type)
 
         # Get data
-        data = pd.DataFrame(self.reflections,
+        data_array = np.array(self.reflections, copy=True)
+        data = pd.DataFrame(data_array,
                             columns=self.reflections.column_labels(),
                             )
         data.set_index(["H", "K", "L"], inplace=True)
