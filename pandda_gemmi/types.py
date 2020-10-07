@@ -191,7 +191,7 @@ class Reflections:
         data_truncated = data_indexed[data_indexed["res"] >= resolution.resolution]
         
         # Rem,ove res colum
-        data_dropped = data_truncated.drop("res")
+        data_dropped = data_truncated.drop("res", "columns")
         
         # To numpy
         data_dropped_array = data_dropped.to_numpy()
