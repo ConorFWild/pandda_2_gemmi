@@ -196,6 +196,12 @@ class Reflections:
         # To numpy
         data_dropped_array = data_dropped.to_numpy()
         
+        # new data
+        new_data = np.hstack([data_dropped.index.to_frame.to_numpy(),
+                              data_dropped_array,
+                              ]
+                             )
+        
         # Update
         new_reflections.set_data(data_dropped_array)
 
