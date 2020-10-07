@@ -176,6 +176,9 @@ class Reflections:
         print(type(index
                    ))
         print(data[index[0]])
+        print(data.loc[index[0]])
+        print(data.loc[index])
+
         
         # add resolutions
         data["res"] = self.reflections.make_d_array() 
