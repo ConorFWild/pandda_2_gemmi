@@ -173,6 +173,8 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
         print(data)
         print(index[0])
+        print(type(indext
+                   ))
         
         # add resolutions
         data["res"] = self.reflections.make_d_array() 
