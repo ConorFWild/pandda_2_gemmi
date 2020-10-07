@@ -672,7 +672,7 @@ class Datasets:
                 selected[high_diff_mask] = False
                 
             min_scale = min_scale_list[-1]
-            print([dtag, min_scale])
+            print([dtag, min_scale_list])
             
             
             f_array = dtag_reflections_table[structure_factors.f]
