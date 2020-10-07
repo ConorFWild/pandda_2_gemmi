@@ -713,6 +713,7 @@ class Datasets:
             new_dataset = Dataset(structure,
                                   reflections,
                                   )    
+            new_datasets_dict[dtag] = new_dataset
         
         return Datasets(new_datasets_dict)
                 
