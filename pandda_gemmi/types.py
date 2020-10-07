@@ -151,7 +151,7 @@ class Reflections:
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
 
-    def truncate(self, resolution: Resolution) -> Reflections:
+    def truncate(self, resolution: Resolution, index=None) -> Reflections:
         new_reflections = gemmi.Mtz(with_base=False)
 
         # Set dataset properties
@@ -165,9 +165,21 @@ class Reflections:
         for column in self.reflections.columns:
             new_reflections.add_column(column.label, column.type)
 
-        # Update data
-        old_data = np.array(self.reflections, copy=True)
-        new_reflections.set_data(old_data[self.reflections.make_d_array() >= resolution.resolution])
+        # Get data
+        data = pd.DataFrame(self.reflections,
+                            columns=self.reflections.column_labels(),
+                            index=["H", "K", "L"],
+                            )
+        
+        # Truncate by index
+        if index:
+            data = data[index]
+
+        # Truncate by resolution
+        data = data[self.reflections.make_d_array() >= resolution.resolution]
+        
+        # Update
+        new_reflections.set_data(data)
 
         # Update resolution
         new_reflections.update_reso()
@@ -337,9 +349,11 @@ class Dataset:
                        reflections=reflections,
                        )
 
-    def truncate(self, resolution: Resolution) -> Dataset:
+    def truncate(self, resolution: Resolution, index=None) -> Dataset:
         return Dataset(self.structure,
-                       self.reflections.truncate(resolution))
+                       self.reflections.truncate(resolution,
+                                                 index,
+                                                 ))
 
     def scale_reflections(self, reference: Reference):
         new_reflections = self.reflections.scale_reflections(reference)
@@ -454,11 +468,35 @@ class Datasets:
     def remove_bad_wilson(self, max_wilson_plot_z_score: float):
         return self
 
+    def common_reflections(self, structure_factors: StructureFactors):
+        
+        running_index = None
+        for dtag in self.datasets:
+            dataset = self.datasets[dtag]
+            reflections = dataset.reflections.reflections
+            reflections_table = pd.DataFrame(reflections,
+                                             columns=reflections.column_labels(),
+                                             index=["H", "K", "L"],
+                                             )
+            flattened_index = reflections_table[~reflections_table[structure_factors.f].isna()].index.to_flat_index()
+            if not running_index:
+                running_index = flattened_index
+            running_index = running_index.intersection(flattened_index)
+
+        return running_index.to_list()
+
+
     def truncate(self, resolution: Resolution) -> Datasets:
         new_datasets = {}
 
+        # Get common set of reflections
+        common_reflections = Datasets.common_reflections()
+
+        # Truncate by common reflections and resolution
         for dtag in self.datasets:
-            truncated_dataset = self.datasets[dtag].truncate(resolution)
+            truncated_dataset = self.datasets[dtag].truncate(resolution,
+                                                             common_reflections,
+                                                             )
 
             new_datasets[dtag] = truncated_dataset
 
