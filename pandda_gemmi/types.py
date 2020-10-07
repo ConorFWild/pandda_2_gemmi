@@ -177,11 +177,12 @@ class Reflections:
         #            ))
         # print(data[index[0]])
         # print(data.loc[index[0]])
-        # print(data.loc[index])
+        print(data.loc[index])
 
         
         # add resolutions
         data["res"] = self.reflections.make_d_array() 
+        print(data)
         
         # Truncate by index
         data_indexed = data.loc[index]
