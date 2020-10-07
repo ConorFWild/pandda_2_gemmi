@@ -1896,7 +1896,7 @@ class Clustering:
         point_111 = grid.grid.get_point(1, 1, 1)
         position_000 = grid.grid.point_to_position(point_000)
         position_111 = grid.grid.point_to_position(point_111)
-        clustering_cutoff = position_000.dist(position_111) * 1.5
+        clustering_cutoff = position_000.dist(position_111) * 1.1
         print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
         if extrema_cart_coords_array.size == 0:
