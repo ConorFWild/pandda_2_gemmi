@@ -197,7 +197,7 @@ class Reflections:
         data_dropped_array = data_dropped.to_numpy()
         
         # new data
-        new_data = np.hstack([data_dropped.index.to_frame.to_numpy(),
+        new_data = np.hstack([data_dropped.index.to_frame().to_numpy(),
                               data_dropped_array,
                               ]
                              )
