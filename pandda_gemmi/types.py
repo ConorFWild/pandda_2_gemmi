@@ -589,7 +589,7 @@ class Datasets:
         new_reflections_dict = {}
         for dtag in self.datasets:
 
-            dtag_reflections = self.datasets[dtag].reflections,
+            dtag_reflections = self.datasets[dtag].reflections.reflections
                                         
                                         
             dtag_reflections_array = np.array(dtag_reflections,
