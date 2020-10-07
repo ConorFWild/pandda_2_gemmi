@@ -609,8 +609,7 @@ class Datasets:
             print(dtag_reflections_array.shape)
             print(reference_reflections_array.shape)
             print(resolution_array.shape)
-            print(f_array.shape)
-
+            print(dtag_f_array.shape)
 
 
             min_scale_list = []
