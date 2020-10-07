@@ -485,6 +485,7 @@ class Datasets:
             if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
+            print(len(running_index))
 
         return running_index.to_list()
 
@@ -494,7 +495,7 @@ class Datasets:
 
         # Get common set of reflections
         common_reflections = self.common_reflections(structure_factors)
-        print(common_reflections)
+        
 
         # Truncate by common reflections and resolution
         for dtag in self.datasets:
