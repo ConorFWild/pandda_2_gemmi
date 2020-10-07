@@ -175,7 +175,7 @@ class Reflections:
         print(index[0])
         print(type(index
                    ))
-        print(data[index[0]])
+        # print(data[index[0]])
         print(data.loc[index[0]])
         print(data.loc[index])
 
