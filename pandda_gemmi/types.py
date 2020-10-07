@@ -566,7 +566,7 @@ class Datasets:
         # truncate on reflections
         new_datasets_reflections = {}
         for dtag in dataset_resolution_truncated:
-            truncated_dataset = new_datasets_reflections[dtag].truncate_reflections(common_reflections,
+            truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                              )
 
             new_datasets_reflections[dtag] = truncated_dataset
