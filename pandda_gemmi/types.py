@@ -711,7 +711,7 @@ class Datasets:
             structure = dataset.structure
             reflections = new_reflections_dict[dtag]
             new_dataset = Dataset(structure,
-                                  reflections,
+                                  Reflections(reflections),
                                   )    
             new_datasets_dict[dtag] = new_dataset
             
