@@ -475,10 +475,10 @@ class Datasets:
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             reflections = dataset.reflections.reflections
-            reflections_array = np.array(reflections, copy=False)
+            reflections_array = np.array(reflections, copy=True)
             reflections_table = pd.DataFrame(reflections_array,
                                              columns=reflections.column_labels(),
-                                             index=["H", "K", "L"],
+                                             index=("H", "K", "L"),
                                              )
             flattened_index = reflections_table[~reflections_table[structure_factors.f].isna()].index.to_flat_index()
             if not running_index:
