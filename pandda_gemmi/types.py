@@ -616,7 +616,7 @@ class Datasets:
                 rmsds = []
 
                 for scale in np.linspace(-4,4,280):
-                    
+                    print([y.shape, y_r.shape])
                     y_s = y * np.exp(scale * y_r)
                     knn_y = neighbors.RadiusNeighborsRegressor(0.01)
                     knn_y.fit(y_r.reshape(-1,1), 
