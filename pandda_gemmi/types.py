@@ -1346,7 +1346,7 @@ class Xmap:
         std = np.std(unaligned_xmap_array)
         print(std)
 
-        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
+        # unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
 
         interpolated_values_tuple = ([], [], [], [])
 
