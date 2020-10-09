@@ -594,6 +594,7 @@ class Datasets:
 
         new_reflections_dict = {}
         for dtag in self.datasets:
+            print(f"\tscaling {dtag}")
 
             dtag_reflections = self.datasets[dtag].reflections.reflections
                                         
