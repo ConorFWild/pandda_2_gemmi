@@ -607,8 +607,8 @@ class Datasets:
             
             dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
 
-            x = dtag_f_array
-            y = reference_f_array
+            x = reference_f_array
+            y = dtag_f_array
             
             r = resolution_array
             
