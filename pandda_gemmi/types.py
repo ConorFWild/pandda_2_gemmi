@@ -581,7 +581,7 @@ class Datasets:
             ):
     
         reference_reflections_array = np.array(reference_reflections,
-                                            copy=False,
+                                            copy=True,
                                             )
         
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
@@ -599,7 +599,7 @@ class Datasets:
                                         
                                         
             dtag_reflections_array = np.array(dtag_reflections,
-                                            copy=False,
+                                            copy=True,
                                         )
             dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
                                                 columns=dtag_reflections.column_labels(),
@@ -633,7 +633,7 @@ class Datasets:
 
                 y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-                rmsd = np.sum(np.square(x_f-y_f)) 
+                rmsd = np.sum(np.abs(x_f-y_f)) 
 
                 scales.append(scale)
                 rmsds.append(rmsd)
@@ -676,9 +676,9 @@ class Datasets:
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             structure = dataset.structure
-            reflections = new_reflections_dict[dtag]
+            new_reflections = new_reflections_dict[dtag]
             new_dataset = Dataset(structure,
-                                Reflections(reflections),
+                                Reflections(new_reflections),
                                 )    
             new_datasets_dict[dtag] = new_dataset
             
