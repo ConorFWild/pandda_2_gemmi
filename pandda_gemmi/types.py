@@ -594,7 +594,6 @@ class Datasets:
 
         new_reflections_dict = {}
         for dtag in self.datasets:
-            print(f"\tscaling {dtag}")
 
             dtag_reflections = self.datasets[dtag].reflections.reflections
                                         
@@ -639,6 +638,8 @@ class Datasets:
                 rmsds.append(rmsd)
                 
             min_scale = scales[np.argmin(rmsds)]
+            print(f"\tscaling {dtag} by {min_scale}")
+
             
             f_array = dtag_reflections_table[structure_factors.f]
             
