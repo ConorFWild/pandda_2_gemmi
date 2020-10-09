@@ -638,7 +638,9 @@ class Datasets:
                 scales.append(scale)
                 rmsds.append(rmsd)
                 
-            min_scale = scales[np.argmax(rmsds)]
+            min_scale = scales[np.argmin(rmsds)]
+            print(scales)
+            print(rmsds)
             print(f"\tscaling {dtag} by {min_scale}")
             
             f_array = dtag_reflections_table[structure_factors.f]
