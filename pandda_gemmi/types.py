@@ -2047,7 +2047,7 @@ class Clustering:
         clustering_cutoff = position_000.dist(position_111) * 1.1
         print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
-        if extrema_cart_coords_array.size == 0:
+        if extrema_cart_coords_array.size < 10:
             clusters = {}
             return Clustering(clusters)
 
