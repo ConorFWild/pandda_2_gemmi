@@ -617,7 +617,6 @@ class Datasets:
 
             for scale in np.linspace(-4,4,100):
                 y_s = y * np.exp(scale * r)
-                print(y_s.shape)
                 knn_y = neighbors.RadiusNeighborsRegressor(0.01)
                 knn_y.fit(r.reshape(-1,1), 
                         y_s.reshape(-1,1),
