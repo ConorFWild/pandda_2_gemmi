@@ -628,7 +628,7 @@ class Datasets:
                         x.reshape(-1,1),
                                                 )
 
-                sample_grid = np.linspace(min(y_r), max(y_r), 100)
+                sample_grid = np.linspace(min(r), max(r), 100)
 
                 x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
                 y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
