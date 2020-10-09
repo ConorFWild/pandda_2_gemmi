@@ -611,6 +611,14 @@ class Datasets:
             y = reference_f_array
             
             r = resolution_array
+            
+            sample_grid = np.linspace(min(r), max(r), 100)
+            
+            knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+            knn_x.fit(r.reshape(-1,1), 
+                      x.reshape(-1,1),
+                      )
+            x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
             scales = []
             rmsds = []
@@ -622,14 +630,7 @@ class Datasets:
                         y_s.reshape(-1,1),
                         )
 
-                knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-                knn_x.fit(r.reshape(-1,1), 
-                        x.reshape(-1,1),
-                                                )
 
-                sample_grid = np.linspace(min(r), max(r), 100)
-
-                x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
                 y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
                 rmsd = np.sum(np.square(x_f-y_f)) 
