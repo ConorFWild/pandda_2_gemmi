@@ -1620,8 +1620,8 @@ class Xmaps:
                                             structure_factors,
                                             sample_rate, 
                                             ),
-                datasets,
-                alignments,
+                datasets.datasets,
+                alignments.alignments,
             )
 
         return Xmaps(xmaps)
