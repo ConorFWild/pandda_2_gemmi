@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pandda_gemmi.crystalographic_types import MtzPython, StructurePython, XmapPython
 
 import typing
 import dataclasses
@@ -125,6 +126,15 @@ class Structure:
                 for residue in chain:
                     for atom in residue:
                         yield atom
+                        
+                        
+    def __getstate__(self):
+        structure_python = StructurePython.from_gemmi(self.structure)
+        return structure_python
+    
+    def __setstate__(self, structure_python: StructurePython):
+        self.structure = structure_python.to_gemmi()
+        
 
 
 @dataclasses.dataclass()
@@ -390,6 +400,13 @@ class Reflections:
 
             x_r_all = x_r_truncated
             y_r_all = y_r_truncated
+            
+    def __getstate__(self):
+        return MtzPython.from_gemmi(self.reflections)
+    
+    def __setstate__(self, reflections_python: MtzPython):
+        reflections = reflections_python.to_gemmi()
+        self.reflections = reflections
 
 
 @dataclasses.dataclass()
@@ -575,7 +592,7 @@ class Datasets:
 
         return Datasets(new_datasets_reflections)
     
-    def smooth(self, reference_reflections: Reflections, 
+    def smooth(self, reference_reflections: gemmi.Mtz, 
             structure_factors: StructureFactors,
             cut = 97.5,
             ):
@@ -686,149 +703,149 @@ class Datasets:
         
         return Datasets(new_datasets_dict)
     
-    def smooth_dep(self, reference_reflections: Reflections,
-               structure_factors: StructureFactors,
-               cut = 97.5,
-               ):
+    # def smooth_dep(self, reference_reflections: Reflections,
+    #            structure_factors: StructureFactors,
+    #            cut = 97.5,
+    #            ):
         
-        reference_reflections_array = np.array(reference_reflections,
-                                               copy=False,
-                                               )
+    #     reference_reflections_array = np.array(reference_reflections,
+    #                                            copy=False,
+    #                                            )
         
-        reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                                  columns=reference_reflections.column_labels(),
-                                                  )
+    #     reference_reflections_table = pd.DataFrame(reference_reflections_array,
+    #                                               columns=reference_reflections.column_labels(),
+    #                                               )
             
-        reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
+    #     reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
         
-        resolution_array = reference_reflections.make_1_d2_array()
+    #     resolution_array = reference_reflections.make_1_d2_array()
 
-        new_reflections_dict = {}
-        for dtag in self.datasets:
+    #     new_reflections_dict = {}
+    #     for dtag in self.datasets:
 
-            dtag_reflections = self.datasets[dtag].reflections.reflections
+    #         dtag_reflections = self.datasets[dtag].reflections.reflections
                                         
                                         
-            dtag_reflections_array = np.array(dtag_reflections,
-                                              copy=False,
-                                        )
-            dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                                  columns=dtag_reflections.column_labels(),
-                                                  )
+    #         dtag_reflections_array = np.array(dtag_reflections,
+    #                                           copy=False,
+    #                                     )
+    #         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+    #                                               columns=dtag_reflections.column_labels(),
+    #                                               )
             
-            dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
-            print(dtag_reflections_array.shape)
-            print(reference_reflections_array.shape)
-            print(resolution_array.shape)
-            print(dtag_f_array.shape)
+    #         dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
+    #         print(dtag_reflections_array.shape)
+    #         print(reference_reflections_array.shape)
+    #         print(resolution_array.shape)
+    #         print(dtag_f_array.shape)
 
 
 
-            min_scale_list = []
+    #         min_scale_list = []
 
-            selected = np.full(dtag_f_array.shape, 
-                               True,
-                            )
+    #         selected = np.full(dtag_f_array.shape, 
+    #                            True,
+    #                         )
 
-            for i in range(6):
-                x = dtag_f_array[selected]
-                y = reference_f_array[selected]
+    #         for i in range(6):
+    #             x = dtag_f_array[selected]
+    #             y = reference_f_array[selected]
                 
-                x_r = resolution_array[selected]
-                y_r = resolution_array[selected]
+    #             x_r = resolution_array[selected]
+    #             y_r = resolution_array[selected]
 
-                scales = []
-                rmsds = []
+    #             scales = []
+    #             rmsds = []
 
-                for scale in np.linspace(-4,4,100):
-                    # print([y.shape, y_r.shape])
-                    y_s = y * np.exp(scale * y_r)
-                    knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-                    knn_y.fit(y_r.reshape(-1,1), 
-                            y_s.reshape(-1,1),
-                            )
+    #             for scale in np.linspace(-4,4,100):
+    #                 # print([y.shape, y_r.shape])
+    #                 y_s = y * np.exp(scale * y_r)
+    #                 knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+    #                 knn_y.fit(y_r.reshape(-1,1), 
+    #                         y_s.reshape(-1,1),
+    #                         )
 
-                    knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-                    knn_x.fit(x_r.reshape(-1,1), 
-                            x.reshape(-1,1),
-                                                    )
+    #                 knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+    #                 knn_x.fit(x_r.reshape(-1,1), 
+    #                         x.reshape(-1,1),
+    #                                                 )
 
-                    sample_grid = np.linspace(min(y_r), max(y_r), 100)
+    #                 sample_grid = np.linspace(min(y_r), max(y_r), 100)
 
-                    x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
-                    y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+    #                 x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+    #                 y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-                    rmsd = np.sum(np.square(x_f-y_f)) 
+    #                 rmsd = np.sum(np.square(x_f-y_f)) 
 
-                    scales.append(scale)
-                    rmsds.append(rmsd)
+    #                 scales.append(scale)
+    #                 rmsds.append(rmsd)
                     
-                min_scale = scales[np.argmin(rmsds)]
-                min_scale_list.append(min_scale)
+    #             min_scale = scales[np.argmin(rmsds)]
+    #             min_scale_list.append(min_scale)
                 
            
-                selected_copy = selected.copy()
+    #             selected_copy = selected.copy()
                 
-                diff_array = np.abs(x-(y*np.exp(min_scale*y_r)))
+    #             diff_array = np.abs(x-(y*np.exp(min_scale*y_r)))
 
-                high_diff = np.percentile(diff_array, 
-                                        cut,
-                                        )
+    #             high_diff = np.percentile(diff_array, 
+    #                                     cut,
+    #                                     )
                 
-                diff_mask = diff_array > high_diff
+    #             diff_mask = diff_array > high_diff
                 
-                selected_index_tuple = np.nonzero(selected)
-                high_diff_mask = selected_index_tuple[0][diff_mask]  
+    #             selected_index_tuple = np.nonzero(selected)
+    #             high_diff_mask = selected_index_tuple[0][diff_mask]  
                 
-                selected[high_diff_mask] = False
+    #             selected[high_diff_mask] = False
                 
-            min_scale = min_scale_list[-1]
-            print([dtag, min_scale_list])
+    #         min_scale = min_scale_list[-1]
+    #         print([dtag, min_scale_list])
             
             
-            f_array = dtag_reflections_table[structure_factors.f]
+    #         f_array = dtag_reflections_table[structure_factors.f]
             
-            f_scaled_array = f_array * np.exp(min_scale*resolution_array)
+    #         f_scaled_array = f_array * np.exp(min_scale*resolution_array)
             
-            dtag_reflections_table[structure_factors.f] = f_scaled_array
+    #         dtag_reflections_table[structure_factors.f] = f_scaled_array
             
-            # New reflections
-            new_reflections = gemmi.Mtz(with_base=False)
+    #         # New reflections
+    #         new_reflections = gemmi.Mtz(with_base=False)
 
-            # Set dataset properties
-            new_reflections.spacegroup = dtag_reflections.spacegroup
-            new_reflections.set_cell_for_all(dtag_reflections.cell)
+    #         # Set dataset properties
+    #         new_reflections.spacegroup = dtag_reflections.spacegroup
+    #         new_reflections.set_cell_for_all(dtag_reflections.cell)
 
-            # Add dataset
-            new_reflections.add_dataset("truncated")
+    #         # Add dataset
+    #         new_reflections.add_dataset("truncated")
 
-            # Add columns
-            for column in dtag_reflections.columns:
-                new_reflections.add_column(column.label, column.type)
+    #         # Add columns
+    #         for column in dtag_reflections.columns:
+    #             new_reflections.add_column(column.label, column.type)
             
-            # Update
-            new_reflections.set_data(dtag_reflections_table.to_numpy())
+    #         # Update
+    #         new_reflections.set_data(dtag_reflections_table.to_numpy())
 
-            # Update resolution
-            new_reflections.update_reso() 
+    #         # Update resolution
+    #         new_reflections.update_reso() 
                        
-            new_reflections_dict[dtag] = new_reflections
+    #         new_reflections_dict[dtag] = new_reflections
             
             
-        # Create new dataset
-        new_datasets_dict = {}
-        for dtag in self.datasets:
-            dataset = self.datasets[dtag]
-            structure = dataset.structure
-            reflections = new_reflections_dict[dtag]
-            new_dataset = Dataset(structure,
-                                  Reflections(reflections),
-                                  )    
-            new_datasets_dict[dtag] = new_dataset
+    #     # Create new dataset
+    #     new_datasets_dict = {}
+    #     for dtag in self.datasets:
+    #         dataset = self.datasets[dtag]
+    #         structure = dataset.structure
+    #         reflections = new_reflections_dict[dtag]
+    #         new_dataset = Dataset(structure,
+    #                               Reflections(reflections),
+    #                               )    
+    #         new_datasets_dict[dtag] = new_dataset
             
             
         
-        return Datasets(new_datasets_dict)
+    #     return Datasets(new_datasets_dict)
 
 
 
@@ -1560,6 +1577,12 @@ class Xmap:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
+        
+    def __getstate__(self):
+        return XmapPython.from_gemmi(self.xmap)
+    
+    def __setstate__(self, xmap_python: XmapPython):
+        self.xmap = xmap_python.to_gemmi()
 
 
 @dataclasses.dataclass()

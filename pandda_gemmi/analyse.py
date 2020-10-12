@@ -5,7 +5,7 @@ from joblib import Parallel
 
 from pandda_gemmi.config import Config
 from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
-from pandda_gemmi.types import *
+from pandda_gemmi.pandda_types import *
 
 
 def main():
