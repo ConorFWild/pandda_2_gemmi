@@ -7,7 +7,7 @@ from pprint import PrettyPrinter
 printer = PrettyPrinter(indent=1)
 from pathlib import Path
 
-from pandda_gemmi.types import *
+from pandda_gemmi.pandda_types import *
 
 @dataclasses.dataclass()
 class Log:
