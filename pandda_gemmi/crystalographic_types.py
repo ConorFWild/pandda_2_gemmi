@@ -8,7 +8,7 @@ import numpy as np
 
 import gemmi
 
-from pandda_gemmi.pandda_types import ResidueID, Partitioning, Transform, Alignment
+from pandda_gemmi.pandda_types import Transform, Alignment, ResidueID
 
 @dataclass()
 class SpacegroupPython:
