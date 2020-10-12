@@ -7,8 +7,6 @@ import numpy as np
 
 import gemmi
 
-from pandda_gemmi.pandda_types import Structure
-
 
 @dataclass()
 class SpacegroupPython:
