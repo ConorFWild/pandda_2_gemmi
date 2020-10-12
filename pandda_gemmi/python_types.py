@@ -124,7 +124,7 @@ class MtzPython:
         mtz_title = mtz.title
         mtz_history = mtz.history
         array = np.array(mtz, copy=True)
-        datasets = [MtzDatasetPython.from_gemmi(dataset) for dataset in mtz.dataset]
+        datasets = [MtzDatasetPython.from_gemmi(dataset) for dataset in mtz.datasets]
         columns = [MtzColumnPython.from_gemmi(column) for column in mtz.columns]
         
         spacegroup = SpacegroupPython.from_gemmi(mtz.spacegroup)
