@@ -1,12 +1,14 @@
 from __future__ import annotations
+from os import stat
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from dataclasses import dataclass
 
 import numpy as np
 
 import gemmi
 
+from pandda_gemmi.pandda_types import ResidueID, Partitioning, Transform, Alignment
 
 @dataclass()
 class SpacegroupPython:
@@ -180,3 +182,151 @@ class StructurePython:
         structure = gemmi.make_structure_from_block(cif_block)
         
         return structure
+
+
+
+# @dataclass
+# class PositionPython:
+#     ...
+
+    
+@dataclass
+class PartitoningPython:
+    partitioning: Dict[ResidueID, Dict[Tuple[int], Tuple[float, float, float]]]
+    
+    @staticmethod
+    def from_gemmi(partitioning: Dict[ResidueID, Dict[Tuple[int], gemmi.Position]]):
+        partitioning_dict = {}
+        
+        for res_id, residue_dict in partitioning.items():
+            
+            partitioning_dict[res_id] = {}
+            
+            for grid_coord, gemmi_position in residue_dict.items():
+                coord_python = (gemmi_position.x,
+                                gemmi_position.y,
+                                gemmi_position.z,
+                                )
+                
+                partitioning_dict[grid_coord] = coord_python
+                
+                
+        return PartitoningPython(partitioning_dict)
+                
+    def to_gemmi(self):
+        partitioning_dict = {}
+        
+        for res_id, residue_dict in self.partitioning.items():
+            
+            partitioning_dict[res_id] = {}
+            
+            for grid_coord, python_position in residue_dict.items():
+                coord_python = gemmi.Position(python_position[0],
+                                              python_position[1],
+                                              python_position[2],
+                                )
+                
+                partitioning_dict[grid_coord] = coord_python
+                
+                
+        return partitioning_dict
+    
+
+@dataclass
+class Int8GridPython:
+    array: np.ndarray
+    spacegroup: SpacegroupPython
+    unit_cell: UnitCellPython
+
+    @staticmethod
+    def from_gemmi(xmap: gemmi.Int8Grid):
+        array = np.array(xmap, copy=False)
+        spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
+        unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
+
+        return XmapPython(array,
+                          spacegroup,
+                          unit_cell,
+                          )
+        
+    def to_gemmi(self):
+        grid = gemmi.Int8Grid(*self.array.shape)
+        grid.spacegroup = self.spacegroup.to_gemmi()
+        grid.set_unit_cell(self.unit_cell.to_gemmi())
+        
+        grid_array = np.array(grid, copy=False)
+        grid_array[:, :, :] = self.array[:, :, :]
+        
+        return grid
+
+@dataclass
+class FloatGridPython:
+    array: np.ndarray
+    spacegroup: SpacegroupPython
+    unit_cell: UnitCellPython
+
+    @staticmethod
+    def from_gemmi(xmap: gemmi.FloatGrid):
+        array = np.array(xmap, copy=False)
+        spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
+        unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
+
+        return XmapPython(array,
+                          spacegroup,
+                          unit_cell,
+                          )
+        
+    def to_gemmi(self):
+        grid = gemmi.FloatGrid(*self.array.shape)
+        grid.spacegroup = self.spacegroup.to_gemmi()
+        grid.set_unit_cell(self.unit_cell.to_gemmi())
+        
+        grid_array = np.array(grid, copy=False)
+        grid_array[:, :, :] = self.array[:, :, :]
+        
+        return grid
+    
+
+        
+@dataclass
+class TransformPython:
+    transform: gemmi.Transform
+    com_reference: np.array
+    com_moving: np.array
+    
+    @staticmethod
+    def from_gemmi(transform_gemmi):
+        transform_python = gemmi.transform.mat.tolist()
+        return TransformPython(transform_python,
+                               transform_gemmi.com_reference,
+                               transform_gemmi.com_moving,
+                               )
+        
+    def to_gemmi(self):
+        transform_gemmi = gemmi.Transform()
+        transform_gemmi.mat.fromlist(self.transform)
+        return Transform(transform_gemmi,
+                         self.com_reference,
+                         self.com_moving,
+                         )
+        
+@dataclass
+class AlignmentPython:
+    alignment: Dict[ResidueID, TransformPython]
+    
+    @staticmethod
+    def from_gemmi(alignment: Alignment):
+        alignment_python = {}
+        for res_id, transform in alignment.transforms.items():
+            transform_python = TransformPython.from_gemmi(transform)
+            alignment_python[res_id] = transform_python
+            
+        return AlignmentPython(alignment_python)
+       
+    def to_gemmi(self):
+        alignment_gemmi = {}
+        for res_id, transform in self.alignment.items():
+            transform_gemmi = transform.to_gemmi()
+            alignment_gemmi[res_id] = transform_gemmi
+            
+        return alignment_gemmi

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pandda_gemmi.crystalographic_types import MtzPython, StructurePython, XmapPython
+from pandda_gemmi.crystalographic_types import AlignmentPython, MtzPython, StructurePython, XmapPython
 
 import typing
 import dataclasses
@@ -23,6 +23,7 @@ import gemmi
 
 from pandda_gemmi.constants import *
 from pandda_gemmi.config import *
+from pandda_gemmi.crystalographic_types import Int8GridPython, FloatGridPython, PartitoningPython
 
 
 @dataclasses.dataclass()
@@ -1094,6 +1095,24 @@ class Partitioning:
         mask_array[~protein_mask_bool] = 0
 
         return mask
+    
+    def __getstate__(self):
+        partitioning_python = PartitoningPython.from_gemmi(self.partitioning)
+        protein_mask_python = Int8GridPython.from_gemmi(self.protein_mask)
+        symmetry_mask_python = Int8GridPython.from_gemmi(self.symmetry_mask)
+        return (partitioning_python,
+                protein_mask_python,
+                symmetry_mask_python,
+                )
+        
+    def __setstate__(self, data):
+        partitioning_gemmi = data[0].to_gemmi()
+        protein_mask_gemmi = data[1].to_gemmi()
+        symmetry_mask_gemmi = data[2].to_gemmi()
+        
+        self.partitioning = partitioning_gemmi
+        self.proteing_mask = protein_mask_gemmi
+        self.symmetry_mask = symmetry_mask_gemmi
 
 
 @dataclasses.dataclass()
@@ -1148,6 +1167,16 @@ class Grid:
     def shape(self):
         grid = self.grid
         return [grid.nu, grid.nv, grid.nw]
+    
+    def __getstate__(self):
+        grid_python = FloatGridPython.from_gemmi(self.grid)
+        partitioning_python = self.partitioning.__getstate__()
+        
+        return (grid_python, partitioning_python)
+    
+    def __setstate__(self, data):
+        self.partitioning = data[1]
+        self.grid = data[0]
 
 
 @dataclasses.dataclass()
@@ -1305,6 +1334,7 @@ class Transform:
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
 
+
 @dataclasses.dataclass()
 class Alignment:
     transforms: typing.Dict[ResidueID, Transform]
@@ -1373,6 +1403,14 @@ class Alignment:
     def __iter__(self):
         for res_id in self.transforms:
             yield res_id
+            
+    def __getstate__(self):
+        alignment = AlignmentPython.from_gemmi(self)
+        return alignment
+    
+    def __setstate__(self, alignment_python: AlignmentPython):
+        alignment_gemmi = alignment_python.to_gemmi()
+        self.transforms = alignment_gemmi
 
 
 @dataclasses.dataclass()
@@ -1389,6 +1427,8 @@ class Alignments:
 
     def __getitem__(self, item):
         return self.alignments[item]
+    
+    
 
 
 @dataclasses.dataclass()
