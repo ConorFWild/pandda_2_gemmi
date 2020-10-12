@@ -14,6 +14,8 @@ from scipy import spatial
 from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
 
+import joblib
+
 from sklearn import neighbors
 
 import pandas as pd
@@ -1595,16 +1597,32 @@ class Xmaps:
 
     @staticmethod
     def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
-                              structure_factors: StructureFactors, sample_rate=3.0):
-        xmaps = {}
-        for dtag in datasets:
-            xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                               alignments[dtag],
-                                               grid,
-                                               structure_factors,
-                                               sample_rate)
+                              structure_factors: StructureFactors, sample_rate=3.0,
+                              mapper=None,
+                              ):
+        
+        if mapper is None:
+            xmaps = {}
+            for dtag in datasets:
+                xmap = Xmap.from_unaligned_dataset(datasets[dtag],
+                                                alignments[dtag],
+                                                grid,
+                                                structure_factors,
+                                                sample_rate)
 
-            xmaps[dtag] = xmap
+                xmaps[dtag] = xmap
+
+        else:
+            xmaps = mapper.map_dict(lambda dataset, alignment:
+                Xmap.from_unaligned_dataset(dataset,
+                                            alignment,
+                                            grid,
+                                            structure_factors,
+                                            sample_rate, 
+                                            ),
+                datasets,
+                alignments,
+            )
 
         return Xmaps(xmaps)
 
@@ -3022,3 +3040,53 @@ class RMSD:
 
     def to_float(self):
         return self.rmsd
+
+
+@dataclasses.dataclass()
+class MapperJoblib:
+    parallel: typing.Any
+
+    @staticmethod
+    def from_joblib(n_jobs=7, verbose=11):
+        parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose).__enter__()
+        return MapperJoblib(parallel_env)
+
+    def map_list(self, func, *args):
+        results = self.parallel(joblib.delayed(func)(*[arg[i] for arg in args])
+                                for i, arg
+                                in enumerate(args[0])
+                                )
+
+        return results
+
+    def map_dict(self, func, *args):
+        keys = list(args[0].keys())
+
+        results = self.parallel(joblib.delayed(func)(*[arg[key] for arg in args])
+                                for key
+                                in keys
+                                )
+
+        results_dict = {keys[i]: results[i]
+                        for i, key
+                        in enumerate(keys)
+                        }
+
+        return results_dict
+
+
+@dataclasses.dataclass()
+class MapperPython:
+    parallel: typing.Any
+
+    @staticmethod
+    def from_python():
+        parallel_env = map
+        return MapperPython(parallel_env)
+
+    def map_list(self, func, *args):
+        results = list(self.parallel(func,
+                                     *args
+                                     ))
+
+        return results

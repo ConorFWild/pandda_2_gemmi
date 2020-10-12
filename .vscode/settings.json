@@ -1,4 +1,4 @@
 {
     "cmake.configureOnOpen": false,
-    "python.pythonPath": "D:\\anaconda3\\python.exe"
+    "python.pythonPath": "d:\\anaconda3\\envs\\gemmi\\python.exe"
 }
