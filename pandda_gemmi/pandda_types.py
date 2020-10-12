@@ -1,5 +1,4 @@
 from __future__ import annotations
-from pandda_gemmi.crystalographic_types import AlignmentPython, MtzPython, StructurePython, XmapPython
 
 import typing
 import dataclasses
@@ -23,7 +22,9 @@ import gemmi
 
 from pandda_gemmi.constants import *
 from pandda_gemmi.config import *
-from pandda_gemmi.crystalographic_types import Int8GridPython, FloatGridPython, PartitoningPython
+
+from pandda_gemmi.python_types import *
+
 
 
 @dataclasses.dataclass()
@@ -1169,7 +1170,7 @@ class Grid:
         return [grid.nu, grid.nv, grid.nw]
     
     def __getstate__(self):
-        grid_python = FloatGridPython.from_gemmi(self.grid)
+        grid_python = Int8GridPython.from_gemmi(self.grid)
         partitioning_python = self.partitioning.__getstate__()
         
         return (grid_python, partitioning_python)
@@ -1332,6 +1333,16 @@ class Transform:
         com_moving = mean
 
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+    
+    def __getstate__(self):
+        transform_python = TransformPython.from_gemmi(self)
+        return transform_python
+    
+    def __setstate__(self, transform_python: TransformPython):
+        transform_gemmi, com_reference, com_moving = transform_python.to_gemmi()
+        self.transforms = transform_gemmi
+        self.com_reference = com_reference
+        self.com_moving = com_moving
 
 
 
@@ -1404,13 +1415,13 @@ class Alignment:
         for res_id in self.transforms:
             yield res_id
             
-    def __getstate__(self):
-        alignment = AlignmentPython.from_gemmi(self)
-        return alignment
+    # def __getstate__(self):
+    #     alignment = AlignmentPython.from_gemmi(self)
+    #     return alignment
     
-    def __setstate__(self, alignment_python: AlignmentPython):
-        alignment_gemmi = alignment_python.to_gemmi()
-        self.transforms = alignment_gemmi
+    # def __setstate__(self, alignment_python: AlignmentPython):
+    #     alignment_gemmi = alignment_python.to_gemmi()
+    #     self.transforms = alignment_gemmi
 
 
 @dataclasses.dataclass()
@@ -1427,6 +1438,20 @@ class Alignments:
 
     def __getitem__(self, item):
         return self.alignments[item]
+    
+    def __getstate__(self):
+        
+        alignments_python = {}
+        for dtag, alignment in self.alignments.items():
+            alignment = AlignmentPython.from_gemmi(self)
+            alignments_python[dtag] = alignment
+        return alignments_python
+    
+    def __setstate__(self, alignment_python: AlignmentPython):
+        alignment_gemmi = alignment_python.to_gemmi()
+        self.transforms = alignment_gemmi
+    
+    
     
     
 

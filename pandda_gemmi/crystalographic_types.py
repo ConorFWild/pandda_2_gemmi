@@ -1,332 +1,254 @@
 from __future__ import annotations
-from os import stat
 
 from typing import List, Dict, Tuple
 from dataclasses import dataclass
 
 import numpy as np
 
+import scipy
+from scipy import spatial
+
 import gemmi
 
-from pandda_gemmi.pandda_types import Transform, Alignment, ResidueID
-
 @dataclass()
-class SpacegroupPython:
-    spacegroup: str
-    
-    @staticmethod
-    def from_gemmi(spacegroup: gemmi.spacegroup):
-        spacegroup_name = spacegroup.xhm()
-        return SpacegroupPython(spacegroup_name)
-    
-    def to_gemmi(self):
-        return gemmi.find_spacegroup_by_name(self.spacegroup)
-
-
-@dataclass()
-class UnitCellPython:
-    a: float
-    b: float
-    c: float
-    alpha: float
-    beta: float
-    gamma: float
-    
-    @staticmethod
-    def from_gemmi(unit_cell: gemmi.UnitCell):
-        return UnitCellPython(unit_cell.a,
-                              unit_cell.b,
-                              unit_cell.c,
-                              unit_cell.alpha,
-                              unit_cell.beta,
-                              unit_cell.gamma,
-                              )
-        
-    def to_gemmi(self):
-        return gemmi.UnitCell(self.a,
-                              self.b,
-                              self.c,
-                              self.alpha,
-                              self.beta,
-                              self.gamma,
-                              )
-
-
-@dataclass()
-class XmapPython:
-    array: np.ndarray
-    spacegroup: SpacegroupPython
-    unit_cell: UnitCellPython
+class ResidueID:
+    model: str
+    chain: str
+    insertion: str
 
     @staticmethod
-    def from_gemmi(xmap: gemmi.FloatGrid):
-        array = np.array(xmap, copy=False)
-        spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
-        unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
-
-        return XmapPython(array,
-                          spacegroup,
-                          unit_cell,
-                          )
-        
-    def to_gemmi(self):
-        grid = gemmi.FloatGrid(*self.array.shape)
-        grid.spacegroup = self.spacegroup.to_gemmi()
-        grid.set_unit_cell(self.unit_cell.to_gemmi())
-        
-        grid_array = np.array(grid, copy=False)
-        grid_array[:, :, :] = self.array[:, :, :]
-        
-        return grid
-
-
-@dataclass
-class MtzDatasetPython:
-    number: int
-    project_name: str
-    crystal_name: str
-    dataset_name: str
-    wavelength: float
-    
-    @staticmethod
-    def from_gemmi(dataset: gemmi.Dataset):
-        return MtzDatasetPython(dataset.number,
-                                dataset.project_name,
-                                dataset.crystal_name,
-                                dataset.dataset_name,
-                                dataset.wavelength,
-                                )
-    
-@dataclass
-class MtzColumnPython:
-    dataset_id: int
-    column_type: str
-    label: str
-
-    @staticmethod
-    def from_gemmi(column: gemmi.Column):
-        return MtzColumnPython(column.dataset_id,
-                               column.type,
-                               column.label,
-                               )
-
-
-@dataclass
-class MtzPython:
-    mtz_title: str
-    mtz_history: str
-    array: np.ndarray
-    spacegroup: SpacegroupPython
-    unit_cell: UnitCellPython
-    datasets: List
-    columns: List
-
-    @staticmethod
-    def from_gemmi(mtz: gemmi.Mtz):
-        mtz_title = mtz.title
-        mtz_history = mtz.history
-        array = np.array(mtz, copy=True)
-        datasets = [MtzDatasetPython.from_gemmi(dataset) for dataset in mtz.dataset]
-        columns = [MtzColumnPython.from_gemmi(column) for column in mtz.columns]
-        
-        spacegroup = SpacegroupPython.from_gemmi(mtz.spacegroup)
-        unit_cell = UnitCellPython.from_gemmi(mtz.cell)
-        
-        return MtzPython(mtz_title,
-                         mtz_history,
-                         array,
-                         spacegroup,
-                         unit_cell,
-                         datasets,
-                         columns,
+    def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
+        return ResidueID(model.name,
+                         chain.name,
+                         str(res.seqid.num),
                          )
 
-    def to_gemmi(self):
-        mtz = gemmi.mtz(with_base=False)
-        mtz.title = self.mtz_title
-        mtz.history = self.mtz_history
-        spacegroup = self.spacegroup.to_gemmi()       
-        mtz.spacegroup = spacegroup 
-        unit_cell = self.unit_cell.to_gemmi()
-        mtz.set_cell_for_all(unit_cell)
-        
-        for dataset in self.datasets:
-            mtz.add_dataset(dataset.dataset_name)
-            ds = mtz.dataset(dataset.number)
-            ds.project_name = dataset.project_name
-            ds.crystal_name = dataset.crystal_name 
-            ds.wavelength = dataset.wavelength
-            
-        for column in self.columns:
-            mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
-
-        mtz.set_data(self.array)
-        
-        return mtz
-        
-        
+    def __hash__(self):
+        return hash((self.model, self.chain, self.insertion))
 
 
 
-@dataclass
-class StructurePython:
-    json_str: str
-    
-    @staticmethod
-    def from_gemmi(structure: gemmi.Structure):
-        json_str = structure.make_mmcif_document().as_json(mmjson=True)
-        return StructurePython(json_str)
-    
-    def to_gemmi(self):
-        cif_block = gemmi.cif.read_mmjson(self.json_str)[0]
-        structure = gemmi.make_structure_from_block(cif_block)
-        
-        return structure
 
-
-
-# @dataclass
-# class PositionPython:
-#     ...
-
-    
-@dataclass
-class PartitoningPython:
-    partitioning: Dict[ResidueID, Dict[Tuple[int], Tuple[float, float, float]]]
-    
-    @staticmethod
-    def from_gemmi(partitioning: Dict[ResidueID, Dict[Tuple[int], gemmi.Position]]):
-        partitioning_dict = {}
-        
-        for res_id, residue_dict in partitioning.items():
-            
-            partitioning_dict[res_id] = {}
-            
-            for grid_coord, gemmi_position in residue_dict.items():
-                coord_python = (gemmi_position.x,
-                                gemmi_position.y,
-                                gemmi_position.z,
-                                )
-                
-                partitioning_dict[grid_coord] = coord_python
-                
-                
-        return PartitoningPython(partitioning_dict)
-                
-    def to_gemmi(self):
-        partitioning_dict = {}
-        
-        for res_id, residue_dict in self.partitioning.items():
-            
-            partitioning_dict[res_id] = {}
-            
-            for grid_coord, python_position in residue_dict.items():
-                coord_python = gemmi.Position(python_position[0],
-                                              python_position[1],
-                                              python_position[2],
-                                )
-                
-                partitioning_dict[grid_coord] = coord_python
-                
-                
-        return partitioning_dict
-    
-
-@dataclass
-class Int8GridPython:
-    array: np.ndarray
-    spacegroup: SpacegroupPython
-    unit_cell: UnitCellPython
-
-    @staticmethod
-    def from_gemmi(xmap: gemmi.Int8Grid):
-        array = np.array(xmap, copy=False)
-        spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
-        unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
-
-        return XmapPython(array,
-                          spacegroup,
-                          unit_cell,
-                          )
-        
-    def to_gemmi(self):
-        grid = gemmi.Int8Grid(*self.array.shape)
-        grid.spacegroup = self.spacegroup.to_gemmi()
-        grid.set_unit_cell(self.unit_cell.to_gemmi())
-        
-        grid_array = np.array(grid, copy=False)
-        grid_array[:, :, :] = self.array[:, :, :]
-        
-        return grid
-
-@dataclass
-class FloatGridPython:
-    array: np.ndarray
-    spacegroup: SpacegroupPython
-    unit_cell: UnitCellPython
-
-    @staticmethod
-    def from_gemmi(xmap: gemmi.FloatGrid):
-        array = np.array(xmap, copy=False)
-        spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
-        unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
-
-        return XmapPython(array,
-                          spacegroup,
-                          unit_cell,
-                          )
-        
-    def to_gemmi(self):
-        grid = gemmi.FloatGrid(*self.array.shape)
-        grid.spacegroup = self.spacegroup.to_gemmi()
-        grid.set_unit_cell(self.unit_cell.to_gemmi())
-        
-        grid_array = np.array(grid, copy=False)
-        grid_array[:, :, :] = self.array[:, :, :]
-        
-        return grid
-    
-
-        
-@dataclass
-class TransformPython:
+@dataclass()
+class Transform:
     transform: gemmi.Transform
     com_reference: np.array
     com_moving: np.array
-    
+
+    def apply_moving_to_reference(self, positions: Dict[Tuple[int], gemmi.Position]) -> Dict[
+        Tuple[int], gemmi.Position]:
+        transformed_positions = {}
+        for index, position in positions.items():
+            rotation_frame_position = gemmi.Position(position[0] - self.com_moving[0],
+                                                     position[1] - self.com_moving[1],
+                                                     position[2] - self.com_moving[2])
+            transformed_vector = self.transform.apply(rotation_frame_position)
+
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_reference[0],
+                                                          transformed_vector[1] + self.com_reference[1],
+                                                          transformed_vector[2] + self.com_reference[2])
+
+        return transformed_positions
+
+    def apply_reference_to_moving(self, positions: Dict[Tuple[int], gemmi.Position]) -> Dict[
+        Tuple[int], gemmi.Position]:
+        inverse_transform = self.transform.inverse()
+        transformed_positions = {}
+        for index, position in positions.items():
+            rotation_frame_position = gemmi.Position(position[0] - self.com_reference[0],
+                                                     position[1] - self.com_reference[1],
+                                                     position[2] - self.com_reference[2])
+            transformed_vector = inverse_transform.apply(rotation_frame_position)
+
+            transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_moving[0],
+                                                          transformed_vector[1] + self.com_moving[1],
+                                                          transformed_vector[2] + self.com_moving[2])
+
+        return transformed_positions
+
     @staticmethod
-    def from_gemmi(transform_gemmi):
-        transform_python = gemmi.transform.mat.tolist()
-        return TransformPython(transform_python,
-                               transform_gemmi.com_reference,
-                               transform_gemmi.com_moving,
-                               )
-        
-    def to_gemmi(self):
-        transform_gemmi = gemmi.Transform()
-        transform_gemmi.mat.fromlist(self.transform)
-        return Transform(transform_gemmi,
-                         self.com_reference,
-                         self.com_moving,
-                         )
-        
-@dataclass
-class AlignmentPython:
-    alignment: Dict[ResidueID, TransformPython]
-    
+    def from_translation_rotation(translation, rotation, com_reference, com_moving):
+        transform = gemmi.Transform()
+        transform.vec.fromlist(translation.tolist())
+        transform.mat.fromlist(rotation.as_matrix().tolist())
+
+        return Transform(transform, com_reference, com_moving)
+
     @staticmethod
-    def from_gemmi(alignment: Alignment):
-        alignment_python = {}
-        for res_id, transform in alignment.transforms.items():
-            transform_python = TransformPython.from_gemmi(transform)
-            alignment_python[res_id] = transform_python
+    def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
+        previous_ca_pos = previous_res["CA"][0].pos
+        current_ca_pos = current_res["CA"][0].pos
+        next_ca_pos = next_res["CA"][0].pos
+
+        previous_ref_ca_pos = previous_ref["CA"][0].pos
+        current_ref_ca_pos = current_ref["CA"][0].pos
+        next_ref_ca_pos = next_ref["CA"][0].pos
+
+        matrix = np.array([
+            Transform.pos_to_list(previous_ca_pos),
+            Transform.pos_to_list(current_ca_pos),
+            Transform.pos_to_list(next_ca_pos),
+        ])
+        matrix_ref = np.array([
+            Transform.pos_to_list(previous_ref_ca_pos),
+            Transform.pos_to_list(current_ref_ca_pos),
+            Transform.pos_to_list(next_ref_ca_pos),
+        ])
+
+        mean = np.mean(matrix, axis=0)
+        mean_ref = np.mean(matrix_ref, axis=0)
+
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
+
+        de_meaned = matrix - mean
+        de_meaned_ref = matrix_ref - mean_ref
+
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+
+        com_reference = mean_ref
+        com_moving = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+
+    @staticmethod
+    def pos_to_list(pos: gemmi.Position):
+        return [pos[0], pos[1], pos[2]]
+
+    @staticmethod
+    def from_start_residues(current_res, next_res, current_ref, next_ref):
+        current_ca_pos = current_res["CA"][0].pos
+        next_ca_pos = next_res["CA"][0].pos
+
+        current_ref_ca_pos = current_ref["CA"][0].pos
+        next_ref_ca_pos = next_ref["CA"][0].pos
+
+        matrix = np.array([
+            Transform.pos_to_list(current_ca_pos),
+            Transform.pos_to_list(next_ca_pos),
+        ])
+        matrix_ref = np.array([
+            Transform.pos_to_list(current_ref_ca_pos),
+            Transform.pos_to_list(next_ref_ca_pos),
+        ])
+
+        mean = np.mean(matrix, axis=0)
+        mean_ref = np.mean(matrix_ref, axis=0)
+
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
+
+        de_meaned = matrix - mean
+        de_meaned_ref = matrix_ref - mean_ref
+
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+
+        com_reference = mean_ref
+
+        com_moving = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+
+    @staticmethod
+    def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
+        previous_ca_pos = previous_res["CA"][0].pos
+        current_ca_pos = current_res["CA"][0].pos
+
+        previous_ref_ca_pos = previous_ref["CA"][0].pos
+        current_ref_ca_pos = current_ref["CA"][0].pos
+
+        matrix = np.array([
+            Transform.pos_to_list(previous_ca_pos),
+            Transform.pos_to_list(current_ca_pos),
+        ])
+        matrix_ref = np.array([
+            Transform.pos_to_list(previous_ref_ca_pos),
+            Transform.pos_to_list(current_ref_ca_pos),
+        ])
+
+        mean = np.mean(matrix, axis=0)
+        mean_ref = np.mean(matrix_ref, axis=0)
+
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
+
+        de_meaned = matrix - mean
+        de_meaned_ref = matrix_ref - mean_ref
+
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+
+        com_reference = mean_ref
+
+        com_moving = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+
+@dataclass()
+class Alignment:
+    transforms: Dict[ResidueID, Transform]
+
+    def __getitem__(self, item: ResidueID):
+        return self.transforms[item]
+
+    @staticmethod
+    def from_dataset(reference, dataset):
+
+        transforms = {}
+
+        for model in dataset.structure.structure:
+            for chain in model:
+                for res in chain.get_polymer():
+                    prev_res = chain.previous_residue(res)
+                    next_res = chain.next_residue(res)
+
+                    if prev_res:
+                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    current_res_id = ResidueID.from_residue_chain(model, chain, res)
+                    if next_res:
+                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
+
+                    if prev_res:
+                        prev_res_ref = reference.dataset.structure[prev_res_id][0]
+                    current_res_ref = reference.dataset.structure[current_res_id][0]
+                    if next_res:
+                        next_res_ref = reference.dataset.structure[next_res_id][0]
+
+                    if not prev_res:
+                        transform = Transform.from_start_residues(res, next_res,
+                                                                  current_res_ref, next_res_ref)
+
+                    if not next_res:
+                        transform = Transform.from_finish_residues(prev_res, res,
+                                                                   prev_res_ref, current_res_ref)
+
+                    if prev_res and next_res:
+                        transform = Transform.from_residues(prev_res, res, next_res,
+                                                            prev_res_ref, current_res_ref, next_res_ref,
+                                                            )
+
+                    transforms[current_res_id] = transform
+
+                for res in chain.get_polymer():
+                    prev_res = chain.previous_residue(res)
+                    next_res = chain.next_residue(res)
+
+                    if prev_res:
+                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+                    current_res_id = ResidueID.from_residue_chain(model, chain, res)
+                    if next_res:
+                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
+
+                    if not prev_res:
+                        transforms[current_res_id].transform.mat.fromlist(
+                            transforms[next_res_id].transform.mat.tolist())
+
+                    if not next_res:
+                        transforms[current_res_id].transform.mat.fromlist(
+                            transforms[prev_res_id].transform.mat.tolist())
+
+        return Alignment(transforms)
+
+    def __iter__(self):
+        for res_id in self.transforms:
+            yield res_id
             
-        return AlignmentPython(alignment_python)
-       
-    def to_gemmi(self):
-        alignment_gemmi = {}
-        for res_id, transform in self.alignment.items():
-            transform_gemmi = transform.to_gemmi()
-            alignment_gemmi[res_id] = transform_gemmi
-            
-        return alignment_gemmi
