@@ -80,7 +80,7 @@ class XmapPython:
 
 @dataclass
 class MtzDatasetPython:
-    number: int
+    id: int
     project_name: str
     crystal_name: str
     dataset_name: str
@@ -88,7 +88,7 @@ class MtzDatasetPython:
     
     @staticmethod
     def from_gemmi(dataset: gemmi.Dataset):
-        return MtzDatasetPython(dataset.number,
+        return MtzDatasetPython(dataset.id,
                                 dataset.project_name,
                                 dataset.crystal_name,
                                 dataset.dataset_name,
