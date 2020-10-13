@@ -21,7 +21,6 @@ import pandas as pd
 import gemmi
 
 from pandda_gemmi.constants import *
-from pandda_gemmi.config import *
 
 from pandda_gemmi.python_types import *
 
@@ -1485,13 +1484,16 @@ class Shells:
     shells: typing.Dict[int, Shell]
 
     @staticmethod
-    def from_datasets(datasets: Datasets, resolution_binning: ResolutionBinning):
+    def from_datasets(datasets: Datasets, min_characterisation_datasets: int,
+                      max_shell_datasets: int,
+                      high_res_increment: float
+                      ):
 
         sorted_dtags = list(sorted(datasets.datasets.keys(),
                                    key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
                                    ))
 
-        train_dtags = sorted_dtags[:resolution_binning.min_characterisation_datasets]
+        train_dtags = sorted_dtags[:min_characterisation_datasets]
 
         shells = {}
         shell_num = 0
@@ -1500,8 +1502,8 @@ class Shells:
         for dtag in sorted_dtags:
             res = datasets[dtag].reflections.resolution().resolution
 
-            if (len(shell_dtags) >= resolution_binning.max_shell_datasets) or (
-                    res - shell_res >= resolution_binning.high_res_increment):
+            if (len(shell_dtags) >= max_shell_datasets) or (
+                    res - shell_res >= high_res_increment):
                 all_dtags = list(set(shell_dtags).union(set(train_dtags)))
                 shell = Shell(shell_dtags,
                               train_dtags,
@@ -2203,7 +2205,7 @@ class Clustering:
     clustering: typing.Dict[int, Cluster]
 
     @staticmethod
-    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, blob_finding: BlobFinding, masks: Masks):
+    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float):
         zmap_array = zmap.to_array(copy=True)
 
         # protein_mask_grid = Clustering.get_protein_mask(zmap,
@@ -2234,7 +2236,7 @@ class Clustering:
         # Don't consider outlying points at symmetry contacts
         zmap_array[np.nonzero(symmetry_contact_mask)] = 0.0
 
-        extrema_mask_array = zmap_array > masks.contour_level
+        extrema_mask_array = zmap_array > contour_level
 
         extrema_grid_coords_array = np.argwhere(extrema_mask_array)  # n,3
 
@@ -2416,10 +2418,10 @@ class Clusterings:
     clusters: typing.Dict[Dtag, Clustering]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, blob_finding: BlobFinding, masks: Masks):
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float):
         clusterings = {}
         for dtag in zmaps:
-            clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, blob_finding, masks)
+            clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, contour_level)
             clusterings[dtag] = clustering
 
         return Clusterings(clusterings)
@@ -2901,9 +2903,9 @@ class DatasetDir:
     ligand_dir: LigandDir
 
     @staticmethod
-    def from_path(path: Path, input_settings: Input):
-        input_pdb_file: Path = next(path.glob(input_settings.pdb_regex))
-        input_mtz_file: Path = next(path.glob(input_settings.mtz_regex))
+    def from_path(path: Path, pdb_regex: str, mtz_regex: str):
+        input_pdb_file: Path = next(path.glob(pdb_regex))
+        input_mtz_file: Path = next(path.glob(mtz_regex))
         ligand_dir: LigandDir = LigandDir.from_path(path / PANDDA_LIGAND_FILES_DIR)
 
         return DatasetDir(input_pdb_file=input_pdb_file,
@@ -2917,14 +2919,14 @@ class DataDirs:
     dataset_dirs: typing.Dict[Dtag, DatasetDir]
 
     @staticmethod
-    def from_dir(directory: Path, input_settings: Input):
+    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str):
         dataset_dir_paths = list(directory.glob("*"))
 
         dataset_dirs = {}
 
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
-            dataset_dir = DatasetDir.from_path(dataset_dir_path, input_settings)
+            dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex)
             dataset_dirs[dtag] = dataset_dir
 
         return DataDirs(dataset_dirs)
@@ -3004,10 +3006,10 @@ class PanDDAFSModel:
     @staticmethod
     def from_dir(input_data_dirs: Path,
                  output_out_dir: Path,
-                 input_settings: Input,
+                 pdb_regex: str, mtz_regex: str
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
-        data_dirs = DataDirs.from_dir(input_data_dirs, input_settings)
+        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )
