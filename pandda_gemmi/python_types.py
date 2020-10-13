@@ -207,7 +207,7 @@ class PartitoningPython:
                                 gemmi_position.z,
                                 )
                 
-                partitioning_dict[grid_coord] = coord_python
+                partitioning_dict[res_id][grid_coord] = coord_python
                 
                 
         return PartitoningPython(partitioning_dict)
@@ -225,7 +225,7 @@ class PartitoningPython:
                                               python_position[2],
                                 )
                 
-                partitioning_dict[grid_coord] = coord_python
+                partitioning_dict[res_id][grid_coord] = coord_python
                 
                 
         return partitioning_dict
