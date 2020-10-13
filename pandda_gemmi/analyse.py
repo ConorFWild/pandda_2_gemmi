@@ -1,3 +1,4 @@
+from shlex import split
 from pprint import PrettyPrinter
 printer = PrettyPrinter()
 
@@ -7,110 +8,98 @@ from pandda_gemmi.config import Config
 from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
 from pandda_gemmi.pandda_types import *
 
-
 def main():
-    config: Config = Config.from_args()
+    args_list = split("--data_dirs=\"/dls/science/groups/i04-1/conor_dev/baz2b_test/data\" --pdb_regex=\"*.dimple.pdb\" --mtz_regex=\"*.dimple.mtz\" --out_dir=\"/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test\" --structure_factors=\"2FOFCWT,PH2FOFCWT\"")
+
+    config: Config = Config.from_args_list(args_list)
     log: Log = Log.from_dir(config.output.out_dir)
     printer.pprint(config)
 
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
-                                                            config.input,
+                                                            config.input.pdb_regex,
+                                                            config.input.mtz_regex,
                                                             )
 
+    mapper = MapperJoblib.from_joblib()
+    pandda_fs_model.build()
+    
+    datasets: Datasets = Datasets.from_dir(pandda_fs_model)
+    print("\tGot {} datasets".format(len(datasets.datasets)))   
+    
+    datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
+    config.params.diffraction_data.structure_factors)
+    print("\tAfter filters (structure factors) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_low_resolution_datasets(
+        config.params.diffraction_data.low_resolution_completeness)
+    print("\tAfter filters (low resolution) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
+    print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
+    print("\tAfter filters {} datasets".format(len(datasets.datasets)))
+    # datasets: Datasets = datasets.scale_reflections()  # TODO
+    print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
 
-    with Parallel(n_jobs=config.params.processing.process_dict_n_cpus) as parallel:
+    reference: Reference = Reference.from_datasets(datasets)
 
-        datasets: Datasets = Datasets.from_dir(pandda_fs_model)
-        print("\tGot {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_dissimilar_models(reference,
+                                                        config.params.filtering.max_rmsd_to_reference,
+                                                        )
+    print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
 
-        datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
-            config.params.diffraction_data.structure_factors)
-        print("\tAfter filters (structure factors) {} datasets".format(len(datasets.datasets)))
-        datasets: Datasets = datasets.remove_low_resolution_datasets(
-            config.params.diffraction_data.low_resolution_completeness)
-        print("\tAfter filters (low resolution) {} datasets".format(len(datasets.datasets)))
-        datasets: Datasets = datasets.remove_bad_rfree(config.params.filtering.max_rfree)
-        print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
-        datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
-        print("\tAfter filters {} datasets".format(len(datasets.datasets)))
-        datasets: Datasets = datasets.scale_reflections()  # TODO
-        print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
+    datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
+    print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
 
-        reference: Reference = Reference.from_datasets(datasets)
+    print("Getting grid")
+    grid: Grid = Grid.from_reference(reference,
+                               config.params.masks.outer_mask,
+                                config.params.masks.inner_mask_symmetry,
+                                )
+    print("\tGot grid")
+    
+    print("Getting alignments")
+    alignments: Alignments = Alignments.from_datasets(reference,
+                                                    datasets,
+                                                    )
+    print("\tGot alignments")
 
-        datasets: Datasets = datasets.remove_dissimilar_models(reference,
-                                                               config.params.filtering.max_rmsd_to_reference,
-                                                               )
-        print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
+    for shell in Shells.from_datasets(datasets, 
+                                  config.params.resolution_binning.min_characterisation_datasets,
+                      config.params.resolution_binning.max_shell_datasets,
+                      config.params.resolution_binning.high_res_increment):
+        continue
+    
+    print("\tWorking on shell {}".format(shell.res_min))
+    
+    shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
 
-        datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
-        print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
+    print("\tTruncating datasets...")
+    shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
+                                                                structure_factors=config.params.diffraction_data.structure_factors,
+                                                                )
+    
+    shell_smoothed_datasets: Datasets = shell_truncated_datasets.smooth(reference_reflections=shell_truncated_datasets[reference.dtag].reflections.reflections,
+                                                          structure_factors=config.params.diffraction_data.structure_factors,
+                                                            )
 
-        print("Getting grid")
-        grid: Grid = Grid.from_reference(reference,
-                                         config.params.masks.outer_mask)
-        print("\tGot grid")
-
-        print("Getting alignments")
-        alignments: Alignments = Alignments.from_datasets(reference,
-                                                          datasets,
-                                                          )
-        print("\tGot alignments")
-
-        # Shells
-        print("Getting shells...")
-        for shell in Shells.from_datasets(datasets, config.params.resolution_binning):
-            print("\tWorking on shell {}".format(shell.res_min))
-
-            print("\tTruncating datasets...")
-            truncated_datasets: Datasets = datasets.truncate(resolution=shell.res_min)
-
-            print("\tGetting reference map...")
-            reference_map: ReferenceMap = ReferenceMap.from_reference(reference,
-                                                                      alignments[reference.dtag],
-                                                                      grid,
-                                                                      config.params.diffraction_data.structure_factors,
-                                                                      )
-
-            print("\tGetting maps...")
-            xmaps: Xmaps = Xmaps.from_aligned_datasets(truncated_datasets,
-                                                       alignments,
-                                                       grid,
-                                                       config.params.diffraction_data.structure_factors,
-                                                       )
-            print("\t\tGot {} xmaps".format(len(xmaps)))
-
-            print("\tDetermining model...")
-            model: Model = Model.from_xmaps(xmaps, grid)
-            print("\t\tGot model")
-            print(ModelLogs.from_model(model))
-
-            print("\tGetting zmaps...")
-            zmaps: Zmaps = Zmaps.from_xmaps(model=model,
-                                            xmaps=xmaps,
+    
+    shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
+    print(len(shell_train_datasets.datasets))
+    shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
+    print(len(shell_test_datasets.datasets))
+    
+    print("\tGetting maps...")
+    xmaps: Xmaps = Xmaps.from_aligned_datasets(shell_smoothed_datasets,
+                                            alignments,
+                                            grid,
+                                            config.params.diffraction_data.structure_factors,
+                                            sample_rate=6.0,
+                                            mapper=mapper,
                                             )
-            print("\t\tGot {} zmaps".format(len(zmaps)))
-
-            print("\tGetting clusters from zmaps...")
-            clusterings: Clusterings = Clusterings.from_Zmaps(zmaps, reference, config.params.blob_finding,
-                                                              config.params.masks)
-            print("\t\tGot {} initial clusters!".format(len(clusterings)))
-            clusterings: Clusterings = clusterings.filter_size(grid,
-                                                               config.params.blob_finding.min_blob_volume)
-            clusterings: Clusterings = clusterings.filter_peak(grid,
-                                                               config.params.blob_finding.min_blob_z_peak)
-
-            events: Events = Events.from_clusters(clusterings)
-
-            z_map_files: ZMapFiles = ZMapFiles.from_zmaps(zmaps)
-            event_map_files: EventMapFiles = EventMapFiles.from_events(events,
-                                                                       xmaps,
-                                                                       )
-
-        site_table_file: SiteTableFile = SiteTableFile.from_events(events)
-        event_table_file: EventTableFile = EventTableFile.from_events(events)
+    print("\t\tGot {} xmaps".format(len(xmaps)))
 
 
 if __name__ == "__main__":
     main()
+
+
