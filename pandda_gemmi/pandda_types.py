@@ -1685,6 +1685,26 @@ class Xmaps:
                 xmaps[dtag] = xmap
 
         else:
+            f = lambda dataset, alignment: Xmap.from_unaligned_dataset(dataset,
+                                            alignment,
+                                            grid,
+                                            structure_factors,
+                                            sample_rate, 
+                                            )
+            
+            keys = list(datasets.datasets.keys())
+            
+            results = joblib.Parallel(n_jobs=-2, verbose=15,
+                                       max_nbytes=None)(
+                                           joblib.delayed(f)(*[datasets[keys],
+                                                               alignments[keys],
+                                                               ])
+                                for key
+                                in keys
+                                       )
+             
+
+            
             xmaps = mapper.map_dict(lambda dataset, alignment:
                 Xmap.from_unaligned_dataset(dataset,
                                             alignment,
