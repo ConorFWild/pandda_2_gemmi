@@ -288,25 +288,17 @@ class FloatGridPython:
         
 @dataclass
 class TransformPython:
-    transform: gemmi.Transform
-    com_reference: np.array
-    com_moving: np.array
-    
+    transform: List
+
     @staticmethod
     def from_gemmi(transform_gemmi):
         transform_python = transform_gemmi.mat.tolist()
-        return TransformPython(transform_python,
-                               transform_gemmi.com_reference,
-                               transform_gemmi.com_moving,
-                               )
+        return TransformPython(transform_python, )
         
     def to_gemmi(self):
         transform_gemmi = gemmi.Transform()
         transform_gemmi.mat.fromlist(self.transform)
-        return (transform_gemmi,
-                         self.com_reference,
-                         self.com_moving,
-                         )
+        return transform_gemmi,
         
 @dataclass
 class AlignmentPython:

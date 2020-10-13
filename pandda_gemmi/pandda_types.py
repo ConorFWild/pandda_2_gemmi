@@ -1335,14 +1335,16 @@ class Transform:
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
     
     def __getstate__(self):
-        transform_python = TransformPython.from_gemmi(self)
-        return transform_python
+        transform_python = TransformPython.from_gemmi(self.transform)
+        com_reference = self.com_reference
+        com_moving = self.com_moving
+        return (transform_python, com_reference, com_moving)
     
-    def __setstate__(self, transform_python: TransformPython):
-        transform_gemmi, com_reference, com_moving = transform_python.to_gemmi()
-        self.transforms = transform_gemmi
-        self.com_reference = com_reference
-        self.com_moving = com_moving
+    def __setstate__(self, data):
+        transform_gemmi = data[0].to_gemmi()
+        self.transform = transform_gemmi
+        self.com_reference = data[1]
+        self.com_moving = data[2]
 
 
 
