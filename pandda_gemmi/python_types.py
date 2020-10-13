@@ -168,16 +168,16 @@ class MtzPython:
 
 @dataclass
 class StructurePython:
-    json_str: str
+    string: str
     
     @staticmethod
     def from_gemmi(structure: gemmi.Structure):
-        json_str = structure.make_mmcif_document().as_json(mmjson=True)
-        return StructurePython(json_str)
+        # json_str = structure.make_mmcif_document().as_json(mmjson=True)
+        string = structure.make_minimal_pdb()
+        return StructurePython(string)
     
     def to_gemmi(self):
-        cif_block = gemmi.cif.read_mmjson(self.json_str)[0]
-        structure = gemmi.make_structure_from_block(cif_block)
+        structure = gemmi.read_pdb_string(self.string)
         
         return structure
 
