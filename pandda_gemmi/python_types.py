@@ -299,7 +299,7 @@ class TransformPython:
     def to_gemmi(self):
         transform_gemmi = gemmi.Transform()
         transform_gemmi.mat.fromlist(self.transform)
-        return transform_gemmi,
+        return transform_gemmi
         
 @dataclass
 class AlignmentPython:
