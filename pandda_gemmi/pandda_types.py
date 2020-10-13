@@ -4,6 +4,7 @@ import typing
 import dataclasses
 
 import os
+import psutil
 import re
 from pathlib import Path
 
@@ -1542,6 +1543,11 @@ class Xmap:
     @staticmethod
     def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors,
                                sample_rate: float = 3.0):
+        
+        p = psutil.Process()
+        p.cpu_affinity()
+        print(f"{p.cpu_affinity()}")
+        
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
@@ -1685,6 +1691,10 @@ class Xmaps:
                 xmaps[dtag] = xmap
 
         else:
+            
+            p = psutil.Process()
+            p.cpu_affinity()
+            print(f"{p.cpu_affinity()}")
             f = lambda dataset, alignment: Xmap.from_unaligned_dataset(dataset,
                                             alignment,
                                             grid,
