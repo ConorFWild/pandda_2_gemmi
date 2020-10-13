@@ -3119,7 +3119,7 @@ class MapperJoblib:
     parallel: typing.Any
 
     @staticmethod
-    def from_joblib(n_jobs=7, verbose=11):
+    def from_joblib(n_jobs=-1, verbose=11):
         parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose).__enter__()
         return MapperJoblib(parallel_env)
 
