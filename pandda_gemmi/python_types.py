@@ -140,7 +140,7 @@ class MtzPython:
                          )
 
     def to_gemmi(self):
-        mtz = gemmi.mtz(with_base=False)
+        mtz = gemmi.Mtz(with_base=False)
         mtz.title = self.mtz_title
         mtz.history = self.mtz_history
         spacegroup = self.spacegroup.to_gemmi()       
