@@ -3119,8 +3119,9 @@ class MapperJoblib:
     parallel: typing.Any
 
     @staticmethod
-    def from_joblib(n_jobs=-1, verbose=11):
-        parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose).__enter__()
+    def from_joblib(n_jobs=-1, verbose=11, max_nbytes=None):
+        parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose,
+                                       max_nbytes=max_nbytes).__enter__()
         return MapperJoblib(parallel_env)
 
     def map_list(self, func, *args):
