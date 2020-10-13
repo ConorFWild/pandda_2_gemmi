@@ -150,10 +150,11 @@ class MtzPython:
         
         for dataset in self.datasets:
             mtz.add_dataset(dataset.dataset_name)
-            ds = mtz.dataset(dataset.number)
+            ds = mtz.dataset(dataset.id)
             ds.project_name = dataset.project_name
             ds.crystal_name = dataset.crystal_name 
             ds.wavelength = dataset.wavelength
+            
             
         for column in self.columns:
             mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
