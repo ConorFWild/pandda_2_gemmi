@@ -1706,11 +1706,15 @@ class Xmaps:
             
             results = joblib.Parallel(n_jobs=-2, verbose=15,
                                        max_nbytes=None)(
-                                           joblib.delayed(f)(*[datasets[key],
-                                                               alignments[key],
-                                                               ])
-                                for key
-                                in keys
+                                           joblib.delayed(Xmap.from_unaligned_dataset)(
+                                               datasets[key],
+                                               alignments[key],
+                                               grid,
+                                               structure_factors,
+                                               sample_rate,
+                                               )
+                                           for key
+                                           in keys
                                        )
              
 
