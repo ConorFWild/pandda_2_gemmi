@@ -1696,14 +1696,15 @@ class Xmaps:
             
             results = joblib.Parallel(n_jobs=-2, verbose=15,
                                        max_nbytes=None)(
-                                           joblib.delayed(f)(*[datasets[keys],
-                                                               alignments[keys],
+                                           joblib.delayed(f)(*[datasets[key],
+                                                               alignments[key],
                                                                ])
                                 for key
                                 in keys
                                        )
              
 
+            
             
             xmaps = mapper.map_dict(lambda dataset, alignment:
                 Xmap.from_unaligned_dataset(dataset,
