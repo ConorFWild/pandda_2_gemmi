@@ -294,7 +294,7 @@ class TransformPython:
     
     @staticmethod
     def from_gemmi(transform_gemmi):
-        transform_python = gemmi.transform.mat.tolist()
+        transform_python = transform_gemmi.mat.tolist()
         return TransformPython(transform_python,
                                transform_gemmi.com_reference,
                                transform_gemmi.com_moving,
