@@ -1175,8 +1175,11 @@ class Grid:
         return (grid_python, partitioning_python)
     
     def __setstate__(self, data):
-        self.partitioning = data[1]
-        self.grid = data[0]
+        self.partitioning = Partitioning(data[1][0].to_gemmi(),
+                                         data[1][1].to_gemmi(),
+                                         data[1][2].to_gemmi(),
+                                         )
+        self.grid = data[0].to_gemmi()
 
 
 @dataclasses.dataclass()
