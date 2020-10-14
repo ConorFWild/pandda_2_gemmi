@@ -10,21 +10,22 @@ from pandda_gemmi.config import Config
 from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
 from pandda_gemmi.pandda_types import *
 
-os.system("taskset -p 0xff %d" % os.getpid())
-
 
 def main():
     args_list = split("--data_dirs=\"/dls/science/groups/i04-1/conor_dev/baz2b_test/data\" --pdb_regex=\"*.dimple.pdb\" --mtz_regex=\"*.dimple.mtz\" --out_dir=\"/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test\" --structure_factors=\"2FOFCWT,PH2FOFCWT\"")
 
     config: Config = Config.from_args_list(args_list)
-    log: Log = Log.from_dir(config.output.out_dir)
+    # log: Log = Log.from_dir(config.output.out_dir)
     printer.pprint(config)
+
+
 
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                             config.output.out_dir,
                                                             config.input.pdb_regex,
                                                             config.input.mtz_regex,
                                                             )
+
 
     mapper = MapperJoblib.from_joblib()
     pandda_fs_model.build()
