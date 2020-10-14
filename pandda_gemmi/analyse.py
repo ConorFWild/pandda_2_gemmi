@@ -103,7 +103,7 @@ if __name__ == '__main__':
                                     verbose=15,
                                     backend="multiprocessing",
                                     max_nbytes=None)(
-                                        joblib.delayed(Xmap.from_unaligned_dataset)(
+                                        joblib.delayed(Xmap.from_unaligned_dataset_c)(
                                             shell_smoothed_datasets[key],
                                             alignments[key],
                                             grid,
