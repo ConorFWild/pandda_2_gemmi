@@ -1704,7 +1704,9 @@ class Xmaps:
             
             keys = list(datasets.datasets.keys())
             
-            results = joblib.Parallel(n_jobs=-2, verbose=15,
+            results = joblib.Parallel(n_jobs=-2, 
+                                      verbose=15,
+                                      backend="multiprocessing",
                                        max_nbytes=None)(
                                            joblib.delayed(Xmap.from_unaligned_dataset)(
                                                datasets[key],
