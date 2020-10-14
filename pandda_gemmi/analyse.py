@@ -95,7 +95,7 @@ if __name__ == '__main__':
         print(len(shell_test_datasets.datasets))
         
         print("\tGetting maps...")
-        keys = list(datasets.datasets.keys())
+        keys = list(shell_smoothed_datasets.datasets.keys())
         
         results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
