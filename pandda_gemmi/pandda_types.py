@@ -1692,32 +1692,32 @@ class Xmaps:
 
         else:
             
-            p = psutil.Process()
-            p.cpu_affinity()
-            print(f"{p.cpu_affinity()}")
-            f = lambda dataset, alignment: Xmap.from_unaligned_dataset(dataset,
-                                            alignment,
-                                            grid,
-                                            structure_factors,
-                                            sample_rate, 
-                                            )
+            # p = psutil.Process()
+            # p.cpu_affinity()
+            # print(f"{p.cpu_affinity()}")
+            # f = lambda dataset, alignment: Xmap.from_unaligned_dataset(dataset,
+            #                                 alignment,
+            #                                 grid,
+            #                                 structure_factors,
+            #                                 sample_rate, 
+            #                                 )
             
-            keys = list(datasets.datasets.keys())
+            # keys = list(datasets.datasets.keys())
             
-            results = joblib.Parallel(n_jobs=-2, 
-                                      verbose=15,
-                                      backend="multiprocessing",
-                                       max_nbytes=None)(
-                                           joblib.delayed(Xmap.from_unaligned_dataset)(
-                                               datasets[key],
-                                               alignments[key],
-                                               grid,
-                                               structure_factors,
-                                               sample_rate,
-                                               )
-                                           for key
-                                           in keys
-                                       )
+            # results = joblib.Parallel(n_jobs=-2, 
+            #                           verbose=15,
+            #                           backend="multiprocessing",
+            #                            max_nbytes=None)(
+            #                                joblib.delayed(Xmap.from_unaligned_dataset)(
+            #                                    datasets[key],
+            #                                    alignments[key],
+            #                                    grid,
+            #                                    structure_factors,
+            #                                    sample_rate,
+            #                                    )
+            #                                for key
+            #                                in keys
+            #                            )
              
 
             
@@ -3156,7 +3156,7 @@ class MapperJoblib:
     parallel: typing.Any
 
     @staticmethod
-    def from_joblib(n_jobs=-1, verbose=11, max_nbytes=None):
+    def from_joblib(n_jobs=-1, verbose=11, max_nbytes=None, backend="multiprocessing"):
         parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose,
                                        max_nbytes=max_nbytes).__enter__()
         return MapperJoblib(parallel_env)
