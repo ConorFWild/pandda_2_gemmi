@@ -4,7 +4,7 @@ if __name__ == '__main__':
     from shlex import split
     from pprint import PrettyPrinter
 
-    from joblib import Parallel
+    import joblib
 
     from pandda_gemmi.config import Config
     from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
