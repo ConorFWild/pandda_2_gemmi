@@ -1,6 +1,7 @@
 if __name__ == '__main__':
 
     import os
+    import time
     import psutil
     from shlex import split
     from pprint import PrettyPrinter
@@ -102,6 +103,21 @@ if __name__ == '__main__':
         
         p = psutil.Process()
         print(f"{p}, affinity {p.cpu_affinity()}")
+
+        start = time.time()        
+        xmaps = {}
+        for dtag in shell_smoothed_datasets:
+            xmap = Xmap.from_unaligned_dataset_c(
+                                            shell_smoothed_datasets[dtag],
+                                            alignments[dtag],
+                                            grid,
+                                            config.params.diffraction_data.structure_factors,
+                                            6.0,
+                                            )
+            xmaps[dtag] = xmap
+        finish = time.time()
+        print(f"Finished in {finish - start}")
+        
         
         results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
