@@ -3158,7 +3158,9 @@ class MapperJoblib:
     @staticmethod
     def from_joblib(n_jobs=-1, verbose=11, max_nbytes=None, backend="multiprocessing"):
         parallel_env = joblib.Parallel(n_jobs=n_jobs, verbose=verbose,
-                                       max_nbytes=max_nbytes).__enter__()
+                                       max_nbytes=max_nbytes,
+                                       backend=backend,
+                                       ).__enter__()
         return MapperJoblib(parallel_env)
 
     def map_list(self, func, *args):
