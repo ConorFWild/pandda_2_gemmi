@@ -27,7 +27,7 @@ if __name__ == '__main__':
                                                                 )
 
 
-        mapper = MapperJoblib.from_joblib()
+        # mapper = MapperJoblib.from_joblib()
         pandda_fs_model.build()
         
         datasets: Datasets = Datasets.from_dir(pandda_fs_model)
