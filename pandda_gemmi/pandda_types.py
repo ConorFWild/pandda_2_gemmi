@@ -4,6 +4,7 @@ import typing
 import dataclasses
 
 import os
+import time
 import psutil
 import re
 from pathlib import Path
@@ -1592,6 +1593,7 @@ class Xmap:
                                  structure_factors: StructureFactors,
                                  sample_rate: float = 3.0):
         
+        start = time.time()
         p = psutil.Process()
         print(f"{p}, affinity {p.cpu_affinity()}")
         
@@ -1630,6 +1632,10 @@ class Xmap:
                                  com_moving_list,
                                  com_reference_list,
                                  )
+        
+        finish = time.time()
+        
+        print(f"{p}: {finish-start}")
 
 
         return Xmap(new_grid)
