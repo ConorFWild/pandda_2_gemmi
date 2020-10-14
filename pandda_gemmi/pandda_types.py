@@ -1692,46 +1692,38 @@ class Xmaps:
 
         else:
             
-            # p = psutil.Process()
-            # p.cpu_affinity()
-            # print(f"{p.cpu_affinity()}")
-            # f = lambda dataset, alignment: Xmap.from_unaligned_dataset(dataset,
+            keys = list(datasets.datasets.keys())
+            
+            results = joblib.Parallel(n_jobs=-2, 
+                                      verbose=15,
+                                      backend="multiprocessing",
+                                       max_nbytes=None)(
+                                           joblib.delayed(Xmap.from_unaligned_dataset)(
+                                               datasets[key],
+                                               alignments[key],
+                                               grid,
+                                               structure_factors,
+                                               sample_rate,
+                                               )
+                                           for key
+                                           in keys
+                                       )
+                                       
+            xmaps = {keys[i]: results[i]
+                for i, key
+                in enumerate(keys)
+                }
+
+            # xmaps = mapper.map_dict(lambda dataset, alignment:
+            #     Xmap.from_unaligned_dataset(dataset,
             #                                 alignment,
             #                                 grid,
             #                                 structure_factors,
             #                                 sample_rate, 
-            #                                 )
-            
-            # keys = list(datasets.datasets.keys())
-            
-            # results = joblib.Parallel(n_jobs=-2, 
-            #                           verbose=15,
-            #                           backend="multiprocessing",
-            #                            max_nbytes=None)(
-            #                                joblib.delayed(Xmap.from_unaligned_dataset)(
-            #                                    datasets[key],
-            #                                    alignments[key],
-            #                                    grid,
-            #                                    structure_factors,
-            #                                    sample_rate,
-            #                                    )
-            #                                for key
-            #                                in keys
-            #                            )
-             
-
-            
-            
-            xmaps = mapper.map_dict(lambda dataset, alignment:
-                Xmap.from_unaligned_dataset(dataset,
-                                            alignment,
-                                            grid,
-                                            structure_factors,
-                                            sample_rate, 
-                                            ),
-                datasets.datasets,
-                alignments.alignments,
-            )
+            #                                 ),
+            #     datasets.datasets,
+            #     alignments.alignments,
+            # )
 
         return Xmaps(xmaps)
 
