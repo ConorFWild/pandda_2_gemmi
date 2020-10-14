@@ -8,7 +8,9 @@ if __name__ == '__main__':
 
     from pandda_gemmi.config import Config
     from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
-    from pandda_gemmi.pandda_types import *
+    from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
+                                           Grid, Alignments, Shells, Xmaps, Xmap,
+    )
 
 
     def main():
