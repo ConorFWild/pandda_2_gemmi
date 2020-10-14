@@ -2,7 +2,6 @@ from __future__ import annotations
 import os
 from shlex import split
 from pprint import PrettyPrinter
-printer = PrettyPrinter()
 
 from joblib import Parallel
 
@@ -95,17 +94,39 @@ def main():
     print(len(shell_test_datasets.datasets))
     
     print("\tGetting maps...")
-    xmaps: Xmaps = Xmaps.from_aligned_datasets(shell_smoothed_datasets,
-                                            alignments,
-                                            grid,
-                                            config.params.diffraction_data.structure_factors,
-                                            sample_rate=6.0,
-                                            mapper=mapper,
-                                            )
-    print("\t\tGot {} xmaps".format(len(xmaps)))
+    keys = list(datasets.datasets.keys())
+    
+    results = joblib.Parallel(n_jobs=-2, 
+                                verbose=15,
+                                backend="multiprocessing",
+                                max_nbytes=None)(
+                                    joblib.delayed(Xmap.from_unaligned_dataset)(
+                                        shell_smoothed_datasets[key],
+                                        alignments[key],
+                                        grid,
+                                        config.params.diffraction_data.structure_factors,
+                                        6.0,
+                                        )
+                                    for key
+                                    in keys
+                                )
+                                
+    xmaps = {keys[i]: results[i]
+        for i, key
+        in enumerate(keys)
+        }
+    xmaps = Xmaps(xmaps)
+    # xmaps: Xmaps = Xmaps.from_aligned_datasets(shell_smoothed_datasets,
+    #                                         alignments,
+    #                                         grid,
+    #                                         config.params.diffraction_data.structure_factors,
+    #                                         sample_rate=6.0,
+    #                                         mapper=mapper,
+    #                                         )
+    # print("\t\tGot {} xmaps".format(len(xmaps)))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
 
