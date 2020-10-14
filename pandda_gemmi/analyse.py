@@ -15,7 +15,7 @@ def main():
 
     config: Config = Config.from_args_list(args_list)
     # log: Log = Log.from_dir(config.output.out_dir)
-    printer.pprint(config)
+    # printer.pprint(config)
 
 
 
