@@ -1,6 +1,7 @@
 if __name__ == '__main__':
 
     import os
+    import psutil
     from shlex import split
     from pprint import PrettyPrinter
 
@@ -98,6 +99,9 @@ if __name__ == '__main__':
         
         print("\tGetting maps...")
         keys = list(shell_smoothed_datasets.datasets.keys())
+        
+        p = psutil.Process()
+        print(f"{p}, affinity {p.cpu_affinity()}")
         
         results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
