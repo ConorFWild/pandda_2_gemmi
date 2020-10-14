@@ -1619,7 +1619,7 @@ class Xmap:
                 com_reference_list.append(com_reference)
 
         # Interpolate values
-        gemmi.interpolate_values(unaligned_xmap,
+        gemmi.interpolate_points(unaligned_xmap,
                                  new_grid,
                                  point_list,
                                  position_list,
