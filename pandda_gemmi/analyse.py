@@ -153,10 +153,11 @@ if __name__ == '__main__':
             print(f"Dumped memmap xmap in {finish-start}")
 
             xmap_array = np.array(xmap.xmap)
-            print(np.mean(xmap))
-            print(np.std(xmap))
-            print(np.max(xmap))
-            print(np.mean(xmap))
+            print(np.mean(xmap_array))
+            print(np.std(xmap_array))
+            print(np.max(xmap_array))
+            print(np.mean(xmap_array))
+
 
             exit()
 
