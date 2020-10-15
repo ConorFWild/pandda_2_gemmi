@@ -1802,8 +1802,6 @@ class Xmap:
         
         new_grid = grid.new_grid()
         
-        
-        
         # Unpack the points, poitions and transforms
         point_list = []
         position_list = []

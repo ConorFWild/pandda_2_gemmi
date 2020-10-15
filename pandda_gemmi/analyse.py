@@ -139,9 +139,6 @@ if __name__ == '__main__':
                 if dtag.dtag == "BAZ2BA-x481":
                     xmaps[dtag].save(path)
                     print("\tSaved!")
-                    
-
-            
 
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
@@ -188,7 +185,7 @@ if __name__ == '__main__':
             clusterings: Clusterings = Clusterings.from_Zmaps(zmaps, 
                                                             reference,
                                                             grid,
-                                                            config.params.blob_finding.clustering_cutoff,
+                                                            config.params.masks.contour_level,
                                                             )
             
             print("\t\tGot {} initial clusters!".format(sum([len(clusterings[dtag]) for dtag in clusterings])))
