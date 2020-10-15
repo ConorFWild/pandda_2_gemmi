@@ -1793,8 +1793,8 @@ class Xmap:
                                                                                                  sample_rate=sample_rate,
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
-        print(np.mean(unaligned_xmap))
-        print(np.std(unaligned_xmap))
+        print(np.mean(unaligned_xmap_array))
+        print(np.std(unaligned_xmap_array))
 
         new_grid = grid.new_grid()
         
@@ -1828,6 +1828,11 @@ class Xmap:
                                  com_moving_list,
                                  com_reference_list,
                                  )
+        
+        
+        new_grid_array = np.array(new_grid, copy=False)
+        print(np.mean(new_grid_array))
+        print(np.std(new_grid_array))
         
         finish = time.time()
 
