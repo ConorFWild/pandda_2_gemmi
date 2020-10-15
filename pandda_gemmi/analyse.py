@@ -140,7 +140,6 @@ if __name__ == '__main__':
             
             
             xmap = xmaps[dtag]
-        
             
             start = time.time()
             pickle.dumps(xmap)
