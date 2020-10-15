@@ -1811,7 +1811,7 @@ class Xmap:
         com_reference_list = []
         for residue_id in alignment:
             al = alignment[residue_id]
-            transform = al.transform
+            transform = al.transform.inverse()
             com_moving = al.com_moving
             com_reference = al.com_reference
             
@@ -1821,8 +1821,6 @@ class Xmap:
                 transform_list.append(transform)
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
-
-        print(len(point_list))
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
