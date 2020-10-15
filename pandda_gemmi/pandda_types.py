@@ -1083,7 +1083,7 @@ class Reference:
 
 @dataclasses.dataclass()
 class Partitioning:
-    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple(float)]]
+    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
     protein_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
 

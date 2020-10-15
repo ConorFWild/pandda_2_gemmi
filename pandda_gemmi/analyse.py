@@ -133,11 +133,16 @@ if __name__ == '__main__':
                 if dtag.dtag == "BAZ2BA-x645":
                     xmaps[dtag].save(path)
                     print("\tSaved!")
+                    
+            path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x561/xmap.ccp4")
+            for dtag in xmaps:
+                if dtag.dtag == "BAZ2BA-x561":
+                    xmaps[dtag].save(path)
+                    print("\tSaved!")
                         
             
             for dtag in shell_test_datasets:
                 continue
-            
             
             xmap = xmaps[dtag]
             
