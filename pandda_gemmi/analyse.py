@@ -8,6 +8,7 @@ if __name__ == '__main__':
     import pickle
     from shlex import split
     from pprint import PrettyPrinter
+    from pathlib import Path
 
     import numpy as np
 
@@ -124,10 +125,15 @@ if __name__ == '__main__':
                                                 )
                 xmaps_dict[dtag] = xmap
             xmaps = Xmaps(xmaps_dict)
-            
             finish = time.time()
             print(f"Interpolated in {finish-start}")
             
+            path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x645/xmap.ccp4")
+            for dtag in xmaps:
+                if dtag.dtag == "BAZ2BA-x645":
+                    xmaps[dtag].save(path)
+                    print("\tSaved!")
+                        
             
             for dtag in shell_test_datasets:
                 continue
@@ -158,17 +164,8 @@ if __name__ == '__main__':
             print(f"Dumped memmap xmap in {finish-start}")
             
             start = time.time()
-            partitioning = grid.partitioning.partitioning
-            partitioning_dict = {}
-            for res_id, residue_dict in partitioning.items():
-                partitioning_dict[res_id] = {}
-                for grid_coord, gemmi_position in residue_dict.items():
-                    coord_python = (gemmi_position.x,
-                                    gemmi_position.y,
-                                    gemmi_position.z,
-                                    )
-                    partitioning_dict[res_id][grid_coord] = coord_python
-            pickle.dumps(partitioning_dict)
+            partitioning = grid.partitioning
+            pickle.dumps(partitioning)
             finish = time.time()
             print(f"Dumped partitioing in {finish-start}")
 
