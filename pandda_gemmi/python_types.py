@@ -241,7 +241,7 @@ class Int8GridPython:
 
     @staticmethod
     def from_gemmi(xmap: gemmi.Int8Grid):
-        array = np.array(xmap, copy=True)
+        array = np.array(xmap, copy=False)
         spacegroup = SpacegroupPython.from_gemmi(xmap.spacegroup)
         unit_cell = UnitCellPython.from_gemmi(xmap.unit_cell)
 
@@ -255,7 +255,7 @@ class Int8GridPython:
         grid.spacegroup = self.spacegroup.to_gemmi()
         grid.set_unit_cell(self.unit_cell.to_gemmi())
         
-        grid_array = np.array(grid, copy=True)
+        grid_array = np.array(grid, copy=False)
         grid_array[:, :, :] = self.array[:, :, :]
         
         return grid

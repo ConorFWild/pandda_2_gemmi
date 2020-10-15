@@ -1792,6 +1792,9 @@ class Xmap:
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
                                                                                                  )
+        unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
+        print(np.mean(unaligned_xmap))
+        print(np.std(unaligned_xmap))
 
         new_grid = grid.new_grid()
         
@@ -1813,6 +1816,8 @@ class Xmap:
                 transform_list.append(transform)
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
+
+        print(len(point_list))
 
         # Interpolate values
         gemmi.interpolate_points(unaligned_xmap,
