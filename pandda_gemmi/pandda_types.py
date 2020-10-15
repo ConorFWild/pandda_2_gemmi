@@ -1787,8 +1787,6 @@ class Xmap:
                                  sample_rate: float = 3.0):
         
         start = time.time()
-        p = psutil.Process()
-        print(f"{p}, affinity {p.cpu_affinity()}")
         
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
@@ -1827,9 +1825,6 @@ class Xmap:
                                  )
         
         finish = time.time()
-        
-        print(f"{p}: {finish-start}")
-
 
         return Xmap(new_grid)
 
