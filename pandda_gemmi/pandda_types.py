@@ -755,7 +755,7 @@ class Datasets:
         
         smoothed_datasets = {}
         for dtag in self.datasets:
-            
+            print(f"\tSmoothing dataset: {dtag}")
             dataset = self.datasets[dtag]
 
             smoothed_dataset = dataset.smooth(reference,
