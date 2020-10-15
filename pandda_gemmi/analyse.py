@@ -199,16 +199,32 @@ if __name__ == '__main__':
                 points = grid.partitioning.partitioning[res_id]
                 for point in points:
                     partitioning.append([x for x in point])
+            
+            print(len(partitioning))
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
             print(f"Dumped just points in {finish-start}")
-
+            
+            partitioning = []
+            for res_id in grid.partitioning.partitioning:
+                points = grid.partitioning.partitioning[res_id]
+                for point in points:
+                    partitioning.append([float(x) for x in point])
+            
+            print(len(partitioning))
+            start = time.time()
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped just points in {finish-start}")
+            
             partitioning = []
             for res_id in grid.partitioning.partitioning:
                 points = grid.partitioning.partitioning[res_id]
                 for point in points:
                     partitioning.append(points[point])
+
+            print(len(partitioning))
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
