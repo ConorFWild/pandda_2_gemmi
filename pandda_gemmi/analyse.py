@@ -111,6 +111,7 @@ if __name__ == '__main__':
             shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
             print(len(shell_test_datasets.datasets))
             
+            start = time.time()
             print("\tGetting maps...")
             xmaps_dict = {}
             for dtag in shell_truncated_datasets:
@@ -123,6 +124,10 @@ if __name__ == '__main__':
                                                 )
                 xmaps_dict[dtag] = xmap
             xmaps = Xmaps(xmaps_dict)
+            
+            finish = time.time()
+            print(f"Interpolated in {finish-start}")
+            
             
             for dtag in shell_test_datasets:
                 continue
