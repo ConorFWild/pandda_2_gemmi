@@ -24,6 +24,8 @@ if __name__ == '__main__':
 
 
     def main():
+        pandda_start = time.time()
+        
         args_list = split("--data_dirs=\"/dls/science/groups/i04-1/conor_dev/baz2b_test/data\" --pdb_regex=\"*.dimple.pdb\" --mtz_regex=\"*.dimple.mtz\" --out_dir=\"/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test\" --structure_factors=\"2FOFCWT,PH2FOFCWT\"")
 
         config: Config = Config.from_args_list(args_list)
@@ -85,6 +87,10 @@ if __name__ == '__main__':
                                                         datasets,
                                                         )
         print("\tGot alignments")
+        
+        pre_pandda_finish = time.time()
+        print(f"Prelim finish in {pre_pandda_finish-pandda_start}")
+
 
         for shell in Shells.from_datasets(datasets, 
                                     config.params.resolution_binning.min_characterisation_datasets,
@@ -234,6 +240,9 @@ if __name__ == '__main__':
             finish = time.time()
             print(f"Finished in {finish - start}")
 
+        pandda_finish = time.time()
+        
+        print(f"PanDDA finished in {pandda_finish-pandda_start}")
 
         site_table_file: SiteTableFile = SiteTableFile.from_events(events)
 
