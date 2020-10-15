@@ -15,7 +15,7 @@ from scipy import spatial
 from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
 
-# import joblib
+import joblib
 
 from sklearn import neighbors
 
@@ -751,17 +751,39 @@ class Datasets:
                         reference: Reference, 
                         structure_factors: StructureFactors,
                         cut = 97.5,
+                        multiprocess=True,
                         ):
         
-        smoothed_datasets = {}
-        for dtag in self.datasets:
-            print(f"\tSmoothing dataset: {dtag}")
-            dataset = self.datasets[dtag]
+        if multiprocess:
+            keys = list(self.datasets.keys())
+            
+            results = joblib.Parallel(n_jobs=-2, 
+                                      verbose=15,
+                                       max_nbytes=None)(
+                                           joblib.delayed(
+                                               self[key].smooth)(
+                                                   reference,
+                                                   structure_factors
+                                                   )
+                                               for key
+                                               in keys
+                                       )
+                                       
+            smoothed_datasets = {keys[i]: results[i]
+                for i, key
+                in enumerate(keys)
+                }
+        
+        else:
+            smoothed_datasets = {}
+            for dtag in self.datasets:
+                print(f"\tSmoothing dataset: {dtag}")
+                dataset = self.datasets[dtag]
 
-            smoothed_dataset = dataset.smooth(reference,
-                                              structure_factors,
-                                              )
-            smoothed_datasets[dtag] = smoothed_dataset
+                smoothed_dataset = dataset.smooth(reference,
+                                                structure_factors,
+                                                )
+                smoothed_datasets[dtag] = smoothed_dataset
             
         return Datasets(smoothed_datasets)
         
