@@ -161,6 +161,8 @@ class MtzPython:
 
         mtz.set_data(self.array)
         
+        mtz.update_reso()
+        
         return mtz
         
         
