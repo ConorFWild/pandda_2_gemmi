@@ -1820,7 +1820,7 @@ class Xmap:
         print(len(point_list))
 
         # Interpolate values
-        gemmi.interpolate_points(unaligned_xmap,
+        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
                                  new_grid,
                                  point_list,
                                  position_list,
@@ -1830,13 +1830,13 @@ class Xmap:
                                  )
         
         
-        new_grid_array = np.array(new_grid, copy=False)
+        new_grid_array = np.array(interpolated_grid, copy=False)
         print(np.mean(new_grid_array))
         print(np.std(new_grid_array))
         
         finish = time.time()
 
-        return Xmap(new_grid)
+        return Xmap(interpolated_grid)
 
     @staticmethod
     def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
