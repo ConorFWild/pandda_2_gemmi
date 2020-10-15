@@ -1785,9 +1785,7 @@ class Xmap:
                                  grid: Grid, 
                                  structure_factors: StructureFactors,
                                  sample_rate: float = 3.0):
-        
-        start = time.time()
-        
+                
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
@@ -1828,13 +1826,7 @@ class Xmap:
                                  com_moving_list,
                                  com_reference_list,
                                  )
-        
-        
-        new_grid_array = np.array(interpolated_grid, copy=False)
-        print(np.mean(new_grid_array))
-        print(np.std(new_grid_array))
-        
-        finish = time.time()
+
 
         return Xmap(interpolated_grid)
 
@@ -1887,6 +1879,59 @@ class Xmap:
         grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
 
         return new_grid
+    
+    @staticmethod
+    def from_aligned_map_c(event_map_reference_grid: gemmi.FloatGrid,
+                         dataset: Dataset, alignment: Alignment, grid: Grid,
+                         structure_factors: StructureFactors, mask_radius: float,
+                         mask_radius_symmetry: float):
+
+        partitioning = Partitioning.from_structure(dataset.structure,
+                                                   event_map_reference_grid,
+                                                   mask_radius,
+                                                   mask_radius_symmetry)
+
+
+        new_grid = gemmi.FloatGrid(*[event_map_reference_grid.nu,
+                                     event_map_reference_grid.nv,
+                                     event_map_reference_grid.nw])
+        new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        new_grid.set_unit_cell(event_map_reference_grid.unit_cell)
+        
+        # Unpack the points, poitions and transforms
+        point_list = []
+        position_list = []
+        transform_list = []
+        com_moving_list = []
+        com_reference_list = []
+        for residue_id in alignment:
+            al = alignment[residue_id]
+            transform = al.transform.inverse()
+            com_moving = al.com_moving
+            com_reference = al.com_reference
+            
+            for point, position in grid.partitioning[residue_id].items():
+                point_list.append(point)
+                position_list.append(position)
+                transform_list.append(transform)
+                com_moving_list.append(com_moving)
+                com_reference_list.append(com_reference)
+
+        print(len(point_list))
+
+        # Interpolate values
+        interpolated_grid = gemmi.interpolate_points(
+            event_map_reference_grid,
+            new_grid,
+            point_list,
+            position_list,
+            transform_list,
+            com_moving_list,
+            com_reference_list,
+            )
+
+        return new_grid
+
 
     @staticmethod
     def interpolate_grid(grid: gemmi.FloatGrid,

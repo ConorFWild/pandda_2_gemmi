@@ -153,7 +153,17 @@ if __name__ == '__main__':
             print(f"Dumped memmap xmap in {finish-start}")
             
             start = time.time()
-            pickle.dumps(grid.partitioning.partitioning)
+            partitioning = grid.partitioning.partitioning
+            partitioning_dict = {}
+            for res_id, residue_dict in partitioning.items():
+                partitioning_dict[res_id] = {}
+                for grid_coord, gemmi_position in residue_dict.items():
+                    coord_python = (gemmi_position.x,
+                                    gemmi_position.y,
+                                    gemmi_position.z,
+                                    )
+                    partitioning_dict[res_id][grid_coord] = coord_python
+            pickle.dumps(partitioning_dict)
             finish = time.time()
             print(f"Dumped partitioing in {finish-start}")
 
@@ -162,6 +172,7 @@ if __name__ == '__main__':
             print(np.std(xmap_array))
             print(np.max(xmap_array))
             print(np.mean(xmap_array))
+            
 
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
