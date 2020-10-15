@@ -73,7 +73,7 @@ if __name__ == '__main__':
         
         for dtag in datasets:
             reflections = datasets[dtag].reflections.reflections
-            array = np.arrat(reflections)
+            array = np.array(reflections)
             print(array)
             
 
