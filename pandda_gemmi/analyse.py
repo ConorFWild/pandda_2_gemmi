@@ -163,9 +163,6 @@ if __name__ == '__main__':
             print(np.max(xmap_array))
             print(np.mean(xmap_array))
 
-
-            exit()
-
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
             shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
