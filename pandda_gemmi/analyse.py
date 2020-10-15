@@ -139,6 +139,7 @@ if __name__ == '__main__':
             pickle.dumps(xmap)
             finish = time.time()
             print(f"Dumped xmap in {finish-start}")
+            
 
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
