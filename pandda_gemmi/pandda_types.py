@@ -765,7 +765,6 @@ class Datasets:
             
         return Datasets(smoothed_datasets)
         
-    
     def smooth(self, 
                reference_reflections: gemmi.Mtz, 
             structure_factors: StructureFactors,
