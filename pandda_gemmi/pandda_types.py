@@ -1796,10 +1796,12 @@ class Xmap:
                                                                                                  sample_rate=sample_rate,
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
-        print(np.mean(unaligned_xmap_array))
-        print(np.std(unaligned_xmap_array))
 
+        std = np.std(unaligned_xmap_array)
+        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
+        
         new_grid = grid.new_grid()
+        
         
         # Unpack the points, poitions and transforms
         point_list = []
