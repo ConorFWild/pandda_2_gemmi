@@ -747,6 +747,7 @@ class Datasets:
 
         return Datasets(new_datasets_reflections)
     
+    
     def smooth_datasets(self, 
                         reference: Reference, 
                         structure_factors: StructureFactors,
@@ -773,6 +774,7 @@ class Datasets:
                 for i, key
                 in enumerate(keys)
                 }
+        
         
         else:
             smoothed_datasets = {}
