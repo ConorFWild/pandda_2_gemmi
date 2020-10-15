@@ -153,7 +153,7 @@ if __name__ == '__main__':
             print(f"Dumped memmap xmap in {finish-start}")
             
             start = time.time()
-            pickle.dumps(grid.partitioning)
+            pickle.dumps(grid.partitioning.partitioning)
             finish = time.time()
             print(f"Dumped partitioing in {finish-start}")
 
