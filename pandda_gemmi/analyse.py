@@ -1,11 +1,15 @@
 if __name__ == '__main__':
 
+
     import os
+    from typing import Dict
     import time
     import psutil
     import pickle
     from shlex import split
     from pprint import PrettyPrinter
+
+    import numpy as np
 
     import joblib
 
@@ -13,6 +17,8 @@ if __name__ == '__main__':
     from pandda_gemmi.logs import Log, XmapLogs, ModelLogs
     from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
                                            Grid, Alignments, Shells, Xmaps, Xmap,
+                                           XmapArray, Model, Dtag, Zmaps, Clusterings,
+                                           Events, SiteTableFile, EventTableFile
     )
 
 
@@ -38,6 +44,7 @@ if __name__ == '__main__':
         datasets: Datasets = Datasets.from_dir(pandda_fs_model)
         print("\tGot {} datasets".format(len(datasets.datasets)))   
         
+        # Initial filters
         datasets: Datasets = datasets.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
         print("\tAfter filters (structure factors) {} datasets".format(len(datasets.datasets)))
@@ -48,19 +55,23 @@ if __name__ == '__main__':
         print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
         datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
         print("\tAfter filters {} datasets".format(len(datasets.datasets)))
-        datasets: Datasets = datasets.smooth_datasets()  
-        print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
 
+        # Select refernce
         reference: Reference = Reference.from_datasets(datasets)
-
+        
+        # Post-reference filters
+        datasets: Datasets = datasets.smooth_datasets(reference, 
+                                                      structure_factors=config.params.diffraction_data.structure_factors,
+                                                      )  
+        print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
         datasets: Datasets = datasets.remove_dissimilar_models(reference,
                                                             config.params.filtering.max_rmsd_to_reference,
                                                             )
         print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
-
         datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
         print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
 
+        # Grid
         print("Getting grid")
         grid: Grid = Grid.from_reference(reference,
                                 config.params.masks.outer_mask,
@@ -78,99 +89,138 @@ if __name__ == '__main__':
                                     config.params.resolution_binning.min_characterisation_datasets,
                         config.params.resolution_binning.max_shell_datasets,
                         config.params.resolution_binning.high_res_increment):
-            continue
         
-        print("\tWorking on shell {}".format(shell.res_min))
-        
-        shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
+            print("\tWorking on shell {}".format(shell.res_min))
+            shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
 
-        print("\tTruncating datasets...")
-        shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
-                                                                    structure_factors=config.params.diffraction_data.structure_factors,
-                                                                    )
-        
-        shell_smoothed_datasets: Datasets = shell_truncated_datasets.smooth(reference_reflections=shell_truncated_datasets[reference.dtag].reflections.reflections,
-                                                            structure_factors=config.params.diffraction_data.structure_factors,
-                                                                )
+            print("\tTruncating datasets...")
+            shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
+                                                                        structure_factors=config.params.diffraction_data.structure_factors,
+                                                                        )
+            
+            # shell_smoothed_datasets: Datasets = shell_truncated_datasets.smooth(reference_reflections=shell_truncated_datasets[reference.dtag].reflections.reflections,
+            #                                                     structure_factors=config.params.diffraction_data.structure_factors,
+            #                                                         )
 
-        
-        shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
-        print(len(shell_train_datasets.datasets))
-        shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
-        print(len(shell_test_datasets.datasets))
-        
-        print("\tGetting maps...")
-        keys = list(shell_smoothed_datasets.datasets.keys())
-        
-        p = psutil.Process()
-        print(f"{p}, affinity {p.cpu_affinity()}")
-        
-        for dtag in shell_smoothed_datasets:
-            continue
-        
-        try:
+            # Assign datasets
+            shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
+            print(len(shell_train_datasets.datasets))
+            shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
+            print(len(shell_test_datasets.datasets))
             
+            print("\tGetting maps...")
             start = time.time()        
-            pickle.dumps(shell_smoothed_datasets[dtag])
-            finish = time.time()
-            print(f"Finished dataset in {finish - start}")
-            
-            start = time.time()        
-            pickle.dumps(alignments[dtag])
-            finish = time.time()
-            print(f"Finished alignment in {finish - start}")
-            
-            start = time.time()        
-            pickle.dumps(grid)
+            xmaps_dict = {}
+            for dtag in shell_truncated_datasets:
+                xmap = Xmap.from_unaligned_dataset_c(
+                                                shell_truncated_datasets[dtag],
+                                                alignments[dtag],
+                                                grid,
+                                                config.params.diffraction_data.structure_factors,
+                                                4.0,
+                                                )
+                xmaps_dict[dtag] = xmap
+            xmaps = Xmaps(xmaps_dict)
             finish = time.time()
             print(f"Finished in {finish - start}")
+            shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
+            print(len(shell_train_xmaps.xmaps))
+            shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
+            print(len(shell_test_xmaps.xmaps))
             
-        
-        except:
-            pass
-        
+            # Get arrays for model        
+            masked_xmap_array: XmapArray = XmapArray.from_xmaps(xmaps,
+                                        grid,
+                                        )
+            masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
+            print(len(masked_train_xmap_array.dtag_list))
+            masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
+            print(len(masked_test_xmap_array.dtag_list))
+            
+            mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
+                                              )
+            
+            sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_xmap_array,
+                                                        mean_array,
+                                                       1.5,
+                                                       )
+            
+            sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
+                                                        mean_array,
+                                                        sigma_is,
+                                                        )
+            
+            print("\tDetermining model...")
+            model: Model = Model.from_mean_is_sms(mean_array,
+                                sigma_is,
+                                sigma_s_m,
+                                                grid,
+                                )
+            print("\t\tGot model")
+            
+            print("\tGetting zmaps...")
+            zmaps: Zmaps = Zmaps.from_xmaps(model=model,
+                                        xmaps=shell_test_xmaps,
+                                        )
+            print("\t\tGot {} zmaps".format(len(zmaps)))
 
-        # start = time.time()        
-        # xmaps = {}
-        # for dtag in shell_smoothed_datasets:
-        #     xmap = Xmap.from_unaligned_dataset_c(
-        #                                     shell_smoothed_datasets[dtag],
-        #                                     alignments[dtag],
-        #                                     grid,
-        #                                     config.params.diffraction_data.structure_factors,
-        #                                     6.0,
-        #                                     )
-        #     xmaps[dtag] = xmap
-        # finish = time.time()
-        # print(f"Finished in {finish - start}")
-        
-        
-        results = joblib.Parallel(n_jobs=-2, 
-                                    verbose=15,)(
-                                        joblib.delayed(Xmap.from_unaligned_dataset_c)(
-                                            shell_smoothed_datasets[key],
-                                            alignments[key],
-                                            grid,
-                                            config.params.diffraction_data.structure_factors,
-                                            6.0,
-                                            )
-                                        for key
-                                        in keys
-                                    )
-                                    
-        xmaps = {keys[i]: results[i]
-            for i, key
-            in enumerate(keys)
-            }
-        xmaps = Xmaps(xmaps)
-        # xmaps: Xmaps = Xmaps.from_aligned_datasets(shell_smoothed_datasets,
-        #                                         alignments,
-        #                                         grid,
-        #                                         config.params.diffraction_data.structure_factors,
-        #                                         sample_rate=6.0,
-        #                                         mapper=mapper,
-        #                                         )
-        # print("\t\tGot {} xmaps".format(len(xmaps)))
+            print("\tGetting clusters from zmaps...")
+            clusterings: Clusterings = Clusterings.from_Zmaps(zmaps, 
+                                                            reference,
+                                                            grid,
+                                                            config.params.blob_finding.clustering_cutoff,
+                                                            )
+            
+            print("\t\tGot {} initial clusters!".format(sum([len(clusterings[dtag]) for dtag in clusterings])))
+            
+            clusterings_large: Clusterings = clusterings.filter_size(grid,
+                                                            12.0)
+            print("\t\tGot {} big clusters!".format(sum([len(clusterings_large[dtag]) for dtag in clusterings_large])))
+            
+            clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
+                                                   config.params.blob_finding.min_blob_z_peak)
+            print("\t\tGot {} peaked clusters!".format(sum([len(clusterings_peaked[dtag]) for dtag in clusterings_peaked])))
+
+            for dtag in zmaps:
+                print(f"\t Saving {dtag}")
+                zmap = zmaps[dtag]
+                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+
+            events: Events = Events.from_clusters(clusterings_peaked, model, xmaps, grid, 1.732)
+
+            for event_id in events:
+                dtag = event_id.dtag
+                event = events[event_id]
+                alignment = alignments[dtag]
+                dataset = datasets[dtag]
+            #     print(type(alignment))
+                string = f"""
+                dtag: {dtag}
+                event bdc: {event.bdc}
+                centroid: {event.cluster.centroid}
+                """
+                print(string)
+                processed_dataset = pandda_fs_model.processed_datasets[event_id.dtag]
+                processed_dataset.event_map_files.add_event(event)
+                processed_dataset.event_map_files[event.event_id.event_idx].save(xmaps[dtag],
+                                                                                model,
+                                                                                event,
+                                                                                dataset, 
+                                                                                alignment,
+                                                                                grid, 
+                                                                                config.params.diffraction_data.structure_factors, 
+                                                                                config.params.masks.outer_mask,
+                                                                                config.params.masks.inner_mask_symmetry,
+                                                                                
+                                                                                )
+
+
+        site_table_file: SiteTableFile = SiteTableFile.from_events(events)
+
+        event_table_file: EventTableFile = EventTableFile.from_events(events)
+                        
+                        
+            
 
 
     main()
