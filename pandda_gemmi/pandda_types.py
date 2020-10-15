@@ -445,6 +445,156 @@ class Dataset:
         return Dataset(self.structure,
                        new_reflections,
                        )
+        
+    def common_reflections(self, 
+                           reference_ref: Reflections,
+                           structure_factors: StructureFactors,
+                           ):
+        # Get own reflections
+        dtag_reflections = self.reflections.reflections
+        dtag_reflections_array = np.array(dtag_reflections, copy=True)
+        dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+                                            columns=dtag_reflections.column_labels(),
+                                            )
+        dtag_reflections_table.set_index(["H", "K", "L"], inplace=True)
+        dtag_flattened_index = dtag_reflections_table[~dtag_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+        
+        # Get reference
+        reference_reflections = reference_ref.reflections
+        reference_reflections_array = np.array(reference_reflections, copy=True)
+        reference_reflections_table = pd.DataFrame(reference_reflections_array,
+                                            columns=reference_reflections.column_labels(),
+                                            )
+        reference_reflections_table.set_index(["H", "K", "L"], inplace=True)
+        reference_flattened_index = reference_reflections_table[~reference_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+        
+        
+        running_index = dtag_flattened_index.intersection(reference_flattened_index)
+
+        return running_index.to_list()
+        
+        
+        
+    def smooth(self, reference: Reference, structure_factors: StructureFactors):
+        reference_dataset = reference.dataset
+        
+        # Get common set of reflections
+        common_reflections = self.common_reflections(reference_dataset.reflections,
+                                                        structure_factors,
+                                                        )
+        
+        
+        # Truncate 
+        truncated_reference = reference.dataset.truncate_reflections(common_reflections)
+        truncated_dataset = self.truncate_reflections(common_reflections)
+        
+        # Refference array 
+        reference_reflections = truncated_reference.reflections.reflections
+        reference_reflections_array = np.array(reference_reflections,
+                                            copy=True,
+                                            )
+        reference_reflections_table = pd.DataFrame(reference_reflections_array,
+                                                columns=reference_reflections.column_labels(),
+                                                )
+        reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
+        
+        # Dtag array
+        dtag_reflections = truncated_dataset.reflections.reflections                           
+        dtag_reflections_array = np.array(dtag_reflections,
+                                        copy=True,
+                                    )
+        dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+                                            columns=dtag_reflections.column_labels(),
+                                            )        
+        dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
+
+        # Resolution array
+        resolution_array = reference_reflections.make_1_d2_array()
+
+        # Prepare optimisation
+        x = reference_f_array
+        y = dtag_f_array
+        
+        r = resolution_array
+        
+        sample_grid = np.linspace(min(r), max(r), 100)
+        
+        knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+        knn_x.fit(r.reshape(-1,1), 
+                    x.reshape(-1,1),
+                    )
+        x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+        scales = []
+        rmsds = []
+        
+        # Optimise the scale factor
+        for scale in np.linspace(-4,4,100):
+            y_s = y * np.exp(scale * r)
+            knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+            knn_y.fit(r.reshape(-1,1), 
+                    y_s.reshape(-1,1),
+                    )
+
+
+            y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+            rmsd = np.sum(np.abs(x_f-y_f)) 
+
+            scales.append(scale)
+            rmsds.append(rmsd)
+            
+        min_scale = scales[np.argmin(rmsds)]
+        print(zip(scales, rmsds))
+        print(f"\tscaling by {min_scale}")
+        
+        # Get the original reflections
+        original_reflections = self.reflections.reflections
+        
+        original_reflections_array = np.array(original_reflections,
+                                            copy=True,
+                                            )
+        
+        original_reflections_table = pd.DataFrame(original_reflections_array,
+                                        columns=reference_reflections.column_labels(),
+                                        )
+        
+        f_array = original_reflections_table[structure_factors.f]
+        
+        f_scaled_array = f_array * np.exp(min_scale*resolution_array)
+        
+        original_reflections_table[structure_factors.f] = f_scaled_array
+        
+        # New reflections
+        new_reflections = gemmi.Mtz(with_base=False)
+
+        # Set dataset properties
+        new_reflections.spacegroup = original_reflections.spacegroup
+        new_reflections.set_cell_for_all(dtag_reflections.cell)
+
+        # Add dataset
+        new_reflections.add_dataset("scaled")
+
+        # Add columns
+        for column in original_reflections.columns:
+            new_reflections.add_column(column.label, column.type)
+        
+        # Update
+        new_reflections.set_data(original_reflections_table.to_numpy())
+
+        # Update resolution
+        new_reflections.update_reso() 
+                
+        # Create new dataset
+        smoothed_dataset = Dataset(self.structure,
+                              Reflections(new_reflections),
+                            )    
+
+        
+        return smoothed_dataset
+
+    
+        
 
 
 @dataclasses.dataclass()
@@ -597,7 +747,27 @@ class Datasets:
 
         return Datasets(new_datasets_reflections)
     
-    def smooth(self, reference_reflections: gemmi.Mtz, 
+    def smooth_datasets(self, 
+                        reference: Reference, 
+                        structure_factors: StructureFactors,
+                        cut = 97.5,
+                        ):
+        
+        smoothed_datasets = {}
+        for dtag in self.datasets:
+            
+            dataset = self.datasets[dtag]
+
+            smoothed_dataset = dataset.smooth(reference,
+                                              structure_factors,
+                                              )
+            smoothed_datasets[dtag] = smoothed_dataset
+            
+        return Datasets(smoothed_datasets)
+        
+    
+    def smooth(self, 
+               reference_reflections: gemmi.Mtz, 
             structure_factors: StructureFactors,
             cut = 97.5,
             ):

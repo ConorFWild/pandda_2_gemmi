@@ -48,7 +48,7 @@ if __name__ == '__main__':
         print("\tAfter filters (max rfree) {} datasets".format(len(datasets.datasets)))
         datasets: Datasets = datasets.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
         print("\tAfter filters {} datasets".format(len(datasets.datasets)))
-        # datasets: Datasets = datasets.scale_reflections()  # TODO
+        datasets: Datasets = datasets.smooth_datasets()  
         print("\tAfter filters (scale reflections) {} datasets".format(len(datasets.datasets)))
 
         reference: Reference = Reference.from_datasets(datasets)
@@ -146,8 +146,7 @@ if __name__ == '__main__':
         
         
         results = joblib.Parallel(n_jobs=-2, 
-                                    verbose=15,
-                                    backend="multiprocessing",)(
+                                    verbose=15,)(
                                         joblib.delayed(Xmap.from_unaligned_dataset_c)(
                                             shell_smoothed_datasets[key],
                                             alignments[key],
