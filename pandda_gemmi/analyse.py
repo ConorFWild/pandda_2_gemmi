@@ -172,6 +172,18 @@ if __name__ == '__main__':
             pickle.dumps(partitioning)
             finish = time.time()
             print(f"Dumped partitioing in {finish-start}")
+            
+            start = time.time()
+            partitioning = grid.partitioning
+            joblib.dump(grid, "/tmp/grid.mm")            
+            finish = time.time()
+            print(f"Dumped partitioing joblib in {finish-start}")
+            
+            start = time.time()
+            partitioning = grid.partitioning.partitioning
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped just partition in {finish-start}")
 
             xmap_array = np.array(xmap.xmap)
             print(np.mean(xmap_array))
