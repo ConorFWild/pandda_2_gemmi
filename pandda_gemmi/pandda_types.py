@@ -1232,19 +1232,20 @@ class Partitioning:
         print("\tAssigning partitions...")
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
-            coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
+            coord = (int(coord_as_array[0]), 
+                     int(coord_as_array[1]), 
+                     int(coord_as_array[2]),
+                     )
             position = positions[i]
 
             res_num = indexes[i]
 
             res_id = res_indexes[res_num]
-
             if res_id not in partitions:
                 partitions[res_id] = {}
 
             # partitions[res_id][coord] = gemmi.Position(*position)
             partitions[res_id][coord] = position
-
 
         print("\tFound {} partitions".format(len(partitions)))
 
