@@ -185,6 +185,36 @@ if __name__ == '__main__':
             pickle.dumps(partitioning)
             finish = time.time()
             print(f"Dumped just partition in {finish-start}")
+            
+            partitioning = []
+            for res_id in grid.partitioning.partitioning:
+                partitioning.append(res_id.model, res_id.chain, res_id.insertion)
+            start = time.time()
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped partition resids in {finish-start}")
+            
+            partitioning = []
+            for res_id in grid.partitioning.partitioning:
+                points = grid.partitioning.partitioning[res_id]
+                for point in points:
+                    partitioning.append(point)
+            start = time.time()
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped just points in {finish-start}")
+
+            partitioning = []
+            for res_id in grid.partitioning.partitioning:
+                points = grid.partitioning.partitioning[res_id]
+                for point in points:
+                    partitioning.append(points[point])
+            start = time.time()
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped just partition in {finish-start}")
+
+
 
             xmap_array = np.array(xmap.xmap)
             print(np.mean(xmap_array))
