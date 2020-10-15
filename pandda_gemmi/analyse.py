@@ -216,7 +216,20 @@ if __name__ == '__main__':
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
-            print(f"Dumped just points in {finish-start}")
+            print(f"Dumped just points (float) in {finish-start}")
+            
+            partitioning = []
+            for res_id in grid.partitioning.partitioning:
+                points = grid.partitioning.partitioning[res_id]
+                for point in points:
+                    partitioning.append([int(x) for x in point])
+            
+            
+            print(len(partitioning))
+            start = time.time()
+            pickle.dumps(partitioning)
+            finish = time.time()
+            print(f"Dumped just points (float) in {finish-start}")
             
             partitioning = []
             for res_id in grid.partitioning.partitioning:
