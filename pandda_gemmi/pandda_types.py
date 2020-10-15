@@ -3084,7 +3084,8 @@ class EventMapFile:
                                                              )
         return EventMapFile(event_map_path)
 
-    def save(self, xmap: Xmap,
+    def save(self, 
+             xmap: Xmap,
              model: Model,
              event: Event,
              dataset: Dataset,
@@ -3127,7 +3128,7 @@ class EventMapFile:
                                                )
 
         ccp4 = gemmi.Ccp4Map()
-        ccp4.grid = event_map_grid
+        ccp4.grid = event_map_grid.xmap
         ccp4.update_ccp4_header(2, True)
         # ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
