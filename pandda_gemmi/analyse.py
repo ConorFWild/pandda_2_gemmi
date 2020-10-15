@@ -89,6 +89,9 @@ if __name__ == '__main__':
                                     config.params.resolution_binning.min_characterisation_datasets,
                         config.params.resolution_binning.max_shell_datasets,
                         config.params.resolution_binning.high_res_increment):
+            # Record start time
+            start = time.time()        
+
         
             print("\tWorking on shell {}".format(shell.res_min))
             shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
@@ -109,7 +112,6 @@ if __name__ == '__main__':
             print(len(shell_test_datasets.datasets))
             
             print("\tGetting maps...")
-            start = time.time()        
             xmaps_dict = {}
             for dtag in shell_truncated_datasets:
                 xmap = Xmap.from_unaligned_dataset_c(
@@ -121,8 +123,7 @@ if __name__ == '__main__':
                                                 )
                 xmaps_dict[dtag] = xmap
             xmaps = Xmaps(xmaps_dict)
-            finish = time.time()
-            print(f"Finished in {finish - start}")
+
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
             shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
@@ -213,6 +214,9 @@ if __name__ == '__main__':
                                                                                 config.params.masks.inner_mask_symmetry,
                                                                                 
                                                                                 )
+                
+            finish = time.time()
+            print(f"Finished in {finish - start}")
 
 
         site_table_file: SiteTableFile = SiteTableFile.from_events(events)
