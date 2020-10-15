@@ -136,7 +136,7 @@ if __name__ == '__main__':
                     
             path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x650/xmap.ccp4")
             for dtag in xmaps:
-                if dtag.dtag == "BAZ2BA-x650":
+                if dtag.dtag == "BAZ2BA-x481":
                     xmaps[dtag].save(path)
                     print("\tSaved!")
                     
@@ -198,7 +198,7 @@ if __name__ == '__main__':
             for res_id in grid.partitioning.partitioning:
                 points = grid.partitioning.partitioning[res_id]
                 for point in points:
-                    partitioning.append(point)
+                    partitioning.append([x for x in point])
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
-            print(f"Dumped just partition in {finish-start}")
+            print(f"Dumped just positions in {finish-start}")
 
 
 
