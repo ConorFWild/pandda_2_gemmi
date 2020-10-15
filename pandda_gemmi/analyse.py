@@ -188,7 +188,7 @@ if __name__ == '__main__':
             
             partitioning = []
             for res_id in grid.partitioning.partitioning:
-                partitioning.append(res_id.model, res_id.chain, res_id.insertion)
+                partitioning.append([res_id.model, res_id.chain, res_id.insertion])
             start = time.time()
             pickle.dumps(partitioning)
             finish = time.time()
