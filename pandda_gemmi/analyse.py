@@ -70,6 +70,12 @@ if __name__ == '__main__':
         print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
         datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
         print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
+        
+        for dtag in datasets:
+            reflections = datasets[dtag].reflections.reflections
+            array = np.arrat(reflections)
+            print(array)
+            
 
         # Grid
         print("Getting grid")

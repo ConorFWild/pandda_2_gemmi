@@ -561,7 +561,7 @@ class Dataset:
         
         f_array = original_reflections_table[structure_factors.f]
         
-        f_scaled_array = f_array * np.exp(min_scale*resolution_array)
+        f_scaled_array = f_array * np.exp(min_scale*original_reflections.make_1_d2_array())
         
         original_reflections_table[structure_factors.f] = f_scaled_array
         
@@ -570,7 +570,7 @@ class Dataset:
 
         # Set dataset properties
         new_reflections.spacegroup = original_reflections.spacegroup
-        new_reflections.set_cell_for_all(dtag_reflections.cell)
+        new_reflections.set_cell_for_all(original_reflections.cell)
 
         # Add dataset
         new_reflections.add_dataset("scaled")
