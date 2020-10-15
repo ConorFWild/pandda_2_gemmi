@@ -1910,7 +1910,7 @@ class Xmap:
         com_reference_list = []
         for residue_id in alignment:
             al = alignment[residue_id]
-            transform = al.transform.inverse()
+            transform = al.transform
             com_moving = al.com_reference
             com_reference = al.com_moving
             
@@ -1934,7 +1934,7 @@ class Xmap:
             com_reference_list,
             )
 
-        return new_grid
+        return Xmap(interpolated_grid)
 
 
     @staticmethod
@@ -3117,7 +3117,7 @@ class EventMapFile:
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
-        event_map_grid = Xmap.from_aligned_map(event_map_reference_grid,
+        event_map_grid = Xmap.from_aligned_map_c(event_map_reference_grid,
                                                dataset,
                                                alignment,
                                                grid,
