@@ -151,6 +151,11 @@ if __name__ == '__main__':
             joblib.dump(grid, "/tmp/grid.mm")
             finish = time.time()
             print(f"Dumped memmap xmap in {finish-start}")
+            
+            start = time.time()
+            pickle.dumps(grid.partitioning)
+            finish = time.time()
+            print(f"Dumped partitioing in {finish-start}")
 
             xmap_array = np.array(xmap.xmap)
             print(np.mean(xmap_array))
