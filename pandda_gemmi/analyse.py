@@ -70,12 +70,6 @@ if __name__ == '__main__':
         print("\tAfter filters (remove dissimilar models) {} datasets".format(len(datasets.datasets)))
         datasets: Datasets = datasets.remove_dissimilar_space_groups(reference)
         print("\tAfter filters (dissimilar spacegroups) {} datasets".format(len(datasets.datasets)))
-        
-        for dtag in datasets:
-            reflections = datasets[dtag].reflections.reflections
-            array = np.array(reflections)
-            print(array)
-            
 
         # Grid
         print("Getting grid")
@@ -135,6 +129,8 @@ if __name__ == '__main__':
             
             
             xmap = xmaps[dtag]
+        
+            
             start = time.time()
             pickle.dumps(xmap)
             finish = time.time()
@@ -145,6 +141,24 @@ if __name__ == '__main__':
             joblib.dump(xmap, "/tmp/xmap.mm")
             finish = time.time()
             print(f"Dumped memmap xmap in {finish-start}")
+            
+            start = time.time()
+            pickle.dumps(grid)
+            finish = time.time()
+            print(f"Dumped grid in {finish-start}")
+            
+            start = time.time()
+            joblib.dump(grid, "/tmp/grid.mm")
+            finish = time.time()
+            print(f"Dumped memmap xmap in {finish-start}")
+
+            xmap_array = np.array(xmap.xmap)
+            print(np.mean(xmap))
+            print(np.std(xmap))
+            print(np.max(xmap))
+            print(np.mean(xmap))
+
+            exit()
 
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
