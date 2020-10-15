@@ -1083,7 +1083,7 @@ class Reference:
 
 @dataclasses.dataclass()
 class Partitioning:
-    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], gemmi.Position]]
+    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple(float)]]
     protein_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
 
@@ -1218,10 +1218,10 @@ class Partitioning:
         for coord in coord_array:
             point = mask.get_point(*coord)
             position = mask.point_to_position(point)
-            positions.append([position[0],
+            positions.append((position[0],
                               position[1],
                               position[2],
-                              ]
+            )
                              )
 
         position_array = np.array(positions)
@@ -1242,7 +1242,9 @@ class Partitioning:
             if res_id not in partitions:
                 partitions[res_id] = {}
 
-            partitions[res_id][coord] = gemmi.Position(*position)
+            # partitions[res_id][coord] = gemmi.Position(*position)
+            partitions[res_id][coord] = position
+
 
         print("\tFound {} partitions".format(len(partitions)))
 
@@ -1292,7 +1294,8 @@ class Partitioning:
         return mask
     
     def __getstate__(self):
-        partitioning_python = PartitoningPython.from_gemmi(self.partitioning)
+        # partitioning_python = PartitoningPython.from_gemmi(self.partitioning)
+        partitioning_python = self.partitioning
         protein_mask_python = Int8GridPython.from_gemmi(self.protein_mask)
         symmetry_mask_python = Int8GridPython.from_gemmi(self.symmetry_mask)
         return (partitioning_python,
@@ -1907,10 +1910,10 @@ class Xmap:
         for residue_id in alignment:
             al = alignment[residue_id]
             transform = al.transform.inverse()
-            com_moving = al.com_moving
-            com_reference = al.com_reference
+            com_moving = al.com_reference
+            com_reference = al.com_moving
             
-            for point, position in grid.partitioning[residue_id].items():
+            for point, position in partitioning[residue_id].items():
                 point_list.append(point)
                 position_list.append(position)
                 transform_list.append(transform)
