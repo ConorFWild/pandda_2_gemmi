@@ -1962,7 +1962,6 @@ class Xmap:
     def __setstate__(self, xmap_python: XmapPython):
         self.xmap = xmap_python.to_gemmi()
 
-
 @dataclasses.dataclass()
 class Xmaps:
     xmaps: typing.Dict[Dtag, Xmap]
@@ -1974,21 +1973,10 @@ class Xmaps:
     @staticmethod
     def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
                               structure_factors: StructureFactors, sample_rate=3.0,
-                              mapper=None,
+                              mapper=True,
                               ):
         
-        if mapper is None:
-            xmaps = {}
-            for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                                alignments[dtag],
-                                                grid,
-                                                structure_factors,
-                                                sample_rate)
-
-                xmaps[dtag] = xmap
-
-        else:
+        if mapper:
             
             keys = list(datasets.datasets.keys())
             
@@ -2011,6 +1999,18 @@ class Xmaps:
                 for i, key
                 in enumerate(keys)
                 }
+            
+        else:
+            
+            xmaps = {}
+            for dtag in datasets:
+                xmap = Xmap.from_unaligned_dataset(datasets[dtag],
+                                                alignments[dtag],
+                                                grid,
+                                                structure_factors,
+                                                sample_rate)
+
+                xmaps[dtag] = xmap
 
             # xmaps = mapper.map_dict(lambda dataset, alignment:
             #     Xmap.from_unaligned_dataset(dataset,
