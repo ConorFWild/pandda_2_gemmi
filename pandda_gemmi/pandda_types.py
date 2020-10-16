@@ -2445,7 +2445,13 @@ class Zmap:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
-
+        
+    def __getstate__(self):
+        return XmapPython.from_gemmi(self.zmap)
+        
+    def __setstate__(self, zmap_pyhton: XmapPython):
+        self.zmap = zmap_pyhton.to_gemmi()
+        
 
 @dataclasses.dataclass()
 class Zmaps:
