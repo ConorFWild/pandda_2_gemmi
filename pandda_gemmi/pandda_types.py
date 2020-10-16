@@ -2952,7 +2952,8 @@ class PositionsArray:
     def from_positions(positions: typing.List[gemmi.Position]):
         accumulator = []
         for position in positions:
-            pos = [position.x, position.y, position.z]
+            # pos = [position.x, position.y, position.z]
+            pos = pos
             accumulator.append(pos)
 
         array = np.array(accumulator)
