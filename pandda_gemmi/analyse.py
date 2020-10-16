@@ -135,6 +135,14 @@ if __name__ == '__main__':
             finish = time.time()
             print(f"Interpolated in {finish-start}")
             
+            xmaps = Xmaps.from_aligned_datasets_c(
+                datasets, 
+                alignments, 
+                grid,
+                config.params.diffraction_data.structure_factors, sample_rate=4.0,
+                mapper=True,
+                )
+            
             path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x645/xmap.ccp4")
             for dtag in xmaps:
                 if dtag.dtag == "BAZ2BA-x645":
