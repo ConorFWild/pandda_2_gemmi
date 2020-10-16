@@ -3086,6 +3086,7 @@ class Events:
         inner_mask_symmetry,
         multiprocess=True,
         ):
+        
         processed_datasets = {}
         for event_id in self:
             dtag = event_id.dtag
