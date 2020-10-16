@@ -2748,11 +2748,38 @@ class Clusterings:
     clusters: typing.Dict[Dtag, Clustering]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float):
-        clusterings = {}
-        for dtag in zmaps:
-            clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, contour_level)
-            clusterings[dtag] = clustering
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float,
+                   multiprocess = True):
+        
+        if multiprocess:
+        
+            keys = list(self.datasets.keys())
+            
+            results = joblib.Parallel(n_jobs=-2, 
+                                    verbose=15,
+                                    )(
+                                        joblib.delayed(
+                                            Clustering.from_zmap)(
+                                                zmaps[key], 
+                                                reference, 
+                                                grid, 
+                                                contour_level,
+                                                )
+                                            for key
+                                            in keys
+                                    )
+                                    
+            clusterings = {keys[i]: results[i]
+                for i, key
+                in enumerate(keys)
+                }
+            
+        else:
+        
+            clusterings = {}
+            for dtag in zmaps:
+                clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, contour_level)
+                clusterings[dtag] = clustering
 
         return Clusterings(clusterings)
 

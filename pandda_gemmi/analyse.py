@@ -91,8 +91,7 @@ if __name__ == '__main__':
         pre_pandda_finish = time.time()
         print(f"Prelim finish in {pre_pandda_finish-pandda_start}")
         
-        events = {}
-
+        all_events = {}
 
         for shell in Shells.from_datasets(datasets, 
                                     config.params.resolution_binning.min_characterisation_datasets,
@@ -239,7 +238,7 @@ if __name__ == '__main__':
                                                                                 
                                                                                 )
                 
-                events[event_id] = event
+                all_events[event_id] = event
                 
             finish = time.time()
             print(f"Finished in {finish - start}")
