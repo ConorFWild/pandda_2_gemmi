@@ -2752,8 +2752,7 @@ class Clusterings:
                    multiprocess = True):
         
         if multiprocess:
-        
-            keys = list(self.datasets.keys())
+            keys = list(zmaps.zmaps.keys())
             
             results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
