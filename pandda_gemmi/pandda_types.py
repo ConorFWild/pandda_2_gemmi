@@ -2762,6 +2762,7 @@ class Clusterings:
             
             results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
+                                    max_nbytes=None,
                                     )(
                                         joblib.delayed(
                                             Clustering.from_zmap)(
@@ -2773,7 +2774,6 @@ class Clusterings:
                                             for key
                                             in keys
                                     )
-                                    
             clusterings = {keys[i]: results[i]
                 for i, key
                 in enumerate(keys)
