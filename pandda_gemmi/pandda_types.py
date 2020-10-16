@@ -2762,6 +2762,7 @@ class Clusterings:
             
             results = joblib.Parallel(n_jobs=-2, 
                                     verbose=15,
+                                    backend="multiprocessing",
                                     max_nbytes=None,
                                     )(
                                         joblib.delayed(
@@ -3106,6 +3107,7 @@ class Events:
             results = joblib.Parallel(
                 n_jobs=-2, 
                 verbose=15,
+                backend="multiprocessing",
                 )(
                     joblib.delayed(
                         processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
