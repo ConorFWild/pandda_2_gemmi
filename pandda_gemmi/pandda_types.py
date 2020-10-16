@@ -1374,7 +1374,7 @@ class Grid:
         return (grid_python, partitioning_python)
     
     def __setstate__(self, data):
-        self.partitioning = Partitioning(data[1][0].to_gemmi(),
+        self.partitioning = Partitioning(data[1][0],
                                          data[1][1].to_gemmi(),
                                          data[1][2].to_gemmi(),
                                          )
@@ -3071,6 +3071,60 @@ class Events:
 
     def __getitem__(self, item):
         return self.events[item]
+    
+    def save_event_maps(
+        self, 
+        datasets, 
+        alignments, 
+        xmaps,
+        model, 
+        pandda_fs_model,
+        grid,
+        structure_factors, 
+        outer_mask,
+        inner_mask_symmetry,
+        multiprocess=True,
+        ):
+        processed_datasets = {}
+        for event_id in self:
+            dtag = event_id.dtag
+            event = self[event_id]
+            string = f"""
+            dtag: {dtag}
+            event bdc: {event.bdc}
+            centroid: {event.cluster.centroid}
+            """
+            print(string)
+            if dtag not in processed_datasets:
+                processed_datasets[dtag] = pandda_fs_model.processed_datasets[event_id.dtag]
+            
+            processed_datasets[dtag].event_map_files.add_event(event)
+            
+        if multiprocess:
+            event_id_list = list(self.events.keys())
+            
+            results = joblib.Parallel(
+                n_jobs=-2, 
+                verbose=15,
+                )(
+                    joblib.delayed(
+                        processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
+                            xmaps[event_id.dtag],
+                            model,
+                            self[event_id],
+                            datasets[event_id.dtag], 
+                            alignments[event_id.dtag],
+                            grid, 
+                            structure_factors, 
+                            outer_mask,
+                            inner_mask_symmetry,
+                            )
+                        for event_id
+                        in event_id_list
+                        )
+                                    
+
+
 
 
 @dataclasses.dataclass()
