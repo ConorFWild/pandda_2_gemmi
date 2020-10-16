@@ -119,42 +119,31 @@ if __name__ == '__main__':
             shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
             print(len(shell_test_datasets.datasets))
             
-            start = time.time()
-            print("\tGetting maps...")
-            xmaps_dict = {}
-            for dtag in shell_truncated_datasets:
-                xmap = Xmap.from_unaligned_dataset_c(
-                                                shell_truncated_datasets[dtag],
-                                                alignments[dtag],
-                                                grid,
-                                                config.params.diffraction_data.structure_factors,
-                                                4.0,
-                                                )
-                xmaps_dict[dtag] = xmap
-            xmaps = Xmaps(xmaps_dict)
-            finish = time.time()
-            print(f"Interpolated in {finish-start}")
+            # start = time.time()
+            # print("\tGetting maps...")
+            # xmaps_dict = {}
+            # for dtag in shell_truncated_datasets:
+            #     xmap = Xmap.from_unaligned_dataset_c(
+            #                                     shell_truncated_datasets[dtag],
+            #                                     alignments[dtag],
+            #                                     grid,
+            #                                     config.params.diffraction_data.structure_factors,
+            #                                     4.0,
+            #                                     )
+            #     xmaps_dict[dtag] = xmap
+            # xmaps = Xmaps(xmaps_dict)
+            # finish = time.time()
+            # print(f"Interpolated in {finish-start}")
             
             xmaps = Xmaps.from_aligned_datasets_c(
-                datasets, 
+                shell_truncated_datasets, 
                 alignments, 
                 grid,
-                config.params.diffraction_data.structure_factors, sample_rate=4.0,
+                config.params.diffraction_data.structure_factors, 
+                sample_rate=4.0,
                 mapper=True,
                 )
             
-            path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x645/xmap.ccp4")
-            for dtag in xmaps:
-                if dtag.dtag == "BAZ2BA-x645":
-                    xmaps[dtag].save(path)
-                    print("\tSaved!")
-                    
-            path = Path("/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test/processed_datasets/BAZ2BA-x650/xmap.ccp4")
-            for dtag in xmaps:
-                if dtag.dtag == "BAZ2BA-x481":
-                    xmaps[dtag].save(path)
-                    print("\tSaved!")
-
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             print(len(shell_train_xmaps.xmaps))
             shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
