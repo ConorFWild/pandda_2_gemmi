@@ -214,33 +214,46 @@ if __name__ == '__main__':
 
             events: Events = Events.from_clusters(clusterings_peaked, model, xmaps, grid, 1.732)
 
-            for event_id in events:
-                dtag = event_id.dtag
-                event = events[event_id]
-                alignment = alignments[dtag]
-                dataset = datasets[dtag]
-            #     print(type(alignment))
-                string = f"""
-                dtag: {dtag}
-                event bdc: {event.bdc}
-                centroid: {event.cluster.centroid}
-                """
-                print(string)
-                processed_dataset = pandda_fs_model.processed_datasets[event_id.dtag]
-                processed_dataset.event_map_files.add_event(event)
-                processed_dataset.event_map_files[event.event_id.event_idx].save(xmaps[dtag],
-                                                                                model,
-                                                                                event,
-                                                                                dataset, 
-                                                                                alignment,
-                                                                                grid, 
-                                                                                config.params.diffraction_data.structure_factors, 
-                                                                                config.params.masks.outer_mask,
-                                                                                config.params.masks.inner_mask_symmetry,
+
+            events.save_event_maps(shell_truncated_datasets,
+                                   alignments,
+                                   xmaps,
+                                   model,
+                                   pandda_fs_model,
+                                   grid,
+                                   config.params.diffraction_data.structure_factors,
+                                   config.params.masks.outer_mask,
+                                   config.params.masks.inner_mask_symmetry,
+                                   multiprocess=True,
+                                   )
+
+            # for event_id in events:
+            #     dtag = event_id.dtag
+            #     event = events[event_id]
+            #     alignment = alignments[dtag]
+            #     dataset = datasets[dtag]
+            # #     print(type(alignment))
+            #     string = f"""
+            #     dtag: {dtag}
+            #     event bdc: {event.bdc}
+            #     centroid: {event.cluster.centroid}
+            #     """
+            #     print(string)
+            #     processed_dataset = pandda_fs_model.processed_datasets[event_id.dtag]
+            #     processed_dataset.event_map_files.add_event(event)
+            #     processed_dataset.event_map_files[event.event_id.event_idx].save(xmaps[dtag],
+            #                                                                     model,
+            #                                                                     event,
+            #                                                                     dataset, 
+            #                                                                     alignment,
+            #                                                                     grid, 
+            #                                                                     config.params.diffraction_data.structure_factors, 
+            #                                                                     config.params.masks.outer_mask,
+            #                                                                     config.params.masks.inner_mask_symmetry,
                                                                                 
-                                                                                )
+            #                                                                     )
                 
-                all_events[event_id] = event
+            #     all_events[event_id] = event
                 
             finish = time.time()
             print(f"Finished in {finish - start}")
