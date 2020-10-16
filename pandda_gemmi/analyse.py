@@ -195,11 +195,10 @@ if __name__ == '__main__':
                 reference,
                 grid,
                 config.params.masks.contour_level,
-                multiprocess=False,
+                multiprocess=True,
                 )
             finish_cluster = time.time()
             print(f"Clustered in {finish_cluster-start_cluster}")
-
             
             print("\t\tGot {} initial clusters!".format(sum([len(clusterings[dtag]) for dtag in clusterings])))
             
