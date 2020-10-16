@@ -2953,7 +2953,7 @@ class PositionsArray:
         accumulator = []
         for position in positions:
             # pos = [position.x, position.y, position.z]
-            pos = pos
+            pos = position
             accumulator.append(pos)
 
         array = np.array(accumulator)
