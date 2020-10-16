@@ -2683,7 +2683,7 @@ class Clustering:
 
             centroid_array = np.mean(cluster_positions_array,
                                      axis=0)
-            centroid = gemmi.Position(centroid_array[0],
+            centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )
 
