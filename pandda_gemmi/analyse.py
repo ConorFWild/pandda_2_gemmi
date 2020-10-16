@@ -189,11 +189,17 @@ if __name__ == '__main__':
             print("\t\tGot {} zmaps".format(len(zmaps)))
 
             print("\tGetting clusters from zmaps...")
-            clusterings: Clusterings = Clusterings.from_Zmaps(zmaps, 
-                                                            reference,
-                                                            grid,
-                                                            config.params.masks.contour_level,
-                                                            )
+            start_cluster = time.time()
+            clusterings: Clusterings = Clusterings.from_Zmaps(
+                zmaps, 
+                reference,
+                grid,
+                config.params.masks.contour_level,
+                multiprocess=False,
+                )
+            finish_cluster = time.time()
+            print(f"Clustered in {finish_cluster-start_cluster}")
+
             
             print("\t\tGot {} initial clusters!".format(sum([len(clusterings[dtag]) for dtag in clusterings])))
             
