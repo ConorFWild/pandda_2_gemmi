@@ -90,6 +90,8 @@ if __name__ == '__main__':
         
         pre_pandda_finish = time.time()
         print(f"Prelim finish in {pre_pandda_finish-pandda_start}")
+        
+        events = {}
 
 
         for shell in Shells.from_datasets(datasets, 
@@ -237,6 +239,8 @@ if __name__ == '__main__':
                                                                                 
                                                                                 )
                 
+                events[event_id] = event
+                
             finish = time.time()
             print(f"Finished in {finish - start}")
 
@@ -248,8 +252,6 @@ if __name__ == '__main__':
 
         event_table_file: EventTableFile = EventTableFile.from_events(events)
                         
-                        
-            
 
 
     main()
