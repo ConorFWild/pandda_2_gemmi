@@ -49,7 +49,6 @@ class UnitCellPython:
                               self.gamma,
                               )
 
-
 @dataclass()
 class XmapPython:
     array: np.ndarray
@@ -72,7 +71,7 @@ class XmapPython:
         grid.spacegroup = self.spacegroup.to_gemmi()
         grid.set_unit_cell(self.unit_cell.to_gemmi())
         
-        grid_array = np.array(grid, copy=True)
+        grid_array = np.array(grid, copy=False)
         grid_array[:, :, :] = self.array[:, :, :]
         
         return grid
