@@ -3136,7 +3136,7 @@ class Events:
         return Events(events, sites)
 
     @staticmethod
-    def from_all_events(event_dict: typing.Dict[EventID, Event], model: Model, xmaps: Xmaps, grid: Grid, cutoff: float):
+    def from_all_events(event_dict: typing.Dict[EventID, Event], grid: Grid, cutoff: float):
 
         all_clusterings_dict = {}
         for event_id in event_dict:
