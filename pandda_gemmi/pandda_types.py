@@ -3270,9 +3270,10 @@ class EventMapFile:
 
     @staticmethod
     def from_event(event: Event, path: Path):
+        rounded_bdc = round(event.bdc.bdc, 2)
         event_map_path = path / PANDDA_EVENT_MAP_FILE.format(dtag=event.event_id.dtag.dtag,
                                                              event_idx=event.event_id.event_idx.event_idx,
-                                                             bdc=event.bdc.bdc,
+                                                             bdc=rounded_bdc,
                                                              )
         return EventMapFile(event_map_path)
 
@@ -3432,10 +3433,11 @@ class EventTable:
         records = []
         for record in self.records:
             event_dict = dataclasses.asdict(record) 
-            event_dict["1-BDC"] = event_dict["bdc"]
+            event_dict["1-BDC"] = float(event_dict["bdc"], 2)
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
+        
         
 @dataclasses.dataclass()
 class SiteTableRecord:
@@ -3624,7 +3626,7 @@ class ProcessedDataset:
         
         
         # Copy the input pdb and mtz
-        dtag = dataset_models_dir.name
+        dtag = processed_dataset_dir.name
         source_mtz = dataset_dir.input_mtz_file
         source_pdb = dataset_dir.input_pdb_file
         input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
