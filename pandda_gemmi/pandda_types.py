@@ -3165,7 +3165,6 @@ class Events:
 
         return Events(events, sites)
 
-
     def __iter__(self):
         for event_id in self.events:
             yield event_id
