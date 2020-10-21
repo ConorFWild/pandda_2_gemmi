@@ -622,7 +622,7 @@ class Datasets:
         return self.datasets[item]
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
-        for dtag in self.datasets:
+        # for dtag in self.datasets:
             # print(dtag)
             # print(RMSD.from_structures(self.datasets[dtag].structure,
             #                            reference.dataset.structure,
