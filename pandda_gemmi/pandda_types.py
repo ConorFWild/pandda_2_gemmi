@@ -3433,9 +3433,9 @@ class EventTable:
         for record in self.records:
             event_dict = dataclasses.asdict(record) 
             event_dict["1-BDC"] = event_dict["bdc"]
+            records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
-        
         
 @dataclasses.dataclass()
 class SiteTableRecord:
