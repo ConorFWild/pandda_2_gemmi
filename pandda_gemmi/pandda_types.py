@@ -3520,14 +3520,18 @@ class EventTableFile:
 class Analyses:
     analyses_dir: Path
     pandda_analyse_events_file: Path
+    pandda_analyse_sites_file: Path
+
 
     @staticmethod
     def from_pandda_dir(pandda_dir: Path):
         analyses_dir = pandda_dir / PANDDA_ANALYSES_DIR
-        pandda_analyse_events_file = pandda_dir / PANDDA_ANALYSE_EVENTS_FILE
+        pandda_analyse_events_file = analyses_dir / PANDDA_ANALYSE_EVENTS_FILE
+        pandda_analyse_sites_file = analyses_dir / PANDDA_ANALYSE_SITES_FILE
 
         return Analyses(analyses_dir=analyses_dir,
                         pandda_analyse_events_file=pandda_analyse_events_file,
+                        pandda_analyse_sites_file=pandda_analyse_sites_file,
                         )
 
     def build(self):
