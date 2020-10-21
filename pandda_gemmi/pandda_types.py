@@ -2660,16 +2660,23 @@ class Clustering:
             return Clustering(clusters)
 
         # print("\tClustering")
-        cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
-                                         # t=blob_finding.clustering_cutoff,
-                                         t=clustering_cutoff,
-                                         criterion='distance',
-                                         metric='euclidean',
-                                         method='single',
-                                         )
+        # cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
+        #                                  # t=blob_finding.clustering_cutoff,
+        #                                  t=clustering_cutoff,
+        #                                  criterion='distance',
+        #                                  metric='euclidean',
+        #                                  method='single',
+        #                                  )
+        voxel_volume = grid.volume() /grid.size() 
+        min_samples = 10.0 / voxel_volume
+        cluster_ids_array = DBSCAN(eps=2.0,
+                                   min_samples=min_samples,
+                                   )
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
+            if unique_cluster == -1:
+                continue
             cluster_mask = cluster_ids_array == unique_cluster  # n
             cluster_indicies = np.nonzero(cluster_mask)  # (n')
             cluster_points_array = extrema_grid_coords_array[cluster_indicies]
