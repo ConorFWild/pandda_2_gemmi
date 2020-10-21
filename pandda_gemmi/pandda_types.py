@@ -2673,7 +2673,8 @@ class Clustering:
         dbscan = DBSCAN(eps=2.0,
                                    min_samples=min_samples,
                                    )
-        cluster_ids_array = dbscan.fit_transform(extrema_cart_coords_array)
+        
+        cluster_ids_array = dbscan.fit_predict(extrema_cart_coords_array)
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
