@@ -3155,11 +3155,10 @@ class Events:
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
         print(sites.event_to_site)
 
-
         events: typing.Dict[EventID, Event] = {}
         for event_id in event_dict:
             event = event_dict[event_id]
-            for event_id_site, event_site in sites.event_to_site,items():
+            for event_id_site, event_site in sites.event_to_site.items():
                 if (event_id_site.dtag.dtag == event_id.dtag.dtag) and (event_id_site.event_idx.event_idx == event_id.event_idx.event_idx):
                     site = event_site
                     
