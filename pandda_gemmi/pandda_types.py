@@ -3155,26 +3155,13 @@ class Events:
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
         events: typing.Dict[EventID, Event] = {}
-        for dtag in clusterings:
-            clustering = clusterings[dtag]
-            for event_idx in clustering:
-                event_idx = EventIDX(event_idx)
-                event_id = EventID(dtag, event_idx)
+        for event_id in event_dict:
+            event = event_dict[event_id]
+            site: SiteID = sites.event_to_site[event_id]
 
-                cluster = clustering[event_idx.event_idx]
-                xmap = xmaps[dtag]
-                bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
-                print([event_id, bdc, cluster.centroid, cluster.values.size])
+            event.site = site
 
-                site: SiteID = sites.event_to_site[event_id]
-
-                event = Event.from_cluster(event_id,
-                                           cluster,
-                                           site,
-                                           bdc,
-                                           )
-
-                events[event_id] = event
+            events[event_id] = event
 
         return Events(events, sites)
 
