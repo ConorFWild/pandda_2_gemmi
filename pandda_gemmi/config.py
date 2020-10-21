@@ -103,6 +103,7 @@ class BlobFinding:
     min_blob_z_peak: float = 3.0
     # clustering_cutoff: float = 1.732
     clustering_cutoff: float = 1.0
+    cluster_cutoff_distance_multiplier: float = 1.3
 
     @classmethod
     def from_args(cls, args):
@@ -414,6 +415,12 @@ class Config:
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
+        parser.add_argument("--cluster_cutoff_distance_multiplier",
+                    default=1.3,
+                    type=float,
+                    help="The directory for output and intermediate files to be saved to",
+                    )
+        
 
         # background correction
         parser.add_argument("--min_bdc",

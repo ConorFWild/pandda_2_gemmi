@@ -2590,7 +2590,7 @@ class Clustering:
     clustering: typing.Dict[int, Cluster]
 
     @staticmethod
-    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float):
+    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float=1.3):
         zmap_array = zmap.to_array(copy=True)
 
         # protein_mask_grid = Clustering.get_protein_mask(zmap,
@@ -2652,7 +2652,7 @@ class Clustering:
         point_111 = grid.grid.get_point(1, 1, 1)
         position_000 = grid.grid.point_to_position(point_000)
         position_111 = grid.grid.point_to_position(point_111)
-        clustering_cutoff = position_000.dist(position_111) * 1.1
+        clustering_cutoff = position_000.dist(position_111) * cluster_cutoff_distance_multiplier
         # print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
         if extrema_cart_coords_array.size < 10:
@@ -2803,7 +2803,7 @@ class Clusterings:
     clusters: typing.Dict[Dtag, Clustering]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float,
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float,
                    multiprocess = True):
         
         if multiprocess:
@@ -2820,6 +2820,7 @@ class Clusterings:
                                                 reference, 
                                                 grid, 
                                                 contour_level,
+                                                cluster_cutoff_distance_multiplier,
                                                 )
                                             for key
                                             in keys
