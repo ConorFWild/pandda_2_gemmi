@@ -1,6 +1,3 @@
-from pandda_gemmi.logs import EventsLog
-
-
 if __name__ == '__main__':
 
 

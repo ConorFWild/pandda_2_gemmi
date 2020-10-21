@@ -328,6 +328,19 @@ class PreprocessingLog:
     smoothing_datasets_log: Dict[str, float]
     struc_datasets_log: List[str]
     space_datasets_log: List[str]
+    
+    @staticmethod
+    def initialise():
+        return PreprocessingLog(
+            initial_datasets_log={},
+            invalid_datasets_log=[],
+            low_res_datasets_log=[],
+            rfree_datasets_log=[],
+            wilson_datasets_log=[],
+            smoothing_datasets_log={},
+            struc_datasets_log=[],
+            space_datasets_log=[],
+        )
 
 
 @dataclasses.dataclass()
@@ -371,10 +384,12 @@ class LogData:
 
     @staticmethod
     def initialise():
+        preprocessing_log = PreprocessingLog.initialise()
+        
         return LogData(
             config=None,
             fs_log=None,
-            preprocessing_log=None,
+            preprocessing_log=preprocessing_log,
             reference_log=None,
             grid_log=None,
             alignments_log={},
