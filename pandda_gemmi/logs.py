@@ -274,7 +274,7 @@ class GridLog:
     @staticmethod
     def from_grid(grid: Grid):
         unit_cell = UnitCellPython.from_gemmi(grid.grid.unit_cell)
-        space_group = SpacegroupPython.from_gemmi(grid.grid.space_group)
+        space_group = SpacegroupPython.from_gemmi(grid.grid.spacegroup)
         
         return GridLog(grid.shape(),
                        unit_cell,
