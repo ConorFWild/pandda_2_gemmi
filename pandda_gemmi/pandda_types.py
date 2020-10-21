@@ -96,11 +96,12 @@ class RFree:
 @dataclasses.dataclass()
 class Structure:
     structure: gemmi.Structure
+    path: typing.Union[Path, None] = None
 
     @staticmethod
     def from_file(file: Path) -> Structure:
         structure = gemmi.read_structure(str(file))
-        return Structure(structure)
+        return Structure(structure, file)
 
     def rfree(self):
         return RFree.from_structure(self)
@@ -159,11 +160,12 @@ class StructureFactors:
 @dataclasses.dataclass()
 class Reflections:
     reflections: gemmi.Mtz
+    path: typing.Union[Path, None] = None
 
     @staticmethod
     def from_file(file: Path) -> Reflections:
         reflections = gemmi.read_mtz_file(str(file))
-        return Reflections(reflections)
+        return Reflections(reflections, file)
 
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
@@ -418,6 +420,7 @@ class Reflections:
 class Dataset:
     structure: Structure
     reflections: Reflections
+    smoothing_factor: float = 0.0
 
     @staticmethod
     def from_files(pdb_file: Path, mtz_file: Path):
@@ -808,6 +811,7 @@ class Datasets:
         resolution_array = reference_reflections.make_1_d2_array()
 
         new_reflections_dict = {}
+        smoothing_factor_dict = {}
         for dtag in self.datasets:
 
             dtag_reflections = self.datasets[dtag].reflections.reflections
@@ -884,6 +888,7 @@ class Datasets:
             new_reflections.update_reso() 
                     
             new_reflections_dict[dtag] = new_reflections
+            smoothing_factor_dict[dtag] = min_scale
             
             
         # Create new dataset
@@ -892,8 +897,12 @@ class Datasets:
             dataset = self.datasets[dtag]
             structure = dataset.structure
             new_reflections = new_reflections_dict[dtag]
+            
+            smoothing_factor = smoothing_factor_dict[dtag]
+            
             new_dataset = Dataset(structure,
                                 Reflections(new_reflections),
+                                smoothing_factor=smoothing_factor
                                 )    
             new_datasets_dict[dtag] = new_dataset
             
@@ -1642,6 +1651,10 @@ class Alignments:
     def __getitem__(self, item):
         return self.alignments[item]
     
+    def __iter__(self):
+        for dtag in self.alignments:
+            yield dtag
+    
     def __getstate__(self):
         
         alignments_python = {}
@@ -1673,6 +1686,7 @@ class Resolution:
 
 @dataclasses.dataclass()
 class Shell:
+    number: int
     test_dtags: typing.List[Dtag]
     train_dtags: typing.List[Dtag]
     all_dtags: typing.List[Dtag]
@@ -1707,7 +1721,8 @@ class Shells:
             if (len(shell_dtags) >= max_shell_datasets) or (
                     res - shell_res >= high_res_increment):
                 all_dtags = list(set(shell_dtags).union(set(train_dtags)))
-                shell = Shell(shell_dtags,
+                shell = Shell(shell_num, 
+                              shell_dtags,
                               train_dtags,
                               all_dtags,
                               Datasets({dtag: datasets[dtag] for dtag in datasets
@@ -2941,7 +2956,8 @@ class Euclidean3Coord:
 
 @dataclasses.dataclass()
 class Site:
-    Coordinates: Euclidean3Coord
+    number: int
+    centroid: typing.List[float]
 
 
 @dataclasses.dataclass()
@@ -2987,6 +3003,14 @@ class SiteID:
 class Sites:
     site_to_event: typing.Dict[SiteID, typing.List[EventID]]
     event_to_site: typing.Dict[EventID, SiteID]
+    centroids: typing.Dict[SiteID, np.ndarray]
+    
+    def __iter__(self):
+        for site_id in self.site_to_event:
+            yield site_id
+            
+    def __getitem__(self, item):
+        return self.site_to_event[item]
 
     @staticmethod
     def from_clusters(clusterings: Clusterings, cutoff: float):
@@ -3014,7 +3038,7 @@ class Sites:
                 site_to_event[site_id].append(cluster_id)
                 event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
 
-            return Sites(site_to_event, event_to_site)
+            return Sites(site_to_event, event_to_site, {})
             
 
         site_ids_array = fclusterdata(X=positions_array.to_array(),
@@ -3035,8 +3059,19 @@ class Sites:
 
             site_to_event[site_id].append(cluster_id)
             event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
+            
+        # Site centroids
+        site_centroids = {}
+        for site_id, event_id_list in event_to_site.items():
+            cluster_coord_list = []
+            for event_id in event_id_list:
+                cluster_centroid = flat_clusters[event_id].centroid
+                cluster_coord_list.append(cluster_centroid)
+            array = np.array(cluster_coord_list)
+            mean_centroid = np.mean(array, axis=0)
+            site_centroids[site_id] = mean_centroid
 
-        return Sites(site_to_event, event_to_site)
+        return Sites(site_to_event, event_to_site, site_centroids)
 
 
 @dataclasses.dataclass()
@@ -3286,6 +3321,147 @@ class EventMapFiles:
 
     def __getitem__(self, item):
         return self.event_map_files[item]
+
+
+@dataclasses.dataclass()
+class EventTableRecord:
+    dtag:str
+    event_idx: int	
+    bdc: float	
+    cluster_size: int	
+    global_correlation_to_average_map: float	
+    global_correlation_to_mean_map: float	
+    local_correlation_to_average_map: float	
+    local_correlation_to_mean_map: float	
+    site_idx: int	
+    x: float	
+    y: float	
+    z: float	
+    z_mean: float	
+    z_peak: float	
+    applied_b_factor_scaling: float	
+    high_resolution: float	
+    low_resolution: float	
+    r_free: float	
+    r_work: float
+    analysed_resolution: float
+    map_uncertainty: float
+    analysed: bool	
+    interesting: bool	
+    exclude_from_z_map_analysis: bool	
+    exclude_from_characterisation: bool
+
+    @staticmethod
+    def from_event(event: Event):
+        return EventTableRecord(
+            dtag=event.event_id.dtag.dtag,
+            event_idx=event.event_id.event_idx.event_idx,
+            bdc=event.bdc.fraction,
+            cluster_size=event.cluster.values.size,
+            global_correlation_to_average_map=0,
+            global_correlation_to_mean_map=0,
+            local_correlation_to_average_map=0,
+            local_correlation_to_mean_map=0,
+            site_idx=event.site.site_id,
+            x=event.cluster.centroid[0],
+            y=event.cluster.centroid[1],
+            z=event.cluster.centroid[2],
+            z_mean=0.0,
+            z_peak=0.0,
+            applied_b_factor_scaling=0.0,
+            high_resolution=0.0,
+            low_resolution=0.0,
+            r_free=0.0,
+            r_work=0.0,
+            analysed_resolution=0.0,
+            map_uncertainty=0.0,
+            analysed=False,
+            interesting=False,	
+            exclude_from_z_map_analysis=False,	
+            exclude_from_characterisation=False,
+                                )
+        
+@dataclasses.dataclass()
+class EventTable:
+    records: List[EventTableRecord]
+    
+    @staticmethod
+    def from_events(events: Events):
+        records = []
+        for event_id in events:
+            event_record = EventTableRecord.from_event(events[event_id])
+            records.append(event_record)
+        
+        return EventTable(records)
+    
+    def save(self, path: Path):
+        records = [dataclasses.asdict(record) for record in self.records]
+        table = pd.DataFrame(records)
+        table.to_csv(str(path))
+        
+        
+@dataclasses.dataclass()
+class SiteTableRecord:
+    site_idx: int	
+    centroid: Tuple[float, float, float]
+    
+    @staticmethod
+    def from_site_id(site_id: SiteID, centroid: np.ndarray):
+        return SiteTableRecord(
+            site_idx=site_id.site_id,
+            centroid=(centroid[0], centroid[1], centroid[2],), 
+        )
+        
+
+@dataclasses.dataclass()
+class SiteTable:
+    site_record_list: List[SiteTableRecord]
+
+
+    @staticmethod
+    def from_events(events: Events, cutoff: float):
+        
+        dtag_clusters = {}
+        for event_id in events:
+            dtag = event_id.dtag
+            event_idx = event_id.event_idx
+            event = events[event_id]
+            
+            if dtag not in dtag_clusters:
+                dtag_clusters[dtag] = {}
+            
+            dtag_clusters[dtag][event_idx] = event.cluster
+            
+        _clusterings = {}
+        for dtag in dtag_clusters:
+            _clusterings[dtag] = Clustering(dtag_clusters[dtag])
+            
+        clusterings = Clusterings(_clusterings)
+            
+        sites: Sites = Sites.from_clusters(clusterings, cutoff)
+        
+        records = []
+        for site_id in sites:
+            site = sites[site_id]
+            centroid = sites.centroids[site_id]
+            site_record = SiteTableRecord.from_site_id(site_id, centroid)
+            records.append(site_record)
+        
+        return EventTable(records)
+        
+        
+        
+    def save(self, path: Path):
+        records = []
+        for site_record in self.site_record_list:
+            site_record_dict = dataclasses.asdict(site_record)
+            records.append(site_record_dict)
+            
+        table = pd.DataFrame(records)
+        
+        table.to_csv(str(path))
+        
+
 
 
 @dataclasses.dataclass()
