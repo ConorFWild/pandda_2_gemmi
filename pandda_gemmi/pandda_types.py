@@ -3144,7 +3144,7 @@ class Events:
             if event_id.dtag not in all_clusterings_dict:
                 all_clusterings_dict[event_id.dtag] = {}
                 
-            all_clusterings_dict[event_id.dtag][event_id.event_idx] = event_dict[event_id].cluster
+            all_clusterings_dict[event_id.dtag][event_id.event_idx.event_idx] = event_dict[event_id].cluster
 
         all_clusterings = {}
         for dtag in all_clusterings_dict:
