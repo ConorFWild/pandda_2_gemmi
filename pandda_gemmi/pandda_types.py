@@ -15,6 +15,7 @@ import scipy
 from scipy import spatial
 from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
+from sklearn.cluster import DBSCAN
 
 import joblib
 
