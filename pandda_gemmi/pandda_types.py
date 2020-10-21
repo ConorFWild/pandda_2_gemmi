@@ -2670,9 +2670,10 @@ class Clustering:
         #                                  )
         voxel_volume = grid.volume() /grid.size() 
         min_samples = 10.0 / voxel_volume
-        cluster_ids_array = DBSCAN(eps=2.0,
+        dbscan = DBSCAN(eps=2.0,
                                    min_samples=min_samples,
                                    )
+        cluster_ids_array = dbscan.fit_transform(extrema_cart_coords_array)
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
