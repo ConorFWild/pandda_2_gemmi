@@ -6,6 +6,7 @@ import dataclasses
 import os
 import time
 import psutil
+import shutil
 import re
 from pathlib import Path
 
@@ -3145,7 +3146,6 @@ class Events:
                 
             all_clusterings_dict[event_id.dtag][event_id.event_idx] = event_dict[event_id].cluster
 
-
         all_clusterings = {}
         for dtag in all_clusterings_dict:
             all_clusterings[dtag] = Clustering(all_clusterings_dict[dtag])
@@ -3153,6 +3153,8 @@ class Events:
         clusterings = Clusterings(all_clusterings)
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
+        print(sites.event_to_site)
+
 
         events: typing.Dict[EventID, Event] = {}
         for event_id in event_dict:
@@ -3610,8 +3612,18 @@ class ProcessedDataset:
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
-        input_mtz = dataset_dir.input_mtz_file
-        input_pdb = dataset_dir.input_pdb_file
+        
+        
+        # Copy the input pdb and mtz
+        dtag = dataset_models_dir.name
+        source_mtz = dataset_dir.input_mtz_file
+        source_pdb = dataset_dir.input_pdb_file
+        input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
+        input_pdb = processed_dataset_dir / PANDDA_PDB_FILE.format(dtag)
+        shutil.copyfile(source_mtz, input_mtz)
+        shutil.copyfile(source_pdb, input_pdb)
+        
+        
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
         event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
 
