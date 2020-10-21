@@ -300,20 +300,20 @@ class AlignmentsLog:
 @dataclasses.dataclass()
 class SiteLog:
     idx: int
-    centroid: List[float]
+    centroid: Tuple[float, float, float]
     
     @staticmethod
-    def from_site(site: Site):
-        return SiteLog(site.number,
-                       site.centroid,
+    def from_site_table_record(site_table_record: SiteTableRecord):
+        return SiteLog(site_table_record.site_idx,
+                       site_table_record.centroid,
                        )
 
 @dataclasses.dataclass()
 class SitesLog:
     @staticmethod
-    def from_sites(sites):
-        return {SiteID.site_id: SiteLog.from_site(site)
-                for site
+    def from_sites(sites: SiteTable):
+        return {site_table_record.site_idx: SiteLog.from_site_table_record(site_table_record)
+                for site_table_record
                 in sites
                 }
 

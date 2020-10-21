@@ -3417,6 +3417,9 @@ class SiteTableRecord:
 class SiteTable:
     site_record_list: List[SiteTableRecord]
 
+    def __iter__(self):
+        for record in self.site_record_list:
+            yield record
 
     @staticmethod
     def from_events(events: Events, cutoff: float):
@@ -3442,7 +3445,7 @@ class SiteTable:
         
         records = []
         for site_id in sites:
-            site = sites[site_id]
+            # site = sites[site_id]
             centroid = sites.centroids[site_id]
             site_record = SiteTableRecord.from_site_id(site_id, centroid)
             records.append(site_record)
