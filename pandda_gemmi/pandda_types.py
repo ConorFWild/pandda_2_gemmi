@@ -3635,6 +3635,7 @@ class PanDDAFSModel:
     data_dirs: DataDirs
     analyses: Analyses
     processed_datasets: ProcessedDatasets
+    log_file: Path
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -3646,11 +3647,13 @@ class PanDDAFSModel:
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )
+        log_path = output_out_dir / PANDDA_LOG_FILE
 
         return PanDDAFSModel(pandda_dir=output_out_dir,
                              data_dirs=data_dirs,
                              analyses=analyses,
                              processed_datasets=processed_datasets,
+                             log_file=log_path,
                              )
 
     def build(self, overwrite=False):

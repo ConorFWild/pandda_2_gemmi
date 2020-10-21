@@ -398,7 +398,7 @@ class LogData:
             sites_log={},
                        )
         
-    def save(self, path: Path):
+    def save_json(self, path: Path):
         log_dict = dataclasses.asdict(self)
         
         with open(str(path), "w") as f:
