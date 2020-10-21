@@ -3450,7 +3450,7 @@ class SiteTable:
             site_record = SiteTableRecord.from_site_id(site_id, centroid)
             records.append(site_record)
         
-        return EventTable(records)
+        return SiteTable(records)
         
         
         
