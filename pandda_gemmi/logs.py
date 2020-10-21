@@ -311,10 +311,10 @@ class SiteLog:
 @dataclasses.dataclass()
 class SitesLog:
     @staticmethod
-    def from_sites(sites: SiteTable):
+    def from_sites(site_table: SiteTable):
         return {site_table_record.site_idx: SiteLog.from_site_table_record(site_table_record)
                 for site_table_record
-                in sites
+                in site_table
                 }
 
 
