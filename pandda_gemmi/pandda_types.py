@@ -3429,7 +3429,10 @@ class EventTable:
         return EventTable(records)
     
     def save(self, path: Path):
-        records = [dataclasses.asdict(record) for record in self.records]
+        records = []
+        for record in self.records:
+            event_dict = dataclasses.asdict(record) 
+            event_dict["1-BDC"] = event_dict["bdc"]
         table = pd.DataFrame(records)
         table.to_csv(str(path))
         
