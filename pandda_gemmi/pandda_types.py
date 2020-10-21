@@ -3135,6 +3135,50 @@ class Events:
 
         return Events(events, sites)
 
+    @staticmethod
+    def from_all_events(event_dict: typing.Dict[EventID, Event], model: Model, xmaps: Xmaps, grid: Grid, cutoff: float):
+
+        all_clusterings_dict = {}
+        for event_id in event_dict:
+            if event_id.dtag not in all_clusterings_dict:
+                all_clusterings_dict[event_id.dtag] = {}
+                
+            all_clusterings_dict[event_id.dtag][event_id.event_idx] = event_dict[event_id].cluster
+
+
+        all_clusterings = {}
+        for dtag in all_clusterings_dict:
+            all_clusterings[dtag] = Clustering(all_clusterings_dict[dtag])
+            
+        clusterings = Clusterings(all_clusterings)
+
+        sites: Sites = Sites.from_clusters(clusterings, cutoff)
+
+        events: typing.Dict[EventID, Event] = {}
+        for dtag in clusterings:
+            clustering = clusterings[dtag]
+            for event_idx in clustering:
+                event_idx = EventIDX(event_idx)
+                event_id = EventID(dtag, event_idx)
+
+                cluster = clustering[event_idx.event_idx]
+                xmap = xmaps[dtag]
+                bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
+                print([event_id, bdc, cluster.centroid, cluster.values.size])
+
+                site: SiteID = sites.event_to_site[event_id]
+
+                event = Event.from_cluster(event_id,
+                                           cluster,
+                                           site,
+                                           bdc,
+                                           )
+
+                events[event_id] = event
+
+        return Events(events, sites)
+
+
     def __iter__(self):
         for event_id in self.events:
             yield event_id
