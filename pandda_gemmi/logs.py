@@ -1,5 +1,5 @@
 from __future__ import annotations
-from re import L
+import json
 
 from typing import Dict, List
 import dataclasses
@@ -397,3 +397,13 @@ class LogData:
             events_log={},
             sites_log={},
                        )
+        
+    def save(self, path: Path):
+        log_dict = dataclasses.asdict(self)
+        
+        with open(str(path), "w") as f:
+            json.dump(log_dict,
+                    f,
+                    )
+            
+        

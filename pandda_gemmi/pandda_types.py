@@ -3062,7 +3062,7 @@ class Sites:
             
         # Site centroids
         site_centroids = {}
-        for site_id, event_id_list in event_to_site.items():
+        for site_id, event_id_list in site_to_event.items():
             cluster_coord_list = []
             for event_id in event_id_list:
                 cluster_centroid = flat_clusters[event_id].centroid
