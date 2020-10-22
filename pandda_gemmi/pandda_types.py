@@ -2919,7 +2919,9 @@ class Clusterings:
                                                   for current_cluster
                                                   in current_clusters])
                 
-                cluster_points_tuple = tuple(np.stack([current_cluster.indexes[i] 
+                
+                
+                cluster_points_tuple = tuple(np.vstack([current_cluster.indexes[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2927,7 +2929,7 @@ class Clusterings:
                                         for i
                                         in [0, 1, 2]
                                         )
-                cluster_positions_array = tuple(np.stack([current_cluster.centroid[i] 
+                cluster_positions_array = tuple(np.vstack([current_cluster.centroid[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2936,7 +2938,7 @@ class Clusterings:
                                         in [0, 1, 2]
                                         )
                 
-                values = tuple(np.stack([current_cluster.values[i] 
+                values = tuple(np.vstack([current_cluster.values[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2948,10 +2950,11 @@ class Clusterings:
                                   np.mean(cluster_positions_array[1]),
                                   np.mean(cluster_positions_array[2]),
                 )
+                
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
-                event_mask_indicies  = tuple(np.stack([current_cluster.event_mask_indicies[i] 
+                event_mask_indicies  = tuple(np.vstack([current_cluster.event_mask_indicies[i] 
                                                     for current_cluster
                                                     in current_clusters
                                                     ]
