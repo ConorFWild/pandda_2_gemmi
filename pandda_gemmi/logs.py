@@ -353,6 +353,7 @@ class ShellLog:
     initial_clusters: Dict[str, Dict[int, ClusterLog]]
     large_clusters: Dict[str, Dict[int, ClusterLog]]
     peaked_clusters: Dict[str, Dict[int, ClusterLog]]
+    clusterings_merged: Dict[str, Dict[int, ClusterLog]]
     events: Dict[str, Dict[int, EventLog]]
     
     @staticmethod
@@ -366,6 +367,7 @@ class ShellLog:
             initial_clusters={},
             large_clusters={},
             peaked_clusters={},
+            clusterings_merged={},
             events={},
         )
     
@@ -397,6 +399,7 @@ class LogData:
             events_log={},
             sites_log={},
                        )
+        
         
     def save_json(self, path: Path):
         log_dict = dataclasses.asdict(self)
