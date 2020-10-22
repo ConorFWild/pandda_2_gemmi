@@ -2661,20 +2661,20 @@ class Clustering:
             return Clustering(clusters)
 
         # print("\tClustering")
-        # cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
-        #                                  # t=blob_finding.clustering_cutoff,
-        #                                  t=clustering_cutoff,
-        #                                  criterion='distance',
-        #                                  metric='euclidean',
-        #                                  method='single',
-        #                                  )
-        voxel_volume = grid.volume() /grid.size() 
-        min_samples = (0.8*10.0) / voxel_volume
-        dbscan = DBSCAN(eps=2.0,
-                                   min_samples=min_samples,
-                                   )
+        cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
+                                         # t=blob_finding.clustering_cutoff,
+                                         t=clustering_cutoff,
+                                         criterion='distance',
+                                         metric='euclidean',
+                                         method='single',
+                                         )
+        # voxel_volume = grid.volume() /grid.size() 
+        # min_samples = (0.8*10.0) / voxel_volume
+        # dbscan = DBSCAN(eps=2.0,
+        #                            min_samples=min_samples,
+        #                            )
         
-        cluster_ids_array = dbscan.fit_predict(extrema_cart_coords_array)
+        # cluster_ids_array = dbscan.fit_predict(extrema_cart_coords_array)
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
             if unique_cluster == -1:
