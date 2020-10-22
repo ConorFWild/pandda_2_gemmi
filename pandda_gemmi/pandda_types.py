@@ -2675,7 +2675,6 @@ class Clustering:
                                    )
         
         cluster_ids_array = dbscan.fit_predict(extrema_cart_coords_array)
-
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
             if unique_cluster == -1:
