@@ -2914,12 +2914,6 @@ class Clusterings:
             for unique_cluster in np.unique(cluster_ids_array):                
                 current_clusters = cluster_array[cluster_ids_array == unique_cluster]
                 
-                print([current_cluster.indexes[0].shape 
-                                                  for current_cluster
-                                                  in current_clusters])
-                
-                
-                
                 cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i] 
                                                   for current_cluster
                                                   in current_clusters
@@ -2940,7 +2934,6 @@ class Clusterings:
                                                  )
 
                 centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
-                print(centroid_array.shape)
                 
                 centroid = (centroid_array[0],
                                       centroid_array[1],
