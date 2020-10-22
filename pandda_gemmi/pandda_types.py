@@ -3443,7 +3443,7 @@ class EventTable:
         records = []
         for record in self.records:
             event_dict = dataclasses.asdict(record) 
-            event_dict["1-BDC"] = float(event_dict["bdc"], 2)
+            event_dict["1-BDC"] = round(event_dict["bdc"], 2)
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
