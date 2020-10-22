@@ -2961,7 +2961,7 @@ class Clusterings:
                               centroid,
                               event_mask_indicies,
                 )
-            
+
                 new_clusters[unique_cluster] = new_cluster
                 
             new_clustering_dict[dtag] = Clustering(new_clusters)      
