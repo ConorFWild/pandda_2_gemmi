@@ -2933,7 +2933,7 @@ class Clusterings:
                                                   in current_clusters
                                                   ]
                 
-                values = np.concatenate([current_cluster.values[i] 
+                values = np.concatenate([current_cluster.values 
                                                   for current_cluster
                                                   in current_clusters
                                                   ], axis=None,
@@ -2943,11 +2943,10 @@ class Clusterings:
                                   np.mean(cluster_positions_array[1]),
                                   np.mean(cluster_positions_array[2]),
                 )
-                
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
-                event_mask_indicies  = np.concatenate([current_cluster.event_mask_indicies[i] 
+                event_mask_indicies  = np.concatenate([current_cluster.event_mask_indicies 
                                                     for current_cluster
                                                     in current_clusters
                                                     ], axis=None,
