@@ -2928,7 +2928,7 @@ class Clusterings:
                                         for i
                                         in [0, 1, 2]
                                         )
-                cluster_positions_array = [current_cluster.centroid 
+                cluster_positions_list = [current_cluster.centroid 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2939,10 +2939,9 @@ class Clusterings:
                                                   ], axis=None,
                                                  )
 
-                centroid_array = (np.mean(cluster_positions_array[0]),
-                                  np.mean(cluster_positions_array[1]),
-                                  np.mean(cluster_positions_array[2]),
-                )
+                centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
+                print(centroid_array.shape)
+                
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
