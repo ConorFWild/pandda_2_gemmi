@@ -2914,7 +2914,7 @@ class Clusterings:
             new_clusters = {}
             for unique_cluster in np.unique(cluster_ids_array):                
                 current_clusters = cluster_array[cluster_ids_array == unique_cluster]
-                cluster_points_tuple = (np.stack([current_cluster.cluster_points_tuple[i] 
+                cluster_points_tuple = tuple(np.stack([current_cluster.cluster_points_tuple[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2922,7 +2922,7 @@ class Clusterings:
                                         for i
                                         in [0, 1, 2]
                                         )
-                cluster_positions_array = (np.stack([current_cluster.cluster_positions_array[i] 
+                cluster_positions_array = tuple(np.stack([current_cluster.cluster_positions_array[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2931,7 +2931,7 @@ class Clusterings:
                                         in [0, 1, 2]
                                         )
                 
-                values = (np.stack([current_cluster.values[i] 
+                values = tuple(np.stack([current_cluster.values[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ]
@@ -2939,12 +2939,14 @@ class Clusterings:
                                         for i
                                         in [0, 1, 2]
                                         )
-                centroid_array = np.mean(cluster_positions_array,
-                                        axis=0)
+                centroid_array = (np.mean(cluster_positions_array[0]),
+                                  np.mean(cluster_positions_array[1]),
+                                  np.mean(cluster_positions_array[2]),
+                )
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
-                event_mask_indicies  = (np.stack([current_cluster.event_mask_indicies[i] 
+                event_mask_indicies  = tuple(np.stack([current_cluster.event_mask_indicies[i] 
                                                     for current_cluster
                                                     in current_clusters
                                                     ]
