@@ -2669,7 +2669,7 @@ class Clustering:
         #                                  method='single',
         #                                  )
         voxel_volume = grid.volume() /grid.size() 
-        min_samples = 10.0 / voxel_volume
+        min_samples = (0.8*10.0) / voxel_volume
         dbscan = DBSCAN(eps=2.0,
                                    min_samples=min_samples,
                                    )
