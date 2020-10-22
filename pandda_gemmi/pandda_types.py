@@ -2928,23 +2928,17 @@ class Clusterings:
                                         for i
                                         in [0, 1, 2]
                                         )
-                cluster_positions_array = tuple(np.concatenate([current_cluster.centroid[i] 
+                cluster_positions_array = [current_cluster.centroid 
                                                   for current_cluster
                                                   in current_clusters
-                                                  ], axis=None,
-                                                 )
-                                        for i
-                                        in [0, 1, 2]
-                                        )
+                                                  ]
                 
-                values = tuple(np.concatenate([current_cluster.values[i] 
+                values = np.concatenate([current_cluster.values[i] 
                                                   for current_cluster
                                                   in current_clusters
                                                   ], axis=None,
                                                  )
-                                        for i
-                                        in [0, 1, 2]
-                                        )
+
                 centroid_array = (np.mean(cluster_positions_array[0]),
                                   np.mean(cluster_positions_array[1]),
                                   np.mean(cluster_positions_array[2]),
@@ -2953,14 +2947,11 @@ class Clusterings:
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
-                event_mask_indicies  = tuple(np.concatenate([current_cluster.event_mask_indicies[i] 
+                event_mask_indicies  = np.concatenate([current_cluster.event_mask_indicies[i] 
                                                     for current_cluster
                                                     in current_clusters
                                                     ], axis=None,
                                                     )
-                                            for i
-                                            in [0, 1, 2]
-                                            )
                 
                 new_cluster = Cluster(
                     cluster_points_tuple,
