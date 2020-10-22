@@ -2910,7 +2910,6 @@ class Clusterings:
             )
             
             cluster_ids_array = dbscan.fit_predict(centroid_array)
-            
             new_clusters = {}
             for unique_cluster in np.unique(cluster_ids_array):                
                 current_clusters = cluster_array[cluster_ids_array == unique_cluster]
@@ -2924,7 +2923,7 @@ class Clusterings:
                 cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i] 
                                                   for current_cluster
                                                   in current_clusters
-                                                  ]
+                                                  ], axis=None,
                                                  )
                                         for i
                                         in [0, 1, 2]
@@ -2932,7 +2931,7 @@ class Clusterings:
                 cluster_positions_array = tuple(np.concatenate([current_cluster.centroid[i] 
                                                   for current_cluster
                                                   in current_clusters
-                                                  ]
+                                                  ], axis=None,
                                                  )
                                         for i
                                         in [0, 1, 2]
@@ -2941,7 +2940,7 @@ class Clusterings:
                 values = tuple(np.concatenate([current_cluster.values[i] 
                                                   for current_cluster
                                                   in current_clusters
-                                                  ]
+                                                  ], axis=None,
                                                  )
                                         for i
                                         in [0, 1, 2]
@@ -2957,7 +2956,7 @@ class Clusterings:
                 event_mask_indicies  = tuple(np.concatenate([current_cluster.event_mask_indicies[i] 
                                                     for current_cluster
                                                     in current_clusters
-                                                    ]
+                                                    ], axis=None,
                                                     )
                                             for i
                                             in [0, 1, 2]
