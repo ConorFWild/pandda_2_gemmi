@@ -2914,6 +2914,11 @@ class Clusterings:
             new_clusters = {}
             for unique_cluster in np.unique(cluster_ids_array):                
                 current_clusters = cluster_array[cluster_ids_array == unique_cluster]
+                
+                print([current_cluster.indexes[0].shape 
+                                                  for current_cluster
+                                                  in current_clusters])
+                
                 cluster_points_tuple = tuple(np.stack([current_cluster.indexes[i] 
                                                   for current_cluster
                                                   in current_clusters
