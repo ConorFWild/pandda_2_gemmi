@@ -3082,18 +3082,20 @@ class BDC:
         cluster_array[cluster_indexes] = True
         # print(np.sum(cluster_array))
         cluster_mask = cluster_array[protein_mask_indicies]
-        # print(np.sum(cluster_mask))
-        # print(cluster_mask.shape)
 
         vals = {}
         for val in np.linspace(0, 1, steps):
             subtracted_map = xmap_masked - val * mean_masked
             cluster_vals = subtracted_map[cluster_mask]
-            local_correlation = stats.pearsonr(mean_masked[cluster_mask],
-                                               cluster_vals)[0]
+            # local_correlation = stats.pearsonr(mean_masked[cluster_mask],
+            #                                    cluster_vals)[0]
+            local_correlation, local_offset = np.polyfit(x=mean_masked[cluster_mask], y=cluster_vals, deg=1)
 
-            global_correlation = stats.pearsonr(mean_masked,
-                                                subtracted_map)[0]
+
+            # global_correlation = stats.pearsonr(mean_masked,
+            #                                     subtracted_map)[0]
+            global_correlation, global_offset = np.polyfit(x=mean_masked, y=subtracted_map, deg=1)
+
 
             vals[val] = np.abs(global_correlation - local_correlation)
 
