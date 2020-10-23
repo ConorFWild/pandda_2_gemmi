@@ -1610,7 +1610,9 @@ class Alignment:
         dataset_tree = spatial.KDTree(dataset_atom_array)
         
         # Other kdtree
-        reference_tree = spatial.KDTree(reference_atom_array)
+        # reference_tree = spatial.KDTree(reference_atom_array)
+        
+        assert reference_atom_array.size == dataset_atom_array.size
 
         transforms = {}
 
@@ -1627,16 +1629,16 @@ class Alignment:
                     reference_ca_pos = current_res_ref["CA"][0].pos
                     
                     # dataset selection
-                    dataset_indexes = reference_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
+                    dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
                                                                     7.0,
                                                                     )
                     dataset_selection = dataset_atom_array[dataset_indexes]
                     
                     # other selection
-                    reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
-                                                                    7.0,
-                                                                    )
-                    reference_selection = dataset_atom_array[reference_indexes]
+                    # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+                    #                                                 7.0,
+                    #                                                 )
+                    reference_selection = reference_atom_array[dataset_indexes]
                     
                     transforms[current_res_id] = Transform.from_atoms(
                         dataset_selection,
