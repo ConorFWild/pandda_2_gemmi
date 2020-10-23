@@ -2776,7 +2776,7 @@ class Clustering:
             event_mask.set_unit_cell(zmap.unit_cell())
             for position in positions:
                 event_mask.set_points_around(position,
-                                             radius=2.0,
+                                             radius=3.0,
                                              value=1,
                                              )
 
