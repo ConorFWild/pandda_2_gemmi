@@ -1511,6 +1511,28 @@ class Transform:
         com_moving = mean
 
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+    
+    @staticmethod
+    def from_atoms(dataset_selection,
+                        reference_selection,
+                        ):
+        mean = np.mean(dataset_selection, axis=0)
+        mean_ref = np.mean(reference_selection, axis=0)
+
+        # vec = mean_ref - mean
+        vec = np.array([0.0, 0.0, 0.0])
+
+        de_meaned = dataset_selection - mean
+        de_meaned_ref = reference_selection - mean_ref
+
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+
+        com_reference = mean_ref
+
+        com_moving = mean
+
+        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+        
 
     @staticmethod
     def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
@@ -1569,61 +1591,117 @@ class Alignment:
 
     @staticmethod
     def from_dataset(reference: Reference, dataset: Dataset):
+        
+        # dataset atom coord matrix
+        dataset_atoms = dataset.structure.protein_atoms()
+        dataset_pos_list = []
+        for atom in dataset_atoms:
+            dataset_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
+        dataset_atom_array = np.array(dataset_pos_list)
+        
+        # Other atom coord matrix
+        reference_atoms = reference.dataset.structure.protein_atoms()
+        reference_pos_list = []
+        for atom in reference_atoms:
+            reference_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
+        reference_atom_array = np.array(dataset_pos_list)
+        
+        # dataset kdtree
+        dataset_tree = spatial.KDTree(dataset_atom_array)
+        
+        # Other kdtree
+        reference_tree = spatial.KDTree(reference_atom_array)
 
         transforms = {}
 
         for model in dataset.structure.structure:
             for chain in model:
-                for res in chain.get_polymer():
-                    prev_res = chain.previous_residue(res)
-                    next_res = chain.next_residue(res)
-
-                    if prev_res:
-                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
-                    current_res_id = ResidueID.from_residue_chain(model, chain, res)
-                    if next_res:
-                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
-
-                    if prev_res:
-                        prev_res_ref = reference.dataset.structure[prev_res_id][0]
+                for dataset_res in chain.get_polymer():
+                    
+                    # Get ca pos
+                    current_res_id = ResidueID.from_residue_chain(model, chain, dataset_res)
+                    dataset_ca_pos = dataset_res["CA"][0].pos
+                    
+                    #
                     current_res_ref = reference.dataset.structure[current_res_id][0]
-                    if next_res:
-                        next_res_ref = reference.dataset.structure[next_res_id][0]
-
-                    if not prev_res:
-                        transform = Transform.from_start_residues(res, next_res,
-                                                                  current_res_ref, next_res_ref)
-
-                    if not next_res:
-                        transform = Transform.from_finish_residues(prev_res, res,
-                                                                   prev_res_ref, current_res_ref)
-
-                    if prev_res and next_res:
-                        transform = Transform.from_residues(prev_res, res, next_res,
-                                                            prev_res_ref, current_res_ref, next_res_ref,
-                                                            )
-
-                    transforms[current_res_id] = transform
-
-                for res in chain.get_polymer():
-                    prev_res = chain.previous_residue(res)
-                    next_res = chain.next_residue(res)
-
-                    if prev_res:
-                        prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
-                    current_res_id = ResidueID.from_residue_chain(model, chain, res)
-                    if next_res:
-                        next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
-
-                    if not prev_res:
-                        transforms[current_res_id].transform.mat.fromlist(
-                            transforms[next_res_id].transform.mat.tolist())
-
-                    if not next_res:
-                        transforms[current_res_id].transform.mat.fromlist(
-                            transforms[prev_res_id].transform.mat.tolist())
+                    reference_ca_pos = current_res_ref["CA"][0].pos
+                    
+                    # dataset selection
+                    dataset_indexes = reference_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
+                                                                    7.0,
+                                                                    )
+                    dataset_selection = dataset_atom_array[dataset_indexes]
+                    
+                    # other selection
+                    reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+                                                                    7.0,
+                                                                    )
+                    reference_selection = dataset_atom_array[reference_indexes]
+                    
+                    transforms[current_res_id] = Transform.from_atoms(
+                        dataset_selection,
+                        reference_selection,
+                    )
 
         return Alignment(transforms)
+
+    # @staticmethod
+    # def from_dataset(reference: Reference, dataset: Dataset):
+
+    #     transforms = {}
+
+    #     for model in dataset.structure.structure:
+    #         for chain in model:
+    #             for res in chain.get_polymer():
+    #                 prev_res = chain.previous_residue(res)
+    #                 next_res = chain.next_residue(res)
+
+    #                 if prev_res:
+    #                     prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+    #                 current_res_id = ResidueID.from_residue_chain(model, chain, res)
+    #                 if next_res:
+    #                     next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
+
+    #                 if prev_res:
+    #                     prev_res_ref = reference.dataset.structure[prev_res_id][0]
+    #                 current_res_ref = reference.dataset.structure[current_res_id][0]
+    #                 if next_res:
+    #                     next_res_ref = reference.dataset.structure[next_res_id][0]
+
+    #                 if not prev_res:
+    #                     transform = Transform.from_start_residues(res, next_res,
+    #                                                               current_res_ref, next_res_ref)
+
+    #                 if not next_res:
+    #                     transform = Transform.from_finish_residues(prev_res, res,
+    #                                                                prev_res_ref, current_res_ref)
+
+    #                 if prev_res and next_res:
+    #                     transform = Transform.from_residues(prev_res, res, next_res,
+    #                                                         prev_res_ref, current_res_ref, next_res_ref,
+    #                                                         )
+
+    #                 transforms[current_res_id] = transform
+
+    #             for res in chain.get_polymer():
+    #                 prev_res = chain.previous_residue(res)
+    #                 next_res = chain.next_residue(res)
+
+    #                 if prev_res:
+    #                     prev_res_id = ResidueID.from_residue_chain(model, chain, prev_res)
+    #                 current_res_id = ResidueID.from_residue_chain(model, chain, res)
+    #                 if next_res:
+    #                     next_res_id = ResidueID.from_residue_chain(model, chain, next_res)
+
+    #                 if not prev_res:
+    #                     transforms[current_res_id].transform.mat.fromlist(
+    #                         transforms[next_res_id].transform.mat.tolist())
+
+    #                 if not next_res:
+    #                     transforms[current_res_id].transform.mat.fromlist(
+    #                         transforms[prev_res_id].transform.mat.tolist())
+
+    #     return Alignment(transforms)
 
     def __iter__(self):
         for res_id in self.transforms:
