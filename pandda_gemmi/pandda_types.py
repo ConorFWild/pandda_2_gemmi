@@ -1604,11 +1604,10 @@ class Alignment:
         reference_pos_list = []
         for atom in reference_atoms:
             reference_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
-        reference_atom_array = np.array(dataset_pos_list)
+        reference_atom_array = np.array(reference_pos_list)
         
         # dataset kdtree
         dataset_tree = spatial.KDTree(dataset_atom_array)
-        
         # Other kdtree
         # reference_tree = spatial.KDTree(reference_atom_array)
         
