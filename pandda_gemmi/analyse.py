@@ -1,37 +1,37 @@
-if __name__ == '__main__':
+import os
+from pandda_gemmi.constants import PANDDA_LOG_FILE
+from typing import Dict
+import time
+import psutil
+import pickle
+from shlex import split
+from pprint import PrettyPrinter
+from pathlib import Path
+
+import numpy as np
+
+import joblib
+
+from pandda_gemmi.config import Config
+from pandda_gemmi import logs
+from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
+                                    Grid, Alignments, Shells, Xmaps, Xmap,
+                                    XmapArray, Model, Dtag, Zmaps, Clusterings,
+                                    Events, SiteTableFile, EventTableFile,
+                                    SiteTable, EventTable
+                                    )
 
 
-    import os
-    from typing import Dict
-    import time
-    import psutil
-    import pickle
-    from shlex import split
-    from pprint import PrettyPrinter
-    from pathlib import Path
-
-    import numpy as np
-
-    import joblib
-
-    from pandda_gemmi.config import Config
-    from pandda_gemmi import logs
-    from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
-                                        Grid, Alignments, Shells, Xmaps, Xmap,
-                                        XmapArray, Model, Dtag, Zmaps, Clusterings,
-                                        Events, SiteTableFile, EventTableFile,
-                                        SiteTable, EventTable
-                                        )
-
-
-    def main():
-        ###################################################################
-        # # Configuration
-        ###################################################################
-        
-        config: Config = Config.from_args()
-        pandda_log: logs.LogData = logs.LogData.initialise()
-        pandda_log.config = config
+def main():
+    ###################################################################
+    # # Configuration
+    ###################################################################
+    
+    config: Config = Config.from_args()
+    pandda_log: logs.LogData = logs.LogData.initialise()
+    pandda_log.config = config
+    
+    try:
 
         pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                                 config.output.out_dir,
@@ -40,7 +40,7 @@ if __name__ == '__main__':
                                                                 )
         pandda_fs_model.build()
         pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)
-        
+                
         ###################################################################
         # # Pre-pandda
         ###################################################################
@@ -256,8 +256,16 @@ if __name__ == '__main__':
                                                         grid,
                                                         )
 
-                        
+    except Exception as e:
+        pandda_log.exception = str(e)
+        pandda_log.print()
+        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+        
 
+
+
+
+if __name__ == '__main__':
 
     main()
 

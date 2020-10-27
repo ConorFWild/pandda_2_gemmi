@@ -383,6 +383,7 @@ class LogData:
     shells_log: Dict[int, ShellLog]
     events_log: Dict[str, Dict[int, EventLog]]
     sites_log: Dict[int, SiteLog]    
+    exception: str
 
     @staticmethod
     def initialise():
@@ -398,8 +399,15 @@ class LogData:
             shells_log={},
             events_log={},
             sites_log={},
+            exception="",
                        )
         
+    def print(self):
+        pretty_printer = PrettyPrinter(indent=4)
+        
+        log_dict = dataclasses.asdict(self)
+        
+        pretty_printer.pprint(log_dict)
         
     def save_json(self, path: Path):
         log_dict = dataclasses.asdict(self)
