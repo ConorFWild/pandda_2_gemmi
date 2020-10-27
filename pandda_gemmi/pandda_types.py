@@ -3911,6 +3911,16 @@ class RMSD:
         print([x for x in structure_2.structure])
         print(list(structure_1.protein_residue_ids()))
         print(list(structure_2.protein_residue_ids()))
+        for model in structure_1.structure:
+            print(model)
+            for chain in model:
+                print(chain)
+                for residue in chain:
+                    print(residue)
+                print("protein")    
+                for residue in chain.get_polymer():
+                    print(residue)
+                
         
         print(len(list(structure_1.all_atoms())))
         print(len(list(structure_2.all_atoms())))
