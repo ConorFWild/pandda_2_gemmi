@@ -28,9 +28,7 @@ if __name__ == '__main__':
         # # Configuration
         ###################################################################
         
-        args_list = split("--data_dirs=\"/dls/science/groups/i04-1/conor_dev/baz2b_test/data\" --pdb_regex=\"*.dimple.pdb\" --mtz_regex=\"*.dimple.mtz\" --out_dir=\"/dls/science/groups/i04-1/conor_dev/experiments/pandda_gemmi_test\" --structure_factors=\"2FOFCWT,PH2FOFCWT\"")
-
-        config: Config = Config.from_args_list(args_list)
+        config: Config = Config.from_args()
         pandda_log: logs.LogData = logs.LogData.initialise()
         pandda_log.config = config
 
