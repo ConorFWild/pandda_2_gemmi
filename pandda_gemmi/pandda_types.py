@@ -111,15 +111,22 @@ class Structure:
     def __getitem__(self, item: ResidueID):
         return self.structure[item.model][item.chain][item.insertion]
 
-    def residue_ids(self):
-        residue_ids = []
+    # def residue_ids(self):
+    #     residue_ids = []
+    #     for model in self.structure:
+    #         for chain in model:
+    #             for residue in chain.get_polymer():
+    #                 resid = ResidueID.from_residue_chain(model, chain, residue)
+    #                 residue_ids.append(resid)
+
+    #     return residue_ids
+
+    def protein_residue_ids(self):
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer():
-                    resid = ResidueID.from_residue_chain(model, chain, residue)
-                    residue_ids.append(resid)
-
-        return residue_ids
+                    resid = ResidueID.from_residue_chain(model, chain, residue)                        
+                    yield resid
 
     def protein_atoms(self):
         for model in self.structure:
@@ -3913,7 +3920,7 @@ class RMSD:
         # positions_2 = [ atom.pos for atom in structure_2.protein_atoms()]
         #
 
-        for residues_id in structure_1.residue_ids():
+        for residues_id in structure_1.protein_residue_ids():
             print(residues_id)
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
