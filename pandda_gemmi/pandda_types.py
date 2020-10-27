@@ -3778,6 +3778,8 @@ class ProcessedDataset:
     dataset_models: DatasetModels
     input_mtz: Path
     input_pdb: Path
+    source_mtz: Path
+    source_pdb: Path
     z_map_file: ZMapFile
     event_map_files: EventMapFiles
 
@@ -3792,8 +3794,7 @@ class ProcessedDataset:
         source_pdb = dataset_dir.input_pdb_file
         input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
         input_pdb = processed_dataset_dir / PANDDA_PDB_FILE.format(dtag)
-        shutil.copyfile(source_mtz, input_mtz)
-        shutil.copyfile(source_pdb, input_pdb)
+
         
         
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
@@ -3803,6 +3804,8 @@ class ProcessedDataset:
                                 dataset_models=DatasetModels.from_dir(dataset_models_dir),
                                 input_mtz=input_mtz,
                                 input_pdb=input_pdb,
+                                source_mtz=source_mtz,
+                                source_pdb=source_pdb,
                                 z_map_file=z_map_file,
                                 event_map_files=event_map_files,
                                 )
@@ -3811,7 +3814,9 @@ class ProcessedDataset:
         if not self.path.exists():
             os.mkdir(str(self.path))
 
-
+        shutil.copyfile(self.source_mtz, self.input_mtz)
+        shutil.copyfile(self.source_pdb, self.input_pdb)
+        
 @dataclasses.dataclass()
 class ProcessedDatasets:
     path: Path
