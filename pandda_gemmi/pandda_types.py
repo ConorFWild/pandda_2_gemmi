@@ -103,6 +103,7 @@ class Structure:
     @staticmethod
     def from_file(file: Path) -> Structure:
         structure = gemmi.read_structure(str(file))
+        structure.setup_entities()
         return Structure(structure, file)
 
     def rfree(self):
@@ -151,6 +152,7 @@ class Structure:
         structure_python = data[0]
         path = data[1]
         self.structure = structure_python.to_gemmi()
+        self.structure.setup_entities()
         self.path = path
 
         
