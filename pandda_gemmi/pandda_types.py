@@ -3898,6 +3898,12 @@ class RMSD:
     def from_structures(structure_1: Structure, structure_2: Structure):
         print(structure_1.path)
         print(structure_2.path)
+        print(structure_1)
+        print(structure_2)
+        print([x for x in structure_1.structure])
+        print([x for x in structure_2.structure])
+        print(len(list(structure_1.all_atoms())))
+        print(len(list(structure_2.all_atoms())))
         distances = []
 
         positions_1 = []

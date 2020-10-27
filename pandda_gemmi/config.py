@@ -70,12 +70,14 @@ class DiffractionData:
     structure_factors: StructureFactors = StructureFactors.from_string("FWT,PHWT")
     low_resolution_completeness: float = 4.0
     all_data_are_valid_values: bool = True
+    sample_rate: float = 4.0
 
     @classmethod
     def from_args(cls, args):
         return DiffractionData(structure_factors=StructureFactors.from_string(args.structure_factors),
                                low_resolution_completeness=args.low_resolution_completeness,
                                all_data_are_valid_values=args.all_data_are_valid_values,
+                               sample_rate=args.sample_rate,
                                )
 
 
@@ -321,6 +323,11 @@ class Config:
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
+        parser.add_argument("--sample_rate",
+                            default=4.0,
+                            type=float,
+                            help="The directory for output and intermediate files to be saved to",
+                            )
 
         # Filters
         parser.add_argument("--max_rmsd_to_reference",
@@ -400,7 +407,7 @@ class Config:
 
         # blob finding
         parser.add_argument("--min_blob_volume",
-                            default=10.0,
+                            default=9.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
@@ -416,7 +423,7 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
         parser.add_argument("--cluster_cutoff_distance_multiplier",
-                    default=1.3,
+                    default=1.1,
                     type=float,
                     help="The directory for output and intermediate files to be saved to",
                     )

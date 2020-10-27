@@ -15,10 +15,9 @@ import joblib
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
-                                    Grid, Alignments, Shells, Xmaps, Xmap,
+                                    Grid, Alignments, Shells, Xmaps, 
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
-                                    Events, SiteTableFile, EventTableFile,
-                                    SiteTable, EventTable
+                                    Events, SiteTable, EventTable
                                     )
 
 
@@ -118,10 +117,6 @@ def main():
             shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
                                                                         structure_factors=config.params.diffraction_data.structure_factors,
                                                                         )
-                
-        #     shell_truncated_datasets: Datasets = shell_truncated_datasets.smooth_datasets(reference, 
-        #                                               structure_factors=config.params.diffraction_data.structure_factors,
-        #                                               )  
 
             # Assign datasets
             shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
@@ -133,7 +128,7 @@ def main():
                 alignments, 
                 grid,
                 config.params.diffraction_data.structure_factors, 
-                sample_rate=4.0,
+                sample_rate=config.params.diffraction_data.sample_rate,
                 mapper=True,
                 )
 
@@ -146,9 +141,7 @@ def main():
                                         grid,
                                         )
             masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
-            print(len(masked_train_xmap_array.dtag_list))
             masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
-            print(len(masked_test_xmap_array.dtag_list))
 
             # Determine the parameters of the model to find outlying electron density
             mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
@@ -158,7 +151,6 @@ def main():
                                                         mean_array,
                                                     1.5,
                                                     )
-            print(sigma_is)
             pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i 
                                                             for dtag, sigma_i 
                                                             in sigma_is.items()}
@@ -205,22 +197,18 @@ def main():
                 clusterings_peaked, grid)
             
             clusterings_merged = clusterings_peaked.merge_clusters()
-            pandda_log.shells_log[shell.number].merged_clusterings = logs.ClusteringsLog.from_clusters(
+            pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
                 clusterings_merged, grid)
 
             # Calculate the shell events
             events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732)
             pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
-            print(f"Got {len(events.events)} events!")
-        #     print(events)
-            print([event_id for event_id in events])
-            print(pandda_log.shells_log[shell.number].events)
 
             # Save the z maps
             for dtag in zmaps:
                 zmap = zmaps[dtag]
                 pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-            # Save the z maps
+            # Save the x maps
             for dtag in xmaps:
                 xmap = xmaps[dtag]
                 path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
