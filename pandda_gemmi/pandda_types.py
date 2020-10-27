@@ -3909,6 +3909,9 @@ class RMSD:
         print(structure_2)
         print([x for x in structure_1.structure])
         print([x for x in structure_2.structure])
+        print(list(structure_1.protein_residue_ids()))
+        print(list(structure_2.protein_residue_ids()))
+        
         print(len(list(structure_1.all_atoms())))
         print(len(list(structure_2.all_atoms())))
         distances = []
