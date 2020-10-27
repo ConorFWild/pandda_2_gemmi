@@ -3899,6 +3899,7 @@ class RMSD:
         #
 
         for residues_id in structure_1.residue_ids():
+            print(residues_id)
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
 
@@ -3933,6 +3934,9 @@ class RMSD:
 
     @staticmethod
     def from_arrays(array_1, array_2):
+        print(array_1)
+        print(array_2)
+        
         array_1_mean = np.mean(array_1, axis=0).reshape((1, 3))
         array_2_mean = np.mean(array_2, axis=0).reshape((1, 3))
 
