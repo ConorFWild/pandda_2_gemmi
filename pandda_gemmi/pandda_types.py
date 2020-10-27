@@ -3889,6 +3889,8 @@ class RMSD:
 
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure):
+        print(structure_1.path)
+        print(structure_2.path)
         distances = []
 
         positions_1 = []
