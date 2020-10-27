@@ -138,10 +138,14 @@ class Structure:
                         
     def __getstate__(self):
         structure_python = StructurePython.from_gemmi(self.structure)
-        return structure_python
+        return (structure_python, self.path)
     
-    def __setstate__(self, structure_python: StructurePython):
+    def __setstate__(self, data: Tuple[StructurePython, Path]):
+        structure_python = data[0]
+        path = data[1]
         self.structure = structure_python.to_gemmi()
+        self.path = path
+
         
 
 
@@ -411,11 +415,14 @@ class Reflections:
             y_r_all = y_r_truncated
             
     def __getstate__(self):
-        return MtzPython.from_gemmi(self.reflections)
+        return (MtzPython.from_gemmi(self.reflections), self.path)
     
-    def __setstate__(self, reflections_python: MtzPython):
+    def __setstate__(self, data: Tuple[MtzPython, Path]):
+        reflections_python = data[0]
+        path = data[1]
         reflections = reflections_python.to_gemmi()
         self.reflections = reflections
+        self.path = path
 
 
 @dataclasses.dataclass()
