@@ -6,7 +6,7 @@ import dataclasses
 
 from pprint import PrettyPrinter
 printer = PrettyPrinter(indent=1)
-from pathlib import Path
+from pathlib import Path, PosixPath
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi.python_types import *
@@ -46,7 +46,14 @@ from pandda_gemmi.config import Config
 #         logs_str.format(model_stds=printer.pformat(model.stds))
 
 #         return logs_str
-    
+
+def iterdict(d):
+  for k,v in d.items():        
+     if isinstance(v, dict):
+         iterdict(v)
+     elif issubclass(v, Path):
+         d[k] = str(v)
+         
 
 
 @dataclasses.dataclass()
@@ -403,9 +410,11 @@ class LogData:
                        )
         
     def print(self):
-        pretty_printer = PrettyPrinter(indent=4)
+        pretty_printer = PrettyPrinter(indent=4, depth=1)
         
         log_dict = dataclasses.asdict(self)
+        
+        iterdict(log_dict)
         
         pretty_printer.pprint(log_dict)
         
