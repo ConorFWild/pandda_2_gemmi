@@ -1623,7 +1623,7 @@ class Alignment:
         dataset_pos_list = []
         reference_pos_list = []
 
-        for model in reference.dataset.structure:
+        for model in reference.dataset.structure.structure:
             for chain in model:
                 for ref_res in chain.get_polymer():
                     res_id = ResidueID.from_residue_chain(model, chain, ref_res)
