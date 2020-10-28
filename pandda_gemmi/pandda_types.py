@@ -67,9 +67,16 @@ class ResidueID:
                          chain.name,
                          str(res.seqid.num),
                          )
-
+    def __eq__(self, other) -> bool:
+        if isinstance(other, type(self)):
+            return ((self.model, self.chain, self.insertion) ==
+                    (other.model, other.chain, other.insertion))
+        return NotImplemented
+    
     def __hash__(self):
         return hash((self.model, self.chain, self.insertion))
+    
+
 
 
 @dataclasses.dataclass()
