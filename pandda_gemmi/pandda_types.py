@@ -28,6 +28,8 @@ from pandda_gemmi.constants import *
 
 from pandda_gemmi.python_types import *
 
+from pandda_gemmi.pandda_exceptions import *
+
 
 
 @dataclasses.dataclass()
@@ -1614,21 +1616,36 @@ class Alignment:
     def __getitem__(self, item: ResidueID):
         return self.transforms[item]
 
+
     @staticmethod
     def from_dataset(reference: Reference, dataset: Dataset):
         
-        # dataset atom coord matrix
-        dataset_atoms = dataset.structure.protein_atoms()
         dataset_pos_list = []
-        for atom in dataset_atoms:
-            dataset_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
+        reference_pos_list = []
+
+        for model in reference.dataset.structure:
+            for chain in model:
+                for ref_res in chain.get_polymer():
+                    res_id = ResidueID.from_residue_chain(model, chain, ref_res)
+                    
+                    dataset_res = dataset.structure[res_id]
+                    
+                    for atom_ref, atom_dataset in zip(ref_res, dataset_res):
+                        dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
+                        reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
+        
+        # dataset atom coord matrix
+        # dataset_atoms = dataset.structure.protein_atoms()
+        # dataset_pos_list = []
+        # for atom in dataset_atoms:
+        #     dataset_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
         dataset_atom_array = np.array(dataset_pos_list)
         
         # Other atom coord matrix
-        reference_atoms = reference.dataset.structure.protein_atoms()
-        reference_pos_list = []
-        for atom in reference_atoms:
-            reference_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
+        # reference_atoms = reference.dataset.structure.protein_atoms()
+        # reference_pos_list = []
+        # for atom in reference_atoms:
+        #     reference_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
         reference_atom_array = np.array(reference_pos_list)
         
         # dataset kdtree
@@ -1636,7 +1653,10 @@ class Alignment:
         # Other kdtree
         # reference_tree = spatial.KDTree(reference_atom_array)
         
-        assert reference_atom_array.size == dataset_atom_array.size
+        if reference_atom_array.size != dataset_atom_array.size:
+            raise AlignmentUnmatchedAtomsError(reference_atom_array,
+                                               dataset_atom_array,
+                                               )
 
         transforms = {}
 
