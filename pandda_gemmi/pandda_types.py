@@ -1949,7 +1949,8 @@ class Xmap:
         transform_list = []
         com_moving_list = []
         com_reference_list = []
-        for residue_id in alignment:
+        for residue_id, point_position_dict in grid.partitioning.partitioning.items():
+            
             al = alignment[residue_id]
             transform = al.transform.inverse()
             com_moving = al.com_moving
@@ -1964,7 +1965,7 @@ class Xmap:
                              )
                       )
             
-            for point, position in grid.partitioning[residue_id].items():
+            for point, position in point_position_dict.items():
                 point_list.append(point)
                 position_list.append(position)
                 transform_list.append(transform)
