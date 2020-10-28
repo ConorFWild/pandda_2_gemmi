@@ -1660,17 +1660,17 @@ class Alignment:
 
         transforms = {}
 
-        for model in dataset.structure.structure:
+        for model in reference.dataset.structure.structure:
             for chain in model:
-                for dataset_res in chain.get_polymer():
+                for ref_res in chain.get_polymer():
                     
                     # Get ca pos
-                    current_res_id = ResidueID.from_residue_chain(model, chain, dataset_res)
-                    dataset_ca_pos = dataset_res["CA"][0].pos
+                    current_res_id = ResidueID.from_residue_chain(model, chain, ref_res)
+                    reference_ca_pos = ref_res["CA"][0].pos
                     
                     #
-                    current_res_ref = reference.dataset.structure[current_res_id][0]
-                    reference_ca_pos = current_res_ref["CA"][0].pos
+                    dataset_res = dataset.structure[current_res_id][0]
+                    dataset_ca_pos = dataset_res["CA"][0].pos
                     
                     # dataset selection
                     dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
