@@ -1935,6 +1935,15 @@ class Xmap:
             com_moving = al.com_moving
             com_reference = al.com_reference
             
+            if residue_id.insertion == "1316":
+                print(residue_id)
+                print(
+                    sorted(
+                        grid.partitioning.partitioning.keys(),
+                        key=lambda x: x.insertion,
+                             )
+                      )
+            
             for point, position in grid.partitioning[residue_id].items():
                 point_list.append(point)
                 position_list.append(position)
@@ -3914,27 +3923,27 @@ class RMSD:
 
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure):
-        print(structure_1.path)
-        print(structure_2.path)
-        print(structure_1)
-        print(structure_2)
-        print([x for x in structure_1.structure])
-        print([x for x in structure_2.structure])
-        print(list(structure_1.protein_residue_ids()))
-        print(list(structure_2.protein_residue_ids()))
-        for model in structure_1.structure:
-            print(model)
-            for chain in model:
-                print(chain)
-                for residue in chain:
-                    print(residue)
-                print("protein")    
-                for residue in chain.get_polymer():
-                    print(residue)
+        # print(structure_1.path)
+        # print(structure_2.path)
+        # print(structure_1)
+        # print(structure_2)
+        # print([x for x in structure_1.structure])
+        # print([x for x in structure_2.structure])
+        # print(list(structure_1.protein_residue_ids()))
+        # print(list(structure_2.protein_residue_ids()))
+        # for model in structure_1.structure:
+        #     print(model)
+        #     for chain in model:
+        #         print(chain)
+        #         for residue in chain:
+        #             print(residue)
+        #         print("protein")    
+        #         for residue in chain.get_polymer():
+        #             print(residue)
                 
         
-        print(len(list(structure_1.all_atoms())))
-        print(len(list(structure_2.all_atoms())))
+        # print(len(list(structure_1.all_atoms())))
+        # print(len(list(structure_2.all_atoms())))
         distances = []
 
         positions_1 = []
@@ -3980,8 +3989,8 @@ class RMSD:
 
     @staticmethod
     def from_arrays(array_1, array_2):
-        print(array_1)
-        print(array_2)
+        # print(array_1)
+        # print(array_2)
         
         array_1_mean = np.mean(array_1, axis=0).reshape((1, 3))
         array_2_mean = np.mean(array_2, axis=0).reshape((1, 3))
