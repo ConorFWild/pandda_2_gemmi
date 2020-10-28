@@ -1359,6 +1359,8 @@ class Grid:
                                                    grid,
                                                    mask_radius,
                                                    mask_radius_symmetry)
+        
+        print(partitioning.partitioning.keys())
 
         return Grid(grid, partitioning)
 
