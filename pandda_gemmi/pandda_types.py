@@ -1628,7 +1628,7 @@ class Alignment:
                 for ref_res in chain.get_polymer():
                     res_id = ResidueID.from_residue_chain(model, chain, ref_res)
                     
-                    dataset_res = dataset.structure[res_id]
+                    dataset_res = dataset.structure[res_id][0]
                     
                     for atom_ref, atom_dataset in zip(ref_res, dataset_res):
                         dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
