@@ -85,6 +85,7 @@ def main():
         datasets = datasets_diss_space
 
         # Grid
+        print("Getting grid")
         grid: Grid = Grid.from_reference(reference,
                                 config.params.masks.outer_mask,
                                     config.params.masks.inner_mask_symmetry,
@@ -92,6 +93,7 @@ def main():
                                     )
         pandda_log.grid_log = logs.GridLog.from_grid(grid)
 
+        print("Getting alignments")
         alignments: Alignments = Alignments.from_datasets(reference,
                                                         datasets,
                                                         )
@@ -109,11 +111,13 @@ def main():
 
         all_events = {}
         for shell in shells:
+            print(f"Working on shell: {shell}")
             pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
 
             # Seperate out test and train datasets
             shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
 
+            print("Truncating datasets")
             shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
                                                                         structure_factors=config.params.diffraction_data.structure_factors,
                                                                         )
@@ -123,6 +127,7 @@ def main():
             shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
 
             # Generate aligned xmaps
+            print("Loading xmaps")
             xmaps = Xmaps.from_aligned_datasets_c(
                 shell_truncated_datasets, 
                 alignments, 
@@ -144,9 +149,11 @@ def main():
             masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
 
             # Determine the parameters of the model to find outlying electron density
+            print("Fitting model")
             mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
                                             )
 
+            print("fitting sigma i")
             sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_xmap_array,
                                                         mean_array,
                                                     1.5,
@@ -155,6 +162,7 @@ def main():
                                                             for dtag, sigma_i 
                                                             in sigma_is.items()}
 
+            print("fitting sigma s m")
             sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                         mean_array,
                                                         sigma_is,
@@ -167,11 +175,13 @@ def main():
                                 )
 
             # Calculate z maps
+            print("Getting zmaps")
             zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                         xmaps=shell_test_xmaps,
                                         )
 
             # Get the clustered electron desnity outliers
+            print("clusting")
             clusterings: Clusterings = Clusterings.from_Zmaps(
                 zmaps, 
                 reference,
@@ -201,20 +211,25 @@ def main():
                 clusterings_merged, grid)
 
             # Calculate the shell events
+            print("getting events")
             events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732)
             pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
+            print(pandda_log.shells_log[shell.number].events)
 
             # Save the z maps
+            print("saving zmaps")
             for dtag in zmaps:
                 zmap = zmaps[dtag]
                 pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
             # Save the x maps
+            print("Saving xmaps")
             for dtag in xmaps:
                 xmap = xmaps[dtag]
                 path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
                 xmap.save(path)
                 
             # Save the event maps!
+            print("print events")
             events.save_event_maps(shell_truncated_datasets,
                                 alignments,
                                 xmaps,
