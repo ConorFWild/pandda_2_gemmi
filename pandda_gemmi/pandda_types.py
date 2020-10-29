@@ -790,7 +790,9 @@ class Datasets:
             
             results = joblib.Parallel(n_jobs=-2, 
                                       verbose=15,
-                                       max_nbytes=None)(
+                                      backend="multiprocessing",
+                                       max_nbytes=None,
+                                       )(
                                            joblib.delayed(
                                                self[key].smooth)(
                                                    reference,
