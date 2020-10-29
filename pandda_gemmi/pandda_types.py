@@ -773,17 +773,13 @@ class Datasets:
                         reference: Reference, 
                         structure_factors: StructureFactors,
                         cut = 97.5,
-                        multiprocess=True,
+                        mapper=False,
                         ):
         
-        if multiprocess:
+        if mapper:
             keys = list(self.datasets.keys())
             
-            results = joblib.Parallel(n_jobs=-2, 
-                                      verbose=15,
-                                      backend="multiprocessing",
-                                       max_nbytes=None,
-                                       )(
+            results = mapper(
                                            joblib.delayed(
                                                self[key].smooth)(
                                                    reference,
@@ -2132,17 +2128,14 @@ class Xmaps:
     @staticmethod
     def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
                               structure_factors: StructureFactors, sample_rate=3.0,
-                              mapper=True,
+                              mapper=False,
                               ):
         
         if mapper:
             
             keys = list(datasets.datasets.keys())
             
-            results = joblib.Parallel(n_jobs=-2, 
-                                      verbose=15,
-                                      backend="multiprocessing",
-                                       max_nbytes=None)(
+            results = mapper(
                                            joblib.delayed(Xmap.from_unaligned_dataset_c)(
                                                datasets[key],
                                                alignments[key],
@@ -2873,16 +2866,12 @@ class Clusterings:
 
     @staticmethod
     def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float,
-                   multiprocess = True):
+                   mapper = False):
         
-        if multiprocess:
+        if mapper:
             keys = list(zmaps.zmaps.keys())
             
-            results = joblib.Parallel(n_jobs=-2, 
-                                    verbose=15,
-                                    backend="multiprocessing",
-                                    max_nbytes=None,
-                                    )(
+            results = mapper(
                                         joblib.delayed(
                                             Clustering.from_zmap)(
                                                 zmaps[key], 

@@ -42,6 +42,13 @@ def main():
                                                                 )
         pandda_fs_model.build()
         pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)
+        
+        print("Getting multiprocessor")
+        mapper = joblib.Parallel(n_jobs=-2, 
+                                      verbose=15,
+                                      backend="multiprocessing",
+                                       max_nbytes=None)
+        print(mapper)
                 
         ###################################################################
         # # Pre-pandda
@@ -78,6 +85,7 @@ def main():
         print("smoothing")
         datasets_smoother: Datasets = datasets_wilson.smooth_datasets(reference, 
                                                     structure_factors=config.params.diffraction_data.structure_factors,
+                                                    mapper=mapper,
                                                     )  
         pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
@@ -142,7 +150,7 @@ def main():
                 grid,
                 config.params.diffraction_data.structure_factors, 
                 sample_rate=config.params.diffraction_data.sample_rate,
-                mapper=False,
+                mapper=mapper,
                 )
 
             # Seperate out test and train maps
@@ -197,7 +205,7 @@ def main():
                 grid,
                 config.params.masks.contour_level,
                 cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
-                multiprocess=True,
+                mapper=mapper,
                 )
             pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
                 clusterings, grid)
