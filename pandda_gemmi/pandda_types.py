@@ -1921,6 +1921,9 @@ class Xmap:
         transform_list: List[gemmi.transform] = []
         com_moving_list: List[np.array] = []
         com_reference_list: List[np.array] = []
+        
+        print("Checkign with exceptons")
+        
         for residue_id, point_position_dict in grid.partitioning.partitioning.items():
             
             al = alignment[residue_id]
