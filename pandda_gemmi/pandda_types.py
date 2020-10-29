@@ -1909,6 +1909,7 @@ class Xmap:
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
 
+
         std = np.std(unaligned_xmap_array)
         unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
         
@@ -1933,6 +1934,12 @@ class Xmap:
                 transform_list.append(transform)
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
+                
+        print(f"Point list length: {len(point_list)}")
+        print(f"position_list length: {len(position_list)}")
+        print(f"transform_list length: {len(transform_list)}")
+        print(f"com_moving_list length: {len(com_moving_list)}")
+        print(f"com_reference_list length: {len(com_reference_list)}")
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
@@ -2156,7 +2163,7 @@ class Xmaps:
             
             xmaps = {}
             for dtag in datasets:
-                print("dtag")
+                print(f"WOrking on dataset: {dtag}")
                 xmap = Xmap.from_unaligned_dataset_c(
                     datasets[dtag],
                                                alignments[dtag],
