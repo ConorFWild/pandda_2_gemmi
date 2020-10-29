@@ -3869,9 +3869,6 @@ class RMSD:
         positions_1 = []
         positions_2 = []
 
-        # positions_1 = [ atom.pos for atom in structure_1.protein_atoms()]
-        # positions_2 = [ atom.pos for atom in structure_2.protein_atoms()]
-        #
 
         for residues_id in structure_1.protein_residue_ids():
             res_1 = structure_1[residues_id][0]
@@ -3894,13 +3891,7 @@ class RMSD:
 
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
-        #
-        # distances_array = np.array(distances)
 
-        # rmsd = np.sqrt((1.0 / distances_array.size) * np.sum(np.square(distances_array)))
-        #
-        #
-        # return RMSD(rmsd)
 
     @staticmethod
     def from_arrays(array_1, array_2):

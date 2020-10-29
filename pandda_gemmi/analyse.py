@@ -25,13 +25,16 @@ def main():
     ###################################################################
     # # Configuration
     ###################################################################
-    
+    print("Getting config")
     config: Config = Config.from_args()
+    
+    print("Initialising log...")
     pandda_log: logs.LogData = logs.LogData.initialise()
     pandda_log.config = config
     
     try:
 
+        print("FSmodel building")
         pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
                                                                 config.output.out_dir,
                                                                 config.input.pdb_regex,
@@ -45,10 +48,12 @@ def main():
         ###################################################################
         
         # Get datasets
+        print("Loading datasets")
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
         pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
 
         # Initial filters
+        print("Filtering invalid datasaets")
         datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
         config.params.diffraction_data.structure_factors)
         pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial, datasets_invalid)
@@ -64,16 +69,19 @@ def main():
         pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree, datasets_wilson)
 
         # Select refernce
+        print("Getting reference")
         reference: Reference = Reference.from_datasets(datasets_wilson)
         pandda_log.reference_log = logs.ReferenceLog.from_reference(reference)
 
 
         # Post-reference filters
+        print("smoothing")
         datasets_smoother: Datasets = datasets_wilson.smooth_datasets(reference, 
                                                     structure_factors=config.params.diffraction_data.structure_factors,
                                                     )  
         pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
+        print("Removing dissimilar models")
         datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(reference,
                                                             config.params.filtering.max_rmsd_to_reference,
                                                             )
