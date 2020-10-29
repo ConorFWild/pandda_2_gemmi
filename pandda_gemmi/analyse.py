@@ -142,14 +142,15 @@ def main():
                 grid,
                 config.params.diffraction_data.structure_factors, 
                 sample_rate=config.params.diffraction_data.sample_rate,
-                mapper=True,
+                mapper=False,
                 )
 
             # Seperate out test and train maps
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
             shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
 
-            # Get arrays for model        
+            # Get arrays for model
+            print("Getting xmap arrays...")        
             masked_xmap_array: XmapArray = XmapArray.from_xmaps(xmaps,
                                         grid,
                                         )

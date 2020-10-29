@@ -2163,11 +2163,13 @@ class Xmaps:
             
             xmaps = {}
             for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset_c(datasets[dtag],
-                                                alignments[dtag],
-                                                grid,
-                                                structure_factors,
-                                                sample_rate)
+                xmap = Xmap.from_unaligned_dataset_c(
+                    datasets[dtag],
+                                               alignments[dtag],
+                                               grid,
+                                               structure_factors,
+                                               sample_rate,
+                                               )
 
                 xmaps[dtag] = xmap
                 
