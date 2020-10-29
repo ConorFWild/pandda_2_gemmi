@@ -1916,11 +1916,11 @@ class Xmap:
         new_grid = grid.new_grid()
         
         # Unpack the points, poitions and transforms
-        point_list = []
-        position_list = []
-        transform_list = []
-        com_moving_list = []
-        com_reference_list = []
+        point_list: List[Tuple[int, int, int]] = []
+        position_list: List[Tuple[float, float, float]] = []
+        transform_list: List[gemmi.transform] = []
+        com_moving_list: List[np.array] = []
+        com_reference_list: List[np.array] = []
         for residue_id, point_position_dict in grid.partitioning.partitioning.items():
             
             al = alignment[residue_id]
@@ -1929,6 +1929,18 @@ class Xmap:
             com_reference = al.com_reference
             
             for point, position in point_position_dict.items():
+                if len(point) != 3: raise Exception(f"Point length not 3: {point}")
+                if len(position) != 3: raise Exception(f"position length not 3: {position}")
+                if len(com_moving) != 3: raise Exception(f"com_moving length not 3: {com_moving}")
+                if len(com_reference) != 3: raise Exception(f"position length not 3: {com_reference}")
+
+                if None in point: raise Exception(f"None in poinf: {point}")
+                if None in position: raise Exception(f"None in position: {position}")
+                if np.isnan(com_moving).any(): raise Exception(f"NaN in com_moving: {com_moving}")
+                if np.isnan(com_reference).any(): raise Exception(f"NaN in com_reference: {com_reference}")
+                
+                if len(np.nonzero(np.array(transform.mat.tolist()))) == 0: raise Exception(f"{transform.mat.tolist()}")
+                
                 point_list.append(point)
                 position_list.append(position)
                 transform_list.append(transform)
