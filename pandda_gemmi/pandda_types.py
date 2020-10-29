@@ -87,9 +87,7 @@ class RFree:
 
     @staticmethod
     def from_structure(structure: Structure):
-        # print(list(structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free"))[0])
         rfree = structure.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0]
-        # print([[item for item in x] for x in structure.structure.make_mmcif_document()])
 
         # regex = "REMARK   3   FREE R VALUE                     :  ([^\s]+))"
         # matches = re.findall(regex,
@@ -384,7 +382,6 @@ class Reflections:
             diff_array = np.abs(f_array - f_other_array)
             high_diff = np.percentile(diff_array, cut)
 
-            # print(high_diff)
 
             x_truncated = f_array[diff_array < high_diff]
             y_truncated = f_other_array[diff_array < high_diff]
@@ -575,8 +572,7 @@ class Dataset:
             rmsds.append(rmsd)
             
         min_scale = scales[np.argmin(rmsds)]
-        # print(zip(scales, rmsds))
-        # print(f"\tscaling by {min_scale}")
+
         
         # Get the original reflections
         original_reflections = self.reflections.reflections
@@ -635,7 +631,6 @@ class Datasets:
     def from_dir(pandda_fs_model: PanDDAFSModel):
         datasets = {}
         for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
-            # print([dtag, dataset_dir])
             dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
                                                   dataset_dir.input_mtz_file,
                                                   )
@@ -648,11 +643,7 @@ class Datasets:
         return self.datasets[item]
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
-        # for dtag in self.datasets:
-            # print(dtag)
-            # print(RMSD.from_structures(self.datasets[dtag].structure,
-            #                            reference.dataset.structure,
-            #                            ).to_float())
+
 
         new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
                                                               reference.dataset.structure,
@@ -748,7 +739,7 @@ class Datasets:
             if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
-            # print(len(running_index))
+
 
         return running_index.to_list()
 
@@ -811,7 +802,6 @@ class Datasets:
         else:
             smoothed_datasets = {}
             for dtag in self.datasets:
-                # print(f"\tSmoothing dataset: {dtag}")
                 dataset = self.datasets[dtag]
 
                 smoothed_dataset = dataset.smooth(reference,
@@ -887,8 +877,7 @@ class Datasets:
                 rmsds.append(rmsd)
                 
             min_scale = scales[np.argmin(rmsds)]
-            # print(zip(scales, rmsds))
-            # print(f"\tscaling {dtag} by {min_scale}")
+
             
             f_array = dtag_reflections_table[structure_factors.f]
             
@@ -970,10 +959,7 @@ class Datasets:
     #                                               )
             
     #         dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
-    #         print(dtag_reflections_array.shape)
-    #         print(reference_reflections_array.shape)
-    #         print(resolution_array.shape)
-    #         print(dtag_f_array.shape)
+
 
 
 
@@ -994,7 +980,6 @@ class Datasets:
     #             rmsds = []
 
     #             for scale in np.linspace(-4,4,100):
-    #                 # print([y.shape, y_r.shape])
     #                 y_s = y * np.exp(scale * y_r)
     #                 knn_y = neighbors.RadiusNeighborsRegressor(0.01)
     #                 knn_y.fit(y_r.reshape(-1,1), 
@@ -1036,7 +1021,6 @@ class Datasets:
     #             selected[high_diff_mask] = False
                 
     #         min_scale = min_scale_list[-1]
-    #         print([dtag, min_scale_list])
             
             
     #         f_array = dtag_reflections_table[structure_factors.f]
@@ -1236,7 +1220,6 @@ class Partitioning:
 
         kdtree = spatial.KDTree(ca_position_array)
 
-        # print("\tMasking {} atoms".format(len(ca_position_array)))
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = grid.spacegroup
         mask.set_unit_cell(grid.unit_cell)
@@ -1264,10 +1247,8 @@ class Partitioning:
 
         position_array = np.array(positions)
 
-        # print("\tQueerying {} grid points".format(len(positions)))
         distances, indexes = kdtree.query(position_array)
 
-        # print("\tAssigning partitions...")
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
             coord = (int(coord_as_array[0]), 
@@ -1285,7 +1266,6 @@ class Partitioning:
             # partitions[res_id][coord] = gemmi.Position(*position)
             partitions[res_id][coord] = position
 
-        # print("\tFound {} partitions".format(len(partitions)))
 
         return Partitioning(partitions, mask, symmetry_mask)
 
@@ -1298,11 +1278,8 @@ class Partitioning:
         mask.spacegroup = protein_mask.spacegroup
         mask.set_unit_cell(protein_mask.unit_cell)
 
-        # print("\tGetting symops")
         symops = Symops.from_grid(mask)
-        # print([symmetry_operation for symmetry_operation in symops])
 
-        # print("\tIterating")
         for atom in structure.all_atoms():
             for symmetry_operation in symops.symops[1:]:
                 position = atom.pos
@@ -1319,11 +1296,9 @@ class Partitioning:
                                        )
 
         mask_array = np.array(mask, copy=False, dtype=np.int8)
-        # print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
 
         equal_mask = protein_mask_array == mask_array
 
-        # print("\tequal mask of size {}".format(np.sum(equal_mask)))
         protein_mask_indicies = np.nonzero(protein_mask_array)
         protein_mask_bool = np.full(protein_mask_array.shape, False)
         protein_mask_bool[protein_mask_indicies] = True
@@ -1371,7 +1346,6 @@ class Grid:
                                                    mask_radius,
                                                    mask_radius_symmetry)
         
-        print(partitioning.partitioning.keys())
 
         return Grid(grid, partitioning)
 
@@ -1891,7 +1865,6 @@ class Xmap:
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
         std = np.std(unaligned_xmap_array)
-        # print(std)
 
         # unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
 
@@ -1958,15 +1931,6 @@ class Xmap:
             com_moving = al.com_moving
             com_reference = al.com_reference
             
-            if residue_id.insertion == "1316":
-                print(residue_id)
-                print(
-                    sorted(
-                        grid.partitioning.partitioning.keys(),
-                        key=lambda x: x.insertion,
-                             )
-                      )
-            
             for point, position in point_position_dict.items():
                 point_list.append(point)
                 position_list.append(position)
@@ -1998,7 +1962,6 @@ class Xmap:
                                                    mask_radius,
                                                    mask_radius_symmetry)
 
-        # print(partitioning.partitioning.keys())
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -2074,7 +2037,6 @@ class Xmap:
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
 
-        # print(len(point_list))
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(
@@ -2251,8 +2213,7 @@ class XmapArray:
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
-            # print(xmap_array.shape)
-            # print(mask_array.shape)
+
             arrays[dtag] = xmap_array[np.nonzero(mask_array)]
 
         dtag_list = list(arrays.keys())
@@ -2347,8 +2308,7 @@ class Model:
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
-            # print(xmap_array.shape)
-            # print(mask_array.shape)
+
             arrays[dtag] = xmap_array[np.nonzero(mask_array)]
 
         stacked_arrays = np.stack(list(arrays.values()), axis=0)
@@ -2361,7 +2321,6 @@ class Model:
                                               arrays[dtag],
                                               cut)
             sigma_is[dtag] = sigma_i
-            print([dtag, sigma_i])
 
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array(list(sigma_is.values()), dtype=np.float32)[:, np.newaxis]
@@ -2386,22 +2345,18 @@ class Model:
         # TODO: Make sure this is actually equivilent
         # Calculated from slope of array - mean distribution against normal(0,1)
         residual = np.subtract(array, mean)
-        # print(residual)
         observed_quantile_estimates = np.sort(residual)
-        # print(observed_quantile_estimates)
         # sigma_i = np.std(residual)
         # sigma_i = 0.01
 
         percentiles = np.linspace(0, 1, array.size + 2)[1:-1]
         normal_quantiles = stats.norm.ppf(percentiles)
-        # print(normal_quantiles)
 
         below_min_mask = normal_quantiles < (-1.0 * cut)
         above_max_mask = normal_quantiles > cut
         centre_mask = np.full(below_min_mask.shape, True)
         centre_mask[below_min_mask] = False
         centre_mask[above_max_mask] = False
-        # print(np.nonzero(centre_mask))
 
         central_theoretical_quantiles = normal_quantiles[centre_mask]
         central_observed_quantiles = observed_quantile_estimates[centre_mask]
@@ -2417,19 +2372,7 @@ class Model:
         # arrays[n,m]
         # sigma_i_array[n]
         #
-        # print("\tMean shape: {}".format(mean.shape))
-        # print("\tarrays shape: {}".format(arrays.shape))
-        # print("\tsigma_is_array shape: {}".format(sigma_is_array.shape))
-        # print(arrays[:, 0])
-        # print(mean[0])
-        # print(sigma_is_array[0, :])
-        # print(arrays[:, -1])
-        # print(mean[-1])
-        # print(sigma_is_array[-1, :])
 
-        # print("First log liklihood")
-        # print(Model.log_liklihood(1e-16, mean[0], arrays[:,0], sigma_is_array[0,0]))
-        #
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 
@@ -2479,17 +2422,14 @@ class Model:
         y_max = func(val)
 
         for x in xs[1:]:
-            # print("\tX equals {}".format(x))
             val[:, :, :, :] = 1
             val = val * x
 
             y = func(x)
-            print(np.max(y))
 
             y_above_y_max_mask = y > y_max
             y_max[y_above_y_max_mask] = y[y_above_y_max_mask]
             res[y_above_y_max_mask] = x
-            # print("\tUpdated {} ress".format(np.sum(y_above_y_max_mask)))
 
         return res
 
@@ -2497,25 +2437,16 @@ class Model:
     def vectorised_optimisation_bisect(func, start, stop, num, shape):
         # Define step 0
         x_lower_orig = (np.ones(shape[1], dtype=np.float32) * start)
-        # print(f"x_lower_orig: {x_lower_orig}")
 
         x_upper_orig = np.ones(shape[1], dtype=np.float32) * stop
-        # print(f"x_upper_orig: {x_upper_orig}")
 
         f_lower = func(x_lower_orig[np.newaxis, :])
-        # print(f"f_lower: {f_lower}")
 
         f_upper = func(x_upper_orig[np.newaxis, :])
-        # print(f"f_upper: {f_upper}")
 
         test_mat = f_lower * f_upper
-        # print(f"test_mat: {test_mat}")
 
         test_mat_mask = test_mat > 0
-        # print(f"test_mat_mask: {test_mat_mask}")
-
-        # print("Number of points that fail bisection is: {}/{}".format(np.sum(test_mat_mask), test_mat_mask.size))
-        # print("fshape is {}".format(f_upper.shape))
 
         # mask = np.tile(test_mat_mask, (x_lower_orig.shape[0], 1))
 
@@ -2735,7 +2666,6 @@ class Clustering:
         #                                                 masks.outer_mask,
         #                                                 )
         protein_mask_grid = grid.partitioning.protein_mask
-        # print("\tGor protein mask")
 
         protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.int8)
 
@@ -2746,7 +2676,6 @@ class Clustering:
         #                                                                   )
         symmetry_contact_mask_grid = grid.partitioning.symmetry_mask
 
-        # print("\tGot symmetry mask")
 
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.int8)
 
@@ -2783,20 +2712,17 @@ class Clustering:
             positions.append(pos_orth_array)
 
         extrema_cart_coords_array = np.array(positions)  # n, 3
-        # print("\tshape: {}".format(extrema_cart_coords_array.shape))
 
         point_000 = grid.grid.get_point(0, 0, 0)
         point_111 = grid.grid.get_point(1, 1, 1)
         position_000 = grid.grid.point_to_position(point_000)
         position_111 = grid.grid.point_to_position(point_111)
         clustering_cutoff = position_000.dist(position_111) * cluster_cutoff_distance_multiplier
-        # print("\tClustering cutoff is: {}".format(clustering_cutoff))
 
         if extrema_cart_coords_array.size < 10:
             clusters = {}
             return Clustering(clusters)
 
-        # print("\tClustering")
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
                                          # t=blob_finding.clustering_cutoff,
                                          t=clustering_cutoff,
@@ -2900,11 +2826,8 @@ class Clustering:
     #     mask.spacegroup = zmap.spacegroup()
     #     mask.set_unit_cell(zmap.unit_cell())
     #
-    #     print("\tGetting symops")
     #     symops = Symops.from_grid(mask)
-    #     print([symmetry_operation for symmetry_operation in symops])
     #
-    #     print("\tIterating")
     #     for atom in reference.dataset.structure.protein_atoms():
     #         for symmetry_operation in symops.symops[1:]:
     #             position = atom.pos
@@ -2921,13 +2844,11 @@ class Clustering:
     #                                    )
     #
     #     mask_array = np.array(mask, copy=False, dtype=np.int8)
-    #     print("\tGot symmetry mask of size {}, shape {}".format(np.sum(mask_array), mask_array.shape))
     #
     #     protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
     #
     #     equal_mask = protein_mask_array == mask_array
     #
-    #     print("\tequal mask of size {}".format(np.sum(equal_mask)))
     #     protein_mask_indicies = np.nonzero(protein_mask_array)
     #     protein_mask_bool = np.full(protein_mask_array.shape, False)
     #     protein_mask_bool[protein_mask_indicies] = True
@@ -3137,7 +3058,6 @@ class BDC:
         mean_masked = model.mean[protein_mask_indicies]
         cluster_array = np.full(protein_mask.shape, False)
         cluster_array[cluster_indexes] = True
-        # print(np.sum(cluster_array))
         cluster_mask = cluster_array[protein_mask_indicies]
 
         vals = {}
@@ -3156,13 +3076,11 @@ class BDC:
 
             vals[val] = np.abs(global_correlation - local_correlation)
 
-        # print(vals)
 
         fraction = max(vals,
                        key=lambda x: vals[x],
                        )
 
-        # print(bdc)
 
         return BDC(1 - fraction, fraction)
 
@@ -3243,7 +3161,6 @@ class Sites:
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
 
-        # print("SHape {}".format(positions_array.to_array().shape))
 
         if positions_array.to_array().shape[0] < 4:
             site_to_event = {}
@@ -3341,7 +3258,6 @@ class Events:
                 cluster = clustering[event_idx.event_idx]
                 xmap = xmaps[dtag]
                 bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
-                # print([event_id, bdc, cluster.centroid, cluster.values.size])
 
                 site: SiteID = sites.event_to_site[event_id]
 
@@ -3372,7 +3288,6 @@ class Events:
         clusterings = Clusterings(all_clusterings)
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
-        # print(sites.event_to_site)
 
         events: typing.Dict[EventID, Event] = {}
         for event_id in event_dict:
@@ -3946,27 +3861,9 @@ class RMSD:
 
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure):
-        # print(structure_1.path)
-        # print(structure_2.path)
-        # print(structure_1)
-        # print(structure_2)
-        # print([x for x in structure_1.structure])
-        # print([x for x in structure_2.structure])
-        # print(list(structure_1.protein_residue_ids()))
-        # print(list(structure_2.protein_residue_ids()))
-        # for model in structure_1.structure:
-        #     print(model)
-        #     for chain in model:
-        #         print(chain)
-        #         for residue in chain:
-        #             print(residue)
-        #         print("protein")    
-        #         for residue in chain.get_polymer():
-        #             print(residue)
+
                 
-        
-        # print(len(list(structure_1.all_atoms())))
-        # print(len(list(structure_2.all_atoms())))
+
         distances = []
 
         positions_1 = []
@@ -3977,7 +3874,6 @@ class RMSD:
         #
 
         for residues_id in structure_1.protein_residue_ids():
-            print(residues_id)
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
 
@@ -3986,8 +3882,7 @@ class RMSD:
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
-            # print(res_1_ca_pos)
-            # print(res_2_ca_pos)
+
 
             positions_1.append(res_1_ca_pos)
             positions_2.append(res_2_ca_pos)
@@ -3997,50 +3892,36 @@ class RMSD:
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
 
-        # print(positions_1_array)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
         #
         # distances_array = np.array(distances)
-        # print(distances_array)
-        # print((1.0 / distances_array.size) )
+
         # rmsd = np.sqrt((1.0 / distances_array.size) * np.sum(np.square(distances_array)))
         #
-        # print(rmsd)
         #
         # return RMSD(rmsd)
 
     @staticmethod
     def from_arrays(array_1, array_2):
-        # print(array_1)
-        # print(array_2)
+
         
         array_1_mean = np.mean(array_1, axis=0).reshape((1, 3))
         array_2_mean = np.mean(array_2, axis=0).reshape((1, 3))
 
-        # print("#################################")
-        # print(array_1)
-        # print(array_1_mean)
 
-        # print([array_1.shape, array_1_mean.shape])
+
         array_1_demeaned = array_1 - array_1_mean
         array_2_demeaned = array_2 - array_2_mean
-        # print(array_1_demeaned)
         #
-        # print(array_1_demeaned-array_2_demeaned)
-        # print("rmsd is: {}".format(np.sqrt(
-        #     np.sum(np.square(np.linalg.norm(array_1_demeaned - array_2_demeaned, axis=1)), axis=0) / array_1.shape[0])))
+
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(array_1_demeaned, array_2_demeaned)
         rotated_vecs = rotation.apply(array_2_demeaned)
-        # print("rmsd after rotation is: {}".format(np.sqrt(
-        #     np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])))
-        # print("scipy thinks rmsd is: {}".format(rmsd))
+
         #
         true_rmsd = np.sqrt(
             np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])
 
-        # print(rotation)
-        # print(rmsd)
 
         return RMSD(true_rmsd)
 
