@@ -130,6 +130,7 @@ def main():
             print(f"Working on shell: {shell}")
             pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
 
+
             # Seperate out test and train datasets
             shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
 
