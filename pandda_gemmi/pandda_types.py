@@ -2889,7 +2889,6 @@ class Clustering:
     def __len__(self):
         return len(self.clustering)
 
-
 @dataclasses.dataclass()
 class Clusterings:
     clusters: typing.Dict[Dtag, Clustering]
