@@ -1349,7 +1349,7 @@ class Grid:
         spacing = [self.grid.nu, self.grid.nv, self.grid.nw]
         unit_cell = self.grid.unit_cell
         grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
-        grid.unit_cell = unit_cell
+        grid.set_unit_cell(unit_cell)
         grid.spacegroup = self.grid.spacegroup
         return grid
 
@@ -1389,7 +1389,6 @@ class Grid:
                                          data[1][2].to_gemmi(),
                                          )
         self.grid = data[0].to_gemmi()
-
 
 @dataclasses.dataclass()
 class Transform:
@@ -1955,6 +1954,15 @@ class Xmap:
         print(f"transform_list length: {len(transform_list)}")
         print(f"com_moving_list length: {len(com_moving_list)}")
         print(f"com_reference_list length: {len(com_reference_list)}")
+        
+        print(unaligned_xmap)
+        
+        print(new_grid)
+        print(SpacegroupPython.from_gemmi(new_grid.spacegroup))
+        print(SpacegroupPython.from_gemmi(unaligned_xmap.spacegroup))
+
+        print(UnitCellPython.from_gemmi(new_grid.unit_cell))
+        print(UnitCellPython.from_gemmi(unaligned_xmap.unit_cell))
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
