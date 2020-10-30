@@ -105,7 +105,7 @@ def main():
         grid: Grid = Grid.from_reference(reference,
                                 config.params.masks.outer_mask,
                                     config.params.masks.inner_mask_symmetry,
-                                        sample_rate=3.0,
+                                        sample_rate=config.params.diffraction_data.sample_rate,
                                     )
         pandda_log.grid_log = logs.GridLog.from_grid(grid)
 
