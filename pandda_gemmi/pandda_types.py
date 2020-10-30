@@ -3757,8 +3757,11 @@ class DataDirs:
 
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
-            dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex)
-            dataset_dirs[dtag] = dataset_dir
+            try:
+                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex)
+                dataset_dirs[dtag] = dataset_dir
+            except:
+                continue 
 
         return DataDirs(dataset_dirs)
 
