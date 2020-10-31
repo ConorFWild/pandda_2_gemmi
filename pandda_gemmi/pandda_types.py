@@ -2009,6 +2009,8 @@ class Xmap:
                                                    event_map_reference_grid,
                                                    mask_radius,
                                                    mask_radius_symmetry)
+        
+        
 
 
         new_grid = gemmi.FloatGrid(*[event_map_reference_grid.nu,
@@ -2023,18 +2025,23 @@ class Xmap:
         transform_list = []
         com_moving_list = []
         com_reference_list = []
-        for residue_id in alignment:
-            al = alignment[residue_id]
-            transform = al.transform
-            com_moving = al.com_reference
-            com_reference = al.com_moving
+        for residue_id in grid.partitioning.partitioning:
             
-            for point, position in partitioning[residue_id].items():
-                point_list.append(point)
-                position_list.append(position)
-                transform_list.append(transform)
-                com_moving_list.append(com_moving)
-                com_reference_list.append(com_reference)
+            if residue_id in partitioning.partitioning:
+                al = alignment[residue_id]
+                transform = al.transform
+                com_moving = al.com_reference
+                com_reference = al.com_moving
+                point_position_dict = partitioning[residue_id]
+                
+                for point, position in point_position_dict.items():
+                    point_list.append(point)
+                    position_list.append(position)
+                    transform_list.append(transform)
+                    com_moving_list.append(com_moving)
+                    com_reference_list.append(com_reference)
+            else:
+                continue
 
 
         # Interpolate values
