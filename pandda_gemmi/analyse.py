@@ -46,7 +46,7 @@ def main():
         print("Getting multiprocessor")
         with joblib.Parallel(n_jobs=-2, 
                                       verbose=15,
-                                      backend="multiprocessing",
+                                      backend="loky",
                                        max_nbytes=None) as mapper:
                     
             ###################################################################
