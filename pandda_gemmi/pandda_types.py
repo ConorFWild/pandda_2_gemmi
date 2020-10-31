@@ -3341,7 +3341,7 @@ class Events:
         structure_factors, 
         outer_mask,
         inner_mask_symmetry,
-        multiprocess=True,
+        mapper=False,
         ):
         
         processed_datasets = {}
@@ -3358,14 +3358,10 @@ class Events:
             
             processed_datasets[dtag].event_map_files.add_event(event)
             
-        if multiprocess:
+        if mapper:
             event_id_list = list(self.events.keys())
             
-            results = joblib.Parallel(
-                n_jobs=-2, 
-                verbose=15,
-                backend="multiprocessing",
-                )(
+            results = mapper(
                     joblib.delayed(
                         processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
                             xmaps[event_id.dtag],

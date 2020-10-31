@@ -258,7 +258,7 @@ def main():
                                     config.params.diffraction_data.structure_factors,
                                     config.params.masks.outer_mask,
                                     config.params.masks.inner_mask_symmetry,
-                                    multiprocess=True,
+                                    mapper=mapper,
                                     )
                 
                 for event_id in events:
