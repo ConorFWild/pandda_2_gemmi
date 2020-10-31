@@ -1915,7 +1915,6 @@ class Xmap:
         unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
         
         new_grid = grid.new_grid()
-        
         # Unpack the points, poitions and transforms
         point_list: List[Tuple[int, int, int]] = []
         position_list: List[Tuple[float, float, float]] = []
