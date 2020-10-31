@@ -2916,7 +2916,6 @@ class Clusterings:
                 for i, key
                 in enumerate(keys)
                 }
-            
         else:
         
             clusterings = {}
