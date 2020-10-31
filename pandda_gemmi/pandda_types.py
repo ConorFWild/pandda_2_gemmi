@@ -1920,9 +1920,7 @@ class Xmap:
         transform_list: List[gemmi.transform] = []
         com_moving_list: List[np.array] = []
         com_reference_list: List[np.array] = []
-        
-        print("Checkign with exceptons")
-        
+                
         for residue_id, point_position_dict in grid.partitioning.partitioning.items():
             
             al = alignment[residue_id]
@@ -1931,17 +1929,6 @@ class Xmap:
             com_reference = al.com_reference
             
             for point, position in point_position_dict.items():
-                if len(point) != 3: raise Exception(f"Point length not 3: {point}")
-                if len(position) != 3: raise Exception(f"position length not 3: {position}")
-                if len(com_moving) != 3: raise Exception(f"com_moving length not 3: {com_moving}")
-                if len(com_reference) != 3: raise Exception(f"position length not 3: {com_reference}")
-
-                if None in point: raise Exception(f"None in poinf: {point}")
-                if None in position: raise Exception(f"None in position: {position}")
-                if np.isnan(com_moving).any(): raise Exception(f"NaN in com_moving: {com_moving}")
-                if np.isnan(com_reference).any(): raise Exception(f"NaN in com_reference: {com_reference}")
-                
-                if len(np.nonzero(np.array(transform.mat.tolist()))) == 0: raise Exception(f"{transform.mat.tolist()}")
                 
                 point_list.append(point)
                 position_list.append(position)
@@ -1949,20 +1936,6 @@ class Xmap:
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
                 
-        print(f"Point list length: {len(point_list)}")
-        print(f"position_list length: {len(position_list)}")
-        print(f"transform_list length: {len(transform_list)}")
-        print(f"com_moving_list length: {len(com_moving_list)}")
-        print(f"com_reference_list length: {len(com_reference_list)}")
-        
-        print(unaligned_xmap)
-        
-        print(new_grid)
-        print(SpacegroupPython.from_gemmi(new_grid.spacegroup))
-        print(SpacegroupPython.from_gemmi(unaligned_xmap.spacegroup))
-
-        print(UnitCellPython.from_gemmi(new_grid.unit_cell))
-        print(UnitCellPython.from_gemmi(unaligned_xmap.unit_cell))
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
