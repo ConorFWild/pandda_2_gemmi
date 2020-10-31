@@ -276,11 +276,11 @@ def main():
                                                             grid,
                                                             )
 
-        except Exception as e:
-            pandda_log.exception = str(e)
-            pandda_log.print()
-            pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
-            
+    except Exception as e:
+        pandda_log.exception = str(e)
+        pandda_log.print()
+        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+        
 
 
 
