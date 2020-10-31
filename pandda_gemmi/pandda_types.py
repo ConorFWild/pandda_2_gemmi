@@ -1953,6 +1953,7 @@ class Xmap:
                                  transform_list,
                                  com_moving_list,
                                  com_reference_list,
+                                 debug
                                  )
 
 
