@@ -1899,7 +1899,9 @@ class Xmap:
                                  alignment: Alignment, 
                                  grid: Grid, 
                                  structure_factors: StructureFactors,
-                                 sample_rate: float = 3.0):
+                                 sample_rate: float = 3.0,
+                                 debug: bool=False,
+                                 ):
                 
                 
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
@@ -1936,6 +1938,13 @@ class Xmap:
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
                 
+                if debug:
+                    print(point)
+                    print(com_moving)
+                    print(com_reference)
+                    print(transform.mat.tolist())
+                    print(transform.vec.tolist())
+                    
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
@@ -2167,12 +2176,17 @@ class Xmaps:
             xmaps = {}
             for dtag in datasets:
                 print(f"WOrking on dataset: {dtag}")
+                if dtag.dtag == "PHIPA-x12224":
+                    debug = True
+                else: 
+                    debug = False
                 xmap = Xmap.from_unaligned_dataset_c(
                     datasets[dtag],
                                                alignments[dtag],
                                                grid,
                                                structure_factors,
                                                sample_rate,
+                                               debug=debug,
                                                )
 
                 xmaps[dtag] = xmap
