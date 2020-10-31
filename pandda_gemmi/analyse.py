@@ -152,7 +152,7 @@ def main():
                     grid,
                     config.params.diffraction_data.structure_factors, 
                     sample_rate=config.params.diffraction_data.sample_rate,
-                    mapper=mapper,
+                    mapper=False,
                     )
 
                 # Seperate out test and train maps
