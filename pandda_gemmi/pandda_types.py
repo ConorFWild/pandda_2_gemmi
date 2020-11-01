@@ -1208,7 +1208,7 @@ class Partitioning:
                     orthogonal_raw = ca.pos
                     fractional = grid.unit_cell.fractionalize(orthogonal_raw)
                     wrapped = fractional.wrap_to_unit()
-                    orthogona = grid.unit_cell.orthogonalize(wrapped)
+                    orthogonal = grid.unit_cell.orthogonalize(wrapped)
 
                     poss.append(orthogonal)
 
@@ -1243,7 +1243,6 @@ class Partitioning:
                               position[2],
             )
                              )
-
         position_array = np.array(positions)
 
         distances, indexes = kdtree.query(position_array)
