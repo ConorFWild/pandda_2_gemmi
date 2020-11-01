@@ -1189,7 +1189,6 @@ class Partitioning:
                                            )
 
         # return Partitioning(partitions, mask, symmetry_mask)
-
     @staticmethod
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
