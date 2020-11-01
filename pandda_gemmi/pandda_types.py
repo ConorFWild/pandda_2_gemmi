@@ -1205,7 +1205,10 @@ class Partitioning:
                 for res in chain.get_polymer():
                     ca = res["CA"][0]
 
-                    orthogonal = ca.pos
+                    orthogonal_raw = ca.pos
+                    fractional = grid.unit_cell.fractionalize(orthogonal_raw)
+                    wrapped = fractional.wrap_to_unit()
+                    orthogona = grid.unit_cell.orthogonalize(wrapped)
 
                     poss.append(orthogonal)
 
