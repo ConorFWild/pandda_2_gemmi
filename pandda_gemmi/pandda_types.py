@@ -1513,11 +1513,17 @@ class Transform:
     @staticmethod
     def from_atoms(dataset_selection,
                         reference_selection,
+                        com_dataset,
+                        com_reference,
                         ):
         print(dataset_selection.shape)
         
-        mean = np.mean(dataset_selection, axis=0)
-        mean_ref = np.mean(reference_selection, axis=0)
+        
+        
+        # mean = np.mean(dataset_selection, axis=0)
+        # mean_ref = np.mean(reference_selection, axis=0)
+        mean = np.array(com_dataset)
+        mean_ref = np.array(com_reference)
         
         print(mean.shape)
 
@@ -1662,6 +1668,8 @@ class Alignment:
                     transforms[current_res_id] = Transform.from_atoms(
                         dataset_selection,
                         reference_selection,
+                        com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
+                        com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
                     )
 
         return Alignment(transforms)
