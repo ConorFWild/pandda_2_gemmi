@@ -1514,8 +1514,12 @@ class Transform:
     def from_atoms(dataset_selection,
                         reference_selection,
                         ):
+        print(dataset_selection.shape)
+        
         mean = np.mean(dataset_selection, axis=0)
         mean_ref = np.mean(reference_selection, axis=0)
+        
+        print(mean.shape)
 
         # vec = mean_ref - mean
         vec = np.array([0.0, 0.0, 0.0])
