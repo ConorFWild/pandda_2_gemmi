@@ -1196,7 +1196,6 @@ class Partitioning:
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
-
         poss = []
         res_indexes = {}
         i = 0
