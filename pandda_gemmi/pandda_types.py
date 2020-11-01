@@ -8,6 +8,7 @@ import time
 import psutil
 import shutil
 import re
+import itertools
 from pathlib import Path
 
 import numpy as np
@@ -1189,6 +1190,80 @@ class Partitioning:
                                            )
 
         # return Partitioning(partitions, mask, symmetry_mask)
+    
+    @staticmethod
+    def get_coord_tuple(grid, ca_position_array, buffer=3.0):
+            # Get the bounds
+            min_x = ca_position_array[:, 0].min() - buffer
+            max_x = ca_position_array[:, 0].max() + buffer
+            min_y = ca_position_array[:, 1].min() - buffer
+            max_y = ca_position_array[:, 1].max() + buffer
+            min_z = ca_position_array[:, 2].min() - buffer
+            max_z = ca_position_array[:, 2].max() + buffer
+            
+            # Get the upper and lower bounds of the grid as positions
+            grid_min_cart = gemmi.Position(min_x, min_y, min_z)
+            grid_max_cart = gemmi.Position(max_x, max_y, max_z)
+            
+            # Get them as fractions of the unit cell
+            grid_min_frac = grid.unit_cell.fractionalize(grid_min_cart)
+            grid_max_frac = grid.unit_cell.fractionalize(grid_max_cart)
+            
+            # Get them as coords
+            grid_min_coord = [int(grid_min_frac[0]*grid.nu), int(grid_min_frac[1]*grid.nv), int(grid_min_frac[2]*grid.nw),]
+            grid_max_coord = [int(grid_max_frac[0]*grid.nu), int(grid_max_frac[1]*grid.nv), int(grid_max_frac[2]*grid.nw),]
+
+            # Get the grid of points around the protein
+            coord_array = np.array(itertools.product(
+                range(grid_min_coord[0], grid_max_coord[0]+1),
+                range(grid_min_coord[1], grid_max_coord[1]+1),
+                range(grid_min_coord[2], grid_max_coord[2]+1),
+            )
+                                         )
+            coord_tuple = (coord_array[:, 0],
+                           coord_array[:, 1],
+                           coord_array[:, 2],
+                           )
+            
+            # Get the corresponding unit cell points
+            coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
+                                     np.mod(coord_tuple[1], grid.nv),
+                                     np.mod(coord_tuple[2], grid.nw),
+                                     )
+            
+            # Check which of them are in the mask
+            mask_array = np.array(grid, copy=False, dtype=np.int8)
+            in_mask_array_int = mask_array[coord_unit_cell_tuple]
+            in_mask_array = in_mask_array_int == 1
+            
+            # Mask those coords in the tuples
+            coord_array_in_mask = (
+                coord_unit_cell_tuple[0][in_mask_array],
+                coord_unit_cell_tuple[1][in_mask_array],
+                coord_unit_cell_tuple[2][in_mask_array],
+            ) 
+            coord_array_unit_cell_in_mask = (
+                coord_unit_cell_tuple[0][in_mask_array],
+                coord_unit_cell_tuple[1][in_mask_array],
+                coord_unit_cell_tuple[2][in_mask_array],
+            )
+            
+            return coord_array_in_mask
+        
+    @staticmethod
+    def get_position_list(mask, coord_array):
+            positions = []
+            for u, v, w in coord_array:
+                point = mask.get_point(u, v, w)
+                position = mask.point_to_position(point)
+                positions.append((position[0],
+                                position[1],
+                                position[2],
+                )
+                                )
+            return positions
+    
+        
     @staticmethod
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
@@ -1203,10 +1278,10 @@ class Partitioning:
                 for res in chain.get_polymer():
                     ca = res["CA"][0]
 
-                    orthogonal_raw = ca.pos
-                    fractional = grid.unit_cell.fractionalize(orthogonal_raw)
-                    wrapped = fractional.wrap_to_unit()
-                    orthogonal = grid.unit_cell.orthogonalize(wrapped)
+                    orthogonal = ca.pos
+                    # fractional = grid.unit_cell.fractionalize(orthogonal_raw)
+                    # wrapped = fractional.wrap_to_unit()
+                    # orthogonal = grid.unit_cell.orthogonalize(wrapped)
 
                     poss.append(orthogonal)
 
@@ -1230,18 +1305,38 @@ class Partitioning:
 
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius_symmetry)
 
-        coord_array = np.argwhere(mask_array == 1)
 
-        positions = []
-        for coord in coord_array:
-            point = mask.get_point(*coord)
-            position = mask.point_to_position(point)
-            positions.append((position[0],
-                              position[1],
-                              position[2],
+        # Get the positions of the protein masked grid points
+        # We need the positions in the protein frame
+        # coord_array = np.argwhere(mask_array == 1)
+
+        # positions = []
+        # for coord in coord_array:
+        #     point = mask.get_point(*coord)
+        #     position = mask.point_to_position(point)
+        #     positions.append((position[0],
+        #                       position[1],
+        #                       position[2],
+        #     )
+        #                      )
+        # position_array = np.array(positions)
+        
+        
+
+        coord_tuple: Tuple[np.ndarray, np.ndarray, np.ndarray] = Partitioning.get_coord_tuple(mask, ca_position_array)
+        coord_array = np.concatenate(
+            [
+                coord_tuple[0].reshape((-1, 1)),
+                coord_tuple[1].reshape((-1, 1)),
+                coord_tuple[2].reshape((-1, 1)),
+            ], 
+            axis=1,
             )
-                             )
-        position_array = np.array(positions)
+        
+        
+        
+        position_list = Partitioning.get_position_list(mask, coord_array)
+        position_array = np.array(position_list)
 
         distances, indexes = kdtree.query(position_array)
 
@@ -1251,7 +1346,7 @@ class Partitioning:
                      int(coord_as_array[1]), 
                      int(coord_as_array[2]),
                      )
-            position = positions[i]
+            position = position_list[i]
 
             res_num = indexes[i]
 
