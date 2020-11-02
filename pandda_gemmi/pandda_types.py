@@ -150,6 +150,71 @@ class Structure:
                 for residue in chain:
                     for atom in residue:
                         yield atom
+
+                        
+    def align_to(self, other: Structure):
+        # Warning: inplace!
+        # Aligns structures usings carbon alphas and transform self into the frame of the other
+        
+        transform = self.get_alignment(other)
+        
+        # Transform positions
+        for atom in self.all_atoms():
+            atom.pos = transform.apply_inverse(atom.pos)
+                    
+        return self
+    
+    def get_alignment(self, other: Structure):
+        # alignment returned is FROM other TO self
+        
+        ca_self = []
+        ca_other = []
+        
+        # Get CAs
+        for model in self.structure:
+            for chain in model:
+                for res_self in chain.get_polymer():            
+                    current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
+
+                    res_other = other.structure[current_res_id][0]
+                    
+                    self_ca_pos = res_self["CA"][0].pos
+                    other_ca_pos = res_other["CA"][0].pos
+                    
+                    ca_list_self = Transform.pos_to_list(self_ca_pos)
+                    ca_list_other = Transform.pos_to_list(other_ca_pos)
+                    
+                    ca_self.append(ca_list_self)
+                    ca_other.append(ca_list_other)
+                    
+        # Make coord matricies
+        matrix_self = np.array(ca_self)
+        matrix_other = np.array(ca_other)
+
+        # Find means
+        mean_self = np.mean(matrix_self, axis=0)
+        mean_other = np.mean(matrix_other, axis=0)
+
+        # demaen
+        de_meaned_self = matrix_self - mean_self
+        de_meaned_other = matrix_other - mean_other
+
+        # Align
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self, 
+                                                                        de_meaned_other,
+                                                                        )
+        
+        # Get transform
+        vec = np.array([0.0, 0.0, 0.0])
+        # Transform is from other frame to self frame
+        transform = Transform.from_translation_rotation(vec,
+                                                        rotation,
+                                                        mean_other, 
+                                                        mean_self, 
+                                                        )
+
+        return transform
+
                         
                         
     def __getstate__(self):
@@ -1621,7 +1686,6 @@ class Transform:
                         com_dataset,
                         com_reference,
                         ):
-        print(dataset_selection.shape)
         
         
         
@@ -1630,7 +1694,6 @@ class Transform:
         mean = np.array(com_dataset)
         mean_ref = np.array(com_reference)
         
-        print(mean.shape)
 
         # vec = mean_ref - mean
         vec = np.array([0.0, 0.0, 0.0])
@@ -2017,7 +2080,6 @@ class Xmap:
                                  grid: Grid, 
                                  structure_factors: StructureFactors,
                                  sample_rate: float = 3.0,
-                                 debug: bool=False,
                                  ):
                 
                 
@@ -2054,12 +2116,6 @@ class Xmap:
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
                 
-                if debug:
-                    print(point)
-                    print(com_moving)
-                    print(com_reference)
-                    print(transform.mat.tolist())
-                    print(transform.vec.tolist())
                     
 
         # Interpolate values
@@ -2070,7 +2126,6 @@ class Xmap:
                                  transform_list,
                                  com_moving_list,
                                  com_reference_list,
-                                 debug
                                  )
 
 
@@ -2292,18 +2347,12 @@ class Xmaps:
             
             xmaps = {}
             for dtag in datasets:
-                print(f"WOrking on dataset: {dtag}")
-                if dtag.dtag == "PHIPA-x12224":
-                    debug = True
-                else: 
-                    debug = False
                 xmap = Xmap.from_unaligned_dataset_c(
                     datasets[dtag],
                                                alignments[dtag],
                                                grid,
                                                structure_factors,
                                                sample_rate,
-                                               debug=debug,
                                                )
 
                 xmaps[dtag] = xmap
