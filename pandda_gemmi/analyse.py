@@ -115,7 +115,6 @@ def main():
                                                             datasets,
                                                             )
             pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
-
                     
             ###################################################################
             # # Process shells
