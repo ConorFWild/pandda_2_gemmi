@@ -1250,7 +1250,7 @@ class Partitioning:
                 coord_unit_cell_tuple[2][in_mask_array],
             )
             
-            return coord_array_in_mask
+            return coord_array_in_mask, coord_array_unit_cell_in_mask
         
     @staticmethod
     def get_position_list(mask, coord_array):
@@ -1325,7 +1325,7 @@ class Partitioning:
         
         
 
-        coord_tuple: Tuple[np.ndarray, np.ndarray, np.ndarray] = Partitioning.get_coord_tuple(mask, ca_position_array)
+        coord_tuple, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(mask, ca_position_array)
         coord_array = np.concatenate(
             [
                 coord_tuple[0].reshape((-1, 1)),
@@ -1357,7 +1357,12 @@ class Partitioning:
                 partitions[res_id] = {}
 
             # partitions[res_id][coord] = gemmi.Position(*position)
-            partitions[res_id][coord] = position
+            
+            coord_unit_cell = (int(coord_array_unit_cell_in_mask[0][i]),
+                               int(coord_array_unit_cell_in_mask[1][i]),
+                               int(coord_array_unit_cell_in_mask[2][i]),
+            )
+            partitions[res_id][coord_unit_cell] = position
 
 
         return Partitioning(partitions, mask, symmetry_mask)
