@@ -151,8 +151,9 @@ def main():
                     grid,
                     config.params.diffraction_data.structure_factors, 
                     sample_rate=config.params.diffraction_data.sample_rate,
-                    mapper=False,
+                    mapper=mapper,
                     )
+
 
                 # Seperate out test and train maps
                 shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
