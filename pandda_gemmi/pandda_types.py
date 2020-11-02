@@ -1233,6 +1233,7 @@ class Partitioning:
                                      np.mod(coord_tuple[2], grid.nw),
                                      )
             
+            
             # Check which of them are in the mask
             mask_array = np.array(grid, copy=False, dtype=np.int8)
             in_mask_array_int = mask_array[coord_unit_cell_tuple]
@@ -1240,9 +1241,9 @@ class Partitioning:
             
             # Mask those coords in the tuples
             coord_array_in_mask = (
-                coord_unit_cell_tuple[0][in_mask_array],
-                coord_unit_cell_tuple[1][in_mask_array],
-                coord_unit_cell_tuple[2][in_mask_array],
+                coord_tuple[0][in_mask_array],
+                coord_tuple[1][in_mask_array],
+                coord_tuple[2][in_mask_array],
             ) 
             coord_array_unit_cell_in_mask = (
                 coord_unit_cell_tuple[0][in_mask_array],
