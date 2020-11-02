@@ -1234,6 +1234,7 @@ class Partitioning:
                                      )
             
             
+            
             # Check which of them are in the mask
             mask_array = np.array(grid, copy=False, dtype=np.int8)
             in_mask_array_int = mask_array[coord_unit_cell_tuple]
