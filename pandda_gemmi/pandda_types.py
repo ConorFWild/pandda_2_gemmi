@@ -3573,6 +3573,8 @@ class ZMapFile:
 #             zmaps[dtag].save()
 
 
+
+
 @dataclasses.dataclass()
 class EventMapFile:
     path: Path
@@ -3700,7 +3702,7 @@ class EventTableRecord:
         return EventTableRecord(
             dtag=event.event_id.dtag.dtag,
             event_idx=event.event_id.event_idx.event_idx,
-            bdc=event.bdc.fraction,
+            bdc=event.bdc.bdc,
             cluster_size=event.cluster.values.size,
             global_correlation_to_average_map=0,
             global_correlation_to_mean_map=0,

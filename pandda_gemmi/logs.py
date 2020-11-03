@@ -51,7 +51,7 @@ def iterdict(d):
   for k,v in d.items():        
      if isinstance(v, dict):
          iterdict(v)
-     elif issubclass(v, PosixPath):
+     elif issubclass(type(v), Path):
          d[k] = str(v)
          
 

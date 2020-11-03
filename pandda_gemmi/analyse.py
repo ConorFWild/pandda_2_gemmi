@@ -10,8 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-import joblib
-from joblib.externals.loky import set_loky_pickler
+
 
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
@@ -20,6 +19,8 @@ from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference,
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
                                     Events, SiteTable, EventTable
                                     )
+import joblib
+from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 
 
@@ -284,7 +285,7 @@ def main():
         pandda_log.print()
         pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
         
-
+    pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
 
 
 
