@@ -3021,7 +3021,14 @@ class Clustering:
                        point_array[:,1],
                        point_array[:,2],
                        )
-        extrema_point_mask = extrema_mask_array[point_tuple] == 1
+        point_tuple_wrapped = (
+            np.mod(point_array[:,0], grid.grid.nu),
+            np.mod(point_array[:,1], grid.grid.nv),
+            np.mod(point_array[:,2], grid.grid.nw),
+                       )
+        
+        
+        extrema_point_mask = extrema_mask_array[point_tuple_wrapped] == 1
         extrema_point_array = point_array[extrema_point_mask]
         extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape((1,3)) 
         
