@@ -1435,6 +1435,25 @@ class Partitioning:
 
         return Partitioning(partitions, mask, symmetry_mask)
 
+    def coord_tuple(self):
+        
+        coord_array = self.coord_array()
+        coord_tuple = (coord_array[:,0],
+                       coord_array[:,1],
+                       coord_array[:,2],
+                       )
+                
+        return coord_tuple
+    
+    def coord_array(self):
+        
+        coord_list = []
+        for res_id in self.partitioning:
+            for coord in self.partitioning[res_id]:
+                coord_list.append(coord)
+                
+        return np.array(coord_list)
+
     @staticmethod
     def get_symmetry_contact_mask(structure: Structure, protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
@@ -1537,7 +1556,7 @@ class Grid:
 
     def volume(self) -> float:
         unit_cell = self.grid.unit_cell
-        return unit_cell.a * unit_cell.b * unit_cell.c
+        return unit_cell.volume
 
     def size(self) -> int:
         grid = self.grid
@@ -2847,19 +2866,10 @@ class Clustering:
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float=1.3):
         zmap_array = zmap.to_array(copy=True)
 
-        # protein_mask_grid = Clustering.get_protein_mask(zmap,
-        #                                                 reference,
-        #                                                 masks.outer_mask,
-        #                                                 )
         protein_mask_grid = grid.partitioning.protein_mask
 
         protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.int8)
 
-        # symmetry_contact_mask_grid = Clustering.get_symmetry_contact_mask(zmap,
-        #                                                                   reference,
-        #                                                                   protein_mask,
-        #                                                                   symmetry_mask_radius=masks.inner_mask,
-        #                                                                   )
         symmetry_contact_mask_grid = grid.partitioning.symmetry_mask
 
 
@@ -2875,27 +2885,30 @@ class Clustering:
 
         extrema_mask_array = zmap_array > contour_level
 
-        extrema_grid_coords_array = np.argwhere(extrema_mask_array)  # n,3
+        # Get the unwrapped coords, and convert them to unwrapped fractional positions, then orthogonal points for clustering       
+        point_array = grid.partitioning.coord_array()
+        point_tuple = (point_array[:,0],
+                       point_array[:,1],
+                       point_array[:,2],
+                       )
+        extrema_point_mask = extrema_mask_array[point_tuple] == 1
+        extrema_point_array = point_array[extrema_point_mask]
+        extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape((1,3)) 
+        
+        positions = [zmap.zmap.unit_cell.orthogonalize(fractional) for fractional in extrema_fractional_array]
 
-        # grid_dimensions_array = np.array([zmap.zmap.unit_cell.a,
-        #                                   zmap.zmap.unit_cell.b,
-        #                                   zmap.zmap.unit_cell.c,
-        #                                   ])
+        # positions = []
+        # for point in extrema_grid_coords_array:
+        #     # position = gemmi.Fractional(*point)
+        #     point = grid.grid.get_point(*point)
+        #     # fractional = grid.grid.point_to_fractional(point)
+        #     # pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
+        #     orthogonal = grid.grid.point_to_position(point)
 
-        # extrema_fractional_coords_array = extrema_grid_coords_array / grid_dimensions_array  # n,3
-
-        positions = []
-        for point in extrema_grid_coords_array:
-            # position = gemmi.Fractional(*point)
-            point = grid.grid.get_point(*point)
-            # fractional = grid.grid.point_to_fractional(point)
-            # pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
-            orthogonal = grid.grid.point_to_position(point)
-
-            pos_orth_array = [orthogonal[0],
-                              orthogonal[1],
-                              orthogonal[2], ]
-            positions.append(pos_orth_array)
+        #     pos_orth_array = [orthogonal[0],
+        #                       orthogonal[1],
+        #                       orthogonal[2], ]
+        #     positions.append(pos_orth_array)
 
         extrema_cart_coords_array = np.array(positions)  # n, 3
 
@@ -2929,7 +2942,7 @@ class Clustering:
                 continue
             cluster_mask = cluster_ids_array == unique_cluster  # n
             cluster_indicies = np.nonzero(cluster_mask)  # (n')
-            cluster_points_array = extrema_grid_coords_array[cluster_indicies]
+            cluster_points_array = extrema_point_array[cluster_indicies]
 
             cluster_points_tuple = (cluster_points_array[:, 0],
                                     cluster_points_array[:, 1],
