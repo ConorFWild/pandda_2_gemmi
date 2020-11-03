@@ -2258,10 +2258,9 @@ class Xmap:
         com_moving_list: List[np.array] = []
         com_reference_list: List[np.array] = []
 
-        transform = al.transform.inverse()
-        com_moving = al.com_moving
-        com_reference = al.com_reference
-
+        transform = transform.transform.inverse()
+        com_moving = [0.0,0.0,0.0]
+        com_reference = [0.0,0.0,0.0]
                 
         for point in original_point_list:
                         
