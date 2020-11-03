@@ -19,6 +19,8 @@ from scipy.cluster.hierarchy import fclusterdata
 from sklearn.cluster import DBSCAN
 
 import joblib
+from joblib.externals.loky import set_loky_pickler
+set_loky_pickler('pickle')
 
 from sklearn import neighbors
 
@@ -2431,23 +2433,19 @@ class Xmaps:
                               ):
         
         if mapper:
-            
             keys = list(datasets.datasets.keys())
             
-            results = joblib.Parallel(n_jobs=-2, 
-                                      verbose=15,
-                                      backend="multiprocessing",
-                                       max_nbytes=None)(
-                                           joblib.delayed(Xmap.from_unaligned_dataset)(
-                                               datasets[key],
-                                               alignments[key],
-                                               grid,
-                                               structure_factors,
-                                               sample_rate,
-                                               )
-                                           for key
-                                           in keys
-                                       )
+            results = mapper(
+                joblib.delayed(Xmap.from_unaligned_dataset)(
+                    datasets[key],
+                    alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate,
+                    )
+                for key
+                in keys
+                )
                                        
             xmaps = {keys[i]: results[i]
                 for i, key
