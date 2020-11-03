@@ -2261,6 +2261,7 @@ class Xmap:
         transform = transform.transform.inverse()
         com_moving = [0.0,0.0,0.0]
         com_reference = [0.0,0.0,0.0]
+        position = [0.0, 0.0, 0.0]
                 
         for point in original_point_list:
                         
