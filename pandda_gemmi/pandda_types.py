@@ -2857,7 +2857,6 @@ class Symops:
         for symop in self.symops:
             yield symop
 
-
 @dataclasses.dataclass()
 class Clustering:
     clustering: typing.Dict[int, Cluster]
@@ -2866,13 +2865,12 @@ class Clustering:
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float=1.3):
         zmap_array = zmap.to_array(copy=True)
 
+        # Get the protein mask
         protein_mask_grid = grid.partitioning.protein_mask
-
         protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.int8)
 
+        # Get the symmetry mask
         symmetry_contact_mask_grid = grid.partitioning.symmetry_mask
-
-
         symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.int8)
 
         # Don't consider outlying points away from the protein
@@ -2929,13 +2927,9 @@ class Clustering:
                                          metric='euclidean',
                                          method='single',
                                          )
-        # voxel_volume = grid.volume() /grid.size() 
-        # min_samples = (0.8*10.0) / voxel_volume
-        # dbscan = DBSCAN(eps=2.0,
-        #                            min_samples=min_samples,
-        #                            )
-        
-        # cluster_ids_array = dbscan.fit_predict(extrema_cart_coords_array)
+
+
+
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
             if unique_cluster == -1:
