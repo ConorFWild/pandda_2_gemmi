@@ -3032,7 +3032,8 @@ class Clustering:
         extrema_point_array = point_array[extrema_point_mask]
         extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape((1,3)) 
         
-        positions = [zmap.zmap.unit_cell.orthogonalize(fractional) for fractional in extrema_fractional_array]
+        positions = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional)) for fractional in extrema_fractional_array]
+
 
         # positions = []
         # for point in extrema_grid_coords_array:
