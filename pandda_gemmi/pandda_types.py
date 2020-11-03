@@ -215,7 +215,70 @@ class Structure:
 
         return transform
 
-                        
+
+    
+    def get_alignment(self, other: Structure):
+        # alignment returned is FROM other TO self
+        
+        ca_self = []
+        ca_other = []
+        
+        # Get CAs
+        for model in self.structure:
+            for chain in model:
+                for res_self in chain.get_polymer():            
+                    current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
+
+                    res_other = other.structure[current_res_id][0]
+                    
+                    self_ca_pos = res_self["CA"][0].pos
+                    other_ca_pos = res_other["CA"][0].pos
+                    
+                    ca_list_self = Transform.pos_to_list(self_ca_pos)
+                    ca_list_other = Transform.pos_to_list(other_ca_pos)
+                    
+                    ca_self.append(ca_list_self)
+                    ca_other.append(ca_list_other)
+                    
+        # Make coord matricies
+        matrix_self = np.array(ca_self)
+        matrix_other = np.array(ca_other)
+
+        # Find means
+        mean_self = np.mean(matrix_self, axis=0)
+        mean_other = np.mean(matrix_other, axis=0)
+
+        # demaen
+        de_meaned_self = matrix_self - mean_self
+        de_meaned_other = matrix_other - mean_other
+
+        # Align
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self, 
+                                                                        de_meaned_other,
+                                                                        )
+        
+        # Get transform
+        vec = np.array([0.0, 0.0, 0.0])
+        # Transform is from other frame to self frame
+        transform = Transform.from_translation_rotation(vec,
+                                                        rotation,
+                                                        mean_other, 
+                                                        mean_self, 
+                                                        )
+
+        return transform
+
+    def align_to(self, other: Structure):
+        # Warning: inplace!
+        # Aligns structures usings carbon alphas and transform self into the frame of the other
+        
+        transform = self.get_alignment(other)
+        
+        # Transform positions
+        for atom in self.all_atoms():
+            atom.pos = transform.apply_reference_to_moving(atom.pos)
+                    
+        return self                        
                         
     def __getstate__(self):
         structure_python = StructurePython.from_gemmi(self.structure)
@@ -1566,6 +1629,7 @@ class Grid:
         grid = self.grid
         return [grid.nu, grid.nv, grid.nw]
     
+    
     def __getstate__(self):
         grid_python = Int8GridPython.from_gemmi(self.grid)
         partitioning_python = self.partitioning.__getstate__()
@@ -2149,6 +2213,75 @@ class Xmap:
 
 
         return Xmap(interpolated_grid)
+    
+    def new_grid(self):
+        spacing = [self.xmap.nu, self.xmap.nv, self.xmap.nw]
+        unit_cell = self.xmap.unit_cell
+        grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
+        grid.unit_cell = unit_cell
+        grid.spacegroup = self.xmap.spacegroup
+        return grid
+    
+    def resample(
+        self,
+        xmap: Xmap,
+        transform: Transform,  # tranfrom FROM the frame of xmap TO the frame of self 
+        sample_rate: float = 3.0,
+        ):
+        
+        unaligned_xmap: gemmi.FloatGrid = self.xmap
+
+        unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
+        std = np.std(unaligned_xmap_array)
+
+        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
+
+        # Copy data into new grid
+        new_grid = xmap.new_grid()
+        
+        # points
+        original_point_list = list(
+            itertools.product(
+                range(new_grid.nu),
+                range(new_grid.nv),
+                range(new_grid.nw),
+            )
+        
+
+        # Unpack the points, poitions and transforms
+        point_list: List[Tuple[int, int, int]] = []
+        position_list: List[Tuple[float, float, float]] = []
+        transform_list: List[gemmi.transform] = []
+        com_moving_list: List[np.array] = []
+        com_reference_list: List[np.array] = []
+
+        transform = al.transform.inverse()
+        com_moving = al.com_moving
+        com_reference = al.com_reference
+
+                
+        for point in original_point_list:
+                        
+            point_list.append(point)
+            position_list.append(position)
+            transform_list.append(transform)
+            com_moving_list.append(com_moving)
+            com_reference_list.append(com_reference)
+                
+                    
+
+        # Interpolate values
+        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+                                 new_grid,
+                                 point_list,
+                                 position_list,
+                                 transform_list,
+                                 com_moving_list,
+                                 com_reference_list,
+                                 )
+
+
+        return Xmap(new_grid)
 
     @staticmethod
     def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
