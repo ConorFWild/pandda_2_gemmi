@@ -2248,6 +2248,7 @@ class Xmap:
                 range(new_grid.nv),
                 range(new_grid.nw),
             )
+        )
         
 
         # Unpack the points, poitions and transforms
