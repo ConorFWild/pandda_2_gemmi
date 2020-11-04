@@ -4394,7 +4394,7 @@ class JoblibMapper:
         return JoblibMapper(mapper) 
     
     def __call__(self, iterable) -> Any:
-        results = self.mapper(x for x in iterable)
+        results = self.mapper(joblib.delayed(x)() for x in iterable)
         
         return results
     
