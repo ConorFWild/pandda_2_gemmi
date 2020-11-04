@@ -3030,6 +3030,11 @@ class Clustering:
         
         extrema_point_mask = extrema_mask_array[point_tuple_wrapped] == 1
         extrema_point_array = point_array[extrema_point_mask]
+        extrema_point_wrapped_tuple = (
+            point_tuple_wrapped[0][extrema_point_mask],
+            point_tuple_wrapped[1][extrema_point_mask],
+            point_tuple_wrapped[2][extrema_point_mask],
+        )                           
         extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape((1,3)) 
         
         positions_orthogonal = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional[0],
@@ -3072,19 +3077,23 @@ class Clustering:
                                          method='single',
                                          )
 
-
-
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
             if unique_cluster == -1:
                 continue
             cluster_mask = cluster_ids_array == unique_cluster  # n
             cluster_indicies = np.nonzero(cluster_mask)  # (n')
-            cluster_points_array = extrema_point_array[cluster_indicies]
+            # cluster_points_array = extrema_point_array[cluster_indicies]
+            # cluster_points_tuple = (cluster_points_array[:, 0],
+            #                         cluster_points_array[:, 1],
+            #                         cluster_points_array[:, 2],)
+            
 
-            cluster_points_tuple = (cluster_points_array[:, 0],
-                                    cluster_points_array[:, 1],
-                                    cluster_points_array[:, 2],)
+            cluster_points_tuple = (
+                extrema_point_wrapped_tuple[0][cluster_indicies],
+                extrema_point_wrapped_tuple[1][cluster_indicies],
+                extrema_point_wrapped_tuple[2][cluster_indicies],
+            )
 
             values = zmap_array[cluster_points_tuple]
 
