@@ -4355,8 +4355,7 @@ class MapperPython:
                                      ))
 
         return results
-    
-    
+
 @dataclasses.dataclass()
 class DaskMapper:
     cluster: Any
@@ -4372,11 +4371,10 @@ class DaskMapper:
     def __call__(self, iterable) -> Any:
         futures = []
         for func in iterable:
-            print(type(func))
-            print(func)
             future = self.mapper.submit(func)
             futures.append(future)
             
         results = [future.result() for future in futures]
         
         return results 
+
