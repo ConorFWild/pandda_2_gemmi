@@ -4355,6 +4355,8 @@ class DaskMapper:
     def __call__(self, iterable) -> Any:
         futures = []
         for func in iterable:
+            print(type(func))
+            print(func)
             future = self.mapper.submit(func)
             futures.append(future)
             
