@@ -47,11 +47,12 @@ from pandda_gemmi.config import Config
 
 #         return logs_str
 
+
 def iterdict(d):
   for k,v in d.items():        
      if isinstance(v, dict):
          iterdict(v)
-     elif issubclass(type(v), Path):
+     elif isinstance(v, PosixPath):
          d[k] = str(v)
          
 
