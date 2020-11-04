@@ -1563,23 +1563,23 @@ class Partitioning:
     
     def save_maps(self, dir: Path, p1: bool=True):
         # Protein mask
-        ccp4 = gemmi.Ccp4Map()
+        ccp4 = gemmi.Ccp4Mask()
         ccp4.grid = self.protein_mask
         if p1:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
             ccp4.grid.symmetrize_max()
-        ccp4.update_ccp4_header(2, True)
+        ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_PROTEIN_MASK_FILE))
         
         # Symmetry mask
-        ccp4 = gemmi.Ccp4Map()
+        ccp4 = gemmi.Ccp4Mask()
         ccp4.grid = self.symmetry_mask
         if p1:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
             ccp4.grid.symmetrize_max()
-        ccp4.update_ccp4_header(2, True)
+        ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_SYMMETRY_MASK_FILE))
         
     
