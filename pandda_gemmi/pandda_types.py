@@ -3039,7 +3039,6 @@ class Clustering:
         positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
 
 
-
         # positions = []
         # for point in extrema_grid_coords_array:
         #     # position = gemmi.Fractional(*point)
