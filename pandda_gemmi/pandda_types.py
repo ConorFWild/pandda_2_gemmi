@@ -4397,3 +4397,4 @@ class JoblibMapper:
         results = self.mapper(x for x in iterable)
         
         return results
+    
