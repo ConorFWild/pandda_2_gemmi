@@ -4380,3 +4380,21 @@ class DaskMapper:
         
         return results 
 
+@dataclasses.dataclass()
+class JoblibMapper:
+    mapper: Any
+    
+    @staticmethod
+    def initialise():
+        mapper = joblib.Parallel(n_jobs=-2, 
+                                      verbose=15,
+                                      backend="loky",
+                                       max_nbytes=None,
+                                       )
+        return JoblibMapper(mapper) 
+    
+    def __call__(self, iterable) -> Any:
+        results = self.mapper(iterable)
+        
+        return results
+
