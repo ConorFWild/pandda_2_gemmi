@@ -14,11 +14,11 @@ import numpy as np
 
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
-from pandda_gemmi.pandda_types import (PanDDAFSModel, Datasets, Reference, 
+from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Reference, 
                                     Grid, Alignments, Shells, Xmaps, 
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
                                     Events, SiteTable, EventTable,
-                                    DaskMapper
+                                    DaskMapper, JoblibMapper
                                     )
 import joblib
 from joblib.externals.loky import set_loky_pickler
@@ -49,8 +49,8 @@ def main():
         
         print("Getting multiprocessor")
 
-        mapper = DaskMapper.initialise()
-        print(f"Mapper address is: {mapper.address}")
+        mapper = JoblibMapper.initialise()
+        
         
         ###################################################################
         # # Pre-pandda
