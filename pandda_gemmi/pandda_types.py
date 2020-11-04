@@ -1,4 +1,5 @@
 from __future__ import annotations
+from types import FunctionType, MethodType
 
 import typing
 import dataclasses
@@ -37,7 +38,23 @@ from pandda_gemmi.python_types import *
 
 from pandda_gemmi.pandda_exceptions import *
 
+@dataclasses.dataclass()
+class DelayedFuncReady:
+    func: MethodType
+    args: Any
+    
+    def __call__(self) -> Any:
+        return self.func(*self.args)
 
+@dataclasses.dataclass()
+class DelayedFuncWaiting:
+    func: MethodType
+    
+    def __call__(self, *args: Any) -> Any:
+        return DelayedFuncReady(self.func, args)
+        
+def delayed(func: MethodType):
+    return DelayedFuncWaiting(func)
 
 @dataclasses.dataclass()
 class Dtag:
@@ -915,7 +932,7 @@ class Datasets:
             keys = list(self.datasets.keys())
             
             results = mapper(
-                                           joblib.delayed(
+                                           delayed(
                                                self[key].smooth)(
                                                    reference,
                                                    structure_factors
@@ -2463,7 +2480,7 @@ class Xmaps:
             keys = list(datasets.datasets.keys())
             
             results = mapper(
-                joblib.delayed(Xmap.from_unaligned_dataset)(
+                delayed(Xmap.from_unaligned_dataset)(
                     datasets[key],
                     alignments[key],
                     grid,
@@ -2504,7 +2521,7 @@ class Xmaps:
             keys = list(datasets.datasets.keys())
             
             results = mapper(
-                                           joblib.delayed(Xmap.from_unaligned_dataset_c)(
+                                           delayed(Xmap.from_unaligned_dataset_c)(
                                                datasets[key],
                                                alignments[key],
                                                grid,
@@ -3247,7 +3264,7 @@ class Clusterings:
             keys = list(zmaps.zmaps.keys())
             
             results = mapper(
-                                        joblib.delayed(
+                                        delayed(
                                             Clustering.from_zmap)(
                                                 zmaps[key], 
                                                 reference, 
@@ -3708,7 +3725,7 @@ class Events:
             event_id_list = list(self.events.keys())
             
             results = mapper(
-                    joblib.delayed(
+                    delayed(
                         processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
                             xmaps[event_id.dtag],
                             model,
