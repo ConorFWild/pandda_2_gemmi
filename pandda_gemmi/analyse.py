@@ -83,10 +83,13 @@ def main():
 
         # Post-reference filters
         print("smoothing")
+        start = time.time()
         datasets_smoother: Datasets = datasets_wilson.smooth_datasets(reference, 
                                                     structure_factors=config.params.diffraction_data.structure_factors,
                                                     mapper=mapper,
-                                                    )  
+                                                    )
+        finish = time.time()
+        print(f"Smoothed in {finish-start}")  
         pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
         print("Removing dissimilar models")
@@ -145,6 +148,7 @@ def main():
 
             # Generate aligned xmaps
             print("Loading xmaps")
+            start = time.time()
             xmaps = Xmaps.from_aligned_datasets_c(
                 shell_truncated_datasets, 
                 alignments, 
@@ -153,7 +157,8 @@ def main():
                 sample_rate=config.params.diffraction_data.sample_rate,
                 mapper=mapper,
                 )
-
+            finish = time.time()
+            print(f"Mapped in {finish-start}")
 
             # Seperate out test and train maps
             shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
