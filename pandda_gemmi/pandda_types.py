@@ -4394,7 +4394,6 @@ class JoblibMapper:
         return JoblibMapper(mapper) 
     
     def __call__(self, iterable) -> Any:
-        results = self.mapper(iterable)
+        results = self.mapper(x for x in iterable)
         
         return results
-
