@@ -50,6 +50,7 @@ def main():
         print("Getting multiprocessor")
 
         mapper = DaskMapper.initialise()
+        print(f"Mapper address is: {mapper.address}")
         
         ###################################################################
         # # Pre-pandda

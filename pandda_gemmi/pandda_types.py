@@ -4360,13 +4360,15 @@ class MapperPython:
 class DaskMapper:
     cluster: Any
     mapper: Any
+    address: str
     
     @staticmethod
     def initialise():
         cluster = LocalCluster()
         cluster.scale(10)
         client = Client()
-        return DaskMapper(cluster, client) 
+        address = client.scheduler_info()['services']
+        return DaskMapper(cluster, client, address) 
     
     def __call__(self, iterable) -> Any:
         futures = []
