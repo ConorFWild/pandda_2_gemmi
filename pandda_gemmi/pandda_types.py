@@ -5,6 +5,7 @@ import dataclasses
 
 import os
 import time
+from typing import Any
 import psutil
 import shutil
 import re
@@ -21,6 +22,9 @@ from sklearn.cluster import DBSCAN
 import joblib
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
+
+from dask.distributed import Client, LocalCluster
+
 
 from sklearn import neighbors
 
@@ -4334,3 +4338,26 @@ class MapperPython:
                                      ))
 
         return results
+    
+    
+@dataclasses.dataclass()
+class DaskMapper:
+    cluster: Any
+    mapper: Any
+    
+    @staticmethod
+    def initialise():
+        cluster = LocalCluster()
+        cluster.scale(10)
+        client = Client()
+        return DaskMapper(cluster, client) 
+    
+    def __call__(self, iterable) -> Any:
+        futures = []
+        for func in iterable:
+            future = self.mapper.submit(func)
+            futures.append(future)
+            
+        results = [future.result() for future in futures]
+        
+        return results 
