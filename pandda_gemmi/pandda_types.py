@@ -1552,9 +1552,8 @@ class Partitioning:
         mask.spacegroup = protein_mask.spacegroup
         mask.set_unit_cell(protein_mask.unit_cell)
 
-
+        # Mask psacegroup summetry related 
         symops = Symops.from_grid(grid)
-
         for atom in structure.all_atoms():
             position = atom.pos
             fractional_position = mask.unit_cell.fractionalize(position)
@@ -1581,6 +1580,60 @@ class Partitioning:
         protein_mask_bool[protein_mask_indicies] = True
 
         mask_array[~protein_mask_bool] = 0
+        
+        # ##################################
+        # Mask unit cell overlap
+        # ################################
+        # Make a temp mask to hold overlap
+        mask_unit_cell = gemmi.Int8Grid(*protein_mask_array.shape)
+        mask_unit_cell.spacegroup = protein_mask.spacegroup
+        mask_unit_cell.set_unit_cell(protein_mask.unit_cell)
+        mask_unit_cell_array = np.array(mask_unit_cell, copy=False, dtype=np.int8)
+        
+        
+        # Assign atoms to unit cells
+        unit_cell_index_dict = {}
+        for atom in structure.all_atoms():
+            position = atom.pos
+            fractional_position = mask_unit_cell.unit_cell.fractionalize(position)
+            
+            unit_cell_index_tuple = (int(fractional_position.x),
+                         int(fractional_position.y),
+                         int(fractional_position.z),
+                         )
+            
+            if unit_cell_index_tuple not in unit_cell_index_dict:
+                unit_cell_index_dict[unit_cell_index_tuple] = []
+            
+            unit_cell_index_dict[unit_cell_index_tuple].append(position)
+            
+        # Create masks of those unit cells
+        unit_cell_mask_dict = {}            
+        for unit_cell_index, unit_cell_position_list in unit_cell_index_dict.items():
+            unit_cell_mask = gemmi.Int8Grid(*protein_mask_array.shape)
+            unit_cell_mask.spacegroup = protein_mask.spacegroup
+            unit_cell_mask.set_unit_cell(protein_mask.unit_cell)
+            
+            for position in unit_cell_position_list:
+            
+                mask_unit_cell.set_points_around_non_overlapping(
+                    position,
+                    radius=symmetry_mask_radius,
+                    value=1,
+                            )
+            
+            unit_cell_mask_dict[unit_cell_index] = unit_cell_mask
+
+        # Overlay those masks
+        for unit_cell_index, unit_cell_mask in unit_cell_mask_dict.items():
+            unit_cell_mask_array = np.array(unit_cell_mask, copy=False, dtype=np.int8)
+            mask_unit_cell_array[unit_cell_mask_array == 1] += 1
+            
+        # Select the unit cell overlapping points
+        mask_unit_cell_array_mask = mask_unit_cell_array > 1
+        
+        # mask them in the symmetry mask array
+        mask_array[mask_unit_cell_array_mask] = 1
 
         return mask
     
