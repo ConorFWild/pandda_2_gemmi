@@ -1458,7 +1458,7 @@ class Partitioning:
                                    )
         mask_array = np.array(mask, copy=False)
 
-        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, mask, mask_radius_symmetry)
+        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
 
 
         # Get the positions of the protein masked grid points
@@ -1543,7 +1543,8 @@ class Partitioning:
 
 
     @staticmethod
-    def get_symmetry_contact_mask(structure: Structure, protein_mask: gemmi.Int8Grid,
+    def get_symmetry_contact_mask(structure: Structure, grid: gemmi.FloatGrid,
+                                  protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
         protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
 
@@ -1551,7 +1552,8 @@ class Partitioning:
         mask.spacegroup = protein_mask.spacegroup
         mask.set_unit_cell(protein_mask.unit_cell)
 
-        symops = Symops.from_grid(mask)
+
+        symops = Symops.from_grid(grid)
 
         for atom in structure.all_atoms():
             position = atom.pos
