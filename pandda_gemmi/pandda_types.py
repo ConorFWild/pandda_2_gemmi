@@ -1448,7 +1448,7 @@ class Partitioning:
         kdtree = spatial.KDTree(ca_position_array)
 
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
-        mask.spacegroup = grid.spacegroup
+        mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         mask.set_unit_cell(grid.unit_cell)
         for atom in structure.protein_atoms():
             pos = atom.pos
@@ -1552,12 +1552,14 @@ class Partitioning:
         symops = Symops.from_grid(mask)
 
         for atom in structure.all_atoms():
+            position = atom.pos
+            fractional_position = mask.unit_cell.fractionalize(position)
+            wrapped_position = fractional_position.wrap_to_unit()
             for symmetry_operation in symops.symops[1:]:
-                position = atom.pos
-                fractional_position = mask.unit_cell.fractionalize(position)
-                symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([fractional_position[0],
-                                                                                       fractional_position[1],
-                                                                                       fractional_position[2],
+               
+                symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([wrapped_position[0],
+                                                                                       wrapped_position[1],
+                                                                                       wrapped_position[2],
                                                                                        ]))
                 orthogonal_symmetry_position = mask.unit_cell.orthogonalize(symmetry_position)
 
