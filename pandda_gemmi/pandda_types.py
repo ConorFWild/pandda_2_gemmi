@@ -1540,6 +1540,7 @@ class Partitioning:
                 
         return np.array(coord_list)
 
+
     @staticmethod
     def get_symmetry_contact_mask(structure: Structure, protein_mask: gemmi.Int8Grid,
                                   symmetry_mask_radius: float = 3):
