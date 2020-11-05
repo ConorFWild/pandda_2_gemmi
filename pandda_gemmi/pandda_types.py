@@ -818,6 +818,10 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
+    
+    def trunate_num_datasets(self, num_datasets: int):
+        new_datasets = {dtag: self.datasets[dtag] for i, dtag in enumerate(self.datasets) if i < num_datasets}
+        return Datasets(new_datasets)
 
     def remove_incomplete_up_to_resolution_datasets(self, structure_factors, resolution: Resolution):
         no_missing_reflections_dtags = filter(

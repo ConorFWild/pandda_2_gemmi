@@ -60,6 +60,8 @@ def main():
         print("Loading datasets")
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
         pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
+        
+        datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
 
         # Initial filters
         print("Filtering invalid datasaets")
