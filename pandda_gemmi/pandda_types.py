@@ -1398,11 +1398,11 @@ class Partitioning:
             # Get the grid of points around the protein
 
             coord_product = itertools.product(
-                range(grid_min_coord[0], grid_max_coord[0]+1),
-                range(grid_min_coord[1], grid_max_coord[1]+1),
-                range(grid_min_coord[2], grid_max_coord[2]+1),
+                range(grid_min_coord[0], grid_max_coord[0]),
+                range(grid_min_coord[1], grid_max_coord[1]),
+                range(grid_min_coord[2], grid_max_coord[2]),
             )
-                                         
+                                        
             coord_array = np.array([[x, y, z] for x, y, z in coord_product])
             
             coord_tuple = (coord_array[:, 0],
