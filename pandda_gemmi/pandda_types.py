@@ -1430,14 +1430,15 @@ class Partitioning:
             # Mask
             for atom in structure.all_atoms():
                 pos = atom.pos
-                pos_transformed = gemmi.Position(pos.x + grid_min_cart[0],
-                                                 pos.y + grid_min_cart[1],
-                                                 pos.z + grid_min_cart[2],
+                pos_transformed = gemmi.Position(pos.x - grid_min_cart[0],
+                                                 pos.y - grid_min_cart[1],
+                                                 pos.z - grid_min_cart[2],
                                                  )
                 protein_grid.set_points_around(pos_transformed,
                                         radius=mask_radius,
                                         value=1,
                                         )
+            
             
             # # Get the corresponding unit cell points
             # coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
