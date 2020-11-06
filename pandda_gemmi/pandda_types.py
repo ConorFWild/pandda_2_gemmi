@@ -1347,7 +1347,7 @@ class Partitioning:
         # return Partitioning(partitions, mask, symmetry_mask)
     
     @staticmethod
-    def get_coord_tuple(grid, ca_position_array, buffer=3.0):
+    def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float=6.0, buffer: float=3.0):
             # Get the bounds
             min_x = ca_position_array[:, 0].min() - buffer
             max_x = ca_position_array[:, 0].max() + buffer
@@ -1367,8 +1367,26 @@ class Partitioning:
             # Get them as coords
             grid_min_coord = [int(grid_min_frac[0]*grid.nu), int(grid_min_frac[1]*grid.nv), int(grid_min_frac[2]*grid.nw),]
             grid_max_coord = [int(grid_max_frac[0]*grid.nu), int(grid_max_frac[1]*grid.nv), int(grid_max_frac[2]*grid.nw),]
+            
+            # Get these as fractions
+            fractional_grid_min = [
+                grid.unit_cell.fractionalize(grid_min_coord[0]), 
+                grid.unit_cell.fractionalize(grid_min_coord[1]),
+                grid.unit_cell.fractionalize(grid_min_coord[2]),
+            ]
+            fractional_grid_max = [
+                grid.unit_cell.fractionalize(grid_max_coord[0]),
+                grid.unit_cell.fractionalize(grid_max_coord[1]),
+                grid.unit_cell.fractionalize(grid_max_coord[2]),
+                ]
+            fractional_diff = [
+                fractional_grid_max[0]-fractional_grid_min[0],
+                fractional_grid_max[1]-fractional_grid_min[1],
+                fractional_grid_max[2]-fractional_grid_min[2],
+            ]
 
             # Get the grid of points around the protein
+
             coord_product = itertools.product(
                 range(grid_min_coord[0], grid_max_coord[0]+1),
                 range(grid_min_coord[1], grid_max_coord[1]+1),
@@ -1382,17 +1400,51 @@ class Partitioning:
                            coord_array[:, 2],
                            )
             
-            # Get the corresponding unit cell points
-            coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
-                                     np.mod(coord_tuple[1], grid.nv),
-                                     np.mod(coord_tuple[2], grid.nw),
-                                     )
+            # Get the corresponding protein grid
+            protein_grid = gemmi.Int8Grid(
+                grid_max_coord[0]-grid_min_coord[0],
+                grid_max_coord[1]-grid_min_coord[1],
+                grid_max_coord[2]-grid_min_coord[2],
+                                          )
+            protein_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+            protein_grid_unit_cell = gemmi.UnitCell(
+                grid.unit_cell.a * fractional_diff[0],
+                grid.unit_cell.b * fractional_diff[0],
+                grid.unit_cell.c * fractional_diff[0],
+                grid.unit_cell.alpha,
+                grid.unit_cell.beta,
+                grid.unit_cell.gamma,
+            )
+            protein_grid.set_unit_cell(protein_grid_unit_cell)
             
+            # Mask
+            for atom in structure.all_atoms():
+                pos = atom.pos
+                pos_transformed = gemmi.Position(pos.x + grid_min_cart[0],
+                                                 pos.y + grid_min_cart[1],
+                                                 pos.z + grid_min_cart[2],
+                                                 )
+                protein_grid.set_points_around(pos_transformed,
+                                        radius=mask_radius,
+                                        value=1,
+                                        )
             
+            # # Get the corresponding unit cell points
+            # coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
+            #                          np.mod(coord_tuple[1], grid.nv),
+            #                          np.mod(coord_tuple[2], grid.nw),
+            #                          )
+            
+            # Get the corresponging protein_grid points 
+            coord_mask_grid_tuple = (
+                coord_tuple[0]-grid_min_coord[0],
+                coord_tuple[1]-grid_min_coord[1],
+                coord_tuple[2]-grid_min_coord[2],
+                )
             
             # Check which of them are in the mask
-            mask_array = np.array(grid, copy=False, dtype=np.int8)
-            in_mask_array_int = mask_array[coord_unit_cell_tuple]
+            mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
+            in_mask_array_int = mask_array[coord_mask_grid_tuple]
             in_mask_array = in_mask_array_int == 1
             
             # Mask those coords in the tuples
@@ -1402,9 +1454,9 @@ class Partitioning:
                 coord_tuple[2][in_mask_array],
             ) 
             coord_array_unit_cell_in_mask = (
-                coord_unit_cell_tuple[0][in_mask_array],
-                coord_unit_cell_tuple[1][in_mask_array],
-                coord_unit_cell_tuple[2][in_mask_array],
+                coord_mask_grid_tuple[0][in_mask_array],
+                coord_mask_grid_tuple[1][in_mask_array],
+                coord_mask_grid_tuple[2][in_mask_array],
             )
             
             return coord_array_in_mask, coord_array_unit_cell_in_mask
@@ -1482,7 +1534,13 @@ class Partitioning:
         
         
 
-        coord_tuple, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(mask, ca_position_array)
+        coord_tuple, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
+            mask,
+            ca_position_array,
+            structure,
+            mask_radius
+            )
+        
         coord_array = np.concatenate(
             [
                 coord_tuple[0].reshape((-1, 1)),
