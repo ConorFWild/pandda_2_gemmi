@@ -1369,16 +1369,26 @@ class Partitioning:
             grid_max_coord = [int(grid_max_frac[0]*grid.nu), int(grid_max_frac[1]*grid.nv), int(grid_max_frac[2]*grid.nw),]
             
             # Get these as fractions
+            # fractional_grid_min = [
+            #     grid.unit_cell.fractionalize(grid_min_coord[0]), 
+            #     grid.unit_cell.fractionalize(grid_min_coord[1]),
+            #     grid.unit_cell.fractionalize(grid_min_coord[2]),
+            # ]
             fractional_grid_min = [
-                grid.unit_cell.fractionalize(grid_min_coord[0]), 
-                grid.unit_cell.fractionalize(grid_min_coord[1]),
-                grid.unit_cell.fractionalize(grid_min_coord[2]),
+                grid_min_coord[0] * (1.0 / grid.nu),
+                grid_min_coord[1] * (1.0 / grid.nv),
+                grid_min_coord[2] * (1.0 / grid.nw),
             ]
+            # fractional_grid_max = [
+            #     grid.unit_cell.fractionalize(grid_max_coord[0]),
+            #     grid.unit_cell.fractionalize(grid_max_coord[1]),
+            #     grid.unit_cell.fractionalize(grid_max_coord[2]),
+            #     ]
             fractional_grid_max = [
-                grid.unit_cell.fractionalize(grid_max_coord[0]),
-                grid.unit_cell.fractionalize(grid_max_coord[1]),
-                grid.unit_cell.fractionalize(grid_max_coord[2]),
-                ]
+                grid_max_coord[0] * (1.0 / grid.nu),
+                grid_max_coord[1] * (1.0 / grid.nv),
+                grid_max_coord[2] * (1.0 / grid.nw),
+            ]
             fractional_diff = [
                 fractional_grid_max[0]-fractional_grid_min[0],
                 fractional_grid_max[1]-fractional_grid_min[1],
