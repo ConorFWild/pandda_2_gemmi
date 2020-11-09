@@ -247,7 +247,7 @@ class Config:
         parser.add_argument("--ligand_cif_regex",
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
-                            default="abcdefg",
+                            default="*.cif",
                             )
         parser.add_argument("--ligand_pdb_regex",
                             type=str,
