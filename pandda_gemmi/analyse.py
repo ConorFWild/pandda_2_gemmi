@@ -43,6 +43,8 @@ def main():
                                                                 config.output.out_dir,
                                                                 config.input.pdb_regex,
                                                                 config.input.mtz_regex,
+                                                                config.input.ligand_cif_regex, 
+                                                                config.input.ligand_pdb_regex,
                                                                 )
         pandda_fs_model.build()
         pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)

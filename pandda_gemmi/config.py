@@ -35,6 +35,8 @@ class Input:
     mtz_regex: str
     pdb_regex: str
     dataset_flags: DatasetFlags
+    ligand_cif_regex: str
+    ligand_pdb_regex: str
 
     @classmethod
     def from_args(cls, args):
@@ -42,6 +44,8 @@ class Input:
                      mtz_regex=args.mtz_regex,
                      pdb_regex=args.pdb_regex,
                      dataset_flags=DatasetFlags.from_args(args),
+                     ligand_cif_regex=args.ligand_cif_regex,
+                     ligand_pdb_regex=args.ligand_pdb_regex,
                      )
 
 
@@ -239,6 +243,16 @@ class Config:
                             type=str,
                             help="The directory for output and intermediate files to be saved to",
                             required=True
+                            )
+        parser.add_argument("--ligand_cif_regex",
+                            type=str,
+                            help="The directory for output and intermediate files to be saved to",
+                            default="abcdefg",
+                            )
+        parser.add_argument("--ligand_pdb_regex",
+                            type=str,
+                            help="The directory for output and intermediate files to be saved to",
+                            default="abcdefg",
                             )
         # Dataset selection
         parser.add_argument("--ground_state_datasets",

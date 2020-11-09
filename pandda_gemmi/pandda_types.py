@@ -6,7 +6,7 @@ import dataclasses
 
 import os
 import time
-from typing import Any
+from typing import Any, Union
 import psutil
 import shutil
 import re
@@ -4202,17 +4202,19 @@ class DatasetModels:
 
 @dataclasses.dataclass()
 class LigandDir:
+    path: Path
     pdbs: typing.List[Path]
     cifs: typing.List[Path]
     smiles: typing.List[Path]
 
     @staticmethod
-    def from_path(path):
+    def from_path(path: Path):
         pdbs = list(path.glob("*.pdb"))
         cifs = list(path.glob("*.cifs"))
         smiles = list(path.glob("*.smiles"))
 
-        return LigandDir(pdbs,
+        return LigandDir(path,
+                         pdbs,
                          cifs,
                          smiles,
                          )
@@ -4222,17 +4224,38 @@ class LigandDir:
 class DatasetDir:
     input_pdb_file: Path
     input_mtz_file: Path
-    ligand_dir: LigandDir
+    ligand_dir: Union[LigandDir, None]
+    source_ligand_cif: Union[Path, None]
+    source_ligand_pdb: Union[Path, None]
 
     @staticmethod
-    def from_path(path: Path, pdb_regex: str, mtz_regex: str):
+    def from_path(path: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str):
         input_pdb_file: Path = next(path.glob(pdb_regex))
         input_mtz_file: Path = next(path.glob(mtz_regex))
-        ligand_dir: LigandDir = LigandDir.from_path(path / PANDDA_LIGAND_FILES_DIR)
+        
+        source_ligand_dir = path / PANDDA_LIGAND_FILES_DIR
+        if source_ligand_dir.exists():
+            ligand_dir = LigandDir.from_path(source_ligand_dir)
+        else:
+            ligand_dir = None
+        
+        try:
+            ligands = path.rglob(ligand_cif_regex)
+            source_ligand_cif = next(ligands)
+        except:
+            source_ligand_cif = None
+
+        try:
+            ligands = path.rglob(ligand_pdb_regex)
+            source_ligand_pdb = next(ligands)
+        except:
+            source_ligand_pdb = None
 
         return DatasetDir(input_pdb_file=input_pdb_file,
                           input_mtz_file=input_mtz_file,
                           ligand_dir=ligand_dir,
+                          source_ligand_cif=source_ligand_cif,
+                          source_ligand_pdb=source_ligand_pdb,
                           )
 
 
@@ -4241,7 +4264,7 @@ class DataDirs:
     dataset_dirs: typing.Dict[Dtag, DatasetDir]
 
     @staticmethod
-    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str):
+    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str):
         dataset_dir_paths = list(directory.glob("*"))
 
         dataset_dirs = {}
@@ -4249,7 +4272,7 @@ class DataDirs:
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
             try:
-                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex)
+                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_cif_regex, ligand_pdb_regex)
                 dataset_dirs[dtag] = dataset_dir
             except:
                 continue 
@@ -4270,6 +4293,12 @@ class ProcessedDataset:
     source_pdb: Path
     z_map_file: ZMapFile
     event_map_files: EventMapFiles
+    source_ligand_cif: Union[Path, None]
+    source_ligand_pdb: Union[Path, None]
+    input_ligand_cif: Path
+    input_ligand_pdb: Path
+    source_ligand_dir: Union[LigandDir, None]
+    input_ligand_dir: Path
 
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
@@ -4280,23 +4309,39 @@ class ProcessedDataset:
         dtag = processed_dataset_dir.name
         source_mtz = dataset_dir.input_mtz_file
         source_pdb = dataset_dir.input_pdb_file
+        source_ligand_cif = dataset_dir.source_ligand_cif
+        source_ligand_pdb = dataset_dir.source_ligand_pdb
+        
+        
         input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
         input_pdb = processed_dataset_dir / PANDDA_PDB_FILE.format(dtag)
-
+        input_ligand_cif = processed_dataset_dir / PANDDA_LIGAND_CIF_FILE
+        input_ligand_pdb = processed_dataset_dir / PANDDA_LIGAND_PDB_FILE
         
         
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
         event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
+        
+        source_ligand_dir = dataset_dir.ligand_dir
+        input_ligand_dir = processed_dataset_dir / PANDDA_LIGAND_FILES_DIR
+        
 
-        return ProcessedDataset(path=processed_dataset_dir,
-                                dataset_models=DatasetModels.from_dir(dataset_models_dir),
-                                input_mtz=input_mtz,
-                                input_pdb=input_pdb,
-                                source_mtz=source_mtz,
-                                source_pdb=source_pdb,
-                                z_map_file=z_map_file,
-                                event_map_files=event_map_files,
-                                )
+        return ProcessedDataset(
+            path=processed_dataset_dir,
+            dataset_models=DatasetModels.from_dir(dataset_models_dir),
+            input_mtz=input_mtz,
+            input_pdb=input_pdb,
+            source_mtz=source_mtz,
+            source_pdb=source_pdb,
+            z_map_file=z_map_file,
+            event_map_files=event_map_files,
+            source_ligand_cif=source_ligand_cif,
+            source_ligand_pdb=source_ligand_pdb,
+            input_ligand_cif=input_ligand_cif,
+            input_ligand_pdb=input_ligand_pdb,
+            source_ligand_dir=source_ligand_dir,
+            input_ligand_dir=input_ligand_dir,
+            )
 
     def build(self):
         if not self.path.exists():
@@ -4304,6 +4349,16 @@ class ProcessedDataset:
 
         shutil.copyfile(self.source_mtz, self.input_mtz)
         shutil.copyfile(self.source_pdb, self.input_pdb)
+        
+        if self.source_ligand_cif: shutil.copyfile(self.source_ligand_cif, self.input_ligand_cif)
+        if self.source_ligand_pdb: shutil.copyfile(self.source_ligand_pdb, self.input_ligand_pdb)
+        
+        if self.source_ligand_dir: 
+            shutil.copytree(str(self.source_ligand_dir.path),
+                                            str(self.input_ligand_dir),
+                        )
+        
+        
         
 @dataclasses.dataclass()
 class ProcessedDatasets:
@@ -4347,10 +4402,11 @@ class PanDDAFSModel:
     @staticmethod
     def from_dir(input_data_dirs: Path,
                  output_out_dir: Path,
-                 pdb_regex: str, mtz_regex: str
+                 pdb_regex: str, mtz_regex: str,
+                 ligand_cif_regex: str, ligand_pdb_regex: str,
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
-        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex)
+        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_cif_regex, ligand_pdb_regex)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )

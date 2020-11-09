@@ -24,6 +24,10 @@ PANDDA_MODELLED_STRUCTURES_DIR = "modelled_structures"
 PANDDA_LIGAND_FILES_DIR = "ligand_files"
 PANDDA_PDB_FILE = "{}-pandda-input.pdb"
 PANDDA_MTZ_FILE = "{}-pandda-input.mtz"
+
+PANDDA_LIGAND_CIF_FILE = "ligand.cif"
+PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
+
 PANDDA_INSPECT_EVENTS_PATH = "pandda_inspect_events.csv"
 PANDDA_EVENT_MAP_FILE = "{}-event_{}_1-BDC_{}_map.native.ccp4"
 PANDDA_EVENT_MODEL = "{}-pandda-model.pdb"

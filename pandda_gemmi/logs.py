@@ -48,10 +48,10 @@ from pandda_gemmi.config import Config
 #         return logs_str
 
 
-def iterdict(d):
+def remove_paths(d):
   for k,v in d.items():        
      if isinstance(v, dict):
-         iterdict(v)
+         remove_paths(v)
      elif isinstance(v, PosixPath):
          d[k] = str(v)
          
@@ -421,6 +421,8 @@ class LogData:
         
     def save_json(self, path: Path):
         log_dict = dataclasses.asdict(self)
+        
+        remove_paths(log_dict)
         
         with open(str(path), "w") as f:
             json.dump(log_dict,
