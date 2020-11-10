@@ -4443,6 +4443,9 @@ class RMSD:
         for residues_id in structure_1.protein_residue_ids():
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
+            
+            print(res_1)
+            print(res_2)
 
             res_1_ca = res_1["CA"][0]
             res_2_ca = res_2["CA"][0]
