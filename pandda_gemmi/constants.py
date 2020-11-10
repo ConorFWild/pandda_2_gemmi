@@ -38,3 +38,25 @@ PANDDA_Z_MAP_FILE = "{dtag}-z_map.native.ccp4"
 PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"
 
 PANDDA_LOG_FILE = "pandda_log.json"
+
+
+RESIDUE_NAMES = ["ALA",
+"ARG",
+"ASN",
+"ASP",
+"CYS",
+"GLN",
+"GLU",
+"HIS",
+"ILE",
+"LEU",
+"LYS",
+"MET",
+"PHE",
+"PRO",
+"SER",
+"THR",
+"TRP",
+"TYR",
+"VAL",
+]

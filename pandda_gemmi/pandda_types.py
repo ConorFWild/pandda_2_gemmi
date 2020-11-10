@@ -155,6 +155,10 @@ class Structure:
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer():
+                    
+                    if residue.name.upper() not in RESIDUE_NAMES:
+                        continue
+                    
                     resid = ResidueID.from_residue_chain(model, chain, residue)                        
                     yield resid
 
@@ -162,6 +166,10 @@ class Structure:
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer():
+                    
+                    if residue.name.upper() not in RESIDUE_NAMES:
+                        continue
+                    
                     for atom in residue:
                         yield atom
 
@@ -194,7 +202,10 @@ class Structure:
         # Get CAs
         for model in self.structure:
             for chain in model:
-                for res_self in chain.get_polymer():            
+                for res_self in chain.get_polymer():
+                    if res_self.name.upper() not in RESIDUE_NAMES:
+                        continue
+                                
                     current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
                     res_other = other.structure[current_res_id][0]
@@ -247,7 +258,9 @@ class Structure:
         # Get CAs
         for model in self.structure:
             for chain in model:
-                for res_self in chain.get_polymer():            
+                for res_self in chain.get_polymer():      
+                    if res_self.name.upper() not in RESIDUE_NAMES:
+                        continue      
                     current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
                     res_other = other.structure[current_res_id][0]
@@ -1496,6 +1509,9 @@ class Partitioning:
         for model in structure.structure:
             for chain in model:
                 for res in chain.get_polymer():
+                    if res.name.upper() not in RESIDUE_NAMES:
+                        continue
+                    
                     ca = res["CA"][0]
 
                     orthogonal = ca.pos
@@ -2033,6 +2049,8 @@ class Alignment:
         for model in reference.dataset.structure.structure:
             for chain in model:
                 for ref_res in chain.get_polymer():
+                    if  ref_res.name.upper() not in RESIDUE_NAMES:
+                        continue
                     res_id = ResidueID.from_residue_chain(model, chain, ref_res)
                     
                     dataset_res = dataset.structure[res_id][0]
@@ -2070,6 +2088,8 @@ class Alignment:
         for model in reference.dataset.structure.structure:
             for chain in model:
                 for ref_res in chain.get_polymer():
+                    if ref_res.name.upper() not in RESIDUE_NAMES:
+                        continue
                     
                     # Get ca pos
                     current_res_id = ResidueID.from_residue_chain(model, chain, ref_res)
@@ -4444,8 +4464,7 @@ class RMSD:
             res_1 = structure_1[residues_id][0]
             res_2 = structure_2[residues_id][0]
             
-            print(res_1)
-            print(res_2)
+
 
             res_1_ca = res_1["CA"][0]
             res_2_ca = res_2["CA"][0]
