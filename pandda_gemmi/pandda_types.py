@@ -24,8 +24,6 @@ import joblib
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 
-from dask.distributed import Client, LocalCluster
-
 
 from sklearn import neighbors
 
