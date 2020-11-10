@@ -3528,7 +3528,7 @@ class Clusterings:
                 centroid = (centroid_array[0],
                                       centroid_array[1],
                                       centroid_array[2], )                
-                event_mask_indicies  = (
+                event_mask_indicies  = tuple(
                     np.concatenate(
                         [current_cluster.event_mask_indicies[i] 
                          for current_cluster
@@ -3538,7 +3538,9 @@ class Clusterings:
                         )
                     for i
                     in [1, 2, 3]
+                    
                     )
+                
                 
                 new_cluster = Cluster(
                     cluster_points_tuple,
