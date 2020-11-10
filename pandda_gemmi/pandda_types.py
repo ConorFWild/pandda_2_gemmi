@@ -3537,8 +3537,7 @@ class Clusterings:
                         axis=None,
                         )
                     for i
-                    in [1, 2, 3]
-                    
+                    in [0, 1, 2]
                     )
                 
                 
