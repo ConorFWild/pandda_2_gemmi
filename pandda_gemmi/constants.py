@@ -31,8 +31,11 @@ PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
 PANDDA_INSPECT_EVENTS_PATH = "pandda_inspect_events.csv"
 PANDDA_EVENT_MAP_FILE = "{}-event_{}_1-BDC_{}_map.native.ccp4"
 PANDDA_EVENT_MODEL = "{}-pandda-model.pdb"
+
 PANDDA_PROTEIN_MASK_FILE = "protein_mask.ccp4"
 PANDDA_SYMMETRY_MASK_FILE = "symmetry_mask.ccp4"
+PANDDA_MEAN_MAP_FILE = "mean_{number}_{res}.ccp4"
+PANDDA_SIGMA_S_M_FILE = "sigma_s_m_{number}_{res}.ccp4"
 
 PANDDA_Z_MAP_FILE = "{dtag}-z_map.native.ccp4"
 PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"

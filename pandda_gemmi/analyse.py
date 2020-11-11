@@ -201,6 +201,8 @@ def main():
                             sigma_s_m,
                             grid,
                             )
+        
+        model.save_maps(pandda_fs_model.pandda_dir)
 
         # Calculate z maps
         print("Getting zmaps")

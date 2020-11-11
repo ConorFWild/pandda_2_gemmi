@@ -3048,6 +3048,45 @@ class Model:
 
         return term1 + np.sum(term2 + term3, axis=0)  # 1 + m
 
+    def save_maps(self, pandda_dir: Path, shell: Shell, p1: bool=True):
+        # Mean map
+        mean_array = self.mean
+        
+        grid = gemmi.FloatGrid(*mean_array.shape)
+        grid_array = np.array(grid, copy=False)
+        mean_array_typed = mean_array.astype(grid_array.dtype)
+        
+        grid_array[:,:,:] = mean_array_typed[:,:,:]
+        
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = grid
+        if p1:
+            ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        else:
+            ccp4.grid.symmetrize_max()
+        ccp4.update_ccp4_header(0, True)
+        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_MEAN_MAP_FILE.format(shell.number, shell.res_min)))
+        
+        # sigma_s_m map
+        sigma_s_m_array = self.sigma_s_m
+        
+        grid = gemmi.FloatGrid(*sigma_s_m_array.shape)
+        grid_array = np.array(grid, copy=False)
+        sigma_s_m_array_typed = sigma_s_m_array.astype(grid_array.dtype)
+        
+        grid_array[:,:,:] = sigma_s_m_array_typed[:,:,:]
+        
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = grid
+        if p1:
+            ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        else:
+            ccp4.grid.symmetrize_max()
+        ccp4.update_ccp4_header(0, True)
+        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(number=shell.number, 
+                                                                          res=shell.res_min.resolution,
+                                                                          )))
+        
 
 @dataclasses.dataclass()
 class Zmap:
