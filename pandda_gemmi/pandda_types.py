@@ -3589,7 +3589,11 @@ class BDC:
     def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
+
         cluster_indexes = cluster.event_mask_indicies
+        print(f"\t\t\t Cluster indicies of length: {len(cluster_indexes)}")
+        print(f"\t\t\t Element length: {(cluster_indexes[0].shape, cluster_indexes[1].shape, cluster_indexes[2].shape,)}")
+
 
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.int8)
         protein_mask_indicies = np.nonzero(protein_mask)
@@ -3787,11 +3791,13 @@ class Events:
     def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float):
         events: typing.Dict[EventID, Event] = {}
 
+        print(f"\tGetting sites...")
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
         for dtag in clusterings:
             clustering = clusterings[dtag]
             for event_idx in clustering:
+                print(f"\t\tGetting bdc...")
                 event_idx = EventIDX(event_idx)
                 event_id = EventID(dtag, event_idx)
 

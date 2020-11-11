@@ -252,6 +252,7 @@ def main():
 
         # Calculate the shell events
         print("getting events")
+        print(f"\tGot {len(clusterings_merged.clusters)} clusters")
         events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732)
         pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
         print(pandda_log.shells_log[shell.number].events)
