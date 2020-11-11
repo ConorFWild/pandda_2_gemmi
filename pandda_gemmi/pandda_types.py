@@ -3048,18 +3048,19 @@ class Model:
 
         return term1 + np.sum(term2 + term3, axis=0)  # 1 + m
 
-    def save_maps(self, pandda_dir: Path, shell: Shell, p1: bool=True):
+    def save_maps(self, pandda_dir: Path, shell: Shell, grid: Grid, p1: bool=True):
         # Mean map
         mean_array = self.mean
         
-        grid = gemmi.FloatGrid(*mean_array.shape)
-        grid_array = np.array(grid, copy=False)
-        mean_array_typed = mean_array.astype(grid_array.dtype)
-        
-        grid_array[:,:,:] = mean_array_typed[:,:,:]
+        mean_grid = gemmi.FloatGrid(*mean_array.shape)
+        mean_grid_array = np.array(grid, copy=False)
+        mean_array_typed = mean_array.astype(mean_grid_array.dtype)
+        mean_grid_array[:,:,:] = mean_array_typed[:,:,:]
+        mean_grid.spacegroup = grid.grid.spacegroup
+        mean_grid.set_unit_cell(grid.grid.unit_cell)
         
         ccp4 = gemmi.Ccp4Map()
-        ccp4.grid = grid
+        ccp4.grid = mean_grid
         if p1:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
@@ -3071,15 +3072,17 @@ class Model:
         
         # sigma_s_m map
         sigma_s_m_array = self.sigma_s_m
+        sigma_s_m_grid = gemmi.FloatGrid(*sigma_s_m_array.shape)
+        sigma_s_m_grid_array = np.array(sigma_s_m_grid, copy=False)
+        sigma_s_m_array_typed = sigma_s_m_array.astype(sigma_s_m_grid_array.dtype)
+        sigma_s_m_grid_array[:,:,:] = sigma_s_m_array_typed[:,:,:]
+        sigma_s_m_grid.spacegroup = grid.grid.spacegroup
+        sigma_s_m_grid.set_unit_cell(grid.grid.unit_cell)
         
-        grid = gemmi.FloatGrid(*sigma_s_m_array.shape)
-        grid_array = np.array(grid, copy=False)
-        sigma_s_m_array_typed = sigma_s_m_array.astype(grid_array.dtype)
         
-        grid_array[:,:,:] = sigma_s_m_array_typed[:,:,:]
         
         ccp4 = gemmi.Ccp4Map()
-        ccp4.grid = grid
+        ccp4.grid = sigma_s_m_grid
         if p1:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
