@@ -3064,7 +3064,7 @@ class Model:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
             ccp4.grid.symmetrize_max()
-        ccp4.update_ccp4_header(0, True)
+        ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(pandda_dir / PANDDA_MEAN_MAP_FILE.format(number=shell.number, 
                                                                          res=shell.res_min,
                                                                          )))
@@ -3084,7 +3084,7 @@ class Model:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
             ccp4.grid.symmetrize_max()
-        ccp4.update_ccp4_header(0, True)
+        ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(number=shell.number, 
                                                                           res=shell.res_min.resolution,
                                                                           )))
