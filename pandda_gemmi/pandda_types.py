@@ -3593,6 +3593,7 @@ class BDC:
         cluster_indexes = cluster.event_mask_indicies
         print(f"\t\t\t Cluster indicies of length: {len(cluster_indexes)}")
         print(f"\t\t\t Element length: {(cluster_indexes[0].shape, cluster_indexes[1].shape, cluster_indexes[2].shape,)}")
+        
 
 
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.int8)
