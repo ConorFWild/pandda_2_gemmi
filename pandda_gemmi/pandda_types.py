@@ -3789,34 +3789,69 @@ class Events:
     sites: Sites
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float):
+    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float, mapper: Any=None):
         events: typing.Dict[EventID, Event] = {}
 
         print(f"\tGetting sites...")
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
-        for dtag in clusterings:
-            clustering = clusterings[dtag]
-            for event_idx in clustering:
-                print(f"\t\tGetting bdc...")
-                event_idx = EventIDX(event_idx)
-                event_id = EventID(dtag, event_idx)
+        if mapper:
+            jobs = {}
+            for dtag in clusterings:
+                clustering = clusterings[dtag]
+                for event_idx in clustering:
+                    event_idx = EventIDX(event_idx)
+                    event_id = EventID(dtag, event_idx)
+                    
+                    cluster = clustering[event_idx.event_idx]
+                    xmap = xmaps[dtag]
+                    
+                    site: SiteID = sites.event_to_site[event_id]
 
-                cluster = clustering[event_idx.event_idx]
-                xmap = xmaps[dtag]
-                bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
 
-                site: SiteID = sites.event_to_site[event_id]
+                    jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid)
 
-                event = Event.from_cluster(event_id,
-                                           cluster,
-                                           site,
-                                           bdc,
-                                           )
+            
+            results = mapper(job for job in jobs.values())
+                   
+            events = {event_id: event for event_id, event in zip(jobs.keys(), results)}
+            
+        else:
+            for dtag in clusterings:
+                clustering = clusterings[dtag]
+                for event_idx in clustering:
+                    print(f"\t\tGetting bdc...")
+                    event_idx = EventIDX(event_idx)
+                    event_id = EventID(dtag, event_idx)
 
-                events[event_id] = event
+                    cluster = clustering[event_idx.event_idx]
+                    xmap = xmaps[dtag]
+                    bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
+
+                    site: SiteID = sites.event_to_site[event_id]
+
+                    event = Event.from_cluster(event_id,
+                                            cluster,
+                                            site,
+                                            bdc,
+                                            )
+
+                    events[event_id] = event
 
         return Events(events, sites)
+    
+    @staticmethod
+    def get_event(xmap, cluster, dtag, site, event_id, model, grid):
+        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid,)
+
+        event = Event.from_cluster(
+            event_id,
+            cluster,
+            site,
+            bdc,
+            )
+        
+        return event
 
     @staticmethod
     def from_all_events(event_dict: typing.Dict[EventID, Event], grid: Grid, cutoff: float):
