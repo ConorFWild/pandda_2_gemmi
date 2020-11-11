@@ -3066,7 +3066,7 @@ class Model:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(pandda_dir / PANDDA_MEAN_MAP_FILE.format(number=shell.number, 
-                                                                         res=shell.res_min,
+                                                                         res=shell.res_min.resolution,
                                                                          )))
         
         # sigma_s_m map
