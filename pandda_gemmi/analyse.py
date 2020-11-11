@@ -202,7 +202,7 @@ def main():
                             grid,
                             )
         
-        model.save_maps(pandda_fs_model.pandda_dir)
+        model.save_maps(pandda_fs_model.pandda_dir, shell)
 
         # Calculate z maps
         print("Getting zmaps")
