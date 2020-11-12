@@ -3074,8 +3074,10 @@ class Model:
         # Mean map
         mean_array = self.mean
         
+        print(mean_array.shape)
+        
         mean_grid = gemmi.FloatGrid(*mean_array.shape)
-        mean_grid_array = np.array(grid, copy=False)
+        mean_grid_array = np.array(mean_grid, copy=False)
         mean_array_typed = mean_array.astype(mean_grid_array.dtype)
         mean_grid_array[:,:,:] = mean_array_typed[:,:,:]
         mean_grid.spacegroup = grid.grid.spacegroup
