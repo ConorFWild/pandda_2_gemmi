@@ -2767,10 +2767,10 @@ class XmapArray:
                    ):
 
         protein_mask = grid.partitioning.protein_mask
-        protein_mask_array = np.array(mask, copy=False, dtype=np.int8)
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
         
         symmetry_contact_mask = grid.partitioning.symmetry_mask
-        symmetry_contact_mask_array = np.array(mask, copy=False, dtype=np.int8)
+        symmetry_contact_mask_array = np.array(symmetry_contact_mask, copy=False, dtype=np.int8)
         
         symmetry_contact_mask_array_1d = symmetry_contact_mask_array[protein_mask_array == 1]
 
