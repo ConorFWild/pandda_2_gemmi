@@ -1581,9 +1581,9 @@ class Partitioning:
         combined_indicies[symmetry_mask_indicies] = 1
         
         # Resample coords
-        coord_tuple = (coord_tuple_source[0][combined_indicies],
-                       coord_tuple_source[1][combined_indicies],
-                       coord_tuple_source[2][combined_indicies],
+        coord_tuple = (coord_tuple_source[0][combined_indicies == 1],
+                       coord_tuple_source[1][combined_indicies == 1],
+                       coord_tuple_source[2][combined_indicies == 1],
         )
         
         # 
