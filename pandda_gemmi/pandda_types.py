@@ -1571,9 +1571,13 @@ class Partitioning:
         
         # Mask by protein
         protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
-        
+        print(f"protein_mask_indicies shape : {protein_mask_indicies.shape}")
+        print(np.sum(protein_mask_indicies))
+
         # Mask by symmetry
         symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
+        print(f"symmetry_mask_indicies shape : {symmetry_mask_indicies.shape}")
+        print(np.sum(symmetry_mask_indicies))
   
         # Combine masks
         combined_indicies = np.zeros(symmetry_mask_indicies.shape)
