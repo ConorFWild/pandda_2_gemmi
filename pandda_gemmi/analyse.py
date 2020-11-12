@@ -186,6 +186,7 @@ def main():
                                                     mean_array,
                                                 1.5,
                                                 )
+        print(sigma_is)
         pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i 
                                                         for dtag, sigma_i 
                                                         in sigma_is.items()}
@@ -195,12 +196,26 @@ def main():
                                                     mean_array,
                                                     sigma_is,
                                                     )
+        print(np.min(sigma_s_m))
 
-        model: Model = Model.from_mean_is_sms(mean_array,
+        model: Model = Model.from_mean_is_sms(
+            mean_array,
                             sigma_is,
                             sigma_s_m,
                             grid,
                             )
+        
+        def summarise_array(array):
+            print(array.shape)
+            print(np.min(array))
+            print(np.max(array))
+            print(np.sum(array == 0))
+            print(np.sum(array != 0))
+            
+        
+        summarise_array(mean_array)
+        summarise_array(model.mean)
+        summarise_array(sigma_s_m)
         
         model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
 

@@ -2766,15 +2766,23 @@ class XmapArray:
                    grid: Grid,
                    ):
 
-        mask = grid.partitioning.protein_mask
-        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        protein_mask = grid.partitioning.protein_mask
+        protein_mask_array = np.array(mask, copy=False, dtype=np.int8)
+        
+        symmetry_contact_mask = grid.partitioning.symmetry_mask
+        symmetry_contact_mask_array = np.array(mask, copy=False, dtype=np.int8)
+        
+        symmetry_contact_mask_array_1d = symmetry_contact_mask_array[protein_mask_array == 1]
 
         arrays = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
 
-            arrays[dtag] = xmap_array[np.nonzero(mask_array)]
+            array = xmap_array[protein_mask_array == 1]
+            array[symmetry_contact_mask_array_1d] = 0
+
+            arrays[dtag] = array
 
         dtag_list = list(arrays.keys())
         xmap_array = np.stack(list(arrays.values()), axis=0)
@@ -3052,6 +3060,9 @@ class Model:
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
+        
+        if xmap_array.shape != self.mean.shape:
+            raise Exception("Wrong shape!")
 
         residuals = (xmap_array - self.mean)
         denominator = (np.sqrt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
