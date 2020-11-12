@@ -1582,7 +1582,7 @@ class Partitioning:
         # Combine masks
         combined_indicies = np.zeros(symmetry_mask_indicies.shape)
         combined_indicies[protein_mask_indicies == 1] = 1
-        combined_indicies[symmetry_mask_indicies == 1] = 1
+        combined_indicies[symmetry_mask_indicies == 1] = 0
         
         print(f"Combined indicies shape : {combined_indicies.shape}")
         print(np.sum(combined_indicies))
