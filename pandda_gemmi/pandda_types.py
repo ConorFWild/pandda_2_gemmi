@@ -1540,6 +1540,7 @@ class Partitioning:
         mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
+        symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
 
 
         # Get the positions of the protein masked grid points
@@ -1572,7 +1573,7 @@ class Partitioning:
         protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
         
         # Mask by symmetry
-        symmetry_mask_indicies = symmetry_mask[coord_array_unit_cell_in_mask]
+        symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
   
         # Combine masks
         combined_indicies = np.zeros(symmetry_mask_indicies.shape)
