@@ -1271,6 +1271,7 @@ class Partitioning:
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
     protein_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
+    total_mask: np.ndarray
 
     def __getitem__(self, item: ResidueID):
         return self.partitioning[item]
@@ -1634,9 +1635,14 @@ class Partitioning:
             )
             partitions[res_id][coord] = position
 
+        total_mask = np.zeros(mask_array.shape, dtype=np.int8)
+        total_mask[
+            coord_array_unit_cell_in_mask[0][combined_indicies == 1],
+            coord_array_unit_cell_in_mask[1][combined_indicies == 1],
+            coord_array_unit_cell_in_mask[2][combined_indicies == 1],
+                   ] = 1
 
-
-        return Partitioning(partitions, mask, symmetry_mask)
+        return Partitioning(partitions, mask, symmetry_mask, total_mask)
 
     def coord_tuple(self):
         
@@ -1784,6 +1790,7 @@ class Partitioning:
         return (partitioning_python,
                 protein_mask_python,
                 symmetry_mask_python,
+                self.total_mask
                 )
         
     def __setstate__(self, data):
@@ -1791,10 +1798,11 @@ class Partitioning:
         protein_mask_gemmi = data[1].to_gemmi()
         symmetry_mask_gemmi = data[2].to_gemmi()
         
+        
         self.partitioning = partitioning_gemmi
         self.proteing_mask = protein_mask_gemmi
         self.symmetry_mask = symmetry_mask_gemmi
-
+        self.total_mask = data[3]
 
 @dataclasses.dataclass()
 class Grid:
@@ -1861,6 +1869,7 @@ class Grid:
         self.partitioning = Partitioning(data[1][0],
                                          data[1][1].to_gemmi(),
                                          data[1][2].to_gemmi(),
+                                         data[1][3],
                                          )
         self.grid = data[0].to_gemmi()
 
@@ -2772,15 +2781,13 @@ class XmapArray:
         symmetry_contact_mask = grid.partitioning.symmetry_mask
         symmetry_contact_mask_array = np.array(symmetry_contact_mask, copy=False, dtype=np.int8)
         
-        symmetry_contact_mask_array_1d = symmetry_contact_mask_array[protein_mask_array == 1]
 
         arrays = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
             xmap_array = xmap.to_array()
 
-            array = xmap_array[protein_mask_array == 1]
-            array[symmetry_contact_mask_array_1d] = 0
+            array = xmap_array[grid.partitioning.total_mask == 1]
 
             arrays[dtag] = array
 
@@ -2853,14 +2860,16 @@ class Model:
                          sigma_s_m_flat,
                          grid: Grid, ):
 
-        mask = grid.partitioning.protein_mask
-        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        # mask = grid.partitioning.protein_mask
+        # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
-        mean = np.zeros(mask_array.shape, dtype=np.float32)
-        mean[np.nonzero(mask_array)] = mean_flat
+        total_mask = grid.partitioning.total_mask
 
-        sigma_s_m = np.zeros(mask_array.shape, dtype=np.float32)
-        sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
+        mean = np.zeros(total_mask.shape, dtype=np.float32)
+        mean[total_mask == 1] = mean_flat
+
+        sigma_s_m = np.zeros(total_mask.shape, dtype=np.float32)
+        sigma_s_m[total_mask == 1] = sigma_s_m_flat
 
         return Model(mean,
                      sigma_is,
@@ -3058,7 +3067,7 @@ class Model:
         term2 = np.ones(est_sigma.shape, dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
-    def evaluate(self, xmap: Xmap, dtag: Dtag):
+    def evaluate(self, xmap: Xmap, dtag: Dtag, grid: Grid):
         xmap_array = np.copy(xmap.to_array())
         
         if xmap_array.shape != self.mean.shape:
@@ -3066,6 +3075,8 @@ class Model:
 
         residuals = (xmap_array - self.mean)
         denominator = (np.sqrt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
+
+        
 
         return residuals / denominator
 

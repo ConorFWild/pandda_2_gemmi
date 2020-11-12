@@ -170,7 +170,8 @@ def main():
 
         # Get arrays for model
         print("Getting xmap arrays...")        
-        masked_xmap_array: XmapArray = XmapArray.from_xmaps(xmaps,
+        masked_xmap_array: XmapArray = XmapArray.from_xmaps(
+            xmaps,
                                     grid,
                                     )
         masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
@@ -206,16 +207,20 @@ def main():
                             )
         
         def summarise_array(array):
+            print("### Statistics")
             print(array.shape)
             print(np.min(array))
             print(np.max(array))
             print(np.sum(array == 0))
             print(np.sum(array != 0))
-            
         
+        
+        summarise_array(masked_train_xmap_array.xmap_array)
         summarise_array(mean_array)
         summarise_array(model.mean)
         summarise_array(sigma_s_m)
+        summarise_array(grid.partitioning.total_mask)
+
         
         model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
 
