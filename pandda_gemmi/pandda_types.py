@@ -1452,17 +1452,17 @@ class Partitioning:
             
             
             # # Get the corresponding unit cell points
-            coord_mask_grid_tuple = (np.mod(coord_tuple[0], grid.nu),
+            coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
                                      np.mod(coord_tuple[1], grid.nv),
                                      np.mod(coord_tuple[2], grid.nw),
                                      )
             
             # Get the corresponging protein_grid points 
-            # coord_mask_grid_tuple = (
-            #     coord_tuple[0]+grid_min_coord[0],
-            #     coord_tuple[1]+grid_min_coord[1],
-            #     coord_tuple[2]+grid_min_coord[2],
-            #     )
+            coord_mask_grid_tuple = (
+                coord_tuple[0]-grid_min_coord[0],
+                coord_tuple[1]-grid_min_coord[1],
+                coord_tuple[2]-grid_min_coord[2],
+                )
             
             # Check which of them are in the mask
             mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
@@ -1476,9 +1476,9 @@ class Partitioning:
                 coord_tuple[2][in_mask_array],
             ) 
             coord_array_unit_cell_in_mask = (
-                coord_mask_grid_tuple[0][in_mask_array],
-                coord_mask_grid_tuple[1][in_mask_array],
-                coord_mask_grid_tuple[2][in_mask_array],
+                coord_unit_cell_tuple[0][in_mask_array],
+                coord_unit_cell_tuple[1][in_mask_array],
+                coord_unit_cell_tuple[2][in_mask_array],
             )
             
             return coord_array_in_mask, coord_array_unit_cell_in_mask
