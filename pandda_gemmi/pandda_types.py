@@ -1580,6 +1580,9 @@ class Partitioning:
         combined_indicies[protein_mask_indicies] = 1
         combined_indicies[symmetry_mask_indicies] = 1
         
+        print(f"Combined indicies shape : {combined_indicies.shape}")
+        print(np.sum(combined_indicies))
+        
         # Resample coords
         coord_tuple = (coord_tuple_source[0][combined_indicies == 1],
                        coord_tuple_source[1][combined_indicies == 1],
