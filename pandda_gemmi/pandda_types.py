@@ -1537,7 +1537,7 @@ class Partitioning:
                                    radius=mask_radius,
                                    value=1,
                                    )
-        mask_array = np.array(mask, copy=False)
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
 
@@ -1559,13 +1559,33 @@ class Partitioning:
         
         
 
-        coord_tuple, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
+        coord_tuple_source, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
             mask,
             ca_position_array,
             structure,
             mask_radius
             )
         
+
+        
+        # Mask by protein
+        protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
+        
+        # Mask by symmetry
+        symmetry_mask_indicies = symmetry_mask[coord_array_unit_cell_in_mask]
+  
+        # Combine masks
+        combined_indicies = np.zeros(symmetry_mask_indicies.shape)
+        combined_indicies[protein_mask_indicies] = 1
+        combined_indicies[symmetry_mask_indicies] = 1
+        
+        # Resample coords
+        coord_tuple = (coord_tuple_source[0][combined_indicies],
+                       coord_tuple_source[1][combined_indicies],
+                       coord_tuple_source[2][combined_indicies],
+        )
+        
+        # 
         coord_array = np.concatenate(
             [
                 coord_tuple[0].reshape((-1, 1)),
@@ -1575,13 +1595,15 @@ class Partitioning:
             axis=1,
             )
         
-        
-        
+        # Get positions
         position_list = Partitioning.get_position_list(mask, coord_array)
         position_array = np.array(position_list)
 
         distances, indexes = kdtree.query(position_array)
+        
 
+        
+        # Get the partitions
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
             coord = (int(coord_as_array[0]), 
