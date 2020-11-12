@@ -160,7 +160,7 @@ def main():
             config.params.diffraction_data.structure_factors, 
             sample_rate=config.params.diffraction_data.sample_rate,
             mapper=mapper,
-            )
+            ) # n x (grid size) with total_mask > 0
         finish = time.time()
         print(f"Mapped in {finish-start}")
 
@@ -173,20 +173,20 @@ def main():
         masked_xmap_array: XmapArray = XmapArray.from_xmaps(
             xmaps,
                                     grid,
-                                    )
+                                    ) # Size of n x (total mask  > 0)
         masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
         masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
 
         # Determine the parameters of the model to find outlying electron density
         print("Fitting model")
         mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
-                                        )
+                                        ) # Size of grid.partitioning.total_mask > 0
 
         print("fitting sigma i")
         sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_xmap_array,
                                                     mean_array,
                                                 1.5,
-                                                )
+                                                ) # size of n
         print(sigma_is)
         pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i 
                                                         for dtag, sigma_i 
@@ -196,7 +196,7 @@ def main():
         sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                     mean_array,
                                                     sigma_is,
-                                                    )
+                                                    ) # size of total_mask > 0
         print(np.min(sigma_s_m))
 
         model: Model = Model.from_mean_is_sms(

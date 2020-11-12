@@ -1832,6 +1832,9 @@ class Grid:
         grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
         grid.set_unit_cell(unit_cell)
         grid.spacegroup = self.grid.spacegroup
+        grid_array = np.array(grid, copy=False)
+        grid_array[:,:,:] = 0
+        
         return grid
 
     @staticmethod
@@ -3067,7 +3070,7 @@ class Model:
         term2 = np.ones(est_sigma.shape, dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
         return np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
-    def evaluate(self, xmap: Xmap, dtag: Dtag, grid: Grid):
+    def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
         
         if xmap_array.shape != self.mean.shape:
