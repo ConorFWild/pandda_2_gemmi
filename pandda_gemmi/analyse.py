@@ -232,15 +232,15 @@ def main():
         
         # Save the z maps
         print("saving zmaps")
-        for dtag in zmaps:
-            zmap = zmaps[dtag]
-            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-        # Save the x maps
-        print("Saving xmaps")
-        for dtag in xmaps:
-            xmap = xmaps[dtag]
-            path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-            xmap.save(path)
+        # for dtag in zmaps:
+        #     zmap = zmaps[dtag]
+        #     pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+        # # Save the x maps
+        # print("Saving xmaps")
+        # for dtag in xmaps:
+        #     xmap = xmaps[dtag]
+        #     path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+        #     xmap.save(path)
 
         # Get the clustered electron desnity outliers
         print("clusting")
@@ -295,6 +295,11 @@ def main():
                             )
         
         for event_id in events:
+            # Save zmaps
+            zmap = zmaps[event_id.dtag]
+            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
+            
+            # Add events
             all_events[event_id] = events[event_id]
             
 
