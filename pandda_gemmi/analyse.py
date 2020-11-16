@@ -206,20 +206,20 @@ def main():
                             grid,
                             )
         
-        def summarise_array(array):
-            print("### Statistics")
-            print(array.shape)
-            print(np.min(array))
-            print(np.max(array))
-            print(np.sum(array == 0))
-            print(np.sum(array != 0))
+        # def summarise_array(array):
+        #     print("### Statistics")
+        #     print(array.shape)
+        #     print(np.min(array))
+        #     print(np.max(array))
+        #     print(np.sum(array == 0))
+        #     print(np.sum(array != 0))
         
         
-        summarise_array(masked_train_xmap_array.xmap_array)
-        summarise_array(mean_array)
-        summarise_array(model.mean)
-        summarise_array(sigma_s_m)
-        summarise_array(grid.partitioning.total_mask)
+        # summarise_array(masked_train_xmap_array.xmap_array)
+        # summarise_array(mean_array)
+        # summarise_array(model.mean)
+        # summarise_array(sigma_s_m)
+        # summarise_array(grid.partitioning.total_mask)
 
         
         model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
