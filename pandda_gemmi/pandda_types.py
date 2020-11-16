@@ -3164,7 +3164,8 @@ class Zmap:
     def grid_from_template(xmap: Xmap, zmap_array: np.array):
         spacing = [xmap.xmap.nu, xmap.xmap.nv, xmap.xmap.nw, ]
         new_grid = gemmi.FloatGrid(*spacing)
-        new_grid.spacegroup = xmap.xmap.spacegroup
+        # new_grid.spacegroup = xmap.xmap.spacegroup
+        new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         new_grid.unit_cell = xmap.xmap.unit_cell
 
         new_grid_array = np.array(new_grid, copy=False)

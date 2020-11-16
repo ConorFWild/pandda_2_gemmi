@@ -299,6 +299,10 @@ def main():
             zmap = zmaps[event_id.dtag]
             pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
             
+            xmap = xmaps[event_id.dtag]
+            path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
+            xmap.save(path)
+            
             # Add events
             all_events[event_id] = events[event_id]
             
