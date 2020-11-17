@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from pandda_gemmi.constants import PANDDA_LOG_FILE
 from typing import Dict
@@ -18,7 +20,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                     Grid, Alignments, Shells, Xmaps, 
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
                                     Events, SiteTable, EventTable,
-                                    DaskMapper, JoblibMapper
+                                    DaskMapper, JoblibMapper, Event
                                     )
 import joblib
 from joblib.externals.loky import set_loky_pickler
@@ -72,14 +74,14 @@ def summarise_structure(structure: gemmi.Structure):
             )
     )
     
-def summarise_event(event: Event):
-    print(
-    (
-        f"Event system: {event.system}\n"
-        f"Event dtag: {event.dtag}\n"
-        f"Event xyz: {event.x} {event.y} {event.z}\n"
-    )
-)
+# def summarise_event(event: Event):
+#     print(
+#     (
+#         f"Event system: {event.system}\n"
+#         f"Event dtag: {event.dtag}\n"
+#         f"Event xyz: {event.x} {event.y} {event.z}\n"
+#     )
+# )
 
 
 
