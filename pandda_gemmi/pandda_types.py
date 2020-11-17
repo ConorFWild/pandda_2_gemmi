@@ -1833,7 +1833,8 @@ class Grid:
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
         grid = gemmi.FloatGrid(*spacing)
-        grid.unit_cell = unit_cell
+        grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        grid.set_unit_cell(unit_cell)
         grid.spacegroup = reference.dataset.reflections.spacegroup()
 
         partitioning = Partitioning.from_reference(reference,
@@ -2473,7 +2474,7 @@ class Xmap:
         spacing = [self.xmap.nu, self.xmap.nv, self.xmap.nw]
         unit_cell = self.xmap.unit_cell
         grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
-        grid.unit_cell = unit_cell
+        grid.set_unit_cell(unit_cell)
         grid.spacegroup = self.xmap.spacegroup
         return grid
     
@@ -3184,7 +3185,7 @@ class Zmap:
         new_grid = gemmi.FloatGrid(*spacing)
         # new_grid.spacegroup = xmap.xmap.spacegroup
         new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        new_grid.unit_cell = xmap.xmap.unit_cell
+        new_grid.set_unit_cell(xmap.xmap.unit_cell)
 
         new_grid_array = np.array(new_grid, copy=False)
         new_grid_array[:, :, :] = zmap_array[:, :, :]
