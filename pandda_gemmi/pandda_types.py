@@ -1414,6 +1414,7 @@ class Partitioning:
                 range(grid_min_coord[1], grid_max_coord[1]),
                 range(grid_min_coord[2], grid_max_coord[2]),
             )
+            
                                         
             coord_array = np.array([[x, y, z] for x, y, z in coord_product])
             
@@ -1421,6 +1422,11 @@ class Partitioning:
                            coord_array[:, 1],
                            coord_array[:, 2],
                            )
+            print((
+                f"coord_tuple" 
+                f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
+                f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
+            ))
             
             # Get the corresponding protein grid
             protein_grid = gemmi.Int8Grid(
@@ -1457,6 +1463,11 @@ class Partitioning:
                                      np.mod(coord_tuple[1], grid.nv),
                                      np.mod(coord_tuple[2], grid.nw),
                                      )
+            print((
+                f"coord_unit_cell_tuple" 
+                f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
+                f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
+            ))
             
             # Get the corresponging protein_grid points 
             coord_mask_grid_tuple = (
@@ -1464,6 +1475,11 @@ class Partitioning:
                 coord_tuple[1]-grid_min_coord[1],
                 coord_tuple[2]-grid_min_coord[2],
                 )
+            print((
+                f"coord_mask_grid_tuple" 
+                f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
+                f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
+            ))
             
             # Check which of them are in the mask
             mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
@@ -1476,11 +1492,22 @@ class Partitioning:
                 coord_tuple[1][in_mask_array],
                 coord_tuple[2][in_mask_array],
             ) 
+            print((
+                f"coord_mask_grid_tuple" 
+                f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
+                f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
+            ))
+            
             coord_array_unit_cell_in_mask = (
                 coord_unit_cell_tuple[0][in_mask_array],
                 coord_unit_cell_tuple[1][in_mask_array],
                 coord_unit_cell_tuple[2][in_mask_array],
             )
+            print((
+                f"coord_mask_grid_tuple" 
+                f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
+                f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
+            ))
             
             return coord_array_in_mask, coord_array_unit_cell_in_mask
         
