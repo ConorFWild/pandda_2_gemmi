@@ -1790,7 +1790,7 @@ class Partitioning:
             )
         total_mask_grid.spacegroup = template_grid.spacegroup
         total_mask_grid.set_unit_cell(template_grid.unit_cell)
-        total_grid_array = np.array(self.total_mask, copy=False)
+        total_grid_array = np.array(total_mask_grid, copy=False, dtype=np.int8)
         total_grid_array[:,:,:] = self.total_mask[:,:,:]
         
         
