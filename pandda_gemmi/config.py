@@ -223,6 +223,7 @@ class Config:
     input: Input
     output: Output
     params: Params
+    debug: int
 
     @staticmethod
     def get_parser():
@@ -487,6 +488,14 @@ class Config:
                             help="The directory for output and intermediate files to be saved to",
                             )
 
+        # Debug
+
+        parser.add_argument("--debug",
+                            default=1,
+                            type=int,
+                            help="The directory for output and intermediate files to be saved to",
+                            )
+
         return parser
 
     @staticmethod
@@ -498,10 +507,12 @@ class Config:
         input: Input = Input.from_args(args)
         output: Output = Output.from_args(args)
         params: Params = Params.from_args(args)
+        debug: int = int(args.debug)
 
         return Config(input=input,
                       output=output,
                       params=params,
+                      debug=debug,
                       )
 
     @staticmethod
@@ -513,8 +524,11 @@ class Config:
         input: Input = Input.from_args(args)
         output: Output = Output.from_args(args)
         params: Params = Params.from_args(args)
+        debug: int = int(args.debug)
+
 
         return Config(input=input,
                       output=output,
                       params=params,
+                      debug=debug,
                       )

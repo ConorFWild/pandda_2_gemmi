@@ -1781,6 +1781,16 @@ class Partitioning:
         ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_SYMMETRY_MASK_FILE))
         
+        # Total mask
+        ccp4 = gemmi.Ccp4Mask()
+        ccp4.grid = self.total_mask
+        if p1:
+            ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        else:
+            ccp4.grid.symmetrize_max()
+        ccp4.update_ccp4_header(0, True)
+        ccp4.write_ccp4_map(str(dir / PANDDA_TOTAL_MASK_FILE))
+        
     
     def __getstate__(self):
         # partitioning_python = PartitoningPython.from_gemmi(self.partitioning)

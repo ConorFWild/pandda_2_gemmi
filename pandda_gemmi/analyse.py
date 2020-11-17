@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-
+import gemmi
 
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
@@ -23,6 +23,64 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
 import joblib
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
+
+
+# ########
+# debug
+# #########
+def summarise_grid(grid: gemmi.FloatGrid):
+    grid_array = np.array(grid, copy=False)
+    print((
+        f"Grid size: {grid.nu} {grid.nv} {grid.nw} \n"
+        f"Grid spacegroup: {grid.spacegroup} \n"
+        f"Grid unit cell: {grid.unit_cell} \n"
+        f"Grid max: {np.max(grid_array)} \n"
+        f"Grid min: {np.min(grid_array)} \n"
+        f"Grid mean: {np.mean(grid_array)} \n"
+    ))
+    
+def summarise_mtz(mtz: gemmi.Mtz):
+    mtz_array = np.array(mtz, copy=False)
+    print(
+        (
+            f"Mtz shape: {mtz_array.shape} \n"
+            f"Mtz spacegroup: {mtz.spacegroup} \n"
+        )
+    )
+    
+def summarise_structure(structure: gemmi.Structure):
+    num_models: int = 0
+    num_chains: int = 0
+    num_residues: int = 0 
+    num_atoms: int = 0
+    
+    for model in structure:
+        num_models += 1
+        for chain in model:
+            num_chains += 1
+            for residue in chain:
+                num_residues += 1
+                for atom in residue:
+                    num_atoms += 1
+    
+    print(
+        (
+            f"Num models: {num_models}"
+            f"Num chains: {num_chains}"
+            f"Num residues: {num_residues}"
+            f"Num atoms: {num_atoms}"
+            )
+    )
+    
+def summarise_event(event: Event):
+    print(
+    (
+        f"Event system: {event.system}\n"
+        f"Event dtag: {event.dtag}\n"
+        f"Event xyz: {event.x} {event.y} {event.z}\n"
+    )
+)
+
 
 
 def main():
@@ -116,11 +174,20 @@ def main():
                                 )
     grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
     pandda_log.grid_log = logs.GridLog.from_grid(grid)
+    if config.debug > 1:
+        print("Summarising protein mask")
+        summarise_grid(grid.partitioning.protein_mask)
+        print("Summarising symmetry mask")
+        summarise_grid(grid.partitioning.symmetry_mask)
+        print("Summarising total mask")
+        summarise_grid(grid.partitioning.total_mask)
+
 
     print("Getting alignments")
-    alignments: Alignments = Alignments.from_datasets(reference,
-                                                    datasets,
-                                                    )
+    alignments: Alignments = Alignments.from_datasets(
+        reference,
+        datasets,
+        )
     pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
             
     ###################################################################
@@ -163,7 +230,14 @@ def main():
             ) # n x (grid size) with total_mask > 0
         finish = time.time()
         print(f"Mapped in {finish-start}")
-
+        
+        if config.debug > 1:
+            print("Saving xmaps")
+            for dtag in xmaps:
+                xmap = xmaps[dtag]
+                path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+                xmap.save(path)
+        
         # Seperate out test and train maps
         shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
         shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
@@ -205,21 +279,6 @@ def main():
                             sigma_s_m,
                             grid,
                             )
-        
-        # def summarise_array(array):
-        #     print("### Statistics")
-        #     print(array.shape)
-        #     print(np.min(array))
-        #     print(np.max(array))
-        #     print(np.sum(array == 0))
-        #     print(np.sum(array != 0))
-        
-        
-        # summarise_array(masked_train_xmap_array.xmap_array)
-        # summarise_array(mean_array)
-        # summarise_array(model.mean)
-        # summarise_array(sigma_s_m)
-        # summarise_array(grid.partitioning.total_mask)
 
         
         model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
@@ -229,18 +288,12 @@ def main():
         zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                     xmaps=shell_test_xmaps,
                                     )
-        
-        # Save the z maps
-        print("saving zmaps")
-        # for dtag in zmaps:
-        #     zmap = zmaps[dtag]
-        #     pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-        # # Save the x maps
-        # print("Saving xmaps")
-        # for dtag in xmaps:
-        #     xmap = xmaps[dtag]
-        #     path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-        #     xmap.save(path)
+        if config.debug > 1:
+            print("saving zmaps")
+            for dtag in zmaps:
+                zmap = zmaps[dtag]
+                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+
 
         # Get the clustered electron desnity outliers
         print("clusting")
