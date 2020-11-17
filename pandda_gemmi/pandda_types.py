@@ -1423,9 +1423,10 @@ class Partitioning:
                            coord_array[:, 2],
                            )
             print((
-                f"coord_tuple" 
+                f"coord_tuple - points in the refence grid\n" 
                 f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
                 f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
+                f"Length: {coord_tuple[0].shape}"
             ))
             
             # Get the corresponding protein grid
@@ -1437,8 +1438,8 @@ class Partitioning:
             protein_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
             protein_grid_unit_cell = gemmi.UnitCell(
                 grid.unit_cell.a * fractional_diff[0],
-                grid.unit_cell.b * fractional_diff[0],
-                grid.unit_cell.c * fractional_diff[0],
+                grid.unit_cell.b * fractional_diff[1],
+                grid.unit_cell.c * fractional_diff[2],
                 grid.unit_cell.alpha,
                 grid.unit_cell.beta,
                 grid.unit_cell.gamma,
@@ -1464,9 +1465,10 @@ class Partitioning:
                                      np.mod(coord_tuple[2], grid.nw),
                                      )
             print((
-                f"coord_unit_cell_tuple" 
+                f"coord_unit_cell_tuple - points in the reference grid normalised to the unit cell\n" 
                 f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
                 f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
+                f"Length: {coord_unit_cell_tuple[0].shape}"
             ))
             
             # Get the corresponging protein_grid points 
@@ -1476,9 +1478,10 @@ class Partitioning:
                 coord_tuple[2]-grid_min_coord[2],
                 )
             print((
-                f"coord_mask_grid_tuple" 
+                f"coord_mask_grid_tuple - points in the portein frame grid\n" 
                 f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
                 f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
+                f"Length: {coord_mask_grid_tuple[0].shape}"
             ))
             
             # Check which of them are in the mask
@@ -1493,7 +1496,7 @@ class Partitioning:
                 coord_tuple[2][in_mask_array],
             ) 
             print((
-                f"coord_mask_grid_tuple" 
+                f"coord_array_in_mask - points in the reference grid in the mask\n" 
                 f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
                 f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
             ))
@@ -1504,7 +1507,7 @@ class Partitioning:
                 coord_unit_cell_tuple[2][in_mask_array],
             )
             print((
-                f"coord_mask_grid_tuple" 
+                f"coord_array_unit_cell_in_mask - points in the reference grid nomralise to the unit cell in the mask\n" 
                 f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
                 f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
             ))
@@ -1594,8 +1597,6 @@ class Partitioning:
             structure,
             mask_radius
             )
-        
-
         
         # Mask by protein
         protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
