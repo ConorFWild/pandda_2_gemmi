@@ -1782,8 +1782,16 @@ class Partitioning:
         ccp4.write_ccp4_map(str(dir / PANDDA_SYMMETRY_MASK_FILE))
         
         # Total mask
+        template_grid = self.symmetry_mask
+        total_mask_grid = gemmi.Int8Grid(
+            template_grid.nu,
+            template_grid.nv,
+            template_grid.nw,
+            )
+        total_mask_grid.spacegroup = template_grid.spacegroup
+        total_mask_grid.set_unit_cell(template_grid.unit_cell)
         ccp4 = gemmi.Ccp4Mask()
-        ccp4.grid = self.total_mask
+        ccp4.grid = total_mask_grid
         if p1:
             ccp4.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         else:
