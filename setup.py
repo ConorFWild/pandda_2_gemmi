@@ -26,13 +26,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
-    install_requires=['numpy',
-                      'scipy',
-                      'psutil',
-                      'sklearn',
-                      'joblib',
-                      'scikit-learn',
-                      'setuptools'
-                      ],
+    python_requires='>=2.7',
+    install_requires=requirements(),
 )

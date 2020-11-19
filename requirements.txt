@@ -1,0 +1,7 @@
+setuptools~=50.3.2
+psutil~=5.7.3
+numpy~=1.19.4
+joblib~=0.17.0
+scipy~=1.5.4
+sklearn~=0.0
+scikit-learn~=0.23.2
