@@ -4799,7 +4799,7 @@ class JoblibMapper:
     
     @staticmethod
     def initialise():
-        mapper = joblib.Parallel(n_jobs=-2, 
+        mapper = joblib.Parallel(n_jobs=20, 
                                       verbose=15,
                                       backend="loky",
                                        max_nbytes=None,

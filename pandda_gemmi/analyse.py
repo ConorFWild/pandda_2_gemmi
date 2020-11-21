@@ -109,7 +109,6 @@ def main():
     pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)
     
     print("Getting multiprocessor")
-
     mapper = JoblibMapper.initialise()
     
     
