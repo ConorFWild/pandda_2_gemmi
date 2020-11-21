@@ -2400,9 +2400,10 @@ class Xmap:
     @staticmethod
     def from_reflections(reflections: Reflections):
         pass
+    
     @staticmethod
-    def from_file(path: Path) -> Xmap:
-        ccp4 = gemmi.read_ccp4_map(str(path))
+    def from_file(file):
+        ccp4 = gemmi.read_ccp4_map(str(file))
         ccp4.setup()
         return Xmap(ccp4.grid)
 
@@ -4774,29 +4775,6 @@ class MapperPython:
 
         return results
 
-@dataclasses.dataclass()
-class DaskMapper:
-    cluster: Any
-    mapper: Any
-    address: str
-    
-    @staticmethod
-    def initialise():
-        cluster = LocalCluster()
-        cluster.scale(10)
-        client = Client()
-        address = client.scheduler_info()['services']
-        return DaskMapper(cluster, client, address) 
-    
-    def __call__(self, iterable) -> Any:
-        futures = []
-        for func in iterable:
-            future = self.mapper.submit(func)
-            futures.append(future)
-            
-        results = [future.result() for future in futures]
-        
-        return results 
 
 @dataclasses.dataclass()
 class JoblibMapper:
