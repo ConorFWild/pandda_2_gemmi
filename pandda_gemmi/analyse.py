@@ -20,7 +20,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                     Grid, Alignments, Shells, Xmaps, 
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
                                     Events, SiteTable, EventTable,
-                                    DaskMapper, JoblibMapper, Event
+                                    JoblibMapper, Event
                                     )
 import joblib
 from joblib.externals.loky import set_loky_pickler
