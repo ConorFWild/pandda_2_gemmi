@@ -190,6 +190,17 @@ def main():
         datasets,
         )
     pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
+    
+    # Cluster
+    datasets: Datasets = datasets.cluster(
+        alignments=alignments, 
+        grid=grid, 
+        reference=reference, 
+        structure_factors=config.params.diffraction_data.structure_factors, 
+        mapper=mapper, 
+        sample_rate=config.params.diffraction_data.sample_rate,
+        )
+    print(f"After clustering now have {len(datasets.datasets)} datasets")
             
     ###################################################################
     # # Process shells

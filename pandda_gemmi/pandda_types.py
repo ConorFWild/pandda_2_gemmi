@@ -781,6 +781,36 @@ class Dataset:
 
         
         return smoothed_dataset
+    
+    def correlation(self, 
+                    alignment: Alignment,
+                    grid: Grid,
+                    structure_factors,
+                    reference_array: np.ndarray,
+                    sample_rate:float = 3.0, 
+                    ) -> float:
+        
+        # Get aligned dataset
+        xmap: Xmap = Xmap.from_unaligned_dataset(
+                    self,
+                    alignment,
+                    grid,
+                    structure_factors,
+                    sample_rate,
+                    )
+        
+        # Get arrays
+        xmap_array: np.ndarray = xmap.to_array()
+        
+        
+        # Get correlation
+        correlation, map_off = np.polyfit(x=xmap_array.flatten(), 
+                                          y=reference_array.flatten(), 
+                                          deg=1,
+                                          )
+        
+        # return
+        return correlation
 
     
         
@@ -1242,6 +1272,80 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in dtags}
         return Datasets(new_datasets)
 
+    def cluster(self, alignments: Alignments, grid: Grid, reference: Reference, structure_factors: StructureFactors, mapper=False, sample_rate: float=3.0) -> Datasets:
+        
+        # Common res
+        resolution_high: Resolution = min([self[dtag].reflections.resolution() for dtag in self],
+                              key=lambda x: x.resolution,
+                              )
+        
+        print(f"High resolution is: {resolution_high}")
+        
+        # Truncated datasets
+        truncated_datasets: Datasets = self.truncate(resolution=resolution_high,
+                                                            structure_factors=structure_factors,
+                                                            )
+        
+        # Truncated reference
+        truncated_reference_dataset: Dataset= truncated_datasets[reference.dtag]
+        
+        # Get reference map
+        reference_xmap: Xmap = Xmap.from_unaligned_dataset(
+                    truncated_reference_dataset,
+                    alignments[reference.dtag],
+                    grid,
+                    structure_factors,
+                    sample_rate,
+                    )
+        # Get reference_array
+        reference_array: np.ndarray = reference_xmap.to_array()
+        
+        # Get dtags
+        keys = list(self.datasets.keys())
+
+        # Get correlations
+        if mapper:
+            correlations: List[float] = mapper(
+                delayed(
+                    self[key].correlation)(
+                        alignments[dtag],
+                        grid,
+                        structure_factors,
+                        reference_array,
+                        sample_rate, 
+                )
+                for dtag
+                in keys
+            )
+        else:
+            correlations: List[float] = [
+                self[dtag].correlation(
+                    alignments[dtag],
+                    grid,
+                    structure_factors,
+                    reference_array,
+                    sample_rate, 
+                    ) 
+                for dtag 
+                in keys
+                ]
+            
+        for i, dtag in enumerate(keys):
+            print(
+                (
+                    f"Dtag: {dtag}; Correlation: {correlations[i]} \n"
+                )
+            )
+
+        new_datasets = {keys[i]: self.datasets[dtag] 
+                        for i, dtag 
+                        in enumerate(keys)
+                        if correlations[i] > 0.7
+                        }
+
+        return Datasets(new_datasets)
+        
+        
 
 @dataclasses.dataclass()
 class Reference:
