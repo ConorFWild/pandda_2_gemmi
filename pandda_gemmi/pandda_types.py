@@ -791,7 +791,7 @@ class Dataset:
                     ) -> float:
         
         # Get aligned dataset
-        xmap: Xmap = Xmap.from_unaligned_dataset(
+        xmap: Xmap = Xmap.from_unaligned_dataset_c(
                     self,
                     alignment,
                     grid,
