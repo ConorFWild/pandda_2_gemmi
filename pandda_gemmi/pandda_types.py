@@ -1292,7 +1292,7 @@ class Datasets:
         truncated_reference_dataset: Dataset= truncated_datasets[reference.dtag]
         
         # Get reference map
-        reference_xmap: Xmap = Xmap.from_unaligned_dataset(
+        reference_xmap: Xmap = Xmap.from_unaligned_dataset_c(
                     truncated_reference_dataset,
                     alignments[reference.dtag],
                     grid,
