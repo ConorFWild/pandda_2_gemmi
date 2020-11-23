@@ -799,6 +799,8 @@ class Dataset:
                     sample_rate,
                     )
         
+        
+        
         # Get arrays
         xmap_array: np.ndarray = xmap.to_array()
         
