@@ -1309,7 +1309,7 @@ class Datasets:
         if mapper:
             correlations: List[float] = mapper(
                 delayed(
-                    self[key].correlation)(
+                    self[dtag].correlation)(
                         alignments[dtag],
                         grid,
                         structure_factors,
