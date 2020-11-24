@@ -839,9 +839,10 @@ class Datasets:
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
 
 
-        new_dtags = filter(lambda dtag: (RMSD.from_structures(self.datasets[dtag].structure,
-                                                              reference.dataset.structure,
-                                                              )).to_float() < max_rmsd_to_reference,
+        new_dtags = filter(lambda dtag: (RMSD.from_reference(
+            reference,
+            self.datasets[dtag],
+            )).to_float() < max_rmsd_to_reference,
                            self.datasets,
                            )
 
@@ -4761,6 +4762,13 @@ class PanDDAFSModel:
 @dataclasses.dataclass()
 class RMSD:
     rmsd: float
+
+    @staticmethod
+    def from_reference(reference: Reference, dataset: Dataset):
+        return RMSD.from_structures(
+            reference.dataset.structure,
+            dataset.structure,
+            )
 
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure):
