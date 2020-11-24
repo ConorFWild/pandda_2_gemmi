@@ -155,7 +155,6 @@ class Structure:
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer():
-                    
                     if residue.name.upper() not in RESIDUE_NAMES:
                         continue
                     
@@ -4766,8 +4765,6 @@ class RMSD:
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure):
 
-                
-
         distances = []
 
         positions_1 = []
@@ -4775,6 +4772,7 @@ class RMSD:
 
 
         for residues_id in structure_1.protein_residue_ids():
+            print(f"Residue id is: {residues_id}")
             
             res_1 = structure_1[residues_id][0]
             try:
@@ -4782,7 +4780,9 @@ class RMSD:
             except:
                 continue
 
-
+            print(f"Residue 1 is: {res_1}")
+            print(f"Residue 2 is: {res_2}")
+            
             res_1_ca = res_1["CA"][0]
             res_2_ca = res_2["CA"][0]
 
