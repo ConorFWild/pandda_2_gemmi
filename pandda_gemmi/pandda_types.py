@@ -2463,7 +2463,7 @@ class Shells:
                                    key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
                                    ))
 
-        train_dtags = sorted_dtags[:min_characterisation_datasets]
+        train_dtags = []
 
         shells = {}
         shell_num = 0
@@ -2474,7 +2474,11 @@ class Shells:
 
             if (len(shell_dtags) >= max_shell_datasets) or (
                     res - shell_res >= high_res_increment):
+                
+                # Get the set of all dtags in shell
                 all_dtags = list(set(shell_dtags).union(set(train_dtags)))
+                
+                # Create the shell
                 shell = Shell(shell_num, 
                               shell_dtags,
                               train_dtags,
@@ -2484,13 +2488,24 @@ class Shells:
                               res_max=Resolution.from_float(shell_res),
                               res_min=Resolution.from_float(res),
                               )
+                
+                # Add shell to dict
                 shells[shell_num] = shell
 
+                # Update iteration parameters
                 shell_dtags = []
                 shell_res = res
                 shell_num = shell_num + 1
 
+            # Add the next shell dtag
             shell_dtags.append(dtag)
+            
+            # Check if the characterisation set is too big and pop if so
+            if len(train_dtags) >= min_characterisation_datasets:
+                train_dtags.pop(0)
+            # Add next train dtag
+            train_dtags.append(dtag)
+                
 
         return Shells(shells)
 
