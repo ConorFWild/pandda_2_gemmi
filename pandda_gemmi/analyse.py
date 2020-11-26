@@ -173,7 +173,7 @@ def main():
                                 config.params.masks.inner_mask_symmetry,
                                     sample_rate=config.params.diffraction_data.sample_rate,
                                 )
-    grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
+    # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
     pandda_log.grid_log = logs.GridLog.from_grid(grid)
     if config.debug > 1:
         print("Summarising protein mask")
@@ -293,7 +293,7 @@ def main():
                             )
 
         
-        model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
+        # model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
 
         # Calculate z maps
         print("Getting zmaps")
