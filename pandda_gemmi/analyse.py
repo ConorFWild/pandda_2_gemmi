@@ -300,11 +300,15 @@ def main():
         zmaps: Zmaps = Zmaps.from_xmaps(model=model,
                                     xmaps=shell_test_xmaps,
                                     )
-        if config.debug > 1:
-            print("saving zmaps")
-            for dtag in zmaps:
-                zmap = zmaps[dtag]
-                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+        # if config.debug > 1:
+        print("saving zmaps")
+        for dtag in zmaps:
+            zmap = zmaps[dtag]
+            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+
+            xmap = xmaps[dtag]
+            path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+            xmap.save(path)
 
 
         # Get the clustered electron desnity outliers

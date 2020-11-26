@@ -198,6 +198,7 @@ class ClusterLog:
 
 @dataclasses.dataclass()
 class ClusteringsLog:
+    clusters: Dict[str, Dict[int, ClusterLog]]
     
     @staticmethod
     def from_clusters(clusterings: Clusterings, grid: Grid):
@@ -216,7 +217,7 @@ class ClusteringsLog:
                                                                                    grid,
                                                                                    )
 
-        return clusters
+        return ClusteringsLog(clusters)
     
 @dataclasses.dataclass()
 class EventLog:
