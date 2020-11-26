@@ -2502,7 +2502,7 @@ class Shells:
             
             # Check if the characterisation set is too big and pop if so
             if len(train_dtags) >= min_characterisation_datasets:
-                train_dtags.pop(0)
+                train_dtags= train_dtags[1:]
             # Add next train dtag
             train_dtags.append(dtag)
                 
