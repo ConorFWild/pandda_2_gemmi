@@ -962,8 +962,16 @@ class Datasets:
         # truncate on reflections
         new_datasets_reflections = {}
         for dtag in dataset_resolution_truncated:
+            reflections = dataset_resolution_truncated[dtag].reflections.reflections
+            reflections_array = np.array(reflections)
+            print(f"{dtag}")
+            print(f"{reflections_array.shape}")
+            
             truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                              )
+            reflections = truncated_dataset.reflections.reflections
+            reflections_array = np.array(reflections)
+            print(f"{dtag}: {reflections_array.shape}")
 
             new_datasets_reflections[dtag] = truncated_dataset
 
