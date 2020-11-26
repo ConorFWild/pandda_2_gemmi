@@ -923,7 +923,7 @@ class Datasets:
     def remove_bad_wilson(self, max_wilson_plot_z_score: float):
         return self
 
-    def common_reflections(self, structure_factors: StructureFactors):
+    def common_reflections(self, structure_factors: StructureFactors, tol=0.000001):
         
         running_index = None
         for dtag in self.datasets:
@@ -934,7 +934,9 @@ class Datasets:
                                              columns=reflections.column_labels(),
                                              )
             reflections_table.set_index(["H", "K", "L"], inplace=True)
-            flattened_index = reflections_table[~reflections_table[structure_factors.f].isna()].index.to_flat_index()
+            is_na = reflections_table[structure_factors.f].isna()
+            is_zero = reflections_table[structure_factors.f].abs() < tol
+            flattened_index = reflections_table[(~is_na) | is_zero].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
