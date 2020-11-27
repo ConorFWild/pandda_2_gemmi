@@ -926,6 +926,7 @@ class Datasets:
     def common_reflections(self, structure_factors: StructureFactors, tol=0.000001):
         
         running_index = None
+        
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             reflections = dataset.reflections.reflections
@@ -936,12 +937,11 @@ class Datasets:
             reflections_table.set_index(["H", "K", "L"], inplace=True)
             is_na = reflections_table[structure_factors.f].isna()
             is_zero = reflections_table[structure_factors.f].abs() < tol
-            flattened_index = reflections_table[(~is_na) | is_zero].index.to_flat_index()
+            mask = (~is_na) | (~is_zero)
+            flattened_index = reflections_table[mask].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
-
-
         return running_index.to_list()
 
 
