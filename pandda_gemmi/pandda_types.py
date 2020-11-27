@@ -937,7 +937,7 @@ class Datasets:
             reflections_table.set_index(["H", "K", "L"], inplace=True)
             is_na = reflections_table[structure_factors.f].isna()
             is_zero = reflections_table[structure_factors.f].abs() < tol
-            mask = (~is_na) | (~is_zero)
+            mask = ~(is_na | is_zero)
             flattened_index = reflections_table[mask].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
