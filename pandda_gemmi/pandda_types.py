@@ -937,8 +937,11 @@ class Datasets:
             reflections_table.set_index(["H", "K", "L"], inplace=True)
             is_na = reflections_table[structure_factors.f].isna()
             is_zero = reflections_table[structure_factors.f].abs() < tol
-            is_missing = reflections_table["F"].abs() < tol
-            mask = ~(is_na | is_zero | is_missing)
+            is_zero_f = reflections_table["F"].abs() < tol
+            is_na_f = reflections_table["F"].isna()
+            
+            print(f"Dtag {}: Missing reflections {is_zero_f.sum()} {is_na_f.sum()}")
+            mask = ~(is_na | is_zero | is_zero_f | is_na_f)
             flattened_index = reflections_table[mask].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
