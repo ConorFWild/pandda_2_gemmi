@@ -243,12 +243,12 @@ def main():
         finish = time.time()
         print(f"Mapped in {finish-start}")
         
-        if config.debug > 1:
-            print("Saving xmaps")
-            for dtag in xmaps:
-                xmap = xmaps[dtag]
-                path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-                xmap.save(path)
+        # if config.debug > 1:
+        #     print("Saving xmaps")
+        #     for dtag in xmaps:
+        #         xmap = xmaps[dtag]
+        #         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+        #         xmap.save(path)
         
         # Seperate out test and train maps
         shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
@@ -301,14 +301,14 @@ def main():
                                     xmaps=shell_test_xmaps,
                                     )
         # if config.debug > 1:
-        print("saving zmaps")
-        for dtag in zmaps:
-            zmap = zmaps[dtag]
-            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+        # print("saving zmaps")
+        # for dtag in zmaps:
+        #     zmap = zmaps[dtag]
+        #     pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
 
-            xmap = xmaps[dtag]
-            path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-            xmap.save(path)
+        #     xmap = xmaps[dtag]
+        #     path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+        #     xmap.save(path)
 
 
         # Get the clustered electron desnity outliers
@@ -365,12 +365,12 @@ def main():
         
         for event_id in events:
             # Save zmaps
-            zmap = zmaps[event_id.dtag]
-            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
+            # zmap = zmaps[event_id.dtag]
+            # pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
             
-            xmap = xmaps[event_id.dtag]
-            path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
-            xmap.save(path)
+            # xmap = xmaps[event_id.dtag]
+            # path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
+            # xmap.save(path)
             
             # Add events
             all_events[event_id] = events[event_id]
