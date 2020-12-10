@@ -116,6 +116,7 @@ class BlobFinding:
         return BlobFinding(min_blob_volume=args.min_blob_volume,
                            min_blob_z_peak=args.min_blob_z_peak,
                            clustering_cutoff=args.clustering_cutoff,
+                           cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
                            )
 
 
