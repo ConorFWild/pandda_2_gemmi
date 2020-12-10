@@ -105,11 +105,11 @@ class Filtering:
 
 @dataclasses.dataclass()
 class BlobFinding:
-    min_blob_volume: float = 10.0
-    min_blob_z_peak: float = 3.0
+    min_blob_volume: float
+    min_blob_z_peak: float 
     # clustering_cutoff: float = 1.732
-    clustering_cutoff: float = 1.0
-    cluster_cutoff_distance_multiplier: float = 1.3
+    clustering_cutoff: float 
+    cluster_cutoff_distance_multiplier: float
 
     @classmethod
     def from_args(cls, args):
@@ -422,7 +422,7 @@ class Config:
 
         # blob finding
         parser.add_argument("--min_blob_volume",
-                            default=9.0,
+                            default=8.0,
                             type=float,
                             help="The directory for output and intermediate files to be saved to",
                             )
