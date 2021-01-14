@@ -213,7 +213,7 @@ class ClusteringsLog:
                 if dtag_python not in clusters:
                     clusters[dtag_python] = {}
                 
-                clusters[dtag_python][cluster_id_python] = ClusterLog.from_cluster(cluster, 
+                clusters[dtag_python][int(cluster_id_python)] = ClusterLog.from_cluster(cluster, 
                                                                                    grid,
                                                                                    )
 
@@ -231,10 +231,10 @@ class EventLog:
     def from_event(event: Event, grid:Grid):
         return EventLog(
             dtag = event.event_id.dtag.dtag,
-            idx = event.event_id.event_idx.event_idx,
+            idx = int(event.event_id.event_idx.event_idx),
             centroid=event.cluster.centroid,
             bdc=event.bdc.bdc,
-            size=event.cluster.size(grid),
+            size=int(event.cluster.size(grid)),
         )
 
 @dataclasses.dataclass()
