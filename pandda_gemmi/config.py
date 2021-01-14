@@ -492,7 +492,7 @@ class Config:
         # Debug
 
         parser.add_argument("--debug",
-                            default=1,
+                            default=0,
                             type=int,
                             help="The directory for output and intermediate files to be saved to",
                             )
