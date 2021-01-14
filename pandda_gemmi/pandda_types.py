@@ -2286,7 +2286,7 @@ class Alignment:
                     
                     # Check if corresponding ones are actually there
                     if len(dataset_res_span) > 0:
-                        return dataset_res_span[0]
+                        dataset_res = dataset_res_span[0]
                     else:
                         continue
                     
