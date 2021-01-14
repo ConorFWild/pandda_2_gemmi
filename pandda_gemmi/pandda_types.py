@@ -830,6 +830,7 @@ class Datasets:
     def from_data_dirs(path: Path, pdb_regex:str, mtz_regex: str):
         datasets = {}
         for directory in path.glob("*"):
+            print(directory)
             if directory.is_dir():
                 dtag = Dtag(directory.name)
                 
