@@ -4271,7 +4271,7 @@ class Events:
                 if len(
                     list(
                         filter(
-                            lambda event_id_2: event_dtag.dtag == dtag.dtag,
+                            lambda event_dtag: event_dtag.dtag == dtag.dtag,
                             event_dtag_list,
                             )
                         )
