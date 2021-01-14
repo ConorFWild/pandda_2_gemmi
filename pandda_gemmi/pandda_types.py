@@ -4268,7 +4268,14 @@ class Events:
             for event_id in event_id_list:
                 dtag = event_id.dtag
                 
-                if len(list(filter(lambda event_id_2: event_id_2.dtag.dtag == dtag.dtag))) == 0:
+                if len(
+                    list(
+                        filter(
+                            lambda event_id_2: event_id_2.dtag.dtag == dtag.dtag,
+                            event_dtag_list,
+                            )
+                        )
+                    ) == 0:
                     event_dtag_list.append(dtag)
                     
             # Get partitionings
