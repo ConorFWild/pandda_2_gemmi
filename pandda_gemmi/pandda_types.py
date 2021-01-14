@@ -825,6 +825,25 @@ class Datasets:
     
     def __len__(self):
         return len(self.datasets)
+    
+    @staticmethod
+    def from_data_dirs(path: Path, pdb_regex:str, mtz_regex: str):
+        datasets = {}
+        for directory in path.glob("*"):
+            if directory.is_dir():
+                dtag = Dtag(directory.name)
+                
+                mtz_files = list(directory.glob(mtz_regex))
+                if len(mtz_files) == 0:
+                    continue
+                
+                pdb_files = list(directory.glob(pdb_regex))
+                if len(pdb_files) == 0:
+                    continue
+                
+                datasets[dtag] = Dataset.from_files(pdb_files[0],
+                                                    mtz_files[0])
+        return Datasets(datasets)
 
     @staticmethod
     def from_dir(pandda_fs_model: PanDDAFSModel):
