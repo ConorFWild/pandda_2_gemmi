@@ -148,7 +148,7 @@ class SmoothingDatasetLog:
     @staticmethod
     def from_datasets(datasets: Datasets):
         return {
-            dtag.dtag: datasets[dtag].smoothing_factor
+            dtag.dtag: float(datasets[dtag].smoothing_factor)
                 for dtag
                 in datasets
                 }
@@ -192,7 +192,7 @@ class ClusterLog:
     @staticmethod
     def from_cluster(cluster: Cluster, grid: Grid):
         return ClusterLog(
-            centroid= cluster.centroid,
+            centroid= (float(x) for x in cluster.centroid),
             size = cluster.size(grid),
         )
 
@@ -232,7 +232,7 @@ class EventLog:
         return EventLog(
             dtag = event.event_id.dtag.dtag,
             idx = int(event.event_id.event_idx.event_idx),
-            centroid=event.cluster.centroid,
+            centroid=(float(x) for x in event.cluster.centroid),
             bdc=event.bdc.bdc,
             size=int(event.cluster.size(grid)),
         )
@@ -253,7 +253,7 @@ class EventsLog:
             if dtag not in dtag_events:
                 dtag_events[dtag] = {}
                 
-            dtag_events[dtag][event_idx] = EventLog.from_event(event, grid)
+            dtag_events[dtag][int(event_idx)] = EventLog.from_event(event, grid)
         
         return dtag_events
 
@@ -285,7 +285,7 @@ class GridLog:
         unit_cell = UnitCellPython.from_gemmi(grid.grid.unit_cell)
         space_group = SpacegroupPython.from_gemmi(grid.grid.spacegroup)
         
-        return GridLog(grid.shape(),
+        return GridLog((float(x) for x in grid.shape()),
                        unit_cell,
                        space_group,
                        )
@@ -313,8 +313,8 @@ class SiteLog:
     
     @staticmethod
     def from_site_table_record(site_table_record: SiteTableRecord):
-        return SiteLog(site_table_record.site_idx,
-                       site_table_record.centroid,
+        return SiteLog(int(site_table_record.site_idx),
+                       (float(x) for x in site_table_record.centroid),
                        )
 
 @dataclasses.dataclass()
