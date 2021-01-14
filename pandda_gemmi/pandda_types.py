@@ -2927,6 +2927,9 @@ class Xmaps:
             
             keys = list(datasets.datasets.keys())
             
+            print(alignments)
+            print(grid)
+            
             results = mapper(
                                            delayed(Xmap.from_unaligned_dataset_c)(
                                                datasets[key],
