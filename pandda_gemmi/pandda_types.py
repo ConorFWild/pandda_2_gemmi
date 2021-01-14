@@ -2273,12 +2273,24 @@ class Alignment:
         for model in reference.dataset.structure.structure:
             for chain in model:
                 for ref_res in chain.get_polymer():
+                    
+                    # Skip unusual protein residues
                     if  ref_res.name.upper() not in RESIDUE_NAMES:
                         continue
+                    
+                    # Get the structure key of the residue
                     res_id = ResidueID.from_residue_chain(model, chain, ref_res)
                     
-                    dataset_res = dataset.structure[res_id][0]
+                    # Get corresponding reses
+                    dataset_res_span = dataset.structure[res_id]
                     
+                    # Check if corresponding ones are actually there
+                    if len(dataset_res_span) > 0:
+                        return dataset_res_span[0]
+                    else:
+                        continue
+                    
+                    # Get the shared atoms
                     for atom_ref, atom_dataset in zip(ref_res, dataset_res):
                         dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
                         reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
