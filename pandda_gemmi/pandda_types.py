@@ -2791,12 +2791,10 @@ class Xmap:
     def from_aligned_map_c(event_map_reference_grid: gemmi.FloatGrid,
                          dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
+                         partitioning: Partitioning,
                          mask_radius_symmetry: float):
 
-        partitioning = Partitioning.from_structure(dataset.structure,
-                                                   event_map_reference_grid,
-                                                   mask_radius,
-                                                   mask_radius_symmetry)
+
         
         
 
@@ -4242,6 +4240,34 @@ class Events:
         if mapper:
             event_id_list = list(self.events.keys())
             
+            # Get unique dtags
+            event_dtag_list = []
+            for event_id in event_id_list:
+                dtag = event_id.dtag
+                
+                if len(list(filter(lambda event_id_2: event_id_2.dtag.dtag == dtag.dtag))) == 0:
+                    event_dtag_list.append(dtag)
+                    
+            # Get partitionings
+            
+            # partitioning = Partitioning.from_structure(dataset.structure,
+            #                                         event_map_reference_grid,
+            #                                         mask_radius,
+            #                                         mask_radius_symmetry)
+            results = mapper(
+                delayed(
+                    Partitioning.from_structure)(
+                        datasets[dtag].structure,
+                        grid,
+                        outer_mask,
+                        inner_mask_symmetry,
+                    )
+                    for dtag
+                    in event_dtag_list
+                )
+            
+            partitioning_dict = {dtag: partitioning for dtag, partitioning in zip(event_dtag_list, results) }
+             
             results = mapper(
                     delayed(
                         processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
@@ -4254,6 +4280,7 @@ class Events:
                             structure_factors, 
                             outer_mask,
                             inner_mask_symmetry,
+                            partitioning_dict[event_id.dtag]
                             )
                         for event_id
                         in event_id_list
@@ -4319,6 +4346,7 @@ class EventMapFile:
              structure_factors: StructureFactors,
              mask_radius: float,
              mask_radius_symmetry: float,
+             partitioning: Partitioning,
              ):
         reference_xmap_grid = xmap.xmap
         reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
@@ -4349,6 +4377,7 @@ class EventMapFile:
                                                grid,
                                                structure_factors,
                                                mask_radius,
+                                               partitioning,
                                                mask_radius_symmetry,
                                                )
 
