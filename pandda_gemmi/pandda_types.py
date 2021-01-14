@@ -34,6 +34,8 @@ from pandda_gemmi.constants import *
 
 from pandda_gemmi.python_types import *
 
+from pandda_gemmi import pandda_exceptions
+
 from pandda_gemmi.pandda_exceptions import *
 
 @dataclasses.dataclass()
@@ -820,6 +822,9 @@ class Dataset:
 @dataclasses.dataclass()
 class Datasets:
     datasets: typing.Dict[Dtag, Dataset]
+    
+    def __len__(self):
+        return len(self.datasets)
 
     @staticmethod
     def from_dir(pandda_fs_model: PanDDAFSModel):
@@ -1365,9 +1370,17 @@ class Datasets:
 class Reference:
     dtag: Dtag
     dataset: Dataset
+    
+    @staticmethod
+    def assert_from_datasets(datasets: Datasets):
+        if len(datasets) < 1:
+             raise pandda_exceptions.ExceptionTooFewDatasets()
 
     @staticmethod
     def from_datasets(datasets: Datasets):
+        
+        Reference.assert_from_datasets(datasets)
+        
         resolutions: typing.Dict[Dtag, Resolution] = {}
         for dtag in datasets:
             resolutions[dtag] = datasets[dtag].reflections.resolution()
