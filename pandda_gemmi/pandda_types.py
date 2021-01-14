@@ -5014,3 +5014,50 @@ class JoblibMapper:
         
         return results
     
+
+def sample_residue(truncated_dataset: Dataset,
+                   grid: Grid,       
+                   residue_id,
+                    alignment: Alignment, 
+                    structure_factors: StructureFactors, 
+                    sample_rate: float, 
+                    ) -> List[float]:
+    
+    print("started")
+    
+    point_position_dict = grid.partitioning[residue_id]
+    
+    unaligned_xmap: gemmi.FloatGrid = truncated_dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                                structure_factors.phi,
+                                                                                                sample_rate=sample_rate,
+                                                                                                )    
+    # Unpack the points, poitions and transforms
+    point_list: List[Tuple[int, int, int]] = []
+    position_list: List[Tuple[float, float, float]] = []
+    transform_list: List[gemmi.transform] = []
+    com_moving_list: List[np.array] = []
+    com_reference_list: List[np.array] = []
+            
+    al = alignment
+    transform = al.transform.inverse()
+    com_moving = al.com_moving
+    com_reference = al.com_reference
+    
+    for point, position in point_position_dict.items():
+        
+        point_list.append(point)
+        position_list.append(position)
+        transform_list.append(transform)
+        com_moving_list.append(com_moving)
+        com_reference_list.append(com_reference)
+    
+    sampled_points = gemmi.interpolate_to_list(unaligned_xmap,
+                                               grid.grid,
+                                    point_list,
+                                 position_list,
+                                 transform_list,
+                                 com_moving_list,
+                                 com_reference_list,           
+                              )
+    
+    return np.array(sampled_points)
