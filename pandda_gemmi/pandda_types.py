@@ -5045,7 +5045,7 @@ def sample_residue(truncated_dataset: Dataset,
     com_moving_list: List[np.array] = []
     com_reference_list: List[np.array] = []
             
-    al = alignment
+    al = alignment[residue_id]
     transform = al.transform.inverse()
     com_moving = al.com_moving
     com_reference = al.com_reference
