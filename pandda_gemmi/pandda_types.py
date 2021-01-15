@@ -2005,7 +2005,7 @@ class Partitioning:
                 )
         
     def __setstate__(self, data):
-        partitioning_gemmi = data[0].to_gemmi()
+        partitioning_gemmi = data[0]
         protein_mask_gemmi = data[1].to_gemmi()
         symmetry_mask_gemmi = data[2].to_gemmi()
         
