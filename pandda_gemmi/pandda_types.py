@@ -2011,7 +2011,7 @@ class Partitioning:
         
         
         self.partitioning = partitioning_gemmi
-        self.proteing_mask = protein_mask_gemmi
+        self.protein_mask = protein_mask_gemmi
         self.symmetry_mask = symmetry_mask_gemmi
         self.total_mask = data[3]
 
