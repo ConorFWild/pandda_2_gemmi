@@ -1678,6 +1678,16 @@ class Partitioning:
                                 )
             return positions
     
+    @staticmethod
+    def from_structure_multiprocess(structure: Structure,
+                       grid: Grid,
+                       mask_radius: float,
+                       mask_radius_symmetry: float,):
+        
+        return Partitioning.from_structure(structure,
+                       grid.grid,
+                       mask_radius,
+                       mask_radius_symmetry,)
         
     @staticmethod
     def from_structure(structure: Structure,
@@ -4282,9 +4292,9 @@ class Events:
             #                                         mask_radius_symmetry)
             results = mapper(
                 delayed(
-                    Partitioning.from_structure)(
+                    Partitioning.from_structure_multiprocess)(
                         datasets[dtag].structure,
-                        grid.grid,
+                        grid,
                         outer_mask,
                         inner_mask_symmetry,
                     )
