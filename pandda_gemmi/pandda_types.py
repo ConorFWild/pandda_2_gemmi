@@ -2815,10 +2815,6 @@ class Xmap:
                          mask_radius_symmetry: float):
 
 
-        
-        
-
-
         new_grid = gemmi.FloatGrid(*[event_map_reference_grid.nu,
                                      event_map_reference_grid.nv,
                                      event_map_reference_grid.nw])
@@ -4288,7 +4284,7 @@ class Events:
                 delayed(
                     Partitioning.from_structure)(
                         datasets[dtag].structure,
-                        grid,
+                        grid.grid,
                         outer_mask,
                         inner_mask_symmetry,
                     )
