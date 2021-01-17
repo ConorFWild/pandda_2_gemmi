@@ -24,6 +24,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                     JoblibMapper, Event
                                     )
 from pandda_gemmi import validators
+from pandda_gemmi import constants
 
 import joblib
 from joblib.externals.loky import set_loky_pickler
