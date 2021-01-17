@@ -10,6 +10,7 @@ from pandda_gemmi import pandda_types
 class DatasetsValidator:
     min_characterisation_datasets: int
     
-    def validate(self, dataset: pandda_types.Datasets, stage: str):
+    def validate(self, datasets: pandda_types.Datasets, stage: str):
         if len(datasets) < self.min_characterisation_datasets:
             raise pandda_exceptions.ExceptionTooFewDatasets(stage)
+        
