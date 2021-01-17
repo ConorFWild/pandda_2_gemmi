@@ -192,7 +192,7 @@ class ClusterLog:
     @staticmethod
     def from_cluster(cluster: Cluster, grid: Grid):
         return ClusterLog(
-            centroid= (float(x) for x in cluster.centroid),
+            centroid= [float(x) for x in cluster.centroid],
             size = cluster.size(grid),
         )
 
@@ -232,7 +232,7 @@ class EventLog:
         return EventLog(
             dtag = event.event_id.dtag.dtag,
             idx = int(event.event_id.event_idx.event_idx),
-            centroid=(float(x) for x in event.cluster.centroid),
+            centroid=[float(x) for x in event.cluster.centroid],
             bdc=event.bdc.bdc,
             size=int(event.cluster.size(grid)),
         )
@@ -285,7 +285,7 @@ class GridLog:
         unit_cell = UnitCellPython.from_gemmi(grid.grid.unit_cell)
         space_group = SpacegroupPython.from_gemmi(grid.grid.spacegroup)
         
-        return GridLog((float(x) for x in grid.shape()),
+        return GridLog([float(x) for x in grid.shape()],
                        unit_cell,
                        space_group,
                        )
@@ -314,7 +314,7 @@ class SiteLog:
     @staticmethod
     def from_site_table_record(site_table_record: SiteTableRecord):
         return SiteLog(int(site_table_record.site_idx),
-                       (float(x) for x in site_table_record.centroid),
+                       [float(x) for x in site_table_record.centroid],
                        )
 
 @dataclasses.dataclass()
