@@ -64,3 +64,11 @@ RESIDUE_NAMES = ["ALA",
 "TYR",
 "VAL",
 ]
+
+STAGE_FILTER_INVALID = "Filter invalid dataset"
+STAGE_FILTER_LOW_RESOLUTION = "Filter low resolution datasets"
+STAGE_FILTER_RFREE = "Filter bad rfree dataset"
+STAGE_FILTER_WILSON = "Filter bad wilson datasets"
+STAGE_FILTER_STRUCTURE = "Filter dissimilar structure datasets"
+STAGE_FILTER_SPACE_GROUP = "Filter different space group datasets"
+

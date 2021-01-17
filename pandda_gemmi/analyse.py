@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pandda_gemmi import constants
 from pandda_gemmi.constants import PANDDA_LOG_FILE
 from typing import Dict
 import time
@@ -22,6 +23,8 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                     Events, SiteTable, EventTable,
                                     JoblibMapper, Event
                                     )
+from pandda_gemmi import validators
+
 import joblib
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
@@ -122,22 +125,32 @@ def main():
     pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
     
     # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
+    
+    # Make dataset validator
+    dataset_validator = validators.DatasetsValidator(config.params.resolution_binning.min_characterisation_datasets)
 
     # Initial filters
     print("Filtering invalid datasaets")
     datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
     config.params.diffraction_data.structure_factors)
     pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial, datasets_invalid)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_INVALID)
 
     datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
         config.params.diffraction_data.low_resolution_completeness)
     pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid, datasets_low_res)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_LOW_RESOLUTION)
+
 
     datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(config.params.filtering.max_rfree)
     pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res, datasets_rfree)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_RFREE)
+
 
     datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
     pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree, datasets_wilson)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_WILSON)
+
 
     # Select refernce
     print("Getting reference")
@@ -160,9 +173,12 @@ def main():
                                                         config.params.filtering.max_rmsd_to_reference,
                                                         )
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother, datasets_diss_struc)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_STRUCTURE)
+
 
     datasets_diss_space: Datasets = datasets_diss_struc.remove_dissimilar_space_groups(reference)
     pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(datasets_diss_struc, datasets_diss_space)
+    dataset_validator(datasets_invalid, constants.STAGE_FILTER_SPACE_GROUP)
 
     datasets = datasets_diss_space
 

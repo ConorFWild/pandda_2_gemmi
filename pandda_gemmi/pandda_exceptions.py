@@ -9,9 +9,11 @@ class AlignmentUnmatchedAtomsError(Exception):
         super().__init__(message)
 
 class ExceptionTooFewDatasets(Exception):
-    def __init__(self):
+    def __init__(self, stage: str = "UNKNOWN"):
 
-        message = f"Too few datasets!"
+        message = f"Too few datasets! Failed at stage: {stage}"
 
         # Call the base class constructor with the parameters it needs
         super().__init__(message)
+        
+        

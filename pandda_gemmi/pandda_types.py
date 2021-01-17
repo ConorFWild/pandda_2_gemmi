@@ -1391,15 +1391,15 @@ class Reference:
     dtag: Dtag
     dataset: Dataset
     
-    @staticmethod
-    def assert_from_datasets(datasets: Datasets):
-        if len(datasets) < 1:
-             raise pandda_exceptions.ExceptionTooFewDatasets()
+    # @staticmethod
+    # def assert_from_datasets(datasets: Datasets):
+    #     if len(datasets) < 1:
+    #          raise pandda_exceptions.ExceptionTooFewDatasets()
 
     @staticmethod
     def from_datasets(datasets: Datasets):
         
-        Reference.assert_from_datasets(datasets)
+        # Reference.assert_from_datasets(datasets)
         
         resolutions: typing.Dict[Dtag, Resolution] = {}
         for dtag in datasets:
