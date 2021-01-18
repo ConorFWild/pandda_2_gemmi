@@ -140,17 +140,17 @@ def main():
     datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
         config.params.diffraction_data.low_resolution_completeness)
     pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid, datasets_low_res)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_LOW_RESOLUTION)
+    dataset_validator.validate(datasets_low_res, constants.STAGE_FILTER_LOW_RESOLUTION)
 
 
     datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(config.params.filtering.max_rfree)
     pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res, datasets_rfree)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_RFREE)
+    dataset_validator.validate(datasets_rfree, constants.STAGE_FILTER_RFREE)
 
 
     datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(config.params.filtering.max_wilson_plot_z_score)  # TODO
     pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree, datasets_wilson)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_WILSON)
+    dataset_validator.validate(datasets_wilson, constants.STAGE_FILTER_WILSON)
 
 
     # Select refernce
@@ -174,12 +174,12 @@ def main():
                                                         config.params.filtering.max_rmsd_to_reference,
                                                         )
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother, datasets_diss_struc)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_STRUCTURE)
+    dataset_validator.validate(datasets_diss_struc, constants.STAGE_FILTER_STRUCTURE)
 
 
     datasets_diss_space: Datasets = datasets_diss_struc.remove_dissimilar_space_groups(reference)
     pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(datasets_diss_struc, datasets_diss_space)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_SPACE_GROUP)
+    dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
 
     datasets = datasets_diss_space
 
