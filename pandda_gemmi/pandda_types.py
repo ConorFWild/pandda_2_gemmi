@@ -5053,7 +5053,7 @@ class RMSD:
             # print(f"Residue 2 is: {res_2}")
             try: 
                 res_1_ca = res_1["CA"][0]
-            except:
+            except Exception as e:
                 continue
             
             try: 
