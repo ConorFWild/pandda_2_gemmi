@@ -339,8 +339,8 @@ class SequenceAlignment:
         return self._residue_id_dict[item]
     
     def __iter__(self):
-        for residue_id, missing in self._residue_id_dict.items():
-            if missing:
+        for residue_id, present in self._residue_id_dict.items():
+            if not present:
                 continue
             else:
                 yield residue_id
