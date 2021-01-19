@@ -352,10 +352,10 @@ class SequenceAlignment:
         return len([x for x in self._residue_id_dict.values() if x])
     
     def missing(self):
-        return [resid for resid, present in self._residue_id_dict.values() if not present]
+        return [resid for resid, present in self._residue_id_dict.items() if not present]
             
     def present(self):
-        return [resid for resid, present in self._residue_id_dict.values() if present]
+        return [resid for resid, present in self._residue_id_dict.items() if present]
             
     @staticmethod
     def from_reference(reference_structure: Structure, structures: typing.Iterable[Structure]):
