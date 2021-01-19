@@ -21,7 +21,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                     Grid, Alignments, Shells, Xmaps, 
                                     XmapArray, Model, Dtag, Zmaps, Clusterings,
                                     Events, SiteTable, EventTable,
-                                    JoblibMapper, Event
+                                    JoblibMapper, Event, SequenceAlignment,
                                     )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -182,6 +182,11 @@ def main():
     dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
 
     datasets = datasets_diss_space
+    
+    # Sequence alignment
+    sequence_alignment = SequenceAlignment.from_reference(reference_structure=reference.dataset.structure,
+                                                          structures=[datasets[dtag].structure for dtag in datasets],)
+    print(f"{sequence_alignment.num_missing()} residues unmatched; {sequence_alignment.present()} residues were matched")
 
     # Grid
     print("Getting grid")
@@ -189,6 +194,7 @@ def main():
                             config.params.masks.outer_mask,
                                 config.params.masks.inner_mask_symmetry,
                                     sample_rate=config.params.diffraction_data.sample_rate,
+                                    sequence_alignment=sequence_alignment,
                                 )
     # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
     pandda_log.grid_log = logs.GridLog.from_grid(grid)
@@ -205,6 +211,7 @@ def main():
     alignments: Alignments = Alignments.from_datasets(
         reference,
         datasets,
+        sequence_alignment=sequence_alignment,
         )
     pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
     
@@ -256,6 +263,7 @@ def main():
             config.params.diffraction_data.structure_factors, 
             sample_rate=config.params.diffraction_data.sample_rate,
             mapper=mapper,
+            sequence_alignment=sequence_alignment,
             ) # n x (grid size) with total_mask > 0
         finish = time.time()
         print(f"Mapped in {finish-start}")

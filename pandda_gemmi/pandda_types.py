@@ -101,8 +101,7 @@ class ResidueID:
     
     def __hash__(self):
         return hash((self.model, self.chain, self.insertion))
-    
-
+        
 
 
 @dataclasses.dataclass()
@@ -328,6 +327,73 @@ class Structure:
 
         
 
+@dataclasses.dataclass()
+class SequenceAlignment:
+    
+    _residue_id_dict: Dict[ResidueID, typing.Bool]
+    
+    def __len__(self):
+        return len(self._residue_id_dict)
+    
+    def __getitem__(self, item: ResidueID):
+        return self._residue_id_dict[item]
+    
+    def __iter__(self):
+        for residue_id, missing in self._residue_id_dict:
+            if missing:
+                continue
+            else:
+                yield residue_id
+                
+    def num_missing(self):
+        return len([x for x in self._residue_id_dict.values() if not x])
+    
+    def num_present(self):
+        return len([x for x in self._residue_id_dict.values() if x])
+    
+    def missing(self):
+        return [resid for resid, present in self._residue_id_dict.values() if not present]
+            
+    def present(self):
+        return [resid for resid, present in self._residue_id_dict.values() if present]
+            
+    @staticmethod
+    def from_reference(reference_structure: Structure, structures: typing.Iterable[Structure]):
+        residue_id_dict = {}
+        
+        for residue_id in reference_structure.protein_residue_ids():
+            
+            present = True
+            # See whether other
+            for structure in structures:
+                residue_span = structure[residue_id]
+                
+                # See if residue span is empty
+                if len(residue_span) == 0:
+                    present = False
+                    residue_id_dict[residue_id] = present
+                    continue
+                
+                try:
+                    ca_selection = residue_span["CA"]
+                    
+                except Exception as e:
+                    present = True
+                    residue_id_dict[residue_id] = present
+                    continue
+                
+                try:
+                    ca = ca_selection[0]
+                    
+                except Exception as e:
+                    present = False
+                    residue_id_dict[residue_id] = present
+                    continue     
+                
+        return SequenceAlignment(residue_id_dict) 
+        
+            
+        
 
 @dataclasses.dataclass()
 class StructureFactors:
@@ -1430,6 +1496,7 @@ class Partitioning:
     @staticmethod
     def from_reference(reference: Reference,
                        grid: gemmi.FloatGrid,
+                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
@@ -1503,6 +1570,7 @@ class Partitioning:
 
         return Partitioning.from_structure(reference.dataset.structure,
                                            grid,
+                                           sequence_alignment,
                                            mask_radius,
                                            mask_radius_symmetry,
                                            )
@@ -1692,29 +1760,42 @@ class Partitioning:
     @staticmethod
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
+                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
         poss = []
         res_indexes = {}
-        i = 0
-        for model in structure.structure:
-            for chain in model:
-                for res in chain.get_polymer():
-                    if res.name.upper() not in RESIDUE_NAMES:
-                        continue
+        # for model in structure.structure:
+        #     for chain in model:
+        #         for res in chain.get_polymer():
+        #             if res.name.upper() not in RESIDUE_NAMES:
+        #                 continue
                     
-                    ca = res["CA"][0]
+        #             ca = res["CA"][0]
 
-                    orthogonal = ca.pos
-                    # fractional = grid.unit_cell.fractionalize(orthogonal_raw)
-                    # wrapped = fractional.wrap_to_unit()
-                    # orthogonal = grid.unit_cell.orthogonalize(wrapped)
+        #             orthogonal = ca.pos
+        #             # fractional = grid.unit_cell.fractionalize(orthogonal_raw)
+        #             # wrapped = fractional.wrap_to_unit()
+        #             # orthogonal = grid.unit_cell.orthogonalize(wrapped)
 
-                    poss.append(orthogonal)
+        #             poss.append(orthogonal)
 
-                    res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
-                    i = i + 1
+        #             res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
+        #             i = i + 1
+        
+        for i, res_id in enumerate(sequence_alignment):
+            res_span = structure[res_id]
+            res = res_span[0]
+            
+            ca = res["CA"][0]
+
+            orthogonal = ca.pos
+
+            poss.append(orthogonal)
+
+            res_indexes[i] = res_id
+
 
         ca_position_array = np.array([[x for x in pos] for pos in poss])
 
@@ -2021,7 +2102,8 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, sample_rate: float = 3.0):
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, 
+                       sequence_alignment: SequenceAlignment, sample_rate: float = 3.0,):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -2032,6 +2114,7 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
+                                                   sequence_alignment,
                                                    mask_radius,
                                                    mask_radius_symmetry)
         
@@ -2295,35 +2378,50 @@ class Alignment:
 
 
     @staticmethod
-    def from_dataset(reference: Reference, dataset: Dataset):
+    def from_dataset(reference: Reference, dataset: Dataset, sequence_alignment: SequenceAlignment ):
         
         dataset_pos_list = []
         reference_pos_list = []
 
-        for model in reference.dataset.structure.structure:
-            for chain in model:
-                for ref_res in chain.get_polymer():
+        # for model in reference.dataset.structure.structure:
+        #     for chain in model:
+        #         for ref_res in chain.get_polymer():
                     
-                    # Skip unusual protein residues
-                    if  ref_res.name.upper() not in RESIDUE_NAMES:
-                        continue
+        #             # Skip unusual protein residues
+        #             if  ref_res.name.upper() not in RESIDUE_NAMES:
+        #                 continue
                     
-                    # Get the structure key of the residue
-                    res_id = ResidueID.from_residue_chain(model, chain, ref_res)
+        #             # Get the structure key of the residue
+        #             res_id = ResidueID.from_residue_chain(model, chain, ref_res)
                     
-                    # Get corresponding reses
-                    dataset_res_span = dataset.structure[res_id]
+        #             # Get corresponding reses
+        #             dataset_res_span = dataset.structure[res_id]
                     
-                    # Check if corresponding ones are actually there
-                    if len(dataset_res_span) > 0:
-                        dataset_res = dataset_res_span[0]
-                    else:
-                        continue
+        #             # Check if corresponding ones are actually there
+        #             if len(dataset_res_span) > 0:
+        #                 dataset_res = dataset_res_span[0]
+        #             else:
+        #                 continue
                     
-                    # Get the shared atoms
-                    for atom_ref, atom_dataset in zip(ref_res, dataset_res):
-                        dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
-                        reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
+        #             # Get the shared atoms
+        #             for atom_ref, atom_dataset in zip(ref_res, dataset_res):
+        #                 dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
+        #                 reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
+        
+
+        for res_id in sequence_alignment: 
+            # Get reference residue
+            ref_res_span = reference.dataset.structure[res_id]
+            ref_res = ref_res_span[0]
+            
+            # Get corresponding reses
+            dataset_res_span = dataset.structure[res_id]
+            dataset_res = dataset_res_span[0]
+            
+            # Get the shared atoms
+            for atom_ref, atom_dataset in zip(ref_res, dataset_res):
+                dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
+                reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
         
         # dataset atom coord matrix
         # dataset_atoms = dataset.structure.protein_atoms()
@@ -2351,38 +2449,79 @@ class Alignment:
 
         transforms = {}
 
-        for model in reference.dataset.structure.structure:
-            for chain in model:
-                for ref_res in chain.get_polymer():
-                    if ref_res.name.upper() not in RESIDUE_NAMES:
-                        continue
+        # for model in reference.dataset.structure.structure:
+        #     for chain in model:
+        #         for ref_res in chain.get_polymer():
+        #             if ref_res.name.upper() not in RESIDUE_NAMES:
+        #                 continue
                     
-                    # Get ca pos
-                    current_res_id = ResidueID.from_residue_chain(model, chain, ref_res)
-                    reference_ca_pos = ref_res["CA"][0].pos
+        #             # Get ca pos in reference model
+        #             current_res_id = ResidueID.from_residue_chain(model, chain, ref_res)
+        #             reference_ca_pos = ref_res["CA"][0].pos
                     
-                    #
-                    dataset_res = dataset.structure[current_res_id][0]
-                    dataset_ca_pos = dataset_res["CA"][0].pos
+        #             # Get residue span in other dataset
+        #             dataset_res_span = dataset.structure[current_res_id]
                     
-                    # dataset selection
-                    dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
-                                                                    7.0,
-                                                                    )
-                    dataset_selection = dataset_atom_array[dataset_indexes]
+        #             # CHeck if the corresponding residue is missing
+        #             if len(dataset_res_span) > 0:
+        #                 dataset_res = dataset_res_span[0]
+        #             else:
+        #                 continue
                     
-                    # other selection
-                    # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
-                    #                                                 7.0,
-                    #                                                 )
-                    reference_selection = reference_atom_array[dataset_indexes]
+        #             # Get ca position in moving dataset model
+        #             dataset_ca_pos = dataset_res["CA"][0].pos
                     
-                    transforms[current_res_id] = Transform.from_atoms(
-                        dataset_selection,
-                        reference_selection,
-                        com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
-                        com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
-                    )
+        #             # dataset selection
+        #             dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
+        #                                                             7.0,
+        #                                                             )
+        #             dataset_selection = dataset_atom_array[dataset_indexes]
+                    
+        #             # other selection
+        #             # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+        #             #                                                 7.0,
+        #             #                                                 )
+        #             reference_selection = reference_atom_array[dataset_indexes]
+                    
+        #             transforms[current_res_id] = Transform.from_atoms(
+        #                 dataset_selection,
+        #                 reference_selection,
+        #                 com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
+        #                 com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+        #             )
+        
+        for res_id in sequence_alignment:
+            # Get reference residue
+            ref_res_span = reference.dataset.structure[res_id]
+            ref_res = ref_res_span[0]
+                    
+            # Get ca pos in reference model
+            reference_ca_pos = ref_res["CA"][0].pos
+            
+            # Get residue span in other dataset
+            dataset_res_span = dataset.structure[res_id]
+            
+            # Get ca position in moving dataset model
+            dataset_ca_pos = dataset_res["CA"][0].pos
+            
+            # dataset selection
+            dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
+                                                            7.0,
+                                                            )
+            dataset_selection = dataset_atom_array[dataset_indexes]
+            
+            # other selection
+            # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+            #                                                 7.0,
+            #                                                 )
+            reference_selection = reference_atom_array[dataset_indexes]
+            
+            transforms[res_id] = Transform.from_atoms(
+                dataset_selection,
+                reference_selection,
+                com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
+                com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+            )
 
         return Alignment(transforms)
 
@@ -4890,7 +5029,7 @@ class RMSD:
             )
 
     @staticmethod
-    def from_structures(structure_1: Structure, structure_2: Structure):
+    def from_structures(structure_1: Structure, structure_2: Structure, sequence_alignment: SequenceAlignment):
 
         distances = []
 
@@ -4898,7 +5037,8 @@ class RMSD:
         positions_2 = []
 
 
-        for residues_id in structure_1.protein_residue_ids():
+        # for residues_id in structure_1.protein_residue_ids():
+        for residues_id in sequence_alignment:
             print(f"Residue id is: {residues_id}")
             
             res_1 = structure_1[residues_id][0]
