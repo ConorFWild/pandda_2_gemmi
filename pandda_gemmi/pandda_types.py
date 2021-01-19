@@ -339,7 +339,7 @@ class SequenceAlignment:
         return self._residue_id_dict[item]
     
     def __iter__(self):
-        for residue_id, missing in self._residue_id_dict:
+        for residue_id, missing in self._residue_id_dict.items():
             if missing:
                 continue
             else:
