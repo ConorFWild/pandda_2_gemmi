@@ -2102,8 +2102,8 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, 
-                       sequence_alignment: SequenceAlignment, sample_rate: float = 3.0,):
+    def from_reference(reference: Reference, sequence_alignment: SequenceAlignment, mask_radius: float, mask_radius_symmetry: float, 
+                       sample_rate: float = 3.0,):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -2500,6 +2500,7 @@ class Alignment:
             
             # Get residue span in other dataset
             dataset_res_span = dataset.structure[res_id]
+            dataset_res = dataset_res_span[0]
             
             # Get ca position in moving dataset model
             dataset_ca_pos = dataset_res["CA"][0].pos
@@ -2601,8 +2602,8 @@ class Alignments:
     alignments: typing.Dict[Dtag, Alignment]
 
     @staticmethod
-    def from_datasets(reference: Reference, datasets: Datasets):
-        alignments = {dtag: Alignment.from_dataset(reference, datasets[dtag])
+    def from_datasets(reference: Reference, datasets: Datasets, sequence_alignment: SequenceAlignment):
+        alignments = {dtag: Alignment.from_dataset(reference, datasets[dtag], sequence_alignment)
                       for dtag
                       in datasets
                       }
@@ -5026,10 +5027,11 @@ class RMSD:
         return RMSD.from_structures(
             reference.dataset.structure,
             dataset.structure,
+            
             )
 
     @staticmethod
-    def from_structures(structure_1: Structure, structure_2: Structure, sequence_alignment: SequenceAlignment):
+    def from_structures(structure_1: Structure, structure_2: Structure, ) -> RMSD:
 
         distances = []
 
@@ -5038,7 +5040,7 @@ class RMSD:
 
 
         # for residues_id in structure_1.protein_residue_ids():
-        for residues_id in sequence_alignment:
+        for residues_id in structure_1.protein_residue_ids():
             print(f"Residue id is: {residues_id}")
             
             res_1 = structure_1[residues_id][0]
@@ -5047,11 +5049,17 @@ class RMSD:
             except:
                 continue
 
-            print(f"Residue 1 is: {res_1}")
-            print(f"Residue 2 is: {res_2}")
+            # print(f"Residue 1 is: {res_1}")
+            # print(f"Residue 2 is: {res_2}")
+            try: 
+                res_1_ca = res_1["CA"][0]
+            except:
+                continue
             
-            res_1_ca = res_1["CA"][0]
-            res_2_ca = res_2["CA"][0]
+            try: 
+                res_2_ca = res_2["CA"][0]
+            except Exception as e:
+                continue
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos

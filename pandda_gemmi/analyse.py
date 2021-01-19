@@ -191,10 +191,10 @@ def main():
     # Grid
     print("Getting grid")
     grid: Grid = Grid.from_reference(reference,
+                                     sequence_alignment,
                             config.params.masks.outer_mask,
                                 config.params.masks.inner_mask_symmetry,
                                     sample_rate=config.params.diffraction_data.sample_rate,
-                                    sequence_alignment=sequence_alignment,
                                 )
     # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
     pandda_log.grid_log = logs.GridLog.from_grid(grid)
@@ -211,7 +211,7 @@ def main():
     alignments: Alignments = Alignments.from_datasets(
         reference,
         datasets,
-        sequence_alignment=sequence_alignment,
+        sequence_alignment,
         )
     pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
     
@@ -263,7 +263,6 @@ def main():
             config.params.diffraction_data.structure_factors, 
             sample_rate=config.params.diffraction_data.sample_rate,
             mapper=mapper,
-            sequence_alignment=sequence_alignment,
             ) # n x (grid size) with total_mask > 0
         finish = time.time()
         print(f"Mapped in {finish-start}")
