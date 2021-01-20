@@ -1749,11 +1749,13 @@ class Partitioning:
     @staticmethod
     def from_structure_multiprocess(structure: Structure,
                        grid: Grid,
+                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,):
         
         return Partitioning.from_structure(structure,
                        grid.grid,
+                       sequence_alignment,
                        mask_radius,
                        mask_radius_symmetry,)
         
@@ -2912,10 +2914,11 @@ class Xmap:
     def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
                          dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
-                         mask_radius_symmetry: float):
+                         mask_radius_symmetry: float, sequence_alignment):
 
         partitioning = Partitioning.from_structure(dataset.structure,
                                                    event_map_reference_grid,
+                                                   sequence_alignment,
                                                    mask_radius,
                                                    mask_radius_symmetry)
 
@@ -4386,6 +4389,7 @@ class Events:
         model, 
         pandda_fs_model,
         grid,
+        sequence_alignment,
         structure_factors, 
         outer_mask,
         inner_mask_symmetry,
@@ -4435,6 +4439,7 @@ class Events:
                     Partitioning.from_structure_multiprocess)(
                         datasets[dtag].structure,
                         grid,
+                        sequence_alignment,
                         outer_mask,
                         inner_mask_symmetry,
                     )

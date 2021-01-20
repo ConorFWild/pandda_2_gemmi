@@ -381,6 +381,7 @@ def main():
                             model,
                             pandda_fs_model,
                             grid,
+                            sequence_alignment,
                             config.params.diffraction_data.structure_factors,
                             config.params.masks.outer_mask,
                             config.params.masks.inner_mask_symmetry,
