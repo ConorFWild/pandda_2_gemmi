@@ -378,7 +378,7 @@ class SequenceAlignment:
                 
                 # See if CA is present
                 try:
-                    ca_selection = residue_span["CA"]
+                    ca_selection = residue_span[0]["CA"]
                 except Exception as e:
                     present = False
                     unmatched = unmatched + 1
