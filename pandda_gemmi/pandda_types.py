@@ -361,8 +361,10 @@ class SequenceAlignment:
     def from_reference(reference_structure: Structure, structures: typing.Iterable[Structure]):
         residue_id_dict = {}
         
+
         for residue_id in reference_structure.protein_residue_ids():
-            
+            matched = 0
+            unmatched = 0
             present = True
             # See whether other
             for structure in structures:
@@ -386,7 +388,14 @@ class SequenceAlignment:
                 except Exception as e:
                     present = False
                     break     
+                
+                matched = matched + 1
             
+            print((
+                f"Residue: {residue_id}\n"
+                f"Matched: {matched}\n"
+                f"unamtched: {unmatched}"
+            ))
             residue_id_dict[residue_id] = present
 
                 
