@@ -373,21 +373,21 @@ class SequenceAlignment:
                 # See if residue span is empty
                 if len(residue_span) == 0:
                     present = False
-                    break
+                    unmatched = unmatched + 1
                 
                 # See if CA is present
                 try:
                     ca_selection = residue_span["CA"]
                 except Exception as e:
                     present = False
-                    break
+                    unmatched = unmatched + 1
                 
                 # See if can actually get CA
                 try:
                     ca = ca_selection[0]
                 except Exception as e:
                     present = False
-                    break     
+                    unmatched = unmatched + 1
                 
                 matched = matched + 1
             
