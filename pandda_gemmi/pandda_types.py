@@ -371,24 +371,24 @@ class SequenceAlignment:
                 # See if residue span is empty
                 if len(residue_span) == 0:
                     present = False
-                    residue_id_dict[residue_id] = present
-                    continue
+                    break
                 
+                # See if CA is present
                 try:
                     ca_selection = residue_span["CA"]
-                    
-                except Exception as e:
-                    present = True
-                    residue_id_dict[residue_id] = present
-                    continue
-                
-                try:
-                    ca = ca_selection[0]
-                    
                 except Exception as e:
                     present = False
-                    residue_id_dict[residue_id] = present
-                    continue     
+                    break
+                
+                # See if can actually get CA
+                try:
+                    ca = ca_selection[0]
+                except Exception as e:
+                    present = False
+                    break     
+            
+            residue_id_dict[residue_id] = present
+
                 
         return SequenceAlignment(residue_id_dict) 
         
@@ -5078,6 +5078,10 @@ class RMSD:
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
 
+        if positions_1_array.size < 3: 
+            return RMSD(100.0)
+        if positions_2_array.size < 3: 
+            return RMSD(100.0)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
 
