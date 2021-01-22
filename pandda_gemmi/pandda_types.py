@@ -374,6 +374,7 @@ class SequenceAlignment:
                 if len(residue_span) == 0:
                     present = False
                     unmatched = unmatched + 1
+                    continue
                 
                 # See if CA is present
                 try:
@@ -381,6 +382,7 @@ class SequenceAlignment:
                 except Exception as e:
                     present = False
                     unmatched = unmatched + 1
+                    continue
                 
                 # See if can actually get CA
                 try:
@@ -388,6 +390,7 @@ class SequenceAlignment:
                 except Exception as e:
                     present = False
                     unmatched = unmatched + 1
+                    continue
                 
                 matched = matched + 1
             
