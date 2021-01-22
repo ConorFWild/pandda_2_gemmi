@@ -360,7 +360,6 @@ class SequenceAlignment:
     @staticmethod
     def from_reference(reference_structure: Structure, structures: typing.Iterable[Structure]):
         residue_id_dict = {}
-        
 
         for residue_id in reference_structure.protein_residue_ids():
             matched = 0
