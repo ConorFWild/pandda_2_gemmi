@@ -366,13 +366,14 @@ class SequenceAlignment:
             unmatched = 0
             present = True
             # See whether other
-            for structure in structures:
+            for dtag, structure in structures.items():
                 residue_span = structure[residue_id]
                 
                 # See if residue span is empty
                 if len(residue_span) == 0:
                     present = False
                     unmatched = unmatched + 1
+                    print(f"Dtag: {dtag} misses residue")
                     continue
                 
                 # See if CA is present
@@ -381,6 +382,8 @@ class SequenceAlignment:
                 except Exception as e:
                     present = False
                     unmatched = unmatched + 1
+                    print(f"Dtag: {dtag} misses CA")
+
                     continue
                 
                 # See if can actually get CA
@@ -389,6 +392,8 @@ class SequenceAlignment:
                 except Exception as e:
                     present = False
                     unmatched = unmatched + 1
+                    print(f"Dtag: {dtag} misses CA actually")
+
                     continue
                 
                 matched = matched + 1
