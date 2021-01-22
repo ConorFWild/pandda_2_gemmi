@@ -185,7 +185,7 @@ def main():
     
     # Sequence alignment
     sequence_alignment = SequenceAlignment.from_reference(reference_structure=reference.dataset.structure,
-                                                          structures=[datasets[dtag].structure for dtag in datasets],)
+                                                          structures={dtag: datasets[dtag].structure for dtag in datasets},)
     print(f"{sequence_alignment.num_missing()} residues unmatched; {sequence_alignment.present()} residues were matched")
 
     # Grid
