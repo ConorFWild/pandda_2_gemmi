@@ -1717,7 +1717,7 @@ class Partitioning:
         poss = []
         res_indexes = {}
         
-        for i, res_id in enumerate(structure.protein_residue_ids):
+        for i, res_id in enumerate(structure.protein_residue_ids()):
             res_span = structure[res_id]
             res = res_span[0]
             ca = res["CA"][0]
@@ -2124,80 +2124,80 @@ class Transform:
 
         return Transform(transform, com_reference, com_moving)
 
-    @staticmethod
-    def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
-        previous_ca_pos = previous_res["CA"][0].pos
-        current_ca_pos = current_res["CA"][0].pos
-        next_ca_pos = next_res["CA"][0].pos
+    # @staticmethod
+    # def from_residues(previous_res, current_res, next_res, previous_ref, current_ref, next_ref):
+    #     previous_ca_pos = previous_res["CA"][0].pos
+    #     current_ca_pos = current_res["CA"][0].pos
+    #     next_ca_pos = next_res["CA"][0].pos
 
-        previous_ref_ca_pos = previous_ref["CA"][0].pos
-        current_ref_ca_pos = current_ref["CA"][0].pos
-        next_ref_ca_pos = next_ref["CA"][0].pos
+    #     previous_ref_ca_pos = previous_ref["CA"][0].pos
+    #     current_ref_ca_pos = current_ref["CA"][0].pos
+    #     next_ref_ca_pos = next_ref["CA"][0].pos
 
-        matrix = np.array([
-            Transform.pos_to_list(previous_ca_pos),
-            Transform.pos_to_list(current_ca_pos),
-            Transform.pos_to_list(next_ca_pos),
-        ])
-        matrix_ref = np.array([
-            Transform.pos_to_list(previous_ref_ca_pos),
-            Transform.pos_to_list(current_ref_ca_pos),
-            Transform.pos_to_list(next_ref_ca_pos),
-        ])
+    #     matrix = np.array([
+    #         Transform.pos_to_list(previous_ca_pos),
+    #         Transform.pos_to_list(current_ca_pos),
+    #         Transform.pos_to_list(next_ca_pos),
+    #     ])
+    #     matrix_ref = np.array([
+    #         Transform.pos_to_list(previous_ref_ca_pos),
+    #         Transform.pos_to_list(current_ref_ca_pos),
+    #         Transform.pos_to_list(next_ref_ca_pos),
+    #     ])
 
-        mean = np.mean(matrix, axis=0)
-        mean_ref = np.mean(matrix_ref, axis=0)
+    #     mean = np.mean(matrix, axis=0)
+    #     mean_ref = np.mean(matrix_ref, axis=0)
 
-        # vec = mean_ref - mean
-        vec = np.array([0.0, 0.0, 0.0])
+    #     # vec = mean_ref - mean
+    #     vec = np.array([0.0, 0.0, 0.0])
 
-        de_meaned = matrix - mean
-        de_meaned_ref = matrix_ref - mean_ref
+    #     de_meaned = matrix - mean
+    #     de_meaned_ref = matrix_ref - mean_ref
 
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+    #     rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com_reference = mean_ref
-        com_moving = mean
+    #     com_reference = mean_ref
+    #     com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+    #     return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
     @staticmethod
     def pos_to_list(pos: gemmi.Position):
         return [pos[0], pos[1], pos[2]]
 
-    @staticmethod
-    def from_start_residues(current_res, next_res, current_ref, next_ref):
-        current_ca_pos = current_res["CA"][0].pos
-        next_ca_pos = next_res["CA"][0].pos
+    # @staticmethod
+    # def from_start_residues(current_res, next_res, current_ref, next_ref):
+    #     current_ca_pos = current_res["CA"][0].pos
+    #     next_ca_pos = next_res["CA"][0].pos
 
-        current_ref_ca_pos = current_ref["CA"][0].pos
-        next_ref_ca_pos = next_ref["CA"][0].pos
+    #     current_ref_ca_pos = current_ref["CA"][0].pos
+    #     next_ref_ca_pos = next_ref["CA"][0].pos
 
-        matrix = np.array([
-            Transform.pos_to_list(current_ca_pos),
-            Transform.pos_to_list(next_ca_pos),
-        ])
-        matrix_ref = np.array([
-            Transform.pos_to_list(current_ref_ca_pos),
-            Transform.pos_to_list(next_ref_ca_pos),
-        ])
+    #     matrix = np.array([
+    #         Transform.pos_to_list(current_ca_pos),
+    #         Transform.pos_to_list(next_ca_pos),
+    #     ])
+    #     matrix_ref = np.array([
+    #         Transform.pos_to_list(current_ref_ca_pos),
+    #         Transform.pos_to_list(next_ref_ca_pos),
+    #     ])
 
-        mean = np.mean(matrix, axis=0)
-        mean_ref = np.mean(matrix_ref, axis=0)
+    #     mean = np.mean(matrix, axis=0)
+    #     mean_ref = np.mean(matrix_ref, axis=0)
 
-        # vec = mean_ref - mean
-        vec = np.array([0.0, 0.0, 0.0])
+    #     # vec = mean_ref - mean
+    #     vec = np.array([0.0, 0.0, 0.0])
 
-        de_meaned = matrix - mean
-        de_meaned_ref = matrix_ref - mean_ref
+    #     de_meaned = matrix - mean
+    #     de_meaned_ref = matrix_ref - mean_ref
 
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+    #     rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com_reference = mean_ref
+    #     com_reference = mean_ref
 
-        com_moving = mean
+    #     com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+    #     return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
     
     @staticmethod
     def from_atoms(dataset_selection,
@@ -2231,39 +2231,39 @@ class Transform:
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
         
 
-    @staticmethod
-    def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
-        previous_ca_pos = previous_res["CA"][0].pos
-        current_ca_pos = current_res["CA"][0].pos
+    # @staticmethod
+    # def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
+    #     previous_ca_pos = previous_res["CA"][0].pos
+    #     current_ca_pos = current_res["CA"][0].pos
 
-        previous_ref_ca_pos = previous_ref["CA"][0].pos
-        current_ref_ca_pos = current_ref["CA"][0].pos
+    #     previous_ref_ca_pos = previous_ref["CA"][0].pos
+    #     current_ref_ca_pos = current_ref["CA"][0].pos
 
-        matrix = np.array([
-            Transform.pos_to_list(previous_ca_pos),
-            Transform.pos_to_list(current_ca_pos),
-        ])
-        matrix_ref = np.array([
-            Transform.pos_to_list(previous_ref_ca_pos),
-            Transform.pos_to_list(current_ref_ca_pos),
-        ])
+    #     matrix = np.array([
+    #         Transform.pos_to_list(previous_ca_pos),
+    #         Transform.pos_to_list(current_ca_pos),
+    #     ])
+    #     matrix_ref = np.array([
+    #         Transform.pos_to_list(previous_ref_ca_pos),
+    #         Transform.pos_to_list(current_ref_ca_pos),
+    #     ])
 
-        mean = np.mean(matrix, axis=0)
-        mean_ref = np.mean(matrix_ref, axis=0)
+    #     mean = np.mean(matrix, axis=0)
+    #     mean_ref = np.mean(matrix_ref, axis=0)
 
-        # vec = mean_ref - mean
-        vec = np.array([0.0, 0.0, 0.0])
+    #     # vec = mean_ref - mean
+    #     vec = np.array([0.0, 0.0, 0.0])
 
-        de_meaned = matrix - mean
-        de_meaned_ref = matrix_ref - mean_ref
+    #     de_meaned = matrix - mean
+    #     de_meaned_ref = matrix_ref - mean_ref
 
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+    #     rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
-        com_reference = mean_ref
+    #     com_reference = mean_ref
 
-        com_moving = mean
+    #     com_moving = mean
 
-        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+    #     return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
     
     def __getstate__(self):
         transform_python = TransformPython.from_gemmi(self.transform)
