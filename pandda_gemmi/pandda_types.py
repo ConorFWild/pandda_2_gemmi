@@ -159,6 +159,11 @@ class Structure:
                     if residue.name.upper() not in RESIDUE_NAMES:
                         continue
                     
+                    try:
+                        has_ca = residue["CA"][0]
+                    except Exception as e:
+                        continue
+                    
                     resid = ResidueID.from_residue_chain(model, chain, residue)                        
                     yield resid
 
@@ -1512,86 +1517,16 @@ class Partitioning:
     @staticmethod
     def from_reference(reference: Reference,
                        grid: gemmi.FloatGrid,
-                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
 
-        #
-        # array = np.array(grid, copy=False)
-        #
-        # spacing = np.array([grid.nu, grid.nv, grid.nw])
-        #
-        # poss = []
-        # res_indexes = {}
-        # i = 0
-        # for model in reference.dataset.structure.structure:
-        #     for chain in model:
-        #         for res in chain.get_polymer():
-        #             ca = res["CA"][0]
-        #
-        #             position = ca.pos
-        #
-        #             fractional = grid.unit_cell.fractionalize(position)
-        #
-        #             poss.append(fractional)
-        #
-        #             res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
-        #             i = i + 1
-        #
-        # ca_position_array = np.array([[x for x in pos] for pos in poss])
-        #
-        # kdtree = spatial.KDTree(ca_position_array)
-        #
-        # mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
-        # mask.spacegroup = grid.spacegroup
-        # mask.set_unit_cell(grid.unit_cell)
-        # for atom in reference.dataset.structure.protein_atoms():
-        #     pos = atom.pos
-        #     mask.set_points_around(pos,
-        #                            radius=mask_radius,
-        #                            value=1,
-        #                            )
-        #
-        # mask_array = np.array(mask, copy=False)
-        #
-        # coord_array = np.argwhere(mask_array == 1)
-        #
-        # # points_array = PointsArray.from_array(coord_array)
-        # #
-        # # position_array = PositionsArray.from_points_array(points_array)
-        #
-        # query_points = coord_array / spacing
-        #
-        # distances, indexes = kdtree.query(query_points)
-        #
-        # partitions = {}
-        # for i, coord_as_array in enumerate(coord_array):
-        #     coord = (coord_as_array[0], coord_as_array[1], coord_as_array[2])
-        #
-        #     res_num = indexes[i]
-        #
-        #     res_id = res_indexes[res_num]
-        #
-        #     if res_id not in partitions:
-        #         partitions[res_id] = {}
-        #
-        #     partitions[res_id][coord] = grid.unit_cell.orthogonalize(gemmi.Fractional(coord[0] / spacing[0],
-        #                                                                               coord[1] / spacing[1],
-        #                                                                               coord[2] / spacing[2],
-        #                                                                               )
-        #                                                              )
-        #
-        # symmetry_mask = Partitioning.get_symmetry_contact_mask(reference.dataset.structure, mask, mask_radius)
 
         return Partitioning.from_structure(reference.dataset.structure,
                                            grid,
-                                           sequence_alignment,
                                            mask_radius,
                                            mask_radius_symmetry,
                                            )
-
-        # return Partitioning(partitions, mask, symmetry_mask)
     
     @staticmethod
     def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float=6.0, buffer: float=3.0):
@@ -1765,53 +1700,29 @@ class Partitioning:
     @staticmethod
     def from_structure_multiprocess(structure: Structure,
                        grid: Grid,
-                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,):
         
         return Partitioning.from_structure(structure,
                        grid.grid,
-                       sequence_alignment,
                        mask_radius,
                        mask_radius_symmetry,)
         
     @staticmethod
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
-                       sequence_alignment: SequenceAlignment,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
         poss = []
         res_indexes = {}
-        # for model in structure.structure:
-        #     for chain in model:
-        #         for res in chain.get_polymer():
-        #             if res.name.upper() not in RESIDUE_NAMES:
-        #                 continue
-                    
-        #             ca = res["CA"][0]
-
-        #             orthogonal = ca.pos
-        #             # fractional = grid.unit_cell.fractionalize(orthogonal_raw)
-        #             # wrapped = fractional.wrap_to_unit()
-        #             # orthogonal = grid.unit_cell.orthogonalize(wrapped)
-
-        #             poss.append(orthogonal)
-
-        #             res_indexes[i] = ResidueID.from_residue_chain(model, chain, res)
-        #             i = i + 1
         
-        for i, res_id in enumerate(sequence_alignment):
+        for i, res_id in enumerate(structure.protein_residue_ids):
             res_span = structure[res_id]
             res = res_span[0]
-            
             ca = res["CA"][0]
-
             orthogonal = ca.pos
-
             poss.append(orthogonal)
-
             res_indexes[i] = res_id
 
 
@@ -1832,24 +1743,6 @@ class Partitioning:
 
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
         symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
-
-
-        # Get the positions of the protein masked grid points
-        # We need the positions in the protein frame
-        # coord_array = np.argwhere(mask_array == 1)
-
-        # positions = []
-        # for coord in coord_array:
-        #     point = mask.get_point(*coord)
-        #     position = mask.point_to_position(point)
-        #     positions.append((position[0],
-        #                       position[1],
-        #                       position[2],
-        #     )
-        #                      )
-        # position_array = np.array(positions)
-        
-        
 
         coord_tuple_source, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
             mask,
@@ -1897,8 +1790,6 @@ class Partitioning:
         position_array = np.array(position_list)
 
         distances, indexes = kdtree.query(position_array)
-        
-
         
         # Get the partitions
         partitions = {}
@@ -2120,7 +2011,7 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, sequence_alignment: SequenceAlignment, mask_radius: float, mask_radius_symmetry: float, 
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, 
                        sample_rate: float = 3.0,):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
@@ -2132,7 +2023,6 @@ class Grid:
 
         partitioning = Partitioning.from_reference(reference,
                                                    grid,
-                                                   sequence_alignment,
                                                    mask_radius,
                                                    mask_radius_symmetry)
         
@@ -2320,8 +2210,10 @@ class Transform:
         
         # mean = np.mean(dataset_selection, axis=0)
         # mean_ref = np.mean(reference_selection, axis=0)
-        mean = np.array(com_dataset)
-        mean_ref = np.array(com_reference)
+        # mean = np.array(com_dataset)
+        # mean_ref = np.array(com_reference)
+        mean = com_dataset
+        mean_ref = com_reference
         
 
         # vec = mean_ref - mean
@@ -2396,69 +2288,44 @@ class Alignment:
 
 
     @staticmethod
-    def from_dataset(reference: Reference, dataset: Dataset, sequence_alignment: SequenceAlignment ):
+    def from_dataset(reference: Reference, dataset: Dataset ):
         
         dataset_pos_list = []
         reference_pos_list = []
 
-        # for model in reference.dataset.structure.structure:
-        #     for chain in model:
-        #         for ref_res in chain.get_polymer():
-                    
-        #             # Skip unusual protein residues
-        #             if  ref_res.name.upper() not in RESIDUE_NAMES:
-        #                 continue
-                    
-        #             # Get the structure key of the residue
-        #             res_id = ResidueID.from_residue_chain(model, chain, ref_res)
-                    
-        #             # Get corresponding reses
-        #             dataset_res_span = dataset.structure[res_id]
-                    
-        #             # Check if corresponding ones are actually there
-        #             if len(dataset_res_span) > 0:
-        #                 dataset_res = dataset_res_span[0]
-        #             else:
-        #                 continue
-                    
-        #             # Get the shared atoms
-        #             for atom_ref, atom_dataset in zip(ref_res, dataset_res):
-        #                 dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
-        #                 reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
-        
-
-        for res_id in sequence_alignment: 
-            # Get reference residue
-            ref_res_span = reference.dataset.structure[res_id]
-            ref_res = ref_res_span[0]
+        # Iterate protein atoms, then pull out their atoms, and search them
+        for res_id in reference.dataset.structure.protein_residue_ids(): 
             
-            # Get corresponding reses
-            dataset_res_span = dataset.structure[res_id]
-            dataset_res = dataset_res_span[0]
-            
-            # Get the shared atoms
-            for atom_ref, atom_dataset in zip(ref_res, dataset_res):
-                dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
+            # Get the matchable CAs
+            try:
+                # Get reference residue
+                ref_res_span = reference.dataset.structure[res_id]
+                ref_res = ref_res_span[0]
+                                            
+                # Get corresponding reses
+                dataset_res_span = dataset.structure[res_id]
+                dataset_res = dataset_res_span[0]
+                
+                # Get the CAs
+                atom_ref = ref_res["CA"][0]
+                atom_dataset = dataset_res["CA"][0]
+                
+                
+                # Get the shared atoms
                 reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
+                dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
         
-        # dataset atom coord matrix
-        # dataset_atoms = dataset.structure.protein_atoms()
-        # dataset_pos_list = []
-        # for atom in dataset_atoms:
-        #     dataset_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
+            except Exception as e:
+                print(f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
+                continue
+        
         dataset_atom_array = np.array(dataset_pos_list)
-        
-        # Other atom coord matrix
-        # reference_atoms = reference.dataset.structure.protein_atoms()
-        # reference_pos_list = []
-        # for atom in reference_atoms:
-        #     reference_pos_list.append([atom.pos.x, atom.pos.y, atom.pos.z, ])
         reference_atom_array = np.array(reference_pos_list)
         
         # dataset kdtree
         dataset_tree = spatial.KDTree(dataset_atom_array)
         # Other kdtree
-        # reference_tree = spatial.KDTree(reference_atom_array)
+        reference_tree = spatial.KDTree(reference_atom_array)
         
         if reference_atom_array.size != dataset_atom_array.size:
             raise AlignmentUnmatchedAtomsError(reference_atom_array,
@@ -2467,48 +2334,8 @@ class Alignment:
 
         transforms = {}
 
-        # for model in reference.dataset.structure.structure:
-        #     for chain in model:
-        #         for ref_res in chain.get_polymer():
-        #             if ref_res.name.upper() not in RESIDUE_NAMES:
-        #                 continue
-                    
-        #             # Get ca pos in reference model
-        #             current_res_id = ResidueID.from_residue_chain(model, chain, ref_res)
-        #             reference_ca_pos = ref_res["CA"][0].pos
-                    
-        #             # Get residue span in other dataset
-        #             dataset_res_span = dataset.structure[current_res_id]
-                    
-        #             # CHeck if the corresponding residue is missing
-        #             if len(dataset_res_span) > 0:
-        #                 dataset_res = dataset_res_span[0]
-        #             else:
-        #                 continue
-                    
-        #             # Get ca position in moving dataset model
-        #             dataset_ca_pos = dataset_res["CA"][0].pos
-                    
-        #             # dataset selection
-        #             dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
-        #                                                             7.0,
-        #                                                             )
-        #             dataset_selection = dataset_atom_array[dataset_indexes]
-                    
-        #             # other selection
-        #             # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
-        #             #                                                 7.0,
-        #             #                                                 )
-        #             reference_selection = reference_atom_array[dataset_indexes]
-                    
-        #             transforms[current_res_id] = Transform.from_atoms(
-        #                 dataset_selection,
-        #                 reference_selection,
-        #                 com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
-        #                 com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
-        #             )
-        
-        for res_id in sequence_alignment:
+        # Start searching        
+        for res_id in reference.dataset.structure.protein_residue_ids():
             # Get reference residue
             ref_res_span = reference.dataset.structure[res_id]
             ref_res = ref_res_span[0]
@@ -2516,30 +2343,35 @@ class Alignment:
             # Get ca pos in reference model
             reference_ca_pos = ref_res["CA"][0].pos
             
-            # Get residue span in other dataset
-            dataset_res_span = dataset.structure[res_id]
-            dataset_res = dataset_res_span[0]
+            # # Get residue span in other dataset
+            # dataset_res_span = dataset.structure[res_id]
+            # dataset_res = dataset_res_span[0]
             
-            # Get ca position in moving dataset model
-            dataset_ca_pos = dataset_res["CA"][0].pos
+            # # Get ca position in moving dataset model
+            # dataset_ca_pos = dataset_res["CA"][0].pos
             
             # dataset selection
-            dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
-                                                            7.0,
-                                                            )
-            dataset_selection = dataset_atom_array[dataset_indexes]
-            
-            # other selection
-            # reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+            # dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
             #                                                 7.0,
             #                                                 )
-            reference_selection = reference_atom_array[dataset_indexes]
+            # dataset_selection = dataset_atom_array[dataset_indexes]
+            
+            # other selection
+            reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+                                                            7.0,
+                                                            )
+            reference_selection = reference_atom_array[reference_indexes]
+            dataset_selection = dataset_atom_array[reference_indexes]
+
             
             transforms[res_id] = Transform.from_atoms(
                 dataset_selection,
                 reference_selection,
-                com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
-                com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+                # com_dataset=[dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z],
+                # com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+                com_dataset=np.mean(dataset_selection, axis=0),
+                com_reference=np.mean(reference_selection, axis=0),
+                
             )
 
         return Alignment(transforms)
@@ -2620,8 +2452,8 @@ class Alignments:
     alignments: typing.Dict[Dtag, Alignment]
 
     @staticmethod
-    def from_datasets(reference: Reference, datasets: Datasets, sequence_alignment: SequenceAlignment):
-        alignments = {dtag: Alignment.from_dataset(reference, datasets[dtag], sequence_alignment)
+    def from_datasets(reference: Reference, datasets: Datasets):
+        alignments = {dtag: Alignment.from_dataset(reference, datasets[dtag])
                       for dtag
                       in datasets
                       }
@@ -2930,11 +2762,10 @@ class Xmap:
     def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
                          dataset: Dataset, alignment: Alignment, grid: Grid,
                          structure_factors: StructureFactors, mask_radius: float,
-                         mask_radius_symmetry: float, sequence_alignment):
+                         mask_radius_symmetry: float):
 
         partitioning = Partitioning.from_structure(dataset.structure,
                                                    event_map_reference_grid,
-                                                   sequence_alignment,
                                                    mask_radius,
                                                    mask_radius_symmetry)
 
@@ -4403,7 +4234,6 @@ class Events:
         model, 
         pandda_fs_model,
         grid,
-        sequence_alignment,
         structure_factors, 
         outer_mask,
         inner_mask_symmetry,
@@ -4453,7 +4283,6 @@ class Events:
                     Partitioning.from_structure_multiprocess)(
                         datasets[dtag].structure,
                         grid,
-                        sequence_alignment,
                         outer_mask,
                         inner_mask_symmetry,
                     )

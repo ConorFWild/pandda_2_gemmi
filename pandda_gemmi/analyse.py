@@ -183,15 +183,9 @@ def main():
 
     datasets = datasets_diss_space
     
-    # Sequence alignment
-    sequence_alignment = SequenceAlignment.from_reference(reference_structure=reference.dataset.structure,
-                                                          structures={dtag: datasets[dtag].structure for dtag in datasets},)
-    print(f"{sequence_alignment.num_missing()} residues unmatched; {sequence_alignment.present()} residues were matched")
-
     # Grid
     print("Getting grid")
     grid: Grid = Grid.from_reference(reference,
-                                     sequence_alignment,
                             config.params.masks.outer_mask,
                                 config.params.masks.inner_mask_symmetry,
                                     sample_rate=config.params.diffraction_data.sample_rate,
@@ -211,7 +205,6 @@ def main():
     alignments: Alignments = Alignments.from_datasets(
         reference,
         datasets,
-        sequence_alignment,
         )
     pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
     
@@ -381,7 +374,6 @@ def main():
                             model,
                             pandda_fs_model,
                             grid,
-                            sequence_alignment,
                             config.params.diffraction_data.structure_factors,
                             config.params.masks.outer_mask,
                             config.params.masks.inner_mask_symmetry,
