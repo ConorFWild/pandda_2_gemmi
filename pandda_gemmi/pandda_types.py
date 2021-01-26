@@ -4272,12 +4272,7 @@ class Events:
                     ) == 0:
                     event_dtag_list.append(dtag)
                     
-            # Get partitionings
-            
-            # partitioning = Partitioning.from_structure(dataset.structure,
-            #                                         event_map_reference_grid,
-            #                                         mask_radius,
-            #                                         mask_radius_symmetry)
+
             results = mapper(
                 delayed(
                     Partitioning.from_structure_multiprocess)(
