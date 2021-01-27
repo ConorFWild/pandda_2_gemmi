@@ -4961,6 +4961,8 @@ class MapperJoblib:
                                        max_nbytes=max_nbytes,
                                        backend=backend,
                                        ).__enter__()
+        
+        
         return MapperJoblib(parallel_env)
 
     def map_list(self, func, *args):
@@ -5010,11 +5012,17 @@ class JoblibMapper:
     
     @staticmethod
     def initialise():
+        # mapper = joblib.Parallel(n_jobs=20, 
+        #                               verbose=15,
+        #                               backend="loky",
+        #                                max_nbytes=None,
+        #                                )
         mapper = joblib.Parallel(n_jobs=20, 
-                                      verbose=15,
-                                      backend="loky",
-                                       max_nbytes=None,
-                                       )
+                                verbose=15,
+                                backend="loky",
+                                max_nbytes=None,
+                                prefer="threads",
+                                )
         return JoblibMapper(mapper) 
     
     def __call__(self, iterable) -> Any:
