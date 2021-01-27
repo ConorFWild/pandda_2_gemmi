@@ -5030,7 +5030,7 @@ class JoblibMapper:
                                 verbose=15,
                                 backend="loky",
                                 max_nbytes=None,
-                                prefer="threads",
+                                # prefer="threads",
                                 )
         return JoblibMapper(mapper) 
     

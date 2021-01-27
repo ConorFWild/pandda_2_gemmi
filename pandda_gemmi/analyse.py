@@ -255,7 +255,7 @@ def main():
             grid,
             config.params.diffraction_data.structure_factors, 
             sample_rate=config.params.diffraction_data.sample_rate,
-            mapper=mapper,
+            mapper=None,
             ) # n x (grid size) with total_mask > 0
         finish = time.time()
         print(f"Mapped in {finish-start}")
