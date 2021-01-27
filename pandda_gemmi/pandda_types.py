@@ -2357,7 +2357,7 @@ class Alignment:
             # dataset_selection = dataset_atom_array[dataset_indexes]
             
             # other selection
-            reference_indexes = dataset_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
+            reference_indexes = reference_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
                                                             7.0,
                                                             )
             reference_selection = reference_atom_array[reference_indexes]
