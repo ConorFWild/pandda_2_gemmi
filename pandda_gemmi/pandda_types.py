@@ -2673,15 +2673,15 @@ class Xmap:
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
                 
-        for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
+        # for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
         
-            print((
-                f"point: {point}\n"
-                f"Position: {position}\n"
-                f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
-                f"com moving: {com_moving} \n"
-                f"Com moving: {com_reference}\n"
-            ))
+            # print((
+            #     f"point: {point}\n"
+            #     f"Position: {position}\n"
+            #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
+            #     f"com moving: {com_moving} \n"
+            #     f"Com moving: {com_reference}\n"
+            # ))
                         
 
         # Interpolate values
