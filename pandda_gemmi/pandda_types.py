@@ -2363,6 +2363,7 @@ class Alignment:
             reference_selection = reference_atom_array[reference_indexes]
             dataset_selection = dataset_atom_array[reference_indexes]
 
+            print(f"Dataset selection shape: {dataset_selection.shape}")
             
             transforms[res_id] = Transform.from_atoms(
                 dataset_selection,
