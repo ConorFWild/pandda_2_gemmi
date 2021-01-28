@@ -961,6 +961,15 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
+    
+    def remove_models_with_large_gaps(self, reference: Reference):
+        new_dtags = filter(lambda dtag: Alignment.has_large_gap(reference, self.datasets[dtag]),
+                           self.datasets,
+                           )
+
+        new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
+
+        return Datasets(new_datasets)
 
     def remove_invalid_structure_factor_datasets(self,
                                                  structure_factors: StructureFactors,
@@ -2286,6 +2295,15 @@ class Alignment:
     def __getitem__(self, item: ResidueID):
         return self.transforms[item]
 
+    @staticmethod
+    def has_large_gap(reference: Reference, dataset: Dataset ):
+        try:
+            Alignment.from_dataset(reference, dataset)
+            
+        except ExceptionUnmatchedAlignmentMarker as e:
+            return False
+        
+        return True
 
     @staticmethod
     def from_dataset(reference: Reference, dataset: Dataset ):
@@ -2356,7 +2374,7 @@ class Alignment:
             # dataset selection
             # dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
             #                                                 7.0,
-            #                                                 )
+            #                      ExceptionNoCommonAtoms                           )
             # dataset_selection = dataset_atom_array[dataset_indexes]
             
             # other selection

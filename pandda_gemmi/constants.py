@@ -71,4 +71,4 @@ STAGE_FILTER_RFREE = "Filter bad rfree dataset"
 STAGE_FILTER_WILSON = "Filter bad wilson datasets"
 STAGE_FILTER_STRUCTURE = "Filter dissimilar structure datasets"
 STAGE_FILTER_SPACE_GROUP = "Filter different space group datasets"
-
+STAGE_FILTER_GAPS = "Filter datasets with large gaps"

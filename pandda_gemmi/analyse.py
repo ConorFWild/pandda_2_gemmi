@@ -176,9 +176,17 @@ def main():
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother, datasets_diss_struc)
     dataset_validator.validate(datasets_diss_struc, constants.STAGE_FILTER_STRUCTURE)
 
+    print("Removing models with large gaps")
+    datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference,)
+    pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_diss_struc, datasets_gaps)
+    for dtag in datasets_gaps:
+        if dtag not in datasets_diss_struc.datasets:
+            print(f"WARNING: Removed dataset {dtag} due to a large gap")
+    dataset_validator.validate(datasets_gaps, constants.STAGE_FILTER_GAPS)
 
-    datasets_diss_space: Datasets = datasets_diss_struc.remove_dissimilar_space_groups(reference)
-    pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(datasets_diss_struc, datasets_diss_space)
+    print("Removing dissimilar space groups")
+    datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
+    pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(datasets_gaps, datasets_diss_space)
     dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
 
     datasets = datasets_diss_space
