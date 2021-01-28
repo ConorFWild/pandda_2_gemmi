@@ -2462,7 +2462,7 @@ class Alignments:
     def from_datasets(reference: Reference, datasets: Datasets):
         alignments = {}
         for dtag in datasets:
-            print(f"Getting alignment for dataset: {dtag}")
+            print(f"Getting alignment for dataset: {dtag} against reference: {reference.dtag}")
             alignments[dtag] = Alignment.from_dataset(reference, datasets[dtag])
 
         return Alignments(alignments)
