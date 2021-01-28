@@ -2460,10 +2460,11 @@ class Alignments:
 
     @staticmethod
     def from_datasets(reference: Reference, datasets: Datasets):
-        alignments = {dtag: Alignment.from_dataset(reference, datasets[dtag])
-                      for dtag
-                      in datasets
-                      }
+        alignments = {}
+        for dtag in datasets:
+            print(f"Getting alignment for dataset: {dtag}")
+            alignments[dtag] = Alignment.from_dataset(reference, datasets[dtag])
+
         return Alignments(alignments)
 
     def __getitem__(self, item):
