@@ -2306,7 +2306,7 @@ class Alignment:
         return True
 
     @staticmethod
-    def from_dataset(reference: Reference, dataset: Dataset ):
+    def from_dataset(reference: Reference, dataset: Dataset, marker_atom_search_radius=10.0):
         
         dataset_pos_list = []
         reference_pos_list = []
@@ -2379,7 +2379,7 @@ class Alignment:
             
             # other selection
             reference_indexes = reference_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
-                                                            7.0,
+                                                            marker_atom_search_radius,
                                                             )
             reference_selection = reference_atom_array[reference_indexes]
             dataset_selection = dataset_atom_array[reference_indexes]
