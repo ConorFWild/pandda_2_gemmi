@@ -17,3 +17,16 @@ class ExceptionTooFewDatasets(Exception):
         super().__init__(message)
         
         
+class ExceptionUnmatchedAlignmentMarker(Exception):
+    def __init__(self, residue_id) -> None:
+        
+        message = f"Found no reference atoms to compare against for residue: {residue_id}"
+        
+        super().__init__(message)
+        
+class ExceptionNoCommonAtoms(Exception):
+    def __init__(self) -> None:
+        
+        message = f"Found no common atoms!"
+        
+        super().__init__(message)

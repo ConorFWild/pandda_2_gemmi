@@ -2322,6 +2322,9 @@ class Alignment:
         dataset_atom_array = np.array(dataset_pos_list)
         reference_atom_array = np.array(reference_pos_list)
         
+        if (reference_atom_array.shape[0] == 0)  or (dataset_atom_array.shape[0] == 0):
+            raise ExceptionNoCommonAtoms()
+        
         # dataset kdtree
         dataset_tree = spatial.KDTree(dataset_atom_array)
         # Other kdtree
@@ -2364,6 +2367,9 @@ class Alignment:
             dataset_selection = dataset_atom_array[reference_indexes]
 
             print(f"Dataset selection shape: {dataset_selection.shape}")
+            
+            if dataset_selection.shape[0] == 0:
+                raise ExceptionUnmatchedAlignmentMarker(res_id)
             
             transforms[res_id] = Transform.from_atoms(
                 dataset_selection,
