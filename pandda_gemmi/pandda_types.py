@@ -2383,8 +2383,6 @@ class Alignment:
                                                             )
             reference_selection = reference_atom_array[reference_indexes]
             dataset_selection = dataset_atom_array[reference_indexes]
-
-            print(f"Dataset selection shape: {dataset_selection.shape}")
             
             if dataset_selection.shape[0] == 0:
                 raise ExceptionUnmatchedAlignmentMarker(res_id)
