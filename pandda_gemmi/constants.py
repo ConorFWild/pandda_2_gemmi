@@ -72,3 +72,11 @@ STAGE_FILTER_WILSON = "Filter bad wilson datasets"
 STAGE_FILTER_STRUCTURE = "Filter dissimilar structure datasets"
 STAGE_FILTER_SPACE_GROUP = "Filter different space group datasets"
 STAGE_FILTER_GAPS = "Filter datasets with large gaps"
+
+
+MISSES = [
+    'ATAD2A-x1835',
+    'CAMK1DA-x0083', 'CAMK1DA-x0091', 'CAMK1DA-x0145', 'CAMK1DA-x0208', 'CAMK1DA-x0218', 'CAMK1DA-x0299',
+    'FAM83BA-x0786', 'FAM83BA-x0813', 'FAM83BA-x0837', 'FAM83BA-x0958', 'FAM83BA-x0963',
+    'HAO1A-x0208', 'HAO1A-x0368', 'HAO1A-x0377', 'HAO1A-x0518', 'HAO1A-x0523', 'HAO1A-x0566', 'HAO1A-x0567', 'HAO1A-x0592', 'HAO1A-x0599', 'HAO1A-x0603', 'HAO1A-x0671', 'HAO1A-x0678', 'HAO1A-x0713', 'HAO1A-x0763', 'HAO1A-x0808', 'HAO1A-x0825', 'HAO1A-x0826', 'HAO1A-x0841', 'HAO1A-x0889',
+    ]
