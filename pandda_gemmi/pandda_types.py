@@ -2303,6 +2303,9 @@ class Alignment:
         except ExceptionUnmatchedAlignmentMarker as e:
             return False
         
+        except ExceptionNoCommonAtoms as e:
+            return False
+        
         return True
 
     @staticmethod
