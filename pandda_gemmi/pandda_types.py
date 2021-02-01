@@ -5055,7 +5055,8 @@ class JoblibMapper:
         #                                )
         mapper = joblib.Parallel(n_jobs=20, 
                                 verbose=15,
-                                backend="loky",
+                                # backend="loky",
+                                backend="multiprocessing",
                                 max_nbytes=None,
                                 # prefer="threads",
                                 )
