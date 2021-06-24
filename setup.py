@@ -14,7 +14,7 @@ def requirements():
 setuptools.setup(
     name="pandda_gemmi",
     version="0.0.1",
-    author="Conor Francis Wild",
+    author="Conor Francis Wild; Nick Pearce",
     author_email="conor.wild@sky.com",
     description="A package for handling many crystalographic datasets simultainiously",
     long_description="",
@@ -26,6 +26,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=2.7',
+    python_requires='>=3.7',
     install_requires=requirements(),
 )

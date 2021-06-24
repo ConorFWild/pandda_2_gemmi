@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/pandda_gemmi.iml" filepath="$PROJECT_DIR$/.idea/pandda_gemmi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pandda_2_gemmi.iml" filepath="$PROJECT_DIR$/.idea/pandda_2_gemmi.iml" />
     </modules>
   </component>
 </project>
