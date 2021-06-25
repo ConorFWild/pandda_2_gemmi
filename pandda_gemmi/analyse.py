@@ -30,7 +30,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
-from pandda_gemmi.pandda_functions import process_local_joblib, get_shells
+from pandda_gemmi.pandda_functions import process_local_joblib, get_shells, get_comparators_high_res_random
 
 set_loky_pickler('pickle')
 
