@@ -85,7 +85,7 @@ def get_shells(
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
 
-    for dtag, comparison_dtags in comparators:
+    for dtag, comparison_dtags in comparators.items():
         low_res = max([resolutions[comparison_dtag] for comparison_dtag in comparison_dtags])
 
         for res in shells:
