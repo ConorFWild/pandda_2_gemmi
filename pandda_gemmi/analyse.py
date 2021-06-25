@@ -355,6 +355,9 @@ def main(
         high_res_increment,
     )
 
+    print("Shells are:")
+    printer.pprint(shells)
+
     # Define how to process a shell
     def process_shell(shell):
         print(f"Working on shell: {shell}")
