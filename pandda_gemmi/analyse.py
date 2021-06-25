@@ -30,7 +30,12 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
-from pandda_gemmi.pandda_functions import process_local_joblib, get_shells, get_comparators_high_res_random
+from pandda_gemmi.pandda_functions import (
+    process_local_joblib,
+    process_global_serial,
+    get_shells,
+    get_comparators_high_res_random,
+)
 
 set_loky_pickler('pickle')
 
@@ -186,7 +191,7 @@ def main(
 
     # Get global processor
     if global_processing == "serial":
-        process_global = ...
+        process_global = process_global_serial
     elif global_processing == "cluster":
         raise NotImplementedError()
         process_global = ...

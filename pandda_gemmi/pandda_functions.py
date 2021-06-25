@@ -19,6 +19,14 @@ def process_local_joblib(n_jobs, verbosity, funcs):
     return results
 
 
+def process_global_serial(funcs):
+    results = []
+    for func in funcs:
+        results.append(func())
+
+    return results
+
+
 def get_comparators_high_res_random(
         datasets: Dict[Dtag, Dataset],
         comparison_min_comparators,
@@ -33,17 +41,18 @@ def get_comparators_high_res_random(
         )
     )
 
-    highest_res_datasets = dtags_by_res[:comparison_min_comparators]
-    highest_res_datasets_max = max([datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators+1]
+    highest_res_datasets_max = max(
+        [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     comparators = {}
     for dtag in dtag_list:
-
         current_res = datasets[dtag].reflections.resolution().resolution
 
         truncation_res = max(current_res, highest_res_datasets_max)
 
-        truncated_datasets = [dtag for dtag in dtag_list if datasets[dtag].reflections.resolution().resolution < truncation_res]
+        truncated_datasets = [dtag for dtag in dtag_list if
+                              datasets[dtag].reflections.resolution().resolution < truncation_res]
 
         comparators[dtag] = list(
             np.random.choice(
@@ -69,11 +78,9 @@ def get_shells(
     # Get the dictionary of resolutions for convenience
     resolutions = {dtag: datasets[dtag].reflections.resolution().resolution for dtag in datasets}
 
-
     # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the
     # Lowest res dataset
     shells = {res: {} for res in range(min(resolutions.values()), max(resolutions.values()), high_res_increment)}
-
 
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
@@ -85,14 +92,10 @@ def get_shells(
             if res > low_res:
                 shells[res] = shells[res].union(set(comparison_dtags))
 
-
-
     # Delete any shells that are empty
     for res in shells:
         if len(shells[res]) == 0:
             del shells[res]
 
-
     return shells
     ...
-
