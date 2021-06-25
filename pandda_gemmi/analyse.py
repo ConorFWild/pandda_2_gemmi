@@ -242,7 +242,7 @@ def main(
     start = time.time()
     datasets_smoother: Datasets = datasets_wilson.smooth_datasets(reference,
                                                                   structure_factors=config.params.diffraction_data.structure_factors,
-                                                                  mapper=mapper,
+                                                                  mapper=process_local,
                                                                   )
     finish = time.time()
     print(f"Smoothed in {finish - start}")
