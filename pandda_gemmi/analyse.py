@@ -27,6 +27,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
+from pandda_gemmi.pandda_functions import process_local_joblib
 
 set_loky_pickler('pickle')
 
@@ -173,7 +174,7 @@ def main(
         raise NotImplementedError()
         process_local = ...
     elif local_processing == "joblib":
-        process_local = process_local_joblib()
+        process_local = lambda funcs: process_local_joblib(local_cpus, 15, funcs)
     elif local_processing == "multiprocessing":
         raise NotImplementedError()
         process_local = ...
