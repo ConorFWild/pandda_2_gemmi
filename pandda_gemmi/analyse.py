@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pandda_gemmi import constants
 from pandda_gemmi.constants import PANDDA_LOG_FILE
-from typing import Dict, Optional, List, Tuple, Union, Literal
+from typing_extensions import Dict, Optional, List, Tuple, Union, Literal
 import time
 import psutil
 import pickle
