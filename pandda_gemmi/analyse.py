@@ -334,7 +334,7 @@ def main(
         raise Exception("Unrecognised comparison strategy")
 
     print("Comparators are:")
-    if config.debug:
+    if debug:
         printer.pprint(comparators)
 
     ###################################################################
@@ -352,7 +352,7 @@ def main(
     )
 
     print("Shells are:")
-    if config.debug:
+    if debug:
         printer.pprint(shells)
 
     # Define how to process a shell
@@ -515,7 +515,7 @@ def main(
             all_events[event_id] = events[event_id]
 
     # Process the shells
-    shell_results = processer_global(process_shell, shells)
+    shell_results = process_global(process_shell, shells)
 
     # Autobuild the results if set to
     if autobuild_results:
