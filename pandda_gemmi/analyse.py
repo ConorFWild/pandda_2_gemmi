@@ -519,7 +519,7 @@ def main(
 
     # Autobuild the results if set to
     if autobuild_results:
-        process_global(autobuild, shell_results)
+        process_global([lambda result: autobuild(result) for result in shell_results])
 
     #
     all_events_events = Events.from_all_events(all_events, grid, 1.7)

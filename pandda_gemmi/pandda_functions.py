@@ -93,9 +93,13 @@ def get_shells(
                 shells[res] = shells[res].union(set(comparison_dtags))
 
     # Delete any shells that are empty
+    shells_to_delete = []
     for res in shells:
         if len(shells[res]) == 0:
-            del shells[res]
+            shells_to_delete.append(res)
+
+    for res in shells_to_delete:
+        del shells[res]
 
     return shells
     ...
