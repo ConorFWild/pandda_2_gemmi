@@ -271,7 +271,7 @@ def main(
                                                                                          datasets_diss_space)
     dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
 
-    datasets = datasets_diss_space
+    datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
 
     # Grid
     print("Getting grid")
@@ -343,6 +343,7 @@ def main(
     # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
     # sake of computational efficiency
     shells = get_shells(
+        datasets,
         comparators,
         min_characterisation_datasets,
         max_shell_datasets,
