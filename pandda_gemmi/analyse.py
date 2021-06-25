@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pandda_gemmi import constants
 from pandda_gemmi.constants import PANDDA_LOG_FILE
-from typing_extensions import Dict, Optional, List, Tuple, Union, Literal
+from typing import Dict, Optional, List, Tuple, Union
 import time
 import psutil
 import pickle
@@ -137,12 +137,12 @@ def main(
         output_multiplier: float = 2.0,
         local_cpus: int = 12,
         job_params_file: Optional[str] = None,
-        comparison_strategy: Union[Literal["closest"], Literal["high_res"], Literal["closest_cutoff"]] = "closest",
+        comparison_strategy: str = "closest",
         comparison_res_cutoff: float = 0.25,
         comparison_min_comparators: int = 15,
         comparison_max_comparators: int = 30,
-        local_processing: Union[Literal["serial"], Literal["joblib"], Literal["multiprocessing"]] = "joblib",
-        global_processing: Union[Literal["serial"], Literal["cluster"]] = "serial",
+        local_processing: str = "joblib",
+        global_processing: str = "serial",
         debug: bool = True,
 ):
     ###################################################################
