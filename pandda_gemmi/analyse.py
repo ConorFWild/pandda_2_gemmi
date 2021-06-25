@@ -10,6 +10,9 @@ import pickle
 from shlex import split
 from pprint import PrettyPrinter
 from pathlib import Path
+import pprint
+
+printer = pprint.PrettyPrinter()
 
 import fire
 import numpy as np
@@ -324,6 +327,9 @@ def main(
 
     else:
         raise Exception("Unrecognised comparison strategy")
+
+    print("Comparators are:")
+    printer.pprint(comparators)
 
     ###################################################################
     # # Process shells
