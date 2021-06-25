@@ -170,10 +170,12 @@ def main(
 
     # Get local processor
     if local_processing == "serial":
+        raise NotImplementedError()
         process_local = ...
     elif local_processing == "joblib":
-        process_local = ...
+        process_local = process_local_joblib()
     elif local_processing == "multiprocessing":
+        raise NotImplementedError()
         process_local = ...
     else:
         raise Exception()
@@ -182,6 +184,7 @@ def main(
     if global_processing == "serial":
         process_global = ...
     elif global_processing == "cluster":
+        raise NotImplementedError()
         process_global = ...
     else:
         raise Exception()
@@ -297,19 +300,27 @@ def main(
     # Assign comparator set for each dataset
     if comparison_strategy == "closest":
         # Closest datasets after clustering
+        raise NotImplementedError()
         comparators: Dict[Dtag, List[Dtag]] = ...
 
     elif comparison_strategy == "closest_cutoff":
         # Closest datasets after clustering as long as they are not too poor res
+        raise NotImplementedError()
         comparators: Dict[Dtag, List[Dtag]] = ...
 
     elif comparison_strategy == "high_res":
         # Almost Old PanDDA strategy: highest res datasets
+        raise NotImplementedError()
         comparators: Dict[Dtag, List[Dtag]] = ...
 
     elif comparison_strategy == "high_res_random":
         # Old pandda strategy: random datasets that are higher resolution
-        comparators: Dict[Dtag, List[Dtag]] = ...
+        comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
+            datasets,
+            comparison_min_comparators,
+            comparison_max_comparators,
+        )
+
     else:
         raise Exception("Unrecognised comparison strategy")
 
@@ -324,11 +335,12 @@ def main(
 
     # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
     # sake of computational efficiency
-    shells = get_shells(comparators,
-                        min_characterisation_datasets,
-                        max_shell_datasets,
-                        high_res_increment,
-                        )
+    shells = get_shells(
+        comparators,
+        min_characterisation_datasets,
+        max_shell_datasets,
+        high_res_increment,
+    )
 
     # Define how to process a shell
     def process_shell(shell):
@@ -339,9 +351,10 @@ def main(
         shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
 
         print("Truncating datasets")
-        shell_truncated_datasets: Datasets = shell_datasets.truncate(resolution=shell.res_min,
-                                                                     structure_factors=config.params.diffraction_data.structure_factors,
-                                                                     )
+        shell_truncated_datasets: Datasets = shell_datasets.truncate(
+            resolution=shell.res_min,
+            structure_factors=config.params.diffraction_data.structure_factors,
+        )
 
         # Assign datasets
         shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
@@ -430,6 +443,10 @@ def main(
             config.params.masks.contour_level,
             cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
             mapper=mapper,
+        )
+        clusterings = process_local(
+            lambda zmap: get_clusters(zmap, cluster_zmap_strategy),
+            list(zmaps.values()),
         )
         pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
             clusterings, grid)
