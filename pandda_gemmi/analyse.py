@@ -30,7 +30,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Re
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
-from pandda_gemmi.pandda_functions import process_local_joblib
+from pandda_gemmi.pandda_functions import process_local_joblib, get_shells
 
 set_loky_pickler('pickle')
 
@@ -141,7 +141,7 @@ def main(
         output_multiplier: float = 2.0,
         local_cpus: int = 12,
         job_params_file: Optional[str] = None,
-        comparison_strategy: str = "closest",
+        comparison_strategy: str = "high_res_random",
         comparison_res_cutoff: float = 0.25,
         comparison_min_comparators: int = 15,
         comparison_max_comparators: int = 30,
