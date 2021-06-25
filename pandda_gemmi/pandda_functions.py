@@ -80,7 +80,7 @@ def get_shells(
 
     # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the
     # Lowest res dataset
-    shells = {res: {} for res in range(min(resolutions.values()), max(resolutions.values()), high_res_increment)}
+    shells = {res: set() for res in np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)}
 
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
