@@ -334,16 +334,12 @@ def main(
         raise Exception("Unrecognised comparison strategy")
 
     print("Comparators are:")
-    printer.pprint(comparators)
+    if config.debug:
+        printer.pprint(comparators)
 
     ###################################################################
     # # Process shells
     ###################################################################
-    # shells = Shells.from_datasets(
-    #     datasets,
-    #     config.params.resolution_binning.min_characterisation_datasets,
-    #     config.params.resolution_binning.max_shell_datasets,
-    #     config.params.resolution_binning.high_res_increment)
 
     # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
     # sake of computational efficiency
@@ -356,7 +352,8 @@ def main(
     )
 
     print("Shells are:")
-    printer.pprint(shells)
+    if config.debug:
+        printer.pprint(shells)
 
     # Define how to process a shell
     def process_shell(shell):
