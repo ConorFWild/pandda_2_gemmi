@@ -22,8 +22,8 @@ from joblib.externals.loky import set_loky_pickler
 
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
-from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Datasets, Reference,
-                                       Grid, Alignments, Shells, Xmaps,
+from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference,
+                                       Grid, Alignments, Shell, Xmaps,
                                        XmapArray, Model, Dtag, Zmaps, Clusterings,
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment,
@@ -98,6 +98,177 @@ def summarise_structure(structure: gemmi.Structure):
 #         f"Event xyz: {event.x} {event.y} {event.z}\n"
 #     )
 # )
+
+
+# Define how to process a shell
+def process_shell(
+        shell: Shell,
+        datasets: Dict[Dtag, Dataset],
+        config,
+        alignments,
+        grid,
+        pandda_fs_model,
+        reference,
+        process_local,
+):
+    print(f"Working on shell: {shell}")
+    # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
+
+    # Seperate out test and train datasets
+    shell_datasets: Datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in shell.all_dtags}  # datasets.from_dtags(shell.all_dtags)
+
+    print("Truncating datasets")
+    shell_truncated_datasets: Datasets = shell_datasets.truncate(
+        resolution=shell.res_min,
+        structure_factors=config.params.diffraction_data.structure_factors,
+    )
+
+    # Assign datasets
+    shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
+    shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
+
+    # Generate aligned xmaps
+    print("Loading xmaps")
+    start = time.time()
+    xmaps = Xmaps.from_aligned_datasets_c(
+        shell_truncated_datasets,
+        alignments,
+        grid,
+        config.params.diffraction_data.structure_factors,
+        sample_rate=config.params.diffraction_data.sample_rate,
+        mapper=None,
+    )  # n x (grid size) with total_mask > 0
+    finish = time.time()
+    print(f"Mapped in {finish - start}")
+
+    # Seperate out test and train maps
+    shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
+    shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
+
+    # Get arrays for model
+    print("Getting xmap arrays...")
+    masked_xmap_array: XmapArray = XmapArray.from_xmaps(
+        xmaps,
+        grid,
+    )  # Size of n x (total mask  > 0)
+    masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
+    masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
+
+    # Determine the parameters of the model to find outlying electron density
+    print("Fitting model")
+    mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
+                                                        )  # Size of grid.partitioning.total_mask > 0
+
+    print("fitting sigma i")
+    sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_xmap_array,
+                                                                 mean_array,
+                                                                 1.5,
+                                                                 )  # size of n
+    print(sigma_is)
+    # pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i
+    #                                                 for dtag, sigma_i
+    #                                                 in sigma_is.items()}
+
+    print("fitting sigma s m")
+    sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
+                                                       mean_array,
+                                                       sigma_is,
+                                                       )  # size of total_mask > 0
+    print(np.min(sigma_s_m))
+
+    model: Model = Model.from_mean_is_sms(
+        mean_array,
+        sigma_is,
+        sigma_s_m,
+        grid,
+    )
+
+    # model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
+
+    # Calculate z maps
+    print("Getting zmaps")
+    zmaps: Zmaps = Zmaps.from_xmaps(model=model,
+                                    xmaps=shell_test_xmaps,
+                                    )
+    # if config.debug > 1:
+    # print("saving zmaps")
+    for dtag in zmaps:
+        if dtag.dtag in constants.MISSES:
+            zmap = zmaps[dtag]
+            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+
+            xmap = xmaps[dtag]
+            path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+            xmap.save(path)
+
+    # Get the clustered electron desnity outliers
+    print("clusting")
+    clusterings: Clusterings = Clusterings.from_Zmaps(
+        zmaps,
+        reference,
+        grid,
+        config.params.masks.contour_level,
+        cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
+        mapper=process_local,
+    )
+    clusterings = process_local(
+        lambda zmap: get_clusters(zmap, cluster_zmap_strategy),
+        list(zmaps.values()),
+    )
+    # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
+    #     clusterings, grid)
+
+    # Filter out small clusters
+    clusterings_large: Clusterings = clusterings.filter_size(grid,
+                                                             config.params.blob_finding.min_blob_volume,
+                                                             )
+    # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
+    #     clusterings_large, grid)
+
+    # Filter out weak clusters (low peak z score)
+    clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
+                                                                    config.params.blob_finding.min_blob_z_peak)
+    # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
+    #     clusterings_peaked, grid)
+
+    clusterings_merged = clusterings_peaked.merge_clusters()
+    # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
+    #     clusterings_merged, grid)
+
+    # Calculate the shell events
+    print("getting events")
+    print(f"\tGot {len(clusterings_merged.clusters)} clusters")
+    events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732, mapper)
+    # pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
+    # print(pandda_log.shells_log[shell.number].events)
+
+    # Save the event maps!
+    print("print events")
+    events.save_event_maps(shell_truncated_datasets,
+                           alignments,
+                           xmaps,
+                           model,
+                           pandda_fs_model,
+                           grid,
+                           config.params.diffraction_data.structure_factors,
+                           config.params.masks.outer_mask,
+                           config.params.masks.inner_mask_symmetry,
+                           mapper=process_local,
+                           )
+
+    for event_id in events:
+        # Save zmaps
+        # zmap = zmaps[event_id.dtag]
+        # pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
+
+        # xmap = xmaps[event_id.dtag]
+        # path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
+        # xmap.save(path)
+
+        # Add events
+        all_events[event_id] = events[event_id]
+
+    return all_events
 
 
 def main(
@@ -245,26 +416,29 @@ def main(
     # Post-reference filters
     print("smoothing")
     start = time.time()
-    datasets_smoother: Datasets = datasets_wilson.smooth_datasets(reference,
-                                                                  structure_factors=config.params.diffraction_data.structure_factors,
-                                                                  mapper=process_local,
-                                                                  )
+    datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
+        reference,
+        structure_factors=config.params.diffraction_data.structure_factors,
+        mapper=process_local,
+    )
     finish = time.time()
     print(f"Smoothed in {finish - start}")
     pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
     print("Removing dissimilar models")
-    datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(reference,
-                                                                               config.params.filtering.max_rmsd_to_reference,
-                                                                               )
+    datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
+        reference,
+        config.params.filtering.max_rmsd_to_reference,
+    )
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
                                                                                          datasets_diss_struc)
     dataset_validator.validate(datasets_diss_struc, constants.STAGE_FILTER_STRUCTURE)
 
     print("Removing models with large gaps")
     datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
-    pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_diss_struc,
-                                                                                         datasets_gaps)
+    pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(
+        datasets_diss_struc,
+        datasets_gaps)
     for dtag in datasets_gaps:
         if dtag not in datasets_diss_struc.datasets:
             print(f"WARNING: Removed dataset {dtag} due to a large gap")
@@ -272,8 +446,9 @@ def main(
 
     print("Removing dissimilar space groups")
     datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-    pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(datasets_gaps,
-                                                                                         datasets_diss_space)
+    pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(
+        datasets_gaps,
+        datasets_diss_space)
     dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
 
     datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
@@ -355,167 +530,22 @@ def main(
     if debug:
         printer.pprint(shells)
 
-    # Define how to process a shell
-    def process_shell(shell):
-        print(f"Working on shell: {shell}")
-        pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
-
-        # Seperate out test and train datasets
-        shell_datasets: Datasets = datasets.from_dtags(shell.all_dtags)
-
-        print("Truncating datasets")
-        shell_truncated_datasets: Datasets = shell_datasets.truncate(
-            resolution=shell.res_min,
-            structure_factors=config.params.diffraction_data.structure_factors,
-        )
-
-        # Assign datasets
-        shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
-        shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
-
-        # Generate aligned xmaps
-        print("Loading xmaps")
-        start = time.time()
-        xmaps = Xmaps.from_aligned_datasets_c(
-            shell_truncated_datasets,
-            alignments,
-            grid,
-            config.params.diffraction_data.structure_factors,
-            sample_rate=config.params.diffraction_data.sample_rate,
-            mapper=None,
-        )  # n x (grid size) with total_mask > 0
-        finish = time.time()
-        print(f"Mapped in {finish - start}")
-
-        # Seperate out test and train maps
-        shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
-        shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
-
-        # Get arrays for model
-        print("Getting xmap arrays...")
-        masked_xmap_array: XmapArray = XmapArray.from_xmaps(
-            xmaps,
-            grid,
-        )  # Size of n x (total mask  > 0)
-        masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags)
-        masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.test_dtags)
-
-        # Determine the parameters of the model to find outlying electron density
-        print("Fitting model")
-        mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
-                                                            )  # Size of grid.partitioning.total_mask > 0
-
-        print("fitting sigma i")
-        sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_xmap_array,
-                                                                     mean_array,
-                                                                     1.5,
-                                                                     )  # size of n
-        print(sigma_is)
-        pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i
-                                                        for dtag, sigma_i
-                                                        in sigma_is.items()}
-
-        print("fitting sigma s m")
-        sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
-                                                           mean_array,
-                                                           sigma_is,
-                                                           )  # size of total_mask > 0
-        print(np.min(sigma_s_m))
-
-        model: Model = Model.from_mean_is_sms(
-            mean_array,
-            sigma_is,
-            sigma_s_m,
-            grid,
-        )
-
-        # model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
-
-        # Calculate z maps
-        print("Getting zmaps")
-        zmaps: Zmaps = Zmaps.from_xmaps(model=model,
-                                        xmaps=shell_test_xmaps,
-                                        )
-        # if config.debug > 1:
-        # print("saving zmaps")
-        for dtag in zmaps:
-            if dtag.dtag in constants.MISSES:
-                zmap = zmaps[dtag]
-                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-
-                xmap = xmaps[dtag]
-                path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-                xmap.save(path)
-
-        # Get the clustered electron desnity outliers
-        print("clusting")
-        clusterings: Clusterings = Clusterings.from_Zmaps(
-            zmaps,
-            reference,
-            grid,
-            config.params.masks.contour_level,
-            cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
-            mapper=mapper,
-        )
-        clusterings = process_local(
-            lambda zmap: get_clusters(zmap, cluster_zmap_strategy),
-            list(zmaps.values()),
-        )
-        pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
-            clusterings, grid)
-
-        # Filter out small clusters
-        clusterings_large: Clusterings = clusterings.filter_size(grid,
-                                                                 config.params.blob_finding.min_blob_volume,
-                                                                 )
-        pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
-            clusterings_large, grid)
-
-        # Filter out weak clusters (low peak z score)
-        clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
-                                                                        config.params.blob_finding.min_blob_z_peak)
-        pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
-            clusterings_peaked, grid)
-
-        clusterings_merged = clusterings_peaked.merge_clusters()
-        pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
-            clusterings_merged, grid)
-
-        # Calculate the shell events
-        print("getting events")
-        print(f"\tGot {len(clusterings_merged.clusters)} clusters")
-        events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732, mapper)
-        pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
-        print(pandda_log.shells_log[shell.number].events)
-
-        # Save the event maps!
-        print("print events")
-        events.save_event_maps(shell_truncated_datasets,
-                               alignments,
-                               xmaps,
-                               model,
-                               pandda_fs_model,
-                               grid,
-                               config.params.diffraction_data.structure_factors,
-                               config.params.masks.outer_mask,
-                               config.params.masks.inner_mask_symmetry,
-                               mapper=mapper,
-                               )
-
-        for event_id in events:
-            # Save zmaps
-            # zmap = zmaps[event_id.dtag]
-            # pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
-
-            # xmap = xmaps[event_id.dtag]
-            # path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
-            # xmap.save(path)
-
-            # Add events
-            all_events[event_id] = events[event_id]
-
     # Process the shells
-    shell_results = process_global(process_shell, shells)
+    shell_results = process_global(
+        [
+            lambda: process_shell(
+                shell,
+                datasets,
+                config,
+                alignments,
+                grid,
+                pandda_fs_model,
+                reference,
+                process_local
+            )
+            for shell in shells
+        ],
+    )
 
     # Autobuild the results if set to
     if autobuild_results:
