@@ -33,6 +33,7 @@ from pandda_gemmi import validators
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
     process_local_joblib,
+    process_local_multiprocessing,
     process_global_serial,
     get_shells,
     get_comparators_high_res_random,
@@ -365,7 +366,7 @@ def main(
         comparison_res_cutoff: float = 0.25,
         comparison_min_comparators: int = 15,
         comparison_max_comparators: int = 30,
-        local_processing: str = "joblib",
+        local_processing: str = "multiprocessing",
         global_processing: str = "serial",
         debug: bool = True,
 ):
@@ -402,10 +403,9 @@ def main(
         raise NotImplementedError()
         process_local = ...
     elif local_processing == "joblib":
-        process_local = lambda funcs: process_local_joblib(local_cpus, 0, funcs)
+        process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
     elif local_processing == "multiprocessing":
-        raise NotImplementedError()
-        process_local = ...
+        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus)
     else:
         raise Exception()
 

@@ -3,10 +3,14 @@ from __future__ import annotations
 from typing import *
 
 import numpy as np
+import multiprocessing as mp
 import joblib
 
 from pandda_gemmi.pandda_types import *
 
+
+def run(func):
+    return func()
 
 def process_local_joblib(n_jobs, verbosity, funcs):
     mapper = joblib.Parallel(n_jobs=n_jobs,
@@ -15,6 +19,14 @@ def process_local_joblib(n_jobs, verbosity, funcs):
                              )
 
     results = mapper(joblib.delayed(func)() for func in funcs)
+
+    return results
+
+def process_local_multiprocessing(n_jobs, funcs):
+    mp.set_start_method("forkserver")
+    with mp.Pool(n_jobs) as pool:
+
+        results = pool.map(run, funcs)
 
     return results
 
