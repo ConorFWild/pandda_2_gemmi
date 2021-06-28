@@ -227,9 +227,11 @@ def process_shell(
 
     # Calculate z maps
     print("Getting zmaps")
-    zmaps: Zmaps = Zmaps.from_xmaps(model=model,
-                                    xmaps=shell_test_xmaps,
-                                    )
+    zmaps: Zmaps = Zmaps.from_xmaps(
+        model=model,
+        xmaps=shell_test_xmaps,
+    )
+
     # if config.debug > 1:
     # print("saving zmaps")
     for dtag in zmaps:
@@ -251,15 +253,17 @@ def process_shell(
     #     cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
     #     mapper=process_local,
     # )
+    cluster_paramaterised = partial(
+        Clustering.from_zmap,
+        reference=reference,
+        grid=grid,
+        contour_level=contour_level,
+        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+    )
+
     clusterings = process_local(
         [
-            lambda: Clustering.from_zmap(
-                zmaps[dtag],
-                reference,
-                grid,
-                contour_level,
-                cluster_cutoff_distance_multiplier,
-            )
+            partial(cluster_paramaterised, zmaps[dtag],)
             for dtag
             in zmaps
         ]

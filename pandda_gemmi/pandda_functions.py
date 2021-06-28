@@ -13,6 +13,9 @@ def run(func):
     return func()
 
 
+
+
+
 def process_local_joblib(n_jobs, verbosity, funcs):
     mapper = joblib.Parallel(n_jobs=n_jobs,
                              verbose=verbosity,
@@ -169,3 +172,6 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
         new_datasets_reflections[dtag] = truncated_dataset
 
     return new_datasets_reflections
+
+
+def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
