@@ -355,6 +355,7 @@ def main(
     data_dirs = Path(data_dirs)
     out_dir = Path(out_dir)
     structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
+    print(structure_factors)
 
 
     print("Initialising log...")
