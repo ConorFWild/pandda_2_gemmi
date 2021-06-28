@@ -101,7 +101,7 @@ def get_shells(
 
     # Create shells
     shells = {}
-    for j, res in reses:
+    for j, res in enumerate(reses):
         shell = Shell(
             shells_test[res],
             shells_train[res],

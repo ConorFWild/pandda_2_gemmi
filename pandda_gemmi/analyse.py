@@ -11,6 +11,7 @@ from shlex import split
 from pprint import PrettyPrinter
 from pathlib import Path
 import pprint
+from functools import partial
 
 printer = pprint.PrettyPrinter()
 
@@ -373,7 +374,7 @@ def main(
         raise NotImplementedError()
         process_local = ...
     elif local_processing == "joblib":
-        process_local = lambda funcs: process_local_joblib(local_cpus, 15, funcs)
+        process_local = lambda funcs: process_local_joblib(local_cpus, 0, funcs)
     elif local_processing == "multiprocessing":
         raise NotImplementedError()
         process_local = ...
@@ -393,14 +394,13 @@ def main(
     structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
 
     # Parameterise
-    process_shell_paramaterised = lambda _shell, _datasets, _alignments, _grid, _pandda_fs_model, _reference: process_shell(
-        _shell, _datasets, _alignments, _grid, _pandda_fs_model, _reference,
-        process_local,
-        structure_factors,
-        sample_rate,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-
+    process_shell_paramaterised = partial(
+        process_shell,
+        process_local=process_local,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+        contour_level=contour_level,
+        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
     )
 
 
