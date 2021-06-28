@@ -175,3 +175,4 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
 
 
 def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
+    ...
