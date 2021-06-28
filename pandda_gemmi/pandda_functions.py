@@ -91,6 +91,8 @@ def get_shells(
         for res in shells:
             if res > low_res:
                 shells[res] = shells[res].union(set(comparison_dtags))
+                # Make sure they only appear in one shell
+                continue
 
     # Delete any shells that are empty
     shells_to_delete = []
@@ -102,4 +104,36 @@ def get_shells(
         del shells[res]
 
     return shells
-    ...
+
+
+def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
+    new_datasets_resolution = {}
+
+    # Truncate by common resolution
+    for dtag in datasets:
+        truncated_dataset = datasets[dtag].truncate_resolution(resolution, )
+
+        new_datasets_resolution[dtag] = truncated_dataset
+
+    dataset_resolution_truncated = Datasets(new_datasets_resolution)
+
+    # Get common set of reflections
+    common_reflections = dataset_resolution_truncated.common_reflections(structure_factors)
+
+    # truncate on reflections
+    new_datasets_reflections = {}
+    for dtag in dataset_resolution_truncated:
+        reflections = dataset_resolution_truncated[dtag].reflections.reflections
+        reflections_array = np.array(reflections)
+        print(f"{dtag}")
+        print(f"{reflections_array.shape}")
+
+        truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
+                                                                                    )
+        reflections = truncated_dataset.reflections.reflections
+        reflections_array = np.array(reflections)
+        print(f"{dtag}: {reflections_array.shape}")
+
+        new_datasets_reflections[dtag] = truncated_dataset
+
+    return new_datasets_reflections

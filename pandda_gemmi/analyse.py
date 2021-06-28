@@ -35,6 +35,8 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     get_shells,
     get_comparators_high_res_random,
+    truncate,
+
 )
 
 set_loky_pickler('pickle')
@@ -115,10 +117,16 @@ def process_shell(
     # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
 
     # Seperate out test and train datasets
-    shell_datasets: Datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in shell.all_dtags}  # datasets.from_dtags(shell.all_dtags)
+    shell_datasets: Dict[Dtag, Dataset] = {
+        dtag: dataset
+        for dtag, dataset
+        in datasets.items()
+        if dtag in shell.all_dtags
+    }  # datasets.from_dtags(shell.all_dtags)
 
     print("Truncating datasets")
-    shell_truncated_datasets: Datasets = shell_datasets.truncate(
+    shell_truncated_datasets: Datasets = truncate(
+        shell_datasets,
         resolution=shell.res_min,
         structure_factors=config.params.diffraction_data.structure_factors,
     )
