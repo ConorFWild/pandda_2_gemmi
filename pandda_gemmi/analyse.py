@@ -420,29 +420,29 @@ def main(
     # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
 
     # Make dataset validator
-    dataset_validator = validators.DatasetsValidator(config.params.resolution_binning.min_characterisation_datasets)
+    dataset_validator = validators.DatasetsValidator(min_characterisation_datasets)
 
     # Initial filters
     print("Filtering invalid datasaets")
     datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
-        config.params.diffraction_data.structure_factors)
+        structure_factors)
     pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
                                                                                              datasets_invalid)
     dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_INVALID)
 
     datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
-        config.params.diffraction_data.low_resolution_completeness)
+        low_resolution_completeness)
     pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid,
                                                                                              datasets_low_res)
     dataset_validator.validate(datasets_low_res, constants.STAGE_FILTER_LOW_RESOLUTION)
 
-    datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(config.params.filtering.max_rfree)
+    datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
     pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res,
                                                                                          datasets_rfree)
     dataset_validator.validate(datasets_rfree, constants.STAGE_FILTER_RFREE)
 
     datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-        config.params.filtering.max_wilson_plot_z_score)  # TODO
+        max_wilson_plot_z_score)  # TODO
     pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree,
                                                                                            datasets_wilson)
     dataset_validator.validate(datasets_wilson, constants.STAGE_FILTER_WILSON)
@@ -457,7 +457,7 @@ def main(
     start = time.time()
     datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
         reference,
-        structure_factors=config.params.diffraction_data.structure_factors,
+        structure_factors=structure_factors,
         mapper=process_local,
     )
     finish = time.time()
@@ -467,7 +467,7 @@ def main(
     print("Removing dissimilar models")
     datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
         reference,
-        config.params.filtering.max_rmsd_to_reference,
+        max_rmsd_to_reference,
     )
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
                                                                                          datasets_diss_struc)
@@ -495,13 +495,13 @@ def main(
     # Grid
     print("Getting grid")
     grid: Grid = Grid.from_reference(reference,
-                                     config.params.masks.outer_mask,
-                                     config.params.masks.inner_mask_symmetry,
-                                     sample_rate=config.params.diffraction_data.sample_rate,
+                                     outer_mask,
+                                     inner_mask_symmetry,
+                                     sample_rate=sample_rate,
                                      )
     # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
     pandda_log.grid_log = logs.GridLog.from_grid(grid)
-    if config.debug > 1:
+    if debug > 1:
         print("Summarising protein mask")
         summarise_grid(grid.partitioning.protein_mask)
         print("Summarising symmetry mask")
