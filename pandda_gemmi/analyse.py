@@ -150,13 +150,19 @@ def process_shell(
     #     sample_rate=sample_rate,
     #     mapper=process_local,
     # )  # n x (grid size) with total_mask > 0
+
+    load_xmap_paramaterised = partial(
+        Xmap.from_unaligned_dataset_c,
+        grid=grid,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+    )
+
     results = process_local(
-        lambda: Xmap.from_unaligned_dataset_c(
+        partial(
+            load_xmap_paramaterised,
             datasets[key],
             alignments[key],
-            grid,
-            structure_factors,
-            sample_rate,
         )
         for key
         in datasets
@@ -243,15 +249,15 @@ def process_shell(
     clusterings = process_local(
         [
             lambda: Clustering.from_zmap(
-            zmaps[dtag],
-            reference,
-            grid,
-            contour_level,
-            cluster_cutoff_distance_multiplier,
-        )
-        for dtag
-        in zmaps
-    ]
+                zmaps[dtag],
+                reference,
+                grid,
+                contour_level,
+                cluster_cutoff_distance_multiplier,
+            )
+            for dtag
+            in zmaps
+        ]
     )
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)
@@ -374,12 +380,9 @@ def main(
     structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
     print(structure_factors)
 
-
     print("Initialising log...")
     pandda_log: logs.LogData = logs.LogData.initialise()
     # pandda_log.config = config
-
-
 
     print("FSmodel building")
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(data_dirs,
@@ -414,7 +417,6 @@ def main(
         process_global = ...
     else:
         raise Exception()
-
 
     # Parameterise
     process_shell_paramaterised = partial(
