@@ -403,7 +403,6 @@ def main(
         cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
     )
 
-
     ###################################################################
     # # Pre-pandda
     ###################################################################
@@ -576,7 +575,7 @@ def main(
                 pandda_fs_model,
                 reference,
             )
-            for shell in shells
+            for res, shell in shells.items()
         ],
     )
 
