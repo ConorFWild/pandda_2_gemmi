@@ -118,6 +118,10 @@ def process_shell(
         sample_rate: float,
         contour_level,
         cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        outer_mask,
+        inner_mask_symmetry,
 ):
     print(f"Working on shell: {shell}")
     # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
@@ -179,7 +183,7 @@ def process_shell(
     print(f"Mapped in {finish - start}")
 
     # Seperate out test and train maps
-    shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps if dtag in shell.test_dtags}
+    shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps.items() if dtag in shell.test_dtags}
 
     # Get arrays for model
     print("Getting xmap arrays...")
@@ -265,14 +269,14 @@ def process_shell(
 
     # Filter out small clusters
     clusterings_large: Clusterings = clusterings.filter_size(grid,
-                                                             config.params.blob_finding.min_blob_volume,
+                                                             min_blob_volume,
                                                              )
     # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_large, grid)
 
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
-                                                                    config.params.blob_finding.min_blob_z_peak)
+                                                                    min_blob_z_peak)
     # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_peaked, grid)
 
@@ -283,7 +287,14 @@ def process_shell(
     # Calculate the shell events
     print("getting events")
     print(f"\tGot {len(clusterings_merged.clusters)} clusters")
-    events: Events = Events.from_clusters(clusterings_merged, model, xmaps, grid, 1.732, mapper)
+    events: Events = Events.from_clusters(
+        clusterings_merged,
+        model,
+        xmaps,
+        grid,
+        1.732,  # TODO: make this a variable ;')
+        process_local,
+    )
     # pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
     # print(pandda_log.shells_log[shell.number].events)
 
@@ -295,9 +306,9 @@ def process_shell(
                            model,
                            pandda_fs_model,
                            grid,
-                           config.params.diffraction_data.structure_factors,
-                           config.params.masks.outer_mask,
-                           config.params.masks.inner_mask_symmetry,
+                           structure_factors,
+                           outer_mask,
+                           inner_mask_symmetry,
                            mapper=process_local,
                            )
 
@@ -427,6 +438,10 @@ def main(
         sample_rate=sample_rate,
         contour_level=contour_level,
         cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+        min_blob_volume=min_blob_volume,
+        min_blob_z_peak=min_blob_z_peak,
+        outer_mask=outer_mask,
+        inner_mask_symmetry=inner_mask_symmetry,
     )
 
     ###################################################################
