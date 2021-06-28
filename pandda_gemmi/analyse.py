@@ -26,7 +26,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Dat
                                        Grid, Alignments, Shell, Xmaps,
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
-                                       JoblibMapper, Event, SequenceAlignment,
+                                       JoblibMapper, Event, SequenceAlignment, StructureFactors,
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -106,12 +106,15 @@ def summarise_structure(structure: gemmi.Structure):
 def process_shell(
         shell: Shell,
         datasets: Dict[Dtag, Dataset],
-        config,
         alignments,
         grid,
         pandda_fs_model,
         reference,
         process_local,
+        structure_factors: StructureFactors,
+        sample_rate: float,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
 ):
     print(f"Working on shell: {shell}")
     # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
@@ -128,7 +131,7 @@ def process_shell(
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
         resolution=Resolution(min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags])),
-        structure_factors=config.params.diffraction_data.structure_factors,
+        structure_factors=structure_factors,
     )
 
     # Assign datasets
@@ -142,8 +145,8 @@ def process_shell(
         shell_truncated_datasets,
         alignments,
         grid,
-        config.params.diffraction_data.structure_factors,
-        sample_rate=config.params.diffraction_data.sample_rate,
+        structure_factors,
+        sample_rate=sample_rate,
         mapper=None,
     )  # n x (grid size) with total_mask > 0
     finish = time.time()
@@ -386,6 +389,21 @@ def main(
     else:
         raise Exception()
 
+    # Process args
+    structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
+
+    # Parameterise
+    process_shell_paramaterised = lambda _shell, _datasets, _alignments, _grid, _pandda_fs_model, _reference: process_shell(
+        _shell, _datasets, _alignments, _grid, _pandda_fs_model, _reference,
+        process_local,
+        structure_factors,
+        sample_rate,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+
+    )
+
+
     ###################################################################
     # # Pre-pandda
     ###################################################################
@@ -550,15 +568,13 @@ def main(
     # Process the shells
     shell_results = process_global(
         [
-            lambda: process_shell(
+            lambda: process_shell_paramaterised(
                 shell,
                 datasets,
-                config,
                 alignments,
                 grid,
                 pandda_fs_model,
                 reference,
-                process_local
             )
             for shell in shells
         ],

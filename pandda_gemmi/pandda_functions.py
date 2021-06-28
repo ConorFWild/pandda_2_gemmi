@@ -123,7 +123,7 @@ def get_shells(
     return shells
 
 
-def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
+def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
     new_datasets_resolution = {}
 
     # Truncate by common resolution
