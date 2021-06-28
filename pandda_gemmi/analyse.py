@@ -430,6 +430,7 @@ def main(
     pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
                                                                                              datasets_invalid)
     dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_INVALID)
+    print(f"\tAfter filtering invalid datasets there are: {len(datasets_invalid)} datasets remaining")
 
     datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
         low_resolution_completeness)
