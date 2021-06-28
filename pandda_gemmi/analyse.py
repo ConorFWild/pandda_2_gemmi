@@ -148,7 +148,7 @@ def process_shell(
         grid,
         structure_factors,
         sample_rate=sample_rate,
-        mapper=None,
+        mapper=process_local,
     )  # n x (grid size) with total_mask > 0
     finish = time.time()
     print(f"Mapped in {finish - start}")
