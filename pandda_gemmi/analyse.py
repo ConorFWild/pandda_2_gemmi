@@ -27,7 +27,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Dat
                                        Grid, Alignments, Shell, Xmaps,
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
-                                       JoblibMapper, Event, SequenceAlignment, StructureFactors,
+                                       JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -142,14 +142,31 @@ def process_shell(
     # Generate aligned xmaps
     print("Loading xmaps")
     start = time.time()
-    xmaps = Xmaps.from_aligned_datasets_c(
-        shell_truncated_datasets,
-        alignments,
-        grid,
-        structure_factors,
-        sample_rate=sample_rate,
-        mapper=process_local,
-    )  # n x (grid size) with total_mask > 0
+    # xmaps = Xmaps.from_aligned_datasets_c(
+    #     shell_truncated_datasets,
+    #     alignments,
+    #     grid,
+    #     structure_factors,
+    #     sample_rate=sample_rate,
+    #     mapper=process_local,
+    # )  # n x (grid size) with total_mask > 0
+    results = process_local(
+        lambda: Xmap.from_unaligned_dataset_c(
+            datasets[key],
+            alignments[key],
+            grid,
+            structure_factors,
+            sample_rate,
+        )
+        for key
+        in datasets
+    )
+
+    xmaps = {dtag: xmap
+             for dtag, xmap
+             in zip(datasets, results)
+             }
+
     finish = time.time()
     print(f"Mapped in {finish - start}")
 
