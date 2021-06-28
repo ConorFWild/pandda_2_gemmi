@@ -179,8 +179,7 @@ def process_shell(
     print(f"Mapped in {finish - start}")
 
     # Seperate out test and train maps
-    shell_train_xmaps: Xmaps = xmaps.from_dtags(shell.train_dtags)
-    shell_test_xmaps: Xmaps = xmaps.from_dtags(shell.test_dtags)
+    shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps if dtag in shell.test_dtags}
 
     # Get arrays for model
     print("Getting xmap arrays...")
