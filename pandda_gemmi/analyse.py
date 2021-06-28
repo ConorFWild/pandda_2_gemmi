@@ -312,7 +312,7 @@ def main(
         min_characterisation_datasets: int = 15,
         structure_factors: Optional[Tuple[str, str]] = None,
         all_data_are_valid_values: bool = True,
-        low_resolution_completeness: bool = False,
+        low_resolution_completeness: float = 4.0,
         sample_rate: float = 3.0,
         max_rmsd_to_reference: float = 1.5,
         max_rfree: float = 0.4,
@@ -417,6 +417,7 @@ def main(
     print("Loading datasets")
     datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
     pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
+    print(f"\tThere are initially: {len(datasets_invalid)} datasets")
 
     # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
 
