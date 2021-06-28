@@ -270,6 +270,7 @@ def process_shell(
         ]
     )
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+    print(f"\t\tIntially found clusters: {[len(cluster) for cluster in clusterings.clusters.values()]}")
 
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)
@@ -278,6 +279,8 @@ def process_shell(
     clusterings_large: Clusterings = clusterings.filter_size(grid,
                                                              min_blob_volume,
                                                              )
+    print(f"\t\tAfter filtering large clusters: {[len(cluster) for cluster in clusterings.clusters.values()]}")
+
     # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_large, grid)
 
@@ -286,10 +289,13 @@ def process_shell(
                                                                     min_blob_z_peak)
     # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_peaked, grid)
+    print(f"\t\tAfter filtering peaked clusters: {[len(cluster) for cluster in clusterings.clusters.values()]}")
 
     clusterings_merged = clusterings_peaked.merge_clusters()
     # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
     #     clusterings_merged, grid)
+    print(f"\t\tAfter merging clusters: {[len(cluster) for cluster in clusterings.clusters.values()]}")
+
 
     # Calculate the shell events
     print("getting events")
