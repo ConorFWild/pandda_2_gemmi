@@ -22,7 +22,7 @@ from joblib.externals.loky import set_loky_pickler
 
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
-from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference,
+from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
                                        Grid, Alignments, Shell, Xmaps,
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
@@ -127,7 +127,7 @@ def process_shell(
     print("Truncating datasets")
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
-        resolution=shell.res_min,
+        resolution=Resolution(min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags])),
         structure_factors=config.params.diffraction_data.structure_factors,
     )
 

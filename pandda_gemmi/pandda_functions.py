@@ -93,7 +93,7 @@ def get_shells(
         # Find the first shell whose res is higher
         for res in reses:
             if res > low_res:
-                shells_test[res] = shells_test[res].union(dtag)
+                shells_test[res] = shells_test[res].union({dtag, })
                 shells_train[res] = shells_train[res].union(set(comparison_dtags))
 
                 # Make sure they only appear in one shell
