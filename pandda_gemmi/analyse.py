@@ -464,7 +464,9 @@ def main(
     # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
 
     # Make dataset validator
-    validation_strategy = validate_strategy_num_datasets(min_characterisation_datasets)
+    validation_strategy = partial(validate_strategy_num_datasets,
+                                  min_characterisation_datasets=min_characterisation_datasets,
+                                  )
     validate_paramterized = partial(validate, strategy=validation_strategy)
 
     # Initial filters
