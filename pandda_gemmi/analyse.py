@@ -39,7 +39,8 @@ from pandda_gemmi.pandda_functions import (
     get_shells,
     get_comparators_high_res_random,
     truncate,
-
+    validate_strategy_num_datasets,
+    validate,
 )
 
 set_loky_pickler('pickle')
@@ -268,6 +269,8 @@ def process_shell(
             in zmaps
         ]
     )
+    clusterings = Clustering({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)
 
@@ -461,7 +464,8 @@ def main(
     # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
 
     # Make dataset validator
-    dataset_validator = validators.DatasetsValidator(min_characterisation_datasets)
+    validation_strategy = validate_strategy_num_datasets(min_characterisation_datasets)
+    validate_paramterized = partial(validate, strategy=validation_strategy)
 
     # Initial filters
     print("Filtering invalid datasaets")
@@ -469,8 +473,7 @@ def main(
         structure_factors)
     pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
                                                                                              datasets_invalid)
-    dataset_validator.validate(datasets_invalid, constants.STAGE_FILTER_INVALID)
-    print(f"\tAfter filtering invalid datasets there are: {len(datasets_invalid)} datasets remaining")
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
     datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
         low_resolution_completeness)
