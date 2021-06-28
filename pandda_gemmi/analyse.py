@@ -350,19 +350,26 @@ def main(
     # # Configuration
     ###################################################################
     print("Getting config")
-    config: Config = Config.from_args()
+    # config: Config = Config.from_args()
+    # Process args
+    data_dirs = Path(data_dirs)
+    out_dir = Path(out_dir)
+    structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
+
 
     print("Initialising log...")
     pandda_log: logs.LogData = logs.LogData.initialise()
-    pandda_log.config = config
+    # pandda_log.config = config
+
+
 
     print("FSmodel building")
-    pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(config.input.data_dirs,
-                                                            config.output.out_dir,
-                                                            config.input.pdb_regex,
-                                                            config.input.mtz_regex,
-                                                            config.input.ligand_cif_regex,
-                                                            config.input.ligand_pdb_regex,
+    pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(data_dirs,
+                                                            out_dir,
+                                                            pdb_regex,
+                                                            mtz_regex,
+                                                            ligand_cif_regex,
+                                                            ligand_pdb_regex,
                                                             )
     pandda_fs_model.build()
     pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)
@@ -390,8 +397,6 @@ def main(
     else:
         raise Exception()
 
-    # Process args
-    structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
 
     # Parameterise
     process_shell_paramaterised = partial(
