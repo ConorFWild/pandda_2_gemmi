@@ -12,6 +12,7 @@ from pandda_gemmi.pandda_types import *
 def run(func):
     return func()
 
+
 def process_local_joblib(n_jobs, verbosity, funcs):
     mapper = joblib.Parallel(n_jobs=n_jobs,
                              verbose=verbosity,
@@ -22,10 +23,10 @@ def process_local_joblib(n_jobs, verbosity, funcs):
 
     return results
 
-def process_local_multiprocessing(n_jobs, funcs):
+
+def process_local_multiprocessing(funcs, n_jobs=12,):
     mp.set_start_method("forkserver")
     with mp.Pool(n_jobs) as pool:
-
         results = pool.map(run, funcs)
 
     return results
