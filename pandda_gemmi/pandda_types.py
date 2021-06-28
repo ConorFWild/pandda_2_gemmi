@@ -2522,15 +2522,25 @@ class Resolution:
         return self.resolution
 
 
+# @dataclasses.dataclass()
+# class Shell:
+#     number: int
+#     test_dtags: typing.List[Dtag]
+#     train_dtags: typing.List[Dtag]
+#     all_dtags: typing.List[Dtag]
+#     datasets: Datasets
+#     res_max: Resolution
+#     res_min: Resolution
+
 @dataclasses.dataclass()
 class Shell:
-    number: int
-    test_dtags: typing.List[Dtag]
-    train_dtags: typing.List[Dtag]
-    all_dtags: typing.List[Dtag]
-    datasets: Datasets
-    res_max: Resolution
-    res_min: Resolution
+    # number: int
+    test_dtags: typing.Set[Dtag]
+    train_dtags: typing.Set[Dtag]
+    all_dtags: typing.Set[Dtag]
+    # datasets: Datasets
+    # res_max: Resolution
+    # res_min: Resolution
 
 
 @dataclasses.dataclass()

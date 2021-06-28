@@ -24,7 +24,7 @@ from pandda_gemmi.config import Config
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference,
                                        Grid, Alignments, Shell, Xmaps,
-                                       XmapArray, Model, Dtag, Zmaps, Clusterings,
+                                       XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment,
                                        )
@@ -211,17 +211,26 @@ def process_shell(
 
     # Get the clustered electron desnity outliers
     print("clusting")
-    clusterings: Clusterings = Clusterings.from_Zmaps(
-        zmaps,
-        reference,
-        grid,
-        config.params.masks.contour_level,
-        cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
-        mapper=process_local,
-    )
+    # clusterings: Clusterings = Clusterings.from_Zmaps(
+    #     zmaps,
+    #     reference,
+    #     grid,
+    #     config.params.masks.contour_level,
+    #     cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
+    #     mapper=process_local,
+    # )
     clusterings = process_local(
-        lambda zmap: get_clusters(zmap, cluster_zmap_strategy),
-        list(zmaps.values()),
+        [
+            lambda: Clustering.from_zmap(
+            zmaps[dtag],
+            reference,
+            grid,
+            contour_level,
+            cluster_cutoff_distance_multiplier,
+        )
+        for dtag
+        in zmaps
+    ]
     )
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)

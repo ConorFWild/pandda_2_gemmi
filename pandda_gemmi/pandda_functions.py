@@ -41,7 +41,7 @@ def get_comparators_high_res_random(
         )
     )
 
-    highest_res_datasets = dtags_by_res[:comparison_min_comparators+1]
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
     highest_res_datasets_max = max(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
@@ -80,7 +80,9 @@ def get_shells(
 
     # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the
     # Lowest res dataset
-    shells = {res: set() for res in np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)}
+    reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
+    shells_test = {res: set() for res in reses}
+    shells_train = {res: set() for res in reses}
 
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
@@ -88,20 +90,35 @@ def get_shells(
     for dtag, comparison_dtags in comparators.items():
         low_res = max([resolutions[comparison_dtag] for comparison_dtag in comparison_dtags])
 
-        for res in shells:
+        # Find the first shell whose res is higher
+        for res in reses:
             if res > low_res:
-                shells[res] = shells[res].union(set(comparison_dtags))
+                shells_test[res] = shells_test[res].union(dtag)
+                shells_train[res] = shells_train[res].union(set(comparison_dtags))
+
                 # Make sure they only appear in one shell
-                continue
+                break
 
     # Delete any shells that are empty
     shells_to_delete = []
-    for res in shells:
-        if len(shells[res]) == 0:
+    for res in reses:
+        if len(shells_test[res]) == 0:
+            shells_to_delete.append(res)
+        if len(shells_train[res]) == 0:
             shells_to_delete.append(res)
 
     for res in shells_to_delete:
-        del shells[res]
+        del shells_test[res]
+        del shells_train[res]
+
+    shells = {}
+    for j, res in reses:
+        shell = Shell(
+            shells_test[res],
+            shells_train[res],
+            shells_test[res].union(shells_train[res]),
+        )
+        shells[res] = shell
 
     return shells
 
