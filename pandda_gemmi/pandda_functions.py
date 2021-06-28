@@ -174,8 +174,11 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
 def validate_strategy_num_datasets(datasets, min_characterisation_datasets=30):
     if len(datasets) < min_characterisation_datasets:
         return False
+    else:
+        return True
 
 
 def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
     if not strategy(datasets):
+        print(datasets)
         raise exception

@@ -481,18 +481,18 @@ def main(
         low_resolution_completeness)
     pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid,
                                                                                              datasets_low_res)
-    dataset_validator.validate(datasets_low_res, constants.STAGE_FILTER_LOW_RESOLUTION)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
 
     datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
     pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res,
                                                                                          datasets_rfree)
-    dataset_validator.validate(datasets_rfree, constants.STAGE_FILTER_RFREE)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: rfree"))
 
     datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
         max_wilson_plot_z_score)  # TODO
     pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree,
                                                                                            datasets_wilson)
-    dataset_validator.validate(datasets_wilson, constants.STAGE_FILTER_WILSON)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: wilson"))
 
     # Select refernce
     print("Getting reference")
@@ -518,7 +518,7 @@ def main(
     )
     pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
                                                                                          datasets_diss_struc)
-    dataset_validator.validate(datasets_diss_struc, constants.STAGE_FILTER_STRUCTURE)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure"))
 
     print("Removing models with large gaps")
     datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
@@ -528,14 +528,14 @@ def main(
     for dtag in datasets_gaps:
         if dtag not in datasets_diss_struc.datasets:
             print(f"WARNING: Removed dataset {dtag} due to a large gap")
-    dataset_validator.validate(datasets_gaps, constants.STAGE_FILTER_GAPS)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure gaps"))
 
     print("Removing dissimilar space groups")
     datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
     pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(
         datasets_gaps,
         datasets_diss_space)
-    dataset_validator.validate(datasets_diss_space, constants.STAGE_FILTER_SPACE_GROUP)
+    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
 
     datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
 
