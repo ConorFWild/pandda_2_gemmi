@@ -99,18 +99,7 @@ def get_shells(
                 # Make sure they only appear in one shell
                 break
 
-    # Delete any shells that are empty
-    shells_to_delete = []
-    for res in reses:
-        if len(shells_test[res]) == 0:
-            shells_to_delete.append(res)
-        if len(shells_train[res]) == 0:
-            shells_to_delete.append(res)
-
-    for res in shells_to_delete:
-        del shells_test[res]
-        del shells_train[res]
-
+    # Create shells
     shells = {}
     for j, res in reses:
         shell = Shell(
@@ -119,6 +108,15 @@ def get_shells(
             shells_test[res].union(shells_train[res]),
         )
         shells[res] = shell
+
+    # Delete any shells that are empty
+    shells_to_delete = []
+    for res in reses:
+        if len(shells_test[res]) == 0 or len(shells_train[res]) == 0:
+            shells_to_delete.append(res)
+
+    for res in shells_to_delete:
+        del shells[res]
 
     return shells
 
