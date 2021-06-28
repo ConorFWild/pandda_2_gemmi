@@ -269,7 +269,7 @@ def process_shell(
             in zmaps
         ]
     )
-    clusterings = Clustering({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+    clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
 
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)
