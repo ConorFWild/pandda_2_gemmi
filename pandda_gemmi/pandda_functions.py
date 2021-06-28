@@ -25,7 +25,11 @@ def process_local_joblib(n_jobs, verbosity, funcs):
 
 
 def process_local_multiprocessing(funcs, n_jobs=12,):
-    mp.set_start_method("forkserver")
+    try:
+        mp.set_start_method("forkserver")
+    except Exception as e:
+        print(e)
+
     with mp.Pool(n_jobs) as pool:
         results = pool.map(run, funcs)
 

@@ -12,6 +12,7 @@ from pprint import PrettyPrinter
 from pathlib import Path
 import pprint
 from functools import partial
+import multiprocessing as mp
 
 printer = pprint.PrettyPrinter()
 
@@ -405,6 +406,7 @@ def main(
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
     elif local_processing == "multiprocessing":
+        mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus)
     else:
         raise Exception()
