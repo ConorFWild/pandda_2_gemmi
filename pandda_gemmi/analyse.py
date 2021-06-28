@@ -136,8 +136,8 @@ def process_shell(
     )
 
     # Assign datasets
-    shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
-    shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
+    # shell_train_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.train_dtags)
+    # shell_test_datasets: Datasets = shell_truncated_datasets.from_dtags(shell.test_dtags)
 
     # Generate aligned xmaps
     print("Loading xmaps")
