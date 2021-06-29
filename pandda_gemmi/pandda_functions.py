@@ -99,7 +99,7 @@ def get_shells(
     # Lowest res dataset
     reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
     shells_test = {res: set() for res in reses}
-    shells_train = {res: set() for res in reses}
+    shells_train = {res: {} for res in reses}
 
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
@@ -111,7 +111,7 @@ def get_shells(
         for res in reses:
             if res > low_res:
                 shells_test[res] = shells_test[res].union({dtag, })
-                shells_train[res] = shells_train[res].union(set(comparison_dtags))
+                shells_train[res][dtag] = set(comparison_dtags)
 
                 # Make sure they only appear in one shell
                 break
@@ -119,6 +119,18 @@ def get_shells(
     # Create shells
     shells = {}
     for j, res in enumerate(reses):
+
+        # Collect a set of all dtags
+        all_dtags = set()
+
+        # Add all the test dtags
+        for dtag in shells_test:
+            all_dtags = all_dtags.union({dtag, })
+
+        # Add all the train dtags
+        for dtags in shells_train:
+            all_dtags = all_dtags.union(dtags)
+
         shell = Shell(
             shells_test[res],
             shells_train[res],

@@ -24,6 +24,7 @@ import joblib
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 
+from typing import *
 
 from sklearn import neighbors
 
@@ -2536,7 +2537,7 @@ class Resolution:
 class Shell:
     # number: int
     test_dtags: typing.Set[Dtag]
-    train_dtags: typing.Set[Dtag]
+    train_dtags: typing.Dict[Dtag, Set[Dtag]]
     all_dtags: typing.Set[Dtag]
     # datasets: Datasets
     # res_max: Resolution
