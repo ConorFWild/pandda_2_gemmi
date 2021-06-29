@@ -196,7 +196,7 @@ def process_shell(
 
     # Now that all the data is loaded, get the comparison set and process each test dtag
     for test_dtag in shell.train_dtags:
-        print(f"\t\tProcessing dtag: {test_dtag}")
+        print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
         masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(shell.train_dtags[test_dtag])
         masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags([test_dtag, ])
 
@@ -206,7 +206,7 @@ def process_shell(
                                                             )  # Size of grid.partitioning.total_mask > 0
 
         print("fitting sigma i")
-        sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_test_xmap_array,
+        sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
                                                                      mean_array,
                                                                      1.5,
                                                                      )  # size of n
