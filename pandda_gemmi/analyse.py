@@ -264,7 +264,7 @@ def process_shell(
 
     clusterings = process_local(
         [
-            partial(cluster_paramaterised, zmaps[dtag],)
+            partial(cluster_paramaterised, zmaps[dtag], )
             for dtag
             in zmaps
         ]
@@ -291,13 +291,15 @@ def process_shell(
     # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_peaked, grid)
     print("\t\tAfter filtering: peak: {}".format(
-        {dtag: len(cluster) for dtag, cluster in zip(clusterings_peaked.clusters, clusterings_peaked.clusters.values())}))
+        {dtag: len(cluster) for dtag, cluster in
+         zip(clusterings_peaked.clusters, clusterings_peaked.clusters.values())}))
 
     clusterings_merged = clusterings_peaked.merge_clusters()
     # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
     #     clusterings_merged, grid)
     print("\t\tAfter filtering: merged: {}".format(
-        {dtag: len(cluster) for dtag, cluster in zip(clusterings_merged.clusters, clusterings_merged.clusters.values())}))
+        {dtag: len(cluster) for dtag, cluster in
+         zip(clusterings_merged.clusters, clusterings_merged.clusters.values())}))
 
     # Calculate the shell events
     print("getting events")
@@ -629,7 +631,8 @@ def main(
     # Process the shells
     shell_results = process_global(
         [
-            lambda: process_shell_paramaterised(
+            partial(
+                process_shell_paramaterised,
                 shell,
                 datasets,
                 alignments,
@@ -637,7 +640,8 @@ def main(
                 pandda_fs_model,
                 reference,
             )
-            for res, shell in shells.items()
+            for res, shell
+            in shells.items()
         ],
     )
 
