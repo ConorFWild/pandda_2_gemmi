@@ -236,13 +236,13 @@ def process_shell(
     # if config.debug > 1:
     # print("saving zmaps")
     for dtag in zmaps:
-        if dtag.dtag in constants.MISSES:
-            zmap = zmaps[dtag]
-            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+        # if dtag.dtag in constants.MISSES:
+        zmap = zmaps[dtag]
+        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
 
-            xmap = xmaps[dtag]
-            path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-            xmap.save(path)
+        xmap = xmaps[dtag]
+        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
+        xmap.save(path)
 
     # Get the clustered electron desnity outliers
     print("clusting")
