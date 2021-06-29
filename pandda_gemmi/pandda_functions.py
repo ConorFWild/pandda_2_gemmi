@@ -124,12 +124,12 @@ def get_shells(
         all_dtags = set()
 
         # Add all the test dtags
-        for dtag in shells_test:
+        for dtag in shells_test[res]:
             all_dtags = all_dtags.union({dtag, })
 
         # Add all the train dtags
-        for dtags in shells_train:
-            all_dtags = all_dtags.union(dtags)
+        for test_dtag, train_dtags in shells_train[res].items():
+            all_dtags = all_dtags.union(train_dtags)
 
         shell = Shell(
             shells_test[res],
