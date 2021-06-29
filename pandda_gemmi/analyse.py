@@ -197,7 +197,7 @@ def process_shell(
     # Now that all the data is loaded, get the comparison set and process each test dtag
     for test_dtag in shell.train_dtags:
         print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
-        masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags([_dtag for _dtag in shell.train_dtags[test_dtag]] + [test_dtag, ])
+        masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags([_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
         masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags([test_dtag, ])
         print(masked_train_xmap_array.dtag_list)
 
