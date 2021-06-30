@@ -14,6 +14,14 @@ def run(func):
     return func()
 
 
+def process_local_serial(funcs):
+    results = []
+    for func in funcs:
+        results.append(func())
+
+    return results
+
+
 def process_local_joblib(n_jobs, verbosity, funcs):
     mapper = joblib.Parallel(n_jobs=n_jobs,
                              verbose=verbosity,
@@ -186,12 +194,11 @@ def get_comparators_closest_cutoff(
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
-        row = correlation_matrix[j,:].flatten()
+        row = correlation_matrix[j, :].flatten()
         closest_dtags = np.argsort(row)
 
-
         # Decide the res upper bound
-        truncation_res = max(current_res+resolution_cutoff, highest_res_datasets_max)
+        truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
