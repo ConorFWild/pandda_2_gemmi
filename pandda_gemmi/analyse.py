@@ -356,7 +356,7 @@ def process_shell(
         process_local=process_local_serial,
     )
 
-    results = process_local(
+    results = process_local_serial(
         [
             partial(
                 process_dataset_paramaterized,
