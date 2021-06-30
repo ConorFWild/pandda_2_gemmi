@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import *
+from functools import partial
 
 import numpy as np
 import multiprocessing as mp
@@ -78,6 +79,135 @@ def get_comparators_high_res_random(
                 replace=False,
             )
         )
+
+    return comparators
+
+
+def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
+    # Make a pairwise matrix
+    correlation_matrix = np.zeros((len(samples), len(samples)))
+
+    for x, reference_sample in enumerate(samples.values()):
+
+        reference_sample_mean = np.mean(reference_sample)
+        reference_sample_demeaned = reference_sample - reference_sample_mean
+        reference_sample_denominator = np.sqrt(np.sum(np.square(reference_sample_demeaned)))
+
+        for y, sample in enumerate(samples.values()):
+            sample_mean = np.mean(sample)
+            sample_demeaned = sample - sample_mean
+            sample_denominator = np.sqrt(np.sum(np.square(sample_demeaned)))
+
+            nominator = np.sum(reference_sample_demeaned * sample_demeaned)
+            denominator = sample_denominator * reference_sample_denominator
+
+            correlation = nominator / denominator
+
+            correlation_matrix[x, y] = correlation
+
+    correlation_matrix = np.nan_to_num(correlation_matrix)
+
+    # distance_matrix = np.ones(correlation_matrix.shape) - correlation_matrix
+
+    for j in range(correlation_matrix.shape[0]):
+        correlation_matrix[j, j] = 1.0
+
+    return correlation_matrix
+
+
+def get_comparators_closest_cutoff(
+        datasets: Dict[Dtag, Dataset],
+        alignments,
+        grid,
+        comparison_min_comparators,
+        comparison_max_comparators,
+        structure_factors,
+        sample_rate,
+        resolution_cutoff,
+        process_local,
+):
+    dtag_list = [dtag for dtag in datasets]
+    dtag_array = np.array(dtag_list)
+
+    dtags_by_res = list(
+        sorted(
+            dtag_list,
+            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+        )
+    )
+
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    highest_res_datasets_max = max(
+        [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    # Load the xmaps
+    shell_truncated_datasets: Datasets = truncate(
+        datasets,
+        resolution=Resolution(highest_res_datasets_max),
+        structure_factors=structure_factors,
+    )
+
+    # Generate aligned xmaps
+    print("Loading xmaps")
+    start = time.time()
+    load_xmap_paramaterised = partial(
+        Xmap.from_unaligned_dataset_c,
+        grid=grid,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+    )
+
+    results = process_local(
+        partial(
+            load_xmap_paramaterised,
+            shell_truncated_datasets[key],
+            alignments[key],
+        )
+        for key
+        in shell_truncated_datasets
+    )
+
+    # Get the maps as arrays
+    xmaps = {dtag: xmap.to_array()
+             for dtag, xmap
+             in zip(datasets, results)
+             }
+
+    finish = time.time()
+    print(f"Mapped in {finish - start}")
+
+    # Get the correlation distance between maps
+    correlation_matrix = get_distance_matrix(xmaps)
+
+    # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
+    # Based on whether they are within the res cutoff
+    comparators = {}
+    for j, dtag in enumerate(dtag_list):
+        current_res = datasets[dtag].reflections.resolution().resolution
+
+        # Get dtags ordered by distance
+        row = correlation_matrix[j,:].flatten()
+        closest_dtags = np.argsort(row)
+
+
+        # Decide the res upper bound
+        truncation_res = max(current_res+resolution_cutoff, highest_res_datasets_max)
+
+        # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
+        # if so
+
+        potential_comparator_dtags = []
+        for potential_comparator_dtag in closest_dtags:
+
+            if datasets[dtag].reflections.resolution().resolution < truncation_res:
+                potential_comparator_dtags.append(potential_comparator_dtag)
+            else:
+                continue
+
+            # of enough accuulated, continue
+            if len(potential_comparator_dtags) > comparison_min_comparators:
+                comparators[dtag] = potential_comparator_dtags
+                break
 
     return comparators
 

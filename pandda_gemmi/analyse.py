@@ -38,6 +38,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     get_shells,
     get_comparators_high_res_random,
+get_comparators_closest_cutoff,
     truncate,
     validate_strategy_num_datasets,
     validate,
@@ -168,16 +169,16 @@ def process_shell(
     results = process_local(
         partial(
             load_xmap_paramaterised,
-            datasets[key],
+            shell_truncated_datasets[key],
             alignments[key],
         )
         for key
-        in datasets
+        in shell_truncated_datasets
     )
 
     xmaps = {dtag: xmap
              for dtag, xmap
-             in zip(datasets, results)
+             in zip(shell_truncated_datasets, results)
              }
 
     finish = time.time()
@@ -399,7 +400,7 @@ def main(
         local_cpus: int = 12,
         job_params_file: Optional[str] = None,
         comparison_strategy: str = "high_res_random",
-        comparison_res_cutoff: float = 0.25,
+        comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 15,
         comparison_max_comparators: int = 30,
         local_processing: str = "multiprocessing",
@@ -593,8 +594,9 @@ def main(
 
     elif comparison_strategy == "closest_cutoff":
         # Closest datasets after clustering as long as they are not too poor res
-        raise NotImplementedError()
-        comparators: Dict[Dtag, List[Dtag]] = ...
+        comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
+            datasets,
+        )
 
     elif comparison_strategy == "high_res":
         # Almost Old PanDDA strategy: highest res datasets
