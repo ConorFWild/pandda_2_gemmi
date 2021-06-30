@@ -133,6 +133,7 @@ def process_dataset(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
     masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags([test_dtag, ])
     print(masked_train_xmap_array.dtag_list)
+    print(masked_test_xmap_array.xmap_array.shape)
 
     # Determine the parameters of the model to find outlying electron density
     print("Fitting model")
