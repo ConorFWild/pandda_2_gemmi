@@ -2502,10 +2502,8 @@ class Alignments:
             alignments_python[dtag] = alignment
         return alignments_python
     
-    def __setstate__(self, alignment_python: AlignmentPython):
-        alignment_gemmi = alignment_python.to_gemmi()
-        self.transforms = alignment_gemmi
-    
+    def __setstate__(self, alignments_python: Dict[Dtag, AlignmentPython]):
+        self.alignments = {dtag: alignment_python.to_gemmi() for dtag, alignment_python in alignments_python.items()}
     
     
     
