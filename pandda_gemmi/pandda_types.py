@@ -2493,19 +2493,19 @@ class Alignments:
     def __iter__(self):
         for dtag in self.alignments:
             yield dtag
-    
-    def __getstate__(self):
-        
-        alignments_python = {}
-        for dtag, alignment in self.alignments.items():
-            alignment_python = AlignmentPython.from_gemmi(alignment)
-            alignments_python[dtag] = alignment_python
-        return alignments_python
-    
-    def __setstate__(self, alignments_python: Dict[Dtag, AlignmentPython]):
-        self.alignments = {dtag: alignment_python.to_gemmi() for dtag, alignment_python in alignments_python.items()}
-    
-    
+    #
+    # def __getstate__(self):
+    #
+    #     alignments_python = {}
+    #     for dtag, alignment in self.alignments.items():
+    #         alignment_python = AlignmentPython.from_gemmi(alignment)
+    #         alignments_python[dtag] = alignment_python
+    #     return alignments_python
+    #
+    # def __setstate__(self, alignments_python: Dict[Dtag, AlignmentPython]):
+    #     self.alignments = {dtag: alignment_python.to_gemmi() for dtag, alignment_python in alignments_python.items()}
+    #
+    #
     
 
 
