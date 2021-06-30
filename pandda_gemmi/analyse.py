@@ -360,7 +360,7 @@ def process_shell(
         [
             partial(
                 process_dataset_paramaterized,
-
+                test_dtag,
             )
             for test_dtag
             in shell.train_dtags
