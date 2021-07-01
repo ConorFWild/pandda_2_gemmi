@@ -268,10 +268,11 @@ def get_shells(
         for test_dtag, train_dtags in shells_train[res].items():
             all_dtags = all_dtags.union(train_dtags)
 
+        # Create the shell
         shell = Shell(
             shells_test[res],
             shells_train[res],
-            shells_test[res].union(shells_train[res]),
+            all_dtags,
         )
         shells[res] = shell
 
