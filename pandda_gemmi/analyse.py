@@ -777,7 +777,7 @@ def main(
             comparison_max_comparators,
             structure_factors,
             sample_rate,
-            resolution_cutoff,
+            comparison_res_cutoff,
             process_local,
         )
 
