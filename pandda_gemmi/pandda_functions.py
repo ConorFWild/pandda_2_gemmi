@@ -197,7 +197,7 @@ def get_comparators_closest_cutoff(
         # Get dtags ordered by distance
         row = correlation_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
-        closest_dtags_indexes = np.argsort(row)
+        closest_dtags_indexes = np.flip(np.argsort(row))
         closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
         print(f"\tClosest dtags are: {closest_dtags}")
         print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
