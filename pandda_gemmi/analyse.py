@@ -322,7 +322,7 @@ def process_shell(
              }
 
     finish = time.time()
-    print(f"Mapped in {finish - start}")
+    print(f"Mapped {len(xmaps)} xmaps in {finish - start}")
 
     # Seperate out test and train maps
     shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps.items() if dtag in shell.test_dtags}
