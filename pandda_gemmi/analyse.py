@@ -580,7 +580,7 @@ def main(
         comparison_max_comparators: int = 30,
         local_processing: str = "multiprocessing",
         global_processing: str = "serial",
-        autobuild_results: bool = False,
+        autobuild: bool = False,
         debug: bool = True,
 ):
     ###################################################################
