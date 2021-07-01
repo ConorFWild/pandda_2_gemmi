@@ -356,7 +356,7 @@ def process_shell(
         process_local=process_local_serial,
     )
 
-    results = process_local(
+    results = process_local_multiprocessing(
         [
             partial(
                 process_dataset_paramaterized,
@@ -364,7 +364,8 @@ def process_shell(
             )
             for test_dtag
             in shell.train_dtags
-        ]
+        ],
+        n_jobs=12 ,
     )
 
     return results
