@@ -580,6 +580,7 @@ def main(
         comparison_max_comparators: int = 30,
         local_processing: str = "multiprocessing",
         global_processing: str = "serial",
+        autobuild_results: bool = False,
         debug: bool = True,
 ):
     ###################################################################
@@ -630,6 +631,21 @@ def main(
         process_global = ...
     else:
         raise Exception()
+
+    # Set up autobuilding
+    if autobuild:
+        if autobuild_strategy == "rhofit":
+            autobuild_parametrized = partial(
+                autobuild_rhofit,
+            )
+
+        elif autobuild_strategy == "inbuilt":
+            autobuild_parametrized = partial(
+                autobuild_inbuilt,
+            )
+
+        else:
+            raise Exception(f"Autobuild strategy: {autobuild_strategy} is not valid!")
 
     # Parameterise
     process_shell_paramaterised = partial(
@@ -838,7 +854,18 @@ def main(
 
     # Autobuild the results if set to
     if autobuild_results:
-        process_global([lambda result: autobuild(result) for result in shell_results])
+
+
+        autobuild_results: Dict[EventID, AutobuildResult] = process_global(
+            [
+                partial(
+                    autobuild_parametrized(event),
+                )
+                for result
+                in shell_results
+            ]
+        )
+
 
     #
     all_events_events = Events.from_all_events(all_events, grid, 1.7)
