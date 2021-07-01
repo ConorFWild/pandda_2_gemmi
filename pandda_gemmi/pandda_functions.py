@@ -202,6 +202,7 @@ def get_comparators_closest_cutoff(
         print(f"\tClosest dtags are: {closest_dtags}")
         print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
+
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
         print(f"\tTrucation res is: {truncation_res}")
