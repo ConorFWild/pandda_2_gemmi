@@ -3078,6 +3078,11 @@ class XmapArray:
 
     def from_dtags(self, dtags: typing.List[Dtag]):
         bool_mask = []
+
+        for dtag in dtags:
+            if dtag not in self.dtag_list:
+                raise Exception(f"Dtag {dtag} not in dtags: {self.dtag_list}")
+
         for dtag in self.dtag_list:
             if dtag in dtags:
                 bool_mask.append(True)
