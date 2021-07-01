@@ -191,14 +191,18 @@ def get_comparators_closest_cutoff(
     # Based on whether they are within the res cutoff
     comparators = {}
     for j, dtag in enumerate(dtag_list):
+        print(f"Finding closes for dtag: {dtag}")
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
         row = correlation_matrix[j, :].flatten()
+        print(f"\tRow is: {row}")
         closest_dtags = np.argsort(row)
+        print(f"\tClosest dtags are: {closest_dtags}")
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
+        print(f"\tTrucation res is: {truncation_res}")
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so

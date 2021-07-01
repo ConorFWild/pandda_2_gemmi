@@ -574,7 +574,7 @@ def main(
         output_multiplier: float = 2.0,
         local_cpus: int = 12,
         job_params_file: Optional[str] = None,
-        comparison_strategy: str = "high_res_random",
+        comparison_strategy: str = "closest_cutoff",
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 15,
         comparison_max_comparators: int = 30,
