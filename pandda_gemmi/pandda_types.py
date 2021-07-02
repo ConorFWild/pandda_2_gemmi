@@ -190,7 +190,7 @@ class Structure:
             for model in self.structure:
                 for chain in model:
                     for residue in chain:
-                        if residue.name == water_code:
+                        if residue.is_water():
                             continue
 
                         for atom in residue:
