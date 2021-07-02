@@ -205,7 +205,7 @@ def process_dataset(
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
     print("\t\tIntially found clusters: {}".format(
         {
-            dtag: (len(clustering), max([len(cluster.indexes) for cluster in clustering.clustering.values()]))
+            dtag: (len(clustering), max([len(cluster.indexes) for cluster in clustering.clustering.values()] + [0,]))
             for dtag, clustering in zip(clusterings.clusters, clusterings.clusters.values())
         }
     )
@@ -625,9 +625,12 @@ def main(
         process_local = ...
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
-    elif local_processing == "multiprocessing":
+    elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
-        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus)
+        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+    elif local_processing == "multiprocessing_spawn":
+        mp.set_start_method("spawn")
+        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
     else:
         raise Exception()
 

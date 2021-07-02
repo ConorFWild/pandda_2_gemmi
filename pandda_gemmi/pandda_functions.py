@@ -33,11 +33,22 @@ def process_local_joblib(n_jobs, verbosity, funcs):
     return results
 
 
-def process_local_multiprocessing(funcs, n_jobs=12, ):
-    try:
-        mp.set_start_method("forkserver")
-    except Exception as e:
-        print(e)
+def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
+    if method == "forkserver":
+        try:
+            mp.set_start_method("forkserver")
+        except Exception as e:
+            print(e)
+
+    elif method == "spawn":
+        try:
+            mp.set_start_method("spawn")
+        except Exception as e:
+            print(e)
+
+    else:
+        raise Exception(f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
+
 
     with mp.Pool(n_jobs) as pool:
         results = pool.map(run, funcs)
