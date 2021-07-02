@@ -199,7 +199,12 @@ def process_dataset(
     )
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
     print("\t\tIntially found clusters: {}".format(
-        {dtag: len(cluster) for dtag, cluster in zip(clusterings.clusters, clusterings.clusters.values())}))
+        {
+            dtag: (len(clustering), max([cluster.size(grid) for cluster in clustering.clustering.values()]))
+            for dtag, clustering in zip(clusterings.clusters, clusterings.clusters.values())
+        }
+    )
+    )
 
     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings, grid)
@@ -854,8 +859,6 @@ def main(
 
     # Autobuild the results if set to
     if autobuild_results:
-
-
         autobuild_results: Dict[EventID, AutobuildResult] = process_global(
             [
                 partial(
@@ -865,7 +868,6 @@ def main(
                 in shell_results
             ]
         )
-
 
     #
     all_events_events = Events.from_all_events(all_events, grid, 1.7)
