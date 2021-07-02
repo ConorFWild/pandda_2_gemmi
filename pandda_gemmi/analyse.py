@@ -161,6 +161,9 @@ def process_dataset(
                                                        sigma_is,
                                                        )  # size of total_mask > 0
     print(np.min(sigma_s_m))
+    print(np.mean(sigma_s_m))
+    print(np.max(sigma_s_m))
+    print(np.std(sigma_s_m))
 
     model: Model = Model.from_mean_is_sms(
         mean_array,
