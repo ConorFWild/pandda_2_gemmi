@@ -184,12 +184,25 @@ class Structure:
                     for atom in residue:
                         yield atom
 
-    def all_atoms(self):
-        for model in self.structure:
-            for chain in model:
-                for residue in chain:
-                    for atom in residue:
-                        yield atom
+    def all_atoms(self, exclude_waters=False, water_code="HOH"):
+        if exclude_waters:
+
+            for model in self.structure:
+                for chain in model:
+                    for residue in chain:
+                        if residue.name == water_code:
+                            continue
+
+                        for atom in residue:
+                            yield atom
+
+        else:
+            for model in self.structure:
+                for chain in model:
+                    for residue in chain:
+
+                        for atom in residue:
+                            yield atom
 
     def align_to(self, other: Structure):
         # Warning: inplace!
@@ -1821,7 +1834,9 @@ class Partitioning:
 
         # Mask psacegroup summetry related 
         symops = Symops.from_grid(grid)
-        for atom in structure.all_atoms():
+
+        # Symmetry waters can be a problem for known hits! See BAZ2BA-x447 for an example
+        for atom in structure.all_atoms(exclude_waters=True):
             position = atom.pos
             fractional_position = mask.unit_cell.fractionalize(position)
             wrapped_position = fractional_position.wrap_to_unit()
