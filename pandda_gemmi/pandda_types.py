@@ -22,6 +22,7 @@ from sklearn.cluster import DBSCAN
 
 import joblib
 from joblib.externals.loky import set_loky_pickler
+
 set_loky_pickler('pickle')
 
 from typing import *
@@ -39,23 +40,27 @@ from pandda_gemmi import pandda_exceptions
 
 from pandda_gemmi.pandda_exceptions import *
 
+
 @dataclasses.dataclass()
 class DelayedFuncReady:
     func: MethodType
     args: Any
-    
+
     def __call__(self) -> Any:
         return self.func(*self.args)
+
 
 @dataclasses.dataclass()
 class DelayedFuncWaiting:
     func: MethodType
-    
+
     def __call__(self, *args: Any) -> Any:
         return DelayedFuncReady(self.func, args)
-        
+
+
 def delayed(func: MethodType):
     return DelayedFuncWaiting(func)
+
 
 @dataclasses.dataclass()
 class Dtag:
@@ -94,15 +99,15 @@ class ResidueID:
                          chain.name,
                          str(res.seqid.num),
                          )
+
     def __eq__(self, other) -> bool:
         if isinstance(other, type(self)):
             return ((self.model, self.chain, self.insertion) ==
                     (other.model, other.chain, other.insertion))
         return NotImplemented
-    
+
     def __hash__(self):
         return hash((self.model, self.chain, self.insertion))
-        
 
 
 @dataclasses.dataclass()
@@ -159,23 +164,23 @@ class Structure:
                 for residue in chain.get_polymer():
                     if residue.name.upper() not in RESIDUE_NAMES:
                         continue
-                    
+
                     try:
                         has_ca = residue["CA"][0]
                     except Exception as e:
                         continue
-                    
-                    resid = ResidueID.from_residue_chain(model, chain, residue)                        
+
+                    resid = ResidueID.from_residue_chain(model, chain, residue)
                     yield resid
 
     def protein_atoms(self):
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer():
-                    
+
                     if residue.name.upper() not in RESIDUE_NAMES:
                         continue
-                    
+
                     for atom in residue:
                         yield atom
 
@@ -186,45 +191,44 @@ class Structure:
                     for atom in residue:
                         yield atom
 
-                        
     def align_to(self, other: Structure):
         # Warning: inplace!
         # Aligns structures usings carbon alphas and transform self into the frame of the other
-        
+
         transform = self.get_alignment(other)
-        
+
         # Transform positions
         for atom in self.all_atoms():
             atom.pos = transform.apply_inverse(atom.pos)
-                    
+
         return self
-    
+
     def get_alignment(self, other: Structure):
         # alignment returned is FROM other TO self
-        
+
         ca_self = []
         ca_other = []
-        
+
         # Get CAs
         for model in self.structure:
             for chain in model:
                 for res_self in chain.get_polymer():
                     if res_self.name.upper() not in RESIDUE_NAMES:
                         continue
-                                
+
                     current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
                     res_other = other.structure[current_res_id][0]
-                    
+
                     self_ca_pos = res_self["CA"][0].pos
                     other_ca_pos = res_other["CA"][0].pos
-                    
+
                     ca_list_self = Transform.pos_to_list(self_ca_pos)
                     ca_list_other = Transform.pos_to_list(other_ca_pos)
-                    
+
                     ca_self.append(ca_list_self)
                     ca_other.append(ca_list_other)
-                    
+
         # Make coord matricies
         matrix_self = np.array(ca_self)
         matrix_other = np.array(ca_other)
@@ -238,48 +242,46 @@ class Structure:
         de_meaned_other = matrix_other - mean_other
 
         # Align
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self, 
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
                                                                         de_meaned_other,
                                                                         )
-        
+
         # Get transform
         vec = np.array([0.0, 0.0, 0.0])
         # Transform is from other frame to self frame
         transform = Transform.from_translation_rotation(vec,
                                                         rotation,
-                                                        mean_other, 
-                                                        mean_self, 
+                                                        mean_other,
+                                                        mean_self,
                                                         )
 
         return transform
 
-
-    
     def get_alignment(self, other: Structure):
         # alignment returned is FROM other TO self
-        
+
         ca_self = []
         ca_other = []
-        
+
         # Get CAs
         for model in self.structure:
             for chain in model:
-                for res_self in chain.get_polymer():      
+                for res_self in chain.get_polymer():
                     if res_self.name.upper() not in RESIDUE_NAMES:
-                        continue      
+                        continue
                     current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
                     res_other = other.structure[current_res_id][0]
-                    
+
                     self_ca_pos = res_self["CA"][0].pos
                     other_ca_pos = res_other["CA"][0].pos
-                    
+
                     ca_list_self = Transform.pos_to_list(self_ca_pos)
                     ca_list_other = Transform.pos_to_list(other_ca_pos)
-                    
+
                     ca_self.append(ca_list_self)
                     ca_other.append(ca_list_other)
-                    
+
         # Make coord matricies
         matrix_self = np.array(ca_self)
         matrix_other = np.array(ca_other)
@@ -293,17 +295,17 @@ class Structure:
         de_meaned_other = matrix_other - mean_other
 
         # Align
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self, 
+        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
                                                                         de_meaned_other,
                                                                         )
-        
+
         # Get transform
         vec = np.array([0.0, 0.0, 0.0])
         # Transform is from other frame to self frame
         transform = Transform.from_translation_rotation(vec,
                                                         rotation,
-                                                        mean_other, 
-                                                        mean_self, 
+                                                        mean_other,
+                                                        mean_self,
                                                         )
 
         return transform
@@ -311,19 +313,19 @@ class Structure:
     def align_to(self, other: Structure):
         # Warning: inplace!
         # Aligns structures usings carbon alphas and transform self into the frame of the other
-        
+
         transform = self.get_alignment(other)
-        
+
         # Transform positions
         for atom in self.all_atoms():
             atom.pos = transform.apply_reference_to_moving(atom.pos)
-                    
-        return self                        
-                        
+
+        return self
+
     def __getstate__(self):
         structure_python = StructurePython.from_gemmi(self.structure)
         return (structure_python, self.path)
-    
+
     def __setstate__(self, data: Tuple[StructurePython, Path]):
         structure_python = data[0]
         path = data[1]
@@ -331,38 +333,36 @@ class Structure:
         self.structure.setup_entities()
         self.path = path
 
-        
 
 @dataclasses.dataclass()
 class SequenceAlignment:
-    
     _residue_id_dict: Dict[ResidueID, typing.Bool]
-    
+
     def __len__(self):
         return len(self._residue_id_dict)
-    
+
     def __getitem__(self, item: ResidueID):
         return self._residue_id_dict[item]
-    
+
     def __iter__(self):
         for residue_id, present in self._residue_id_dict.items():
             if not present:
                 continue
             else:
                 yield residue_id
-                
+
     def num_missing(self):
         return len([x for x in self._residue_id_dict.values() if not x])
-    
+
     def num_present(self):
         return len([x for x in self._residue_id_dict.values() if x])
-    
+
     def missing(self):
         return [resid for resid, present in self._residue_id_dict.items() if not present]
-            
+
     def present(self):
         return [resid for resid, present in self._residue_id_dict.items() if present]
-            
+
     @staticmethod
     def from_reference(reference_structure: Structure, structures: typing.Iterable[Structure]):
         residue_id_dict = {}
@@ -374,14 +374,14 @@ class SequenceAlignment:
             # See whether other
             for dtag, structure in structures.items():
                 residue_span = structure[residue_id]
-                
+
                 # See if residue span is empty
                 if len(residue_span) == 0:
                     present = False
                     unmatched = unmatched + 1
                     print(f"Dtag: {dtag} misses residue")
                     continue
-                
+
                 # See if CA is present
                 try:
                     ca_selection = residue_span[0]["CA"]
@@ -391,7 +391,7 @@ class SequenceAlignment:
                     print(f"Dtag: {dtag} misses CA")
 
                     continue
-                
+
                 # See if can actually get CA
                 try:
                     ca = ca_selection[0]
@@ -401,9 +401,9 @@ class SequenceAlignment:
                     print(f"Dtag: {dtag} misses CA actually")
 
                     continue
-                
+
                 matched = matched + 1
-            
+
             print((
                 f"Residue: {residue_id}\n"
                 f"Matched: {matched}\n"
@@ -411,11 +411,8 @@ class SequenceAlignment:
             ))
             residue_id_dict[residue_id] = present
 
-                
-        return SequenceAlignment(residue_id_dict) 
-        
-            
-        
+        return SequenceAlignment(residue_id_dict)
+
 
 @dataclasses.dataclass()
 class StructureFactors:
@@ -466,24 +463,23 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
 
         # add resolutions
-        data["res"] = self.reflections.make_d_array() 
+        data["res"] = self.reflections.make_d_array()
 
         # Truncate by resolution
         data_truncated = data[data["res"] >= resolution.resolution]
-        
+
         # Rem,ove res colum
         data_dropped = data_truncated.drop("res", "columns")
-        
-        
+
         # To numpy
         data_dropped_array = data_dropped.to_numpy()
-        
+
         # new data
         new_data = np.hstack([data_dropped.index.to_frame().to_numpy(),
                               data_dropped_array,
                               ]
                              )
-        
+
         # Update
         new_reflections.set_data(new_data)
 
@@ -491,7 +487,7 @@ class Reflections:
         new_reflections.update_reso()
 
         return Reflections(new_reflections)
-    
+
     def truncate_reflections(self, index=None) -> Reflections:
         new_reflections = gemmi.Mtz(with_base=False)
 
@@ -518,13 +514,13 @@ class Reflections:
 
         # To numpy
         data_dropped_array = data_indexed.to_numpy()
-        
+
         # new data
         new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
                               data_dropped_array,
                               ]
                              )
-        
+
         # Update
         new_reflections.set_data(new_data)
 
@@ -597,13 +593,13 @@ class Reflections:
     def scale_reflections(self, other: Reflections, cut: float = 99.6):
 
         data_table = pd.DataFrame(data=np.array(self.reflections),
-                                      columns=self.reflections.column_labels(),
-                                      index=["H", "K", "L"],
-                                      )
+                                  columns=self.reflections.column_labels(),
+                                  index=["H", "K", "L"],
+                                  )
         data_other_table = pd.DataFrame(data=np.array(other.reflections),
-                                            columns=other.reflections.column_labels(),
-                                            index=["H", "K", "L"],
-                                            )
+                                        columns=other.reflections.column_labels(),
+                                        index=["H", "K", "L"],
+                                        )
 
         # Set resolutions
         data_table["1_d2"] = self.reflections.make_1_d2_array()
@@ -634,7 +630,6 @@ class Reflections:
             diff_array = np.abs(f_array - f_other_array)
             high_diff = np.percentile(diff_array, cut)
 
-
             x_truncated = f_array[diff_array < high_diff]
             y_truncated = f_other_array[diff_array < high_diff]
 
@@ -657,13 +652,11 @@ class Reflections:
             x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
             y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-
             # optimise scale
             scales = []
             rmsds = []
 
             for scale in np.linspace(-4, 4, 280):
-
                 x = x_f
                 y_s = y_f * np.exp(scale * sample_grid)
 
@@ -680,10 +673,10 @@ class Reflections:
 
             x_r_all = x_r_truncated
             y_r_all = y_r_truncated
-            
+
     def __getstate__(self):
         return (MtzPython.from_gemmi(self.reflections), self.path)
-    
+
     def __setstate__(self, data: Tuple[MtzPython, Path]):
         reflections_python = data[0]
         path = data[1]
@@ -712,20 +705,20 @@ class Dataset:
                        self.reflections.truncate_resolution(resolution,
                                                             )
                        )
-        
+
     def truncate_reflections(self, index=None) -> Dataset:
         return Dataset(self.structure,
-                        self.reflections.truncate_reflections( index,
-                                                            )
-                    )
+                       self.reflections.truncate_reflections(index,
+                                                             )
+                       )
 
     def scale_reflections(self, reference: Reference):
         new_reflections = self.reflections.scale_reflections(reference)
         return Dataset(self.structure,
                        new_reflections,
                        )
-        
-    def common_reflections(self, 
+
+    def common_reflections(self,
                            reference_ref: Reflections,
                            structure_factors: StructureFactors,
                            ):
@@ -733,58 +726,56 @@ class Dataset:
         dtag_reflections = self.reflections.reflections
         dtag_reflections_array = np.array(dtag_reflections, copy=True)
         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                            columns=dtag_reflections.column_labels(),
-                                            )
+                                              columns=dtag_reflections.column_labels(),
+                                              )
         dtag_reflections_table.set_index(["H", "K", "L"], inplace=True)
-        dtag_flattened_index = dtag_reflections_table[~dtag_reflections_table[structure_factors.f].isna()].index.to_flat_index()
-        
+        dtag_flattened_index = dtag_reflections_table[
+            ~dtag_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+
         # Get reference
         reference_reflections = reference_ref.reflections
         reference_reflections_array = np.array(reference_reflections, copy=True)
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                            columns=reference_reflections.column_labels(),
-                                            )
+                                                   columns=reference_reflections.column_labels(),
+                                                   )
         reference_reflections_table.set_index(["H", "K", "L"], inplace=True)
-        reference_flattened_index = reference_reflections_table[~reference_reflections_table[structure_factors.f].isna()].index.to_flat_index()
-        
-        
+        reference_flattened_index = reference_reflections_table[
+            ~reference_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+
         running_index = dtag_flattened_index.intersection(reference_flattened_index)
 
         return running_index.to_list()
-        
-        
-        
+
     def smooth(self, reference: Reference, structure_factors: StructureFactors):
         reference_dataset = reference.dataset
-        
+
         # Get common set of reflections
         common_reflections = self.common_reflections(reference_dataset.reflections,
-                                                        structure_factors,
-                                                        )
-        
-        
+                                                     structure_factors,
+                                                     )
+
         # Truncate 
         truncated_reference = reference.dataset.truncate_reflections(common_reflections)
         truncated_dataset = self.truncate_reflections(common_reflections)
-        
+
         # Refference array 
         reference_reflections = truncated_reference.reflections.reflections
         reference_reflections_array = np.array(reference_reflections,
-                                            copy=True,
-                                            )
+                                               copy=True,
+                                               )
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                                columns=reference_reflections.column_labels(),
-                                                )
+                                                   columns=reference_reflections.column_labels(),
+                                                   )
         reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
-        
+
         # Dtag array
-        dtag_reflections = truncated_dataset.reflections.reflections                           
+        dtag_reflections = truncated_dataset.reflections.reflections
         dtag_reflections_array = np.array(dtag_reflections,
-                                        copy=True,
-                                    )
+                                          copy=True,
+                                          )
         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                            columns=dtag_reflections.column_labels(),
-                                            )        
+                                              columns=dtag_reflections.column_labels(),
+                                              )
         dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
 
         # Resolution array
@@ -793,56 +784,54 @@ class Dataset:
         # Prepare optimisation
         x = reference_f_array
         y = dtag_f_array
-        
+
         r = resolution_array
-        
+
         sample_grid = np.linspace(min(r), max(r), 100)
-        
+
         knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-        knn_x.fit(r.reshape(-1,1), 
-                    x.reshape(-1,1),
-                    )
+        knn_x.fit(r.reshape(-1, 1),
+                  x.reshape(-1, 1),
+                  )
         x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
         scales = []
         rmsds = []
-        
+
         # Optimise the scale factor
-        for scale in np.linspace(-4,4,100):
+        for scale in np.linspace(-4, 4, 100):
             y_s = y * np.exp(scale * r)
             knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-            knn_y.fit(r.reshape(-1,1), 
-                    y_s.reshape(-1,1),
-                    )
-
+            knn_y.fit(r.reshape(-1, 1),
+                      y_s.reshape(-1, 1),
+                      )
 
             y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-            rmsd = np.sum(np.abs(x_f-y_f)) 
+            rmsd = np.sum(np.abs(x_f - y_f))
 
             scales.append(scale)
             rmsds.append(rmsd)
-            
+
         min_scale = scales[np.argmin(rmsds)]
 
-        
         # Get the original reflections
         original_reflections = self.reflections.reflections
-        
+
         original_reflections_array = np.array(original_reflections,
-                                            copy=True,
-                                            )
-        
+                                              copy=True,
+                                              )
+
         original_reflections_table = pd.DataFrame(original_reflections_array,
-                                        columns=reference_reflections.column_labels(),
-                                        )
-        
+                                                  columns=reference_reflections.column_labels(),
+                                                  )
+
         f_array = original_reflections_table[structure_factors.f]
-        
-        f_scaled_array = f_array * np.exp(min_scale*original_reflections.make_1_d2_array())
-        
+
+        f_scaled_array = f_array * np.exp(min_scale * original_reflections.make_1_d2_array())
+
         original_reflections_table[structure_factors.f] = f_scaled_array
-        
+
         # New reflections
         new_reflections = gemmi.Mtz(with_base=False)
 
@@ -856,80 +845,73 @@ class Dataset:
         # Add columns
         for column in original_reflections.columns:
             new_reflections.add_column(column.label, column.type)
-        
+
         # Update
         new_reflections.set_data(original_reflections_table.to_numpy())
 
         # Update resolution
-        new_reflections.update_reso() 
-                
+        new_reflections.update_reso()
+
         # Create new dataset
         smoothed_dataset = Dataset(self.structure,
-                              Reflections(new_reflections),
-                            )    
+                                   Reflections(new_reflections),
+                                   )
 
-        
         return smoothed_dataset
-    
-    def correlation(self, 
+
+    def correlation(self,
                     alignment: Alignment,
                     grid: Grid,
                     structure_factors,
                     reference_array: np.ndarray,
-                    sample_rate:float = 3.0, 
+                    sample_rate: float = 3.0,
                     ) -> float:
-        
+
         # Get aligned dataset
         xmap: Xmap = Xmap.from_unaligned_dataset_c(
-                    self,
-                    alignment,
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                    )
-        
-        
-        
+            self,
+            alignment,
+            grid,
+            structure_factors,
+            sample_rate,
+        )
+
         # Get arrays
         xmap_array: np.ndarray = xmap.to_array()
-        
-        
+
         # Get correlation
-        correlation, map_off = np.polyfit(x=xmap_array.flatten(), 
-                                          y=reference_array.flatten(), 
+        correlation, map_off = np.polyfit(x=xmap_array.flatten(),
+                                          y=reference_array.flatten(),
                                           deg=1,
                                           )
-        
+
         # return
         return correlation
-
-    
-        
 
 
 @dataclasses.dataclass()
 class Datasets:
     datasets: typing.Dict[Dtag, Dataset]
-    
+
     def __len__(self):
         return len(self.datasets)
-    
+
     @staticmethod
-    def from_data_dirs(path: Path, pdb_regex:str, mtz_regex: str):
+    def from_data_dirs(path: Path, pdb_regex: str, mtz_regex: str):
         datasets = {}
         for directory in path.glob("*"):
             print(directory)
             if directory.is_dir():
                 dtag = Dtag(directory.name)
-                
+
                 mtz_files = list(directory.glob(mtz_regex))
                 if len(mtz_files) == 0:
                     continue
-                
+
                 pdb_files = list(directory.glob(pdb_regex))
                 if len(pdb_files) == 0:
                     continue
-                
+
                 datasets[dtag] = Dataset.from_files(pdb_files[0],
                                                     mtz_files[0])
         return Datasets(datasets)
@@ -951,18 +933,17 @@ class Datasets:
 
     def remove_dissimilar_models(self, reference: Reference, max_rmsd_to_reference: float) -> Datasets:
 
-
         new_dtags = filter(lambda dtag: (RMSD.from_reference(
             reference,
             self.datasets[dtag],
-            )).to_float() < max_rmsd_to_reference,
+        )).to_float() < max_rmsd_to_reference,
                            self.datasets,
                            )
 
         new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
-    
+
     def remove_models_with_large_gaps(self, reference: Reference):
         new_dtags = filter(lambda dtag: Alignment.has_large_gap(reference, self.datasets[dtag]),
                            self.datasets,
@@ -983,7 +964,7 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
-    
+
     def trunate_num_datasets(self, num_datasets: int):
         new_datasets = {dtag: self.datasets[dtag] for i, dtag in enumerate(self.datasets) if i < num_datasets}
         return Datasets(new_datasets)
@@ -1046,9 +1027,9 @@ class Datasets:
         return self
 
     def common_reflections(self, structure_factors: StructureFactors, tol=0.000001):
-        
+
         running_index = None
-        
+
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             reflections = dataset.reflections.reflections
@@ -1057,32 +1038,31 @@ class Datasets:
                                              columns=reflections.column_labels(),
                                              )
             reflections_table.set_index(["H", "K", "L"], inplace=True)
-            
+
             is_na = reflections_table[structure_factors.f].isna()
             is_zero = reflections_table[structure_factors.f].abs() < tol
             mask = ~(is_na | is_zero)
-            
+
             flattened_index = reflections_table[mask].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
             running_index = running_index.intersection(flattened_index)
         return running_index.to_list()
 
-
     def truncate(self, resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
         new_datasets_resolution = {}
-        
+
         # Truncate by common resolution
         for dtag in self.datasets:
-            truncated_dataset = self.datasets[dtag].truncate_resolution(resolution,)
+            truncated_dataset = self.datasets[dtag].truncate_resolution(resolution, )
 
             new_datasets_resolution[dtag] = truncated_dataset
-            
+
         dataset_resolution_truncated = Datasets(new_datasets_resolution)
-            
+
         # Get common set of reflections
         common_reflections = dataset_resolution_truncated.common_reflections(structure_factors)
-        
+
         # truncate on reflections
         new_datasets_reflections = {}
         for dtag in dataset_resolution_truncated:
@@ -1090,9 +1070,9 @@ class Datasets:
             reflections_array = np.array(reflections)
             print(f"{dtag}")
             print(f"{reflections_array.shape}")
-            
+
             truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
-                                                             )
+                                                                                        )
             reflections = truncated_dataset.reflections.reflections
             reflections_array = np.array(reflections)
             print(f"{dtag}: {reflections_array.shape}")
@@ -1100,62 +1080,61 @@ class Datasets:
             new_datasets_reflections[dtag] = truncated_dataset
 
         return Datasets(new_datasets_reflections)
-    
-    
-    def smooth_datasets(self, 
-                        reference: Reference, 
+
+    def smooth_datasets(self,
+                        reference: Reference,
                         structure_factors: StructureFactors,
-                        cut = 97.5,
+                        cut=97.5,
                         mapper=False,
                         ):
-        
+
         if mapper:
             keys = list(self.datasets.keys())
-            
+
             results = mapper(
-                                           delayed(
-                                               self[key].smooth)(
-                                                   reference,
-                                                   structure_factors
-                                                   )
-                                               for key
-                                               in keys
-                                       )
-                                       
+                delayed(
+                    self[key].smooth)(
+                    reference,
+                    structure_factors
+                )
+                for key
+                in keys
+            )
+
             smoothed_datasets = {keys[i]: results[i]
-                for i, key
-                in enumerate(keys)
-                }
-        
-        
+                                 for i, key
+                                 in enumerate(keys)
+                                 }
+
+
         else:
             smoothed_datasets = {}
             for dtag in self.datasets:
                 dataset = self.datasets[dtag]
 
                 smoothed_dataset = dataset.smooth(reference,
-                                                structure_factors,
-                                                )
+                                                  structure_factors,
+                                                  )
                 smoothed_datasets[dtag] = smoothed_dataset
-            
+
         return Datasets(smoothed_datasets)
-        
-    def smooth(self, 
-               reference_reflections: gemmi.Mtz, 
-            structure_factors: StructureFactors,
-            cut = 97.5,
-            ):
-    
+
+    def smooth(self,
+               reference_reflections: gemmi.Mtz,
+               structure_factors: StructureFactors,
+               cut=97.5,
+               ):
+
         reference_reflections_array = np.array(reference_reflections,
-                                            copy=True,
-                                            )
-        
+                                               copy=True,
+                                               )
+
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                                columns=reference_reflections.column_labels(),
-                                                )
-            
+                                                   columns=reference_reflections.column_labels(),
+                                                   )
+
         reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
-        
+
         resolution_array = reference_reflections.make_1_d2_array()
 
         new_reflections_dict = {}
@@ -1163,57 +1142,54 @@ class Datasets:
         for dtag in self.datasets:
 
             dtag_reflections = self.datasets[dtag].reflections.reflections
-                                        
-                                        
+
             dtag_reflections_array = np.array(dtag_reflections,
-                                            copy=True,
-                                        )
+                                              copy=True,
+                                              )
             dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                                columns=dtag_reflections.column_labels(),
-                                                )
-            
+                                                  columns=dtag_reflections.column_labels(),
+                                                  )
+
             dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
 
             x = reference_f_array
             y = dtag_f_array
-            
+
             r = resolution_array
-            
+
             sample_grid = np.linspace(min(r), max(r), 100)
-            
+
             knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-            knn_x.fit(r.reshape(-1,1), 
-                      x.reshape(-1,1),
+            knn_x.fit(r.reshape(-1, 1),
+                      x.reshape(-1, 1),
                       )
             x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
             scales = []
             rmsds = []
 
-            for scale in np.linspace(-4,4,100):
+            for scale in np.linspace(-4, 4, 100):
                 y_s = y * np.exp(scale * r)
                 knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-                knn_y.fit(r.reshape(-1,1), 
-                        y_s.reshape(-1,1),
-                        )
-
+                knn_y.fit(r.reshape(-1, 1),
+                          y_s.reshape(-1, 1),
+                          )
 
                 y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-                rmsd = np.sum(np.abs(x_f-y_f)) 
+                rmsd = np.sum(np.abs(x_f - y_f))
 
                 scales.append(scale)
                 rmsds.append(rmsd)
-                
+
             min_scale = scales[np.argmin(rmsds)]
 
-            
             f_array = dtag_reflections_table[structure_factors.f]
-            
-            f_scaled_array = f_array * np.exp(min_scale*resolution_array)
-            
+
+            f_scaled_array = f_array * np.exp(min_scale * resolution_array)
+
             dtag_reflections_table[structure_factors.f] = f_scaled_array
-            
+
             # New reflections
             new_reflections = gemmi.Mtz(with_base=False)
 
@@ -1227,70 +1203,63 @@ class Datasets:
             # Add columns
             for column in dtag_reflections.columns:
                 new_reflections.add_column(column.label, column.type)
-            
+
             # Update
             new_reflections.set_data(dtag_reflections_table.to_numpy())
 
             # Update resolution
-            new_reflections.update_reso() 
-                    
+            new_reflections.update_reso()
+
             new_reflections_dict[dtag] = new_reflections
             smoothing_factor_dict[dtag] = min_scale
-            
-            
+
         # Create new dataset
         new_datasets_dict = {}
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
             structure = dataset.structure
             new_reflections = new_reflections_dict[dtag]
-            
+
             smoothing_factor = smoothing_factor_dict[dtag]
-            
+
             new_dataset = Dataset(structure,
-                                Reflections(new_reflections),
-                                smoothing_factor=smoothing_factor
-                                )    
+                                  Reflections(new_reflections),
+                                  smoothing_factor=smoothing_factor
+                                  )
             new_datasets_dict[dtag] = new_dataset
-            
-            
-        
+
         return Datasets(new_datasets_dict)
-    
+
     # def smooth_dep(self, reference_reflections: Reflections,
     #            structure_factors: StructureFactors,
     #            cut = 97.5,
     #            ):
-        
+
     #     reference_reflections_array = np.array(reference_reflections,
     #                                            copy=False,
     #                                            )
-        
+
     #     reference_reflections_table = pd.DataFrame(reference_reflections_array,
     #                                               columns=reference_reflections.column_labels(),
     #                                               )
-            
+
     #     reference_f_array = reference_reflections_table[structure_factors.f].to_numpy()
-        
+
     #     resolution_array = reference_reflections.make_1_d2_array()
 
     #     new_reflections_dict = {}
     #     for dtag in self.datasets:
 
     #         dtag_reflections = self.datasets[dtag].reflections.reflections
-                                        
-                                        
+
     #         dtag_reflections_array = np.array(dtag_reflections,
     #                                           copy=False,
     #                                     )
     #         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
     #                                               columns=dtag_reflections.column_labels(),
     #                                               )
-            
+
     #         dtag_f_array = dtag_reflections_table[structure_factors.f].to_numpy()
-
-
-
 
     #         min_scale_list = []
 
@@ -1301,7 +1270,7 @@ class Datasets:
     #         for i in range(6):
     #             x = dtag_f_array[selected]
     #             y = reference_f_array[selected]
-                
+
     #             x_r = resolution_array[selected]
     #             y_r = resolution_array[selected]
 
@@ -1329,35 +1298,33 @@ class Datasets:
 
     #                 scales.append(scale)
     #                 rmsds.append(rmsd)
-                    
+
     #             min_scale = scales[np.argmin(rmsds)]
     #             min_scale_list.append(min_scale)
-                
-           
+
     #             selected_copy = selected.copy()
-                
+
     #             diff_array = np.abs(x-(y*np.exp(min_scale*y_r)))
 
     #             high_diff = np.percentile(diff_array, 
     #                                     cut,
     #                                     )
-                
+
     #             diff_mask = diff_array > high_diff
-                
+
     #             selected_index_tuple = np.nonzero(selected)
     #             high_diff_mask = selected_index_tuple[0][diff_mask]  
-                
+
     #             selected[high_diff_mask] = False
-                
+
     #         min_scale = min_scale_list[-1]
-            
-            
+
     #         f_array = dtag_reflections_table[structure_factors.f]
-            
+
     #         f_scaled_array = f_array * np.exp(min_scale*resolution_array)
-            
+
     #         dtag_reflections_table[structure_factors.f] = f_scaled_array
-            
+
     #         # New reflections
     #         new_reflections = gemmi.Mtz(with_base=False)
 
@@ -1371,16 +1338,15 @@ class Datasets:
     #         # Add columns
     #         for column in dtag_reflections.columns:
     #             new_reflections.add_column(column.label, column.type)
-            
+
     #         # Update
     #         new_reflections.set_data(dtag_reflections_table.to_numpy())
 
     #         # Update resolution
     #         new_reflections.update_reso() 
-                       
+
     #         new_reflections_dict[dtag] = new_reflections
-            
-            
+
     #     # Create new dataset
     #     new_datasets_dict = {}
     #     for dtag in self.datasets:
@@ -1391,14 +1357,8 @@ class Datasets:
     #                               Reflections(reflections),
     #                               )    
     #         new_datasets_dict[dtag] = new_dataset
-            
-            
-        
+
     #     return Datasets(new_datasets_dict)
-
-
-
-                
 
     def __iter__(self):
         for dtag in self.datasets:
@@ -1408,34 +1368,35 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in dtags}
         return Datasets(new_datasets)
 
-    def cluster(self, alignments: Alignments, grid: Grid, reference: Reference, structure_factors: StructureFactors, mapper=False, sample_rate: float=3.0) -> Datasets:
-        
+    def cluster(self, alignments: Alignments, grid: Grid, reference: Reference, structure_factors: StructureFactors,
+                mapper=False, sample_rate: float = 3.0) -> Datasets:
+
         # Common res
         resolution_high: Resolution = min([self[dtag].reflections.resolution() for dtag in self],
-                              key=lambda x: x.resolution,
-                              )
-        
+                                          key=lambda x: x.resolution,
+                                          )
+
         print(f"High resolution is: {resolution_high}")
-        
+
         # Truncated datasets
         truncated_datasets: Datasets = self.truncate(resolution=resolution_high,
-                                                            structure_factors=structure_factors,
-                                                            )
-        
+                                                     structure_factors=structure_factors,
+                                                     )
+
         # Truncated reference
-        truncated_reference_dataset: Dataset= truncated_datasets[reference.dtag]
-        
+        truncated_reference_dataset: Dataset = truncated_datasets[reference.dtag]
+
         # Get reference map
         reference_xmap: Xmap = Xmap.from_unaligned_dataset_c(
-                    truncated_reference_dataset,
-                    alignments[reference.dtag],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                    )
+            truncated_reference_dataset,
+            alignments[reference.dtag],
+            grid,
+            structure_factors,
+            sample_rate,
+        )
         # Get reference_array
         reference_array: np.ndarray = reference_xmap.to_array()
-        
+
         # Get dtags
         keys = list(self.datasets.keys())
 
@@ -1444,11 +1405,11 @@ class Datasets:
             correlations: List[float] = mapper(
                 delayed(
                     self[dtag].correlation)(
-                        alignments[dtag],
-                        grid,
-                        structure_factors,
-                        reference_array,
-                        sample_rate, 
+                    alignments[dtag],
+                    grid,
+                    structure_factors,
+                    reference_array,
+                    sample_rate,
                 )
                 for dtag
                 in keys
@@ -1460,12 +1421,12 @@ class Datasets:
                     grid,
                     structure_factors,
                     reference_array,
-                    sample_rate, 
-                    ) 
-                for dtag 
+                    sample_rate,
+                )
+                for dtag
                 in keys
-                ]
-            
+            ]
+
         for i, dtag in enumerate(keys):
             print(
                 (
@@ -1473,21 +1434,20 @@ class Datasets:
                 )
             )
 
-        new_datasets = {keys[i]: self.datasets[dtag] 
-                        for i, dtag 
+        new_datasets = {keys[i]: self.datasets[dtag]
+                        for i, dtag
                         in enumerate(keys)
                         if correlations[i] > 0.7
                         }
 
         return Datasets(new_datasets)
-        
-        
+
 
 @dataclasses.dataclass()
 class Reference:
     dtag: Dtag
     dataset: Dataset
-    
+
     # @staticmethod
     # def assert_from_datasets(datasets: Datasets):
     #     if len(datasets) < 1:
@@ -1495,9 +1455,8 @@ class Reference:
 
     @staticmethod
     def from_datasets(datasets: Datasets):
-        
         # Reference.assert_from_datasets(datasets)
-        
+
         resolutions: typing.Dict[Dtag, Resolution] = {}
         for dtag in datasets:
             resolutions[dtag] = datasets[dtag].reflections.resolution()
@@ -1531,193 +1490,192 @@ class Partitioning:
                        mask_radius_symmetry: float,
                        ):
 
-
         return Partitioning.from_structure(reference.dataset.structure,
                                            grid,
                                            mask_radius,
                                            mask_radius_symmetry,
                                            )
-    
+
     @staticmethod
-    def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float=6.0, buffer: float=3.0):
-            # Get the bounds
-            min_x = ca_position_array[:, 0].min() - buffer
-            max_x = ca_position_array[:, 0].max() + buffer
-            min_y = ca_position_array[:, 1].min() - buffer
-            max_y = ca_position_array[:, 1].max() + buffer
-            min_z = ca_position_array[:, 2].min() - buffer
-            max_z = ca_position_array[:, 2].max() + buffer
-            
-            # Get the upper and lower bounds of the grid as positions
-            grid_min_cart = gemmi.Position(min_x, min_y, min_z)
-            grid_max_cart = gemmi.Position(max_x, max_y, max_z)
-            
-            # Get them as fractions of the unit cell
-            grid_min_frac = grid.unit_cell.fractionalize(grid_min_cart)
-            grid_max_frac = grid.unit_cell.fractionalize(grid_max_cart)
-            
-            # Get them as coords
-            grid_min_coord = [int(grid_min_frac[0]*grid.nu), int(grid_min_frac[1]*grid.nv), int(grid_min_frac[2]*grid.nw),]
-            grid_max_coord = [int(grid_max_frac[0]*grid.nu), int(grid_max_frac[1]*grid.nv), int(grid_max_frac[2]*grid.nw),]
-            
-            # Get these as fractions
-            # fractional_grid_min = [
-            #     grid.unit_cell.fractionalize(grid_min_coord[0]), 
-            #     grid.unit_cell.fractionalize(grid_min_coord[1]),
-            #     grid.unit_cell.fractionalize(grid_min_coord[2]),
-            # ]
-            fractional_grid_min = [
-                grid_min_coord[0] * (1.0 / grid.nu),
-                grid_min_coord[1] * (1.0 / grid.nv),
-                grid_min_coord[2] * (1.0 / grid.nw),
-            ]
-            # fractional_grid_max = [
-            #     grid.unit_cell.fractionalize(grid_max_coord[0]),
-            #     grid.unit_cell.fractionalize(grid_max_coord[1]),
-            #     grid.unit_cell.fractionalize(grid_max_coord[2]),
-            #     ]
-            fractional_grid_max = [
-                grid_max_coord[0] * (1.0 / grid.nu),
-                grid_max_coord[1] * (1.0 / grid.nv),
-                grid_max_coord[2] * (1.0 / grid.nw),
-            ]
-            fractional_diff = [
-                fractional_grid_max[0]-fractional_grid_min[0],
-                fractional_grid_max[1]-fractional_grid_min[1],
-                fractional_grid_max[2]-fractional_grid_min[2],
-            ]
+    def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float = 6.0, buffer: float = 3.0):
+        # Get the bounds
+        min_x = ca_position_array[:, 0].min() - buffer
+        max_x = ca_position_array[:, 0].max() + buffer
+        min_y = ca_position_array[:, 1].min() - buffer
+        max_y = ca_position_array[:, 1].max() + buffer
+        min_z = ca_position_array[:, 2].min() - buffer
+        max_z = ca_position_array[:, 2].max() + buffer
 
-            # Get the grid of points around the protein
+        # Get the upper and lower bounds of the grid as positions
+        grid_min_cart = gemmi.Position(min_x, min_y, min_z)
+        grid_max_cart = gemmi.Position(max_x, max_y, max_z)
 
-            coord_product = itertools.product(
-                range(grid_min_coord[0], grid_max_coord[0]),
-                range(grid_min_coord[1], grid_max_coord[1]),
-                range(grid_min_coord[2], grid_max_coord[2]),
-            )
-            
-                                        
-            coord_array = np.array([[x, y, z] for x, y, z in coord_product])
-            
-            coord_tuple = (coord_array[:, 0],
-                           coord_array[:, 1],
-                           coord_array[:, 2],
-                           )
-            print((
-                f"coord_tuple - points in the refence grid\n" 
-                f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
-                f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
-                f"Length: {coord_tuple[0].shape}"
-            ))
-            
-            # Get the corresponding protein grid
-            protein_grid = gemmi.Int8Grid(
-                grid_max_coord[0]-grid_min_coord[0],
-                grid_max_coord[1]-grid_min_coord[1],
-                grid_max_coord[2]-grid_min_coord[2],
-                                          )
-            protein_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-            protein_grid_unit_cell = gemmi.UnitCell(
-                grid.unit_cell.a * fractional_diff[0],
-                grid.unit_cell.b * fractional_diff[1],
-                grid.unit_cell.c * fractional_diff[2],
-                grid.unit_cell.alpha,
-                grid.unit_cell.beta,
-                grid.unit_cell.gamma,
-            )
-            protein_grid.set_unit_cell(protein_grid_unit_cell)
-            
-            # Mask
-            for atom in structure.all_atoms():
-                pos = atom.pos
-                pos_transformed = gemmi.Position(pos.x - grid_min_cart[0],
-                                                 pos.y - grid_min_cart[1],
-                                                 pos.z - grid_min_cart[2],
-                                                 )
-                protein_grid.set_points_around(pos_transformed,
-                                        radius=mask_radius,
-                                        value=1,
-                                        )
-            
-            
-            # # Get the corresponding unit cell points
-            coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
-                                     np.mod(coord_tuple[1], grid.nv),
-                                     np.mod(coord_tuple[2], grid.nw),
-                                     )
-            print((
-                f"coord_unit_cell_tuple - points in the reference grid normalised to the unit cell\n" 
-                f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
-                f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
-                f"Length: {coord_unit_cell_tuple[0].shape}"
-            ))
-            
-            # Get the corresponging protein_grid points 
-            coord_mask_grid_tuple = (
-                coord_tuple[0]-grid_min_coord[0],
-                coord_tuple[1]-grid_min_coord[1],
-                coord_tuple[2]-grid_min_coord[2],
-                )
-            print((
-                f"coord_mask_grid_tuple - points in the portein frame grid\n" 
-                f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
-                f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
-                f"Length: {coord_mask_grid_tuple[0].shape}"
-            ))
-            
-            # Check which of them are in the mask
-            mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
-            in_mask_array_int = mask_array[coord_mask_grid_tuple]
-            in_mask_array = in_mask_array_int == 1
-            
-            # Mask those coords in the tuples
-            coord_array_in_mask = (
-                coord_tuple[0][in_mask_array],
-                coord_tuple[1][in_mask_array],
-                coord_tuple[2][in_mask_array],
-            ) 
-            print((
-                f"coord_array_in_mask - points in the reference grid in the mask\n" 
-                f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
-                f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
-            ))
-            
-            coord_array_unit_cell_in_mask = (
-                coord_unit_cell_tuple[0][in_mask_array],
-                coord_unit_cell_tuple[1][in_mask_array],
-                coord_unit_cell_tuple[2][in_mask_array],
-            )
-            print((
-                f"coord_array_unit_cell_in_mask - points in the reference grid nomralise to the unit cell in the mask\n" 
-                f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
-                f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
-            ))
-            
-            return coord_array_in_mask, coord_array_unit_cell_in_mask
-        
+        # Get them as fractions of the unit cell
+        grid_min_frac = grid.unit_cell.fractionalize(grid_min_cart)
+        grid_max_frac = grid.unit_cell.fractionalize(grid_max_cart)
+
+        # Get them as coords
+        grid_min_coord = [int(grid_min_frac[0] * grid.nu), int(grid_min_frac[1] * grid.nv),
+                          int(grid_min_frac[2] * grid.nw), ]
+        grid_max_coord = [int(grid_max_frac[0] * grid.nu), int(grid_max_frac[1] * grid.nv),
+                          int(grid_max_frac[2] * grid.nw), ]
+
+        # Get these as fractions
+        # fractional_grid_min = [
+        #     grid.unit_cell.fractionalize(grid_min_coord[0]),
+        #     grid.unit_cell.fractionalize(grid_min_coord[1]),
+        #     grid.unit_cell.fractionalize(grid_min_coord[2]),
+        # ]
+        fractional_grid_min = [
+            grid_min_coord[0] * (1.0 / grid.nu),
+            grid_min_coord[1] * (1.0 / grid.nv),
+            grid_min_coord[2] * (1.0 / grid.nw),
+        ]
+        # fractional_grid_max = [
+        #     grid.unit_cell.fractionalize(grid_max_coord[0]),
+        #     grid.unit_cell.fractionalize(grid_max_coord[1]),
+        #     grid.unit_cell.fractionalize(grid_max_coord[2]),
+        #     ]
+        fractional_grid_max = [
+            grid_max_coord[0] * (1.0 / grid.nu),
+            grid_max_coord[1] * (1.0 / grid.nv),
+            grid_max_coord[2] * (1.0 / grid.nw),
+        ]
+        fractional_diff = [
+            fractional_grid_max[0] - fractional_grid_min[0],
+            fractional_grid_max[1] - fractional_grid_min[1],
+            fractional_grid_max[2] - fractional_grid_min[2],
+        ]
+
+        # Get the grid of points around the protein
+
+        coord_product = itertools.product(
+            range(grid_min_coord[0], grid_max_coord[0]),
+            range(grid_min_coord[1], grid_max_coord[1]),
+            range(grid_min_coord[2], grid_max_coord[2]),
+        )
+
+        coord_array = np.array([[x, y, z] for x, y, z in coord_product])
+
+        coord_tuple = (coord_array[:, 0],
+                       coord_array[:, 1],
+                       coord_array[:, 2],
+                       )
+        print((
+            f"coord_tuple - points in the refence grid\n"
+            f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
+            f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
+            f"Length: {coord_tuple[0].shape}"
+        ))
+
+        # Get the corresponding protein grid
+        protein_grid = gemmi.Int8Grid(
+            grid_max_coord[0] - grid_min_coord[0],
+            grid_max_coord[1] - grid_min_coord[1],
+            grid_max_coord[2] - grid_min_coord[2],
+        )
+        protein_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        protein_grid_unit_cell = gemmi.UnitCell(
+            grid.unit_cell.a * fractional_diff[0],
+            grid.unit_cell.b * fractional_diff[1],
+            grid.unit_cell.c * fractional_diff[2],
+            grid.unit_cell.alpha,
+            grid.unit_cell.beta,
+            grid.unit_cell.gamma,
+        )
+        protein_grid.set_unit_cell(protein_grid_unit_cell)
+
+        # Mask
+        for atom in structure.all_atoms():
+            pos = atom.pos
+            pos_transformed = gemmi.Position(pos.x - grid_min_cart[0],
+                                             pos.y - grid_min_cart[1],
+                                             pos.z - grid_min_cart[2],
+                                             )
+            protein_grid.set_points_around(pos_transformed,
+                                           radius=mask_radius,
+                                           value=1,
+                                           )
+
+        # # Get the corresponding unit cell points
+        coord_unit_cell_tuple = (np.mod(coord_tuple[0], grid.nu),
+                                 np.mod(coord_tuple[1], grid.nv),
+                                 np.mod(coord_tuple[2], grid.nw),
+                                 )
+        print((
+            f"coord_unit_cell_tuple - points in the reference grid normalised to the unit cell\n"
+            f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
+            f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
+            f"Length: {coord_unit_cell_tuple[0].shape}"
+        ))
+
+        # Get the corresponging protein_grid points
+        coord_mask_grid_tuple = (
+            coord_tuple[0] - grid_min_coord[0],
+            coord_tuple[1] - grid_min_coord[1],
+            coord_tuple[2] - grid_min_coord[2],
+        )
+        print((
+            f"coord_mask_grid_tuple - points in the portein frame grid\n"
+            f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
+            f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
+            f"Length: {coord_mask_grid_tuple[0].shape}"
+        ))
+
+        # Check which of them are in the mask
+        mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
+        in_mask_array_int = mask_array[coord_mask_grid_tuple]
+        in_mask_array = in_mask_array_int == 1
+
+        # Mask those coords in the tuples
+        coord_array_in_mask = (
+            coord_tuple[0][in_mask_array],
+            coord_tuple[1][in_mask_array],
+            coord_tuple[2][in_mask_array],
+        )
+        print((
+            f"coord_array_in_mask - points in the reference grid in the mask\n"
+            f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
+            f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
+        ))
+
+        coord_array_unit_cell_in_mask = (
+            coord_unit_cell_tuple[0][in_mask_array],
+            coord_unit_cell_tuple[1][in_mask_array],
+            coord_unit_cell_tuple[2][in_mask_array],
+        )
+        print((
+            f"coord_array_unit_cell_in_mask - points in the reference grid nomralise to the unit cell in the mask\n"
+            f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
+            f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
+        ))
+
+        return coord_array_in_mask, coord_array_unit_cell_in_mask
+
     @staticmethod
     def get_position_list(mask, coord_array):
-            positions = []
-            for u, v, w in coord_array:
-                point = mask.get_point(u, v, w)
-                position = mask.point_to_position(point)
-                positions.append((position[0],
-                                position[1],
-                                position[2],
-                )
-                                )
-            return positions
-    
+        positions = []
+        for u, v, w in coord_array:
+            point = mask.get_point(u, v, w)
+            position = mask.point_to_position(point)
+            positions.append((position[0],
+                              position[1],
+                              position[2],
+                              )
+                             )
+        return positions
+
     @staticmethod
     def from_structure_multiprocess(structure: Structure,
-                       grid: Grid,
-                       mask_radius: float,
-                       mask_radius_symmetry: float,):
-        
+                                    grid: Grid,
+                                    mask_radius: float,
+                                    mask_radius_symmetry: float, ):
+
         return Partitioning.from_structure(structure,
-                       grid.grid,
-                       mask_radius,
-                       mask_radius_symmetry,)
-        
+                                           grid.grid,
+                                           mask_radius,
+                                           mask_radius_symmetry, )
+
     @staticmethod
     def from_structure(structure: Structure,
                        grid: gemmi.FloatGrid,
@@ -1726,7 +1684,7 @@ class Partitioning:
                        ):
         poss = []
         res_indexes = {}
-        
+
         for i, res_id in enumerate(structure.protein_residue_ids()):
             res_span = structure[res_id]
             res = res_span[0]
@@ -1734,7 +1692,6 @@ class Partitioning:
             orthogonal = ca.pos
             poss.append(orthogonal)
             res_indexes[i] = res_id
-
 
         ca_position_array = np.array([[x for x in pos] for pos in poss])
 
@@ -1759,8 +1716,8 @@ class Partitioning:
             ca_position_array,
             structure,
             mask_radius
-            )
-        
+        )
+
         # Mask by protein
         protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
         print(f"protein_mask_indicies shape : {protein_mask_indicies.shape}")
@@ -1770,42 +1727,42 @@ class Partitioning:
         symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
         print(f"symmetry_mask_indicies shape : {symmetry_mask_indicies.shape}")
         print(np.sum(symmetry_mask_indicies))
-  
+
         # Combine masks
         combined_indicies = np.zeros(symmetry_mask_indicies.shape)
         combined_indicies[protein_mask_indicies == 1] = 1
         combined_indicies[symmetry_mask_indicies == 1] = 0
-        
+
         print(f"Combined indicies shape : {combined_indicies.shape}")
         print(np.sum(combined_indicies))
-        
+
         # Resample coords
         coord_tuple = (coord_tuple_source[0][combined_indicies == 1],
                        coord_tuple_source[1][combined_indicies == 1],
                        coord_tuple_source[2][combined_indicies == 1],
-        )
-        
+                       )
+
         # 
         coord_array = np.concatenate(
             [
                 coord_tuple[0].reshape((-1, 1)),
                 coord_tuple[1].reshape((-1, 1)),
                 coord_tuple[2].reshape((-1, 1)),
-            ], 
+            ],
             axis=1,
-            )
-        
+        )
+
         # Get positions
         position_list = Partitioning.get_position_list(mask, coord_array)
         position_array = np.array(position_list)
 
         distances, indexes = kdtree.query(position_array)
-        
+
         # Get the partitions
         partitions = {}
         for i, coord_as_array in enumerate(coord_array):
-            coord = (int(coord_as_array[0]), 
-                     int(coord_as_array[1]), 
+            coord = (int(coord_as_array[0]),
+                     int(coord_as_array[1]),
                      int(coord_as_array[2]),
                      )
             position = position_list[i]
@@ -1817,11 +1774,11 @@ class Partitioning:
                 partitions[res_id] = {}
 
             # partitions[res_id][coord] = gemmi.Position(*position)
-            
+
             coord_unit_cell = (int(coord_array_unit_cell_in_mask[0][i]),
                                int(coord_array_unit_cell_in_mask[1][i]),
                                int(coord_array_unit_cell_in_mask[2][i]),
-            )
+                               )
             partitions[res_id][coord] = position
 
         total_mask = np.zeros(mask_array.shape, dtype=np.int8)
@@ -1829,30 +1786,28 @@ class Partitioning:
             coord_array_unit_cell_in_mask[0][combined_indicies == 1],
             coord_array_unit_cell_in_mask[1][combined_indicies == 1],
             coord_array_unit_cell_in_mask[2][combined_indicies == 1],
-                   ] = 1
+        ] = 1
 
         return Partitioning(partitions, mask, symmetry_mask, total_mask)
 
     def coord_tuple(self):
-        
+
         coord_array = self.coord_array()
-        coord_tuple = (coord_array[:,0],
-                       coord_array[:,1],
-                       coord_array[:,2],
+        coord_tuple = (coord_array[:, 0],
+                       coord_array[:, 1],
+                       coord_array[:, 2],
                        )
-                
+
         return coord_tuple
-    
+
     def coord_array(self):
-        
+
         coord_list = []
         for res_id in self.partitioning:
             for coord in self.partitioning[res_id]:
                 coord_list.append(coord)
-                
+
         return np.array(coord_list)
-
-
 
     @staticmethod
     def get_symmetry_contact_mask(structure: Structure, grid: gemmi.FloatGrid,
@@ -1871,7 +1826,6 @@ class Partitioning:
             fractional_position = mask.unit_cell.fractionalize(position)
             wrapped_position = fractional_position.wrap_to_unit()
             for symmetry_operation in symops.symops[1:]:
-               
                 symmetry_position = gemmi.Fractional(*symmetry_operation.apply_to_xyz([wrapped_position[0],
                                                                                        wrapped_position[1],
                                                                                        wrapped_position[2],
@@ -1892,7 +1846,7 @@ class Partitioning:
         protein_mask_bool[protein_mask_indicies] = True
 
         mask_array[~protein_mask_bool] = 0
-        
+
         # ##################################
         # Mask unit cell overlap
         # ################################
@@ -1901,55 +1855,53 @@ class Partitioning:
         mask_unit_cell.spacegroup = protein_mask.spacegroup
         mask_unit_cell.set_unit_cell(protein_mask.unit_cell)
         mask_unit_cell_array = np.array(mask_unit_cell, copy=False, dtype=np.int8)
-        
-        
+
         # Assign atoms to unit cells
         unit_cell_index_dict = {}
         for atom in structure.all_atoms():
             position = atom.pos
             fractional_position = mask_unit_cell.unit_cell.fractionalize(position)
-            
+
             unit_cell_index_tuple = (int(fractional_position.x),
-                         int(fractional_position.y),
-                         int(fractional_position.z),
-                         )
-            
+                                     int(fractional_position.y),
+                                     int(fractional_position.z),
+                                     )
+
             if unit_cell_index_tuple not in unit_cell_index_dict:
                 unit_cell_index_dict[unit_cell_index_tuple] = []
-            
+
             unit_cell_index_dict[unit_cell_index_tuple].append(position)
-            
+
         # Create masks of those unit cells
-        unit_cell_mask_dict = {}            
+        unit_cell_mask_dict = {}
         for unit_cell_index, unit_cell_position_list in unit_cell_index_dict.items():
             unit_cell_mask = gemmi.Int8Grid(*protein_mask_array.shape)
             unit_cell_mask.spacegroup = protein_mask.spacegroup
             unit_cell_mask.set_unit_cell(protein_mask.unit_cell)
-            
+
             for position in unit_cell_position_list:
-            
                 mask_unit_cell.set_points_around_non_overlapping(
                     position,
                     radius=symmetry_mask_radius,
                     value=1,
-                            )
-            
+                )
+
             unit_cell_mask_dict[unit_cell_index] = unit_cell_mask
 
         # Overlay those masks
         for unit_cell_index, unit_cell_mask in unit_cell_mask_dict.items():
             unit_cell_mask_array = np.array(unit_cell_mask, copy=False, dtype=np.int8)
             mask_unit_cell_array[unit_cell_mask_array == 1] += 1
-            
+
         # Select the unit cell overlapping points
         mask_unit_cell_array_mask = mask_unit_cell_array > 1
-        
+
         # mask them in the symmetry mask array
         mask_array[mask_unit_cell_array_mask] = 1
 
         return mask
-    
-    def save_maps(self, dir: Path, p1: bool=True):
+
+    def save_maps(self, dir: Path, p1: bool = True):
         # Protein mask
         ccp4 = gemmi.Ccp4Mask()
         ccp4.grid = self.protein_mask
@@ -1959,7 +1911,7 @@ class Partitioning:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_PROTEIN_MASK_FILE))
-        
+
         # Symmetry mask
         ccp4 = gemmi.Ccp4Mask()
         ccp4.grid = self.symmetry_mask
@@ -1969,20 +1921,19 @@ class Partitioning:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_SYMMETRY_MASK_FILE))
-        
+
         # Total mask
         template_grid = self.symmetry_mask
         total_mask_grid = gemmi.Int8Grid(
             template_grid.nu,
             template_grid.nv,
             template_grid.nw,
-            )
+        )
         total_mask_grid.spacegroup = template_grid.spacegroup
         total_mask_grid.set_unit_cell(template_grid.unit_cell)
         total_grid_array = np.array(total_mask_grid, copy=False, dtype=np.int8)
-        total_grid_array[:,:,:] = self.total_mask[:,:,:]
-        
-        
+        total_grid_array[:, :, :] = self.total_mask[:, :, :]
+
         ccp4 = gemmi.Ccp4Mask()
         ccp4.grid = total_mask_grid
         if p1:
@@ -1991,8 +1942,7 @@ class Partitioning:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(0, True)
         ccp4.write_ccp4_map(str(dir / PANDDA_TOTAL_MASK_FILE))
-        
-    
+
     def __getstate__(self):
         # partitioning_python = PartitoningPython.from_gemmi(self.partitioning)
         partitioning_python = self.partitioning
@@ -2003,17 +1953,17 @@ class Partitioning:
                 symmetry_mask_python,
                 self.total_mask
                 )
-        
+
     def __setstate__(self, data):
         partitioning_gemmi = data[0]
         protein_mask_gemmi = data[1].to_gemmi()
         symmetry_mask_gemmi = data[2].to_gemmi()
-        
-        
+
         self.partitioning = partitioning_gemmi
         self.protein_mask = protein_mask_gemmi
         self.symmetry_mask = symmetry_mask_gemmi
         self.total_mask = data[3]
+
 
 @dataclasses.dataclass()
 class Grid:
@@ -2021,8 +1971,8 @@ class Grid:
     partitioning: Partitioning
 
     @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float, 
-                       sample_rate: float = 3.0,):
+    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float,
+                       sample_rate: float = 3.0, ):
         unit_cell = Grid.unit_cell_from_reference(reference)
         spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -2035,7 +1985,6 @@ class Grid:
                                                    grid,
                                                    mask_radius,
                                                    mask_radius_symmetry)
-        
 
         return Grid(grid, partitioning)
 
@@ -2046,8 +1995,8 @@ class Grid:
         grid.set_unit_cell(unit_cell)
         grid.spacegroup = self.grid.spacegroup
         grid_array = np.array(grid, copy=False)
-        grid_array[:,:,:] = 0
-        
+        grid_array[:, :, :] = 0
+
         return grid
 
     @staticmethod
@@ -2073,14 +2022,13 @@ class Grid:
     def shape(self):
         grid = self.grid
         return [grid.nu, grid.nv, grid.nw]
-    
-    
+
     def __getstate__(self):
         grid_python = Int8GridPython.from_gemmi(self.grid)
         partitioning_python = self.partitioning.__getstate__()
-        
+
         return (grid_python, partitioning_python)
-    
+
     def __setstate__(self, data):
         self.partitioning = Partitioning(data[1][0],
                                          data[1][1].to_gemmi(),
@@ -2088,6 +2036,7 @@ class Grid:
                                          data[1][3],
                                          )
         self.grid = data[0].to_gemmi()
+
 
 @dataclasses.dataclass()
 class Transform:
@@ -2208,23 +2157,20 @@ class Transform:
     #     com_moving = mean
 
     #     return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
-    
+
     @staticmethod
     def from_atoms(dataset_selection,
-                        reference_selection,
-                        com_dataset,
-                        com_reference,
-                        ):
-        
-        
-        
+                   reference_selection,
+                   com_dataset,
+                   com_reference,
+                   ):
+
         # mean = np.mean(dataset_selection, axis=0)
         # mean_ref = np.mean(reference_selection, axis=0)
         # mean = np.array(com_dataset)
         # mean_ref = np.array(com_reference)
         mean = com_dataset
         mean_ref = com_reference
-        
 
         # vec = mean_ref - mean
         vec = np.array([0.0, 0.0, 0.0])
@@ -2239,7 +2185,6 @@ class Transform:
         com_moving = mean
 
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
-        
 
     # @staticmethod
     # def from_finish_residues(previous_res, current_res, previous_ref, current_ref):
@@ -2274,19 +2219,18 @@ class Transform:
     #     com_moving = mean
 
     #     return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
-    
+
     def __getstate__(self):
         transform_python = TransformPython.from_gemmi(self.transform)
         com_reference = self.com_reference
         com_moving = self.com_moving
         return (transform_python, com_reference, com_moving)
-    
+
     def __setstate__(self, data):
         transform_gemmi = data[0].to_gemmi()
         self.transform = transform_gemmi
         self.com_reference = data[1]
         self.com_moving = data[2]
-
 
 
 @dataclasses.dataclass()
@@ -2297,61 +2241,60 @@ class Alignment:
         return self.transforms[item]
 
     @staticmethod
-    def has_large_gap(reference: Reference, dataset: Dataset ):
+    def has_large_gap(reference: Reference, dataset: Dataset):
         try:
             Alignment.from_dataset(reference, dataset)
-            
+
         except ExceptionUnmatchedAlignmentMarker as e:
             return False
-        
+
         except ExceptionNoCommonAtoms as e:
             return False
-        
+
         return True
 
     @staticmethod
     def from_dataset(reference: Reference, dataset: Dataset, marker_atom_search_radius=10.0):
-        
+
         dataset_pos_list = []
         reference_pos_list = []
 
         # Iterate protein atoms, then pull out their atoms, and search them
-        for res_id in reference.dataset.structure.protein_residue_ids(): 
-            
+        for res_id in reference.dataset.structure.protein_residue_ids():
+
             # Get the matchable CAs
             try:
                 # Get reference residue
                 ref_res_span = reference.dataset.structure[res_id]
                 ref_res = ref_res_span[0]
-                                            
+
                 # Get corresponding reses
                 dataset_res_span = dataset.structure[res_id]
                 dataset_res = dataset_res_span[0]
-                
+
                 # Get the CAs
                 atom_ref = ref_res["CA"][0]
                 atom_dataset = dataset_res["CA"][0]
-                
-                
+
                 # Get the shared atoms
                 reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
                 dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
-        
+
             except Exception as e:
                 print(f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
                 continue
-        
+
         dataset_atom_array = np.array(dataset_pos_list)
         reference_atom_array = np.array(reference_pos_list)
-        
-        if (reference_atom_array.shape[0] == 0)  or (dataset_atom_array.shape[0] == 0):
+
+        if (reference_atom_array.shape[0] == 0) or (dataset_atom_array.shape[0] == 0):
             raise ExceptionNoCommonAtoms()
-        
+
         # dataset kdtree
         dataset_tree = spatial.KDTree(dataset_atom_array)
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
-        
+
         if reference_atom_array.size != dataset_atom_array.size:
             raise AlignmentUnmatchedAtomsError(reference_atom_array,
                                                dataset_atom_array,
@@ -2364,33 +2307,34 @@ class Alignment:
             # Get reference residue
             ref_res_span = reference.dataset.structure[res_id]
             ref_res = ref_res_span[0]
-                    
+
             # Get ca pos in reference model
             reference_ca_pos = ref_res["CA"][0].pos
-            
+
             # # Get residue span in other dataset
             # dataset_res_span = dataset.structure[res_id]
             # dataset_res = dataset_res_span[0]
-            
+
             # # Get ca position in moving dataset model
             # dataset_ca_pos = dataset_res["CA"][0].pos
-            
+
             # dataset selection
             # dataset_indexes = dataset_tree.query_ball_point([dataset_ca_pos.x, dataset_ca_pos.y, dataset_ca_pos.z], 
             #                                                 7.0,
             #                      ExceptionNoCommonAtoms                           )
             # dataset_selection = dataset_atom_array[dataset_indexes]
-            
+
             # other selection
-            reference_indexes = reference_tree.query_ball_point([reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z], 
-                                                            marker_atom_search_radius,
-                                                            )
+            reference_indexes = reference_tree.query_ball_point(
+                [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+                marker_atom_search_radius,
+                )
             reference_selection = reference_atom_array[reference_indexes]
             dataset_selection = dataset_atom_array[reference_indexes]
-            
+
             if dataset_selection.shape[0] == 0:
                 raise ExceptionUnmatchedAlignmentMarker(res_id)
-            
+
             transforms[res_id] = Transform.from_atoms(
                 dataset_selection,
                 reference_selection,
@@ -2398,7 +2342,7 @@ class Alignment:
                 # com_reference=[reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
                 com_dataset=np.mean(dataset_selection, axis=0),
                 com_reference=np.mean(reference_selection, axis=0),
-                
+
             )
 
         return Alignment(transforms)
@@ -2464,11 +2408,11 @@ class Alignment:
     def __iter__(self):
         for res_id in self.transforms:
             yield res_id
-            
+
     # def __getstate__(self):
     #     alignment = AlignmentPython.from_gemmi(self)
     #     return alignment
-    
+
     # def __setstate__(self, alignment_python: AlignmentPython):
     #     alignment_gemmi = alignment_python.to_gemmi()
     #     self.transforms = alignment_gemmi
@@ -2489,7 +2433,7 @@ class Alignments:
 
     def __getitem__(self, item):
         return self.alignments[item]
-    
+
     def __iter__(self):
         for dtag in self.alignments:
             yield dtag
@@ -2506,7 +2450,6 @@ class Alignments:
     #     self.alignments = {dtag: alignment_python.to_gemmi() for dtag, alignment_python in alignments_python.items()}
     #
     #
-    
 
 
 @dataclasses.dataclass()
@@ -2567,12 +2510,11 @@ class Shells:
 
             if (len(shell_dtags) >= max_shell_datasets) or (
                     res - shell_res >= high_res_increment):
-                
                 # Get the set of all dtags in shell
                 all_dtags = list(set(shell_dtags).union(set(train_dtags)))
-                
+
                 # Create the shell
-                shell = Shell(shell_num, 
+                shell = Shell(shell_num,
                               shell_dtags,
                               train_dtags,
                               all_dtags,
@@ -2581,7 +2523,7 @@ class Shells:
                               res_max=Resolution.from_float(shell_res),
                               res_min=Resolution.from_float(res),
                               )
-                
+
                 # Add shell to dict
                 shells[shell_num] = shell
 
@@ -2592,15 +2534,13 @@ class Shells:
 
             # Add the next shell dtag
             shell_dtags.append(dtag)
-            
+
             # Check if the characterisation set is too big and pop if so
             if len(train_dtags) >= min_characterisation_datasets:
-                train_dtags= train_dtags[1:]
-                
-                
+                train_dtags = train_dtags[1:]
+
             # Add next train dtag
             train_dtags.append(dtag)
-                
 
         return Shells(shells)
 
@@ -2616,7 +2556,7 @@ class Xmap:
     @staticmethod
     def from_reflections(reflections: Reflections):
         pass
-    
+
     @staticmethod
     def from_file(file):
         ccp4 = gemmi.read_ccp4_map(str(file))
@@ -2626,7 +2566,7 @@ class Xmap:
     @staticmethod
     def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors,
                                sample_rate: float = 3.0):
-        
+
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
@@ -2666,26 +2606,24 @@ class Xmap:
         grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
 
         return Xmap(new_grid)
-    
+
     @staticmethod
-    def from_unaligned_dataset_c(dataset: Dataset, 
-                                 alignment: Alignment, 
-                                 grid: Grid, 
+    def from_unaligned_dataset_c(dataset: Dataset,
+                                 alignment: Alignment,
+                                 grid: Grid,
                                  structure_factors: StructureFactors,
                                  sample_rate: float = 3.0,
                                  ):
-                
-                
+
         unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                                  structure_factors.phi,
                                                                                                  sample_rate=sample_rate,
                                                                                                  )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
 
-
         std = np.std(unaligned_xmap_array)
         unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
-        
+
         new_grid = grid.new_grid()
         # Unpack the points, poitions and transforms
         point_list: List[Tuple[int, int, int]] = []
@@ -2693,46 +2631,43 @@ class Xmap:
         transform_list: List[gemmi.transform] = []
         com_moving_list: List[np.array] = []
         com_reference_list: List[np.array] = []
-                
+
         for residue_id, point_position_dict in grid.partitioning.partitioning.items():
-            
+
             al = alignment[residue_id]
             transform = al.transform.inverse()
             com_moving = al.com_moving
             com_reference = al.com_reference
-            
+
             for point, position in point_position_dict.items():
-                
                 point_list.append(point)
                 position_list.append(position)
                 transform_list.append(transform)
                 com_moving_list.append(com_moving)
                 com_reference_list.append(com_reference)
-                
+
         # for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
-        
-            # print((
-            #     f"point: {point}\n"
-            #     f"Position: {position}\n"
-            #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
-            #     f"com moving: {com_moving} \n"
-            #     f"Com moving: {com_reference}\n"
-            # ))
-                        
+
+        # print((
+        #     f"point: {point}\n"
+        #     f"Position: {position}\n"
+        #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
+        #     f"com moving: {com_moving} \n"
+        #     f"Com moving: {com_reference}\n"
+        # ))
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                 new_grid,
-                                 point_list,
-                                 position_list,
-                                 transform_list,
-                                 com_moving_list,
-                                 com_reference_list,
-                                 )
-
+                                                     new_grid,
+                                                     point_list,
+                                                     position_list,
+                                                     transform_list,
+                                                     com_moving_list,
+                                                     com_reference_list,
+                                                     )
 
         return Xmap(interpolated_grid)
-    
+
     def new_grid(self):
         spacing = [self.xmap.nu, self.xmap.nv, self.xmap.nw]
         unit_cell = self.xmap.unit_cell
@@ -2740,14 +2675,14 @@ class Xmap:
         grid.set_unit_cell(unit_cell)
         grid.spacegroup = self.xmap.spacegroup
         return grid
-    
+
     def resample(
-        self,
-        xmap: Xmap,
-        transform: Transform,  # tranfrom FROM the frame of xmap TO the frame of self 
-        sample_rate: float = 3.0,
-        ):
-        
+            self,
+            xmap: Xmap,
+            transform: Transform,  # tranfrom FROM the frame of xmap TO the frame of self
+            sample_rate: float = 3.0,
+    ):
+
         unaligned_xmap: gemmi.FloatGrid = self.xmap
 
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
@@ -2757,7 +2692,7 @@ class Xmap:
 
         # Copy data into new grid
         new_grid = xmap.new_grid()
-        
+
         # points
         original_point_list = list(
             itertools.product(
@@ -2766,7 +2701,6 @@ class Xmap:
                 range(new_grid.nw),
             )
         )
-        
 
         # Unpack the points, poitions and transforms
         point_list: List[Tuple[int, int, int]] = []
@@ -2776,30 +2710,26 @@ class Xmap:
         com_reference_list: List[np.array] = []
 
         transform = transform.transform.inverse()
-        com_moving = [0.0,0.0,0.0]
-        com_reference = [0.0,0.0,0.0]
+        com_moving = [0.0, 0.0, 0.0]
+        com_reference = [0.0, 0.0, 0.0]
         position = [0.0, 0.0, 0.0]
-                
+
         for point in original_point_list:
-                        
             point_list.append(point)
             position_list.append(position)
             transform_list.append(transform)
             com_moving_list.append(com_moving)
             com_reference_list.append(com_reference)
-                
-                    
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                 new_grid,
-                                 point_list,
-                                 position_list,
-                                 transform_list,
-                                 com_moving_list,
-                                 com_reference_list,
-                                 )
-
+                                                     new_grid,
+                                                     point_list,
+                                                     position_list,
+                                                     transform_list,
+                                                     com_moving_list,
+                                                     com_reference_list,
+                                                     )
 
         return Xmap(new_grid)
 
@@ -2813,7 +2743,6 @@ class Xmap:
                                                    event_map_reference_grid,
                                                    mask_radius,
                                                    mask_radius_symmetry)
-
 
         interpolated_values_tuple = ([], [], [], [])
 
@@ -2851,21 +2780,20 @@ class Xmap:
         grid_array[interpolated_values_tuple[0:3]] = interpolated_values_tuple[3]
 
         return new_grid
-    
+
     @staticmethod
     def from_aligned_map_c(event_map_reference_grid: gemmi.FloatGrid,
-                         dataset: Dataset, alignment: Alignment, grid: Grid,
-                         structure_factors: StructureFactors, mask_radius: float,
-                         partitioning: Partitioning,
-                         mask_radius_symmetry: float):
-
+                           dataset: Dataset, alignment: Alignment, grid: Grid,
+                           structure_factors: StructureFactors, mask_radius: float,
+                           partitioning: Partitioning,
+                           mask_radius_symmetry: float):
 
         new_grid = gemmi.FloatGrid(*[event_map_reference_grid.nu,
                                      event_map_reference_grid.nv,
                                      event_map_reference_grid.nw])
         new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         new_grid.set_unit_cell(event_map_reference_grid.unit_cell)
-        
+
         # Unpack the points, poitions and transforms
         point_list = []
         position_list = []
@@ -2873,14 +2801,14 @@ class Xmap:
         com_moving_list = []
         com_reference_list = []
         for residue_id in grid.partitioning.partitioning:
-            
+
             if residue_id in partitioning.partitioning:
                 al = alignment[residue_id]
                 transform = al.transform
                 com_moving = al.com_reference
                 com_reference = al.com_moving
                 point_position_dict = partitioning[residue_id]
-                
+
                 for point, position in point_position_dict.items():
                     point_list.append(point)
                     position_list.append(position)
@@ -2889,7 +2817,6 @@ class Xmap:
                     com_reference_list.append(com_reference)
             else:
                 continue
-
 
         # Interpolate values
         interpolated_grid = gemmi.interpolate_points(
@@ -2900,10 +2827,9 @@ class Xmap:
             transform_list,
             com_moving_list,
             com_reference_list,
-            )
+        )
 
         return Xmap(interpolated_grid)
-
 
     @staticmethod
     def interpolate_grid(grid: gemmi.FloatGrid,
@@ -2914,7 +2840,7 @@ class Xmap:
     def to_array(self, copy=True):
         return np.array(self.xmap, copy=copy)
 
-    def save(self, path: Path, p1: bool=True):
+    def save(self, path: Path, p1: bool = True):
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.xmap
         if p1:
@@ -2934,14 +2860,14 @@ class Xmap:
             w = point.w
             new_grid.set_value(u, v, w, float(array[u, v, w]))
 
-
         return Xmap(new_grid)
-        
+
     def __getstate__(self):
         return XmapPython.from_gemmi(self.xmap)
-    
+
     def __setstate__(self, xmap_python: XmapPython):
         self.xmap = xmap_python.to_gemmi()
+
 
 @dataclasses.dataclass()
 class Xmaps:
@@ -2956,10 +2882,10 @@ class Xmaps:
                               structure_factors: StructureFactors, sample_rate=3.0,
                               mapper=True,
                               ):
-        
+
         if mapper:
             keys = list(datasets.datasets.keys())
-            
+
             results = mapper(
                 delayed(Xmap.from_unaligned_dataset)(
                     datasets[key],
@@ -2967,72 +2893,71 @@ class Xmaps:
                     grid,
                     structure_factors,
                     sample_rate,
-                    )
+                )
                 for key
                 in keys
-                )
-                                       
+            )
+
             xmaps = {keys[i]: results[i]
-                for i, key
-                in enumerate(keys)
-                }
-            
+                     for i, key
+                     in enumerate(keys)
+                     }
+
         else:
-            
+
             xmaps = {}
             for dtag in datasets:
                 xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                                alignments[dtag],
-                                                grid,
-                                                structure_factors,
-                                                sample_rate)
+                                                   alignments[dtag],
+                                                   grid,
+                                                   structure_factors,
+                                                   sample_rate)
 
                 xmaps[dtag] = xmap
 
         return Xmaps(xmaps)
-    
+
     @staticmethod
     def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
-                              structure_factors: StructureFactors, sample_rate=3.0,
-                              mapper=False,
-                              ):
-        
+                                structure_factors: StructureFactors, sample_rate=3.0,
+                                mapper=False,
+                                ):
+
         if mapper:
-            
+
             keys = list(datasets.datasets.keys())
-            
-            
+
             results = mapper(
-                                           delayed(Xmap.from_unaligned_dataset_c)(
-                                               datasets[key],
-                                               alignments[key],
-                                               grid,
-                                               structure_factors,
-                                               sample_rate,
-                                               )
-                                           for key
-                                           in keys
-                                       )
-                                       
+                delayed(Xmap.from_unaligned_dataset_c)(
+                    datasets[key],
+                    alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate,
+                )
+                for key
+                in keys
+            )
+
             xmaps = {keys[i]: results[i]
-                for i, key
-                in enumerate(keys)
-                }
-            
+                     for i, key
+                     in enumerate(keys)
+                     }
+
         else:
-            
+
             xmaps = {}
             for dtag in datasets:
                 xmap = Xmap.from_unaligned_dataset_c(
                     datasets[dtag],
-                                               alignments[dtag],
-                                               grid,
-                                               structure_factors,
-                                               sample_rate,
-                                               )
+                    alignments[dtag],
+                    grid,
+                    structure_factors,
+                    sample_rate,
+                )
 
                 xmaps[dtag] = xmap
-                
+
         return Xmaps(xmaps)
 
     def from_dtags(self, dtags: typing.List[Dtag]):
@@ -3070,10 +2995,9 @@ class XmapArray:
 
         protein_mask = grid.partitioning.protein_mask
         protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
-        
+
         symmetry_contact_mask = grid.partitioning.symmetry_mask
         symmetry_contact_mask_array = np.array(symmetry_contact_mask, copy=False, dtype=np.int8)
-        
 
         arrays = {}
         for dtag in xmaps:
@@ -3366,14 +3290,12 @@ class Model:
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
-        
+
         if xmap_array.shape != self.mean.shape:
             raise Exception("Wrong shape!")
 
         residuals = (xmap_array - self.mean)
         denominator = (np.sqrt(np.square(self.sigma_s_m) + np.square(self.sigma_is[dtag])))
-
-        
 
         return residuals / denominator
 
@@ -3397,19 +3319,19 @@ class Model:
 
         return term1 + np.sum(term2 + term3, axis=0)  # 1 + m
 
-    def save_maps(self, pandda_dir: Path, shell: Shell, grid: Grid, p1: bool=True):
+    def save_maps(self, pandda_dir: Path, shell: Shell, grid: Grid, p1: bool = True):
         # Mean map
         mean_array = self.mean
-        
+
         print(mean_array.shape)
-        
+
         mean_grid = gemmi.FloatGrid(*mean_array.shape)
         mean_grid_array = np.array(mean_grid, copy=False)
         mean_array_typed = mean_array.astype(mean_grid_array.dtype)
-        mean_grid_array[:,:,:] = mean_array_typed[:,:,:]
+        mean_grid_array[:, :, :] = mean_array_typed[:, :, :]
         mean_grid.spacegroup = grid.grid.spacegroup
         mean_grid.set_unit_cell(grid.grid.unit_cell)
-        
+
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = mean_grid
         if p1:
@@ -3417,21 +3339,19 @@ class Model:
         else:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
-        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_MEAN_MAP_FILE.format(number=shell.number, 
+        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_MEAN_MAP_FILE.format(number=shell.number,
                                                                          res=shell.res_min.resolution,
                                                                          )))
-        
+
         # sigma_s_m map
         sigma_s_m_array = self.sigma_s_m
         sigma_s_m_grid = gemmi.FloatGrid(*sigma_s_m_array.shape)
         sigma_s_m_grid_array = np.array(sigma_s_m_grid, copy=False)
         sigma_s_m_array_typed = sigma_s_m_array.astype(sigma_s_m_grid_array.dtype)
-        sigma_s_m_grid_array[:,:,:] = sigma_s_m_array_typed[:,:,:]
+        sigma_s_m_grid_array[:, :, :] = sigma_s_m_array_typed[:, :, :]
         sigma_s_m_grid.spacegroup = grid.grid.spacegroup
         sigma_s_m_grid.set_unit_cell(grid.grid.unit_cell)
-        
-        
-        
+
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = sigma_s_m_grid
         if p1:
@@ -3439,10 +3359,10 @@ class Model:
         else:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
-        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(number=shell.number, 
+        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(number=shell.number,
                                                                           res=shell.res_min.resolution,
                                                                           )))
-        
+
 
 @dataclasses.dataclass()
 class Zmap:
@@ -3488,13 +3408,13 @@ class Zmap:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
-        
+
     def __getstate__(self):
         return XmapPython.from_gemmi(self.zmap)
-        
+
     def __setstate__(self, zmap_pyhton: XmapPython):
         self.zmap = zmap_pyhton.to_gemmi()
-        
+
 
 @dataclasses.dataclass()
 class Zmaps:
@@ -3578,12 +3498,14 @@ class Symops:
         for symop in self.symops:
             yield symop
 
+
 @dataclasses.dataclass()
 class Clustering:
     clustering: typing.Dict[int, Cluster]
 
     @staticmethod
-    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float=1.3):
+    def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float,
+                  cluster_cutoff_distance_multiplier: float = 1.3):
         zmap_array = zmap.to_array(copy=True)
 
         # Get the protein mask
@@ -3606,32 +3528,32 @@ class Clustering:
 
         # Get the unwrapped coords, and convert them to unwrapped fractional positions, then orthogonal points for clustering       
         point_array = grid.partitioning.coord_array()
-        point_tuple = (point_array[:,0],
-                       point_array[:,1],
-                       point_array[:,2],
+        point_tuple = (point_array[:, 0],
+                       point_array[:, 1],
+                       point_array[:, 2],
                        )
         point_tuple_wrapped = (
-            np.mod(point_array[:,0], grid.grid.nu),
-            np.mod(point_array[:,1], grid.grid.nv),
-            np.mod(point_array[:,2], grid.grid.nw),
-                       )
-        
-        
+            np.mod(point_array[:, 0], grid.grid.nu),
+            np.mod(point_array[:, 1], grid.grid.nv),
+            np.mod(point_array[:, 2], grid.grid.nw),
+        )
+
         extrema_point_mask = extrema_mask_array[point_tuple_wrapped] == 1
         extrema_point_array = point_array[extrema_point_mask]
         extrema_point_wrapped_tuple = (
             point_tuple_wrapped[0][extrema_point_mask],
             point_tuple_wrapped[1][extrema_point_mask],
             point_tuple_wrapped[2][extrema_point_mask],
-        )                           
-        extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape((1,3)) 
-        
-        positions_orthogonal = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional[0],
-                                                                        fractional[1],
-                                                                        fractional[2],
-                                                                        )) for fractional in extrema_fractional_array]
-        positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
+        )
+        extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape(
+            (1, 3))
 
+        positions_orthogonal = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional[0],
+                                                                                   fractional[1],
+                                                                                   fractional[2],
+                                                                                   )) for fractional in
+                                extrema_fractional_array]
+        positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
 
         # positions = []
         # for point in extrema_grid_coords_array:
@@ -3676,7 +3598,6 @@ class Clustering:
             # cluster_points_tuple = (cluster_points_array[:, 0],
             #                         cluster_points_array[:, 1],
             #                         cluster_points_array[:, 2],)
-            
 
             cluster_points_tuple = (
                 extrema_point_wrapped_tuple[0][cluster_indicies],
@@ -3706,8 +3627,8 @@ class Clustering:
             centroid_array = np.mean(cluster_positions_array,
                                      axis=0)
             centroid = (centroid_array[0],
-                                      centroid_array[1],
-                                      centroid_array[2], )
+                        centroid_array[1],
+                        centroid_array[2],)
 
             cluster = Cluster(cluster_points_tuple,
                               values,
@@ -3798,35 +3719,37 @@ class Clustering:
     def __len__(self):
         return len(self.clustering)
 
+
 @dataclasses.dataclass()
 class Clusterings:
     clusterings: typing.Dict[Dtag, Clustering]
 
     @staticmethod
-    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float,
-                   mapper = False):
-        
+    def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float,
+                   cluster_cutoff_distance_multiplier: float,
+                   mapper=False):
+
         if mapper:
             keys = list(zmaps.zmaps.keys())
-            
+
             results = mapper(
-                                        delayed(
-                                            Clustering.from_zmap)(
-                                                zmaps[key], 
-                                                reference, 
-                                                grid, 
-                                                contour_level,
-                                                cluster_cutoff_distance_multiplier,
-                                                )
-                                            for key
-                                            in keys
-                                    )
+                delayed(
+                    Clustering.from_zmap)(
+                    zmaps[key],
+                    reference,
+                    grid,
+                    contour_level,
+                    cluster_cutoff_distance_multiplier,
+                )
+                for key
+                in keys
+            )
             clusterings = {keys[i]: results[i]
-                for i, key
-                in enumerate(keys)
-                }
+                           for i, key
+                           in enumerate(keys)
+                           }
         else:
-        
+
             clusterings = {}
             for dtag in zmaps:
                 clustering = Clustering.from_zmap(zmaps[dtag], reference, grid, contour_level)
@@ -3873,12 +3796,12 @@ class Clusterings:
                 new_clusterings[dtag] = new_clustering
 
         return Clusterings(new_clusterings)
-    
+
     def merge_clusters(self):
         new_clustering_dict = {}
         for dtag in self.clusterings:
             clustering = self.clusterings[dtag]
-            
+
             cluster_list = []
             centroid_list = []
             for cluster_id in clustering:
@@ -3886,71 +3809,68 @@ class Clusterings:
                 centroid = cluster.centroid
                 cluster_list.append(cluster)
                 centroid_list.append(centroid)
-                
+
             cluster_array = np.array(cluster_list)
             centroid_array = np.array(centroid_list)
-            
+
             dbscan = DBSCAN(
                 eps=6,
                 min_samples=1,
             )
-            
+
             cluster_ids_array = dbscan.fit_predict(centroid_array)
             new_clusters = {}
-            for unique_cluster in np.unique(cluster_ids_array):                
+            for unique_cluster in np.unique(cluster_ids_array):
                 current_clusters = cluster_array[cluster_ids_array == unique_cluster]
-                
-                cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i] 
-                                                  for current_cluster
-                                                  in current_clusters
-                                                  ], axis=None,
-                                                 )
-                                        for i
-                                        in [0, 1, 2]
+
+                cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i]
+                                                             for current_cluster
+                                                             in current_clusters
+                                                             ], axis=None,
+                                                            )
+                                             for i
+                                             in [0, 1, 2]
+                                             )
+                cluster_positions_list = [current_cluster.centroid
+                                          for current_cluster
+                                          in current_clusters
+                                          ]
+
+                values = np.concatenate([current_cluster.values
+                                         for current_cluster
+                                         in current_clusters
+                                         ], axis=None,
                                         )
-                cluster_positions_list = [current_cluster.centroid 
-                                                  for current_cluster
-                                                  in current_clusters
-                                                  ]
-                
-                values = np.concatenate([current_cluster.values 
-                                                  for current_cluster
-                                                  in current_clusters
-                                                  ], axis=None,
-                                                 )
 
                 centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
-                
+
                 centroid = (centroid_array[0],
-                                      centroid_array[1],
-                                      centroid_array[2], )                
-                event_mask_indicies  = tuple(
+                            centroid_array[1],
+                            centroid_array[2],)
+                event_mask_indicies = tuple(
                     np.concatenate(
-                        [current_cluster.event_mask_indicies[i] 
+                        [current_cluster.event_mask_indicies[i]
                          for current_cluster
                          in current_clusters
-                         ], 
+                         ],
                         axis=None,
-                        )
+                    )
                     for i
                     in [0, 1, 2]
-                    )
-                
-                
+                )
+
                 new_cluster = Cluster(
                     cluster_points_tuple,
-                              values,
-                              centroid,
-                              event_mask_indicies,
+                    values,
+                    centroid,
+                    event_mask_indicies,
                 )
 
                 new_clusters[unique_cluster] = new_cluster
-                
-            new_clustering_dict[dtag] = Clustering(new_clusters)      
-            
-            
-        return Clusterings(new_clustering_dict)      
-        
+
+            new_clustering_dict[dtag] = Clustering(new_clusters)
+
+        return Clusterings(new_clustering_dict)
 
     def filter_distance_from_protein(self):
         pass
@@ -3985,12 +3905,10 @@ class BDC:
     def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
-
         cluster_indexes = cluster.event_mask_indicies
         print(f"\t\t\t Cluster indicies of length: {len(cluster_indexes)}")
-        print(f"\t\t\t Element length: {(cluster_indexes[0].shape, cluster_indexes[1].shape, cluster_indexes[2].shape,)}")
-        
-
+        print(
+            f"\t\t\t Element length: {(cluster_indexes[0].shape, cluster_indexes[1].shape, cluster_indexes[2].shape,)}")
 
         protein_mask = np.array(grid.partitioning.protein_mask, copy=False, dtype=np.int8)
         protein_mask_indicies = np.nonzero(protein_mask)
@@ -4009,19 +3927,15 @@ class BDC:
             #                                    cluster_vals)[0]
             local_correlation, local_offset = np.polyfit(x=mean_masked[cluster_mask], y=cluster_vals, deg=1)
 
-
             # global_correlation = stats.pearsonr(mean_masked,
             #                                     subtracted_map)[0]
             global_correlation, global_offset = np.polyfit(x=mean_masked, y=subtracted_map, deg=1)
 
-
             vals[val] = np.abs(global_correlation - local_correlation)
-
 
         fraction = max(vals,
                        key=lambda x: vals[x],
                        )
-
 
         return BDC(1 - fraction, fraction)
 
@@ -4083,11 +3997,11 @@ class Sites:
     site_to_event: typing.Dict[SiteID, typing.List[EventID]]
     event_to_site: typing.Dict[EventID, SiteID]
     centroids: typing.Dict[SiteID, np.ndarray]
-    
+
     def __iter__(self):
         for site_id in self.site_to_event:
             yield site_id
-            
+
     def __getitem__(self, item):
         return self.site_to_event[item]
 
@@ -4101,7 +4015,6 @@ class Sites:
 
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
-
 
         if positions_array.to_array().shape[0] < 4:
             site_to_event = {}
@@ -4117,7 +4030,6 @@ class Sites:
                 event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
 
             return Sites(site_to_event, event_to_site, {})
-            
 
         site_ids_array = fclusterdata(X=positions_array.to_array(),
                                       t=cutoff,
@@ -4137,7 +4049,7 @@ class Sites:
 
             site_to_event[site_id].append(cluster_id)
             event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
-            
+
         # Site centroids
         site_centroids = {}
         for site_id, event_id_list in site_to_event.items():
@@ -4185,7 +4097,8 @@ class Events:
     sites: Sites
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float, mapper: Any=None):
+    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float,
+                      mapper: Any = None):
         events: typing.Dict[EventID, Event] = {}
 
         print(f"\tGetting sites...")
@@ -4198,20 +4111,18 @@ class Events:
                 for event_idx in clustering:
                     event_idx = EventIDX(event_idx)
                     event_id = EventID(dtag, event_idx)
-                    
+
                     cluster = clustering[event_idx.event_idx]
                     xmap = xmaps[dtag]
-                    
-                    site: SiteID = sites.event_to_site[event_id]
 
+                    site: SiteID = sites.event_to_site[event_id]
 
                     jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid)
 
-            
             results = mapper(job for job in jobs.values())
-                   
+
             events = {event_id: event for event_id, event in zip(jobs.keys(), results)}
-            
+
         else:
             for dtag in clusterings:
                 clustering = clusterings[dtag]
@@ -4227,26 +4138,26 @@ class Events:
                     site: SiteID = sites.event_to_site[event_id]
 
                     event = Event.from_cluster(event_id,
-                                            cluster,
-                                            site,
-                                            bdc,
-                                            )
+                                               cluster,
+                                               site,
+                                               bdc,
+                                               )
 
                     events[event_id] = event
 
         return Events(events, sites)
-    
+
     @staticmethod
     def get_event(xmap, cluster, dtag, site, event_id, model, grid):
-        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid,)
+        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, )
 
         event = Event.from_cluster(
             event_id,
             cluster,
             site,
             bdc,
-            )
-        
+        )
+
         return event
 
     @staticmethod
@@ -4256,13 +4167,13 @@ class Events:
         for event_id in event_dict:
             if event_id.dtag not in all_clusterings_dict:
                 all_clusterings_dict[event_id.dtag] = {}
-                
+
             all_clusterings_dict[event_id.dtag][event_id.event_idx.event_idx] = event_dict[event_id].cluster
 
         all_clusterings = {}
         for dtag in all_clusterings_dict:
             all_clusterings[dtag] = Clustering(all_clusterings_dict[dtag])
-            
+
         clusterings = Clusterings(all_clusterings)
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
@@ -4270,11 +4181,12 @@ class Events:
         events: typing.Dict[EventID, Event] = {}
         for event_id in event_dict:
             event = event_dict[event_id]
-            
+
             for event_id_site, event_site in sites.event_to_site.items():
-                if (event_id_site.dtag.dtag == event_id.dtag.dtag) and (event_id_site.event_idx.event_idx == event_id.event_idx.event_idx):
+                if (event_id_site.dtag.dtag == event_id.dtag.dtag) and (
+                        event_id_site.event_idx.event_idx == event_id.event_idx.event_idx):
                     site = event_site
-                    
+
             event.site = site
 
             events[event_id] = event
@@ -4287,21 +4199,21 @@ class Events:
 
     def __getitem__(self, item):
         return self.events[item]
-    
+
     def save_event_maps(
-        self, 
-        datasets, 
-        alignments, 
-        xmaps,
-        model, 
-        pandda_fs_model,
-        grid,
-        structure_factors, 
-        outer_mask,
-        inner_mask_symmetry,
-        mapper=False,
-        ):
-        
+            self,
+            datasets,
+            alignments,
+            xmaps,
+            model,
+            pandda_fs_model,
+            grid,
+            structure_factors,
+            outer_mask,
+            inner_mask_symmetry,
+            mapper=False,
+    ):
+
         processed_datasets = {}
         for event_id in self:
             dtag = event_id.dtag
@@ -4313,62 +4225,58 @@ class Events:
             """
             if dtag not in processed_datasets:
                 processed_datasets[dtag] = pandda_fs_model.processed_datasets[event_id.dtag]
-            
+
             processed_datasets[dtag].event_map_files.add_event(event)
-            
+
         if mapper:
             event_id_list = list(self.events.keys())
-            
+
             # Get unique dtags
             event_dtag_list = []
             for event_id in event_id_list:
                 dtag = event_id.dtag
-                
+
                 if len(
-                    list(
-                        filter(
-                            lambda event_dtag: event_dtag.dtag == dtag.dtag,
-                            event_dtag_list,
+                        list(
+                            filter(
+                                lambda event_dtag: event_dtag.dtag == dtag.dtag,
+                                event_dtag_list,
                             )
                         )
-                    ) == 0:
+                ) == 0:
                     event_dtag_list.append(dtag)
-                    
 
             results = mapper(
                 delayed(
                     Partitioning.from_structure_multiprocess)(
-                        datasets[dtag].structure,
-                        grid,
-                        outer_mask,
-                        inner_mask_symmetry,
-                    )
-                    for dtag
-                    in event_dtag_list
+                    datasets[dtag].structure,
+                    grid,
+                    outer_mask,
+                    inner_mask_symmetry,
                 )
-            
-            partitioning_dict = {dtag: partitioning for dtag, partitioning in zip(event_dtag_list, results) }
-             
+                for dtag
+                in event_dtag_list
+            )
+
+            partitioning_dict = {dtag: partitioning for dtag, partitioning in zip(event_dtag_list, results)}
+
             results = mapper(
-                    delayed(
-                        processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
-                            xmaps[event_id.dtag],
-                            model,
-                            self[event_id],
-                            datasets[event_id.dtag], 
-                            alignments[event_id.dtag],
-                            grid, 
-                            structure_factors, 
-                            outer_mask,
-                            inner_mask_symmetry,
-                            partitioning_dict[event_id.dtag]
-                            )
-                        for event_id
-                        in event_id_list
-                        )
-                                    
-
-
+                delayed(
+                    processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
+                    xmaps[event_id.dtag],
+                    model,
+                    self[event_id],
+                    datasets[event_id.dtag],
+                    alignments[event_id.dtag],
+                    grid,
+                    structure_factors,
+                    outer_mask,
+                    inner_mask_symmetry,
+                    partitioning_dict[event_id.dtag]
+                )
+                for event_id
+                in event_id_list
+            )
 
 
 @dataclasses.dataclass()
@@ -4402,8 +4310,6 @@ class ZMapFile:
 #             zmaps[dtag].save()
 
 
-
-
 @dataclasses.dataclass()
 class EventMapFile:
     path: Path
@@ -4417,7 +4323,7 @@ class EventMapFile:
                                                              )
         return EventMapFile(event_map_path)
 
-    def save(self, 
+    def save(self,
              xmap: Xmap,
              model: Model,
              event: Event,
@@ -4453,14 +4359,14 @@ class EventMapFile:
                 1 - event.bdc.bdc)
 
         event_map_grid = Xmap.from_aligned_map_c(event_map_reference_grid,
-                                               dataset,
-                                               alignment,
-                                               grid,
-                                               structure_factors,
-                                               mask_radius,
-                                               partitioning,
-                                               mask_radius_symmetry,
-                                               )
+                                                 dataset,
+                                                 alignment,
+                                                 grid,
+                                                 structure_factors,
+                                                 mask_radius,
+                                                 partitioning,
+                                                 mask_radius_symmetry,
+                                                 )
 
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = event_map_grid.xmap
@@ -4502,30 +4408,30 @@ class EventMapFiles:
 
 @dataclasses.dataclass()
 class EventTableRecord:
-    dtag:str
-    event_idx: int	
-    bdc: float	
-    cluster_size: int	
-    global_correlation_to_average_map: float	
-    global_correlation_to_mean_map: float	
-    local_correlation_to_average_map: float	
-    local_correlation_to_mean_map: float	
-    site_idx: int	
-    x: float	
-    y: float	
-    z: float	
-    z_mean: float	
-    z_peak: float	
-    applied_b_factor_scaling: float	
-    high_resolution: float	
-    low_resolution: float	
-    r_free: float	
+    dtag: str
+    event_idx: int
+    bdc: float
+    cluster_size: int
+    global_correlation_to_average_map: float
+    global_correlation_to_mean_map: float
+    local_correlation_to_average_map: float
+    local_correlation_to_mean_map: float
+    site_idx: int
+    x: float
+    y: float
+    z: float
+    z_mean: float
+    z_peak: float
+    applied_b_factor_scaling: float
+    high_resolution: float
+    low_resolution: float
+    r_free: float
     r_work: float
     analysed_resolution: float
     map_uncertainty: float
-    analysed: bool	
-    interesting: bool	
-    exclude_from_z_map_analysis: bool	
+    analysed: bool
+    interesting: bool
+    exclude_from_z_map_analysis: bool
     exclude_from_characterisation: bool
 
     @staticmethod
@@ -4553,46 +4459,47 @@ class EventTableRecord:
             analysed_resolution=0.0,
             map_uncertainty=0.0,
             analysed=False,
-            interesting=False,	
-            exclude_from_z_map_analysis=False,	
+            interesting=False,
+            exclude_from_z_map_analysis=False,
             exclude_from_characterisation=False,
-                                )
-        
+        )
+
+
 @dataclasses.dataclass()
 class EventTable:
     records: List[EventTableRecord]
-    
+
     @staticmethod
     def from_events(events: Events):
         records = []
         for event_id in events:
             event_record = EventTableRecord.from_event(events[event_id])
             records.append(event_record)
-        
+
         return EventTable(records)
-    
+
     def save(self, path: Path):
         records = []
         for record in self.records:
-            event_dict = dataclasses.asdict(record) 
+            event_dict = dataclasses.asdict(record)
             event_dict["1-BDC"] = round(event_dict["bdc"], 2)
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
-        
-        
+
+
 @dataclasses.dataclass()
 class SiteTableRecord:
-    site_idx: int	
+    site_idx: int
     centroid: Tuple[float, float, float]
-    
+
     @staticmethod
     def from_site_id(site_id: SiteID, centroid: np.ndarray):
         return SiteTableRecord(
             site_idx=site_id.site_id,
-            centroid=(centroid[0], centroid[1], centroid[2],), 
+            centroid=(centroid[0], centroid[1], centroid[2],),
         )
-        
+
 
 @dataclasses.dataclass()
 class SiteTable:
@@ -4604,48 +4511,44 @@ class SiteTable:
 
     @staticmethod
     def from_events(events: Events, cutoff: float):
-        
+
         dtag_clusters = {}
         for event_id in events:
             dtag = event_id.dtag
             event_idx = event_id.event_idx
             event = events[event_id]
-            
+
             if dtag not in dtag_clusters:
                 dtag_clusters[dtag] = {}
-            
+
             dtag_clusters[dtag][event_idx] = event.cluster
-            
+
         _clusterings = {}
         for dtag in dtag_clusters:
             _clusterings[dtag] = Clustering(dtag_clusters[dtag])
-            
+
         clusterings = Clusterings(_clusterings)
-            
+
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
-        
+
         records = []
         for site_id in sites:
             # site = sites[site_id]
             centroid = sites.centroids[site_id]
             site_record = SiteTableRecord.from_site_id(site_id, centroid)
             records.append(site_record)
-        
+
         return SiteTable(records)
-        
-        
-        
+
     def save(self, path: Path):
         records = []
         for site_record in self.site_record_list:
             site_record_dict = dataclasses.asdict(site_record)
             records.append(site_record_dict)
-            
-        table = pd.DataFrame(records)
-        
-        table.to_csv(str(path))
-        
 
+        table = pd.DataFrame(records)
+
+        table.to_csv(str(path))
 
 
 @dataclasses.dataclass()
@@ -4669,7 +4572,6 @@ class Analyses:
     analyses_dir: Path
     pandda_analyse_events_file: Path
     pandda_analyse_sites_file: Path
-
 
     @staticmethod
     def from_pandda_dir(pandda_dir: Path):
@@ -4728,13 +4630,13 @@ class DatasetDir:
     def from_path(path: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str):
         input_pdb_file: Path = next(path.glob(pdb_regex))
         input_mtz_file: Path = next(path.glob(mtz_regex))
-        
+
         source_ligand_dir = path / PANDDA_LIGAND_FILES_DIR
         if source_ligand_dir.exists():
             ligand_dir = LigandDir.from_path(source_ligand_dir)
         else:
             ligand_dir = None
-        
+
         try:
             ligands = path.rglob(ligand_cif_regex)
             source_ligand_cif = next(ligands)
@@ -4768,10 +4670,11 @@ class DataDirs:
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
             try:
-                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_cif_regex, ligand_pdb_regex)
+                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_cif_regex,
+                                                   ligand_pdb_regex)
                 dataset_dirs[dtag] = dataset_dir
             except:
-                continue 
+                continue
 
         return DataDirs(dataset_dirs)
 
@@ -4799,28 +4702,24 @@ class ProcessedDataset:
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
-        
-        
+
         # Copy the input pdb and mtz
         dtag = processed_dataset_dir.name
         source_mtz = dataset_dir.input_mtz_file
         source_pdb = dataset_dir.input_pdb_file
         source_ligand_cif = dataset_dir.source_ligand_cif
         source_ligand_pdb = dataset_dir.source_ligand_pdb
-        
-        
+
         input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
         input_pdb = processed_dataset_dir / PANDDA_PDB_FILE.format(dtag)
         input_ligand_cif = processed_dataset_dir / PANDDA_LIGAND_CIF_FILE
         input_ligand_pdb = processed_dataset_dir / PANDDA_LIGAND_PDB_FILE
-        
-        
+
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
         event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
-        
+
         source_ligand_dir = dataset_dir.ligand_dir
         input_ligand_dir = processed_dataset_dir / PANDDA_LIGAND_FILES_DIR
-        
 
         return ProcessedDataset(
             path=processed_dataset_dir,
@@ -4837,7 +4736,7 @@ class ProcessedDataset:
             input_ligand_pdb=input_ligand_pdb,
             source_ligand_dir=source_ligand_dir,
             input_ligand_dir=input_ligand_dir,
-            )
+        )
 
     def build(self):
         if not self.path.exists():
@@ -4845,17 +4744,16 @@ class ProcessedDataset:
 
         shutil.copyfile(self.source_mtz, self.input_mtz)
         shutil.copyfile(self.source_pdb, self.input_pdb)
-        
+
         if self.source_ligand_cif: shutil.copyfile(self.source_ligand_cif, self.input_ligand_cif)
         if self.source_ligand_pdb: shutil.copyfile(self.source_ligand_pdb, self.input_ligand_pdb)
-        
-        if self.source_ligand_dir: 
+
+        if self.source_ligand_dir:
             shutil.copytree(str(self.source_ligand_dir.path),
-                                            str(self.input_ligand_dir),
-                        )
-        
-        
-        
+                            str(self.input_ligand_dir),
+                            )
+
+
 @dataclasses.dataclass()
 class ProcessedDatasets:
     path: Path
@@ -4932,8 +4830,8 @@ class RMSD:
         return RMSD.from_structures(
             reference.dataset.structure,
             dataset.structure,
-            
-            )
+
+        )
 
     @staticmethod
     def from_structures(structure_1: Structure, structure_2: Structure, ) -> RMSD:
@@ -4943,11 +4841,10 @@ class RMSD:
         positions_1 = []
         positions_2 = []
 
-
         # for residues_id in structure_1.protein_residue_ids():
         for residues_id in structure_1.protein_residue_ids():
             print(f"Residue id is: {residues_id}")
-            
+
             res_1 = structure_1[residues_id][0]
             try:
                 res_2 = structure_2[residues_id][0]
@@ -4956,19 +4853,18 @@ class RMSD:
 
             # print(f"Residue 1 is: {res_1}")
             # print(f"Residue 2 is: {res_2}")
-            try: 
+            try:
                 res_1_ca = res_1["CA"][0]
             except Exception as e:
                 continue
-            
-            try: 
+
+            try:
                 res_2_ca = res_2["CA"][0]
             except Exception as e:
                 continue
 
             res_1_ca_pos = res_1_ca.pos
             res_2_ca_pos = res_2_ca.pos
-
 
             positions_1.append(res_1_ca_pos)
             positions_2.append(res_2_ca_pos)
@@ -4978,22 +4874,18 @@ class RMSD:
         positions_1_array = np.array([[x[0], x[1], x[2]] for x in positions_1])
         positions_2_array = np.array([[x[0], x[1], x[2]] for x in positions_2])
 
-        if positions_1_array.size < 3: 
+        if positions_1_array.size < 3:
             return RMSD(100.0)
-        if positions_2_array.size < 3: 
+        if positions_2_array.size < 3:
             return RMSD(100.0)
 
         return RMSD.from_arrays(positions_1_array, positions_2_array)
 
-
     @staticmethod
     def from_arrays(array_1, array_2):
 
-        
         array_1_mean = np.mean(array_1, axis=0).reshape((1, 3))
         array_2_mean = np.mean(array_2, axis=0).reshape((1, 3))
-
-
 
         array_1_demeaned = array_1 - array_1_mean
         array_2_demeaned = array_2 - array_2_mean
@@ -5005,7 +4897,6 @@ class RMSD:
         #
         true_rmsd = np.sqrt(
             np.sum(np.square(np.linalg.norm(array_1_demeaned - rotated_vecs, axis=1)), axis=0) / array_1.shape[0])
-
 
         return RMSD(true_rmsd)
 
@@ -5023,8 +4914,7 @@ class MapperJoblib:
                                        max_nbytes=max_nbytes,
                                        backend=backend,
                                        ).__enter__()
-        
-        
+
         return MapperJoblib(parallel_env)
 
     def map_list(self, func, *args):
@@ -5071,7 +4961,7 @@ class MapperPython:
 @dataclasses.dataclass()
 class JoblibMapper:
     mapper: Any
-    
+
     @staticmethod
     def initialise():
         # mapper = joblib.Parallel(n_jobs=20, 
@@ -5079,64 +4969,63 @@ class JoblibMapper:
         #                               backend="loky",
         #                                max_nbytes=None,
         #                                )
-        mapper = joblib.Parallel(n_jobs=20, 
-                                verbose=15,
-                                # backend="loky",
-                                backend="multiprocessing",
-                                max_nbytes=None,
-                                # prefer="threads",
-                                )
-        return JoblibMapper(mapper) 
-    
+        mapper = joblib.Parallel(n_jobs=20,
+                                 verbose=15,
+                                 # backend="loky",
+                                 backend="multiprocessing",
+                                 max_nbytes=None,
+                                 # prefer="threads",
+                                 )
+        return JoblibMapper(mapper)
+
     def __call__(self, iterable) -> Any:
         results = self.mapper(joblib.delayed(x)() for x in iterable)
-        
+
         return results
-    
+
 
 def sample_residue(truncated_dataset: Dataset,
-                   grid: Grid,       
+                   grid: Grid,
                    residue_id,
-                    alignment: Alignment, 
-                    structure_factors: StructureFactors, 
-                    sample_rate: float, 
-                    ) -> List[float]:
-    
+                   alignment: Alignment,
+                   structure_factors: StructureFactors,
+                   sample_rate: float,
+                   ) -> List[float]:
     print("started")
-    
+
     point_position_dict = grid.partitioning[residue_id]
-    
-    unaligned_xmap: gemmi.FloatGrid = truncated_dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                                structure_factors.phi,
-                                                                                                sample_rate=sample_rate,
-                                                                                                )    
+
+    unaligned_xmap: gemmi.FloatGrid = truncated_dataset.reflections.reflections.transform_f_phi_to_map(
+        structure_factors.f,
+        structure_factors.phi,
+        sample_rate=sample_rate,
+        )
     # Unpack the points, poitions and transforms
     point_list: List[Tuple[int, int, int]] = []
     position_list: List[Tuple[float, float, float]] = []
     transform_list: List[gemmi.transform] = []
     com_moving_list: List[np.array] = []
     com_reference_list: List[np.array] = []
-            
+
     al = alignment[residue_id]
     transform = al.transform.inverse()
     com_moving = al.com_moving
     com_reference = al.com_reference
-    
+
     for point, position in point_position_dict.items():
-        
         point_list.append(point)
         position_list.append(position)
         transform_list.append(transform)
         com_moving_list.append(com_moving)
         com_reference_list.append(com_reference)
-    
+
     sampled_points = gemmi.interpolate_to_list(unaligned_xmap,
                                                grid.grid,
-                                    point_list,
-                                 position_list,
-                                 transform_list,
-                                 com_moving_list,
-                                 com_reference_list,           
-                              )
-    
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
+
     return np.array(sampled_points)
