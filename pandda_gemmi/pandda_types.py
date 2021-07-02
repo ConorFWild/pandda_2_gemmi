@@ -184,7 +184,7 @@ class Structure:
                     for atom in residue:
                         yield atom
 
-    def all_atoms(self, exclude_waters=False, water_code="HOH"):
+    def all_atoms(self, exclude_waters=False):
         if exclude_waters:
 
             for model in self.structure:

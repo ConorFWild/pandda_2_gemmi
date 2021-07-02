@@ -216,7 +216,7 @@ def process_dataset(
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
     print("\t\tIntially found clusters: {}".format(
         {
-            dtag: (len(clustering), max([len(cluster.indexes) for cluster in clustering.clustering.values()] + [0,]))
+            dtag: (len(clustering), max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0,]))
             for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
         }
     )
