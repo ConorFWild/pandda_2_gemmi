@@ -2923,6 +2923,19 @@ class Xmap:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(path))
+
+    @staticmethod
+    def from_grid_array(grid: Grid, array):
+        new_grid = grid.new_grid()
+
+        for point in new_grid:
+            u = point.u
+            v = point.v
+            w = point.w
+            new_grid.set_value(u, v, w, float(array[u, v, w]))
+
+
+        return Xmap(new_grid)
         
     def __getstate__(self):
         return XmapPython.from_gemmi(self.xmap)
@@ -3234,7 +3247,6 @@ class Model:
         # arrays[n,m]
         # sigma_i_array[n]
         #
-
 
         func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
 

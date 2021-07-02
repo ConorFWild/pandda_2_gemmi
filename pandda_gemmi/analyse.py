@@ -25,7 +25,7 @@ from joblib.externals.loky import set_loky_pickler
 from pandda_gemmi.config import Config
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
-                                       Grid, Alignments, Shell, Xmaps,
+                                       Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
@@ -187,6 +187,8 @@ def process_dataset(
         xmap = dataset_xmaps[dtag]
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
         xmap.save(path)
+
+        mean_map = Xmap.from_grid_array(grid, mean_array)
 
     # Get the clustered electron desnity outliers
     print("clusting")
