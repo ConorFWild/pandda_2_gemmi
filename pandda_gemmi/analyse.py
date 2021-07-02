@@ -217,7 +217,7 @@ def process_dataset(
     print("\t\tIntially found clusters: {}".format(
         {
             dtag: (len(clustering), max([len(cluster.indexes) for cluster in clustering.clustering.values()] + [0,]))
-            for dtag, clustering in zip(clusterings.clusters, clusterings.clusters.values())
+            for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
         }
     )
     )
@@ -231,7 +231,7 @@ def process_dataset(
                                                              )
     print("\t\tAfter filtering: large: {}".format(
         {dtag: len(cluster) for dtag, cluster in
-         zip(clusterings_large.clusters, clusterings_large.clusters.values())}))
+         zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
     # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
     #     clusterings_large, grid)
 
@@ -242,18 +242,18 @@ def process_dataset(
     #     clusterings_peaked, grid)
     print("\t\tAfter filtering: peak: {}".format(
         {dtag: len(cluster) for dtag, cluster in
-         zip(clusterings_peaked.clusters, clusterings_peaked.clusters.values())}))
+         zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
 
     clusterings_merged = clusterings_peaked.merge_clusters()
     # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
     #     clusterings_merged, grid)
     print("\t\tAfter filtering: merged: {}".format(
         {dtag: len(cluster) for dtag, cluster in
-         zip(clusterings_merged.clusters, clusterings_merged.clusters.values())}))
+         zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
 
     # Calculate the shell events
     print("getting events")
-    print(f"\tGot {len(clusterings_merged.clusters)} clusters")
+    print(f"\tGot {len(clusterings_merged.clusterings)} clusters")
     events: Events = Events.from_clusters(
         clusterings_merged,
         model,

@@ -3800,7 +3800,7 @@ class Clustering:
 
 @dataclasses.dataclass()
 class Clusterings:
-    clusters: typing.Dict[Dtag, Clustering]
+    clusterings: typing.Dict[Dtag, Clustering]
 
     @staticmethod
     def from_Zmaps(zmaps: Zmaps, reference: Reference, grid: Grid, contour_level: float, cluster_cutoff_distance_multiplier: float,
@@ -3836,8 +3836,8 @@ class Clusterings:
 
     def filter_size(self, grid: Grid, min_cluster_size: float):
         new_clusterings = {}
-        for dtag in self.clusters:
-            clustering = self.clusters[dtag]
+        for dtag in self.clusterings:
+            clustering = self.clusterings[dtag]
             new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
                                            clustering,
                                            )
@@ -3856,8 +3856,8 @@ class Clusterings:
 
     def filter_peak(self, grid: Grid, z_peak: float):
         new_clusterings = {}
-        for dtag in self.clusters:
-            clustering = self.clusters[dtag]
+        for dtag in self.clusterings:
+            clustering = self.clusterings[dtag]
             new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
                                            clustering,
                                            )
@@ -3876,8 +3876,8 @@ class Clusterings:
     
     def merge_clusters(self):
         new_clustering_dict = {}
-        for dtag in self.clusters:
-            clustering = self.clusters[dtag]
+        for dtag in self.clusterings:
+            clustering = self.clusterings[dtag]
             
             cluster_list = []
             centroid_list = []
@@ -3962,13 +3962,13 @@ class Clusterings:
         pass
 
     def __getitem__(self, item):
-        return self.clusters[item]
+        return self.clusterings[item]
 
     def __len__(self):
-        return len(self.clusters)
+        return len(self.clusterings)
 
     def __iter__(self):
-        for dtag in self.clusters:
+        for dtag in self.clusterings:
             yield dtag
 
 
