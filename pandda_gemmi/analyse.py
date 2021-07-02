@@ -110,11 +110,9 @@ def summarise_structure(structure: gemmi.Structure):
 def process_dataset(
         test_dtag,
         shell,
-        shell_truncated_datasets,
+        dataset_truncated_datasets,
         alignments,
-        xmaps,
-        shell_test_xmaps,
-        masked_xmap_array,
+        dataset_xmaps,
         pandda_fs_model,
         reference,
         grid,
@@ -128,6 +126,13 @@ def process_dataset(
         process_local=process_local_serial,
 
 ):
+    masked_xmap_array = XmapArray.from_xmaps(
+        dataset_xmaps,
+        grid,
+    )
+
+
+
     print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
@@ -169,14 +174,14 @@ def process_dataset(
     print("Getting zmaps")
     zmaps: Zmaps = Zmaps.from_xmaps(
         model=model,
-        xmaps={test_dtag: shell_test_xmaps[test_dtag], },
+        xmaps={test_dtag: dataset_xmaps[test_dtag], },
     )
 
     for dtag in zmaps:
         zmap = zmaps[dtag]
         pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
 
-        xmap = xmaps[dtag]
+        xmap = dataset_xmaps[dtag]
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
         xmap.save(path)
 
@@ -241,7 +246,7 @@ def process_dataset(
     events: Events = Events.from_clusters(
         clusterings_merged,
         model,
-        xmaps,
+        dataset_xmaps,
         grid,
         1.732,  # TODO: make this a variable ;')
         process_local,
@@ -251,9 +256,9 @@ def process_dataset(
 
     # Save the event maps!
     print("print events")
-    events.save_event_maps(shell_truncated_datasets,
+    events.save_event_maps(dataset_truncated_datasets,
                            alignments,
-                           xmaps,
+                           dataset_xmaps,
                            model,
                            pandda_fs_model,
                            grid,
@@ -330,24 +335,20 @@ def process_shell(
     print(f"Mapped {len(xmaps)} xmaps in {finish - start}")
 
     # Seperate out test and train maps
-    shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps.items() if dtag in shell.test_dtags}
+    # shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps.items() if dtag in shell.test_dtags}
 
     # Get arrays for model
     print("Getting xmap arrays...")
-    masked_xmap_array: XmapArray = XmapArray.from_xmaps(
-        xmaps,
-        grid,
-    )  # Size of n x (total mask  > 0)
+    # masked_xmap_array: XmapArray = XmapArray.from_xmaps(
+    #     xmaps,
+    #     grid,
+    # )  # Size of n x (total mask  > 0)
 
     # Now that all the data is loaded, get the comparison set and process each test dtag
     process_dataset_paramaterized = partial(
         process_dataset,
         shell=shell,
-        shell_truncated_datasets=shell_truncated_datasets,
         alignments=alignments,
-        xmaps=xmaps,
-        shell_test_xmaps=shell_test_xmaps,
-        masked_xmap_array=masked_xmap_array,
         pandda_fs_model=pandda_fs_model,
         reference=reference,
         grid=grid,
@@ -361,11 +362,13 @@ def process_shell(
         process_local=process_local_serial,
     )
 
-    results = process_local_serial(
+    results = process_local(
         [
             partial(
                 process_dataset_paramaterized,
                 test_dtag,
+                dataset_truncated_datasets={_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.datasets.items() if _dtag in shell.train_dtags[_dtag]},
+                dataset_xmaps={_dtag: _xmap for _dtag, _xmap in xmaps.items() if _dtag in shell.train_dtags[_dtag]},
             )
             for test_dtag
             in shell.train_dtags
