@@ -588,7 +588,7 @@ def main(
         inner_mask_symmetry: float = 2.0,
         contour_level: float = 2.5,
         negative_values: bool = False,
-        min_blob_volume: float = 8.0,
+        min_blob_volume: float = 10.0,
         min_blob_z_peak: float = 3.0,
         clustering_cutoff: float = 1.5,
         cluster_cutoff_distance_multiplier: float = 1.0,
