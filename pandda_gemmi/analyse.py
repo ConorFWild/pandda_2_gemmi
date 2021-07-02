@@ -219,7 +219,7 @@ def process_dataset(
             dtag: (
                 len(clustering),
                 max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0,]),
-                max([len(cluster.size(grid)) for cluster in clustering.clustering.values()] + [0,]),
+                max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0,]),
             )
             for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
         }
