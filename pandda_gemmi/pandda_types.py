@@ -3190,7 +3190,7 @@ class Model:
         # sigma_i_array[n]
         #
 
-        func = partial(Model.log_liklihood, mean=mean, arrays=arrays, sigma_is_array=sigma_is_array)
+        func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
@@ -3217,7 +3217,7 @@ class Model:
             _sigma_i = sigma_is_array.flatten()
             print(_sigma_i)
 
-            result = shgo(partial(Model.log_liklihood, mean=_mean, arrays=_array, sigma_is_array=_sigma_i))
+            result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
             print([result.x, result.fun])
 
         # sigma_ms = Model.maximise_over_range(func,
@@ -3317,7 +3317,7 @@ class Model:
         return x_lower
 
     @staticmethod
-    def log_liklihood(est_sigma, est_mu, obs_vals, obs_error):
+    def log_liklihood(est_sigma, est_mu=0.0, obs_vals=0.0, obs_error=0.0):
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
