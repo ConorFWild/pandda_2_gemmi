@@ -26,7 +26,10 @@ from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 
 from typing import *
+from functools import partial
 
+
+from scipy.optimize import shgo
 from sklearn import neighbors
 
 import pandas as pd
@@ -3187,7 +3190,7 @@ class Model:
         # sigma_i_array[n]
         #
 
-        func = lambda est_sigma: Model.log_liklihood(est_sigma, mean, arrays, sigma_is_array)
+        func = partial(Model.log_liklihood, mean=mean, arrays=arrays, sigma_is_array=sigma_is_array)
 
         shape = mean.shape
         num = len(sigma_is_array)
@@ -3198,6 +3201,24 @@ class Model:
                                                         31,
                                                         arrays.shape
                                                         )
+
+        print(sigma_ms.shape)
+        print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
+
+        print(mean.shape)
+        for x, y, z in np.ndindex(*mean.shape):
+            print("#######")
+            print([x,y,z])
+            print(f"Vectorised bisec gives: {sigma_ms[x, y, z]}")
+            _mean = mean[x,y,z]
+            print(_mean)
+            _array = arrays[:, x, y, z]
+            print(_array)
+            _sigma_i = sigma_is_array.flatten()
+            print(_sigma_i)
+
+            result = shgo(partial(Model.log_liklihood, mean=_mean, arrays=_array, sigma_is_array=_sigma_i))
+            print([result.x, result.fun])
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
