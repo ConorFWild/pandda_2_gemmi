@@ -586,7 +586,7 @@ def main(
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
-        local_processing: str = "multiprocessing",
+        local_processing: str = "multiprocessing_forkserver",
         global_processing: str = "serial",
         autobuild: bool = False,
         debug: bool = True,
