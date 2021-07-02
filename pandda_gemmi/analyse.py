@@ -216,7 +216,11 @@ def process_dataset(
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
     print("\t\tIntially found clusters: {}".format(
         {
-            dtag: (len(clustering), max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0,]))
+            dtag: (
+                len(clustering),
+                max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0,]),
+                max([len(cluster.size(grid)) for cluster in clustering.clustering.values()] + [0,]),
+            )
             for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
         }
     )
@@ -248,7 +252,7 @@ def process_dataset(
     # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
     #     clusterings_merged, grid)
     print("\t\tAfter filtering: merged: {}".format(
-        {dtag: len(cluster) for dtag, cluster in
+        {dtag: len(_cluster) for dtag, _cluster in
          zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
 
     # Calculate the shell events
@@ -267,6 +271,7 @@ def process_dataset(
 
     # Save the event maps!
     print("print events")
+    printer.pprint(events)
     events.save_event_maps(dataset_truncated_datasets,
                            alignments,
                            dataset_xmaps,
