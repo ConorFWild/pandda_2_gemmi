@@ -3211,12 +3211,14 @@ class Model:
             print("#######")
             print([x])
             print(f"Vectorised bisec gives: {sigma_ms[x]}")
-            _mean = mean[x]
+            _mean = np.array((mean[x], ))
             print(_mean)
             _array = arrays[:, x, ]
             print(_array)
             _sigma_i = sigma_is_array.flatten()
             print(_sigma_i)
+
+            print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
 
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
             result = optimize.minimize(
@@ -3328,7 +3330,10 @@ class Model:
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
         term2 = np.ones(est_sigma.shape, dtype=np.float32) / (np.square(est_sigma) + np.square(obs_error))
-        return np.sum(term1, axis=0) - np.sum(term2, axis=0)
+
+        difference = np.sum(term1, axis=0) - np.sum(term2, axis=0)
+
+        return difference
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
