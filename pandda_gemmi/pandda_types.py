@@ -3221,8 +3221,8 @@ class Model:
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
             result = optimize.minimize(
                 partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                1.0,
-                bounds=((0.0, 20.0))
+                (1.0, ),
+                bounds=((0.0, 20.0),)
             )
             print([result.x, sigma_ms[x], result.fun])
 
