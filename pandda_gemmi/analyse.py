@@ -192,9 +192,9 @@ def process_dataset(
         # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "mean.ccp4"
         # mean_xmap.save()
         #
-        # std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
-        # std_xmap.save(path)
+        std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
+        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
+        std_xmap.save(path)
 
     # Get the clustered electron desnity outliers
     print("clusting")
@@ -283,6 +283,11 @@ def process_dataset(
                            inner_mask_symmetry,
                            mapper=None,
                            )
+
+    return ShellResult(
+        shell,
+        events,
+    )
 
 
 # Define how to process a shell
