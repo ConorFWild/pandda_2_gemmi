@@ -29,7 +29,7 @@ from typing import *
 from functools import partial
 
 
-from scipy.optimize import shgo
+from scipy import optimize
 from sklearn import neighbors
 
 import pandas as pd
@@ -3221,7 +3221,11 @@ class Model:
             _sigma_i = sigma_is_array.flatten()
             print(_sigma_i)
 
-            result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
+            # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
+            result = optimize.minimize(
+                partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+                bounds=[0.0, 20.0]
+            )
             print([result.x, result.fun])
 
         # sigma_ms = Model.maximise_over_range(func,
