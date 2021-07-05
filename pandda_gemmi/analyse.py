@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import traceback
 from pandda_gemmi import constants
 from pandda_gemmi.constants import PANDDA_LOG_FILE
 from typing import Dict, Optional, List, Tuple, Union
@@ -644,278 +645,285 @@ def process_pandda(
 
     print("Getting multiprocessor")
 
-    # Get local processor
-    if local_processing == "serial":
-        raise NotImplementedError()
-        process_local = ...
-    elif local_processing == "joblib":
-        process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
-    elif local_processing == "multiprocessing_forkserver":
-        mp.set_start_method("forkserver")
-        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-    elif local_processing == "multiprocessing_spawn":
-        mp.set_start_method("spawn")
-        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-    else:
-        raise Exception()
+    try:
 
-    # Get global processor
-    if global_processing == "serial":
-        process_global = process_global_serial
-    elif global_processing == "cluster":
-        raise NotImplementedError()
-        process_global = ...
-    else:
-        raise Exception()
-
-    # Set up autobuilding
-    if autobuild:
-        if autobuild_strategy == "rhofit":
-            autobuild_parametrized = partial(
-                autobuild_rhofit,
-            )
-
-        elif autobuild_strategy == "inbuilt":
-            autobuild_parametrized = partial(
-                autobuild_inbuilt,
-            )
-
+        # Get local processor
+        if local_processing == "serial":
+            raise NotImplementedError()
+            process_local = ...
+        elif local_processing == "joblib":
+            process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
+        elif local_processing == "multiprocessing_forkserver":
+            mp.set_start_method("forkserver")
+            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+        elif local_processing == "multiprocessing_spawn":
+            mp.set_start_method("spawn")
+            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
         else:
-            raise Exception(f"Autobuild strategy: {autobuild_strategy} is not valid!")
+            raise Exception()
 
-    # Parameterise
-    process_shell_paramaterised = partial(
-        process_shell,
-        process_local=process_local,
-        structure_factors=structure_factors,
-        sample_rate=sample_rate,
-        contour_level=contour_level,
-        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-        min_blob_volume=min_blob_volume,
-        min_blob_z_peak=min_blob_z_peak,
-        outer_mask=outer_mask,
-        inner_mask_symmetry=inner_mask_symmetry,
-    )
+        # Get global processor
+        if global_processing == "serial":
+            process_global = process_global_serial
+        elif global_processing == "cluster":
+            raise NotImplementedError()
+            process_global = ...
+        else:
+            raise Exception()
 
-    ###################################################################
-    # # Pre-pandda
-    ###################################################################
+        # Set up autobuilding
+        if autobuild:
+            if autobuild_strategy == "rhofit":
+                autobuild_parametrized = partial(
+                    autobuild_rhofit,
+                )
 
-    # Get datasets
-    print("Loading datasets")
-    datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
-    pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
-    print(f"\tThere are initially: {len(datasets_initial)} datasets")
+            elif autobuild_strategy == "inbuilt":
+                autobuild_parametrized = partial(
+                    autobuild_inbuilt,
+                )
 
-    # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
+            else:
+                raise Exception(f"Autobuild strategy: {autobuild_strategy} is not valid!")
 
-    # Make dataset validator
-    validation_strategy = partial(validate_strategy_num_datasets,
-                                  min_characterisation_datasets=min_characterisation_datasets,
-                                  )
-    validate_paramterized = partial(validate, strategy=validation_strategy)
-
-    # Initial filters
-    print("Filtering invalid datasaets")
-    datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
-        structure_factors)
-    pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
-                                                                                             datasets_invalid)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
-
-    datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
-        low_resolution_completeness)
-    pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid,
-                                                                                             datasets_low_res)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
-
-    datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
-    pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res,
-                                                                                         datasets_rfree)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: rfree"))
-
-    datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-        max_wilson_plot_z_score)  # TODO
-    pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree,
-                                                                                           datasets_wilson)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: wilson"))
-
-    # Select refernce
-    print("Getting reference")
-    reference: Reference = Reference.from_datasets(datasets_wilson)
-    pandda_log.reference_log = logs.ReferenceLog.from_reference(reference)
-
-    # Post-reference filters
-    print("smoothing")
-    start = time.time()
-    datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
-        reference,
-        structure_factors=structure_factors,
-        mapper=process_local,
-    )
-    finish = time.time()
-    print(f"Smoothed in {finish - start}")
-    pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
-
-    print("Removing dissimilar models")
-    datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
-        reference,
-        max_rmsd_to_reference,
-    )
-    pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
-                                                                                         datasets_diss_struc)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure"))
-
-    print("Removing models with large gaps")
-    datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
-    pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(
-        datasets_diss_struc,
-        datasets_gaps)
-    for dtag in datasets_gaps:
-        if dtag not in datasets_diss_struc.datasets:
-            print(f"WARNING: Removed dataset {dtag} due to a large gap")
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure gaps"))
-
-    print("Removing dissimilar space groups")
-    datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-    pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(
-        datasets_gaps,
-        datasets_diss_space)
-    validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
-
-    datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
-
-    # Grid
-    print("Getting grid")
-    grid: Grid = Grid.from_reference(reference,
-                                     outer_mask,
-                                     inner_mask_symmetry,
-                                     sample_rate=sample_rate,
-                                     )
-    # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
-    pandda_log.grid_log = logs.GridLog.from_grid(grid)
-    if debug > 1:
-        print("Summarising protein mask")
-        summarise_grid(grid.partitioning.protein_mask)
-        print("Summarising symmetry mask")
-        summarise_grid(grid.partitioning.symmetry_mask)
-        print("Summarising total mask")
-        summarise_grid(grid.partitioning.total_mask)
-
-    print("Getting alignments")
-    alignments: Alignments = Alignments.from_datasets(
-        reference,
-        datasets,
-    )
-    pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
-
-    ###################################################################
-    # # Assign comparison datasets
-    ###################################################################
-
-    # Assign comparator set for each dataset
-    if comparison_strategy == "closest":
-        # Closest datasets after clustering
-        raise NotImplementedError()
-        comparators: Dict[Dtag, List[Dtag]] = ...
-
-    elif comparison_strategy == "closest_cutoff":
-        # Closest datasets after clustering as long as they are not too poor res
-        comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
-            datasets,
-            alignments,
-            grid,
-            comparison_min_comparators,
-            comparison_max_comparators,
-            structure_factors,
-            sample_rate,
-            comparison_res_cutoff,
-            process_local,
+        # Parameterise
+        process_shell_paramaterised = partial(
+            process_shell,
+            process_local=process_local,
+            structure_factors=structure_factors,
+            sample_rate=sample_rate,
+            contour_level=contour_level,
+            cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+            min_blob_volume=min_blob_volume,
+            min_blob_z_peak=min_blob_z_peak,
+            outer_mask=outer_mask,
+            inner_mask_symmetry=inner_mask_symmetry,
         )
 
-    elif comparison_strategy == "high_res":
-        # Almost Old PanDDA strategy: highest res datasets
-        raise NotImplementedError()
-        comparators: Dict[Dtag, List[Dtag]] = ...
+        ###################################################################
+        # # Pre-pandda
+        ###################################################################
 
-    elif comparison_strategy == "high_res_random":
-        # Old pandda strategy: random datasets that are higher resolution
-        comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
-            datasets,
-            comparison_min_comparators,
-            comparison_max_comparators,
+        # Get datasets
+        print("Loading datasets")
+        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
+        pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
+        print(f"\tThere are initially: {len(datasets_initial)} datasets")
+
+        # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
+
+        # Make dataset validator
+        validation_strategy = partial(validate_strategy_num_datasets,
+                                      min_characterisation_datasets=min_characterisation_datasets,
+                                      )
+        validate_paramterized = partial(validate, strategy=validation_strategy)
+
+        # Initial filters
+        print("Filtering invalid datasaets")
+        datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
+            structure_factors)
+        pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
+                                                                                                 datasets_invalid)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+
+        datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
+            low_resolution_completeness)
+        pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid,
+                                                                                                 datasets_low_res)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
+
+        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
+        pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res,
+                                                                                             datasets_rfree)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: rfree"))
+
+        datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
+            max_wilson_plot_z_score)  # TODO
+        pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree,
+                                                                                               datasets_wilson)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: wilson"))
+
+        # Select refernce
+        print("Getting reference")
+        reference: Reference = Reference.from_datasets(datasets_wilson)
+        pandda_log.reference_log = logs.ReferenceLog.from_reference(reference)
+
+        # Post-reference filters
+        print("smoothing")
+        start = time.time()
+        datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
+            reference,
+            structure_factors=structure_factors,
+            mapper=process_local,
         )
+        finish = time.time()
+        print(f"Smoothed in {finish - start}")
+        pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
-    else:
-        raise Exception("Unrecognised comparison strategy")
+        print("Removing dissimilar models")
+        datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
+            reference,
+            max_rmsd_to_reference,
+        )
+        pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
+                                                                                             datasets_diss_struc)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure"))
 
-    print("Comparators are:")
-    if debug:
-        printer.pprint(comparators)
+        print("Removing models with large gaps")
+        datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
+        pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(
+            datasets_diss_struc,
+            datasets_gaps)
+        for dtag in datasets_gaps:
+            if dtag not in datasets_diss_struc.datasets:
+                print(f"WARNING: Removed dataset {dtag} due to a large gap")
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure gaps"))
 
-    ###################################################################
-    # # Process shells
-    ###################################################################
+        print("Removing dissimilar space groups")
+        datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
+        pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(
+            datasets_gaps,
+            datasets_diss_space)
+        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
 
-    # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
-    # sake of computational efficiency
-    shells = get_shells(
-        datasets,
-        comparators,
-        min_characterisation_datasets,
-        max_shell_datasets,
-        high_res_increment,
-    )
+        datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
 
-    print("Shells are:")
-    if debug:
-        printer.pprint(shells)
+        # Grid
+        print("Getting grid")
+        grid: Grid = Grid.from_reference(reference,
+                                         outer_mask,
+                                         inner_mask_symmetry,
+                                         sample_rate=sample_rate,
+                                         )
+        # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
+        pandda_log.grid_log = logs.GridLog.from_grid(grid)
+        if debug > 1:
+            print("Summarising protein mask")
+            summarise_grid(grid.partitioning.protein_mask)
+            print("Summarising symmetry mask")
+            summarise_grid(grid.partitioning.symmetry_mask)
+            print("Summarising total mask")
+            summarise_grid(grid.partitioning.total_mask)
 
-    # Process the shells
-    shell_results = process_global(
-        [
-            partial(
-                process_shell_paramaterised,
-                shell,
+        print("Getting alignments")
+        alignments: Alignments = Alignments.from_datasets(
+            reference,
+            datasets,
+        )
+        pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
+
+        ###################################################################
+        # # Assign comparison datasets
+        ###################################################################
+
+        # Assign comparator set for each dataset
+        if comparison_strategy == "closest":
+            # Closest datasets after clustering
+            raise NotImplementedError()
+            comparators: Dict[Dtag, List[Dtag]] = ...
+
+        elif comparison_strategy == "closest_cutoff":
+            # Closest datasets after clustering as long as they are not too poor res
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
                 datasets,
                 alignments,
                 grid,
-                pandda_fs_model,
-                reference,
+                comparison_min_comparators,
+                comparison_max_comparators,
+                structure_factors,
+                sample_rate,
+                comparison_res_cutoff,
+                process_local,
             )
-            for res, shell
-            in shells.items()
-        ],
-    )
 
-    # Autobuild the results if set to
-    if autobuild_results:
-        autobuild_results: Dict[EventID, AutobuildResult] = process_global(
-            [
-                partial(
-                    autobuild_parametrized(event),
-                )
-                for result
-                in shell_results
-            ]
+        elif comparison_strategy == "high_res":
+            # Almost Old PanDDA strategy: highest res datasets
+            raise NotImplementedError()
+            comparators: Dict[Dtag, List[Dtag]] = ...
+
+        elif comparison_strategy == "high_res_random":
+            # Old pandda strategy: random datasets that are higher resolution
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
+                datasets,
+                comparison_min_comparators,
+                comparison_max_comparators,
+            )
+
+        else:
+            raise Exception("Unrecognised comparison strategy")
+
+        print("Comparators are:")
+        if debug:
+            printer.pprint(comparators)
+
+        ###################################################################
+        # # Process shells
+        ###################################################################
+
+        # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
+        # sake of computational efficiency
+        shells = get_shells(
+            datasets,
+            comparators,
+            min_characterisation_datasets,
+            max_shell_datasets,
+            high_res_increment,
         )
 
-    #
-    all_events_events = Events.from_all_events(all_events, grid, 1.7)
+        print("Shells are:")
+        if debug:
+            printer.pprint(shells)
 
-    # Get the sites and output a csv of them
-    site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
-    site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
-    pandda_log.sites_log = logs.SitesLog.from_sites(site_table)
+        # Process the shells
+        shell_results = process_global(
+            [
+                partial(
+                    process_shell_paramaterised,
+                    shell,
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_fs_model,
+                    reference,
+                )
+                for res, shell
+                in shells.items()
+            ],
+        )
 
-    # Output a csv of the events
-    event_table: EventTable = EventTable.from_events(all_events_events)
-    event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
-    pandda_log.events_log = logs.EventsLog.from_events(all_events_events,
-                                                       grid,
-                                                       )
+        # Autobuild the results if set to
+        if autobuild_results:
+            autobuild_results: Dict[EventID, AutobuildResult] = process_global(
+                [
+                    partial(
+                        autobuild_parametrized(event),
+                    )
+                    for result
+                    in shell_results
+                ]
+            )
 
-    pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+        #
+        all_events_events = Events.from_all_events(all_events, grid, 1.7)
+
+        # Get the sites and output a csv of them
+        site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
+        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+        pandda_log.sites_log = logs.SitesLog.from_sites(site_table)
+
+        # Output a csv of the events
+        event_table: EventTable = EventTable.from_events(all_events_events)
+        event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
+        pandda_log.events_log = logs.EventsLog.from_events(all_events_events,
+                                                           grid,
+                                                           )
+
+        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+
+    except Exception as e:
+        traceback.print_exc()
+
+        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
 
 
 if __name__ == '__main__':
