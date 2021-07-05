@@ -28,7 +28,6 @@ set_loky_pickler('pickle')
 from typing import *
 from functools import partial
 
-
 from scipy import optimize
 from sklearn import neighbors
 
@@ -2346,7 +2345,7 @@ class Alignment:
             reference_indexes = reference_tree.query_ball_point(
                 [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
                 marker_atom_search_radius,
-                )
+            )
             reference_selection = reference_atom_array[reference_indexes]
             dataset_selection = dataset_atom_array[reference_indexes]
 
@@ -3204,8 +3203,6 @@ class Model:
 
         print(sigma_ms.shape)
         print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
-
-
 
         print(mean.shape)
         print(arrays.shape)
@@ -5044,7 +5041,7 @@ def sample_residue(truncated_dataset: Dataset,
         structure_factors.f,
         structure_factors.phi,
         sample_rate=sample_rate,
-        )
+    )
     # Unpack the points, poitions and transforms
     point_list: List[Tuple[int, int, int]] = []
     position_list: List[Tuple[float, float, float]] = []
@@ -5074,3 +5071,15 @@ def sample_residue(truncated_dataset: Dataset,
                                                )
 
     return np.array(sampled_points)
+
+
+@dataclasses.dataclass()
+class DatasetResult:
+    dtag: Dtag
+    events: Dict[EventID, Event]
+
+
+@dataclasses.dataclass()
+class ShellResult:
+    shell: Shell
+    dataset_results: Dict[Dtag, DatasetResult]

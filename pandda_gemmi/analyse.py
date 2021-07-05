@@ -29,6 +29,7 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Dat
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
+DatasetResult,ShellResult,
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -284,9 +285,9 @@ def process_dataset(
                            mapper=None,
                            )
 
-    return ShellResult(
-        shell,
-        events,
+    return DatasetResult(
+        dtag=test_dtag,
+        events=events,
     )
 
 
@@ -396,7 +397,10 @@ def process_shell(
         ],
     )
 
-    return results
+    return ShellResult(
+        shell=shell,
+        dataset_results=results,
+    )
 
     # for test_dtag in shell.train_dtags:
     #     print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
