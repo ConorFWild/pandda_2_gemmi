@@ -3205,14 +3205,18 @@ class Model:
         print(sigma_ms.shape)
         print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
 
+
+
         print(mean.shape)
-        for x, y, z in np.ndindex(*mean.shape):
+        print(arrays.shape)
+        print(sigma_ms.shape)
+        for x in np.ndindex(*mean.shape):
             print("#######")
-            print([x,y,z])
-            print(f"Vectorised bisec gives: {sigma_ms[x, y, z]}")
-            _mean = mean[x,y,z]
+            print([x])
+            print(f"Vectorised bisec gives: {sigma_ms[x]}")
+            _mean = mean[x]
             print(_mean)
-            _array = arrays[:, x, y, z]
+            _array = arrays[:, x, ]
             print(_array)
             _sigma_i = sigma_is_array.flatten()
             print(_sigma_i)
