@@ -49,7 +49,7 @@ from pandda_gemmi.pandda_functions import (
 set_loky_pickler('pickle')
 
 
-# ########
+# #########
 # debug
 # #########
 def summarise_grid(grid: gemmi.FloatGrid):
@@ -561,7 +561,7 @@ def process_shell(
     # return all_events
 
 
-def main(
+def process_pandda(
         data_dirs: str,
         out_dir: str,
         pdb_regex: str = "*.pdb",
@@ -919,4 +919,4 @@ def main(
 
 
 if __name__ == '__main__':
-    fire.Fire(main)
+    fire.Fire(process_pandda)
