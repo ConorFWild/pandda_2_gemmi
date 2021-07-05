@@ -3226,7 +3226,7 @@ class Model:
                 partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
                 bounds=[0.0, 20.0]
             )
-            print([result.x, result.fun])
+            print([result.x, sigma_ms[x], result.fun])
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
