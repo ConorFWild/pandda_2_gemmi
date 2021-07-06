@@ -45,6 +45,7 @@ PANDDA_LOG_FILE = "pandda_log.json"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
 LOG_INVALID: str = "Datasets filtered for being invalid"
+LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
 
 RESIDUE_NAMES = ["ALA",
 "ARG",

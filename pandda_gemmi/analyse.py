@@ -24,14 +24,14 @@ import joblib
 from joblib.externals.loky import set_loky_pickler
 
 from pandda_gemmi import logs
-from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
-                                       Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
-                                       XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
-                                       Events, SiteTable, EventTable,
-                                       JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
-DatasetResult, ShellResult,
-                                       )
-from pandda_gemmi import validators
+from pandda_gemmi.pandda_types import (
+    PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
+    Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
+    XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
+    Events, SiteTable, EventTable,
+    StructureFactors, Xmap,
+    DatasetResult, ShellResult,
+)
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
@@ -127,6 +127,9 @@ def process_dataset(
         process_local=process_local_serial,
 
 ):
+    dataset_log = {}
+    dataset_log[constants.LOG_DATASET_TRAIN] = shell.train_dtags[test_dtag]
+
     masked_xmap_array = XmapArray.from_xmaps(
         dataset_xmaps,
         grid,
@@ -135,9 +138,6 @@ def process_dataset(
     print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
-
-    print(masked_train_xmap_array.dtag_list)
-    print(masked_train_xmap_array.xmap_array.shape)
 
     # Determine the parameters of the model to find outlying electron density
     print("Fitting model")
@@ -179,10 +179,6 @@ def process_dataset(
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
         xmap.save(path)
 
-        # mean_xmap = Xmap.from_grid_array(grid, mean_array)
-        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "mean.ccp4"
-        # mean_xmap.save()
-        #
         std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
         std_xmap.save(path)
@@ -209,8 +205,8 @@ def process_dataset(
         {
             dtag: (
                 len(clustering),
-                max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0,]),
-                max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0,]),
+                max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
+                max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
             )
             for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
         }
@@ -299,7 +295,6 @@ def process_shell(
         outer_mask,
         inner_mask_symmetry,
 ):
-
     shell_log = {}
 
     if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
@@ -386,7 +381,8 @@ def process_shell(
             partial(
                 process_dataset_paramaterized,
                 test_dtag,
-                dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in shell.train_dtags[test_dtag]},
+                dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
+                                            shell.train_dtags[test_dtag]},
                 dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag]},
             )
             for test_dtag
@@ -637,7 +633,6 @@ def process_pandda(
                                                             )
     pandda_fs_model.build()
 
-
     print("Getting multiprocessor")
     try:
 
@@ -701,7 +696,6 @@ def process_pandda(
         # Get datasets
         print("Loading datasets")
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
-        pandda_log.preprocessing_log.initial_datasets_log = logs.InitialDatasetLog.from_initial_datasets(datasets_initial)
         print(f"\tThere are initially: {len(datasets_initial)} datasets")
 
         # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
@@ -725,20 +719,15 @@ def process_pandda(
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
-        pandda_log.preprocessing_log.rfree_datasets_log = logs.RFreeDatasetLog.from_datasets(datasets_low_res,
-                                                                                             datasets_rfree)
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: rfree"))
 
         datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
             max_wilson_plot_z_score)  # TODO
-        pandda_log.preprocessing_log.wilson_datasets_log = logs.WilsonDatasetLog.from_datasets(datasets_rfree,
-                                                                                               datasets_wilson)
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: wilson"))
 
         # Select refernce
         print("Getting reference")
         reference: Reference = Reference.from_datasets(datasets_wilson)
-        pandda_log.reference_log = logs.ReferenceLog.from_reference(reference)
 
         # Post-reference filters
         print("smoothing")
@@ -750,22 +739,16 @@ def process_pandda(
         )
         finish = time.time()
         print(f"Smoothed in {finish - start}")
-        pandda_log.preprocessing_log.smoothing_datasets_log = logs.SmoothingDatasetLog.from_datasets(datasets_smoother)
 
         print("Removing dissimilar models")
         datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
             reference,
             max_rmsd_to_reference,
         )
-        pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(datasets_smoother,
-                                                                                             datasets_diss_struc)
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure"))
 
         print("Removing models with large gaps")
         datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
-        pandda_log.preprocessing_log.struc_datasets_log = logs.StrucDatasetLog.from_datasets(
-            datasets_diss_struc,
-            datasets_gaps)
         for dtag in datasets_gaps:
             if dtag not in datasets_diss_struc.datasets:
                 print(f"WARNING: Removed dataset {dtag} due to a large gap")
@@ -773,9 +756,6 @@ def process_pandda(
 
         print("Removing dissimilar space groups")
         datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-        pandda_log.preprocessing_log.space_datasets_log = logs.SpaceDatasetLog.from_datasets(
-            datasets_gaps,
-            datasets_diss_space)
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
 
         datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
@@ -788,7 +768,6 @@ def process_pandda(
                                          sample_rate=sample_rate,
                                          )
         # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
-        pandda_log.grid_log = logs.GridLog.from_grid(grid)
         if debug > 1:
             print("Summarising protein mask")
             summarise_grid(grid.partitioning.protein_mask)
@@ -802,7 +781,6 @@ def process_pandda(
             reference,
             datasets,
         )
-        pandda_log.alignments_log = logs.AlignmentsLog.from_alignments(alignments)
 
         ###################################################################
         # # Assign comparison datasets
@@ -901,14 +879,10 @@ def process_pandda(
         # Get the sites and output a csv of them
         site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
-        pandda_log.sites_log = logs.SitesLog.from_sites(site_table)
 
         # Output a csv of the events
         event_table: EventTable = EventTable.from_events(all_events_events)
         event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
-        pandda_log.events_log = logs.EventsLog.from_events(all_events_events,
-                                                           grid,
-                                                           )
 
         save_json_log(config.output.out_dir / constants.PANDDA_LOG_FILE)
 
