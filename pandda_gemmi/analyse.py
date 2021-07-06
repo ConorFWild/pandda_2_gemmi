@@ -24,7 +24,6 @@ import numpy as np
 import gemmi
 import joblib
 
-
 ## Custom Imports
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (
@@ -48,7 +47,6 @@ from pandda_gemmi.pandda_functions import (
     validate_strategy_num_datasets,
     validate,
 )
-
 
 
 # #########
@@ -165,10 +163,9 @@ def process_dataset(
         grid,
     )
 
-    # model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
     # Calculate z maps
     print("Getting zmaps")
-    zmaps: Zmaps = Zmaps.from_xmaps(
+    zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
         model=model,
         xmaps={test_dtag: dataset_xmaps[test_dtag], },
     )
@@ -276,6 +273,7 @@ def process_dataset(
     return DatasetResult(
         dtag=test_dtag,
         events=events,
+        log=dataset_log,
     )
 
 
@@ -350,16 +348,6 @@ def process_shell(
     finish = time.time()
     print(f"Mapped {len(xmaps)} xmaps in {finish - start}")
 
-    # Seperate out test and train maps
-    # shell_test_xmaps: Dict[Dtag, Xmap] = {dtag: xmap for dtag, xmap in xmaps.items() if dtag in shell.test_dtags}
-
-    # Get arrays for model
-    print("Getting xmap arrays...")
-    # masked_xmap_array: XmapArray = XmapArray.from_xmaps(
-    #     xmaps,
-    #     grid,
-    # )  # Size of n x (total mask  > 0)
-
     # Now that all the data is loaded, get the comparison set and process each test dtag
     process_dataset_paramaterized = partial(
         process_dataset,
@@ -397,164 +385,6 @@ def process_shell(
         dataset_results=results,
         log=shell_log,
     )
-
-    # for test_dtag in shell.train_dtags:
-    #     print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
-    #     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-    #         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
-    #     masked_test_xmap_array: XmapArray = masked_xmap_array.from_dtags([test_dtag, ])
-    #     print(masked_train_xmap_array.dtag_list)
-    #
-    #     # Determine the parameters of the model to find outlying electron density
-    #     print("Fitting model")
-    #     mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
-    #                                                         )  # Size of grid.partitioning.total_mask > 0
-    #
-    #     print("fitting sigma i")
-    #     sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
-    #                                                                  mean_array,
-    #                                                                  1.5,
-    #                                                                  )  # size of n
-    #     print(sigma_is)
-    #     # pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i
-    #     #                                                 for dtag, sigma_i
-    #     #                                                 in sigma_is.items()}
-    #
-    #     print("fitting sigma s m")
-    #     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
-    #                                                        mean_array,
-    #                                                        sigma_is,
-    #                                                        )  # size of total_mask > 0
-    #     print(np.min(sigma_s_m))
-    #
-    #     model: Model = Model.from_mean_is_sms(
-    #         mean_array,
-    #         sigma_is,
-    #         sigma_s_m,
-    #         grid,
-    #     )
-    #
-    #     # model.save_maps(pandda_fs_model.pandda_dir, shell, grid)
-    #
-    #     # Calculate z maps
-    #     print("Getting zmaps")
-    #     zmaps: Zmaps = Zmaps.from_xmaps(
-    #         model=model,
-    #         xmaps={test_dtag: shell_test_xmaps[test_dtag], },
-    #     )
-    #
-    #     # if config.debug > 1:
-    #     # print("saving zmaps")
-    #     for dtag in zmaps:
-    #         # if dtag.dtag in constants.MISSES:
-    #         zmap = zmaps[dtag]
-    #         pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-    #
-    #         xmap = xmaps[dtag]
-    #         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-    #         xmap.save(path)
-    #
-    #     # Get the clustered electron desnity outliers
-    #     print("clusting")
-    #     # clusterings: Clusterings = Clusterings.from_Zmaps(
-    #     #     zmaps,
-    #     #     reference,
-    #     #     grid,
-    #     #     config.params.masks.contour_level,
-    #     #     cluster_cutoff_distance_multiplier=config.params.blob_finding.cluster_cutoff_distance_multiplier,
-    #     #     mapper=process_local,
-    #     # )
-    #     cluster_paramaterised = partial(
-    #         Clustering.from_zmap,
-    #         reference=reference,
-    #         grid=grid,
-    #         contour_level=contour_level,
-    #         cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-    #     )
-    #
-    #     clusterings = process_local(
-    #         [
-    #             partial(cluster_paramaterised, zmaps[dtag], )
-    #             for dtag
-    #             in zmaps
-    #         ]
-    #     )
-    #     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
-    #     print("\t\tIntially found clusters: {}".format(
-    #         {dtag: len(cluster) for dtag, cluster in zip(clusterings.clusters, clusterings.clusters.values())}))
-    #
-    #     # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
-    #     #     clusterings, grid)
-    #
-    #     # Filter out small clusters
-    #     clusterings_large: Clusterings = clusterings.filter_size(grid,
-    #                                                              min_blob_volume,
-    #                                                              )
-    #     print("\t\tAfter filtering: large: {}".format(
-    #         {dtag: len(cluster) for dtag, cluster in
-    #          zip(clusterings_large.clusters, clusterings_large.clusters.values())}))
-    #     # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
-    #     #     clusterings_large, grid)
-    #
-    #     # Filter out weak clusters (low peak z score)
-    #     clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
-    #                                                                     min_blob_z_peak)
-    #     # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
-    #     #     clusterings_peaked, grid)
-    #     print("\t\tAfter filtering: peak: {}".format(
-    #         {dtag: len(cluster) for dtag, cluster in
-    #          zip(clusterings_peaked.clusters, clusterings_peaked.clusters.values())}))
-    #
-    #     clusterings_merged = clusterings_peaked.merge_clusters()
-    #     # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
-    #     #     clusterings_merged, grid)
-    #     print("\t\tAfter filtering: merged: {}".format(
-    #         {dtag: len(cluster) for dtag, cluster in
-    #          zip(clusterings_merged.clusters, clusterings_merged.clusters.values())}))
-    #
-    #     # Calculate the shell events
-    #     print("getting events")
-    #     print(f"\tGot {len(clusterings_merged.clusters)} clusters")
-    #     events: Events = Events.from_clusters(
-    #         clusterings_merged,
-    #         model,
-    #         xmaps,
-    #         grid,
-    #         1.732,  # TODO: make this a variable ;')
-    #         process_local,
-    #     )
-    #     # pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
-    #     # print(pandda_log.shells_log[shell.number].events)
-    #
-    #     # Save the event maps!
-    #     print("print events")
-    #     events.save_event_maps(shell_truncated_datasets,
-    #                            alignments,
-    #                            xmaps,
-    #                            model,
-    #                            pandda_fs_model,
-    #                            grid,
-    #                            structure_factors,
-    #                            outer_mask,
-    #                            inner_mask_symmetry,
-    #                            mapper=process_local,
-    #                            )
-
-    # return None
-
-    # for event_id in events:
-    #     # Save zmaps
-    #     # zmap = zmaps[event_id.dtag]
-    #     # pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].z_map_file.save(zmap)
-    #
-    #     # xmap = xmaps[event_id.dtag]
-    #     # path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / "xmap.ccp4"
-    #     # xmap.save(path)
-    #
-    #     # Add events
-    #     all_events[event_id] = events[event_id]
-    #
-    # return all_events
 
 
 def process_pandda(
@@ -717,7 +547,7 @@ def process_pandda(
 
         datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
             low_resolution_completeness)
-        pandda_log[Constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_invalid if dtag not in datasets_low_res]
+        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_invalid if dtag not in datasets_low_res]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
