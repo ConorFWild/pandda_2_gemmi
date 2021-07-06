@@ -3189,10 +3189,10 @@ class Model:
         # sigma_i_array[n]
         #
 
-        func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
-
-        shape = mean.shape
-        num = len(sigma_is_array)
+        # func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
+        #
+        # shape = mean.shape
+        # num = len(sigma_is_array)
 
         # sigma_ms_bisect = Model.vectorised_optimisation_bisect(func,
         #                                                 0,
