@@ -712,7 +712,7 @@ def process_pandda(
         print("Filtering invalid datasaets")
         datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
             structure_factors)
-        pandda_log[Constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
+        pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
         datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
