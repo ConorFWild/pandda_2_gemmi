@@ -3213,7 +3213,7 @@ class Model:
             print(f"Vectorised bisec gives: {sigma_ms[x]}")
             _mean = np.array((mean[x], ))
             print(_mean)
-            _array = arrays[:, x, ]
+            _array = arrays[:, x, ].flatten()
             print(_array)
             _sigma_i = sigma_is_array.flatten()
             print(_sigma_i)
