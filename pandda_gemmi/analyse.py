@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# Base python
 import os
 import traceback
 from pandda_gemmi import constants
@@ -17,12 +18,14 @@ import multiprocessing as mp
 
 printer = pprint.PrettyPrinter()
 
+# Scientific python libraries
 import fire
 import numpy as np
 import gemmi
 import joblib
-from joblib.externals.loky import set_loky_pickler
 
+
+## Custom Imports
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
@@ -46,7 +49,6 @@ from pandda_gemmi.pandda_functions import (
     validate,
 )
 
-set_loky_pickler('pickle')
 
 
 # #########
