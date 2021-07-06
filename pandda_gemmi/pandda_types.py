@@ -3242,7 +3242,7 @@ class Model:
 
             # print([sigma_ms_bisect[x], result_root.x, result_min.x,])
             # print([result.x, sigma_ms[x], result.fun])
-            sigma_ms[x] = result_root.x
+            sigma_ms[x] = np.abs(result_root.x)
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
