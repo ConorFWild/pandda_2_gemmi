@@ -394,6 +394,11 @@ def process_pandda(
         local_processing: str = "multiprocessing_forkserver",
         global_processing: str = "serial",
         distributed_scheduler: str = "SGE",
+        distributed_queue: str = "default",
+        distributed_project: str = "default",
+        distributed_num_workers: int = 10,
+        distributed_mem_per_worker: str = "10G",
+        distributed_resource_spec: str = "m_mem_free=10G",
         autobuild: bool = False,
         debug: bool = True,
 ):
@@ -445,8 +450,13 @@ def process_pandda(
         elif global_processing == "distributed":
             process_global = partial(
                 process_global_dask,
-                distributed_scehduler,
-
+                scheduler=distributed_scheduler,
+                num_workers=distributed_num_workers,
+                queue=distributed_queue,
+                project=distributed_project,
+                cores_per_worker=local_cpus,
+                memory_per_worker=distributed_mem_per_worker,
+                resource_spec=""
             )
         else:
             raise Exception()
