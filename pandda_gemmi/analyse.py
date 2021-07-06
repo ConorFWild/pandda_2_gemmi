@@ -310,6 +310,11 @@ def process_shell(
         outer_mask,
         inner_mask_symmetry,
 ):
+
+    if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
+        print(f"447 is not in {shell.test_dtags} ")
+        return None
+
     print(f"Working on shell: {shell}")
     # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
 
