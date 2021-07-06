@@ -3226,7 +3226,7 @@ class Model:
             start = time.time()
             result_root = optimize.root_scalar(
                 partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                np.power(2, -20),
+                np.power(2.0, -20),
             )
             finish = time.time()
             print(f"Root found in {finish-start}")
@@ -3234,7 +3234,7 @@ class Model:
             start = time.time()
             result_min = optimize.minimise(
                 partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                np.power(2, -20),
+                np.power(2.0, -20),
             )
             finish = time.time()
             print(f"Minimised in {finish-start}")
