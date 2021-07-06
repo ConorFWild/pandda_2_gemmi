@@ -3194,12 +3194,12 @@ class Model:
         shape = mean.shape
         num = len(sigma_is_array)
 
-        sigma_ms_bisect = Model.vectorised_optimisation_bisect(func,
-                                                        0,
-                                                        20,
-                                                        31,
-                                                        arrays.shape
-                                                        )
+        # sigma_ms_bisect = Model.vectorised_optimisation_bisect(func,
+        #                                                 0,
+        #                                                 20,
+        #                                                 31,
+        #                                                 arrays.shape
+        #                                                 )
 
         # print(sigma_ms.shape)
         # print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
@@ -3223,24 +3223,24 @@ class Model:
             # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
 
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
-            start = time.time()
+            # start = time.time()
             result_root = optimize.root(
                 partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
                 x0=np.power(2.0, -20),
             )
-            finish = time.time()
-            print(f"Root found in {finish-start}")
+            # finish = time.time()
+            # print(f"Root found in {finish-start}")
 
-            start = time.time()
-            result_min = optimize.minimize(
-                partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                np.array((np.power(2.0, -20.0),),),
-                bounds=((0.0, 20.0,),)
-            )
-            finish = time.time()
-            print(f"Minimised in {finish-start}")
+            # start = time.time()
+            # result_min = optimize.minimize(
+            #     partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+            #     np.array((np.power(2.0, -20.0),),),
+            #     bounds=((0.0, 20.0,),)
+            # )
+            # finish = time.time()
+            # print(f"Minimised in {finish-start}")
 
-            print([sigma_ms_bisect[x], result_root.x, result_min.x,])
+            # print([sigma_ms_bisect[x], result_root.x, result_min.x,])
             # print([result.x, sigma_ms[x], result.fun])
             sigma_ms[x] = result_root.x
 
