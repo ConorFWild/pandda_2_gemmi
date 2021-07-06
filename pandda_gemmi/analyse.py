@@ -85,6 +85,10 @@ def process_dataset(
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
 
+    ###################################################################
+    # # Generate the statistical model of the dataset
+    ###################################################################
+
     # Determine the parameters of the model to find outlying electron density
     print("Fitting model")
     mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
@@ -131,6 +135,10 @@ def process_dataset(
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
         std_xmap.save(path)
 
+
+    ###################################################################
+    # # Cluster the outlying density
+    ###################################################################
     # Get the clustered electron desnity outliers
     print("clusting")
     cluster_paramaterised = partial(
@@ -161,9 +169,6 @@ def process_dataset(
     )
     )
 
-    # pandda_log.shells_log[shell.number].initial_clusters = logs.ClusteringsLog.from_clusters(
-    #     clusterings, grid)
-
     # Filter out small clusters
     clusterings_large: Clusterings = clusterings.filter_size(grid,
                                                              min_blob_volume,
@@ -171,25 +176,22 @@ def process_dataset(
     print("\t\tAfter filtering: large: {}".format(
         {dtag: len(cluster) for dtag, cluster in
          zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
-    # pandda_log.shells_log[shell.number].large_clusters = logs.ClusteringsLog.from_clusters(
-    #     clusterings_large, grid)
 
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
                                                                     min_blob_z_peak)
-    # pandda_log.shells_log[shell.number].peaked_clusters = logs.ClusteringsLog.from_clusters(
-    #     clusterings_peaked, grid)
     print("\t\tAfter filtering: peak: {}".format(
         {dtag: len(cluster) for dtag, cluster in
          zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
 
     clusterings_merged = clusterings_peaked.merge_clusters()
-    # pandda_log.shells_log[shell.number].clusterings_merged = logs.ClusteringsLog.from_clusters(
-    #     clusterings_merged, grid)
     print("\t\tAfter filtering: merged: {}".format(
         {dtag: len(_cluster) for dtag, _cluster in
          zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
 
+    ###################################################################
+    # # Fund the events
+    ###################################################################
     # Calculate the shell events
     print("getting events")
     print(f"\tGot {len(clusterings_merged.clusterings)} clusters")
@@ -201,9 +203,10 @@ def process_dataset(
         1.732,  # TODO: make this a variable ;')
         process_local,
     )
-    # pandda_log.shells_log[shell.number].events = logs.EventsLog.from_events(events, grid)
-    # print(pandda_log.shells_log[shell.number].events)
 
+    ###################################################################
+    # # Generate event maps
+    ###################################################################
     # Save the event maps!
     print("print events")
     printer.pprint(events)
@@ -251,7 +254,6 @@ def process_shell(
         return None
 
     print(f"Working on shell: {shell}")
-    # pandda_log.shells_log[shell.number] = logs.ShellLog.from_shell(shell)
 
     # Seperate out test and train datasets
     shell_datasets: Dict[Dtag, Dataset] = {
@@ -259,8 +261,11 @@ def process_shell(
         for dtag, dataset
         in datasets.items()
         if dtag in shell.all_dtags
-    }  # datasets.from_dtags(shell.all_dtags)
+    }
 
+    ###################################################################
+    # # Homogonise shell datasets by truncation of resolution
+    ###################################################################
     print("Truncating datasets")
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
@@ -268,7 +273,9 @@ def process_shell(
         structure_factors=structure_factors,
     )
 
-    # Generate aligned xmaps
+    ###################################################################
+    # # Generate aligned Xmaps
+    ###################################################################
     print("Loading xmaps")
     start = time.time()
 
@@ -297,6 +304,9 @@ def process_shell(
     finish = time.time()
     print(f"Mapped {len(xmaps)} xmaps in {finish - start}")
 
+    ###################################################################
+    # # Process each test dataset
+    ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
     process_dataset_paramaterized = partial(
         process_dataset,
@@ -640,6 +650,10 @@ def process_pandda(
             ],
         )
 
+        ###################################################################
+        # # Autobuilding
+        ###################################################################
+
         # Autobuild the results if set to
         if autobuild_results:
             autobuild_results: Dict[EventID, AutobuildResult] = process_global(
@@ -652,18 +666,33 @@ def process_pandda(
                 ]
             )
 
+        ###################################################################
+        # # Assign Sites
+        ###################################################################
+
         #
         all_events_events = Events.from_all_events(all_events, grid, 1.7)
 
         # Get the sites and output a csv of them
         site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
-        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
+        ###################################################################
+        # # Output pandda summary information
+        ###################################################################
 
         # Output a csv of the events
         event_table: EventTable = EventTable.from_events(all_events_events)
         event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
+        # Output site table
+        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
+        # Output json log
         save_json_log(config.output.out_dir / constants.PANDDA_LOG_FILE)
+
+    ###################################################################
+    # # Handle Exceptions
+    ###################################################################
 
     except Exception as e:
         traceback.print_exc()
