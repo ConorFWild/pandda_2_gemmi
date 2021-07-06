@@ -3229,7 +3229,7 @@ class Model:
                 bounds=((0.0, 20.0),)
             )
             # print([result.x, sigma_ms[x], result.fun])
-            sigma_ms[x] = result
+            sigma_ms[x] = result.x
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
@@ -5085,9 +5085,16 @@ def sample_residue(truncated_dataset: Dataset,
 class DatasetResult:
     dtag: Dtag
     events: Dict[EventID, Event]
+    log: Dict
 
 
 @dataclasses.dataclass()
 class ShellResult:
     shell: Shell
     dataset_results: Dict[Dtag, DatasetResult]
+    log: Dict
+
+
+class Cosntants:
+    trace: str = "trace"
+    exception: str = "exception"

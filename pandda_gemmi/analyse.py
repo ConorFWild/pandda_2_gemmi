@@ -30,7 +30,8 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Dat
                                        XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
-DatasetResult,ShellResult,
+DatasetResult, ShellResult,
+Constants,
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -133,8 +134,6 @@ def process_dataset(
         grid,
     )
 
-
-
     print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
@@ -152,20 +151,12 @@ def process_dataset(
                                                                  mean_array,
                                                                  1.5,
                                                                  )  # size of n
-    print(sigma_is)
-    # pandda_log.shells_log[shell.number].sigma_is = {dtag.dtag: sigma_i
-    #                                                 for dtag, sigma_i
-    #                                                 in sigma_is.items()}
 
     print("fitting sigma s m")
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                        mean_array,
                                                        sigma_is,
                                                        )  # size of total_mask > 0
-    print(np.min(sigma_s_m))
-    print(np.mean(sigma_s_m))
-    print(np.max(sigma_s_m))
-    print(np.std(sigma_s_m))
 
     model: Model = Model.from_mean_is_sms(
         mean_array,
@@ -311,6 +302,8 @@ def process_shell(
         inner_mask_symmetry,
 ):
 
+    shell_log = {}
+
     if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
         print(f"447 is not in {shell.test_dtags} ")
         return None
@@ -406,6 +399,7 @@ def process_shell(
     return ShellResult(
         shell=shell,
         dataset_results=results,
+        log=shell_log,
     )
 
     # for test_dtag in shell.train_dtags:
@@ -626,16 +620,14 @@ def process_pandda(
     # # Configuration
     ###################################################################
     print("Getting config")
-    # config: Config = Config.from_args()
+
     # Process args
     data_dirs = Path(data_dirs)
     out_dir = Path(out_dir)
     structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
-    print(structure_factors)
 
     print("Initialising log...")
-    pandda_log: logs.LogData = logs.LogData.initialise()
-    # pandda_log.config = config
+    pandda_log: Dict = {}
 
     print("FSmodel building")
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(data_dirs,
@@ -646,10 +638,9 @@ def process_pandda(
                                                             ligand_pdb_regex,
                                                             )
     pandda_fs_model.build()
-    pandda_log.fs_log = logs.FSLog.from_pandda_fs_model(pandda_fs_model)
+
 
     print("Getting multiprocessor")
-
     try:
 
         # Get local processor
@@ -923,12 +914,15 @@ def process_pandda(
                                                            grid,
                                                            )
 
-        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+        save_json_log(config.output.out_dir / PANDDA_LOG_FILE)
 
     except Exception as e:
         traceback.print_exc()
 
-        pandda_log.save_json(config.output.out_dir / PANDDA_LOG_FILE)
+        pandda_log[Constants.trace] = traceback.format_exc()
+        pandda_log[Constants.exception] = str(e)
+
+        save_json_log(config.output.out_dir / PANDDA_LOG_FILE)
 
 
 if __name__ == '__main__':
