@@ -30,7 +30,6 @@ from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Dat
                                        Events, SiteTable, EventTable,
                                        JoblibMapper, Event, SequenceAlignment, StructureFactors, Xmap,
 DatasetResult, ShellResult,
-Constants,
                                        )
 from pandda_gemmi import validators
 from pandda_gemmi import constants
@@ -717,14 +716,12 @@ def process_pandda(
         print("Filtering invalid datasaets")
         datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
             structure_factors)
-        pandda_log.preprocessing_log.invalid_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_initial,
-                                                                                                 datasets_invalid)
+        pandda_log[Constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
         datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
             low_resolution_completeness)
-        pandda_log.preprocessing_log.low_res_datasets_log = logs.InvalidDatasetLog.from_datasets(datasets_invalid,
-                                                                                                 datasets_low_res)
+        pandda_log[Constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_invalid if dtag not in datasets_low_res]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)

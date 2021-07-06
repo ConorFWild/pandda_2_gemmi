@@ -44,6 +44,7 @@ PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"
 PANDDA_LOG_FILE = "pandda_log.json"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
+LOG_INVALID: str = "Datasets filtered for being invalid"
 
 RESIDUE_NAMES = ["ALA",
 "ARG",
