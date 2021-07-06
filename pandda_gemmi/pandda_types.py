@@ -3194,12 +3194,12 @@ class Model:
         shape = mean.shape
         num = len(sigma_is_array)
 
-        # sigma_ms = Model.vectorised_optimisation_bisect(func,
-        #                                                 0,
-        #                                                 20,
-        #                                                 31,
-        #                                                 arrays.shape
-        #                                                 )
+        sigma_ms_bisect = Model.vectorised_optimisation_bisect(func,
+                                                        0,
+                                                        20,
+                                                        31,
+                                                        arrays.shape
+                                                        )
 
         # print(sigma_ms.shape)
         # print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
@@ -3210,7 +3210,7 @@ class Model:
 
         sigma_ms = np.zeros(mean.shape)
         for x in np.ndindex(*mean.shape):
-            # print("#######")
+            print("#######")
             # print([x])
             # print(f"Vectorised bisec gives: {sigma_ms[x]}")
             _mean = np.array((mean[x], ))
@@ -3223,13 +3223,25 @@ class Model:
             # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
 
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
-            result = optimize.minimize(
-                partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                (1.0, ),
-                bounds=((0.0, 20.0),)
+            start = time.time()
+            result_root = optimize.root_scalar(
+                partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+                np.power(2, -20),
             )
+            finish = time.time()
+            print(f"Root found in {finish-start}")
+
+            start = time.time()
+            result_min = optimize.minimise(
+                partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+                np.power(2, -20),
+            )
+            finish = time.time()
+            print(f"Minimised in {finish-start}")
+
+            print([sigma_ms_bisect[x], result_root, result_min,])
             # print([result.x, sigma_ms[x], result.fun])
-            sigma_ms[x] = result.x
+            sigma_ms[x] = result_root.x
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
@@ -3328,7 +3340,7 @@ class Model:
         return x_lower
 
     @staticmethod
-    def log_liklihood(est_sigma, est_mu=0.0, obs_vals=0.0, obs_error=0.0):
+    def differentiated_log_liklihood(est_sigma, est_mu=0.0, obs_vals=0.0, obs_error=0.0):
         """Calculate the value of the differentiated log likelihood for the values of mu, sigma"""
 
         term1 = np.square(obs_vals - est_mu) / np.square(np.square(est_sigma) + np.square(obs_error))
@@ -3337,6 +3349,13 @@ class Model:
         difference = np.sum(term1, axis=0) - np.sum(term2, axis=0)
 
         return difference
+
+    @staticmethod
+    def log_liklihood(est_sigma, est_mu=0.0, obs_vals=0.0, obs_error=0.0):
+        term_1 = -0.5*( (np.square(obs_vals) - np.square(est_mu)) / (np.square(est_sigma) + np.square(obs_error)))
+        term_2 = -0.5*(np.log(2*np.pi*(np.square(est_sigma) + np.square(obs_error))))
+
+        return np.sum(term_1, axis=0) + np.sum(term_2, axis=0)
 
     def evaluate(self, xmap: Xmap, dtag: Dtag):
         xmap_array = np.copy(xmap.to_array())
