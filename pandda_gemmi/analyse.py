@@ -52,61 +52,7 @@ from pandda_gemmi.pandda_functions import (
 # #########
 # debug
 # #########
-def summarise_grid(grid: gemmi.FloatGrid):
-    grid_array = np.array(grid, copy=False)
-    print((
-        f"Grid size: {grid.nu} {grid.nv} {grid.nw} \n"
-        f"Grid spacegroup: {grid.spacegroup} \n"
-        f"Grid unit cell: {grid.unit_cell} \n"
-        f"Grid max: {np.max(grid_array)} \n"
-        f"Grid min: {np.min(grid_array)} \n"
-        f"Grid mean: {np.mean(grid_array)} \n"
-    ))
 
-
-def summarise_mtz(mtz: gemmi.Mtz):
-    mtz_array = np.array(mtz, copy=False)
-    print(
-        (
-            f"Mtz shape: {mtz_array.shape} \n"
-            f"Mtz spacegroup: {mtz.spacegroup} \n"
-        )
-    )
-
-
-def summarise_structure(structure: gemmi.Structure):
-    num_models: int = 0
-    num_chains: int = 0
-    num_residues: int = 0
-    num_atoms: int = 0
-
-    for model in structure:
-        num_models += 1
-        for chain in model:
-            num_chains += 1
-            for residue in chain:
-                num_residues += 1
-                for atom in residue:
-                    num_atoms += 1
-
-    print(
-        (
-            f"Num models: {num_models}"
-            f"Num chains: {num_chains}"
-            f"Num residues: {num_residues}"
-            f"Num atoms: {num_atoms}"
-        )
-    )
-
-
-# def summarise_event(event: Event):
-#     print(
-#     (
-#         f"Event system: {event.system}\n"
-#         f"Event dtag: {event.dtag}\n"
-#         f"Event xyz: {event.x} {event.y} {event.z}\n"
-#     )
-# )
 
 def process_dataset(
         test_dtag,
@@ -597,7 +543,7 @@ def process_pandda(
                                          inner_mask_symmetry,
                                          sample_rate=sample_rate,
                                          )
-        # grid.partitioning.save_maps(pandda_fs_model.pandda_dir)
+
         if debug > 1:
             print("Summarising protein mask")
             summarise_grid(grid.partitioning.protein_mask)

@@ -5,12 +5,17 @@ from typing import Dict, List
 import dataclasses
 
 from pprint import PrettyPrinter
+
 printer = PrettyPrinter(indent=1)
 from pathlib import Path, PosixPath
+
+import numpy as np
+import gemmi
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.config import Config
+
 
 # @dataclasses.dataclass()
 # class Log:
@@ -20,7 +25,7 @@ from pandda_gemmi.config import Config
 #     @staticmethod
 #     def from_dir(out_dir: Path) -> Log:
 #         pass
-    
+
 #     def log(self, message_dict: Dict):
 #         self.log_dict.update(message_dict)
 
@@ -49,31 +54,30 @@ from pandda_gemmi.config import Config
 
 
 def remove_paths(d):
-  for k,v in d.items():        
-     if isinstance(v, dict):
-         remove_paths(v)
-     elif isinstance(v, PosixPath):
-         d[k] = str(v)
-         
+    for k, v in d.items():
+        if isinstance(v, dict):
+            remove_paths(v)
+        elif isinstance(v, PosixPath):
+            d[k] = str(v)
 
 
 @dataclasses.dataclass()
 class DatasetLog:
     structure_path: str
     reflections_path: str
-    
+
     @staticmethod
     def from_dataset(dataset: Dataset):
         return DatasetLog(
-                structure_path=str(dataset.structure.path),
-                reflections_path=str(dataset.reflections.path),
+            structure_path=str(dataset.structure.path),
+            reflections_path=str(dataset.reflections.path),
         )
 
 
 @dataclasses.dataclass()
 class InitialDatasetLog:
     datasets: Dict[str, DatasetLog]
-    
+
     @staticmethod
     def from_initial_datasets(initial_datasets: Datasets):
         return {dtag.dtag: DatasetLog.from_dataset(initial_datasets[dtag])
@@ -81,10 +85,11 @@ class InitialDatasetLog:
                 in initial_datasets
                 }
 
+
 @dataclasses.dataclass()
 class InvalidDatasetLog:
     rejected_datasets: List[str]
-    
+
     @staticmethod
     def from_datasets(datasets: Datasets, filtered_datasets: Datasets):
         rejected_dataset_dtag_list = []
@@ -93,9 +98,10 @@ class InvalidDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
-    
+
+
 @dataclasses.dataclass()
 class LowResDatasetLog:
     rejected_datasets: List[str]
@@ -108,13 +114,14 @@ class LowResDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
-    
+
+
 @dataclasses.dataclass()
 class RFreeDatasetLog:
     rejected_datasets: List[str]
-    
+
     @staticmethod
     def from_datasets(datasets: Datasets, filtered_datasets: Datasets):
         rejected_dataset_dtag_list = []
@@ -123,13 +130,14 @@ class RFreeDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
+
 
 @dataclasses.dataclass()
 class WilsonDatasetLog:
     rejected_datasets: List[str]
-    
+
     @staticmethod
     def from_datasets(datasets: Datasets, filtered_datasets: Datasets):
         rejected_dataset_dtag_list = []
@@ -138,25 +146,27 @@ class WilsonDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
+
 
 @dataclasses.dataclass()
 class SmoothingDatasetLog:
     smoothing_factors: Dict[str, float]
-    
+
     @staticmethod
     def from_datasets(datasets: Datasets):
         return {
             dtag.dtag: float(datasets[dtag].smoothing_factor)
-                for dtag
-                in datasets
-                }
+            for dtag
+            in datasets
+        }
+
 
 @dataclasses.dataclass()
 class StrucDatasetLog:
     rejected_datasets: List[str]
-    
+
     @staticmethod
     def from_datasets(datasets: Datasets, filtered_datasets: Datasets):
         rejected_dataset_dtag_list = []
@@ -165,8 +175,9 @@ class StrucDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
+
 
 @dataclasses.dataclass()
 class SpaceDatasetLog:
@@ -180,7 +191,7 @@ class SpaceDatasetLog:
                 continue
             else:
                 rejected_dataset_dtag_list.append(dtag.dtag)
-    
+
         return rejected_dataset_dtag_list
 
 
@@ -188,21 +199,22 @@ class SpaceDatasetLog:
 class ClusterLog:
     centroid: List[float]
     size: float
-    
+
     @staticmethod
     def from_cluster(cluster: Cluster, grid: Grid):
         return ClusterLog(
-            centroid= [float(x) for x in cluster.centroid],
-            size = cluster.size(grid),
+            centroid=[float(x) for x in cluster.centroid],
+            size=cluster.size(grid),
         )
+
 
 @dataclasses.dataclass()
 class ClusteringsLog:
     clusters: Dict[str, Dict[int, ClusterLog]]
-    
+
     @staticmethod
     def from_clusters(clusterings: Clusterings, grid: Grid):
-        
+
         clusters = {}
         for dtag in clusterings:
             clustering = clusterings[dtag]
@@ -212,13 +224,14 @@ class ClusteringsLog:
                 cluster = clusterings[dtag][cluster_id]
                 if dtag_python not in clusters:
                     clusters[dtag_python] = {}
-                
-                clusters[dtag_python][int(cluster_id_python)] = ClusterLog.from_cluster(cluster, 
-                                                                                   grid,
-                                                                                   )
+
+                clusters[dtag_python][int(cluster_id_python)] = ClusterLog.from_cluster(cluster,
+                                                                                        grid,
+                                                                                        )
 
         return ClusteringsLog(clusters)
-    
+
+
 @dataclasses.dataclass()
 class EventLog:
     dtag: str
@@ -226,76 +239,82 @@ class EventLog:
     centroid: List[float]
     bdc: float
     size: int
-    
+
     @staticmethod
-    def from_event(event: Event, grid:Grid):
+    def from_event(event: Event, grid: Grid):
         return EventLog(
-            dtag = event.event_id.dtag.dtag,
-            idx = int(event.event_id.event_idx.event_idx),
+            dtag=event.event_id.dtag.dtag,
+            idx=int(event.event_id.event_idx.event_idx),
             centroid=[float(x) for x in event.cluster.centroid],
             bdc=event.bdc.bdc,
             size=int(event.cluster.size(grid)),
         )
 
+
 @dataclasses.dataclass()
 class EventsLog:
     dataset_events: Dict[int, EventLog]
-    
+
     @staticmethod
     def from_events(events: Events, grid: Grid):
-        
+
         dtag_events = {}
         for event_id in events:
             dtag = event_id.dtag.dtag
             event_idx = event_id.event_idx.event_idx
             event = events[event_id]
-            
+
             if dtag not in dtag_events:
                 dtag_events[dtag] = {}
-                
+
             dtag_events[dtag][int(event_idx)] = EventLog.from_event(event, grid)
-        
+
         return dtag_events
+
 
 @dataclasses.dataclass()
 class FSLog:
     out_dir: str
-    
+
     @staticmethod
     def from_pandda_fs_model(pandda_fs: PanDDAFSModel):
         return FSLog(out_dir=str(pandda_fs.pandda_dir),
                      )
-    
+
+
 @dataclasses.dataclass()
 class ReferenceLog:
     dtag: str
-    
+
     @staticmethod
     def from_reference(reference: Reference):
         return ReferenceLog(reference.dtag.dtag)
+
 
 @dataclasses.dataclass()
 class GridLog:
     grid_size: List[float]
     unit_cell: UnitCellPython
     spacegroup: SpacegroupPython
-    
+
     @staticmethod
     def from_grid(grid: Grid):
         unit_cell = UnitCellPython.from_gemmi(grid.grid.unit_cell)
         space_group = SpacegroupPython.from_gemmi(grid.grid.spacegroup)
-        
+
         return GridLog([float(x) for x in grid.shape()],
                        unit_cell,
                        space_group,
                        )
-    
+
+
 @dataclasses.dataclass()
 class AlignmentLog:
     @staticmethod
     def from_alignment(alignment: Alignment):
         return None
-    
+
+
 @dataclasses.dataclass()
 class AlignmentsLog:
     @staticmethod
@@ -304,18 +323,19 @@ class AlignmentsLog:
                 for dtag
                 in alignments
                 }
-    
-    
+
+
 @dataclasses.dataclass()
 class SiteLog:
     idx: int
     centroid: Tuple[float, float, float]
-    
+
     @staticmethod
     def from_site_table_record(site_table_record: SiteTableRecord):
         return SiteLog(int(site_table_record.site_idx),
                        [float(x) for x in site_table_record.centroid],
                        )
+
 
 @dataclasses.dataclass()
 class SitesLog:
@@ -337,7 +357,7 @@ class PreprocessingLog:
     smoothing_datasets_log: Dict[str, float]
     struc_datasets_log: List[str]
     space_datasets_log: List[str]
-    
+
     @staticmethod
     def initialise():
         return PreprocessingLog(
@@ -364,7 +384,7 @@ class ShellLog:
     peaked_clusters: Dict[str, Dict[int, ClusterLog]]
     clusterings_merged: Dict[str, Dict[int, ClusterLog]]
     events: Dict[str, Dict[int, EventLog]]
-    
+
     @staticmethod
     def from_shell(shell: Shell):
         return ShellLog(
@@ -379,7 +399,7 @@ class ShellLog:
             clusterings_merged={},
             events={},
         )
-    
+
 
 @dataclasses.dataclass()
 class LogData:
@@ -391,13 +411,13 @@ class LogData:
     alignments_log: Dict[str, AlignmentLog]
     shells_log: Dict[int, ShellLog]
     events_log: Dict[str, Dict[int, EventLog]]
-    sites_log: Dict[int, SiteLog]    
+    sites_log: Dict[int, SiteLog]
     exception: str
 
     @staticmethod
     def initialise():
         preprocessing_log = PreprocessingLog.initialise()
-        
+
         return LogData(
             config=None,
             fs_log=None,
@@ -409,25 +429,83 @@ class LogData:
             events_log={},
             sites_log={},
             exception="",
-                       )
-        
+        )
+
     def print(self):
         pretty_printer = PrettyPrinter(indent=4, depth=1)
-        
+
         log_dict = dataclasses.asdict(self)
-        
+
         iterdict(log_dict)
-        
+
         pretty_printer.pprint(log_dict)
-        
+
     def save_json(self, path: Path):
         log_dict = dataclasses.asdict(self)
-        
+
         remove_paths(log_dict)
-        
+
         with open(str(path), "w") as f:
             json.dump(log_dict,
-                    f,
-                    )
-            
-        
+                      f,
+                      )
+
+
+def summarise_grid(grid: gemmi.FloatGrid):
+    grid_array = np.array(grid, copy=False)
+
+    summary =
+    print((
+        f"Grid size: {grid.nu} {grid.nv} {grid.nw} \n"
+        f"Grid spacegroup: {grid.spacegroup} \n"
+        f"Grid unit cell: {grid.unit_cell} \n"
+        f"Grid max: {np.max(grid_array)} \n"
+        f"Grid min: {np.min(grid_array)} \n"
+        f"Grid mean: {np.mean(grid_array)} \n"
+    ))
+
+    return summary
+
+def summarise_mtz(mtz: gemmi.Mtz):
+    mtz_array = np.array(mtz, copy=False)
+
+    summary = {
+
+            f"Mtz shape": f"{mtz_array.shape}",
+            f"Mtz spacegroup": f"{mtz.spacegroup}"
+        }
+
+    return summary
+
+
+def summarise_structure(structure: gemmi.Structure):
+    num_models: int = 0
+    num_chains: int = 0
+    num_residues: int = 0
+    num_atoms: int = 0
+
+    for model in structure:
+        num_models += 1
+        for chain in model:
+            num_chains += 1
+            for residue in chain:
+                num_residues += 1
+                for atom in residue:
+                    num_atoms += 1
+
+    summary = {
+        f"Num models": f"{num_models}",
+        f"Num chains": f"{num_chains}",
+        f"Num residues": f"{num_residues}",
+        f"Num atoms": f"{num_atoms}",
+    }
+
+    return summary
+
+
+def summarise_event(event: Event):
+    summary = {"Event system": f"{event.system}",
+               f"Event dtag": "{event.dtag}",
+               f"Event xyz": "{event.x} {event.y} {event.z}", }
+
+    return summary

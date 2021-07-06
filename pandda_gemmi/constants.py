@@ -46,6 +46,7 @@ LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
 LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
+LOG_LOW_RES: str = "Datasets filtered for being too low res"
 
 RESIDUE_NAMES = ["ALA",
 "ARG",
