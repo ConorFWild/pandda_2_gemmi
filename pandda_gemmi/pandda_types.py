@@ -3210,7 +3210,7 @@ class Model:
 
         sigma_ms = np.zeros(mean.shape)
         for x in np.ndindex(*mean.shape):
-            print("#######")
+            # print("#######")
             # print([x])
             # print(f"Vectorised bisec gives: {sigma_ms[x]}")
             _mean = np.array((mean[x], ))
