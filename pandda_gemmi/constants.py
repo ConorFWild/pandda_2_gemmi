@@ -41,7 +41,12 @@ PANDDA_SIGMA_S_M_FILE = "sigma_s_m_{number}_{res}.ccp4"
 PANDDA_Z_MAP_FILE = "{dtag}-z_map.native.ccp4"
 PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"
 
+###################################################################
+# # Logging constants
+###################################################################
 PANDDA_LOG_FILE = "pandda_log.json"
+
+LOG_START: str = "Start time"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
 

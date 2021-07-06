@@ -4,7 +4,6 @@ from typing import *
 from functools import partial
 import json
 
-
 import numpy as np
 import multiprocessing as mp
 import joblib
@@ -49,8 +48,8 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
             print(e)
 
     else:
-        raise Exception(f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
-
+        raise Exception(
+            f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
 
     with mp.Pool(n_jobs) as pool:
         results = pool.map(run, funcs)
@@ -64,6 +63,75 @@ def process_global_serial(funcs):
         results.append(func())
 
     return results
+
+
+def process_global_dask(funcs, scheduler="SGE",
+                        num_workers=10,
+                        queue=None,
+                        project=None,
+                        cores_per_worker=12,
+                        memory_per_worker="120 GB",
+                        resource_spec=""
+                        ):
+    from dask.distributed import Client
+    from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
+
+    schedulers = ["HTCONDOR", "PBS", "SGE", "SLURM"]
+    if scheduler not in schedulers:
+        raise Exception(f"Supported schedulers are: {schedulers}")
+
+    if scheduler == "HTCONDOR":
+        cluster = HTCondorCluster(
+            queue=queue,
+            project=project,
+            cores=cores_per_worker,
+            memory=memory_per_worker,
+            resource_spec=resource_spec
+        )
+
+
+    elif scheduler == "PBS":
+        cluster = PBSCluster(
+            queue=queue,
+            project=project,
+            cores=cores_per_worker,
+            memory=memory_per_worker,
+            resource_spec=resource_spec
+        )
+
+    elif scheduler == "SGE":
+        cluster = SGECluster(
+            queue=queue,
+            project=project,
+            cores=cores_per_worker,
+            memory=memory_per_worker,
+            resource_spec=resource_spec
+        )
+
+    elif scheduler == "SLURM":
+        cluster = SLURMCluster(
+            queue=queue,
+            project=project,
+            cores=cores_per_worker,
+            memory=memory_per_worker,
+            resource_spec=resource_spec
+        )
+
+    else:
+        raise Exception("Something has gone wrong process_global_dask")
+
+    # Scale the cluster up to the number of workers
+    cluster.scale(jobs=num_workers)
+
+    # Launch the client
+    client = Client(cluster)
+
+    # Multiprocess
+    processes = client.map(run, funcs)
+    results = client.gather(processes)
+
+    return results
+
 
 
 def get_comparators_high_res_random(
@@ -214,7 +282,6 @@ def get_comparators_closest_cutoff(
         closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
         print(f"\tClosest dtags are: {closest_dtags}")
         print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
-
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)

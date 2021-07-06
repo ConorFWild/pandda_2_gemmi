@@ -40,6 +40,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_joblib,
     process_local_multiprocessing,
     process_global_serial,
+    process_global_dask,
     get_shells,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
@@ -47,11 +48,6 @@ from pandda_gemmi.pandda_functions import (
     validate_strategy_num_datasets,
     validate,
 )
-
-
-# #########
-# debug
-# #########
 
 
 def process_dataset(
@@ -131,10 +127,9 @@ def process_dataset(
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
         xmap.save(path)
 
-        std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
-        std_xmap.save(path)
-
+        # std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
+        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
+        # std_xmap.save(path)
 
     ###################################################################
     # # Cluster the outlying density
@@ -398,6 +393,7 @@ def process_pandda(
         comparison_max_comparators: int = 30,
         local_processing: str = "multiprocessing_forkserver",
         global_processing: str = "serial",
+        distributed_scheduler: str = "SGE",
         autobuild: bool = False,
         debug: bool = True,
 ):
@@ -413,6 +409,7 @@ def process_pandda(
 
     print("Initialising log...")
     pandda_log: Dict = {}
+    pandda_log[constants.LOG_START] = time.time()
 
     print("FSmodel building")
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(data_dirs,
@@ -445,9 +442,12 @@ def process_pandda(
         # Get global processor
         if global_processing == "serial":
             process_global = process_global_serial
-        elif global_processing == "cluster":
-            raise NotImplementedError()
-            process_global = ...
+        elif global_processing == "distributed":
+            process_global = partial(
+                process_global_dask,
+                distributed_scehduler,
+
+            )
         else:
             raise Exception()
 
@@ -700,6 +700,7 @@ def process_pandda(
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
+        print(f"Saving PanDDA log to: {out_dir / constants.PANDDA_LOG_FILE}")
         save_json_log(out_dir / constants.PANDDA_LOG_FILE)
 
 
