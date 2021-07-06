@@ -25,7 +25,7 @@ import gemmi
 import joblib
 
 ## Custom Imports
-from pandda_gemmi import logs
+from pandda_gemmi.logs import summarise_grid, summarise_event, summarise_structure, summarise_mtz
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
     Grid, Alignments, Shell, Xmap, Xmaps, Zmap,

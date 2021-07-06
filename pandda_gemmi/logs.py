@@ -454,15 +454,14 @@ class LogData:
 def summarise_grid(grid: gemmi.FloatGrid):
     grid_array = np.array(grid, copy=False)
 
-    summary =
-    print((
-        f"Grid size: {grid.nu} {grid.nv} {grid.nw} \n"
-        f"Grid spacegroup: {grid.spacegroup} \n"
-        f"Grid unit cell: {grid.unit_cell} \n"
-        f"Grid max: {np.max(grid_array)} \n"
-        f"Grid min: {np.min(grid_array)} \n"
-        f"Grid mean: {np.mean(grid_array)} \n"
-    ))
+    summary = {
+        f"Grid size": f"{grid.nu} {grid.nv} {grid.nw}",
+        f"Grid spacegroup": f"{grid.spacegroup}",
+        f"Grid unit cell": f"{grid.unit_cell}",
+        f"Grid max": f"{np.max(grid_array)}",
+        f"Grid min": f"{np.min(grid_array)}",
+        f"Grid mean": f"{np.mean(grid_array)}",
+    }
 
     return summary
 
