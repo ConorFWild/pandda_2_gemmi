@@ -530,8 +530,6 @@ def process_pandda(
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
         print(f"\tThere are initially: {len(datasets_initial)} datasets")
 
-        # datasets_initial: Datasets = datasets_initial.trunate_num_datasets(100)
-
         # Make dataset validator
         validation_strategy = partial(validate_strategy_num_datasets,
                                       min_characterisation_datasets=min_characterisation_datasets,
