@@ -3224,7 +3224,7 @@ class Model:
 
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
             start = time.time()
-            result_root = optimize.root_scalar(
+            result_root = optimize.root(
                 partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
                 x0=np.power(2.0, -20),
             )
