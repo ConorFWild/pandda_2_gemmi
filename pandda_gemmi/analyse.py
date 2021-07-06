@@ -89,18 +89,22 @@ def process_dataset(
     print("Fitting model")
     mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
                                                         )  # Size of grid.partitioning.total_mask > 0
+    dataset_log[constants.LOG_DATASET_MEAN] = summarise_array(mean_array)
+
 
     print("fitting sigma i")
     sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
                                                                  mean_array,
                                                                  1.5,
                                                                  )  # size of n
+    dataset_log[constants.LOG_DATASET_SIGMA_I] = sigma_is
 
     print("fitting sigma s m")
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                        mean_array,
                                                        sigma_is,
                                                        )  # size of total_mask > 0
+    dataset_log[constants.LOG_DATASET_SIGMA_S] = summarise_array(sigma_s_m)
 
     model: Model = Model.from_mean_is_sms(
         mean_array,

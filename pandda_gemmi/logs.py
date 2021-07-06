@@ -508,3 +508,14 @@ def summarise_event(event: Event):
                f"Event xyz": "{event.x} {event.y} {event.z}", }
 
     return summary
+
+
+def summarise_array(array):
+    summary = {
+        "Shape": array.shape,
+        "Mean": np.mean(array),
+        "std": np.std(array),
+        "min": np.min(array),
+        "max": np.max(array),
+    }
+    return summary
