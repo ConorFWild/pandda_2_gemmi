@@ -53,10 +53,17 @@ LOG_EXCEPTION: str = "exception"
 LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
 
+LOG_SHELL_XMAP_TIME: str = "Time taken to generate aligned xmaps"
+
 LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
 LOG_DATASET_MEAN: str = "Mean map statistics"
 LOG_DATASET_SIGMA_I: str = "Sigma I's for dataset"
 LOG_DATASET_SIGMA_S: str = "Sigma S map statistics"
+LOG_DATASET_MODEL_TIME: str = "Time taken to generate dataset model"
+LOG_DATASET_Z_MAPS_TIME: str = "Time taken to generate z map"
+LOG_DATASET_CLUSTER_TIME: str = "Time taken to cluster z map"
+LOG_DATASET_EVENT_TIME: str = "Time taken to get events"
+LOG_DATASET_EVENT_MAP_TIME: str = "Time taken to generate event map"
 
 RESIDUE_NAMES = ["ALA",
 "ARG",

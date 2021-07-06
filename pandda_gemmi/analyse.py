@@ -84,6 +84,7 @@ def process_dataset(
     ###################################################################
     # # Generate the statistical model of the dataset
     ###################################################################
+    time_model_start = time.time()
 
     # Determine the parameters of the model to find outlying electron density
     print("Fitting model")
@@ -111,13 +112,18 @@ def process_dataset(
         sigma_s_m,
         grid,
     )
+    time_model_finish = time.time()
+    dataset_log[constants.LOG_DATASET_MODEL_TIME] = time_model_finish - time_model_start
 
     # Calculate z maps
     print("Getting zmaps")
+    time_z_maps_start = time.time()
     zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
         model=model,
         xmaps={test_dtag: dataset_xmaps[test_dtag], },
     )
+    time_z_maps_finish = time.time()
+    dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
 
     for dtag in zmaps:
         zmap = zmaps[dtag]
@@ -134,6 +140,8 @@ def process_dataset(
     ###################################################################
     # # Cluster the outlying density
     ###################################################################
+    time_cluster_start = time.time()
+
     # Get the clustered electron desnity outliers
     print("clusting")
     cluster_paramaterised = partial(
@@ -184,9 +192,13 @@ def process_dataset(
         {dtag: len(_cluster) for dtag, _cluster in
          zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
 
+    time_cluster_finish = time.time()
+    dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
+
     ###################################################################
     # # Fund the events
     ###################################################################
+    time_event_start = time.time()
     # Calculate the shell events
     print("getting events")
     print(f"\tGot {len(clusterings_merged.clusterings)} clusters")
@@ -199,9 +211,14 @@ def process_dataset(
         process_local,
     )
 
+    time_event_finish = time.time()
+    dataset_log[constants.LOG_DATASET_EVENT_TIME] = time_event_finish-time_event_start
+
     ###################################################################
     # # Generate event maps
     ###################################################################
+    time_event_map_start = time.time()
+
     # Save the event maps!
     print("print events")
     printer.pprint(events)
@@ -216,6 +233,9 @@ def process_dataset(
                            inner_mask_symmetry,
                            mapper=None,
                            )
+
+    time_event_map_finish = time.time()
+    dataset_log[constants.LOG_DATASET_EVENT_MAP_TIME] = time_event_map_finish - time_event_map_start
 
     return DatasetResult(
         dtag=test_dtag,
@@ -272,7 +292,7 @@ def process_shell(
     # # Generate aligned Xmaps
     ###################################################################
     print("Loading xmaps")
-    start = time.time()
+    time_xmaps_start = time.time()
 
     load_xmap_paramaterised = partial(
         Xmap.from_unaligned_dataset_c,
@@ -296,8 +316,9 @@ def process_shell(
              in zip(shell_truncated_datasets, results)
              }
 
-    finish = time.time()
-    print(f"Mapped {len(xmaps)} xmaps in {finish - start}")
+    time_xmaps_finish = time.time()
+    print(f"Mapped {len(xmaps)} xmaps in {time_xmaps_finish-time_xmaps_start}")
+    shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish-time_xmaps_start
 
     ###################################################################
     # # Process each test dataset
