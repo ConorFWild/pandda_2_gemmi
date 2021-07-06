@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import *
 from functools import partial
+import json
+
 
 import numpy as np
 import multiprocessing as mp
@@ -350,3 +352,10 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
     if not strategy(datasets):
         print(datasets)
         raise exception
+
+
+def save_json_log(log_dict: Dict, path: Path):
+    with open(str(path), "w") as f:
+        json.dump(log_dict,
+                  f,
+                  )

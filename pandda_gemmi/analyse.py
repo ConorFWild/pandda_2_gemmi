@@ -23,7 +23,6 @@ import gemmi
 import joblib
 from joblib.externals.loky import set_loky_pickler
 
-from pandda_gemmi.config import Config
 from pandda_gemmi import logs
 from pandda_gemmi.pandda_types import (JoblibMapper, PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
                                        Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
@@ -914,15 +913,15 @@ def process_pandda(
                                                            grid,
                                                            )
 
-        save_json_log(config.output.out_dir / PANDDA_LOG_FILE)
+        save_json_log(config.output.out_dir / constants.PANDDA_LOG_FILE)
 
     except Exception as e:
         traceback.print_exc()
 
-        pandda_log[Constants.trace] = traceback.format_exc()
-        pandda_log[Constants.exception] = str(e)
+        pandda_log[constants.LOG_TRACE] = traceback.format_exc()
+        pandda_log[constants.LOG_EXCEPTION] = str(e)
 
-        save_json_log(config.output.out_dir / PANDDA_LOG_FILE)
+        save_json_log(out_dir / constants.PANDDA_LOG_FILE)
 
 
 if __name__ == '__main__':

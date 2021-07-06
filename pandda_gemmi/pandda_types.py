@@ -5094,7 +5094,3 @@ class ShellResult:
     dataset_results: Dict[Dtag, DatasetResult]
     log: Dict
 
-
-class Cosntants:
-    trace: str = "trace"
-    exception: str = "exception"
