@@ -3194,31 +3194,33 @@ class Model:
         shape = mean.shape
         num = len(sigma_is_array)
 
-        sigma_ms = Model.vectorised_optimisation_bisect(func,
-                                                        0,
-                                                        20,
-                                                        31,
-                                                        arrays.shape
-                                                        )
+        # sigma_ms = Model.vectorised_optimisation_bisect(func,
+        #                                                 0,
+        #                                                 20,
+        #                                                 31,
+        #                                                 arrays.shape
+        #                                                 )
 
-        print(sigma_ms.shape)
-        print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
+        # print(sigma_ms.shape)
+        # print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
+        #
+        # print(mean.shape)
+        # print(arrays.shape)
+        # print(sigma_ms.shape)
 
-        print(mean.shape)
-        print(arrays.shape)
-        print(sigma_ms.shape)
+        sigma_ms = np.zeros(mean.shape)
         for x in np.ndindex(*mean.shape):
-            print("#######")
-            print([x])
-            print(f"Vectorised bisec gives: {sigma_ms[x]}")
+            # print("#######")
+            # print([x])
+            # print(f"Vectorised bisec gives: {sigma_ms[x]}")
             _mean = np.array((mean[x], ))
-            print(_mean)
+            # print(_mean)
             _array = arrays[:, x, ].flatten()
-            print(_array)
+            # print(_array)
             _sigma_i = sigma_is_array.flatten()
-            print(_sigma_i)
-
-            print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
+            # print(_sigma_i)
+            #
+            # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
 
             # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
             result = optimize.minimize(
@@ -3226,7 +3228,8 @@ class Model:
                 (1.0, ),
                 bounds=((0.0, 20.0),)
             )
-            print([result.x, sigma_ms[x], result.fun])
+            # print([result.x, sigma_ms[x], result.fun])
+            sigma_ms[x] = result
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,
