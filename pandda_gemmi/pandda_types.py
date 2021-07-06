@@ -3234,7 +3234,8 @@ class Model:
             start = time.time()
             result_min = optimize.minimise(
                 partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                np.power(2.0, -20),
+                np.array((np.power(2.0, -20.0),),),
+                bounds=((0.0, 20.0,),)
             )
             finish = time.time()
             print(f"Minimised in {finish-start}")
