@@ -3232,7 +3232,7 @@ class Model:
             print(f"Root found in {finish-start}")
 
             start = time.time()
-            result_min = optimize.minimise(
+            result_min = optimize.minimize(
                 partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
                 np.array((np.power(2.0, -20.0),),),
                 bounds=((0.0, 20.0,),)
