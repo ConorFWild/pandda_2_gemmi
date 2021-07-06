@@ -44,9 +44,14 @@ PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"
 PANDDA_LOG_FILE = "pandda_log.json"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
+
 LOG_INVALID: str = "Datasets filtered for being invalid"
-LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
+
+LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
+LOG_DATASET_MEAN: str = "Mean map statistics"
+LOG_DATASET_SIGMA_I: str = "Sigma I's for dataset"
+LOG_DATASET_SIGMA_S: str = "Sigma S map statistics"
 
 RESIDUE_NAMES = ["ALA",
 "ARG",

@@ -465,14 +465,15 @@ def summarise_grid(grid: gemmi.FloatGrid):
 
     return summary
 
+
 def summarise_mtz(mtz: gemmi.Mtz):
     mtz_array = np.array(mtz, copy=False)
 
     summary = {
 
-            f"Mtz shape": f"{mtz_array.shape}",
-            f"Mtz spacegroup": f"{mtz.spacegroup}"
-        }
+        f"Mtz shape": f"{mtz_array.shape}",
+        f"Mtz spacegroup": f"{mtz.spacegroup}"
+    }
 
     return summary
 

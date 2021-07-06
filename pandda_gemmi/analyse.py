@@ -25,7 +25,7 @@ import gemmi
 import joblib
 
 ## Custom Imports
-from pandda_gemmi.logs import summarise_grid, summarise_event, summarise_structure, summarise_mtz
+from pandda_gemmi.logs import summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
     Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
@@ -90,7 +90,6 @@ def process_dataset(
     mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
                                                         )  # Size of grid.partitioning.total_mask > 0
     dataset_log[constants.LOG_DATASET_MEAN] = summarise_array(mean_array)
-
 
     print("fitting sigma i")
     sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
