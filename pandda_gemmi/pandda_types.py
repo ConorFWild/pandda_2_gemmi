@@ -3447,7 +3447,8 @@ class Zmap:
     @staticmethod
     def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
         zmap_array = model.evaluate(xmap, dtag)
-        zmap = Zmap.grid_from_template(xmap, zmap_array)
+        normalised_zmap_array = (zmap_array - np.mean(zmap_array)) / np.std(zmap_array)
+        zmap = Zmap.grid_from_template(xmap, normalised_zmap_array)
         return Zmap(zmap)
 
     @staticmethod
