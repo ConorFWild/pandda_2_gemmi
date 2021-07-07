@@ -114,6 +114,7 @@ def process_dataset(
     )
     time_model_finish = time.time()
     dataset_log[constants.LOG_DATASET_MODEL_TIME] = time_model_finish - time_model_start
+    print(f"Calculated model s in: {dataset_log[constants.LOG_DATASET_MODEL_TIME]}")
 
     # Calculate z maps
     print("Getting zmaps")
