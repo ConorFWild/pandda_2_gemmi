@@ -134,13 +134,13 @@ def process_dataset(
         path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
         xmap.save(path)
 
-        mean_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "mean.ccp4"
-        mean_xmap.save(path)
-
-        std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
-        std_xmap.save(path)
+        # mean_xmap = Xmap.from_grid_array(grid, sigma_s_m)
+        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "mean.ccp4"
+        # mean_xmap.save(path)
+        #
+        # std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
+        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
+        # std_xmap.save(path)
 
     ###################################################################
     # # Cluster the outlying density
