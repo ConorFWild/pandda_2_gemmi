@@ -3449,14 +3449,10 @@ class Zmap:
         zmap_array = model.evaluate(xmap, dtag)
 
         new_zmap_grid = xmap.new_grid()
-
-        new_zmap_array = xmap.to_array(copy=False)
-
+        new_zmap_array = np.array(new_zmap_grid, copy=False)
         new_zmap_array[:, :, :] = zmap_array[:, :, :]
-
-        new_zmap_grid.symmetrize_max()
-
-        new_zmap_array = xmap.to_array(copy=False)
+        new_zmap_grid.symmetrize_abs_max()
+        new_zmap_array = new_zmap_grid.to_array(copy=False)
 
         zmap_mean = np.mean(zmap_array)
         zmap_std = np.std(zmap_array)
