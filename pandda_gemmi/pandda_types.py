@@ -2868,8 +2868,14 @@ class Xmap:
         ccp4.write_ccp4_map(str(path))
 
     @staticmethod
-    def from_grid_array(grid: Grid, array):
+    def from_grid_array(grid: Grid, array_flat):
         new_grid = grid.new_grid()
+
+        mask = grid.partitioning.protein_mask
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+
+        array = np.zeros(mask_array.shape, dtype=np.float32)
+        array[np.nonzero(mask_array)] = array_flat
 
         for point in new_grid:
             u = point.u
