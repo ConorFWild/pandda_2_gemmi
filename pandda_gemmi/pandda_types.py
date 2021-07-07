@@ -3446,21 +3446,35 @@ class Zmap:
 
     @staticmethod
     def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
+
+        # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
 
-        new_zmap_grid = xmap.new_grid()
-        new_zmap_array = np.array(new_zmap_grid, copy=False)
-        new_zmap_array[:, :, :] = zmap_array[:, :, :]
-        new_zmap_grid.symmetrize_abs_max()
-        new_zmap_array = new_zmap_grid.to_array(copy=False)
+        # Symmeterize Positive values
+        new_zmap_grid_pos = xmap.new_grid()
+        new_zmap_array_pos = np.array(new_zmap_grid_pos, copy=False)
+        new_zmap_array_pos[:, :, :] = zmap_array[:, :, :]
+        new_zmap_grid_pos.symmetrize_max()
 
+        # Symmetrize Negative values
+        new_zmap_grid_neg = xmap.new_grid()
+        new_zmap_array_neg = np.array(new_zmap_grid_neg, copy=False)
+        new_zmap_array_neg[:, :, :] = -zmap_array[:, :, :]
+        new_zmap_grid_neg.symmetrize_max()
+
+        # Get merged map
+        new_zmap_grid_symm = xmap.new_grid()
+        new_zmap_array_symm = np.array(new_zmap_grid_symm, copy=False)
+        new_zmap_array_symm[:, :, :] = new_zmap_array_pos[:, :, :] - new_zmap_array_neg[:, :, :]
+
+        # Get mean and std
         zmap_mean = np.mean(zmap_array)
         zmap_std = np.std(zmap_array)
 
         print(f"Unsymm mean+std: {zmap_mean} {zmap_std}")
 
-        zmap_symm_mean = np.mean(new_zmap_array)
-        zmap_symm_std = np.std(new_zmap_array)
+        zmap_symm_mean = np.mean(new_zmap_array_symm)
+        zmap_symm_std = np.std(new_zmap_array_symm)
 
         print(f"Symm mean+std: {zmap_symm_mean} {zmap_symm_std}")
 
