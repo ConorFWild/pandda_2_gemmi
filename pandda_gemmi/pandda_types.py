@@ -3447,7 +3447,29 @@ class Zmap:
     @staticmethod
     def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
         zmap_array = model.evaluate(xmap, dtag)
-        normalised_zmap_array = (zmap_array - np.mean(zmap_array)) / np.std(zmap_array)
+
+        new_zmap_grid = xmap.new_grid()
+
+        new_zmap_array = xmap.to_array(copy=False)
+
+        new_zmap_array[:, :, :] = zmap_array[:, :, :]
+
+        new_zmap_grid.symmetrize_max()
+
+        new_zmap_array = xmap.to_array(copy=False)
+
+        zmap_mean = np.mean(zmap_array)
+        zmap_std = np.std(zmap_array)
+
+        print(f"Unsymm mean+std: {zmap_mean} {zmap_std}")
+
+        zmap_symm_mean = np.mean(new_zmap_array)
+        zmap_symm_std = np.std(new_zmap_array)
+
+        print(f"Symm mean+std: {zmap_symm_mean} {zmap_symm_std}")
+
+        normalised_zmap_array = (zmap_array - zmap_symm_mean) / zmap_symm_std
+
         zmap = Zmap.grid_from_template(xmap, normalised_zmap_array)
         return Zmap(zmap)
 

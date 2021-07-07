@@ -1,16 +1,25 @@
+# ###########################################
+# # Todo
+# ###########################################
+# 1. [ ] Check event calculation makes sense
+# 2. [ ] Check zmaps match up after normalisation
+# 3. [ ] Tidy up code
+# 4. [ ] Check event table and site table make sense
+# 5. [ ] Make sure PanDDA inspect works
+# 6. [ ] Make sure works with XCE
+# 7. [ ] Get autobuilding working
+# 8. [ ] Check dask submission works on diamond
+# 9. [ ] Complete logging
+# 10. [ ] Speed up sigma calculation - ?Numba?
+# 11. [ ] Email Marcin about cutout maps
+# 12. [ ] Remove the random constants from code
+
 from __future__ import annotations
 
 # Base python
-import os
 import traceback
-from pandda_gemmi import constants
-from pandda_gemmi.constants import PANDDA_LOG_FILE
 from typing import Dict, Optional, List, Tuple, Union
 import time
-import psutil
-import pickle
-from shlex import split
-from pprint import PrettyPrinter
 from pathlib import Path
 import pprint
 from functools import partial
@@ -25,7 +34,9 @@ import gemmi
 import joblib
 
 ## Custom Imports
-from pandda_gemmi.logs import summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array
+from pandda_gemmi.logs import (
+    summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array,
+)
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
     Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
@@ -69,6 +80,12 @@ def process_dataset(
         process_local=process_local_serial,
 
 ):
+
+    if "BAZ2BA-x447" != test_dtag.dtag:
+        print(f"\t447 is not {test_dtag} ")
+        return None
+
+
     dataset_log = {}
     dataset_log[constants.LOG_DATASET_TRAIN] = shell.train_dtags[test_dtag]
 
@@ -217,7 +234,7 @@ def process_dataset(
     )
 
     time_event_finish = time.time()
-    dataset_log[constants.LOG_DATASET_EVENT_TIME] = time_event_finish-time_event_start
+    dataset_log[constants.LOG_DATASET_EVENT_TIME] = time_event_finish - time_event_start
 
     ###################################################################
     # # Generate event maps
@@ -322,8 +339,8 @@ def process_shell(
              }
 
     time_xmaps_finish = time.time()
-    print(f"Mapped {len(xmaps)} xmaps in {time_xmaps_finish-time_xmaps_start}")
-    shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish-time_xmaps_start
+    print(f"Mapped {len(xmaps)} xmaps in {time_xmaps_finish - time_xmaps_start}")
+    shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish - time_xmaps_start
 
     ###################################################################
     # # Process each test dataset
