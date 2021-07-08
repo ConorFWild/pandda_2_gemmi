@@ -3447,6 +3447,8 @@ class Zmap:
     @staticmethod
     def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
 
+        print(f"Spacegorup is: {xmap.xmap.spacegroup.xhm()}")
+
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
 
@@ -3455,17 +3457,20 @@ class Zmap:
         new_zmap_array_pos = np.array(new_zmap_grid_pos, copy=False)
         new_zmap_array_pos[:, :, :] = zmap_array[:, :, :]
         new_zmap_grid_pos.symmetrize_max()
+        print([np.min(new_zmap_array_pos), np.max(new_zmap_array_pos)])
 
         # Symmetrize Negative values
         new_zmap_grid_neg = xmap.new_grid()
         new_zmap_array_neg = np.array(new_zmap_grid_neg, copy=False)
         new_zmap_array_neg[:, :, :] = -zmap_array[:, :, :]
         new_zmap_grid_neg.symmetrize_max()
+        print([np.min(new_zmap_array_neg), np.max(new_zmap_array_neg)])
 
         # Get merged map
         new_zmap_grid_symm = xmap.new_grid()
         new_zmap_array_symm = np.array(new_zmap_grid_symm, copy=False)
         new_zmap_array_symm[:, :, :] = new_zmap_array_pos[:, :, :] - new_zmap_array_neg[:, :, :]
+        print([np.min(new_zmap_array_symm), np.max(new_zmap_array_symm)])
 
         # Get mean and std
         zmap_mean = np.mean(zmap_array)
@@ -3478,7 +3483,12 @@ class Zmap:
 
         print(f"Symm mean+std: {zmap_symm_mean} {zmap_symm_std}")
 
-        normalised_zmap_array = (zmap_array - zmap_symm_mean) / zmap_symm_std
+        zmap_sparse_mean = np.mean(zmap_array[zmap_array != 0.0])
+        zmap_sparse_std = np.std(zmap_array[zmap_array!= 0.0])
+
+        print(f"Sparse mean+std: {zmap_sparse_mean} {zmap_sparse_std}")
+
+        normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 
         zmap = Zmap.grid_from_template(xmap, normalised_zmap_array)
         return Zmap(zmap)
@@ -4409,7 +4419,7 @@ class ZMapFile:
 
 
 # @dataclasses.dataclass()
-# class ZMapFiles:
+# apFiles:
 #
 #     @staticmethod
 #     def from_zmaps(zmaps: Zmaps, pandda_fs_model: PanDDAFSModel):
@@ -5152,4 +5162,5 @@ class ShellResult:
     shell: Shell
     dataset_results: Dict[Dtag, DatasetResult]
     log: Dict
+
 
