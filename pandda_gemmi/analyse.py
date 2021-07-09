@@ -2,7 +2,7 @@
 # # Todo
 # ###########################################
 # 1. [ ] Check event calculation makes sense
-# 2. [ ] Check zmaps match up after normalisation
+# 2. [ x ] Check zmaps match up after normalisation
 # 3. [ ] Tidy up code
 # 4. [ ] Check event table and site table make sense
 # 5. [ ] Make sure PanDDA inspect works
@@ -687,7 +687,7 @@ def process_pandda(
             printer.pprint(shells)
 
         # Process the shells
-        shell_results = process_global(
+        shell_results: List[ShellResult] = process_global(
             [
                 partial(
                     process_shell_paramaterised,
@@ -702,6 +702,13 @@ def process_pandda(
                 in shells.items()
             ],
         )
+
+        all_events = {}
+        for shell_result in shell_results:
+            for dtag, dataset_result in shell_result.dataset_results.items():
+                all_events.update(dataset_result.events)
+
+        printer.pprint(all_events)
 
         ###################################################################
         # # Autobuilding
