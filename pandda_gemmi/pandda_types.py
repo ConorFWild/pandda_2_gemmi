@@ -4211,7 +4211,7 @@ class Event:
     bdc: BDC
     cluster: Cluster
     native_centroid: Tuple[float, float, float]
-    native_positions: List[Tuple[gloat, float, float]]
+    native_positions: List[Tuple[float, float, float]]
 
     @staticmethod
     def from_cluster(event_id: EventID,
@@ -4294,8 +4294,8 @@ class Events:
 
                     # Get native event mask
                     event_positions = []
-                    for point in cluster.indexes:
-                        position = grid.grid.point_to_position(point[0], point[1], point[2])
+                    for x, y, z in zip(cluster.indexes[1], cluster.indexes[1], cluster.indexes[2]):
+                        position = grid.grid.point_to_position(x, y, z)
                         event_positions.append([position.x, position.y, position.z])
 
                     native_positions = alignment.reference_to_moving(event_positions)
