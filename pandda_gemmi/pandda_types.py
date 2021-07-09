@@ -4848,7 +4848,8 @@ class DataDirs:
                 dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_cif_regex,
                                                    ligand_pdb_regex, ligand_smiles_regex)
                 dataset_dirs[dtag] = dataset_dir
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
         return DataDirs(dataset_dirs)
