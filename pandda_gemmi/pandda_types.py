@@ -4296,7 +4296,7 @@ class Events:
                     # Get native event mask
                     event_positions = []
                     for x, y, z in zip(cluster.indexes[1], cluster.indexes[1], cluster.indexes[2]):
-                        position = grid.grid.point_to_position(x, y, z)
+                        position = grid.grid.point_to_position(grid.grid.get_point(x, y, z))
                         event_positions.append([position.x, position.y, position.z])
 
                     native_positions = alignment.reference_to_moving(np.array(event_positions))
