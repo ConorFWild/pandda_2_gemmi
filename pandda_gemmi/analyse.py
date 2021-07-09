@@ -231,7 +231,7 @@ def process_dataset(
         grid,
         alignments[test_dtag],
         1.732,  # TODO: make this a variable ;')
-        process_local,
+        None,
     )
 
     time_event_finish = time.time()
