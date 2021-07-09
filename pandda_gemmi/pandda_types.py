@@ -2267,7 +2267,7 @@ class Alignment:
 
         print(dist)
         print(inds)
-        print(positions.shape)
+        print(len(positions))
         print(reference_positions.shape)
 
         results = []
