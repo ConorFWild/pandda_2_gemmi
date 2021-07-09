@@ -3,15 +3,19 @@
 # ###########################################
 # 1. [ ] Check event calculation makes sense
 # 2. [ x ] Check zmaps match up after normalisation
-# 3. [ ] Tidy up code
 # 4. [ ] Check event table and site table make sense
 # 5. [ ] Make sure PanDDA inspect works
-# 6. [ ] Make sure works with XCE
-# 7. [ ] Get autobuilding working
 # 8. [ ] Check dask submission works on diamond
+
+# Maybe
+# 11. [ ] Email Marcin about cutout maps (mapmask or gemmi)
+# 7. [ ] Get autobuilding working
+
+# More optional
+# 3. [ ] Tidy up code
+# 6. [ ] Make sure works with XCE
 # 9. [ ] Complete logging
 # 10. [ ] Speed up sigma calculation - ?Numba?
-# 11. [ ] Email Marcin about cutout maps
 # 12. [ ] Remove the random constants from code
 
 from __future__ import annotations

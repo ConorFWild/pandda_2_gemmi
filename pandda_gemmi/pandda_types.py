@@ -4827,6 +4827,7 @@ class DatasetDir:
                           ligand_dir=ligand_dir,
                           source_ligand_cif=source_ligand_cif,
                           source_ligand_pdb=source_ligand_pdb,
+                          souce_ligand_smiles=source_ligand_smiles
                           )
 
 
