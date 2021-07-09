@@ -2265,6 +2265,11 @@ class Alignment:
         tree = spatial.KDTree(reference_positions)
         dist, inds = tree.query(positions)
 
+        print(dist)
+        print(inds)
+        print(positions.shape)
+        print(reference_positions.shape)
+
         results = []
         for pos, ind in zip(positions, inds):
             transform = transforms_list[ind]
@@ -4205,17 +4210,23 @@ class Event:
     site: SiteID
     bdc: BDC
     cluster: Cluster
-    centroid_native: Tuple[float, float, float]
+    native_centroid: Tuple[float, float, float]
+    native_positions: List[Tuple[gloat, float, float]]
 
     @staticmethod
     def from_cluster(event_id: EventID,
                      cluster: Cluster,
                      site: SiteID,
-                     bdc: BDC, ):
+                     bdc: BDC,
+                     native_centroid: Tuple[float, float, float],
+                     native_positions: List[Tuple[float, float, float]]):
         return Event(event_id=event_id,
                      site=site,
                      bdc=bdc,
-                     cluster=cluster)
+                     cluster=cluster,
+                     native_centroid=native_centroid,
+                     native_positions=native_positions,
+                     )
 
 
 @dataclasses.dataclass()
