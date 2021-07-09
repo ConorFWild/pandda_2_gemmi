@@ -106,9 +106,7 @@ def truncate_model(model_path: Path, coords: Coord, out_dir: Path):
 # #####################
 
 
-def get_cut_out_event_map(event_map: gemmi.FloatGrid, coord: Coord, radius: float = 10.0) -> gemmi.FloatGrid:
-    event_centroid = gemmi.Position(coord.x, coord.y, coord.z)
-
+def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: Coord, radius: float = 1.5) -> gemmi.FloatGrid:
     xmap_array = np.array(event_map, copy=True)
 
     mask_grid = gemmi.Int8Grid(*xmap_array.shape)
@@ -125,10 +123,12 @@ def get_cut_out_event_map(event_map: gemmi.FloatGrid, coord: Coord, radius: floa
     # print(f"Grid size: {mask_grid.size}")
     mask_grid.set_unit_cell(event_map.unit_cell)
 
-    mask_grid.set_points_around(event_centroid,
-                                radius=radius,
-                                value=1,
-                                )
+    for position_python in coords:
+        position = gemmi.Position(*position_python)
+        mask_grid.set_points_around(position,
+                                    radius=radius,
+                                    value=1,
+                                    )
     mask_grid.symmetrize_max()
 
     mask_array = np.array(mask_grid, copy=False, dtype=np.int8)
@@ -396,12 +396,16 @@ def save_score_dictionary(score_dictionary, path):
 
 def autobuild_rhofit(dataset:Dataset, event: Event):
     # Type all the input variables
-    model_path = Path(model)
+    model_path = Path(dataset.model)
     xmap_path = Path(xmap)
     mtz_path = Path(mtz)
     smiles_path = Path(smiles)
     out_dir = Path(out_dir)
-    coords = Coord(x, y, z)
+    coords = Coord(
+        event.native_centroid[0],
+        event.native_centroid[1],
+        event.native_centroid[2],
+    )
 
     # Truncate the model
     truncated_model_path = truncate_model(model_path, coords, out_dir)
@@ -416,12 +420,11 @@ def autobuild_rhofit(dataset:Dataset, event: Event):
     print(f"\tCut out xmap")
 
     # Generate the cif
-    cif_path = generate_cif(smiles_path, out_dir, phenix_setup)
+    cif_path = generate_cif(smiles_path, out_dir,)
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir,
-              phenix_setup, rhofit_setup,)
+    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir,)
     print(f"\tRhofit")
 
     # Score rhofit builds
