@@ -363,7 +363,7 @@ def process_shell(
         process_local=process_local_serial,
     )
 
-    results = process_local_serial(
+    results = process_local(
         [
             partial(
                 process_dataset_paramaterized,
@@ -708,7 +708,7 @@ def process_pandda(
         ###################################################################
 
         # Autobuild the results if set to
-        if autobuild_results:
+        if autobuild:
             autobuild_results: Dict[EventID, AutobuildResult] = process_global(
                 [
                     partial(
@@ -723,7 +723,7 @@ def process_pandda(
         # # Assign Sites
         ###################################################################
 
-        #
+        # Get the events and assign sites to them
         all_events_events = Events.from_all_events(all_events, grid, 1.7)
 
         # Get the sites and output a csv of them
