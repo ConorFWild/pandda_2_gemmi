@@ -444,6 +444,7 @@ def process_pandda(
         distributed_mem_per_worker: str = "10G",
         distributed_resource_spec: str = "m_mem_free=10G",
         autobuild: bool = False,
+        autobuild_strategy: str = "rhofit",
         debug: bool = True,
 ):
     ###################################################################
