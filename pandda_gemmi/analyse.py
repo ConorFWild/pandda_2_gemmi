@@ -380,7 +380,7 @@ def process_shell(
 
     return ShellResult(
         shell=shell,
-        dataset_results=results,
+        dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results},
         log=shell_log,
     )
 
