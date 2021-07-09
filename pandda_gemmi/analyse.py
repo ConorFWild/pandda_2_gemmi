@@ -229,6 +229,7 @@ def process_dataset(
         model,
         dataset_xmaps,
         grid,
+        alignments[test_dtag],
         1.732,  # TODO: make this a variable ;')
         process_local,
     )
@@ -363,7 +364,7 @@ def process_shell(
         process_local=process_local_serial,
     )
 
-    results = process_local(
+    results = process_local_serial(
         [
             partial(
                 process_dataset_paramaterized,

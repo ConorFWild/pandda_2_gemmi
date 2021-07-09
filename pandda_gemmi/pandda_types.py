@@ -2257,6 +2257,22 @@ class Alignment:
     def __getitem__(self, item: ResidueID):
         return self.transforms[item]
 
+    def reference_to_moving(self, positions):
+
+        transforms_list = [transform for transform in self.transforms.values()]
+
+        reference_positions = np.vstack([transform.com_reference for transform in transforms_list])
+        tree = spatial.KDTree(reference_positions)
+        dist, inds = tree.query(positions)
+
+        results = []
+        for pos, ind in zip(positions, inds):
+            transform = transforms_list[ind]
+            transformed_pos = transform.apply_reference_to_moving({(0, 0, 0): gemmi.Position(*pos), })[(0, 0, 0)]
+            results.append([transformed_pos.x, transformed_pos.y, transformed_pos.z])
+
+        return results
+
     @staticmethod
     def has_large_gap(reference: Reference, dataset: Dataset):
         try:
@@ -3219,7 +3235,7 @@ class Model:
             # print("#######")
             # print([x])
             # print(f"Vectorised bisec gives: {sigma_ms[x]}")
-            _mean = np.array((mean[x], ))
+            _mean = np.array((mean[x],))
             # print(_mean)
             _array = arrays[:, x, ].flatten()
             # print(_array)
@@ -3359,8 +3375,8 @@ class Model:
 
     @staticmethod
     def log_liklihood(est_sigma, est_mu=0.0, obs_vals=0.0, obs_error=0.0):
-        term_1 = -0.5*( (np.square(obs_vals) - np.square(est_mu)) / (np.square(est_sigma) + np.square(obs_error)))
-        term_2 = -0.5*(np.log(2*np.pi*(np.square(est_sigma) + np.square(obs_error))))
+        term_1 = -0.5 * ((np.square(obs_vals) - np.square(est_mu)) / (np.square(est_sigma) + np.square(obs_error)))
+        term_2 = -0.5 * (np.log(2 * np.pi * (np.square(est_sigma) + np.square(obs_error))))
 
         return np.sum(term_1, axis=0) + np.sum(term_2, axis=0)
 
@@ -3484,7 +3500,7 @@ class Zmap:
         print(f"Symm mean+std: {zmap_symm_mean} {zmap_symm_std}")
 
         zmap_sparse_mean = np.mean(zmap_array[zmap_array != 0.0])
-        zmap_sparse_std = np.std(zmap_array[zmap_array!= 0.0])
+        zmap_sparse_std = np.std(zmap_array[zmap_array != 0.0])
 
         print(f"Sparse mean+std: {zmap_sparse_mean} {zmap_sparse_std}")
 
@@ -3590,7 +3606,7 @@ class ClusterID:
 class Cluster:
     indexes: typing.Tuple[np.ndarray]
     values: np.ndarray
-    centroid: gemmi.Position
+    centroid: Tuple[float, float, float]
     event_mask_indicies: np.ndarray
 
     def size(self, grid: Grid):
@@ -4189,6 +4205,7 @@ class Event:
     site: SiteID
     bdc: BDC
     cluster: Cluster
+    centroid_native: Tuple[float, float, float]
 
     @staticmethod
     def from_cluster(event_id: EventID,
@@ -4216,7 +4233,8 @@ class Events:
     sites: Sites
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid, cutoff: float,
+    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid,
+                      alignment: Alignment, cutoff: float,
                       mapper: Any = None):
         events: typing.Dict[EventID, Event] = {}
 
@@ -4256,10 +4274,28 @@ class Events:
 
                     site: SiteID = sites.event_to_site[event_id]
 
+                    # Get native centroid
+                    native_centroid = alignment.reference_to_moving(
+                        (cluster.centroid[0],
+                         cluster.centroid[1],
+                         cluster.centroid[2],)
+                    )
+
+                    # Get native event mask
+                    event_positions = []
+                    for point in cluster.indexes:
+                        position = grid.grid.point_to_position(point[0], point[1], point[2])
+                        event_positions.append([position.x, position.y, position.z])
+
+                    native_positions = alignment.reference_to_moving(event_positions)
+
+
                     event = Event.from_cluster(event_id,
                                                cluster,
                                                site,
                                                bdc,
+                                               native_centroid,
+                                               native_positions,
                                                )
 
                     events[event_id] = event
@@ -5162,5 +5198,3 @@ class ShellResult:
     shell: Shell
     dataset_results: Dict[Dtag, DatasetResult]
     log: Dict
-
-
