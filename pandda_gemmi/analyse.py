@@ -392,6 +392,7 @@ def process_pandda(
         mtz_regex: str = "*.mtz",
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
+        ligand_smiles_regex: str = "*.smiles",
         ground_state_datasets: Optional[List[str]] = None,
         exclude_from_z_map_analysis: Optional[List[str]] = None,
         exclude_from_characterisation: Optional[List[str]] = None,
@@ -468,6 +469,7 @@ def process_pandda(
                                                             mtz_regex,
                                                             ligand_cif_regex,
                                                             ligand_pdb_regex,
+                                                            ligand_smiles_regex,
                                                             )
     pandda_fs_model.build()
 

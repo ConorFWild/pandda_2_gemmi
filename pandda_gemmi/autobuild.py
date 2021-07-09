@@ -394,12 +394,18 @@ def save_score_dictionary(score_dictionary, path):
 # # Autobuild
 # #####################
 
-def autobuild_rhofit(dataset:Dataset, event: Event):
+def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # Type all the input variables
-    model_path = Path(dataset.model)
-    xmap_path = Path(xmap)
-    mtz_path = Path(mtz)
-    smiles_path = Path(smiles)
+    xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id]
+    out_dir = pandda_fs.processed_datasets[event.event_id.dtag]
+    model_path = dataset.structure.path
+    mtz_path = dataset.reflections.path
+    smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_smiles
+
+    model_path = Path(model_path)
+    xmap_path = Path(xmap_path)
+    mtz_path = Path(mtz_path)
+    smiles_path = Path(smiles_path)
     out_dir = Path(out_dir)
     coords = Coord(
         event.native_centroid[0],

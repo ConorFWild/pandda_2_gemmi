@@ -4300,7 +4300,6 @@ class Events:
 
                     native_positions = alignment.reference_to_moving(event_positions)
 
-
                     event = Event.from_cluster(event_id,
                                                cluster,
                                                site,
@@ -4791,9 +4790,11 @@ class DatasetDir:
     ligand_dir: Union[LigandDir, None]
     source_ligand_cif: Union[Path, None]
     source_ligand_pdb: Union[Path, None]
+    souce_ligand_smiles: Optional[Path]
 
     @staticmethod
-    def from_path(path: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str):
+    def from_path(path: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str,
+                  ligand_smiles_regex: str):
         input_pdb_file: Path = next(path.glob(pdb_regex))
         input_mtz_file: Path = next(path.glob(mtz_regex))
 
@@ -4815,6 +4816,11 @@ class DatasetDir:
         except:
             source_ligand_pdb = None
 
+        try:
+            source_ligand_smiles = path.rglob(ligand_smiles_regex)
+        except:
+            source_ligand_smiles = None
+
         return DatasetDir(input_pdb_file=input_pdb_file,
                           input_mtz_file=input_mtz_file,
                           ligand_dir=ligand_dir,
@@ -4828,7 +4834,8 @@ class DataDirs:
     dataset_dirs: typing.Dict[Dtag, DatasetDir]
 
     @staticmethod
-    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str):
+    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str,
+                 ligand_smiles_regex: str):
         dataset_dir_paths = list(directory.glob("*"))
 
         dataset_dirs = {}
@@ -4837,7 +4844,7 @@ class DataDirs:
             dtag = Dtag(dataset_dir_path.name)
             try:
                 dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_cif_regex,
-                                                   ligand_pdb_regex)
+                                                   ligand_pdb_regex, ligand_smiles_regex)
                 dataset_dirs[dtag] = dataset_dir
             except:
                 continue
@@ -4963,10 +4970,10 @@ class PanDDAFSModel:
     def from_dir(input_data_dirs: Path,
                  output_out_dir: Path,
                  pdb_regex: str, mtz_regex: str,
-                 ligand_cif_regex: str, ligand_pdb_regex: str,
+                 ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
-        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_cif_regex, ligand_pdb_regex)
+        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_cif_regex, ligand_pdb_regex, ligand_smiles_regex)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )
