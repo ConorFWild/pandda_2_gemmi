@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 
 from typing import Dict, List
@@ -520,3 +521,10 @@ def summarise_array(array):
         "max": np.max(array),
     }
     return summary
+
+
+def save_json_log(log_dict: Dict, path: Path):
+    with open(str(path), "w") as f:
+        json.dump(log_dict,
+                  f,
+                  )

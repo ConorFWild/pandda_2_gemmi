@@ -95,6 +95,16 @@ STAGE_FILTER_SPACE_GROUP = "Filter different space group datasets"
 STAGE_FILTER_GAPS = "Filter datasets with large gaps"
 
 
+###################################################################
+# # Autobuild constants
+###################################################################
+PANDDA_RHOFIT_SCRIPT_FILE = "pandda_rhofit.sh"
+RHOFIT_COMMAND = (
+    "#!/bin/bash \n"
+    "source ~/.bashrc \n"
+    "{pandda_rhofit} -map {event_map} -mtz {mtz} -pdb {pdb} -cif {cif} -out {out_dir}"
+)
+
 MISSES = [
     "BAZ2BA-x447",
     "BAZ2BA-x557",

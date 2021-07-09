@@ -1,5 +1,3 @@
-
-
 from pandda_gemmi.pandda_types import *
 
 from __future__ import annotations
@@ -14,8 +12,7 @@ import fire
 import numpy as np
 import gemmi
 
-from constants import Constants
-
+from pandda_gemmi import constants
 
 def execute(command: str):
     p = subprocess.Popen(command,
@@ -112,7 +109,7 @@ def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: Coord, radius: flo
     mask_grid = gemmi.Int8Grid(*xmap_array.shape)
     # print(f"Spacegroup: {mask_grid.spacegroup.xhm()}")
     # mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 21 21 21")  #  gemmi.find_spacegroup_by_name("P 1")#event_map.spacegroup
-    mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")#event_map.spacegroup
+    mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # event_map.spacegroup
     print(f"Spacegroup: {mask_grid.spacegroup.xhm()}")
     print(f"grid: {mask_grid}")
     mask_grid_array = np.array(mask_grid)
@@ -296,15 +293,11 @@ def generate_cif(smiles_path: Path, out_dir: Path, phenix_setup):
 
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path,
-phenix_setup,
-           rhofit_setup
            ):
     # Make rhofit commands
-    pandda_rhofit = str(Path(__file__).parent / Constants.PANDDA_RHOFIT_SCRIPT_FILE)
+    pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
 
-    rhofit_command: str = Constants.RHOFIT_COMMAND.format(
-        phenix_setup=phenix_setup,
-        rhofit_setup=rhofit_setup,
+    rhofit_command: str = constants.RHOFIT_COMMAND.format(
         pandda_rhofit=pandda_rhofit,
         event_map=str(truncated_xmap_path),
         mtz=str(mtz_path),
@@ -400,12 +393,14 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     model_path = dataset.structure.path
     mtz_path = dataset.reflections.path
+    cif_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_cif
     smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_smiles
 
     model_path = Path(model_path)
     xmap_path = Path(xmap_path)
     mtz_path = Path(mtz_path)
-    smiles_path = Path(smiles_path)
+    # smiles_path = Path(smiles_path)
+    # cif_path = Path(cif_path)
     out_dir = Path(out_dir)
     coords = Coord(
         event.native_centroid[0],
@@ -426,11 +421,15 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     print(f"\tCut out xmap")
 
     # Generate the cif
-    cif_path = generate_cif(smiles_path, out_dir,)
+    if cif_path:
+        cif_path = cif_path
+    else:
+        raise NotImplementedError()
+
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir,)
+    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, )
     print(f"\tRhofit")
 
     # Score rhofit builds
@@ -446,7 +445,3 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # Remove the big map
     print(f"Removing truncated map")
     os.remove(str(truncated_xmap_path))
-
-
-
-

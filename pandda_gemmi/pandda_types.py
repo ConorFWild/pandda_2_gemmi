@@ -2267,7 +2267,7 @@ class Alignment:
 
         print(dist)
         print(inds)
-        print(len(positions))
+        print(positions.shape)
         print(reference_positions.shape)
 
         results = []
@@ -4287,9 +4287,10 @@ class Events:
 
                     # Get native centroid
                     native_centroid = alignment.reference_to_moving(
-                        (cluster.centroid[0],
+                        np.array(
+                            (cluster.centroid[0],
                          cluster.centroid[1],
-                         cluster.centroid[2],)
+                         cluster.centroid[2],)).reshape(-1, 3)
                     )
 
                     # Get native event mask
@@ -4298,7 +4299,7 @@ class Events:
                         position = grid.grid.point_to_position(x, y, z)
                         event_positions.append([position.x, position.y, position.z])
 
-                    native_positions = alignment.reference_to_moving(event_positions)
+                    native_positions = alignment.reference_to_moving(np.array(event_positions))
 
                     event = Event.from_cluster(event_id,
                                                cluster,
