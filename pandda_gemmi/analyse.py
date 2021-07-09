@@ -380,7 +380,7 @@ def process_shell(
 
     return ShellResult(
         shell=shell,
-        dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results)},
+        dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
         log=shell_log,
     )
 
@@ -706,8 +706,9 @@ def process_pandda(
 
         all_events = {}
         for shell_result in shell_results:
-            for dtag, dataset_result in shell_result.dataset_results.items():
-                all_events.update(dataset_result.events)
+            if shell_result:
+                for dtag, dataset_result in shell_result.dataset_results.items():
+                    all_events.update(dataset_result.events)
 
         printer.pprint(all_events)
 
