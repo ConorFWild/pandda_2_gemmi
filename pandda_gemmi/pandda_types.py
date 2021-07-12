@@ -4697,6 +4697,9 @@ class SiteTable:
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
+        print(sites)
+        print(sites.centroids)
+
         records = []
         for site_id in sites:
             # site = sites[site_id]
