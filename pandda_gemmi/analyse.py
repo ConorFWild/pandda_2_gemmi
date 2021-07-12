@@ -695,6 +695,7 @@ def process_pandda(
             printer.pprint(shells)
 
         # Process the shells
+        time_shells_start = time.time()
         shell_results: List[ShellResult] = process_global(
             [
                 partial(
@@ -710,12 +711,15 @@ def process_pandda(
                 in shells.items()
             ],
         )
+        time_shells_finish = time.time()
+        print(f"Finished processing shells in: {time_shells_finish-time_shells_start}")
 
         all_events = {}
         for shell_result in shell_results:
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
-                    all_events.update(dataset_result.events)
+                    print(type(dataset_result.events))
+                    all_events.update(dataset_result.events.events)
 
         printer.pprint(all_events)
 
