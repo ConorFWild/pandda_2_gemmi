@@ -761,7 +761,10 @@ def process_pandda(
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         # Output json log
-        save_json_log(config.output.out_dir / constants.PANDDA_LOG_FILE)
+        save_json_log(
+            pandda_log,
+            config.output.out_dir / constants.PANDDA_LOG_FILE,
+        )
 
     ###################################################################
     # # Handle Exceptions
