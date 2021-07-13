@@ -4187,7 +4187,7 @@ class Sites:
             if not site_id in site_to_event:
                 site_to_event[site_id] = []
 
-            site_to_event[site_id].append(cluster_id)
+            site_to_event[site_id].append(EventID(cluster_id.dtag, cluster_id.number))
             event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
 
         # Site centroids
@@ -4694,6 +4694,7 @@ class SiteTable:
             _clusterings[dtag] = Clustering(dtag_clusters[dtag])
 
         clusterings = Clusterings(_clusterings)
+        print(clusterings)
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
