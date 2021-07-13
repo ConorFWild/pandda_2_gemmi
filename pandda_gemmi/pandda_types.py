@@ -4156,20 +4156,20 @@ class Sites:
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
 
-        if positions_array.to_array().shape[0] < 4:
-            site_to_event = {}
-            event_to_site = {}
-
-            for site_id, cluster_id in enumerate(flat_clusters):
-                site_id = SiteID(int(site_id))
-
-                if not site_id in site_to_event:
-                    site_to_event[site_id] = []
-
-                site_to_event[site_id].append(cluster_id)
-                event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
-
-            return Sites(site_to_event, event_to_site, {})
+        # if positions_array.to_array().shape[0] < 4:
+        #     site_to_event = {}
+        #     event_to_site = {}
+        #
+        #     for site_id, cluster_id in enumerate(flat_clusters):
+        #         site_id = SiteID(int(site_id))
+        #
+        #         if not site_id in site_to_event:
+        #             site_to_event[site_id] = []
+        #
+        #         site_to_event[site_id].append(cluster_id)
+        #         event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
+        #
+        #     return Sites(site_to_event, event_to_site, {})
 
         site_ids_array = fclusterdata(X=positions_array.to_array(),
                                       t=cutoff,
@@ -4180,7 +4180,6 @@ class Sites:
 
         site_to_event = {}
         event_to_site = {}
-
         for cluster_id, site_id in zip(flat_clusters, site_ids_array):
             site_id = SiteID(int(site_id))
 

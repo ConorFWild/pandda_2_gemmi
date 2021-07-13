@@ -62,6 +62,11 @@ from pandda_gemmi.pandda_functions import (
     truncate,
     validate_strategy_num_datasets,
     validate,
+
+)
+from pandda_gemmi.ranking import (
+    rank_events_size,
+    rank_events_autobuild,
 )
 
 
@@ -84,11 +89,9 @@ def process_dataset(
         process_local=process_local_serial,
 
 ):
-
     if "BAZ2BA-x447" != test_dtag.dtag:
         print(f"\t447 is not {test_dtag} ")
         return None
-
 
     dataset_log = {}
     dataset_log[constants.LOG_DATASET_TRAIN] = shell.train_dtags[test_dtag]
@@ -450,6 +453,7 @@ def process_pandda(
         distributed_resource_spec: str = "m_mem_free=10G",
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
+        rank_method: str = "size",
         debug: bool = True,
 ):
     ###################################################################
@@ -712,7 +716,7 @@ def process_pandda(
             ],
         )
         time_shells_finish = time.time()
-        print(f"Finished processing shells in: {time_shells_finish-time_shells_start}")
+        print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
 
         all_events = {}
         for shell_result in shell_results:
@@ -740,11 +744,32 @@ def process_pandda(
             )
 
         ###################################################################
+        # # Rank Events
+        ###################################################################
+        if rank_method == "size":
+            all_events_ranked = rank_events_size(all_events, grid)
+        elif rank_method == "size_delta":
+            raise NotImplementedError()
+            all_events_ranked = rank_events_size_delta()
+        elif rank_method == "cnn":
+            raise NotImplementedError()
+            all_events_ranked = rank_events_cnn()
+
+        elif rank_method == "autobuild":
+            if not autobuild:
+                raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+            else:
+                raise NotImplementedError()
+                all_events_ranked = rank_events_autobuild(all_events, autobuild_results)
+        else:
+            raise Exception(f"Ranking method: {rank_method} is unknown!")
+
+        ###################################################################
         # # Assign Sites
         ###################################################################
 
         # Get the events and assign sites to them
-        all_events_events = Events.from_all_events(all_events, grid, 1.7)
+        all_events_events = Events.from_all_events(all_events_ranked, grid, 1.7)
 
         # Get the sites and output a csv of them
         site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)

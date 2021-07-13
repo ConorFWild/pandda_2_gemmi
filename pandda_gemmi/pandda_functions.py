@@ -133,7 +133,6 @@ def process_global_dask(funcs, scheduler="SGE",
     return results
 
 
-
 def get_comparators_high_res_random(
         datasets: Dict[Dtag, Dataset],
         comparison_min_comparators,
