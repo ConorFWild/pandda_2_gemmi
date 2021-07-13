@@ -777,7 +777,8 @@ def process_pandda(
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
         print(f"Saving PanDDA log to: {out_dir / constants.PANDDA_LOG_FILE}")
-        save_json_log(out_dir / constants.PANDDA_LOG_FILE)
+        save_json_log(pandda_log,
+                      out_dir / constants.PANDDA_LOG_FILE)
 
 
 if __name__ == '__main__':

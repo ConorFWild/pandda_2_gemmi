@@ -4681,7 +4681,7 @@ class SiteTable:
         dtag_clusters = {}
         for event_id in events:
             dtag = event_id.dtag
-            event_idx = event_id.event_idx
+            event_idx = event_id.event_idx.event_idx
             event = events[event_id]
 
             if dtag not in dtag_clusters:
