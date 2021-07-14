@@ -4535,12 +4535,30 @@ class EventMapFile:
 
         # # Get the event bounding box
         # Find the min and max positions
+        min_array = np.array(event.native_positions[0])
+        max_array = np.array(event.native_positions[0])
+        for position in event.native_positions:
+            position_array = np.array(position)
+            min_array = np.min(np.vstack(min_array, position_array), axis=0)
+            max_array = np.max(np.vstack(max_array, position_array), axis=0)
 
-        # Get them as fractional
+
+        # Get them as fractional bounding box
+        print(min_array)
+        print(max_array)
+        print(event.native_positions[0])
+        print(event.native_centroid)
+        print(event.cluster.centroid)
+
+        box = gemmi.FractionalBox()
+        box.minimum = gemmi.Fractional(min_array[0], min_array[1], min_array[2])
+        box.maximum = gemmi.Fractional(max_array[0], max_array[1], max_array[2])
 
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = event_map_grid.xmap
         ccp4.update_ccp4_header(2, True)
+        ccp4.setup()
+        ccp4.set_extent(box)
         # ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
 
