@@ -9,7 +9,7 @@ box = gemmi.PositionBox()
 box.minimum = gemmi.Position(-2.0, 2.0, 2.5)
 box.maximum = gemmi.Position(2.5, 7.5, 7.5)
 
-ccp4 = gemmi.Ccp4MapFile()
+ccp4 = gemmi.Ccp4Map()
 ccp4.update_ccp4_header(2, True)
 ccp4.grid = grid
 ccp4.setup()
@@ -20,7 +20,7 @@ box = gemmi.FractionalBox()
 box.minimum = gemmi.Fractional(-0.25, 0.25, 0.25)
 box.maximum = gemmi.Fractional(0.25, 0.75, 0.75)
 
-ccp4 = gemmi.Ccp4MapFile()
+ccp4 = gemmi.Ccp4Map()
 ccp4.update_ccp4_header(2, True)
 ccp4.grid = grid
 ccp4.setup()
