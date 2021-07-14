@@ -1,10 +1,10 @@
 # ###########################################
 # # Todo
 # ###########################################
-# 1. [ ] Check event calculation makes sense
+# 1. [ x ] Check event calculation makes sense
 # 2. [ x ] Check zmaps match up after normalisation
-# 4. [ ] Check event table and site table make sense
-# 5. [ ] Make sure PanDDA inspect works
+# 4. [ x ] Check event table and site table make sense
+# 5. [ x ] Make sure PanDDA inspect works
 # 8. [ ] Check dask submission works on diamond
 
 # Maybe
@@ -519,7 +519,7 @@ def process_pandda(
                 project=distributed_project,
                 cores_per_worker=local_cpus,
                 memory_per_worker=distributed_mem_per_worker,
-                resource_spec=""
+                resource_spec=distributed_resource_spec
             )
         else:
             raise Exception()
