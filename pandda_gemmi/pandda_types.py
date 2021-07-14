@@ -4533,6 +4533,11 @@ class EventMapFile:
                                                  mask_radius_symmetry,
                                                  )
 
+        # # Get the event bounding box
+        # Find the min and max positions
+
+        # Get them as fractional
+
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = event_map_grid.xmap
         ccp4.update_ccp4_header(2, True)

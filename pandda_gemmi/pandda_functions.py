@@ -65,14 +65,16 @@ def process_global_serial(funcs):
     return results
 
 
-def process_global_dask(funcs, scheduler="SGE",
-                        num_workers=10,
-                        queue=None,
-                        project=None,
-                        cores_per_worker=12,
-                        memory_per_worker="120 GB",
-                        resource_spec=""
-                        ):
+def process_global_dask(
+        funcs,
+        scheduler="SGE",
+        num_workers=10,
+        queue=None,
+        project=None,
+        cores_per_worker=12,
+        memory_per_worker="120 GB",
+        resource_spec=""
+):
     from dask.distributed import Client
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
@@ -88,7 +90,6 @@ def process_global_dask(funcs, scheduler="SGE",
             memory=memory_per_worker,
             resource_spec=resource_spec
         )
-
 
     elif scheduler == "PBS":
         cluster = PBSCluster(
@@ -418,5 +419,3 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
     if not strategy(datasets):
         print(datasets)
         raise exception
-
-
