@@ -791,7 +791,7 @@ def process_pandda(
         # Output json log
         save_json_log(
             pandda_log,
-            config.output.out_dir / constants.PANDDA_LOG_FILE,
+            out_dir / constants.PANDDA_LOG_FILE,
         )
 
     ###################################################################
