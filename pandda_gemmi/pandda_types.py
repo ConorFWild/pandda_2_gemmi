@@ -4151,7 +4151,7 @@ class Sites:
         for dtag in clusterings:
             for event_idx in clusterings[dtag]:
                 event_idx = EventIDX(event_idx)
-                flat_clusters[ClusterID(dtag, event_idx)] = clusterings[dtag][event_idx.event_idx]
+                flat_clusters[EventID(dtag, event_idx)] = clusterings[dtag][event_idx.event_idx]
 
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
@@ -4180,14 +4180,14 @@ class Sites:
 
         site_to_event = {}
         event_to_site = {}
-        for cluster_id, site_id in zip(flat_clusters, site_ids_array):
+        for event_id, site_id in zip(flat_clusters, site_ids_array):
             site_id = SiteID(int(site_id))
 
             if not site_id in site_to_event:
                 site_to_event[site_id] = []
 
-            site_to_event[site_id].append(EventID(cluster_id.dtag, cluster_id.number))
-            event_to_site[EventID(cluster_id.dtag, cluster_id.number)] = site_id
+            site_to_event[site_id].append(event_id)
+            event_to_site[event_id] = site_id
 
         # Site centroids
         site_centroids = {}

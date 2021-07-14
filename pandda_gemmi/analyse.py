@@ -68,6 +68,9 @@ from pandda_gemmi.ranking import (
     rank_events_size,
     rank_events_autobuild,
 )
+from pandda_gemmi.autobuild import (
+    autobuild_rhofit,
+)
 
 
 def process_dataset(
@@ -760,7 +763,7 @@ def process_pandda(
                 raise Exception("Cannot rank on autobuilds if autobuild is not set!")
             else:
                 raise NotImplementedError()
-                all_events_ranked = rank_events_autobuild(all_events, autobuild_results)
+                all_events_ranked = rank_events_autobuild(all_events, autobuild_results, datasets, pandda_fs_model,)
         else:
             raise Exception(f"Ranking method: {rank_method} is unknown!")
 

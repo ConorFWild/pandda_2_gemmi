@@ -32,5 +32,11 @@ def rank_events_cnn(events: Dict[EventID, Event]):
     ...
 
 
-def rank_events_autobuild(events: Dict[EventID, Event], autobuild_results, datasets: Dict[Dtag, Dataset], pandda_fs: PanDDAFSModel):
+def rank_events_autobuild(
+        events: Dict[EventID, Event],
+        autobuild_results: Dict[EventID, AutobuildResult],
+        datasets: Dict[Dtag, Dataset],
+        pandda_fs: PanDDAFSModel,
+):
+
     ...
