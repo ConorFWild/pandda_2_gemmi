@@ -1,5 +1,3 @@
-from pandda_gemmi.pandda_types import *
-
 from __future__ import annotations
 
 import os
@@ -13,6 +11,8 @@ import numpy as np
 import gemmi
 
 from pandda_gemmi import constants
+from pandda_gemmi.pandda_types import *
+
 
 def execute(command: str):
     p = subprocess.Popen(command,
