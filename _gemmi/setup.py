@@ -51,7 +51,8 @@ ext_modules = [
                   ['gemmi', 'align', 'ccp4', 'cif', 'custom', 'elem', 'hkl',
                    'grid', 'meta', 'mol', 'monlib', 'mtz', 'read', 'recgrid',
                    'scaling', 'search', 'sf', 'sym', 'topo',
-                   'unitcell', 'write']],
+                   'unitcell', 'write',
+                   ]],
               include_dirs=zlib_include_dirs + [
                   'include',
                   'third_party',
