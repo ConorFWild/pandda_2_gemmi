@@ -11,8 +11,8 @@ box.minimum = gemmi.Fractional(-0.25, 0.25, 0.25)
 box.maximum = gemmi.Fractional(0.25, 0.75, 0.75)
 
 m = gemmi.Ccp4Map()
-m.update_ccp4_header(2, True)
 m.grid = grid
+m.update_ccp4_header(2, True)
 m.setup()
 m.set_extent(box)
 m.write_ccp4_map("fractional.ccp4")
