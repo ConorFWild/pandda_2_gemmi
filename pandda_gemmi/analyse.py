@@ -264,7 +264,7 @@ def process_dataset(
                            structure_factors,
                            outer_mask,
                            inner_mask_symmetry,
-                           mapper=None,
+                           mapper=process_local_serial,
                            )
 
     time_event_map_finish = time.time()
@@ -774,9 +774,6 @@ def process_pandda(
         # Get the events and assign sites to them
         all_events_events = Events.from_all_events(all_events_ranked, grid, 1.7)
 
-        # Get the sites and output a csv of them
-        site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
-
         ###################################################################
         # # Output pandda summary information
         ###################################################################
@@ -786,6 +783,7 @@ def process_pandda(
         event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
+        site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         # Output json log
