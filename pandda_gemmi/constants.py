@@ -54,6 +54,8 @@ LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
 
 LOG_SHELL_XMAP_TIME: str = "Time taken to generate aligned xmaps"
+LOG_SHELL_DATASET_LOGS: str = "Logs for each dataset in shell"
+LOG_SHELLS: str = "Logs for each shell"
 
 LOG_DATASET_TRAIN: str = "Datasets density charactersied against"
 LOG_DATASET_MEAN: str = "Mean map statistics"

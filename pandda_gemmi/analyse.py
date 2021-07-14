@@ -388,6 +388,11 @@ def process_shell(
         ],
     )
 
+    # Update shell log with dataset results
+    shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
+    for result in results:
+        shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
+
     return ShellResult(
         shell=shell,
         dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
@@ -720,6 +725,7 @@ def process_pandda(
         )
         time_shells_finish = time.time()
         print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
+        pandda_log[constants.LOG_SHELLS] = {res: shell_result.log for res, shell_result in zip(shells, shell_results)}
 
         all_events = {}
         for shell_result in shell_results:
