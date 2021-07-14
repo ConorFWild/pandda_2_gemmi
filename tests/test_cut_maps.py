@@ -18,7 +18,7 @@ ccp4.write_ccp4_map("position.ccp4")
 
 box = gemmi.FractionalBox()
 box.minimum = gemmi.Fractional(-0.25, 0.25, 0.25)
-box.maximum = gemmi.Position(0.25, 0.75, 0.75)
+box.maximum = gemmi.Fractional(0.25, 0.75, 0.75)
 
 ccp4 = gemmi.Ccp4MapFile()
 ccp4.update_ccp4_header(2, True)
