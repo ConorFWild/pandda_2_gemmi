@@ -474,6 +474,7 @@ def process_pandda(
     ###################################################################
     # # Configuration
     ###################################################################
+    time_start = time.time()
     print("Getting config")
 
     # Process args
@@ -828,6 +829,9 @@ def process_pandda(
         # Output site table
         site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
+        time_finish = time.time()
+        print(f"PanDDA ran in: {time_finish-time_start}")
 
         # Output json log
         save_json_log(
