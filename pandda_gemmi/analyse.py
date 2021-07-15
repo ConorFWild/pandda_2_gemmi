@@ -54,6 +54,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
     process_local_multiprocessing,
+    get_dask_client,
     process_local_dask,
     process_global_serial,
     process_global_dask,
