@@ -122,6 +122,7 @@ def get_dask_client(scheduler="SGE",
         )
 
     elif scheduler == "SGE":
+        extra = f"-pe smp {cores_per_worker}"
         cluster = SGECluster(
             queue=queue,
             project=project,
@@ -131,6 +132,7 @@ def get_dask_client(scheduler="SGE",
             walltime=walltime,
             processes=1,
             nanny=False,
+            job_extra=extra,
         )
 
     elif scheduler == "SLURM":
