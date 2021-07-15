@@ -56,6 +56,11 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
 
     return results
 
+def process_local_dask(funcs):
+    from dask.distributed import worker_client
+
+    with worker_client() as client:
+
 
 def process_global_serial(funcs):
     results = []
@@ -65,16 +70,13 @@ def process_global_serial(funcs):
     return results
 
 
-def process_global_dask(
-        funcs,
-        scheduler="SGE",
+def get_dask_client(scheduler="SGE",
         num_workers=10,
         queue=None,
         project=None,
         cores_per_worker=12,
         memory_per_worker="120 GB",
-        resource_spec=""
-):
+        resource_spec=""):
     from dask.distributed import Client
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
@@ -133,6 +135,13 @@ def process_global_dask(
 
     # Launch the client
     client = Client(cluster)
+    return client
+
+
+def process_global_dask(
+        funcs,
+        client=None,
+):
 
     # Multiprocess
     processes = client.map(run, funcs)

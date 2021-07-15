@@ -54,6 +54,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
     process_local_multiprocessing,
+    process_local_dask,
     process_global_serial,
     process_global_dask,
     get_shells,
@@ -492,6 +493,27 @@ def process_pandda(
 
     print("Getting multiprocessor")
     try:
+        # Get global processor
+        if global_processing == "serial":
+            process_global = process_global_serial
+        elif global_processing == "distributed":
+            if local_processing != "dask":
+                raise Exception("Local processing option must be dask with distribution")
+            client = get_dask_client(
+                scheduler=distributed_scheduler,
+                num_workers=distributed_num_workers,
+                queue=distributed_queue,
+                project=distributed_project,
+                cores_per_worker=local_cpus,
+                memory_per_worker=distributed_mem_per_worker,
+                resource_spec=distributed_resource_spec
+            )
+            process_global = partial(
+                process_global_dask,
+                client=client,
+            )
+        else:
+            raise Exception()
 
         # Get local processor
         if local_processing == "serial":
@@ -505,25 +527,14 @@ def process_pandda(
         elif local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
             process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+        elif local_processing == "dask":
+            if global_processing != "distributed":
+                raise Exception("Global rpocessing must be distributed with local processing dask")
+            process_local = partial(process_local_dask, client=client,)
         else:
             raise Exception()
 
-        # Get global processor
-        if global_processing == "serial":
-            process_global = process_global_serial
-        elif global_processing == "distributed":
-            process_global = partial(
-                process_global_dask,
-                scheduler=distributed_scheduler,
-                num_workers=distributed_num_workers,
-                queue=distributed_queue,
-                project=distributed_project,
-                cores_per_worker=local_cpus,
-                memory_per_worker=distributed_mem_per_worker,
-                resource_spec=distributed_resource_spec
-            )
-        else:
-            raise Exception()
+
 
         # Set up autobuilding
         if autobuild:
