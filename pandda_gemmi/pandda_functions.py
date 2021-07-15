@@ -105,6 +105,7 @@ def get_dask_client(scheduler="SGE",
             memory=memory_per_worker,
             resource_spec=resource_spec,
             walltime=walltime,
+            processes=1,
         )
 
     elif scheduler == "PBS":
@@ -115,6 +116,7 @@ def get_dask_client(scheduler="SGE",
             memory=memory_per_worker,
             resource_spec=resource_spec,
             walltime=walltime,
+            processes=1,
         )
 
     elif scheduler == "SGE":
@@ -125,6 +127,7 @@ def get_dask_client(scheduler="SGE",
             memory=memory_per_worker,
             resource_spec=resource_spec,
             walltime=walltime,
+            processes=1,
         )
 
     elif scheduler == "SLURM":
@@ -135,6 +138,7 @@ def get_dask_client(scheduler="SGE",
             memory=memory_per_worker,
             resource_spec=resource_spec,
             walltime=walltime,
+            processes=1,
         )
 
     else:
