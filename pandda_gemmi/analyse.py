@@ -394,7 +394,8 @@ def process_shell(
     # Update shell log with dataset results
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
-        shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
+        if result:
+            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
 
     return ShellResult(
         shell=shell,
