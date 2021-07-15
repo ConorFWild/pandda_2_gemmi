@@ -90,8 +90,11 @@ def get_dask_client(scheduler="SGE",
                     resource_spec="",
                     walltime="1:00:00",
                     ):
+    import dask
     from dask.distributed import Client
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
+
+    dask.config.set({'distributed.worker.daemon': False})
 
     schedulers = ["HTCONDOR", "PBS", "SGE", "SLURM"]
     if scheduler not in schedulers:
