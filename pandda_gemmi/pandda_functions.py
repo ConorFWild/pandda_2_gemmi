@@ -58,7 +58,7 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
 
 
 def process_local_dask(funcs, client=None):
-    processes = client.map(run, funcs)
+    processes = [client.submit(func) for func in funcs]
     results = client.gather(processes)
     return results
 
@@ -68,7 +68,7 @@ def process_shell_dask(funcs):
 
     with worker_client() as client:
         # Multiprocess
-        processes = client.map(run, funcs)
+        processes = [client.submit(func) for func in funcs]
         results = client.gather(processes)
     return results
 
@@ -147,7 +147,7 @@ def process_global_dask(
         client=None,
 ):
     # Multiprocess
-    processes = client.map(run, funcs)
+    processes = [client.submit(func) for func in funcs]
     results = client.gather(processes)
 
     return results
