@@ -681,6 +681,8 @@ def process_pandda(
         # # Assign comparison datasets
         ###################################################################
 
+        print("Assigning comparison datasets...")
+
         # Assign comparator set for each dataset
         if comparison_strategy == "closest":
             # Closest datasets after clustering

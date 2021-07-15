@@ -255,6 +255,7 @@ def get_comparators_closest_cutoff(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
+    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
