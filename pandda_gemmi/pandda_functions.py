@@ -79,6 +79,9 @@ def process_global_dask(
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
     from cloudpickle import dumps, loads
+    print(funcs)
+    print(type(funcs))
+    print(type(funcs[0]))
     loads(dumps(funcs[0]))
     loads(dumps(funcs))
 
