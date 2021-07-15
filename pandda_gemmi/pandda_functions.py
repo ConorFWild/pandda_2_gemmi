@@ -87,7 +87,9 @@ def get_dask_client(scheduler="SGE",
                     project=None,
                     cores_per_worker=12,
                     memory_per_worker="120 GB",
-                    resource_spec=""):
+                    resource_spec="",
+                    walltime="1:00:00",
+                    ):
     from dask.distributed import Client
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
@@ -101,7 +103,8 @@ def get_dask_client(scheduler="SGE",
             project=project,
             cores=cores_per_worker,
             memory=memory_per_worker,
-            resource_spec=resource_spec
+            resource_spec=resource_spec,
+            walltime=walltime,
         )
 
     elif scheduler == "PBS":
@@ -110,7 +113,8 @@ def get_dask_client(scheduler="SGE",
             project=project,
             cores=cores_per_worker,
             memory=memory_per_worker,
-            resource_spec=resource_spec
+            resource_spec=resource_spec,
+            walltime=walltime,
         )
 
     elif scheduler == "SGE":
@@ -119,7 +123,8 @@ def get_dask_client(scheduler="SGE",
             project=project,
             cores=cores_per_worker,
             memory=memory_per_worker,
-            resource_spec=resource_spec
+            resource_spec=resource_spec,
+            walltime=walltime,
         )
 
     elif scheduler == "SLURM":
@@ -128,7 +133,8 @@ def get_dask_client(scheduler="SGE",
             project=project,
             cores=cores_per_worker,
             memory=memory_per_worker,
-            resource_spec=resource_spec
+            resource_spec=resource_spec,
+            walltime=walltime,
         )
 
     else:

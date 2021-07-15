@@ -462,6 +462,7 @@ def process_pandda(
         distributed_num_workers: int = 10,
         distributed_mem_per_worker: str = "10G",
         distributed_resource_spec: str = "m_mem_free=10G",
+        distributed_walltime="5:0:0",
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
         rank_method: str = "size",
@@ -508,7 +509,8 @@ def process_pandda(
                 project=distributed_project,
                 cores_per_worker=local_cpus,
                 memory_per_worker=distributed_mem_per_worker,
-                resource_spec=distributed_resource_spec
+                resource_spec=distributed_resource_spec,
+                walltime=distributed_walltime,
             )
             process_global = partial(
                 process_global_dask,
