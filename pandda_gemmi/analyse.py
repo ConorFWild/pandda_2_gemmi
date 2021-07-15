@@ -457,7 +457,7 @@ def process_pandda(
         local_processing: str = "multiprocessing_forkserver",
         global_processing: str = "serial",
         distributed_scheduler: str = "SGE",
-        distributed_queue: str = "high.q",
+        distributed_queue: str = "medium.q",
         distributed_project: str = "labxchem",
         distributed_num_workers: int = 10,
         distributed_mem_per_worker: str = "10G",
