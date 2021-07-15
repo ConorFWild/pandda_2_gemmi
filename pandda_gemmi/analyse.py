@@ -274,7 +274,7 @@ def process_dataset(
     dataset_log[constants.LOG_DATASET_EVENT_MAP_TIME] = time_event_map_finish - time_event_map_start
 
     return DatasetResult(
-        dtag=test_dtag,
+        dtag=test_dtag.dtag,
         events=events,
         log=dataset_log,
     )
@@ -395,7 +395,7 @@ def process_shell(
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
         if result:
-            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
+            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag.dtag] = result.log
 
     return ShellResult(
         shell=shell,
