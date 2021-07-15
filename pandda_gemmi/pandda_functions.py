@@ -60,7 +60,10 @@ def process_local_dask(funcs):
     from dask.distributed import worker_client
 
     with worker_client() as client:
-
+        # Multiprocess
+        processes = client.map(run, funcs)
+        results = client.gather(processes)
+    return results
 
 def process_global_serial(funcs):
     results = []

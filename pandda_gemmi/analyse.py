@@ -530,7 +530,7 @@ def process_pandda(
         elif local_processing == "dask":
             if global_processing != "distributed":
                 raise Exception("Global rpocessing must be distributed with local processing dask")
-            process_local = partial(process_local_dask, client=client,)
+            process_local = process_local_dask
         else:
             raise Exception()
 
