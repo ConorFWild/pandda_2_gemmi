@@ -83,13 +83,6 @@ def get_dask_client(scheduler="SGE",
     from dask.distributed import Client
     from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
-    from cloudpickle import dumps, loads
-    print(funcs)
-    print(type(funcs))
-    print(type(funcs[0]))
-    loads(dumps(funcs[0]))
-    loads(dumps(funcs))
-
     schedulers = ["HTCONDOR", "PBS", "SGE", "SLURM"]
     if scheduler not in schedulers:
         raise Exception(f"Supported schedulers are: {schedulers}")
