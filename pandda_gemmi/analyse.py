@@ -58,6 +58,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_dask,
     process_global_serial,
     process_global_dask,
+    process_shell_dask,
     get_shells,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
@@ -531,11 +532,28 @@ def process_pandda(
         elif local_processing == "dask":
             if global_processing != "distributed":
                 raise Exception("Global rpocessing must be distributed with local processing dask")
-            process_local = process_local_dask
+            process_local = partial(process_local_dask, client=client)
         else:
             raise Exception()
 
-
+        # Get shell processor
+        if local_processing == "serial":
+            raise NotImplementedError()
+            process_local_shell = ...
+        elif local_processing == "joblib":
+            process_local_shell = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
+        elif local_processing == "multiprocessing_forkserver":
+            mp.set_start_method("forkserver")
+            process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+        elif local_processing == "multiprocessing_spawn":
+            mp.set_start_method("spawn")
+            process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+        elif local_processing == "dask":
+            if global_processing != "distributed":
+                raise Exception("Global rpocessing must be distributed with local processing dask")
+            process_local_shell = process_shell_dask
+        else:
+            raise Exception()
 
         # Set up autobuilding
         if autobuild:
@@ -555,7 +573,7 @@ def process_pandda(
         # Parameterise
         process_shell_paramaterised = partial(
             process_shell,
-            process_local=process_local,
+            process_local=process_local_shell,
             structure_factors=structure_factors,
             sample_rate=sample_rate,
             contour_level=contour_level,
