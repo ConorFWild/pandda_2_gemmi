@@ -106,6 +106,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
+            nanny=False,
         )
 
     elif scheduler == "PBS":
@@ -117,6 +118,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
+            nanny=False,
         )
 
     elif scheduler == "SGE":
@@ -128,6 +130,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
+            nanny=False,
         )
 
     elif scheduler == "SLURM":
@@ -139,6 +142,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
+            nanny=False,
         )
 
     else:

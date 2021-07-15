@@ -501,8 +501,8 @@ def process_pandda(
         if global_processing == "serial":
             process_global = process_global_serial
         elif global_processing == "distributed":
-            if local_processing != "dask":
-                raise Exception("Local processing option must be dask with distribution")
+            # if local_processing != "dask":
+            #     raise Exception("Local processing option must be dask with distribution")
             client = get_dask_client(
                 scheduler=distributed_scheduler,
                 num_workers=distributed_num_workers,
@@ -531,10 +531,10 @@ def process_pandda(
             process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
         elif local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
-            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
         elif local_processing == "dask":
-            if global_processing != "distributed":
-                raise Exception("Global rpocessing must be distributed with local processing dask")
+            # if global_processing != "distributed":
+            #     raise Exception("Global rpocessing must be distributed with local processing dask")
             process_local = partial(process_local_dask, client=client)
         else:
             raise Exception()
@@ -550,10 +550,10 @@ def process_pandda(
             process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
         elif local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
-            process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+            process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
         elif local_processing == "dask":
-            if global_processing != "distributed":
-                raise Exception("Global rpocessing must be distributed with local processing dask")
+            # if global_processing != "distributed":
+            #     raise Exception("Global rpocessing must be distributed with local processing dask")
             process_local_shell = process_shell_dask
         else:
             raise Exception()
