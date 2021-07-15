@@ -4844,7 +4844,7 @@ class DatasetDir:
             source_ligand_pdb = None
 
         try:
-            source_ligand_smiles = path.rglob(ligand_smiles_regex)
+            source_ligand_smiles = next(path.rglob(ligand_smiles_regex))
         except:
             source_ligand_smiles = None
 
