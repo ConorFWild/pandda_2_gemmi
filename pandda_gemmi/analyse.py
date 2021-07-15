@@ -762,7 +762,7 @@ def process_pandda(
         )
         time_shells_finish = time.time()
         print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
-        pandda_log[constants.LOG_SHELLS] = {res: shell_result.log for res, shell_result in zip(shells, shell_results)}
+        pandda_log[constants.LOG_SHELLS] = {res: shell_result.log for res, shell_result in zip(shells, shell_results) if shell_result}
 
         all_events = {}
         for shell_result in shell_results:
