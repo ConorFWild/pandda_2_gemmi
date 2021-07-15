@@ -461,7 +461,7 @@ def process_pandda(
         distributed_project: str = "labxchem",
         distributed_num_workers: int = 10,
         distributed_mem_per_worker: str = "10G",
-        distributed_resource_spec: str = "m_mem_free=10G,h_vmem=20G",
+        distributed_resource_spec: str = "m_mem_free=10G",
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
         rank_method: str = "size",
