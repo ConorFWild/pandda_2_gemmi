@@ -273,13 +273,15 @@ def get_comparators_closest_cutoff(
     )
 
     results = process_local(
-        partial(
+        [
+            partial(
             load_xmap_paramaterised,
             shell_truncated_datasets[key],
             alignments[key],
         )
         for key
         in shell_truncated_datasets
+            ]
     )
 
     # Get the maps as arrays
