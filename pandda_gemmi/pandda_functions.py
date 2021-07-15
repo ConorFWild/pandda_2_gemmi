@@ -122,7 +122,7 @@ def get_dask_client(scheduler="SGE",
         )
 
     elif scheduler == "SGE":
-        extra = f"-pe smp {cores_per_worker}"
+        extra = [f"-pe smp {cores_per_worker}",]
         cluster = SGECluster(
             queue=queue,
             project=project,
