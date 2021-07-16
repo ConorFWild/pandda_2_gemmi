@@ -503,8 +503,6 @@ def process_pandda(
         if global_processing == "serial":
             process_global = process_global_serial
         elif global_processing == "distributed":
-            # if local_processing != "dask":
-            #     raise Exception("Local processing option must be dask with distribution")
             client = get_dask_client(
                 scheduler=distributed_scheduler,
                 num_workers=distributed_num_workers,
@@ -534,31 +532,8 @@ def process_pandda(
         elif local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
             process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        elif local_processing == "dask":
-            # if global_processing != "distributed":
-            #     raise Exception("Global rpocessing must be distributed with local processing dask")
-            process_local = partial(process_local_dask, client=client)
         else:
             raise Exception()
-
-        # # Get shell processor
-        # if local_processing == "serial":
-        #     raise NotImplementedError()
-        #     process_local_shell = ...
-        # elif local_processing == "joblib":
-        #     process_local_shell = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
-        # elif local_processing == "multiprocessing_forkserver":
-        #     mp.set_start_method("forkserver")
-        #     process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        # elif local_processing == "multiprocessing_spawn":
-        #     mp.set_start_method("spawn")
-        #     process_local_shell = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        # elif local_processing == "dask":
-        #     # if global_processing != "distributed":
-        #     #     raise Exception("Global rpocessing must be distributed with local processing dask")
-        #     process_local_shell = process_shell_dask
-        # else:
-        #     raise Exception()
 
         # Set up autobuilding
         if autobuild:
@@ -778,17 +753,35 @@ def process_pandda(
         # # Autobuilding
         ###################################################################
 
+        # TODO: remove thjis code to generate test data
+        for event_id, event in all_events.items():
+            pickle.dump(event, out_dir / f"event_{event_id}.pickle")
+            pickle.dump(datasets[event_id.dtag], out_dir / f"dataset_{event_id.dtag}.pickle")
+            pickle.dump(pandda_fs_model, out_dir / f"pandda_fs_model.pickle")
+
         # Autobuild the results if set to
         if autobuild:
-            autobuild_results: Dict[EventID, AutobuildResult] = process_global(
+            autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
                 [
                     partial(
-                        autobuild_parametrized(event),
+                        autobuild_parametrized(
+                            event,
+                        ),
                     )
-                    for result
-                    in shell_results
+                    for event
+                    in all_events
                 ]
             )
+
+            autobuild_results = {
+                event_id: autobuild_result
+                for event_id, autobuild_result
+                in zip(all_events, autobuild_results_list)
+            }
+
+            # Add the best fragment by scoring method to default model
+            for event_id, autobuild_result in autobuild_results.items():
+                save_best_fragment_model(autobuild_result, dataset[event_id.dtag])
 
         ###################################################################
         # # Rank Events
@@ -834,6 +827,7 @@ def process_pandda(
         print(f"PanDDA ran in: {time_finish-time_start}")
 
         # Output json log
+        printer.pprint(pandda_log)
         save_json_log(
             pandda_log,
             out_dir / constants.PANDDA_LOG_FILE,

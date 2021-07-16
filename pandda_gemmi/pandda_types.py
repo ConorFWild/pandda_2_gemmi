@@ -5245,3 +5245,10 @@ class ShellResult:
     shell: Shell
     dataset_results: Dict[Dtag, DatasetResult]
     log: Dict
+
+
+@dataclasses.dataclass()
+class AutobuildResult:
+    paths: List[str]
+    scores: Dict[str, float]
+    cif_path: str
