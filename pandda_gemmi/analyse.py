@@ -395,7 +395,7 @@ def process_shell(
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
         if result:
-            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag.dtag] = result.log
+            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
 
     return ShellResult(
         shell=shell,
