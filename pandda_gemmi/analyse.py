@@ -36,6 +36,7 @@ import fire
 import numpy as np
 import gemmi
 import joblib
+import pickle
 
 ## Custom Imports
 from pandda_gemmi.logs import (
