@@ -106,6 +106,16 @@ RHOFIT_COMMAND = (
     "source ~/.bashrc \n"
     "{pandda_rhofit} -map {event_map} -mtz {mtz} -pdb {pdb} -cif {cif} -out {out_dir}"
 )
+MASKED_PDB_FILE = "masked.pdb"
+TRUNCATED_EVENT_MAP_FILE = "truncated.ccp4"
+CUT_EVENT_MAP_FILE = "cut.ccp4"
+ELBOW_COMMAND = "{phenix_setup}; cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
+LIGAND_PREFIX = "ligand"
+LIGAND_CIF_FILE = "ligand.cif"
+
+###################################################################
+# # Autobuild constants
+###################################################################
 
 MISSES = [
     "BAZ2BA-x447",

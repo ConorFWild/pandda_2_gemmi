@@ -14,7 +14,7 @@ def main(
     event = pickle.load(event_pickle_path)
     pandda_fs = pickle.load(pandda_fs_pickle_path)
 
-    autobuild_rhofit(dataset, event, pandda_fs_pickle_path)
+    autobuild_rhofit(dataset, event, pandda_fs)
 
 
 if __name__ == "__main__":

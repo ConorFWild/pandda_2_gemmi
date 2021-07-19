@@ -91,7 +91,7 @@ def truncate_model(model_path: Path, coords: Coord, out_dir: Path):
 
     # Write
     masked_pdb_file = save_pdb_file(masked_pdb,
-                                    out_dir / Constants.MASKED_PDB_FILE,
+                                    out_dir / constants.MASKED_PDB_FILE,
                                     )
 
     # Return
@@ -204,7 +204,7 @@ def truncate_xmap(xmap_path: Path, coords: Coord, out_dir: Path):
 
     # Save cut out event
     cut_out_event_map_file: Path = save_xmap(cut_out_event_map,
-                                             out_dir / Constants.TRUNCATED_EVENT_MAP_FILE,
+                                             out_dir / constants.TRUNCATED_EVENT_MAP_FILE,
                                              )
 
     return cut_out_event_map_file
@@ -259,7 +259,7 @@ def cut_out_xmap(xmap_path: Path, coords: Coord, out_dir: Path):
     # Save cut out event
     cut_out_event_map_file: Path = save_cut_xmap(ccp4_map,
                                                  bounding_box,
-                                                 out_dir / Constants.CUT_EVENT_MAP_FILE,
+                                                 out_dir / constants.CUT_EVENT_MAP_FILE,
                                                  )
 
     return cut_out_event_map_file
@@ -270,10 +270,10 @@ def cut_out_xmap(xmap_path: Path, coords: Coord, out_dir: Path):
 # #####################
 
 def get_elbow_command(smiles_file: Path, out_dir: Path, phenix_setup) -> str:
-    command = Constants.ELBOW_COMMAND.format(phenix_setup=phenix_setup,
+    command = constants.ELBOW_COMMAND.format(phenix_setup=phenix_setup,
                                              out_dir=str(out_dir),
                                              smiles_file=str(smiles_file),
-                                             prefix=Constants.LIGAND_PREFIX, )
+                                             prefix=constants.LIGAND_PREFIX, )
     return command
 
 
@@ -284,7 +284,7 @@ def generate_cif(smiles_path: Path, out_dir: Path, phenix_setup):
     # Run the command
     execute(elbow_command)
 
-    return out_dir / Constants.LIGAND_CIF_FILE
+    return out_dir / constants.LIGAND_CIF_FILE
 
 
 # #####################
@@ -382,9 +382,65 @@ def save_score_dictionary(score_dictionary, path):
     with open(str(path), "w") as f:
         json.dump(score_dictionary, f)
 
+# #####################
+# # Core autobuilding
+# #####################
+# def _autobuild(
+#         model: str,
+#         xmap: str,
+#         mtz: str,
+#         cif_path: str,
+#         x: float,
+#         y: float,
+#         z: float,
+#         out_dir: str,
+# ):
+#     # Type all the input variables
+#     model_path = Path(model)
+#     xmap_path = Path(xmap)
+#     mtz_path = Path(mtz)
+#     smiles_path = Path(smiles)
+#     out_dir = Path(out_dir)
+#     coords = Coord(x, y, z)
+#
+#     # Truncate the model
+#     truncated_model_path = truncate_model(model_path, coords, out_dir)
+#     print(f"\tTruncated model")
+#
+#     # Truncate the ed map
+#     truncated_xmap_path = truncate_xmap(xmap_path, coords, out_dir)
+#     print(f"\tTruncated xmap")
+#
+#     # Make cut out map
+#     cut_out_xmap(xmap_path, coords, out_dir)
+#     print(f"\tCut out xmap")
+#
+#     # Generate the cif
+#     cif_path = generate_cif(smiles_path, out_dir, phenix_setup)
+#     print(f"\tGenerated cif")
+#
+#     # Call rhofit
+#     rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir,
+#               phenix_setup, rhofit_setup,)
+#     print(f"\tRhofit")
+#
+#     # Score rhofit builds
+#     score_dictionary = score_builds(out_dir / "rhofit", xmap_path)
+#     print(f"\tRescored")
+#     for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
+#         print(f"\t\t{score_dictionary[path]}: {path}")
+#
+#     # Write scores
+#     save_score_dictionary(score_dictionary, out_dir / "scores.json")
+#     print(f"\tSaved scores")
+#
+#     # Remove the big map
+#     print(f"Removing truncated map")
+#     os.remove(str(truncated_xmap_path))
+
 
 # #####################
-# # Autobuild
+# # Autobuild from pandda
 # #####################
 
 def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
