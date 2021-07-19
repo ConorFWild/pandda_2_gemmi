@@ -761,11 +761,11 @@ def process_pandda(
 
         # TODO: remove thjis code to generate test data
         for event_id, event in all_events.items():
-            with open(str(out_dir / f"event_{event_id}.pickle"), "w") as f:
+            with open(str(out_dir / f"event_{event_id}.pickle"), "wb") as f:
                 pickle.dump(event, f)
-            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle"), "w") as f:
+            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle"), "wb") as f:
                 pickle.dump(datasets[event_id.dtag], f)
-            with open(str(out_dir / f"pandda_fs_model.pickle"), "w") as f:
+            with open(str(out_dir / f"pandda_fs_model.pickle"), "wb") as f:
                 pickle.dump(pandda_fs_model, f)
 
         # Autobuild the results if set to
