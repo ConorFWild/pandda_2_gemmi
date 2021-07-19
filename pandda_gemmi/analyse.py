@@ -450,14 +450,16 @@ def process_pandda(
         max_bdc: float = 1.0,
         increment: float = 0.05,
         output_multiplier: float = 2.0,
-        local_cpus: int = 12,
-        job_params_file: Optional[str] = None,
         comparison_strategy: str = "closest_cutoff",
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
+        # Processing settings
         local_processing: str = "multiprocessing_forkserver",
+        local_cpus: int = 12,
         global_processing: str = "serial",
+        job_params_file: Optional[str] = None,
+        # Distributed settings
         distributed_scheduler: str = "SGE",
         distributed_queue: str = "medium.q",
         distributed_project: str = "labxchem",
@@ -466,9 +468,12 @@ def process_pandda(
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
         distributed_walltime="5:0:0",
+        # Autobuild settings
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
+        # Ranking settings
         rank_method: str = "size",
+        # Debug settings
         debug: bool = True,
 ):
 
@@ -756,11 +761,11 @@ def process_pandda(
 
         # TODO: remove thjis code to generate test data
         for event_id, event in all_events.items():
-            with open(str(out_dir / f"event_{event_id}.pickle")) as f:
+            with open(str(out_dir / f"event_{event_id}.pickle"), "w") as f:
                 pickle.dump(event, f)
-            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle")) as f:
+            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle"), "w") as f:
                 pickle.dump(datasets[event_id.dtag], f)
-            with open(str(out_dir / f"pandda_fs_model.pickle")) as f:
+            with open(str(out_dir / f"pandda_fs_model.pickle"), "w") as f:
                 pickle.dump(pandda_fs_model, f)
 
         # Autobuild the results if set to
