@@ -100,6 +100,8 @@ def process_dataset(
         print(f"\t447 is not {test_dtag} ")
         return None
 
+    time_dataset_start = time.time()
+
     dataset_log = {}
     dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[test_dtag]]
 
@@ -128,7 +130,7 @@ def process_dataset(
                                                                  mean_array,
                                                                  1.5,
                                                                  )  # size of n
-    dataset_log[constants.LOG_DATASET_SIGMA_I] = {_dtag.dtag: sigma_i for _dtag, sigma_i in sigma_is.items()}
+    dataset_log[constants.LOG_DATASET_SIGMA_I] = {_dtag.dtag: float(sigma_i) for _dtag, sigma_i in sigma_is.items()}
 
     print("fitting sigma s m")
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
@@ -274,6 +276,9 @@ def process_dataset(
     time_event_map_finish = time.time()
     dataset_log[constants.LOG_DATASET_EVENT_MAP_TIME] = time_event_map_finish - time_event_map_start
 
+    time_dataset_finish = time.time()
+    dataset_log[constants.LOG_DATASET_TIME] = time_dataset_finish - time_dataset_start
+
     return DatasetResult(
         dtag=test_dtag.dtag,
         events=events,
@@ -299,6 +304,7 @@ def process_shell(
         outer_mask,
         inner_mask_symmetry,
 ):
+    time_shell_start = time.time()
     shell_log = {}
 
     if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
@@ -397,6 +403,9 @@ def process_shell(
     for result in results:
         if result:
             shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
+
+    time_shell_finish = time.time()
+    shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
 
     return ShellResult(
         shell=shell,
