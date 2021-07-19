@@ -46,7 +46,7 @@ from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
     Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
     XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
-    Events, SiteTable, EventTable,
+    EventID, Event, Events, SiteTable, EventTable,
     StructureFactors, Xmap,
     DatasetResult, ShellResult,
 )
@@ -753,14 +753,23 @@ def process_pandda(
         )
         time_shells_finish = time.time()
         print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
-        pandda_log[constants.LOG_SHELLS] = {res: shell_result.log for res, shell_result in zip(shells, shell_results) if shell_result}
+        pandda_log[constants.LOG_SHELLS] = {
+            res: shell_result.log
+            for res, shell_result
+            in zip(shells, shell_results)
+            if shell_result
+        }
 
-        all_events = {}
+        all_events: Dict[EventId, Event] = {}
         for shell_result in shell_results:
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
                     print(type(dataset_result.events))
                     all_events.update(dataset_result.events.events)
+
+        # Add the event maps to the fs
+        for event_id, event in all_events.items():
+            pandda_fs_model.processed_datasets[event_id.dtag].event_map_files.add_event(event)
 
         printer.pprint(all_events)
 
