@@ -10,9 +10,12 @@ def main(
         event_pickle_path,
         pandda_fs_pickle_path
 ):
-    dataset = pickle.load(dataset_pickle_path)
-    event = pickle.load(event_pickle_path)
-    pandda_fs = pickle.load(pandda_fs_pickle_path)
+    with open(dataset_pickle_path, "rb") as f:
+        dataset = pickle.load(f)
+    with open(event_pickle_path, "rb") as f:
+        event = pickle.load(f)
+    with open(pandda_fs_pickle_path, "rb") as f:
+        pandda_fs = pickle.load(f)
 
     autobuild_rhofit(dataset, event, pandda_fs)
 
