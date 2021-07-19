@@ -5,10 +5,10 @@
 # 2. [ x ] Check zmaps match up after normalisation
 # 4. [ x ] Check event table and site table make sense
 # 5. [ x ] Make sure PanDDA inspect works
-# 8. [ ] Check dask submission works on diamond
+# 8. [ x ] Check dask submission works on diamond
 
 # Maybe
-# 11. [ ] Email Marcin about cutout maps (mapmask or gemmi)
+# 11. [ x ] Email Marcin about cutout maps (mapmask or gemmi)
 # 7. [ ] Get autobuilding working
 
 # More optional
@@ -101,7 +101,7 @@ def process_dataset(
         return None
 
     dataset_log = {}
-    dataset_log[constants.LOG_DATASET_TRAIN] = shell.train_dtags[test_dtag]
+    dataset_log[constants.LOG_DATASET_TRAIN] = list(shell.train_dtags[test_dtag])
 
     masked_xmap_array = XmapArray.from_xmaps(
         dataset_xmaps,
@@ -756,9 +756,12 @@ def process_pandda(
 
         # TODO: remove thjis code to generate test data
         for event_id, event in all_events.items():
-            pickle.dump(event, out_dir / f"event_{event_id}.pickle")
-            pickle.dump(datasets[event_id.dtag], out_dir / f"dataset_{event_id.dtag}.pickle")
-            pickle.dump(pandda_fs_model, out_dir / f"pandda_fs_model.pickle")
+            with open(str(out_dir / f"event_{event_id}.pickle")) as f:
+                pickle.dump(event, f)
+            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle")) as f:
+                pickle.dump(datasets[event_id.dtag], f)
+            with open(str(out_dir / f"pandda_fs_model.pickle")) as f:
+                pickle.dump(pandda_fs_model, f)
 
         # Autobuild the results if set to
         if autobuild:
@@ -845,6 +848,7 @@ def process_pandda(
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
         print(f"Saving PanDDA log to: {out_dir / constants.PANDDA_LOG_FILE}")
+
         save_json_log(pandda_log,
                       out_dir / constants.PANDDA_LOG_FILE)
 
