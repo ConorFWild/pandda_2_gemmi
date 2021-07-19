@@ -514,7 +514,7 @@ def summarise_event(event: Event):
 
 def summarise_array(array):
     summary = {
-        "Shape": float(array.shape),
+        "Shape": array.shape,
         "Mean": float(np.mean(array)),
         "std": float(np.std(array)),
         "min": float(np.min(array)),
