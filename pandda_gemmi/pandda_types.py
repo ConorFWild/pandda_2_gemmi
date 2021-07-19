@@ -3216,17 +3216,17 @@ class Model:
         # sigma_i_array[n]
         #
 
-        # func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
+        func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
         #
         # shape = mean.shape
         # num = len(sigma_is_array)
 
-        # sigma_ms_bisect = Model.vectorised_optimisation_bisect(func,
-        #                                                 0,
-        #                                                 20,
-        #                                                 31,
-        #                                                 arrays.shape
-        #                                                 )
+        sigma_ms = Model.vectorised_optimisation_bisect(func,
+                                                        0,
+                                                        20,
+                                                        31,
+                                                        arrays.shape
+                                                        )
 
         # print(sigma_ms.shape)
         # print([np.max(sigma_ms), np.min(sigma_ms), np.std(sigma_ms), np.mean(sigma_ms)])
@@ -3234,42 +3234,42 @@ class Model:
         # print(mean.shape)
         # print(arrays.shape)
         # print(sigma_ms.shape)
-
-        sigma_ms = np.zeros(mean.shape)
-        for x in np.ndindex(*mean.shape):
-            # print("#######")
-            # print([x])
-            # print(f"Vectorised bisec gives: {sigma_ms[x]}")
-            _mean = np.array((mean[x],))
-            # print(_mean)
-            _array = arrays[:, x, ].flatten()
-            # print(_array)
-            _sigma_i = sigma_is_array.flatten()
-            # print(_sigma_i)
-            #
-            # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
-
-            # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
-            # start = time.time()
-            result_root = optimize.root(
-                partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                x0=np.power(2.0, -20),
-            )
-            # finish = time.time()
-            # print(f"Root found in {finish-start}")
-
-            # start = time.time()
-            # result_min = optimize.minimize(
-            #     partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-            #     np.array((np.power(2.0, -20.0),),),
-            #     bounds=((0.0, 20.0,),)
-            # )
-            # finish = time.time()
-            # print(f"Minimised in {finish-start}")
-
-            # print([sigma_ms_bisect[x], result_root.x, result_min.x,])
-            # print([result.x, sigma_ms[x], result.fun])
-            sigma_ms[x] = np.abs(result_root.x)
+        #
+        # sigma_ms = np.zeros(mean.shape)
+        # for x in np.ndindex(*mean.shape):
+        #     # print("#######")
+        #     # print([x])
+        #     # print(f"Vectorised bisec gives: {sigma_ms[x]}")
+        #     _mean = np.array((mean[x],))
+        #     # print(_mean)
+        #     _array = arrays[:, x, ].flatten()
+        #     # print(_array)
+        #     _sigma_i = sigma_is_array.flatten()
+        #     # print(_sigma_i)
+        #     #
+        #     # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
+        #
+        #     # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
+        #     # start = time.time()
+        #     result_root = optimize.root(
+        #         partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+        #         x0=np.power(2.0, -20),
+        #     )
+        #     # finish = time.time()
+        #     # print(f"Root found in {finish-start}")
+        #
+        #     # start = time.time()
+        #     # result_min = optimize.minimize(
+        #     #     partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+        #     #     np.array((np.power(2.0, -20.0),),),
+        #     #     bounds=((0.0, 20.0,),)
+        #     # )
+        #     # finish = time.time()
+        #     # print(f"Minimised in {finish-start}")
+        #
+        #     # print([sigma_ms_bisect[x], result_root.x, result_min.x,])
+        #     # print([result.x, sigma_ms[x], result.fun])
+        #     sigma_ms[x] = np.abs(result_root.x)
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,

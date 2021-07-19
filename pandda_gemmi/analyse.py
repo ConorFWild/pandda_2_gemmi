@@ -101,7 +101,7 @@ def process_dataset(
         return None
 
     dataset_log = {}
-    dataset_log[constants.LOG_DATASET_TRAIN] = list(shell.train_dtags[test_dtag])
+    dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[test_dtag]]
 
     masked_xmap_array = XmapArray.from_xmaps(
         dataset_xmaps,
@@ -128,7 +128,7 @@ def process_dataset(
                                                                  mean_array,
                                                                  1.5,
                                                                  )  # size of n
-    dataset_log[constants.LOG_DATASET_SIGMA_I] = sigma_is
+    dataset_log[constants.LOG_DATASET_SIGMA_I] = {_dtag.dtag: sigma_i for _dtag, sigma_i in sigma_is.items()}
 
     print("fitting sigma s m")
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
