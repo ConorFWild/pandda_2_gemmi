@@ -3216,7 +3216,7 @@ class Model:
         # sigma_i_array[n]
         #
 
-        func = partial(Model.log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
+        func = partial(Model.differentiated_log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
         #
         # shape = mean.shape
         # num = len(sigma_is_array)
