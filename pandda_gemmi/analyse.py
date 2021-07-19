@@ -854,6 +854,10 @@ def process_pandda(
 
         print(f"Saving PanDDA log to: {out_dir / constants.PANDDA_LOG_FILE}")
 
+        printer.pprint(
+            pandda_log
+        )
+
         save_json_log(pandda_log,
                       out_dir / constants.PANDDA_LOG_FILE)
 
