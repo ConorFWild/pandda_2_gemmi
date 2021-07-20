@@ -139,7 +139,7 @@ def get_cut_out_event_map(
         position = gemmi.Position(*position_python)
         mask_grid.set_points_around(position,
                                     radius=radius,
-                                    value=1.0,
+                                    value=1,
                                     )
     mask_grid.symmetrize_max()
 
@@ -474,7 +474,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # smiles_path = Path(smiles_path)
     # cif_path = Path(cif_path)
     out_dir = Path(out_dir)
-    print(f"\tCoord: {event.native_centroid}")
+    print(f"\tEvent native centroid: {event.native_centroid}")
     coord = Coord(
         event.native_centroid[0],
         event.native_centroid[1],
