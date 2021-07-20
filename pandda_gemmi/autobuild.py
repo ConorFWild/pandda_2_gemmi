@@ -450,7 +450,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     model_path = dataset.structure.path
     mtz_path = dataset.reflections.path
     cif_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_cif
-    smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].
+    smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_smiles
 
     model_path = Path(model_path)
     xmap_path = Path(xmap_path)
