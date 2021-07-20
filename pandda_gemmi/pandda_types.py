@@ -3973,7 +3973,7 @@ class Clusterings:
                                              for i
                                              in [0, 1, 2]
                                              )
-                cluster_positions_array = np.vstack([current_cluster.position_array
+                cluster_positions_array = np.vstack([current_cluster.cluster_positions_array
                                                       for current_cluster
                                                       in current_clusters])
 
