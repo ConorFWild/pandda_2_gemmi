@@ -2274,7 +2274,7 @@ class Alignment:
         for pos, ind in zip(positions, inds):
             transform = transforms_list[ind]
             transformed_pos = transform.apply_reference_to_moving({(0, 0, 0): gemmi.Position(*pos), })[(0, 0, 0)]
-            results.append([transformed_pos.x, transformed_pos.y, transformed_pos.z])
+            results.append((transformed_pos.x, transformed_pos.y, transformed_pos.z,))
 
         return results
 
@@ -4290,7 +4290,7 @@ class Events:
                             (cluster.centroid[0],
                          cluster.centroid[1],
                          cluster.centroid[2],)).reshape(-1, 3)
-                    )
+                    )[0]
 
                     # Get native event mask
                     event_positions = []
