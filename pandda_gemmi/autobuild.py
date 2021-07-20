@@ -103,7 +103,7 @@ def truncate_model(model_path: Path, coords: Coord, out_dir: Path):
 # #####################
 
 
-def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: Coord, radius: float = 1.5) -> gemmi.FloatGrid:
+def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: List[Tuple[float, float, float]], radius: float = 1.5) -> gemmi.FloatGrid:
     xmap_array = np.array(event_map, copy=True)
 
     mask_grid = gemmi.Int8Grid(*xmap_array.shape)
@@ -196,7 +196,7 @@ def save_xmap(event_map,
     return path
 
 
-def truncate_xmap(xmap_path: Path, coords: Coord, out_dir: Path):
+def truncate_xmap(xmap_path: Path, coords: List[Tuple[float, float, float]], out_dir: Path):
     event_map: gemmi.FloatGrid = get_event_map(xmap_path)
 
     # Cut out events:
@@ -250,11 +250,11 @@ def save_cut_xmap(event_ccp4,
     return path
 
 
-def cut_out_xmap(xmap_path: Path, coords: Coord, out_dir: Path):
+def cut_out_xmap(xmap_path: Path, coord: Coord, out_dir: Path):
     ccp4_map = get_ccp4_map(xmap_path)
 
     # Cut out events:
-    bounding_box = get_bounding_box(ccp4_map, coords)
+    bounding_box = get_bounding_box(ccp4_map, coord)
 
     # Save cut out event
     cut_out_event_map_file: Path = save_cut_xmap(ccp4_map,
@@ -460,14 +460,15 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # cif_path = Path(cif_path)
     out_dir = Path(out_dir)
     print(f"\tCoord: {event.native_centroid}")
-    coords = Coord(
+    coord = Coord(
         event.native_centroid[0],
         event.native_centroid[1],
         event.native_centroid[2],
     )
+    coords = event.native_positions
 
     # Truncate the model
-    truncated_model_path = truncate_model(model_path, coords, out_dir)
+    truncated_model_path = truncate_model(model_path, coord, out_dir)
     print(f"\tTruncated model")
 
     # Truncate the ed map
@@ -475,7 +476,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     print(f"\tTruncated xmap")
 
     # Make cut out map
-    cut_out_xmap(xmap_path, coords, out_dir)
+    cut_out_xmap(xmap_path, coord, out_dir)
     print(f"\tCut out xmap")
 
     # Generate the cif
