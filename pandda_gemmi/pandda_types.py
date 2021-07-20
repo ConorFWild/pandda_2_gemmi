@@ -3610,6 +3610,7 @@ class ClusterID:
 @dataclasses.dataclass()
 class Cluster:
     indexes: typing.Tuple[np.ndarray]
+    cluster_positions_array: np.array
     values: np.ndarray
     centroid: Tuple[float, float, float]
     event_mask_indicies: np.ndarray
@@ -3771,6 +3772,7 @@ class Clustering:
                         centroid_array[2],)
 
             cluster = Cluster(cluster_points_tuple,
+                              cluster_positions_array,
                               values,
                               centroid,
                               event_mask_indicies,
@@ -3971,6 +3973,10 @@ class Clusterings:
                                              for i
                                              in [0, 1, 2]
                                              )
+                cluster_positions_array = np.vstack([current_cluster.position_array
+                                                      for current_cluster
+                                                      in current_clusters])
+
                 cluster_positions_list = [current_cluster.centroid
                                           for current_cluster
                                           in current_clusters
@@ -3999,8 +4005,11 @@ class Clusterings:
                     in [0, 1, 2]
                 )
 
+
+
                 new_cluster = Cluster(
                     cluster_points_tuple,
+                    cluster_positions_array,
                     values,
                     centroid,
                     event_mask_indicies,
@@ -4293,12 +4302,12 @@ class Events:
                     )[0]
 
                     # Get native event mask
-                    event_positions = []
-                    for x, y, z in zip(cluster.indexes[1], cluster.indexes[1], cluster.indexes[2]):
-                        position = grid.grid.point_to_position(grid.grid.get_point(x, y, z))
-                        event_positions.append([position.x, position.y, position.z])
+                    # event_positions = []
+                    # for cluster_position in cluster.position_array:
+                    #     position = grid.grid.point_to_position(grid.grid.get_point(x, y, z))
+                    #     event_positions.append([position.x, position.y, position.z])
 
-                    native_positions = alignment.reference_to_moving(np.array(event_positions))
+                    native_positions = alignment.reference_to_moving(cluster.cluster_positions_array)
 
                     event = Event.from_cluster(event_id,
                                                cluster,
