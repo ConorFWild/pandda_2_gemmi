@@ -461,7 +461,8 @@ def save_score_dictionary(score_dictionary, path):
 def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
-    xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
+    # xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
+    xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
