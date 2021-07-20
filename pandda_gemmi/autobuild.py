@@ -459,6 +459,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     # smiles_path = Path(smiles_path)
     # cif_path = Path(cif_path)
     out_dir = Path(out_dir)
+    print(f"\tCoord: {event.native_centroid}")
     coords = Coord(
         event.native_centroid[0],
         event.native_centroid[1],
