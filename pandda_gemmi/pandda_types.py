@@ -4938,7 +4938,7 @@ class ProcessedDataset:
             event_map_files=event_map_files,
             source_ligand_cif=source_ligand_cif,
             source_ligand_pdb=source_ligand_pdb,
-            source_ligands_smiles=source_ligand_smiles,
+            source_ligand_smiles=source_ligand_smiles,
             input_ligand_cif=input_ligand_cif,
             input_ligand_pdb=input_ligand_pdb,
             input_ligand_smiles=input_ligand_smiles,
