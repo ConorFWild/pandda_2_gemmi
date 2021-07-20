@@ -51,6 +51,13 @@ def get_masked_pdb(pdb: gemmi.Structure, coord: Coord, radius: float = 8.0) -> g
         coord.z,
     )
 
+    ns = gemmi.NeighborSearch(pdb[0], pdb.cell, radius).populate()
+
+    marks = ns.find_atoms(event_centoid, radius=radius)
+    # cras = [mark.to_cra(pdb[0]) for mark in marks]
+    for mark in marks:
+        mark.to_cra(pdb[0]).atom.flag = 's'
+
     new_structure = gemmi.Structure()
 
     for model_i, model in enumerate(pdb):
@@ -72,8 +79,10 @@ def get_masked_pdb(pdb: gemmi.Structure, coord: Coord, radius: float = 8.0) -> g
 
                 for atom_i, atom in enumerate(residue):
                     pos = atom.pos
-                    if pos.dist(event_centoid) > radius:
-                        new_structure[model_i][chain_i][residue_i].add_atom(atom, pos=-1)
+                    # if pos.dist(event_centoid) > radius:
+                    if atom.flag == "s":
+                        continue
+                    new_structure[model_i][chain_i][residue_i].add_atom(atom, pos=-1)
 
     for model_i, model in enumerate(pdb):
         pdb.add_model(new_structure[model_i], pos=-1)
