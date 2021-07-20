@@ -4817,7 +4817,7 @@ class DatasetDir:
     ligand_dir: Union[LigandDir, None]
     source_ligand_cif: Union[Path, None]
     source_ligand_pdb: Union[Path, None]
-    souce_ligand_smiles: Optional[Path]
+    source_ligand_smiles: Optional[Path]
 
     @staticmethod
     def from_path(path: Path, pdb_regex: str, mtz_regex: str, ligand_cif_regex: str, ligand_pdb_regex: str,
@@ -4853,7 +4853,7 @@ class DatasetDir:
                           ligand_dir=ligand_dir,
                           source_ligand_cif=source_ligand_cif,
                           source_ligand_pdb=source_ligand_pdb,
-                          souce_ligand_smiles=source_ligand_smiles
+                          source_ligand_smiles=source_ligand_smiles
                           )
 
 
