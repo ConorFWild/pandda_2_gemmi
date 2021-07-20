@@ -4896,8 +4896,10 @@ class ProcessedDataset:
     event_map_files: EventMapFiles
     source_ligand_cif: Union[Path, None]
     source_ligand_pdb: Union[Path, None]
+    source_ligand_smiles: Optional[Path]
     input_ligand_cif: Path
     input_ligand_pdb: Path
+    input_ligand_smiles: Path
     source_ligand_dir: Union[LigandDir, None]
     input_ligand_dir: Path
 
@@ -4911,11 +4913,13 @@ class ProcessedDataset:
         source_pdb = dataset_dir.input_pdb_file
         source_ligand_cif = dataset_dir.source_ligand_cif
         source_ligand_pdb = dataset_dir.source_ligand_pdb
+        source_ligand_smiles = dataset_dir.source_ligand_smiles
 
         input_mtz = processed_dataset_dir / PANDDA_MTZ_FILE.format(dtag)
         input_pdb = processed_dataset_dir / PANDDA_PDB_FILE.format(dtag)
         input_ligand_cif = processed_dataset_dir / PANDDA_LIGAND_CIF_FILE
         input_ligand_pdb = processed_dataset_dir / PANDDA_LIGAND_PDB_FILE
+        input_ligand_smiles = processed_dataset_dir / PANDDA_LIGAND_SMILES_FILE
 
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
         event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
@@ -4934,8 +4938,10 @@ class ProcessedDataset:
             event_map_files=event_map_files,
             source_ligand_cif=source_ligand_cif,
             source_ligand_pdb=source_ligand_pdb,
+            source_ligands_smiles=source_ligand_smiles,
             input_ligand_cif=input_ligand_cif,
             input_ligand_pdb=input_ligand_pdb,
+            input_ligand_smiles=input_ligand_smiles,
             source_ligand_dir=source_ligand_dir,
             input_ligand_dir=input_ligand_dir,
         )
@@ -4949,6 +4955,7 @@ class ProcessedDataset:
 
         if self.source_ligand_cif: shutil.copyfile(self.source_ligand_cif, self.input_ligand_cif)
         if self.source_ligand_pdb: shutil.copyfile(self.source_ligand_pdb, self.input_ligand_pdb)
+        if self.source_ligand_smiles: shutil.copyfile(self.source_ligand_smiles, self.input_ligand_smiles)
 
         if self.source_ligand_dir:
             shutil.copytree(str(self.source_ligand_dir.path),

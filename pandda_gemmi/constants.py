@@ -27,6 +27,7 @@ PANDDA_MTZ_FILE = "{}-pandda-input.mtz"
 
 PANDDA_LIGAND_CIF_FILE = "ligand.cif"
 PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
+PANDDA_LIGAND_SMILES_FILE = "ligand.smiles"
 
 PANDDA_INSPECT_EVENTS_PATH = "pandda_inspect_events.csv"
 PANDDA_EVENT_MAP_FILE = "{}-event_{}_1-BDC_{}_map.native.ccp4"
