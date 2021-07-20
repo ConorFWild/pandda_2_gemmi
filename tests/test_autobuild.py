@@ -17,7 +17,10 @@ def main(
     with open(pandda_fs_pickle_path, "rb") as f:
         pandda_fs = pickle.load(f)
 
+    print("####################################################")
+    print("Dataset info:")
     print(pandda_fs.processed_datasets[event.event_id.dtag])
+    print("####################################################")
 
     autobuild_rhofit(dataset, event, pandda_fs)
 
