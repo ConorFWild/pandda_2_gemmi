@@ -112,7 +112,12 @@ def truncate_model(model_path: Path, coords: Coord, out_dir: Path):
 # #####################
 
 
-def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: List[Tuple[float, float, float]], radius: float = 1.5) -> gemmi.FloatGrid:
+def get_cut_out_event_map(
+        event_map: gemmi.FloatGrid,
+        coords: List[Tuple[float, float, float]],
+        radius: float = 3.0,
+) -> gemmi.FloatGrid:
+
     xmap_array = np.array(event_map, copy=True)
 
     mask_grid = gemmi.Int8Grid(*xmap_array.shape)
@@ -130,10 +135,11 @@ def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: List[Tuple[float, 
     mask_grid.set_unit_cell(event_map.unit_cell)
 
     for position_python in coords:
+        print(f"\t{position_python}")
         position = gemmi.Position(*position_python)
         mask_grid.set_points_around(position,
                                     radius=radius,
-                                    value=1,
+                                    value=1.0,
                                     )
     mask_grid.symmetrize_max()
 
@@ -146,7 +152,7 @@ def get_cut_out_event_map(event_map: gemmi.FloatGrid, coords: List[Tuple[float, 
     new_grid_array = np.array(new_grid, copy=False)
 
     new_grid_array[np.nonzero(mask_array)] = xmap_array[np.nonzero(mask_array)]
-    new_grid.symmetrize_max()
+    # new_grid.symmetrize_max()
 
     return new_grid
 
