@@ -833,8 +833,7 @@ def process_pandda(
                 )
 
                 # Copy to pandda models
-                pandda_model_path = pandda_fs.processed_datasets[dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(
-                    event.event_id.dtag)
+                pandda_model_path = pandda_fs.processed_datasets[dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag)
                 merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
                 save_pdb_file(merged_structure, pandda_model_path)
 
