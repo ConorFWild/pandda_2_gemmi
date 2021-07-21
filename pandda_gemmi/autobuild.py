@@ -543,7 +543,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     selected_fragement_path = max(score_dictionary, key=lambda _path: score_dictionary[_path])
 
     # Copy to pandda models
-    pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models / constants.PANDDA_EVENT_MODEL
+    pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL
     merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
     save_pdb_file(merged_structure, model_path)
 
