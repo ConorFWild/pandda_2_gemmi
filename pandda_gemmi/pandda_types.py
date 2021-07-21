@@ -5265,6 +5265,8 @@ class ShellResult:
 
 @dataclasses.dataclass()
 class AutobuildResult:
+    status: bool
     paths: List[str]
     scores: Dict[str, float]
     cif_path: str
+    selected_fragment_path: str

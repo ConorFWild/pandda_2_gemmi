@@ -117,7 +117,6 @@ def get_cut_out_event_map(
         coords: List[Tuple[float, float, float]],
         radius: float = 3.0,
 ) -> gemmi.FloatGrid:
-
     xmap_array = np.array(event_map, copy=True)
 
     mask_grid = gemmi.Int8Grid(*xmap_array.shape)
@@ -397,6 +396,25 @@ def save_score_dictionary(score_dictionary, path):
     with open(str(path), "w") as f:
         json.dump(score_dictionary, f)
 
+
+def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
+    receptor = get_pdb(receptor_path)
+    ligand = get_pdb(ligand_path)
+
+    for receptor_model in receptor:
+        for receptor_chain in receptor_model:
+
+            for model in ligand:
+                for chain in model:
+                    for residue in chain:
+                        receptor_chain.add_residue(residue, pos=-1)
+
+            break
+        break
+
+    return receptor
+
+
 # #####################
 # # Core autobuilding
 # #####################
@@ -519,4 +537,21 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
 
     # Remove the big map
     print(f"Removing truncated map")
-    # os.remove(str(truncated_xmap_path))
+    os.remove(str(truncated_xmap_path))
+
+    # Select fragment build
+    selected_fragement_path = max(score_dictionary, key=lambda _path: score_dictionary[_path])
+
+    # Copy to pandda models
+    pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models / constants.PANDDA_EVENT_MODEL
+    merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
+    save_pdb_file(merged_structure, model_path)
+
+    # return result
+    return AutobuildResult(
+        True,
+        [path for path in score_dictionary],
+        score_dictionary,
+        cif_path,
+        selected_fragement_path,
+    )

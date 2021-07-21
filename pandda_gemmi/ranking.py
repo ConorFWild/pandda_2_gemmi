@@ -38,5 +38,11 @@ def rank_events_autobuild(
         datasets: Dict[Dtag, Dataset],
         pandda_fs: PanDDAFSModel,
 ):
+    ranked_event_ids = sorted(
+        events.keys(),
+        key=lambda event_id: max(autobuild_results[event_id].scores),
+    )
 
-    ...
+    events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
+
+    return events_ranked

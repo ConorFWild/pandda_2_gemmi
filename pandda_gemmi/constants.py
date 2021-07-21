@@ -70,6 +70,8 @@ LOG_DATASET_CLUSTER_TIME: str = "Time taken to cluster z map"
 LOG_DATASET_EVENT_TIME: str = "Time taken to get events"
 LOG_DATASET_EVENT_MAP_TIME: str = "Time taken to generate event map"
 
+LOG_AUTOBUILD_TIME: str = "Time taken to autobuild events"
+
 RESIDUE_NAMES = ["ALA",
 "ARG",
 "ASN",

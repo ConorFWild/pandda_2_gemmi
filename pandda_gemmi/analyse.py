@@ -788,6 +788,7 @@ def process_pandda(
 
         # Autobuild the results if set to
         if autobuild:
+            time_autobuild_start = time.time()
             autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
                 [
                     partial(
@@ -800,6 +801,9 @@ def process_pandda(
                 ]
             )
 
+            time_autobuild_finish = time.time()
+            pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish-time_autobuild_start
+
             autobuild_results = {
                 event_id: autobuild_result
                 for event_id, autobuild_result
@@ -808,7 +812,10 @@ def process_pandda(
 
             # Add the best fragment by scoring method to default model
             for event_id, autobuild_result in autobuild_results.items():
-                save_best_fragment_model(autobuild_result, dataset[event_id.dtag])
+                save_best_fragment_model(
+                    autobuild_result,
+                    dataset[event_id.dtag],
+                )
 
         ###################################################################
         # # Rank Events
@@ -826,8 +833,12 @@ def process_pandda(
             if not autobuild:
                 raise Exception("Cannot rank on autobuilds if autobuild is not set!")
             else:
-                raise NotImplementedError()
-                all_events_ranked = rank_events_autobuild(all_events, autobuild_results, datasets, pandda_fs_model,)
+                all_events_ranked = rank_events_autobuild(
+                    all_events,
+                    autobuild_results,
+                    datasets,
+                    pandda_fs_model,
+                )
         else:
             raise Exception(f"Ranking method: {rank_method} is unknown!")
 
