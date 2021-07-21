@@ -795,7 +795,9 @@ def process_pandda(
                 [
                     partial(
                         autobuild_parametrized(
+                            datasets[event.event_id.dtag],
                             event,
+                            pandda_fs_model,
                         ),
                     )
                     for event
