@@ -828,11 +828,15 @@ def process_pandda(
                     for path, score in autobuild_result.scores.items():
                         all_scores[path] = score
 
+                printer.pprint(all_scores)
+
                 # Select fragment build
                 selected_fragement_path = max(
                     all_scores,
                     key=lambda _path: all_scores[_path],
                 )
+
+                print(f"Selected fragment path: {selected_fragement_path}")
 
                 # Copy to pandda models
                 model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
