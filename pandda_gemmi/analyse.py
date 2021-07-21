@@ -74,6 +74,8 @@ from pandda_gemmi.ranking import (
 )
 from pandda_gemmi.autobuild import (
     autobuild_rhofit,
+    merge_ligand_into_structure_from_paths,
+    save_pdb_file,
 )
 
 
@@ -811,11 +813,32 @@ def process_pandda(
             }
 
             # Add the best fragment by scoring method to default model
-            for event_id, autobuild_result in autobuild_results.items():
-                save_best_fragment_model(
-                    autobuild_result,
-                    dataset[event_id.dtag],
+            for dtag in datasets:
+                dataset_autobuild_results = {
+                    event_id: autobuild_result
+                    for event_id, autobuild_result
+                in autobuild_results
+                if dtag == event_id.dtag
+                }
+
+                all_scores = {}
+                for event_id, autobuild_result in dataset_autobuild_results.items():
+                    for path, score in autobuild_result.scores.items():
+                        all_scores[path] = score
+
+                # Select fragment build
+                selected_fragement_path = max(
+                    all_scores,
+                    key=lambda _path: all_scores[_path],
                 )
+
+                # Copy to pandda models
+                pandda_model_path = pandda_fs.processed_datasets[
+                                        event.event_id.dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(
+                    event.event_id.dtag)
+                merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
+                save_pdb_file(merged_structure, pandda_model_path)
+
 
         ###################################################################
         # # Rank Events
