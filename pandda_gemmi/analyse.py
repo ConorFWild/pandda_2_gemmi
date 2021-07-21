@@ -795,12 +795,12 @@ def process_pandda(
                 [
                     partial(
                         autobuild_parametrized(
-                            datasets[event.event_id.dtag],
-                            event,
+                            datasets[event_id.dtag],
+                            all_events[event_id],
                             pandda_fs_model,
                         ),
                     )
-                    for event
+                    for event_id
                     in all_events
                 ]
             )
