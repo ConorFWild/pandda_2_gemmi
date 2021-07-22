@@ -829,7 +829,7 @@ def process_pandda(
                 dataset_autobuild_results = {
                     event_id: autobuild_result
                     for event_id, autobuild_result
-                    in autobuild_results
+                    in autobuild_results.items()
                     if dtag == event_id.dtag
                 }
 
