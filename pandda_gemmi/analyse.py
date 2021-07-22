@@ -826,12 +826,17 @@ def process_pandda(
 
             # Add the best fragment by scoring method to default model
             for dtag in datasets:
+                print(f"Finding best autobuild for dataset: {dtag}")
                 dataset_autobuild_results = {
                     event_id: autobuild_result
                     for event_id, autobuild_result
                     in autobuild_results.items()
                     if dtag == event_id.dtag
                 }
+
+                if len(dataset_autobuild_results) == 0:
+                    print("\tNo autobuilds for this dataset!")
+                    continue
 
                 all_scores = {}
                 for event_id, autobuild_result in dataset_autobuild_results.items():
