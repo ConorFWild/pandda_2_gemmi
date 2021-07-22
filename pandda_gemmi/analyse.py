@@ -475,7 +475,7 @@ def process_pandda(
         distributed_queue: str = "medium.q",
         distributed_project: str = "labxchem",
         distributed_num_workers: int = 12,
-        distributed_cores_per_worker: int =12,
+        distributed_cores_per_worker: int = 12,
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
         distributed_walltime="5:0:0",
@@ -487,7 +487,6 @@ def process_pandda(
         # Debug settings
         debug: bool = True,
 ):
-
     ###################################################################
     # # Configuration
     ###################################################################
@@ -794,11 +793,10 @@ def process_pandda(
             autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
                 [
                     partial(
-                        autobuild_parametrized(
-                            datasets[event_id.dtag],
-                            all_events[event_id],
-                            pandda_fs_model,
-                        ),
+                        autobuild_parametrized,
+                        datasets[event_id.dtag],
+                        all_events[event_id],
+                        pandda_fs_model,
                     )
                     for event_id
                     in all_events
@@ -806,7 +804,7 @@ def process_pandda(
             )
 
             time_autobuild_finish = time.time()
-            pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish-time_autobuild_start
+            pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
 
             autobuild_results = {
                 event_id: autobuild_result
@@ -819,8 +817,8 @@ def process_pandda(
                 dataset_autobuild_results = {
                     event_id: autobuild_result
                     for event_id, autobuild_result
-                in autobuild_results
-                if dtag == event_id.dtag
+                    in autobuild_results
+                    if dtag == event_id.dtag
                 }
 
                 all_scores = {}
@@ -840,10 +838,10 @@ def process_pandda(
 
                 # Copy to pandda models
                 model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
-                pandda_model_path = pandda_fs.processed_datasets[dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag)
+                pandda_model_path = pandda_fs.processed_datasets[
+                                        dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag)
                 merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
                 save_pdb_file(merged_structure, pandda_model_path)
-
 
         ###################################################################
         # # Rank Events
@@ -890,7 +888,7 @@ def process_pandda(
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()
-        print(f"PanDDA ran in: {time_finish-time_start}")
+        print(f"PanDDA ran in: {time_finish - time_start}")
 
         # Output json log
         printer.pprint(pandda_log)
