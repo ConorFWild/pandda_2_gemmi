@@ -843,6 +843,10 @@ def process_pandda(
                     for path, score in autobuild_result.scores.items():
                         all_scores[path] = score
 
+                if len(all_scores) == 0:
+                    print(f"\tNo autobuilds for this dataset!")
+                    continue
+
                 printer.pprint(all_scores)
 
                 # Select fragment build
