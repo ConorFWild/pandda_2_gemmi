@@ -542,7 +542,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
 
     # Remove the big map
     print(f"Removing truncated map")
-    os.remove(str(truncated_xmap_path))
+    # os.remove(str(truncated_xmap_path))
 
     # Select fragment build
     selected_fragement_path = max(score_dictionary, key=lambda _path: score_dictionary[_path])
