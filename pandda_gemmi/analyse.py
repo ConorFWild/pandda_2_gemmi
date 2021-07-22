@@ -790,7 +790,7 @@ def process_pandda(
         # Autobuild the results if set to
         if autobuild:
             time_autobuild_start = time.time()
-            autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
+            autobuild_results_list: Dict[EventID, AutobuildResult] = process_local_serial(
                 [
                     partial(
                         autobuild_parametrized,

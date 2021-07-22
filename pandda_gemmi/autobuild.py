@@ -481,11 +481,16 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
     xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
-    out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path
+    out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"{event.event_id.event_idx.event_idx}"
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
     cif_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_cif
     smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_smiles
+
+    try:
+        os.mkdir(str(out_dir))
+    except Exception as e:
+        print(e)
 
     model_path = Path(model_path)
     xmap_path = Path(xmap_path)
@@ -543,9 +548,9 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     selected_fragement_path = max(score_dictionary, key=lambda _path: score_dictionary[_path])
 
     # Copy to pandda models
-    pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(event.event_id.dtag)
-    merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
-    save_pdb_file(merged_structure, pandda_model_path)
+    # pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(event.event_id.dtag)
+    # merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
+    # save_pdb_file(merged_structure, pandda_model_path)
 
     # return result
     return AutobuildResult(
