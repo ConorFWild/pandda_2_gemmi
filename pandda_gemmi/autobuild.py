@@ -17,6 +17,7 @@ from pandda_gemmi.pandda_types import *
 def execute(command: str):
     p = subprocess.Popen(command,
                          shell=True,
+                         env=os.environ.copy(),
                          )
 
     p.communicate()

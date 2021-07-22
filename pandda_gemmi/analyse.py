@@ -554,6 +554,17 @@ def process_pandda(
         # Set up autobuilding
         if autobuild:
             if autobuild_strategy == "rhofit":
+                ana_pdbmaps_path = shutil.which("ana_pdbmaps")
+                rhofit_path = shutil.which("rhofit")
+                pandda_rhofit_path = shutil.which("pandda_rhofit.sh")
+
+                if not ana_pdbmaps_path:
+                    raise Exception("PanDDA Rhofit requires ana_pdbmaps to be in path!")
+                if not rhofit_path:
+                    raise Exception("PanDDA Rhofit requires rhofit to be in path!")
+                if not pandda_rhofit_path:
+                    raise Exception("PanDDA Rhofit rquires pandda_rhofit.sh to be in path!")
+
                 autobuild_parametrized = partial(
                     autobuild_rhofit,
                 )
