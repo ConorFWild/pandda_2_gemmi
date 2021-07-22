@@ -18,9 +18,13 @@ def execute(command: str):
     p = subprocess.Popen(command,
                          shell=True,
                          env=os.environ.copy(),
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
                          )
 
-    p.communicate()
+    stdout, stderr = p.communicate()
+    print(stdout)
+    print(stderr)
 
 
 @dataclasses.dataclass()
