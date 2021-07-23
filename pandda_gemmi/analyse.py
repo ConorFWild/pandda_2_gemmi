@@ -99,9 +99,9 @@ def process_dataset(
         process_local=process_local_serial,
 
 ):
-    if "BAZ2BA-x447" != test_dtag.dtag:
-        print(f"\t447 is not {test_dtag} ")
-        return None
+    # if "BAZ2BA-x447" != test_dtag.dtag:
+    #     print(f"\t447 is not {test_dtag} ")
+    #     return None
 
     time_dataset_start = time.time()
 
@@ -311,9 +311,9 @@ def process_shell(
     time_shell_start = time.time()
     shell_log = {}
 
-    if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
-        print(f"447 is not in {shell.test_dtags} ")
-        return None
+    # if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
+    #     print(f"447 is not in {shell.test_dtags} ")
+    #     return None
 
     print(f"Working on shell: {shell}")
 
