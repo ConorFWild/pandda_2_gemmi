@@ -3114,7 +3114,8 @@ class Model:
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array([sigma_is[dtag] for dtag in masked_train_xmap_array],
                                   dtype=np.float32)[:, np.newaxis]
-        sigma_s_m_flat = Model.calculate_sigma_s_m(mean_array,
+        sigma_s_m_flat = Model.calculate_sigma_s_m_np(
+            mean_array,
                                                    masked_train_xmap_array.xmap_array,
                                                    sigma_is_array,
                                                    process_local,
@@ -3316,6 +3317,25 @@ class Model:
         #                                      6,
         #                                      150,
         #                                      arrays.shape)
+
+        return sigma_ms
+
+    @staticmethod
+    def calculate_sigma_s_m_np(mean: np.array, arrays: np.array, sigma_is_array: np.array, process_local):
+        # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
+        # mean[m]
+        # arrays[n,m]
+        # sigma_i_array[n]
+        #
+
+        func = partial(Model.differentiated_log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
+
+        sigma_ms = Model.vectorised_optimisation_bisect(func,
+                                                        0,
+                                                        20,
+                                                        31,
+                                                        arrays.shape
+                                                        )
 
         return sigma_ms
 
