@@ -311,7 +311,7 @@ def generate_cif(smiles_path: Path, out_dir: Path, phenix_setup):
 # #####################
 
 
-def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path,
+def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path, cut: float = 2.0,
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -323,6 +323,7 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
         pdb=str(truncated_model_path),
         cif=str(cif_path),
         out_dir=str(out_dir),
+        cut=cut,
     )
     print(f"rhofit_command is: {rhofit_command}")
 
@@ -481,7 +482,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 # # Autobuild from pandda
 # #####################
 
-def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
+def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float =2.0):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -532,7 +533,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel):
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, )
+    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut)
     print(f"\tRhofit")
 
     # Score rhofit builds
