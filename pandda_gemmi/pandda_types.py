@@ -4971,6 +4971,8 @@ class ProcessedDataset:
                             str(self.input_ligand_dir),
                             )
 
+        os.mkdir(str(self.dataset_models.path))
+
 
 @dataclasses.dataclass()
 class ProcessedDatasets:
