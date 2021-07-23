@@ -3109,6 +3109,7 @@ class Model:
     def sigma_sms_from_xmaps(masked_train_xmap_array: XmapArray,
                              mean_array: np.ndarray,
                              sigma_is: typing.Dict[Dtag, float],
+                             process_local,
                              ):
         # Estimate the adjusted pointwise variance
         sigma_is_array = np.array([sigma_is[dtag] for dtag in masked_train_xmap_array],
@@ -3116,6 +3117,7 @@ class Model:
         sigma_s_m_flat = Model.calculate_sigma_s_m(mean_array,
                                                    masked_train_xmap_array.xmap_array,
                                                    sigma_is_array,
+                                                   process_local,
                                                    )
 
         return sigma_s_m_flat
@@ -3142,46 +3144,46 @@ class Model:
                      sigma_s_m,
                      )
 
-    @staticmethod
-    def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
-        mask = grid.partitioning.protein_mask
-        mask_array = np.array(mask, copy=False, dtype=np.int8)
-
-        arrays = {}
-        for dtag in xmaps:
-            xmap = xmaps[dtag]
-            xmap_array = xmap.to_array()
-
-            arrays[dtag] = xmap_array[np.nonzero(mask_array)]
-
-        stacked_arrays = np.stack(list(arrays.values()), axis=0)
-        mean_flat = np.mean(stacked_arrays, axis=0)
-
-        # Estimate the dataset residual variability
-        sigma_is = {}
-        for dtag in xmaps:
-            sigma_i = Model.calculate_sigma_i(mean_flat,
-                                              arrays[dtag],
-                                              cut)
-            sigma_is[dtag] = sigma_i
-
-        # Estimate the adjusted pointwise variance
-        sigma_is_array = np.array(list(sigma_is.values()), dtype=np.float32)[:, np.newaxis]
-        sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
-                                                   stacked_arrays[:60],
-                                                   sigma_is_array[:60],
-                                                   )
-
-        mean = np.zeros(mask_array.shape, dtype=np.float32)
-        mean[np.nonzero(mask_array)] = mean_flat
-
-        sigma_s_m = np.zeros(mask_array.shape, dtype=np.float32)
-        sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
-
-        return Model(mean,
-                     sigma_is,
-                     sigma_s_m,
-                     )
+    # @staticmethod
+    # def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
+    #     mask = grid.partitioning.protein_mask
+    #     mask_array = np.array(mask, copy=False, dtype=np.int8)
+    #
+    #     arrays = {}
+    #     for dtag in xmaps:
+    #         xmap = xmaps[dtag]
+    #         xmap_array = xmap.to_array()
+    #
+    #         arrays[dtag] = xmap_array[np.nonzero(mask_array)]
+    #
+    #     stacked_arrays = np.stack(list(arrays.values()), axis=0)
+    #     mean_flat = np.mean(stacked_arrays, axis=0)
+    #
+    #     # Estimate the dataset residual variability
+    #     sigma_is = {}
+    #     for dtag in xmaps:
+    #         sigma_i = Model.calculate_sigma_i(mean_flat,
+    #                                           arrays[dtag],
+    #                                           cut)
+    #         sigma_is[dtag] = sigma_i
+    #
+    #     # Estimate the adjusted pointwise variance
+    #     sigma_is_array = np.array(list(sigma_is.values()), dtype=np.float32)[:, np.newaxis]
+    #     sigma_s_m_flat = Model.calculate_sigma_s_m(mean_flat,
+    #                                                stacked_arrays[:60],
+    #                                                sigma_is_array[:60],
+    #                                                )
+    #
+    #     mean = np.zeros(mask_array.shape, dtype=np.float32)
+    #     mean[np.nonzero(mask_array)] = mean_flat
+    #
+    #     sigma_s_m = np.zeros(mask_array.shape, dtype=np.float32)
+    #     sigma_s_m[np.nonzero(mask_array)] = sigma_s_m_flat
+    #
+    #     return Model(mean,
+    #                  sigma_is,
+    #                  sigma_s_m,
+    #                  )
 
     @staticmethod
     def calculate_sigma_i(mean: np.array, array: np.array, cut: float):
@@ -3209,14 +3211,32 @@ class Model:
         return map_unc
 
     @staticmethod
-    def calculate_sigma_s_m(mean: np.array, arrays: np.array, sigma_is_array: np.array):
+    def calculate_sigma_s_m_batched(_means, _arrays, _sigma_is_array):
+        sigma_ms = np.zeros(_means.shape)
+
+        for x in np.ndindex(*_means.shape):
+            _mean = np.array((_means[x],))
+            _array = _arrays[:, x, ].flatten()
+            _sigma_i = _sigma_is_array.flatten()
+
+            result_root = optimize.root(
+                partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+                x0=np.power(2.0, -20),
+            )
+
+            sigma_ms[x] = result_root
+
+        return np.abs(sigma_ms)
+
+    @staticmethod
+    def calculate_sigma_s_m(mean: np.array, arrays: np.array, sigma_is_array: np.array, process_local):
         # Maximise liklihood of data at m under normal(mu_m, sigma_i + sigma_s_m) by optimising sigma_s_m
         # mean[m]
         # arrays[n,m]
         # sigma_i_array[n]
         #
 
-        func = partial(Model.differentiated_log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
+        # func = partial(Model.differentiated_log_liklihood, est_mu=mean, obs_vals=arrays, obs_error=sigma_is_array)
         #
         # shape = mean.shape
         # num = len(sigma_is_array)
@@ -3235,26 +3255,46 @@ class Model:
         # print(arrays.shape)
         # print(sigma_ms.shape)
         #
-        sigma_ms = np.zeros(mean.shape)
-        for x in np.ndindex(*mean.shape):
+        means_batches = np.array_split(mean, 12)
+        print(means_batches.shape)
+        arrays_batches = np.array_split(arrays, 12, axis=1)
+        print(arrays_batches.shape)
+
+        sigma_ms_batches = process_local(
+            [
+                partial(
+                    Model.calculate_sigma_s_m_batched,
+                    mean_batch,
+                    array_batch,
+                    sigma_is_array,
+                )
+                for mean_batch, array_batch
+                in zip(means_batches, arrays_batches)
+            ]
+        )
+
+        sigma_ms = np.concatenate(sigma_ms_batches).flatten()
+
+        # sigma_ms = np.zeros(mean.shape)
+        # for x in np.ndindex(*mean.shape):
         #     # print("#######")
         #     # print([x])
         #     # print(f"Vectorised bisec gives: {sigma_ms[x]}")
-            _mean = np.array((mean[x],))
+        #     _mean = np.array((mean[x],))
         #     # print(_mean)
-            _array = arrays[:, x, ].flatten()
+        #     _array = arrays[:, x, ].flatten()
         #     # print(_array)
-            _sigma_i = sigma_is_array.flatten()
+        #     _sigma_i = sigma_is_array.flatten()
         #     # print(_sigma_i)
         #     #
         #     # print([_sigma_i.shape, _mean.shape, _array.shape, Model.log_liklihood(np.array((1.0,)), _mean, _array, _sigma_i)])
         #
         #     # result = shgo(partial(Model.log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i))
         #     # start = time.time()
-            result_root = optimize.root(
-                partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
-                x0=np.power(2.0, -20),
-            )
+        #     result_root = optimize.root(
+        #         partial(Model.differentiated_log_liklihood, est_mu=_mean, obs_vals=_array, obs_error=_sigma_i),
+        #         x0=np.power(2.0, -20),
+        #     )
         #     # finish = time.time()
         #     # print(f"Root found in {finish-start}")
         #
@@ -3269,7 +3309,7 @@ class Model:
         #
         #     # print([sigma_ms_bisect[x], result_root.x, result_min.x,])
         #     # print([result.x, sigma_ms[x], result.fun])
-            sigma_ms[x] = np.abs(result_root.x)
+        #     sigma_ms[x] = np.abs(result_root.x)
 
         # sigma_ms = Model.maximise_over_range(func,
         #                                      0,

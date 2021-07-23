@@ -139,6 +139,7 @@ def process_dataset(
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                        mean_array,
                                                        sigma_is,
+                                                       process_local,
                                                        )  # size of total_mask > 0
     dataset_log[constants.LOG_DATASET_SIGMA_S] = summarise_array(sigma_s_m)
 
