@@ -4233,7 +4233,7 @@ class Sites:
             return Sites({}, {}, {})
 
         # If there is one or less event
-        if positions_array.to_array().shape[0] < 1:
+        if positions_array.to_array().shape[0] == 1:
             site_to_event = {}
             event_to_site = {}
             site_centroids = {}
