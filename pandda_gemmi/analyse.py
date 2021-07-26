@@ -337,9 +337,9 @@ def process_shell(
 
     xmaps = {
         dtag: xmap
-             for dtag, xmap
-             in zip(shell_truncated_datasets, results)
-             }
+        for dtag, xmap
+        in zip(shell_truncated_datasets, results)
+    }
 
     time_xmaps_finish = time.time()
     print(f"Mapped {len(xmaps)} xmaps in {time_xmaps_finish - time_xmaps_start}")
@@ -496,14 +496,15 @@ def process_pandda(
     pandda_log[constants.LOG_START] = time.time()
 
     print("FSmodel building")
-    pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(data_dirs,
-                                                            out_dir,
-                                                            pdb_regex,
-                                                            mtz_regex,
-                                                            ligand_cif_regex,
-                                                            ligand_pdb_regex,
-                                                            ligand_smiles_regex,
-                                                            )
+    pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
+        data_dirs,
+        out_dir,
+        pdb_regex,
+        mtz_regex,
+        ligand_cif_regex,
+        ligand_pdb_regex,
+        ligand_smiles_regex,
+    )
     pandda_fs_model.build()
 
     print("Getting multiprocessor")
