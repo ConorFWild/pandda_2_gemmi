@@ -4144,11 +4144,11 @@ class BDC:
 
             vals[val] = np.abs(global_correlation - local_correlation)
 
-        fraction = max(vals,
+        mean_fraction = max(vals,
                        key=lambda x: vals[x],
                        )
 
-        return BDC(1 - fraction, fraction)
+        return BDC(mean_fraction, 1-mean_fraction)
 
 
 @dataclasses.dataclass()
