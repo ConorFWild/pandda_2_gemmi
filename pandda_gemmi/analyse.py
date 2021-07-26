@@ -9,13 +9,13 @@
 
 # Maybe
 # 11. [ x ] Email Marcin about cutout maps (mapmask or gemmi)
-# 7. [ ] Get autobuilding working
+# 7. [ x ] Get autobuilding working
 
 # More optional
 # 3. [ ] Tidy up code
 # 6. [ ] Make sure works with XCE
 # 9. [ ] Complete logging
-# 10. [ ] Speed up sigma calculation - ?Numba?
+# 10. [ x ] Speed up sigma calculation - ?Numba?
 # 12. [ ] Remove the random constants from code
 
 from __future__ import annotations
@@ -96,13 +96,10 @@ def process_dataset(
         structure_factors,
         outer_mask,
         inner_mask_symmetry,
+        max_site_distance_cutoff,
         process_local=process_local_serial,
 
 ):
-    # if "BAZ2BA-x447" != test_dtag.dtag:
-    #     print(f"\t447 is not {test_dtag} ")
-    #     return None
-
     time_dataset_start = time.time()
 
     dataset_log = {}
@@ -166,18 +163,6 @@ def process_dataset(
     for dtag in zmaps:
         zmap = zmaps[dtag]
         pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
-
-        xmap = dataset_xmaps[dtag]
-        path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "xmap.ccp4"
-        xmap.save(path)
-
-        # mean_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "mean.ccp4"
-        # mean_xmap.save(path)
-        #
-        # std_xmap = Xmap.from_grid_array(grid, sigma_s_m)
-        # path = pandda_fs_model.processed_datasets.processed_datasets[dtag].path / "std.ccp4"
-        # std_xmap.save(path)
 
     ###################################################################
     # # Cluster the outlying density
@@ -250,7 +235,7 @@ def process_dataset(
         dataset_xmaps,
         grid,
         alignments[test_dtag],
-        1.732,  # TODO: make this a variable ;')
+        max_site_distance_cutoff,
         None,
     )
 
@@ -307,13 +292,10 @@ def process_shell(
         min_blob_z_peak,
         outer_mask,
         inner_mask_symmetry,
+        max_site_distance_cutoff,
 ):
     time_shell_start = time.time()
     shell_log = {}
-
-    # if "BAZ2BA-x447" not in [dtag.dtag for dtag in shell.test_dtags]:
-    #     print(f"447 is not in {shell.test_dtags} ")
-    #     return None
 
     print(f"Working on shell: {shell}")
 
@@ -385,9 +367,11 @@ def process_shell(
         structure_factors=structure_factors,
         outer_mask=outer_mask,
         inner_mask_symmetry=inner_mask_symmetry,
+        max_site_distance_cutoff=max_site_distance_cutoff,
         process_local=process_local_serial,
     )
 
+    # Process each dataset in the shell
     results = process_local_serial(
         [
             partial(
@@ -419,6 +403,7 @@ def process_shell(
 
 
 def process_pandda(
+        # IO options
         data_dirs: str,
         out_dir: str,
         pdb_regex: str = "*.pdb",
@@ -426,26 +411,31 @@ def process_pandda(
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
+        # Dataset selection options
         ground_state_datasets: Optional[List[str]] = None,
         exclude_from_z_map_analysis: Optional[List[str]] = None,
         exclude_from_characterisation: Optional[List[str]] = None,
         only_datasets: Optional[List[str]] = None,
         ignore_datasets: Optional[List[str]] = None,
+        # Shell determination options
         dynamic_res_limits: bool = True,
         high_res_upper_limit: float = 1.0,
         high_res_lower_limit: float = 4.0,
         high_res_increment: float = 0.05,
         max_shell_datasets: int = 60,
         min_characterisation_datasets: int = 15,
+        # Diffraction data options
         structure_factors: Optional[Tuple[str, str]] = None,
         all_data_are_valid_values: bool = True,
         low_resolution_completeness: float = 4.0,
         sample_rate: float = 3.0,
+        # Dataset filtering options
         max_rmsd_to_reference: float = 1.5,
         max_rfree: float = 0.4,
         max_wilson_plot_z_score=1.5,
         same_space_group_only: bool = False,
         similar_models_only: bool = False,
+        # Map options
         resolution_factor: float = 0.25,
         grid_spacing: float = 0.5,
         padding: float = 3.0,
@@ -453,16 +443,21 @@ def process_pandda(
         outer_mask: float = 8.0,
         inner_mask: float = 2.0,
         inner_mask_symmetry: float = 2.0,
+        # ZMap clustering options
         contour_level: float = 2.5,
         negative_values: bool = False,
         min_blob_volume: float = 10.0,
         min_blob_z_peak: float = 3.0,
         clustering_cutoff: float = 1.5,
         cluster_cutoff_distance_multiplier: float = 1.0,
+        # Site finding options
+        max_site_distance_cutoff=1.732,
+        # BDC options
         min_bdc: float = 0.0,
         max_bdc: float = 1.0,
         increment: float = 0.05,
         output_multiplier: float = 2.0,
+        # Comparater set finding options
         comparison_strategy: str = "closest_cutoff",
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 30,
@@ -591,6 +586,7 @@ def process_pandda(
             min_blob_z_peak=min_blob_z_peak,
             outer_mask=outer_mask,
             inner_mask_symmetry=inner_mask_symmetry,
+            max_site_distance_cutoff=max_site_distance_cutoff,
         )
 
         ###################################################################
@@ -791,15 +787,6 @@ def process_pandda(
         # # Autobuilding
         ###################################################################
 
-        # TODO: remove thjis code to generate test data
-        for event_id, event in all_events.items():
-            with open(str(out_dir / f"event_{event_id}.pickle"), "wb") as f:
-                pickle.dump(event, f)
-            with open(str(out_dir / f"dataset_{event_id.dtag}.pickle"), "wb") as f:
-                pickle.dump(datasets[event_id.dtag], f)
-            with open(str(out_dir / f"pandda_fs_model.pickle"), "wb") as f:
-                pickle.dump(pandda_fs_model, f)
-
         # Autobuild the results if set to
         if autobuild:
             time_autobuild_start = time.time()
@@ -895,7 +882,7 @@ def process_pandda(
         ###################################################################
 
         # Get the events and assign sites to them
-        all_events_events = Events.from_all_events(all_events_ranked, grid, 1.7)
+        all_events_events = Events.from_all_events(all_events_ranked, grid, max_site_distance_cutoff)
 
         ###################################################################
         # # Output pandda summary information
@@ -906,7 +893,7 @@ def process_pandda(
         event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
-        site_table: SiteTable = SiteTable.from_events(all_events_events, 1.7)
+        site_table: SiteTable = SiteTable.from_events(all_events_events, max_site_distance_cutoff)
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()
