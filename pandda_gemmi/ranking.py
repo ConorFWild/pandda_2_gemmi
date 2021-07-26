@@ -38,10 +38,17 @@ def rank_events_autobuild(
         datasets: Dict[Dtag, Dataset],
         pandda_fs: PanDDAFSModel,
 ):
-    ranked_event_ids = sorted(
-        events.keys(),
-        key=lambda event_id: max(autobuild_results[event_id].scores),
+    # Rank events with a score
+    ranked_event_ids = list(sorted(
+        [event_id for event_id in events.keys() if len(autobuild_results[event_id].scores) == 0],
+        key=lambda event_id: max(autobuild_results[event_id].scores.values()),
     )
+    )
+
+    # Add events missing any autobuilds
+    for event_id in autobuild_results.keys():
+        if len(autobuild_results[event_id].scores) == 0:
+            ranked_event_ids.append(event_id)
 
     events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
 

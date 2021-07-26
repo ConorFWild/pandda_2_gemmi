@@ -5348,4 +5348,4 @@ class AutobuildResult:
     paths: List[str]
     scores: Dict[str, float]
     cif_path: str
-    selected_fragment_path: str
+    selected_fragment_path: Optional[str]

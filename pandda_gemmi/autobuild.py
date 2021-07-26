@@ -311,7 +311,8 @@ def generate_cif(smiles_path: Path, out_dir: Path, phenix_setup):
 # #####################
 
 
-def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path, cut: float = 2.0,
+def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path,
+           cut: float = 2.0,
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -482,7 +483,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 # # Autobuild from pandda
 # #####################
 
-def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float =2.0):
+def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float = 2.0):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -551,12 +552,13 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     os.remove(str(truncated_xmap_path))
 
     # Select fragment build
-    selected_fragement_path = max(score_dictionary, key=lambda _path: score_dictionary[_path])
-
-    # Copy to pandda models
-    # pandda_model_path = pandda_fs.processed_datasets[event.event_id.dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(event.event_id.dtag)
-    # merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
-    # save_pdb_file(merged_structure, pandda_model_path)
+    if len(score_dictionary) == 0:
+        selected_fragement_path = None
+    else:
+        selected_fragement_path = max(
+            score_dictionary,
+            key=lambda _path: score_dictionary[_path],
+        )
 
     # return result
     return AutobuildResult(

@@ -22,7 +22,7 @@ from __future__ import annotations
 
 # Base python
 import traceback
-from typing import Dict, Optional, List, Tuple, Union
+from typing import Dict, Optional, List, Tuple
 import time
 from pathlib import Path
 import pprint
@@ -34,9 +34,6 @@ printer = pprint.PrettyPrinter()
 # Scientific python libraries
 import fire
 import numpy as np
-import gemmi
-import joblib
-import pickle
 import shutil
 
 ## Custom Imports
@@ -57,10 +54,8 @@ from pandda_gemmi.pandda_functions import (
     process_local_joblib,
     process_local_multiprocessing,
     get_dask_client,
-    process_local_dask,
     process_global_serial,
     process_global_dask,
-    process_shell_dask,
     get_shells,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
@@ -340,7 +335,8 @@ def process_shell(
         in shell_truncated_datasets
     )
 
-    xmaps = {dtag: xmap
+    xmaps = {
+        dtag: xmap
              for dtag, xmap
              in zip(shell_truncated_datasets, results)
              }
