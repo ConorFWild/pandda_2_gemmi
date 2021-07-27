@@ -492,6 +492,7 @@ def process_pandda(
 
             # Add the best fragment by scoring method to default model
             pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
+            pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
             for dtag in datasets:
                 print(f"Finding best autobuild for dataset: {dtag}")
                 dataset_autobuild_results = {
@@ -523,6 +524,7 @@ def process_pandda(
                 )
 
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = all_scores[selected_fragement_path]
 
                 print(f"Selected fragment path: {selected_fragement_path}")
 

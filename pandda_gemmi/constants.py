@@ -61,6 +61,8 @@ LOG_DATASET_EVENT_MAP_TIME: str = "Time taken to generate event map"
 
 LOG_AUTOBUILD_TIME: str = "Time taken to autobuild events"
 LOG_AUTOBUILD_SELECTED_BUILDS: str = "Build selected for each dataset"
+LOG_AUTOBUILD_SELECTED_BUILD_SCORES: str = "Score for Build selected for each dataset"
+
 
 ###################################################################
 # # Residue names
