@@ -355,10 +355,12 @@ def get_comparators_closest_cutoff(
     correlation_matrix = get_distance_matrix(xmaps)
 
     # Save a bokeh plot
+    labels = [dtag.dtag for dtag in xmaps]
+    known_apos = [dtag.dtag for dtag, dataset in datasets.items()]
     save_plot_pca_umap_bokeh(correlation_matrix,
                              labels,
                              known_apos,
-                             out_dir / f"pca_umap.html")
+                             pandda_fs_model.pandda_dir / f"pca_umap.html")
 
     # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
     # Based on whether they are within the res cutoff
