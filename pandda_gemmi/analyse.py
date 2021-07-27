@@ -82,7 +82,7 @@ def process_pandda(
         out_dir: str,
         pdb_regex: str = "*.pdb",
         mtz_regex: str = "*.mtz",
-        ligand_dir_name: str = "compounds",
+        ligand_dir_name: str = "compound",
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
