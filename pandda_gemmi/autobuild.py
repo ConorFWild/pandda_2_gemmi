@@ -486,8 +486,9 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float = 2.0):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
-    score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
+    # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
     build_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
+    score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"{event.event_id.event_idx.event_idx}"
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
