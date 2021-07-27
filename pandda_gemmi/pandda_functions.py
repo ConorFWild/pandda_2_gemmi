@@ -8,6 +8,10 @@ import numpy as np
 import multiprocessing as mp
 import joblib
 
+from sklearn import decomposition
+import umap
+from bokeh.plotting import ColumnDataSource, figure, output_file, show
+
 from pandda_gemmi.pandda_types import *
 
 
@@ -105,7 +109,7 @@ def get_dask_client(scheduler="SGE",
             queue=queue,
             project=project,
             cores=cores_per_worker,
-            memory=f"{distributed_mem_per_core*cores_per_worker}G",
+            memory=f"{distributed_mem_per_core * cores_per_worker}G",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
@@ -117,7 +121,7 @@ def get_dask_client(scheduler="SGE",
             queue=queue,
             project=project,
             cores=cores_per_worker,
-            memory=f"{distributed_mem_per_core*cores_per_worker}G",
+            memory=f"{distributed_mem_per_core * cores_per_worker}G",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
@@ -130,7 +134,7 @@ def get_dask_client(scheduler="SGE",
             queue=queue,
             project=project,
             cores=cores_per_worker,
-            memory=f"{distributed_mem_per_core*cores_per_worker}G",
+            memory=f"{distributed_mem_per_core * cores_per_worker}G",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
@@ -143,7 +147,7 @@ def get_dask_client(scheduler="SGE",
             queue=queue,
             project=project,
             cores=cores_per_worker,
-            memory=f"{distributed_mem_per_core*cores_per_worker}G",
+            memory=f"{distributed_mem_per_core * cores_per_worker}G",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
@@ -242,6 +246,46 @@ def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
     return correlation_matrix
 
 
+def embed_umap(distance_matrix):
+    pca = decomposition.PCA(n_components=min(distance_matrix.shape[0], 50))
+    reducer = umap.UMAP()
+    transform = pca.fit_transform(distance_matrix)
+    transform = reducer.fit_transform(transform)
+    return transform
+
+
+def bokeh_scatter_plot(embedding, labels, know_apos, plot_file):
+    output_file(str(plot_file))
+
+    source = ColumnDataSource(
+        data=dict(
+            x=embedding[:, 0].tolist(),
+            y=embedding[:, 1].tolist(),
+            dtag=labels,
+            apo=["green" if label in know_apos else "pink" for label in labels]
+        ))
+
+    TOOLTIPS = [
+        ("index", "$index"),
+        ("(x,y)", "($x, $y)"),
+        ("dtag", "@dtag"),
+        ("apo", "@apo"),
+    ]
+
+    p = figure(plot_width=1200, plot_height=1200, tooltips=TOOLTIPS,
+               title="Mouse over the dots",
+               )
+
+    p.circle('x', 'y', size=15, source=source, color="apo")
+
+    show(p)
+
+
+def save_plot_pca_umap_bokeh(dataset_connectivity_matrix, labels, known_apos, plot_file):
+    embedding = embed_umap(dataset_connectivity_matrix)
+    bokeh_scatter_plot(embedding, labels, known_apos, plot_file)
+
+
 def get_comparators_closest_cutoff(
         datasets: Dict[Dtag, Dataset],
         alignments,
@@ -251,6 +295,7 @@ def get_comparators_closest_cutoff(
         structure_factors,
         sample_rate,
         resolution_cutoff,
+        pandda_fs_model: PanDDAFSModel,
         process_local,
 ):
     dtag_list = [dtag for dtag in datasets]
@@ -308,6 +353,12 @@ def get_comparators_closest_cutoff(
 
     # Get the correlation distance between maps
     correlation_matrix = get_distance_matrix(xmaps)
+
+    # Save a bokeh plot
+    save_plot_pca_umap_bokeh(correlation_matrix,
+                             labels,
+                             known_apos,
+                             out_dir / f"pca_umap.html")
 
     # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
     # Based on whether they are within the res cutoff

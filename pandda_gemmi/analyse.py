@@ -82,6 +82,7 @@ def process_pandda(
         out_dir: str,
         pdb_regex: str = "*.pdb",
         mtz_regex: str = "*.mtz",
+        ligand_dir_name: str = "compounds",
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
@@ -128,7 +129,7 @@ def process_pandda(
         max_site_distance_cutoff=1.732,
         # BDC options
         min_bdc: float = 0.0,
-        max_bdc: float = 1.0,
+        max_bdc: float = 0.95,
         increment: float = 0.05,
         output_multiplier: float = 2.0,
         # Comparater set finding options
@@ -179,6 +180,7 @@ def process_pandda(
         out_dir,
         pdb_regex,
         mtz_regex,
+        ligand_dir_name,
         ligand_cif_regex,
         ligand_pdb_regex,
         ligand_smiles_regex,
@@ -380,6 +382,7 @@ def process_pandda(
                 structure_factors,
                 sample_rate,
                 comparison_res_cutoff,
+                pandda_fs_model,
                 process_local,
             )
 
