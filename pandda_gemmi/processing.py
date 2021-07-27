@@ -71,6 +71,7 @@ def process_dataset(
         outer_mask,
         inner_mask_symmetry,
         max_site_distance_cutoff,
+min_bdc, max_bdc,
         process_local=process_local_serial,
 
 ):
@@ -210,6 +211,7 @@ def process_dataset(
         grid,
         alignments[test_dtag],
         max_site_distance_cutoff,
+        min_bdc, max_bdc,
         None,
     )
 
@@ -267,6 +269,8 @@ def process_shell(
         outer_mask,
         inner_mask_symmetry,
         max_site_distance_cutoff,
+        min_bdc,
+        max_bdc,
 ):
     time_shell_start = time.time()
     shell_log = {}
@@ -343,6 +347,8 @@ def process_shell(
         outer_mask=outer_mask,
         inner_mask_symmetry=inner_mask_symmetry,
         max_site_distance_cutoff=max_site_distance_cutoff,
+        min_bdc=min_bdc,
+        max_bdc=max_bdc,
         process_local=process_local_serial,
     )
 

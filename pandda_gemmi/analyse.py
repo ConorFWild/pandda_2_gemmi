@@ -262,6 +262,8 @@ def process_pandda(
             outer_mask=outer_mask,
             inner_mask_symmetry=inner_mask_symmetry,
             max_site_distance_cutoff=max_site_distance_cutoff,
+            min_bdc=min_bdc,
+            max_bdc=max_bdc,
         )
 
         ###################################################################

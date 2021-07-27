@@ -4111,7 +4111,8 @@ class BDC:
         pass
 
     @staticmethod
-    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid, steps=100):
+    def from_cluster(xmap: Xmap, model: Model, cluster: Cluster, dtag: Dtag, grid: Grid,
+                     min_bdc=0.0, max_bdc=0.95, steps=100):
         xmap_array = xmap.to_array(copy=True)
 
         cluster_indexes = cluster.event_mask_indicies
@@ -4129,7 +4130,7 @@ class BDC:
         cluster_mask = cluster_array[protein_mask_indicies]
 
         vals = {}
-        for val in np.linspace(0, 1, steps):
+        for val in np.linspace(min_bdc, max_bdc, steps):
             subtracted_map = xmap_masked - val * mean_masked
             cluster_vals = subtracted_map[cluster_mask]
             # local_correlation = stats.pearsonr(mean_masked[cluster_mask],
@@ -4331,6 +4332,7 @@ class Events:
     @staticmethod
     def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid,
                       alignment: Alignment, cutoff: float,
+                      min_bdc, max_bdc,
                       mapper: Any = None):
         events: typing.Dict[EventID, Event] = {}
 
@@ -4350,7 +4352,7 @@ class Events:
 
                     site: SiteID = sites.event_to_site[event_id]
 
-                    jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid)
+                    jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc,)
 
             results = mapper(job for job in jobs.values())
 
@@ -4366,7 +4368,7 @@ class Events:
 
                     cluster = clustering[event_idx.event_idx]
                     xmap = xmaps[dtag]
-                    bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid)
+                    bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc,)
 
                     site: SiteID = sites.event_to_site[event_id]
 
@@ -4399,8 +4401,8 @@ class Events:
         return Events(events, sites)
 
     @staticmethod
-    def get_event(xmap, cluster, dtag, site, event_id, model, grid):
-        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, )
+    def get_event(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc,):
+        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc,)
 
         event = Event.from_cluster(
             event_id,
