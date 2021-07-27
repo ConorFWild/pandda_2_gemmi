@@ -138,7 +138,7 @@ def process_pandda(
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
         # Processing settings
-        local_processing: str = "multiprocessing_forkserver",
+        local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
         global_processing: str = "serial",
         job_params_file: Optional[str] = None,
