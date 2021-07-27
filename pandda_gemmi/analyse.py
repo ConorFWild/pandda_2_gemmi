@@ -518,7 +518,7 @@ def process_pandda(
                 num_workers=distributed_num_workers,
                 queue=distributed_queue,
                 project=distributed_project,
-                cores_per_worker=distributed_cores_per_worker,
+                cores_per_worker=local_cpus,
                 distributed_mem_per_core=distributed_mem_per_core,
                 resource_spec=distributed_resource_spec,
                 walltime=distributed_walltime,
@@ -895,6 +895,7 @@ def process_pandda(
 
         time_finish = time.time()
         print(f"PanDDA ran in: {time_finish - time_start}")
+        pandda_log[constants.LOG_TIME] = time_finish - time_start
 
         # Output json log
         printer.pprint(pandda_log)

@@ -34,6 +34,7 @@ PANDDA_LOG_FILE = "pandda_log.json"
 LOG_START: str = "Start time"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"
+LOG_TIME: str = "Time taken to complete PanDDA"
 
 LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
