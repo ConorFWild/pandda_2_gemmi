@@ -488,7 +488,7 @@ def process_pandda(
                 for event_id, autobuild_result
                 in zip(all_events, autobuild_results_list)
             }
-            printer.pprint(autobuild_result)
+            printer.pprint(autobuild_results)
 
             # Add the best fragment by scoring method to default model
             pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
