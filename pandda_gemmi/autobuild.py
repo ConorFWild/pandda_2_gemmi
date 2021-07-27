@@ -371,9 +371,9 @@ def score_structure(structure, xmap):
 
     xmap_array = np.array(xmap)
 
-    truncated_xmap_mask = xmap_array > 1.5
+    truncated_xmap_mask = xmap_array > 1.25
 
-    score = np.sum(truncated_xmap_mask) # * mask_array)
+    score = np.sum(truncated_xmap_mask * mask_array)
 
     return float(score)
 
