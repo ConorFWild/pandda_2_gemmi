@@ -371,9 +371,9 @@ def score_structure(structure, xmap):
 
     xmap_array = np.array(xmap)
 
-    truncated_xmap_mask = xmap_array > 1.25
+    truncated_xmap_mask = xmap_array > 1.5
 
-    score = np.sum(truncated_xmap_mask * mask_array)
+    score = np.sum(truncated_xmap_mask) # * mask_array)
 
     return float(score)
 
@@ -486,8 +486,8 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float = 2.0):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
-    # xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
-    xmap_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
+    score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
+    build_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"{event.event_id.event_idx.event_idx}"
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
@@ -500,7 +500,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
         print(e)
 
     model_path = Path(model_path)
-    xmap_path = Path(xmap_path)
+    build_map_path = Path(build_map_path)
     mtz_path = Path(mtz_path)
     # smiles_path = Path(smiles_path)
     # cif_path = Path(cif_path)
@@ -518,11 +518,11 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     print(f"\tTruncated model")
 
     # Truncate the ed map
-    truncated_xmap_path = truncate_xmap(xmap_path, coords, out_dir)
+    truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
     print(f"\tTruncated xmap")
 
     # Make cut out map
-    cut_out_xmap(xmap_path, coord, out_dir)
+    cut_out_xmap(build_map_path, coord, out_dir)
     print(f"\tCut out xmap")
 
     # Generate the cif
@@ -538,7 +538,10 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     print(f"\tRhofit")
 
     # Score rhofit builds
-    score_dictionary = score_builds(out_dir / "rhofit", xmap_path)
+    score_dictionary = score_builds(
+        out_dir / "rhofit",
+        score_map_path,
+    )
     print(f"\tRescored")
     for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
         print(f"\t\t{score_dictionary[path]}: {path}")
