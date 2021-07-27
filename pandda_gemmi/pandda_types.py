@@ -5050,12 +5050,16 @@ class ProcessedDataset:
         if self.source_ligand_pdb: shutil.copyfile(self.source_ligand_pdb, self.input_ligand_pdb)
         if self.source_ligand_smiles: shutil.copyfile(self.source_ligand_smiles, self.input_ligand_smiles)
 
-        if self.source_ligand_dir:
-            shutil.copytree(str(self.source_ligand_dir.path),
-                            str(self.input_ligand_dir),
-                            )
+        input_ligand_dir_path = self.input_ligand_dir
+        if not input_ligand_dir_path.exists():
+            if self.source_ligand_dir:
+                shutil.copytree(str(self.source_ligand_dir.path),
+                                str(self.input_ligand_dir),
+                                )
 
-        os.mkdir(str(self.dataset_models.path))
+        dataset_models_path = self.dataset_models.path
+        if not dataset_models_path.exists():
+            os.mkdir(str(self.dataset_models.path))
 
 
 @dataclasses.dataclass()
