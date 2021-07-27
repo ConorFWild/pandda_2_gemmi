@@ -16,6 +16,7 @@ def rank_events_size(events: Dict[EventID, Event], grid: Grid):
     ranked_event_ids = sorted(
         events,
         key=lambda event_id: events[event_id].cluster.size(grid),
+        reverse=True,
     )
 
     # Then construct a new dictionary
@@ -42,6 +43,7 @@ def rank_events_autobuild(
     ranked_event_ids = list(sorted(
         [event_id for event_id in events.keys() if len(autobuild_results[event_id].scores) == 0],
         key=lambda event_id: max(autobuild_results[event_id].scores.values()),
+        reverse=True,
     )
     )
 

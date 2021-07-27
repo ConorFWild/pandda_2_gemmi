@@ -476,7 +476,7 @@ def process_pandda(
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
         # Ranking settings
-        rank_method: str = "size",
+        rank_method: str = "autobuild",
         # Debug settings
         debug: bool = True,
 ):
