@@ -173,6 +173,8 @@ min_bdc, max_bdc,
         }
     )
     )
+    dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings.clusterings.values()])
 
     # Filter out small clusters
     clusterings_large: Clusterings = clusterings.filter_size(grid,
@@ -181,6 +183,8 @@ min_bdc, max_bdc,
     print("\t\tAfter filtering: large: {}".format(
         {dtag: len(cluster) for dtag, cluster in
          zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+    dataset_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_large.clusterings.values()])
 
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
@@ -188,17 +192,21 @@ min_bdc, max_bdc,
     print("\t\tAfter filtering: peak: {}".format(
         {dtag: len(cluster) for dtag, cluster in
          zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+    dataset_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
 
     clusterings_merged = clusterings_peaked.merge_clusters()
     print("\t\tAfter filtering: merged: {}".format(
         {dtag: len(_cluster) for dtag, _cluster in
          zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
+    dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_merged.clusterings.values()])
 
     time_cluster_finish = time.time()
     dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
 
     ###################################################################
-    # # Fund the events
+    # # Find the events
     ###################################################################
     time_event_start = time.time()
     # Calculate the shell events
