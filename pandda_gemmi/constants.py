@@ -60,6 +60,7 @@ LOG_DATASET_EVENT_TIME: str = "Time taken to get events"
 LOG_DATASET_EVENT_MAP_TIME: str = "Time taken to generate event map"
 
 LOG_AUTOBUILD_TIME: str = "Time taken to autobuild events"
+LOG_AUTOBUILD_SELECTED_BUILDS: str = "Build selected for each dataset"
 
 ###################################################################
 # # Residue names
