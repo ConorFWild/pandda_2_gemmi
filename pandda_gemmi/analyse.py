@@ -368,7 +368,7 @@ def process_shell(
     )
 
     # Process each dataset in the shell
-    results = process_local_serial(
+    results = process_local(
         [
             partial(
                 process_dataset_paramaterized,
