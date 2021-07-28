@@ -105,7 +105,7 @@ def get_dask_client(scheduler="SGE",
         raise Exception(f"Supported schedulers are: {schedulers}")
 
     if scheduler == "HTCONDOR":
-        job_extra=[f"GetEnv = True"]
+        job_extra = [f"GetEnv = True", ]
         cluster = HTCondorCluster(
             queue=queue,
             project=project,
@@ -113,6 +113,7 @@ def get_dask_client(scheduler="SGE",
             memory=f"{distributed_mem_per_core * cores_per_worker}G",
             resource_spec=resource_spec,
             walltime=walltime,
+            disk="10G",
             processes=1,
             nanny=False,
             job_extra=job_extra,
