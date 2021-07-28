@@ -39,6 +39,8 @@ LOG_TIME: str = "Time taken to complete PanDDA"
 LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
 
+LOG_DATASETS: str = "Summary of input datasets"
+
 LOG_SHELL_XMAP_TIME: str = "Time taken to generate aligned xmaps"
 LOG_SHELL_DATASET_LOGS: str = "Logs for each dataset in shell"
 LOG_SHELL_TIME: str = "Time taken to process shell"

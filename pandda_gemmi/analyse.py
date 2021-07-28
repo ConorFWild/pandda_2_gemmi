@@ -39,6 +39,7 @@ import shutil
 ## Custom Imports
 from pandda_gemmi.logs import (
     summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
+summarise_datasets
 )
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
@@ -336,6 +337,7 @@ def process_pandda(
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
 
         datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
+        pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
 
         # Grid
         print("Getting grid")

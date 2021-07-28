@@ -6,7 +6,6 @@ from pprint import PrettyPrinter
 
 printer = PrettyPrinter(indent=1)
 
-
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi.python_types import *
 
@@ -80,6 +79,27 @@ def summarise_array(array):
         "max": float(np.max(array)),
     }
     return summary
+
+
+def summarise_datasets(datasets: Dict[Dtag, Dataset], pandda_fs_model: PanDDAFSModel):
+    summaries = {}
+    for dtag in datasets:
+        dataset = datasets[dtag]
+        source_dir = pandda_fs_model.data_dirs.dataset_dirs[dtag]
+        processed_dir = pandda_fs_model.processed_datasets[dtag]
+        summary = {
+            "compound_dir": str(processed_dir.source_ligand_dir.path),
+            "source_structure_path": str(processed_dir.source_pdb),
+            "source_reflections_path": str(processed_dir.source_mtz),
+            "ligand_cif_path": str(processed_dir.source_ligand_cif),
+            "ligand_smiles_path": str(processed_dir.source_ligand_pdb),
+            "ligand_pdb_path": str(processed_dir.source_ligand_pdb),
+            "smoothing_factor": dataset.smoothing_factor,
+            "source_dir": str(processed_dir),
+            "processed_dir": str(source_dir)
+        }
+        summaries[dtag.dtag] = summary
+    return summaries
 
 
 def save_json_log(log_dict: Dict, path: Path):

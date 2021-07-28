@@ -530,7 +530,13 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     if cif_path:
         cif_path = cif_path
     else:
-        raise NotImplementedError()
+        return AutobuildResult(
+            False,
+            [],
+            {},
+            "",
+            ""
+        )
 
     print(f"\tGenerated cif")
 
