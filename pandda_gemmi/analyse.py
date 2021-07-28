@@ -488,12 +488,23 @@ def process_pandda(
             time_autobuild_finish = time.time()
             pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
 
-            autobuild_results = {
+            autobuild_results: Dict[EventID, Event] = {
                 event_id: autobuild_result
                 for event_id, autobuild_result
                 in zip(all_events, autobuild_results_list)
             }
             printer.pprint(autobuild_results)
+
+            # Save results
+            pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
+            for event_id, autobuild_result in autobuild_results.items():
+                dtag = event_id.dtag.dtag
+                if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
+                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
+
+                event_idx = event_id.event_idx.event_idx
+
+                pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
 
             # Add the best fragment by scoring method to default model
             pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}

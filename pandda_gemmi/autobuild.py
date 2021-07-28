@@ -331,6 +331,7 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
     # Execute job script
     execute(rhofit_command)
 
+    return rhofit_command
 
 # #####################
 # Rescore
@@ -535,13 +536,14 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
             [],
             {},
             "",
+            "",
             ""
         )
 
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut)
+    rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut)
     print(f"\tRhofit")
 
     # Score rhofit builds
@@ -577,4 +579,5 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
         score_dictionary,
         cif_path,
         selected_fragement_path,
+        rhofit_command
     )

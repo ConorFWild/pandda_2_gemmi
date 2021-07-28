@@ -5421,3 +5421,4 @@ class AutobuildResult:
     scores: Dict[str, float]
     cif_path: str
     selected_fragment_path: Optional[str]
+    command: str
