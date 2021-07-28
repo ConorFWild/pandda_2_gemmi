@@ -7,8 +7,13 @@ It is reccomended that you install PanDDA 2 in it's own python 3.7 anaconda envi
 ```bash
 conda create -n pandda2 python=3.7
 conda activate pandda2
+conda install -c conda-forge fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue
+git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd /path/to/cloned/repository
 pip install .
+cd _gemmi
+pip install .
+
 ```
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda enviroment.
@@ -20,7 +25,7 @@ Installing PanDDA 2 this way will add various scripts to your path, but only whi
 Once you have installed PanDDA 2 in a conda enviroment, running it is as simple as:
 
 ```bash
-python /path/to/analyse.py <data directories> <output directory> --pdb_regex="*.dimple.pdb" --mtz_regex="*.dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' <options>
+python /path/to/analyse.py <data directories> <output directory> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' <options>
 
 ```
 
@@ -29,7 +34,7 @@ PanDDA 2 supports the autobuilding of events and ranking them by autobuildabilit
 
 An example:
 ```bash
-python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex="*.dimple.pdb" --mtz_regex="*.dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' --autobuild=True <options>
+python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' --autobuild=True <options>
 
 ```
 
@@ -40,7 +45,22 @@ It is strongly reccomended that if you are qsub'ing a script that will run PanDD
 
 An example of how to run with distributed computing at Diamond Light Source is as follows:
 ```bash
-python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex="*.dimple.pdb" --mtz_regex="*.dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' --global_processing="distributed" <options>
+# Ensuring availability of Global Phasing code
+module load buster
+
+# submit.sh
+python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' --global_processing="distributed" <options>
+
+# Submitting
+chmod 777 submit.sh
+qsub -V -o submit.o -e submit.e -q medium.q -pe smp 20 -l m_mem_free=15G submit.sh
+
+```
+
+
+### Running with distributed computing from condor
+```bash
+python ./pandda_gemmi/analyse.py /data/share-2/conor/pandda/data/pandda_inputs/BRD1 /data/share-2/conor/pandda/output/pandda_2_BRD1 --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("FWT","PHWT")' --autobuild=True --global_processing="distributed" --distributed_scheduler="HTCONDOR" --local_cpus=20
 
 ```
 

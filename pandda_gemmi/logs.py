@@ -87,8 +87,13 @@ def summarise_datasets(datasets: Dict[Dtag, Dataset], pandda_fs_model: PanDDAFSM
         dataset = datasets[dtag]
         source_dir = pandda_fs_model.data_dirs.dataset_dirs[dtag]
         processed_dir = pandda_fs_model.processed_datasets[dtag]
+        if processed_dir.source_ligand_dir:
+            compound_dir = processed_dir.source_ligand_dir.path
+        else:
+            compound_dir = None
+
         summary = {
-            "compound_dir": str(processed_dir.source_ligand_dir.path),
+            "compound_dir": str(compound_dir),
             "source_structure_path": str(processed_dir.source_pdb),
             "source_reflections_path": str(processed_dir.source_mtz),
             "ligand_cif_path": str(processed_dir.source_ligand_cif),
