@@ -2706,6 +2706,67 @@ class Xmap:
 
         return Xmap(interpolated_grid)
 
+    @staticmethod
+    def from_unaligned_dataset_c(dataset: Dataset,
+                                 alignment: Alignment,
+                                 grid: Grid,
+                                 structure_factors: StructureFactors,
+                                 sample_rate: float = 3.0,
+                                 ):
+
+        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                                 structure_factors.phi,
+                                                                                                 sample_rate=sample_rate,
+                                                                                                 )
+        unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
+
+        std = np.std(unaligned_xmap_array)
+        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
+
+        new_grid = grid.new_grid()
+        # Unpack the points, poitions and transforms
+        point_list: List[Tuple[int, int, int]] = []
+        position_list: List[Tuple[float, float, float]] = []
+        transform_list: List[gemmi.transform] = []
+        com_moving_list: List[np.array] = []
+        com_reference_list: List[np.array] = []
+
+        for residue_id, point_position_dict in grid.partitioning.partitioning.items():
+
+            al = alignment[residue_id]
+            transform = al.transform.inverse()
+            com_moving = al.com_moving
+            com_reference = al.com_reference
+
+            for point, position in point_position_dict.items():
+                point_list.append(point)
+                position_list.append(position)
+                transform_list.append(transform)
+                com_moving_list.append(com_moving)
+                com_reference_list.append(com_reference)
+
+        # for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
+
+        # print((
+        #     f"point: {point}\n"
+        #     f"Position: {position}\n"
+        #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
+        #     f"com moving: {com_moving} \n"
+        #     f"Com moving: {com_reference}\n"
+        # ))
+
+        # Interpolate values
+        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+                                                     new_grid,
+                                                     point_list,
+                                                     position_list,
+                                                     transform_list,
+                                                     com_moving_list,
+                                                     com_reference_list,
+                                                     )
+
+        return Xmap(interpolated_grid)
+
     def new_grid(self):
         spacing = [self.xmap.nu, self.xmap.nv, self.xmap.nw]
         unit_cell = self.xmap.unit_cell

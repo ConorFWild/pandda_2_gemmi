@@ -286,6 +286,25 @@ def save_plot_pca_umap_bokeh(dataset_connectivity_matrix, labels, known_apos, pl
     bokeh_scatter_plot(embedding, labels, known_apos, plot_file)
 
 
+def from_unaligned_dataset_c_flat(dataset: Dataset,
+                                  alignment: Alignment,
+                                  grid: Grid,
+                                  structure_factors: StructureFactors,
+                                  sample_rate: float = 3.0, ):
+    xmap = Xmap.from_unaligned_dataset_c(dataset,
+                                         alignment,
+                                         grid,
+                                         structure_factors,
+                                         sample_rate,
+                                         )
+
+    xmap_array = xmap.to_array()
+
+    masked_array = xmap_array[grid.partitioning.total_mask == 1]
+
+    return masked_array
+
+
 def get_comparators_closest_cutoff(
         datasets: Dict[Dtag, Dataset],
         alignments,
@@ -324,7 +343,7 @@ def get_comparators_closest_cutoff(
     print("Loading xmaps")
     start = time.time()
     load_xmap_paramaterised = partial(
-        Xmap.from_unaligned_dataset_c,
+        from_unaligned_dataset_c_flat,
         grid=grid,
         structure_factors=structure_factors,
         sample_rate=sample_rate,
@@ -341,9 +360,11 @@ def get_comparators_closest_cutoff(
             in shell_truncated_datasets
         ]
     )
+    print("Got xmaps!")
 
     # Get the maps as arrays
-    xmaps = {dtag: xmap.to_array()
+    print("Getting xmaps as arrays")
+    xmaps = {dtag: xmap
              for dtag, xmap
              in zip(datasets, results)
              }
