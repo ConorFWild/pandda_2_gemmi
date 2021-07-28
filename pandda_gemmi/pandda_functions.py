@@ -107,7 +107,7 @@ def get_dask_client(scheduler="SGE",
     if scheduler == "HTCONDOR":
         job_extra = [f"GetEnv = True", ]
         cluster = HTCondorCluster(
-            queue=queue,
+            # queue=queue,
             project=project,
             cores=cores_per_worker,
             memory=f"{distributed_mem_per_core * cores_per_worker}G",
