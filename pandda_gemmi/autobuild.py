@@ -551,10 +551,9 @@ def autobuild_rhofit(dataset: Dataset,
     elif cif_strategy == "elbow":
         if cif_path:
             cif_path = generate_cif(
-                smiles_path,
+                cif_path,
                 out_dir,
             )
-
         else:
             return AutobuildResult(
                 False,
