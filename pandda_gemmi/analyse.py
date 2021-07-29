@@ -156,6 +156,7 @@ def process_pandda(
         # Autobuild settings
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
+        cif_strategy: str = "elbow",
         # Ranking settings
         rank_method: str = "autobuild",
         # Debug settings
@@ -243,6 +244,7 @@ def process_pandda(
 
                 autobuild_parametrized = partial(
                     autobuild_rhofit,
+                    cif_strategy=cif_strategy,
                 )
 
             elif autobuild_strategy == "inbuilt":

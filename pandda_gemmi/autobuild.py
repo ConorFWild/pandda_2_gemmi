@@ -288,17 +288,17 @@ def cut_out_xmap(xmap_path: Path, coord: Coord, out_dir: Path):
 # # Generate cif
 # #####################
 
-def get_elbow_command(smiles_file: Path, out_dir: Path, phenix_setup) -> str:
-    command = constants.ELBOW_COMMAND.format(phenix_setup=phenix_setup,
+def get_elbow_command(smiles_file: Path, out_dir: Path) -> str:
+    command = constants.ELBOW_COMMAND.format(
                                              out_dir=str(out_dir),
                                              smiles_file=str(smiles_file),
                                              prefix=constants.LIGAND_PREFIX, )
     return command
 
 
-def generate_cif(smiles_path: Path, out_dir: Path, phenix_setup):
+def generate_cif(smiles_path: Path, out_dir: Path):
     # Get the command to run elbow
-    elbow_command = get_elbow_command(smiles_path, out_dir, phenix_setup)
+    elbow_command = get_elbow_command(smiles_path, out_dir)
 
     # Run the command
     execute(elbow_command)
@@ -484,7 +484,11 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 # # Autobuild from pandda
 # #####################
 
-def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, cut: float = 2.0):
+def autobuild_rhofit(dataset: Dataset,
+                     event: Event,
+                     pandda_fs: PanDDAFSModel,
+                     cif_strategy,
+                     cut: float = 2.0):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -504,8 +508,8 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     model_path = Path(model_path)
     build_map_path = Path(build_map_path)
     mtz_path = Path(mtz_path)
-    # smiles_path = Path(smiles_path)
-    # cif_path = Path(cif_path)
+    smiles_path = Path(smiles_path)
+    cif_path = Path(cif_path)
     out_dir = Path(out_dir)
     print(f"\tEvent native centroid: {event.native_centroid}")
     coord = Coord(
@@ -528,9 +532,7 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
     print(f"\tCut out xmap")
 
     # Generate the cif
-    if cif_path:
-        cif_path = cif_path
-    else:
+    if not cif_path:
         return AutobuildResult(
             False,
             [],
@@ -539,6 +541,26 @@ def autobuild_rhofit(dataset: Dataset, event: Event, pandda_fs: PanDDAFSModel, c
             "",
             ""
         )
+
+    if cif_strategy == "default":
+        cif_path = cif_path
+    elif cif_strategy == "elbow":
+        if smiles_path:
+            cif_path = generate_cif(
+                smiles_path,
+                out_dir,
+            )
+        else:
+            return AutobuildResult(
+                False,
+                [],
+                {},
+                "",
+                "",
+                ""
+            )
+    else:
+        raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
 
     print(f"\tGenerated cif")
 

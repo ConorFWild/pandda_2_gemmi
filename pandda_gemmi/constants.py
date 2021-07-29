@@ -105,7 +105,7 @@ RHOFIT_COMMAND = (
 MASKED_PDB_FILE = "masked.pdb"
 TRUNCATED_EVENT_MAP_FILE = "truncated.ccp4"
 CUT_EVENT_MAP_FILE = "cut.ccp4"
-ELBOW_COMMAND = "{phenix_setup}; cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
+ELBOW_COMMAND = "cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
 LIGAND_PREFIX = "ligand"
 LIGAND_CIF_FILE = "ligand.cif"
 
