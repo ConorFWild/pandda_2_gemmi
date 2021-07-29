@@ -3177,10 +3177,10 @@ class Model:
                                   dtype=np.float32)[:, np.newaxis]
         sigma_s_m_flat = Model.calculate_sigma_s_m_np(
             mean_array,
-                                                   masked_train_xmap_array.xmap_array,
-                                                   sigma_is_array,
-                                                   process_local,
-                                                   )
+            masked_train_xmap_array.xmap_array,
+            sigma_is_array,
+            process_local,
+        )
 
         return sigma_s_m_flat
 
@@ -4095,8 +4095,8 @@ class Clusterings:
                                              in [0, 1, 2]
                                              )
                 cluster_positions_array = np.vstack([current_cluster.cluster_positions_array
-                                                      for current_cluster
-                                                      in current_clusters])
+                                                     for current_cluster
+                                                     in current_clusters])
 
                 cluster_positions_list = [current_cluster.centroid
                                           for current_cluster
@@ -4125,8 +4125,6 @@ class Clusterings:
                     for i
                     in [0, 1, 2]
                 )
-
-
 
                 new_cluster = Cluster(
                     cluster_points_tuple,
@@ -4197,20 +4195,20 @@ class BDC:
             # local_correlation = stats.pearsonr(mean_masked[cluster_mask],
             #                                    cluster_vals)[0]
             # local_correlation, local_offset = np.polyfit(x=mean_masked[cluster_mask], y=cluster_vals, deg=1)
-            local_correlation = np.corrcoef(x=mean_masked[cluster_mask], y=cluster_vals)[0,1]
+            local_correlation = np.corrcoef(x=mean_masked[cluster_mask], y=cluster_vals)[0, 1]
 
             # global_correlation = stats.pearsonr(mean_masked,
             #                                     subtracted_map)[0]
             # global_correlation, global_offset = np.polyfit(x=mean_masked, y=subtracted_map, deg=1)
-            global_correlation = np.corrcoef(x=mean_masked, y=subtracted_map)[0,1]
+            global_correlation = np.corrcoef(x=mean_masked, y=subtracted_map)[0, 1]
 
             vals[val] = np.abs(global_correlation - local_correlation)
 
         mean_fraction = max(vals,
-                       key=lambda x: vals[x],
-                       )
+                            key=lambda x: vals[x],
+                            )
 
-        return BDC(mean_fraction, 1-mean_fraction)
+        return BDC(mean_fraction, 1 - mean_fraction)
 
 
 @dataclasses.dataclass()
@@ -4413,7 +4411,8 @@ class Events:
 
                     site: SiteID = sites.event_to_site[event_id]
 
-                    jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc,)
+                    jobs[event_id] = delayed(Events.get_event)(xmap, cluster, dtag, site, event_id, model, grid,
+                                                               min_bdc, max_bdc, )
 
             results = mapper(job for job in jobs.values())
 
@@ -4429,7 +4428,7 @@ class Events:
 
                     cluster = clustering[event_idx.event_idx]
                     xmap = xmaps[dtag]
-                    bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc,)
+                    bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc, )
 
                     site: SiteID = sites.event_to_site[event_id]
 
@@ -4437,8 +4436,8 @@ class Events:
                     native_centroid = alignment.reference_to_moving(
                         np.array(
                             (cluster.centroid[0],
-                         cluster.centroid[1],
-                         cluster.centroid[2],)).reshape(-1, 3)
+                             cluster.centroid[1],
+                             cluster.centroid[2],)).reshape(-1, 3)
                     )[0]
 
                     # Get native event mask
@@ -4462,8 +4461,8 @@ class Events:
         return Events(events, sites)
 
     @staticmethod
-    def get_event(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc,):
-        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc,)
+    def get_event(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc, ):
+        bdc = BDC.from_cluster(xmap, model, cluster, dtag, grid, min_bdc, max_bdc, )
 
         event = Event.from_cluster(
             event_id,
@@ -4961,6 +4960,7 @@ class LigandDir:
 
 @dataclasses.dataclass()
 class DatasetDir:
+    path: Path
     input_pdb_file: Path
     input_mtz_file: Path
     ligand_dir: Union[LigandDir, None]
@@ -4970,7 +4970,7 @@ class DatasetDir:
 
     @staticmethod
     def from_path(path: Path, pdb_regex: str, mtz_regex: str,
-                  ligand_dir_name:str,
+                  ligand_dir_name: str,
                   ligand_cif_regex: str, ligand_pdb_regex: str,
                   ligand_smiles_regex: str):
         input_pdb_file: Path = next(path.glob(pdb_regex))
@@ -5002,13 +5002,15 @@ class DatasetDir:
         except:
             source_ligand_smiles = None
 
-        return DatasetDir(input_pdb_file=input_pdb_file,
-                          input_mtz_file=input_mtz_file,
-                          ligand_dir=ligand_dir,
-                          source_ligand_cif=source_ligand_cif,
-                          source_ligand_pdb=source_ligand_pdb,
-                          source_ligand_smiles=source_ligand_smiles
-                          )
+        return DatasetDir(
+            path=path,
+            input_pdb_file=input_pdb_file,
+            input_mtz_file=input_mtz_file,
+            ligand_dir=ligand_dir,
+            source_ligand_cif=source_ligand_cif,
+            source_ligand_pdb=source_ligand_pdb,
+            source_ligand_smiles=source_ligand_smiles
+        )
 
 
 @dataclasses.dataclass()
@@ -5016,7 +5018,8 @@ class DataDirs:
     dataset_dirs: typing.Dict[Dtag, DatasetDir]
 
     @staticmethod
-    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str,
+    def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_dir_name, ligand_cif_regex: str,
+                 ligand_pdb_regex: str,
                  ligand_smiles_regex: str):
         dataset_dir_paths = list(directory.glob("*"))
 
@@ -5025,7 +5028,8 @@ class DataDirs:
         for dataset_dir_path in dataset_dir_paths:
             dtag = Dtag(dataset_dir_path.name)
             try:
-                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
+                dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
+                                                   ligand_cif_regex,
                                                    ligand_pdb_regex, ligand_smiles_regex)
                 dataset_dirs[dtag] = dataset_dir
             except Exception as e:
@@ -5169,7 +5173,8 @@ class PanDDAFSModel:
                  ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
-        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex, ligand_pdb_regex, ligand_smiles_regex)
+        data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
+                                      ligand_pdb_regex, ligand_smiles_regex)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
                                                               )

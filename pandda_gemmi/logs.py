@@ -100,8 +100,8 @@ def summarise_datasets(datasets: Dict[Dtag, Dataset], pandda_fs_model: PanDDAFSM
             "ligand_smiles_path": str(processed_dir.source_ligand_pdb),
             "ligand_pdb_path": str(processed_dir.source_ligand_pdb),
             "smoothing_factor": dataset.smoothing_factor,
-            "source_dir": str(processed_dir),
-            "processed_dir": str(source_dir)
+            "source_dir": str(processed_dir.path),
+            "processed_dir": str(source_dir.path)
         }
         summaries[dtag.dtag] = summary
     return summaries
