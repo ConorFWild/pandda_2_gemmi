@@ -22,7 +22,7 @@ def main(
     print(pandda_fs.processed_datasets[event.event_id.dtag])
     print("####################################################")
 
-    autobuild_rhofit(dataset, event, pandda_fs)
+    autobuild_rhofit(dataset, event, pandda_fs, cif_strategy="elbow")
 
 
 if __name__ == "__main__":

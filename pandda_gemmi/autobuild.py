@@ -508,8 +508,12 @@ def autobuild_rhofit(dataset: Dataset,
     model_path = Path(model_path)
     build_map_path = Path(build_map_path)
     mtz_path = Path(mtz_path)
-    smiles_path = Path(smiles_path)
-    cif_path = Path(cif_path)
+
+    if smiles_path:
+        smiles_path = Path(smiles_path)
+    if cif_path:
+        cif_path = Path(cif_path)
+
     out_dir = Path(out_dir)
     print(f"\tEvent native centroid: {event.native_centroid}")
     coord = Coord(
@@ -539,7 +543,7 @@ def autobuild_rhofit(dataset: Dataset,
             {},
             "",
             "",
-            ""
+            "",
         )
 
     if cif_strategy == "default":
@@ -557,7 +561,7 @@ def autobuild_rhofit(dataset: Dataset,
                 {},
                 "",
                 "",
-                ""
+                "",
             )
     else:
         raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
