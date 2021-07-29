@@ -48,6 +48,7 @@ from pandda_gemmi.pandda_types import (
     EventID, Event, Events, SiteTable, EventTable,
     StructureFactors, Xmap,
     DatasetResult, ShellResult,
+    AutobuildResult
 )
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
@@ -488,7 +489,7 @@ def process_pandda(
             time_autobuild_finish = time.time()
             pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
 
-            autobuild_results: Dict[EventID, Event] = {
+            autobuild_results: Dict[EventID, AutobuildResult] = {
                 event_id: autobuild_result
                 for event_id, autobuild_result
                 in zip(all_events, autobuild_results_list)
@@ -498,11 +499,11 @@ def process_pandda(
             # Save results
             pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
             for event_id, autobuild_result in autobuild_results.items():
-                dtag = event_id.dtag.dtag
+                dtag = str(event_id.dtag.dtag)
                 if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
                     pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
 
-                event_idx = event_id.event_idx.event_idx
+                event_idx = int(event_id.event_idx.event_idx)
 
                 pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
 
