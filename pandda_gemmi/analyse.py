@@ -540,7 +540,7 @@ def process_pandda(
                 )
 
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = all_scores[selected_fragement_path]
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(all_scores[selected_fragement_path])
 
                 print(f"Selected fragment path: {selected_fragement_path}")
 
