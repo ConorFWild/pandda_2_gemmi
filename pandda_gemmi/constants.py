@@ -41,6 +41,7 @@ COMMON_F_PHI_LABEL_PAIRS = (
 ###################################################################
 PANDDA_LOG_FILE = "pandda_log.json"
 
+LOG_ARGUMENTS: str = "The arguments to the main function and their values"
 LOG_START: str = "Start time"
 LOG_TRACE: str = "trace"
 LOG_EXCEPTION: str = "exception"

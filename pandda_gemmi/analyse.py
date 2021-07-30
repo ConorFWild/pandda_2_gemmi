@@ -28,6 +28,7 @@ from pathlib import Path
 import pprint
 from functools import partial
 import multiprocessing as mp
+import inspect
 
 printer = pprint.PrettyPrinter()
 
@@ -168,7 +169,11 @@ def process_pandda(
     time_start = time.time()
     print("Getting config")
 
+
+
     # Process args
+    initial_arg_values = inspect.getargvalues(inspect.currentframe())
+    printer.pprint(initial_arg_values)
     data_dirs = Path(data_dirs)
     out_dir = Path(out_dir)
 
@@ -178,6 +183,7 @@ def process_pandda(
     print("Initialising log...")
     pandda_log: Dict = {}
     pandda_log[constants.LOG_START] = time.time()
+    pandda_log[constants.LOG_ARGUMENTS] = initial_arg_values
 
     print("FSmodel building")
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
