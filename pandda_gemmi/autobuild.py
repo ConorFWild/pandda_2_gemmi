@@ -290,9 +290,9 @@ def cut_out_xmap(xmap_path: Path, coord: Coord, out_dir: Path):
 
 def get_elbow_command(smiles_file: Path, out_dir: Path) -> str:
     command = constants.ELBOW_COMMAND.format(
-                                             out_dir=str(out_dir),
-                                             smiles_file=str(smiles_file),
-                                             prefix=constants.LIGAND_PREFIX, )
+        out_dir=str(out_dir),
+        smiles_file=str(smiles_file),
+        prefix=constants.LIGAND_PREFIX, )
     return command
 
 
@@ -332,6 +332,7 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
     execute(rhofit_command)
 
     return rhofit_command
+
 
 # #####################
 # Rescore
@@ -536,8 +537,19 @@ def autobuild_rhofit(dataset: Dataset,
     print(f"\tCut out xmap")
 
     # Generate the cif
-    if not cif_path:
-        if not smiles_path:
+    # if not cif_path:
+    #     if not smiles_path:
+    #         return AutobuildResult(
+    #             False,
+    #             [],
+    #             {},
+    #             "",
+    #             "",
+    #             "",
+    #         )
+
+    if cif_strategy == "default":
+        if not cif_path:
             return AutobuildResult(
                 False,
                 [],
@@ -547,8 +559,9 @@ def autobuild_rhofit(dataset: Dataset,
                 "",
             )
 
-    if cif_strategy == "default":
         cif_path = cif_path
+
+    # Makinf with elbow
     elif cif_strategy == "elbow":
         if cif_path:
             cif_path = generate_cif(
