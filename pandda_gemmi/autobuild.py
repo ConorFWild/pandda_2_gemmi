@@ -537,14 +537,15 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Generate the cif
     if not cif_path:
-        return AutobuildResult(
-            False,
-            [],
-            {},
-            "",
-            "",
-            "",
-        )
+        if not smiles_path:
+            return AutobuildResult(
+                False,
+                [],
+                {},
+                "",
+                "",
+                "",
+            )
 
     if cif_strategy == "default":
         cif_path = cif_path
@@ -554,6 +555,12 @@ def autobuild_rhofit(dataset: Dataset,
                 cif_path,
                 out_dir,
             )
+        elif smiles_path:
+            cif_path = generate_cif(
+                smiles_path,
+                out_dir,
+            )
+
         else:
             return AutobuildResult(
                 False,
