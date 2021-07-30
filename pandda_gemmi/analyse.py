@@ -64,7 +64,7 @@ from pandda_gemmi.pandda_functions import (
     truncate,
     validate_strategy_num_datasets,
     validate,
-
+    get_common_structure_factors,
 )
 from pandda_gemmi.ranking import (
     rank_events_size,
@@ -171,7 +171,9 @@ def process_pandda(
     # Process args
     data_dirs = Path(data_dirs)
     out_dir = Path(out_dir)
-    structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
+
+    if structure_factors:
+        structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
 
     print("Initialising log...")
     pandda_log: Dict = {}
@@ -280,6 +282,13 @@ def process_pandda(
         print("Loading datasets")
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
         print(f"\tThere are initially: {len(datasets_initial)} datasets")
+
+        # If structure factors not given, check if any common ones are available
+        if not structure_factors:
+            structure_factors = get_common_structure_factors(datasets_initial)
+            # If still no structure factors
+            if not structure_factors:
+                raise Exception("No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
 
         # Make dataset validator
         validation_strategy = partial(validate_strategy_num_datasets,

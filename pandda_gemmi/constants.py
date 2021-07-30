@@ -29,6 +29,16 @@ PANDDA_SIGMA_S_M_FILE = "sigma_s_m_{number}_{res}.ccp4"
 ###################################################################
 # # Logging constants
 ###################################################################
+COMMON_F_PHI_LABEL_PAIRS = (
+    ("FWT", "PHWT"),
+    ("2FOFCWT", "2PHFOFCWT"),
+    ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
+    ("2FOFCWT_fill", "PH2FOFCWT_fill",),
+)
+
+###################################################################
+# # Logging constants
+###################################################################
 PANDDA_LOG_FILE = "pandda_log.json"
 
 LOG_START: str = "Start time"
@@ -54,8 +64,8 @@ LOG_DATASET_SIGMA_S: str = "Sigma S map statistics"
 LOG_DATASET_MODEL_TIME: str = "Time taken to generate dataset model"
 LOG_DATASET_Z_MAPS_TIME: str = "Time taken to generate z map"
 LOG_DATASET_INITIAL_CLUSTERS_NUM: str = "Initial number of clusters"
-LOG_DATASET_LARGE_CLUSTERS_NUM : str = "Number of clusters after filtering small clusters"
-LOG_DATASET_PEAKED_CLUSTERS_NUM : str = "Number of clusters after filtering low peaked clusters"
+LOG_DATASET_LARGE_CLUSTERS_NUM: str = "Number of clusters after filtering small clusters"
+LOG_DATASET_PEAKED_CLUSTERS_NUM: str = "Number of clusters after filtering low peaked clusters"
 LOG_DATASET_MERGED_CLUSTERS_NUM: str = "Number of clusters after merging clusters"
 LOG_DATASET_CLUSTER_TIME: str = "Time taken to cluster z map"
 LOG_DATASET_EVENT_TIME: str = "Time taken to get events"
@@ -65,7 +75,6 @@ LOG_AUTOBUILD_TIME: str = "Time taken to autobuild events"
 LOG_AUTOBUILD_SELECTED_BUILDS: str = "Build selected for each dataset"
 LOG_AUTOBUILD_SELECTED_BUILD_SCORES: str = "Score for Build selected for each dataset"
 LOG_AUTOBUILD_COMMANDS: str = "Commands to autobuild each event"
-
 
 ###################################################################
 # # Residue names
@@ -91,7 +100,6 @@ RESIDUE_NAMES = ["ALA",
                  "TYR",
                  "VAL",
                  ]
-
 
 ###################################################################
 # # Autobuild constants

@@ -13,7 +13,7 @@ import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show
 
 from pandda_gemmi.pandda_types import *
-
+from pandda_gemmi import constants
 
 def run(func):
     return func()
@@ -537,3 +537,18 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
     if not strategy(datasets):
         print(datasets)
         raise exception
+
+
+def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
+    for dtag in datasets:
+        dataset = datasets[dtag]
+        reflections = dataset.reflections
+        column_labels = reflections.columns()
+        for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
+
+            f_label = common_f_phi_label_pair[0]
+            if f_label in column_labels:
+                return StructureFactors(common_f_phi_label_pair[0], common_f_phi_label_pair[1])
+
+    # If couldn't find common names in any dataset return None
+    return None
