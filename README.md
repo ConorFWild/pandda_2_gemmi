@@ -45,10 +45,11 @@ It is strongly reccomended that if you are qsub'ing a script that will run PanDD
 
 An example of how to run with distributed computing at Diamond Light Source is as follows:
 ```bash
-# Ensuring availability of Global Phasing code
+# Ensuring availability of Global Phasing code for autobuilding and phenix for building cifs
+module load phenix
 module load buster
 
-# submit.sh
+# Put the following in the file submit.sh
 python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' --global_processing="distributed" <options>
 
 # Submitting
