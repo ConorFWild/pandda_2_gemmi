@@ -67,6 +67,7 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
             processes=1,
             nanny=False,
             job_extra=job_extra,
+            log_directory=str(out_dirs),
         )
 
         # Scale the cluster up to the number of workers
