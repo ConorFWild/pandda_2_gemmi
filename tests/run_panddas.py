@@ -6,7 +6,7 @@ import subprocess
 
 
 def generate_pandda_command(data_dir: str, out_dir: str) -> str:
-    command = f"pandda.analyse {data_dir}/* {out_dir} pdb_style=\"*.pdb\" mtz_style=\"*.mtz\" cpus=12 max_new_datasets=9999"
+    command = f"pandda.analyse \"{data_dir}/*\" \"{out_dir}\" pdb_style=\"*.pdb\" mtz_style=\"*.mtz\" cpus=12 max_new_datasets=9999"
     return command
 
 
