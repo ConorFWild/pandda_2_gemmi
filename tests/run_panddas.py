@@ -29,7 +29,7 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
     if not out_dirs.exists():
         os.mkdir(out_dirs)
 
-    commands = [generate_pandda_command(data_dir, out_dirs / data_dir.name) for data_dir in data_dirs]
+    commands = [generate_pandda_command(data_dir, out_dirs / data_dir.name) for data_dir in data_dirs.glob("*")]
     for command in commands:
         print(f"\t{command}")
 
