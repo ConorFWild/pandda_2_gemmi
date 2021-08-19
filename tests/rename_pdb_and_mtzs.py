@@ -4,7 +4,7 @@ from pathlib import Path
 import fire
 
 
-def rename(directory: str, dry=True):
+def rename(directory: str, dry=False):
     directory = Path(directory)
 
     for path in directory.rglob("*"):
