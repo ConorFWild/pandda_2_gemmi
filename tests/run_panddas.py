@@ -54,14 +54,19 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
 
         dask.config.set({'distributed.worker.daemon': False})
 
-        job_extra = [(f"GetEnv", "True"), ]
+        job_extra = [
+            (f"GetEnv", "True"),
+            ("RequestCpus", f"{cores_per_worker}"),
+            ("RequestMemory", f"{cores_per_worker*distributed_mem_per_core}"),
+            ("RequestDisk", f"100G"),
+        ]
         cluster = HTCondorCluster(
             cores=cores_per_worker,
             memory=f"{distributed_mem_per_core * cores_per_worker}G",
             disk="100G",
             processes=1,
             nanny=False,
-            # job_extra=job_extra,
+            job_extra=job_extra,
         )
 
         # Scale the cluster up to the number of workers
