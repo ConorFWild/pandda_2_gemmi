@@ -11,6 +11,7 @@ def generate_pandda_command(data_dir: str, out_dir: str) -> str:
 
 
 def run(command: str):
+    print(f"Running command: {command}")
     p = subprocess.Popen(command,
                          shell=True,
                          )
