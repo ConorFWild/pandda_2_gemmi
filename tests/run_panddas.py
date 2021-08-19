@@ -6,7 +6,7 @@ import subprocess
 
 
 def generate_pandda_command(data_dir: str, out_dir: str) -> str:
-    command = f"pandda.analyse {data_dir}/* {out_dir} pdb_style=\"*.pdb\" mtz_style=\"*.mtz\" cpus=12"
+    command = f"pandda.analyse {data_dir}/* {out_dir} pdb_style=\"*.pdb\" mtz_style=\"*.mtz\" cpus=12 max_new_datasets=9999"
     return command
 
 
@@ -29,7 +29,13 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
     if not out_dirs.exists():
         os.mkdir(out_dirs)
 
-    commands = [generate_pandda_command(data_dir, out_dirs / data_dir.name) for data_dir in data_dirs.glob("*")]
+    commands = [
+        generate_pandda_command(
+            str(data_dir),
+            str(out_dirs / data_dir.name),
+        )
+        for data_dir
+        in data_dirs.glob("*")]
     for command in commands:
         print(f"\t{command}")
 
