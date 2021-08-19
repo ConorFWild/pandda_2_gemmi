@@ -32,8 +32,8 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
 
     commands = [
         generate_pandda_command(
-            str(data_dir),
-            str(out_dirs / data_dir.name),
+            str(data_dir.resolve()),
+            str((out_dirs / data_dir.name).resolve()),
         )
         for data_dir
         in data_dirs.glob("*")]
