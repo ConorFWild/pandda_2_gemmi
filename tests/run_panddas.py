@@ -45,7 +45,7 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
         queue = None
         project = None
         cores_per_worker = 6
-        distributed_mem_per_core = 40
+        distributed_mem_per_core = 50
         resource_spec = ""
         walltime = "120:00:00"
 
