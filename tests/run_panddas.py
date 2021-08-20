@@ -61,16 +61,16 @@ def run_panddas(data_dirs: str, out_dirs: str, distributed: bool = True):
             ("RequestMemory", f"{cores_per_worker*distributed_mem_per_core}"),
             ("RequestDisk", f"100G"),
         ]
-        extra = ["--nprocs", 1]
+        # extra = ["--nprocs", 1]
         cluster = HTCondorCluster(
-            cores=cores_per_worker,
+            cores=1,
             memory=f"{distributed_mem_per_core * cores_per_worker}G",
             disk="100G",
             processes=1,
             nanny=False,
             job_extra=job_extra,
             log_directory=str(out_dirs),
-            extra=extra,
+            # extra=extra,
         )
 
         # Scale the cluster up to the number of workers
