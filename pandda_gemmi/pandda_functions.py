@@ -10,7 +10,7 @@ import joblib
 
 from sklearn import decomposition
 import umap
-from bokeh.plotting import ColumnDataSource, figure, output_file, show
+from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi import constants
@@ -281,7 +281,7 @@ def bokeh_scatter_plot(embedding, labels, know_apos, plot_file):
 
     p.circle('x', 'y', size=15, source=source, color="apo")
 
-    show(p)
+    save(p)
 
 
 def save_plot_pca_umap_bokeh(dataset_connectivity_matrix, labels, known_apos, plot_file):
