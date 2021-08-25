@@ -159,7 +159,7 @@ def process_pandda(
         autobuild_strategy: str = "rhofit",
         cif_strategy: str = "elbow",
         # Ranking settings
-        rank_method: str = "autobuild",
+        rank_method: str = "size",
         # Debug settings
         debug: bool = True,
 ):
