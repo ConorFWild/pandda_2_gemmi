@@ -450,7 +450,13 @@ class Reflections:
 
     @staticmethod
     def from_file(file: Path) -> Reflections:
-        reflections = gemmi.read_mtz_file(str(file))
+
+        try:
+            reflections = gemmi.read_mtz_file(str(file))
+        except Exception as e:
+            print(e)
+            print(f"Error trying to open file: {file}")
+            raise Exception(e)
         return Reflections(reflections, file)
 
     def resolution(self) -> Resolution:
