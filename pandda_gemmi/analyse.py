@@ -153,6 +153,7 @@ def process_pandda(
         distributed_cores_per_worker: int = 12,
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
+        job_extra: str = ["--exclusive",],
         distributed_walltime="5:0:0",
         # Autobuild settings
         autobuild: bool = False,
@@ -212,6 +213,7 @@ def process_pandda(
                 cores_per_worker=local_cpus,
                 distributed_mem_per_core=distributed_mem_per_core,
                 resource_spec=distributed_resource_spec,
+                job_extra=job_extra,
                 walltime=distributed_walltime,
             )
             process_global = partial(

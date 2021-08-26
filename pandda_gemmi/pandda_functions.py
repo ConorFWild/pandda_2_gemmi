@@ -92,6 +92,7 @@ def get_dask_client(scheduler="SGE",
                     cores_per_worker=12,
                     distributed_mem_per_core=10,
                     resource_spec="",
+                    job_extra=("",),
                     walltime="1:00:00",
                     ):
     import dask
@@ -150,11 +151,11 @@ def get_dask_client(scheduler="SGE",
             queue=queue,
             project=project,
             cores=cores_per_worker,
-            memory=f"{distributed_mem_per_core * cores_per_worker}G",
-            resource_spec=resource_spec,
+            memory=f"{distributed_mem_per_core * cores_per_worker}GB",
             walltime=walltime,
             processes=1,
             nanny=False,
+            job_extra=job_extra
         )
 
     else:
