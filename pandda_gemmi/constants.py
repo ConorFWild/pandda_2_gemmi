@@ -5,6 +5,7 @@
 PANDDA_ANALYSES_DIR = "analyses"
 PANDDA_ANALYSE_EVENTS_FILE = "pandda_analyse_events.csv"
 PANDDA_ANALYSE_SITES_FILE = "pandda_analyse_sites.csv"
+PANDDA_HTML_SUMMARIES_DIR = "html_summaries"
 PANDDA_PROCESSED_DATASETS_DIR = "processed_datasets"
 PANDDA_MODELLED_STRUCTURES_DIR = "modelled_structures"
 PANDDA_LIGAND_FILES_DIR = "ligand_files"

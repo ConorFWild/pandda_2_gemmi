@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from typing import *
+from time import sleep
 from functools import partial
 import json
+
 
 import numpy as np
 import multiprocessing as mp
@@ -94,6 +96,7 @@ def get_dask_client(scheduler="SGE",
                     resource_spec="",
                     job_extra=("",),
                     walltime="1:00:00",
+                    watcher=True,
                     ):
     import dask
     from dask.distributed import Client
@@ -116,7 +119,7 @@ def get_dask_client(scheduler="SGE",
             # walltime=walltime,
             disk="10G",
             processes=1,
-            nanny=False,
+            nanny=watcher,
             job_extra=job_extra,
         )
 
@@ -129,7 +132,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
-            nanny=False,
+            nanny=watcher,
         )
 
     elif scheduler == "SGE":
@@ -142,7 +145,7 @@ def get_dask_client(scheduler="SGE",
             resource_spec=resource_spec,
             walltime=walltime,
             processes=1,
-            nanny=False,
+            nanny=watcher,
             job_extra=extra,
         )
 
@@ -154,7 +157,7 @@ def get_dask_client(scheduler="SGE",
             memory=f"{distributed_mem_per_core * cores_per_worker}GB",
             walltime=walltime,
             processes=1,
-            nanny=False,
+            nanny=watcher,
             job_extra=job_extra
         )
 
@@ -173,8 +176,21 @@ def process_global_dask(
         funcs,
         client=None,
 ):
+
     # Multiprocess
     processes = [client.submit(func) for func in funcs]
+    while any(f.status == 'pending' for f in processes):
+        sleep(0.1)
+
+    if any(f.status == 'error' for f in processes):
+        errored_processes = [f for f in processes if f.status == 'error']
+
+        print(f'{len(errored_processes)} out of {len(processes)} processes errored! Attempting to recreate clocally')
+
+        for f in errored_processes:
+            client.recreate_error_locally(f)
+        raise Exception(f'Failed to recreate errors in dask distribution locally!')
+
     results = client.gather(processes)
 
     return results

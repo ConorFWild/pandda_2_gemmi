@@ -140,7 +140,10 @@ class Structure:
 
     @staticmethod
     def from_file(file: Path) -> Structure:
-        structure = gemmi.read_structure(str(file))
+        try:
+            structure = gemmi.read_structure(str(file))
+        except Exception as e:
+            raise Exception(f'Error trying to open file: {file}: {e}')
         structure.setup_entities()
         return Structure(structure, file)
 
@@ -454,9 +457,7 @@ class Reflections:
         try:
             reflections = gemmi.read_mtz_file(str(file))
         except Exception as e:
-            print(e)
-            print(f"Error trying to open file: {file}")
-            raise Exception(e)
+            raise Exception(f'Error trying to open file: {file}: {e}')
         return Reflections(reflections, file)
 
     def resolution(self) -> Resolution:
@@ -4918,21 +4919,26 @@ class Analyses:
     analyses_dir: Path
     pandda_analyse_events_file: Path
     pandda_analyse_sites_file: Path
+    pandda_html_summaries_dir: Path
 
     @staticmethod
     def from_pandda_dir(pandda_dir: Path):
         analyses_dir = pandda_dir / PANDDA_ANALYSES_DIR
         pandda_analyse_events_file = analyses_dir / PANDDA_ANALYSE_EVENTS_FILE
         pandda_analyse_sites_file = analyses_dir / PANDDA_ANALYSE_SITES_FILE
+        pandda_html_summaries_dir = analyses_dir / PANDDA_HTML_SUMMARIES_DIR
 
         return Analyses(analyses_dir=analyses_dir,
                         pandda_analyse_events_file=pandda_analyse_events_file,
                         pandda_analyse_sites_file=pandda_analyse_sites_file,
+                        pandda_html_summaries_dir=pandda_html_summaries_dir,
                         )
 
     def build(self):
         if not self.analyses_dir.exists():
             os.mkdir(str(self.analyses_dir))
+        if not self.pandda_html_summaries_dir.exists():
+            os.mkdir(str(self.pandda_html_summaries_dir))
 
 
 @dataclasses.dataclass()
