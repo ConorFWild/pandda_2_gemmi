@@ -573,17 +573,6 @@ def autobuild_rhofit(dataset: Dataset,
     print(f"\tCut out xmap")
 
     # Generate the cif
-    # if not cif_path:
-    #     if not smiles_path:
-    #         return AutobuildResult(
-    #             False,
-    #             [],
-    #             {},
-    #             "",
-    #             "",
-    #             "",
-    #         )
-
     if cif_strategy == "default":
         if not cif_path:
             return AutobuildResult(
@@ -621,12 +610,12 @@ def autobuild_rhofit(dataset: Dataset,
             )
     # Makinf with grade
     elif cif_strategy == "grade":
-        # if cif_path:
-        #     cif_path = generate_cif_grade(
-        #         cif_path,
-        #         out_dir,
-        #     )
-        if smiles_path:
+        if cif_path:
+            cif_path = generate_cif_grade(
+                cif_path,
+                out_dir,
+            )
+        elif smiles_path:
             cif_path = generate_cif_grade(
                 smiles_path,
                 out_dir,
