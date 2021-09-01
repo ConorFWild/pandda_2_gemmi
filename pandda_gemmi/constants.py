@@ -118,6 +118,9 @@ CUT_EVENT_MAP_FILE = "cut.ccp4"
 ELBOW_COMMAND = "cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
 LIGAND_PREFIX = "ligand"
 LIGAND_CIF_FILE = "ligand.cif"
+GRADE_COMMAND = "cd {out_dir}; grade -in {smiles_file} -ocif \"{prefix}\".lig -opdb \"{prefix}\".lig -f; cd -"
+GRADE2_COMMAND = "cd {out_dir}; grade2 --in {smiles_file} -j -o \"{prefix}\" -f; mv \"{prefix}.restraints.cif\" \"{prefix}.cif\"; cd -"
+
 
 ###################################################################
 # # Test constants

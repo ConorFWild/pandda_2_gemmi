@@ -2,10 +2,10 @@
 
 ## Installation
 
-It is reccomended that you install PanDDA 2 in it's own python 3.7 anaconda enviroment. This can be achieved by installing anaconda and then:
+It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda enviroment. This can be achieved by installing anaconda and then:
 
 ```bash
-conda create -n pandda2 python=3.7
+conda create -n pandda2 python=3.9
 conda activate pandda2
 conda install -c conda-forge fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git

@@ -306,6 +306,42 @@ def generate_cif(smiles_path: Path, out_dir: Path):
     return out_dir / constants.LIGAND_CIF_FILE
 
 
+def get_grade_command(smiles_file: Path, out_dir: Path) -> str:
+    command = constants.GRADE_COMMAND.format(
+        out_dir=str(out_dir),
+        smiles_file=str(smiles_file),
+        prefix=constants.LIGAND_PREFIX, )
+    return command
+
+
+def generate_cif_grade(smiles_path: Path, out_dir: Path):
+    # Get the command to run elbow
+    elbow_command = get_grade_command(smiles_path, out_dir)
+
+    # Run the command
+    execute(elbow_command)
+
+    return out_dir / constants.LIGAND_CIF_FILE
+
+
+def get_grade2_command(smiles_file: Path, out_dir: Path) -> str:
+    command = constants.GRADE2_COMMAND.format(
+        out_dir=str(out_dir),
+        smiles_file=str(smiles_file),
+        prefix=constants.LIGAND_PREFIX, )
+    return command
+
+
+def generate_cif_grade2(smiles_path: Path, out_dir: Path):
+    # Get the command to run elbow
+    elbow_command = get_grade2_command(smiles_path, out_dir)
+
+    # Run the command
+    execute(elbow_command)
+
+    return out_dir / constants.LIGAND_CIF_FILE
+
+
 # #####################
 # # rhofit
 # #####################
@@ -583,6 +619,52 @@ def autobuild_rhofit(dataset: Dataset,
                 "",
                 "",
             )
+    # Makinf with grade
+    elif cif_strategy == "grade":
+        # if cif_path:
+        #     cif_path = generate_cif_grade(
+        #         cif_path,
+        #         out_dir,
+        #     )
+        if smiles_path:
+            cif_path = generate_cif_grade(
+                smiles_path,
+                out_dir,
+            )
+
+        else:
+            return AutobuildResult(
+                False,
+                [],
+                {},
+                "",
+                "",
+                "",
+            )
+
+    # Makinf with grade2
+    elif cif_strategy == "grade2":
+        # if cif_path:
+        #     cif_path = generate_cif_grade2(
+        #         cif_path,
+        #         out_dir,
+        #     )
+        if smiles_path:
+            cif_path = generate_cif_grade2(
+                smiles_path,
+                out_dir,
+            )
+
+        else:
+            return AutobuildResult(
+                False,
+                [],
+                {},
+                "",
+                "",
+                "",
+            )
+
     else:
         raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
 
