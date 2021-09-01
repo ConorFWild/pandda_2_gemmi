@@ -155,7 +155,7 @@ def process_pandda(
         distributed_resource_spec: str = "m_mem_free=10G",
         job_extra: str = ["--exclusive",],
         distributed_walltime="5:0:0",
-        distributed_watcher=True,
+        distributed_watcher=False,
         # Autobuild settings
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
