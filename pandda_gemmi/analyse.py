@@ -242,6 +242,7 @@ def process_pandda(
 
         # Set up autobuilding
         if autobuild:
+
             if autobuild_strategy == "rhofit":
                 ana_pdbmaps_path = shutil.which("ana_pdbmaps")
                 rhofit_path = shutil.which("rhofit")
@@ -493,6 +494,8 @@ def process_pandda(
 
         # Autobuild the results if set to
         if autobuild:
+            print("Attempting to autobuild!...")
+
             time_autobuild_start = time.time()
             autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
                 [
