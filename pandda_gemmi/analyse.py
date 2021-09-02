@@ -40,7 +40,7 @@ import shutil
 ## Custom Imports
 from pandda_gemmi.logs import (
     summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
-summarise_datasets
+    summarise_datasets
 )
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
@@ -78,6 +78,7 @@ from pandda_gemmi.autobuild import (
 )
 
 from pandda_gemmi.processing import process_shell
+
 
 def process_pandda(
         # IO options
@@ -153,7 +154,7 @@ def process_pandda(
         distributed_cores_per_worker: int = 12,
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
-        job_extra: str = ["--exclusive",],
+        job_extra: str = ["--exclusive", ],
         distributed_walltime="5:0:0",
         distributed_watcher=False,
         # Autobuild settings
@@ -170,8 +171,6 @@ def process_pandda(
     ###################################################################
     time_start = time.time()
     print("Getting config")
-
-
 
     # Process args
     initial_arg_values = inspect.getargvalues(inspect.currentframe())
@@ -299,7 +298,8 @@ def process_pandda(
             structure_factors = get_common_structure_factors(datasets_initial)
             # If still no structure factors
             if not structure_factors:
-                raise Exception("No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
+                raise Exception(
+                    "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
 
         # Make dataset validator
         validation_strategy = partial(validate_strategy_num_datasets,
@@ -565,7 +565,8 @@ def process_pandda(
                 )
 
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(all_scores[selected_fragement_path])
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(
+                    all_scores[selected_fragement_path])
 
                 print(f"Selected fragment path: {selected_fragement_path}")
 

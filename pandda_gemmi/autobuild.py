@@ -308,8 +308,8 @@ def generate_cif(smiles_path: Path, out_dir: Path):
 
 def get_grade_command(smiles_file: Path, out_dir: Path) -> str:
     command = constants.GRADE_COMMAND.format(
-        out_dir=str(out_dir),
-        smiles_file=str(smiles_file),
+        out_dir=str(out_dir.resolve()),
+        smiles_file=str(smiles_file.resolve()),
         prefix=constants.LIGAND_PREFIX, )
     return command
 
