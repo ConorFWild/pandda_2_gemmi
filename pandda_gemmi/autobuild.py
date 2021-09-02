@@ -316,10 +316,11 @@ def get_grade_command(smiles_file: Path, out_dir: Path) -> str:
 
 def generate_cif_grade(smiles_path: Path, out_dir: Path):
     # Get the command to run elbow
-    elbow_command = get_grade_command(smiles_path, out_dir)
+    grade_command = get_grade_command(smiles_path, out_dir)
+    print(grade_command)
 
     # Run the command
-    execute(elbow_command)
+    execute(grade_command)
 
     return out_dir / constants.LIGAND_CIF_FILE
 
@@ -334,10 +335,12 @@ def get_grade2_command(smiles_file: Path, out_dir: Path) -> str:
 
 def generate_cif_grade2(smiles_path: Path, out_dir: Path):
     # Get the command to run elbow
-    elbow_command = get_grade2_command(smiles_path, out_dir)
+    grade_2_command = get_grade2_command(smiles_path, out_dir)
+    print(grade_2_command)
 
     # Run the command
-    execute(elbow_command)
+    execute(grade_2_command)
+
 
     return out_dir / constants.LIGAND_CIF_FILE
 
