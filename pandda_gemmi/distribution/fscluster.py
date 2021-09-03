@@ -281,6 +281,8 @@ class FSCluster:
     def __call__(self, funcs):
         futures = [self.submit(f) for f in funcs]
 
+        print([f.status(self.scheduler) for f in futures])
+
         while not any(f.status(self.scheduler) == FutureStatus.RUNNING for f in futures):
             running = [f for f in futures if f.status(self.scheduler) == FutureStatus.RUNNING]
             failed = [f for f in futures if f.status(self.scheduler) == FutureStatus.FAILED]
