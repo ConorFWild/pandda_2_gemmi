@@ -128,11 +128,11 @@ class HTCONDOR:
         # describe job to scheduler: needs to be saved/removed by this process
         job_script = self.JOB_SCRIPT.format(
             executable_file=run_script_file,
-            log_file=f"{key}.log",
-            output_file=f"{key}.out",
-            error_file=f"{key}.err",
+            log_file=self.output_dir / f"{key}.log",
+            output_file=self.output_dir / f"{key}.out",
+            error_file=self.output_dir / f"{key}.err",
             request_cpus=self.distributed_cores_per_worker,
-            request_memory=f"{self.distributed_mem_per_core * self.distributed_cores_per_worker}G",
+            request_memory=self.distributed_mem_per_core * self.distributed_cores_per_worker,
         )
         job_script_file = self.output_dir / f"{key}.job"
         write(job_script, job_script_file)
