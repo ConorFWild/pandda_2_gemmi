@@ -174,7 +174,7 @@ class HTCONDOR:
 
         return future
 
-    def running(self, key, debug=True):
+    def running(self, key, debug=False):
         stdout, stderr = shell("condor_q --json")
 
         if debug:
