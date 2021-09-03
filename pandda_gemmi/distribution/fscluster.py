@@ -291,6 +291,13 @@ class FSCluster:
             print(f"\t{len(running)} out of {len(futures)} running. {len(failed)} failed. {len(complete)} completee")
             sleep(1)
 
+
+        statuses = [f.status(self.scheduler) for f in futures]
+        print("###########################")
+        print(f"Statuses are: {statuses}")
+        print("###########################")
+
+
         results = [f.result() for f in futures]
         for result in results:
             print(result)
