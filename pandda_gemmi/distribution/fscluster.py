@@ -250,7 +250,7 @@ class FSCluster:
                  job_extra=("",),
                  walltime="1:00:00",
                  watcher=True,
-                 output_dir=Path("/tmp"),
+                 output_dir=Path("/data/share-2/conor/pandda/tmp"),
                  ):
 
         if scheduler == "SGE":
