@@ -47,7 +47,7 @@ class Run:
     def __call__(self):
         result = self.f()
 
-        with open(self.output_file, "w") as f:
+        with open(self.output_file, "wb") as f:
             pickle.dump(result, f)
 
         # with open(self.target_file, "w") as f:
@@ -110,7 +110,7 @@ class HTCONDOR:
         input_file = self.output_dir / f"{key}.in.pickle"
         output_file = self.output_dir / f"{key}.out.pickle"
         func_ob = Run(func, output_file)
-        with open(input_file, "w") as f:
+        with open(input_file, "wb") as f:
             pickle.dump(func_ob, f)
 
         if debug:
@@ -210,7 +210,7 @@ class FSFuture:
             raise Exception(f"Unknown future status for job")
 
     def result(self):
-        with open(self.target_file, "r") as f:
+        with open(self.target_file, "rb") as f:
             result = pickle.load(f)
 
         self.clean()

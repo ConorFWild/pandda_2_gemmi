@@ -4,7 +4,7 @@ import fire
 
 
 def main(path: str):
-    with open(path, "r") as f:
+    with open(path, "rb") as f:
         func = pickle.load(f)
 
     func()
