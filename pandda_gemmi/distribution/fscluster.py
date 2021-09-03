@@ -6,7 +6,7 @@ import subprocess
 import re
 import pickle
 import secrets
-
+import os
 
 def shell(command: str):
     p = subprocess.Popen(
@@ -99,9 +99,11 @@ class HTCONDOR:
         self.distributed_cores_per_worker = distributed_cores_per_worker
         self.distributed_mem_per_core = distributed_mem_per_core
 
-    def submit(self, func):
+    def submit(self, func, debug=True):
         # Assign the key to the future
         key = secrets.token_hex(16)
+        if debug:
+            print(f"\tKey is: {key}")
 
         # Wrap func to pickle it's result
         input_file = self.output_dir / f"{key}.in.pickle"
@@ -110,10 +112,18 @@ class HTCONDOR:
         with open(input_file, "w") as f:
             pickle.dump(func_ob, f)
 
+        if debug:
+            print(f"\tInput file is: {input_file}")
+            print(f"\tOutput file is: {output_file}")
+
+
         # Script to run on worker: needs to be saved by this process/removed by future
         run_script = f"python {Path(__file__).parent}/run.py {input_file}"
         run_script_file = self.output_dir / f"{key}.run.sh"
         write(run_script, run_script_file)
+        if debug:
+            print(f"\tRun script is: {run_script}")
+            print(f"\tRun script file is: {run_script_file}")
 
         # describe job to scheduler: needs to be saved/removed by this process
         job_script = self.JOB_SCRIPT.format(
@@ -127,8 +137,15 @@ class HTCONDOR:
         job_script_file = f"{key}.job"
         write(job_script, job_script_file)
 
+        if debug:
+            print(f"\tJob script is: {job_script}")
+            print(f"\tJob script file file is: {job_script_file}")
+
         # code to submit job to sceduler
         submit_script = f"condor_submit {job_script_file}"
+
+        if debug:
+            print(f"\tSubmit script is: {submit_script}")
 
         # run the submitscript locally
         shell(submit_script)
@@ -137,6 +154,7 @@ class HTCONDOR:
         future = FSFuture(
             key=key,
             run_script_file=run_script_file,
+            input_file=input_file,
             target_file=output_file,
         )
 
@@ -166,10 +184,12 @@ class FSFuture:
     def __init__(self,
                  key: str,
                  run_script_file: Path,
+                 input_file: Path,
                  target_file: Path,
                  ):
         self.key = key
         self.run_script_file = run_script_file
+        self.input_file = input_file
         self.target_file = target_file
 
     def status(self, scheduler):
@@ -189,7 +209,14 @@ class FSFuture:
         with open(self.target_file, "r") as f:
             result = pickle.load(f)
 
-        return f
+        self.clean()
+
+        return result
+
+    def clean(self):
+        os.remove(self.input_file)
+        os.remove(self.target_file)
+
 
 
 class FSCluster:
