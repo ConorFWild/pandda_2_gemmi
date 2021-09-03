@@ -283,7 +283,7 @@ class FSCluster:
 
         print([f.status(self.scheduler) for f in futures])
 
-        while not any(f.status(self.scheduler) == FutureStatus.RUNNING for f in futures):
+        while any(f.status(self.scheduler) == FutureStatus.RUNNING for f in futures):
             running = [f for f in futures if f.status(self.scheduler) == FutureStatus.RUNNING]
             failed = [f for f in futures if f.status(self.scheduler) == FutureStatus.FAILED]
             complete = [f for f in futures if f.status(self.scheduler) == FutureStatus.DONE]
