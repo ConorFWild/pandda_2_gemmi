@@ -102,7 +102,7 @@ class HTCONDOR:
 
     def submit(self, func, debug=True):
         # Assign the key to the future
-        key = secrets.token_hex(16)
+        key = str(secrets.token_hex(16))
         if debug:
             print(f"\tKey is: {key}")
 
@@ -231,7 +231,7 @@ class FSCluster:
                  job_extra=("",),
                  walltime="1:00:00",
                  watcher=True,
-                 output_dir="/tmp"
+                 output_dir=Path("/tmp"),
                  ):
 
         if scheduler == "SGE":
