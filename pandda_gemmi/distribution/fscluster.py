@@ -132,7 +132,7 @@ class HTCONDOR:
             print(f"\tOutput file is: {output_file}")
 
         # Script to run on worker: needs to be saved by this process/removed by future
-        run_script = f"python {Path(__file__).parent}/run.py {input_file}"
+        run_script = f"#!/bin/bash\npython {Path(__file__).parent}/run.py {input_file}"
         run_script_file = self.output_dir / f"{key}.run.sh"
         write(run_script, run_script_file)
         if debug:
