@@ -134,7 +134,7 @@ class HTCONDOR:
             request_cpus=self.distributed_cores_per_worker,
             request_memory=f"{self.distributed_mem_per_core * self.distributed_cores_per_worker}G",
         )
-        job_script_file = f"{key}.job"
+        job_script_file = self.output_dir / f"{key}.job"
         write(job_script, job_script_file)
 
         if debug:
