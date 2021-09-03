@@ -59,6 +59,20 @@ class SGE:
 
 
 class SLURM:
+    JOB_SCRIPT = (
+        "#!/bin/bash\n"
+        "#SBATCH --job-name=PanDDAdist\n"
+        "#SBATCH --partition=cpu\n"
+        "#SBATCH --ntasks=1\n"
+        "#SBATCH --cpus-per-task=12\n"
+        "#SBATCH --mem-per-cpu=10G\n"
+        "#SBATCH --output=slurm-%j.out\n"
+        "#SBATCH --error=slurm-%j.err\n"
+        "#SBATCH --exclusive      \n"
+
+        "{executable_file}\n"
+    )
+
     def __init__(self):
         ...
 
@@ -165,6 +179,7 @@ class HTCONDOR:
 
         if debug:
             print(str(stdout))
+            print(str(stderr))
 
         if re.search(key, str(stdout)):
             return True
