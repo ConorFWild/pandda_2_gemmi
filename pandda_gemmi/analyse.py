@@ -76,6 +76,7 @@ from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
 )
+from pandda_gemmi.distribution.fscluster import FSCluster
 
 from pandda_gemmi.processing import process_shell
 
@@ -221,6 +222,20 @@ def process_pandda(
                 process_global_dask,
                 client=client,
             )
+        elif global_processing == "fs":
+            process_global = FSCluster(
+                scheduler=distributed_scheduler,
+                num_workers=distributed_num_workers,
+                queue=distributed_queue,
+                project=distributed_project,
+                cores_per_worker=local_cpus,
+                distributed_mem_per_core=distributed_mem_per_core,
+                resource_spec=distributed_resource_spec,
+                job_extra=job_extra,
+                walltime=distributed_walltime,
+                watcher=distributed_watcher,
+            )
+
         else:
             raise Exception()
 
