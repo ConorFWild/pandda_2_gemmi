@@ -341,7 +341,6 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
     # Run the command
     execute(grade_2_command)
 
-
     return out_dir / constants.LIGAND_CIF_FILE
 
 
