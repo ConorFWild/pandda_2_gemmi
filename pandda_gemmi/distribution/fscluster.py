@@ -160,8 +160,12 @@ class HTCONDOR:
 
         return future
 
-    def running(self, key):
+    def running(self, key, debug=True):
         stdout, stderr = shell("condor_q")
+
+        if debug:
+            print(str(stdout))
+
         if re.search(key, str(stdout)):
             return True
         else:
