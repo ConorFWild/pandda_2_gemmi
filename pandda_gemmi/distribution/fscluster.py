@@ -127,7 +127,7 @@ class HTCONDOR:
 
         # describe job to scheduler: needs to be saved/removed by this process
         job_script = self.JOB_SCRIPT.format(
-            pandda_script_file=run_script_file,
+            executable_file=run_script_file,
             log_file=f"{key}.log",
             output_file=f"{key}.out",
             error_file=f"{key}.err",
