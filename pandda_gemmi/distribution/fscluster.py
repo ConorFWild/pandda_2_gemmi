@@ -282,7 +282,11 @@ class FSCluster:
         futures = [self.submit(f) for f in funcs]
 
         while not any(f.status(self.scheduler) == FutureStatus.RUNNING for f in futures):
-            print([f.status(self.scheduler) for f in futures])
+            running = [f for f in futures if f.status(self.scheduler) == FutureStatus.RUNNING]
+            failed = [f for f in futures if f.status(self.scheduler) == FutureStatus.FAILED]
+            complete = [f for f in futures if f.status(self.scheduler) == FutureStatus.DONE]
+
+            print(f"\t{len(running)} out of {len(futures)} running. {len(failed)} failed. {len(complete)} completee")
             sleep(1)
 
     def submit(self, f) -> FSFuture:
