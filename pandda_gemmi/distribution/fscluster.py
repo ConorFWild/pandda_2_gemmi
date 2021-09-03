@@ -289,5 +289,11 @@ class FSCluster:
             print(f"\t{len(running)} out of {len(futures)} running. {len(failed)} failed. {len(complete)} completee")
             sleep(1)
 
+        results = [f.result() for f in futures]
+        for result in results:
+            print(result)
+
+        return results
+
     def submit(self, f) -> FSFuture:
         return self.scheduler.submit(f)
