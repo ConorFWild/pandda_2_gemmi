@@ -79,7 +79,7 @@ class SLURM:
     def submit(self):
         ...
 
-    def status(self, key):
+    def running(self, key):
         ...
 
 
@@ -189,7 +189,7 @@ class HTCONDOR:
 
 class FutureStatus(Enum):
     RUNNING = auto()
-    FAILED = auto
+    FAILED = auto()
     DONE = auto()
 
 
