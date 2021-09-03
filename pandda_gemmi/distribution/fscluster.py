@@ -61,11 +61,11 @@ class SGE:
 class SLURM:
     JOB_SCRIPT = (
         "#!/bin/bash\n"
-        "#SBATCH --job-name=PanDDAdist\n"
-        "#SBATCH --partition=cpu\n"
+        "#SBATCH --job-name={job_name}\n"
+        "#SBATCH --partition={partition}\n"
         "#SBATCH --ntasks=1\n"
-        "#SBATCH --cpus-per-task=12\n"
-        "#SBATCH --mem-per-cpu=10G\n"
+        "#SBATCH --cpus-per-task={cpus}\n"
+        "#SBATCH --mem-per-cpu={mem_per_cpu}G\n"
         "#SBATCH --output=slurm-%j.out\n"
         "#SBATCH --error=slurm-%j.err\n"
         "#SBATCH --exclusive      \n"
@@ -175,7 +175,7 @@ class HTCONDOR:
         return future
 
     def running(self, key, debug=True):
-        stdout, stderr = shell("condor_q")
+        stdout, stderr = shell("condor_q --json")
 
         if debug:
             print(str(stdout))
