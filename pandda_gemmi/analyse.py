@@ -180,6 +180,7 @@ def process_pandda(
     printer.pprint(initial_arg_values)
     data_dirs = Path(data_dirs)
     out_dir = Path(out_dir)
+    distributed_tmp = Path(distributed_tmp)
 
     if structure_factors:
         structure_factors = StructureFactors(f=structure_factors[0], phi=structure_factors[1])
