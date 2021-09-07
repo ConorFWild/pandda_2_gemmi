@@ -243,7 +243,7 @@ def process_global_dask(
     run_funcs = [Run(func, tmp_dir / f"{key}.in.pickle", tmp_dir / f"{key}.out.pickle") for func in funcs]
 
     # Multiprocess
-    processes = [client.submit(run_funcs) for func in funcs]
+    processes = [client.submit(func) for func in funcs]
     while any(f.status == 'pending' for f in processes):
         sleep(0.1)
 
