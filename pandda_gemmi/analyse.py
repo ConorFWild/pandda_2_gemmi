@@ -155,9 +155,11 @@ def process_pandda(
         distributed_cores_per_worker: int = 12,
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
+        distributed_tmp:str = "/tmp",
         job_extra: str = ["--exclusive", ],
         distributed_walltime="5:0:0",
         distributed_watcher=False,
+        distributed_slurm_partition=None,
         # Autobuild settings
         autobuild: bool = False,
         autobuild_strategy: str = "rhofit",
@@ -234,6 +236,8 @@ def process_pandda(
                 job_extra=job_extra,
                 walltime=distributed_walltime,
                 watcher=distributed_watcher,
+                slurm_partition=distributed_slurm_partition,
+                output_dir=distributed_tmp,
             )
 
         else:
