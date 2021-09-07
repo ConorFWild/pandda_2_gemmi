@@ -224,6 +224,7 @@ def process_pandda(
             process_global = partial(
                 process_global_dask,
                 client=client,
+                out_dir=distributed_tmp
             )
         elif global_processing == "fs":
             process_global = FSCluster(

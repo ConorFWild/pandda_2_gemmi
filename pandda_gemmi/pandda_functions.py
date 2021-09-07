@@ -4,7 +4,8 @@ from typing import *
 from time import sleep
 from functools import partial
 import json
-
+import pickle
+import secrets
 
 import numpy as np
 import multiprocessing as mp
@@ -16,6 +17,7 @@ from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi import constants
+
 
 def run(func):
     return func()
@@ -172,13 +174,76 @@ def get_dask_client(scheduler="SGE",
     return client
 
 
+#
+# def process_global_dask(
+#         funcs,
+#         client=None,
+# ):
+#
+#     # Pickle all the funcs to some directory
+#
+#     # construct the run functions
+#
+#     #
+#
+#
+#     # Multiprocess
+#     processes = [client.submit(func) for func in funcs]
+#     while any(f.status == 'pending' for f in processes):
+#         sleep(0.1)
+#
+#     if any(f.status == 'error' for f in processes):
+#         errored_processes = [f for f in processes if f.status == 'error']
+#
+#         print(f'{len(errored_processes)} out of {len(processes)} processes errored! Attempting to recreate clocally')
+#
+#         for f in errored_processes:
+#             client.recreate_error_locally(f)
+#         raise Exception(f'Failed to recreate errors in dask distribution locally!')
+#
+#     results = client.gather(processes)
+#
+#     return results
+
+
+class Run:
+    def __init__(self,
+                 func,
+                 input_file,
+                 output_file,
+                 # target_file,
+                 ):
+        self.input_file = input_file
+        self.output_file = output_file
+
+        with open(input_file, 'wb') as f:
+            pickle.dump(func, f)
+
+    def __call__(self):
+        with open(self.input_file, 'rb') as f:
+            f = pickle.load(f)
+
+        result = f()
+
+        with open(self.output_file, "wb") as f:
+            pickle.dump(result, f)
+
+        return self.output_file
+
+
 def process_global_dask(
         funcs,
         client=None,
+        tmp_dir=None,
 ):
+    # Key
+    key = str(secrets.token_hex(16))
+
+    # construct the run functions
+    run_funcs = [Run(func, tmp_dir / f"{key}.in.pickle", tmp_dir / f"{key}.out.pickle") for func in funcs]
 
     # Multiprocess
-    processes = [client.submit(func) for func in funcs]
+    processes = [client.submit(run_funcs) for func in funcs]
     while any(f.status == 'pending' for f in processes):
         sleep(0.1)
 
@@ -193,7 +258,13 @@ def process_global_dask(
 
     results = client.gather(processes)
 
-    return results
+    # Load all the pickled results
+    results_loaded = []
+    for result in results:
+        with open(result, 'rb') as f:
+            results_loaded.append(pickle.load(f))
+
+    return results_loaded
 
 
 def get_comparators_high_res_random(
