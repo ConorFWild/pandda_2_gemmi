@@ -237,15 +237,19 @@ def process_global_dask(
         tmp_dir=None,
 ):
     # Key
-    key = str(secrets.token_hex(16))
+    keys = [str(secrets.token_hex(16)) for func in funcs]
 
     # construct the run functions
-    run_funcs = [Run(func, tmp_dir / f"{key}.in.pickle", tmp_dir / f"{key}.out.pickle") for func in funcs]
+    run_funcs = [
+        Run(func, tmp_dir / f"{key}.in.pickle", tmp_dir / f"{key}.out.pickle")
+        for key, func
+        in zip(keys, funcs,)
+    ]
 
     # Multiprocess
     processes = [client.submit(func) for func in run_funcs]
     while any(f.status == 'pending' for f in processes):
-        sleep(0.1)
+        sleep(1)
 
     if any(f.status == 'error' for f in processes):
         errored_processes = [f for f in processes if f.status == 'error']
