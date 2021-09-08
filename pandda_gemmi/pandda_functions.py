@@ -230,6 +230,13 @@ class Run:
 
         return self.output_file
 
+    def clean(self):
+        try:
+            os.remove(self.input_file)
+            os.remove(self.output_file)
+        except Exception as e:
+            print(e)
+
 
 def process_global_dask(
         funcs,
@@ -267,6 +274,9 @@ def process_global_dask(
     for result in results:
         with open(result, 'rb') as f:
             results_loaded.append(pickle.load(f))
+
+    for run_func in run_funcs:
+        run_func.clean()
 
     return results_loaded
 
