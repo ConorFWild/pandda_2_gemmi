@@ -515,7 +515,8 @@ def get_comparators_closest_cutoff(
         for j, potential_comparator_dtag in enumerate(closest_dtags):
 
             if j < exclude_local:
-                continue
+                if j> 0:
+                    continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
