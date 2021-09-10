@@ -622,8 +622,9 @@ def get_comparators_closest_apo_cutoff(
     known_apo_closest_dtags = {}
     known_apo_rows = correlation_matrix[known_apo_mask, :]
     for j, known_apo in enumerate(known_apos):
-        print(f"Known apo {known_apo.dtag} has distances: {distances}")
         distances = known_apo_rows[j, :].flatten()
+        print(f"Known apo {known_apo.dtag} has distances: {distances}")
+
         closest_dtags_indexes = np.flip(np.argsort(distances))
         closest_dtags = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)
         known_apo_closest_dtags = closest_dtags
