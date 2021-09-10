@@ -645,7 +645,7 @@ def get_comparators_closest_apo_cutoff(
 
         # Get closest known apo
         closest_dtags_indexes = np.flip(np.argsort(row_known_apos))
-        closest_known_apo_distances = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)[0]
+        closest_known_apo_distances = np.take_along_axis(closest_dtags_indexes, closest_dtags_indexes, axis=0)[0]
         closest_known_apo_index = closest_dtags_indexes[0]
         closest_known_apo_dtag = index_to_known_apo[closest_known_apo_index]
         closest_known_apo_all_index = dtag_to_index[closest_known_apo_dtag]
