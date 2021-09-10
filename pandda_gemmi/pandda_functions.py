@@ -250,7 +250,7 @@ def process_global_dask(
     run_funcs = [
         Run(func, tmp_dir / f"{key}.in.pickle", tmp_dir / f"{key}.out.pickle")
         for key, func
-        in zip(keys, funcs,)
+        in zip(keys, funcs, )
     ]
 
     # Multiprocess
@@ -515,7 +515,7 @@ def get_comparators_closest_cutoff(
         for j, potential_comparator_dtag in enumerate(closest_dtags):
 
             if j < exclude_local:
-                if j> 0:
+                if j > 0:
                     continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
@@ -527,7 +527,6 @@ def get_comparators_closest_cutoff(
             if len(potential_comparator_dtags) > comparison_min_comparators:
                 comparators[dtag] = potential_comparator_dtags
                 break
-
 
     return comparators
 
@@ -610,7 +609,7 @@ def get_comparators_closest_apo_cutoff(
         else:
             return False
 
-    known_apo_mask = np.array([is_known_apo(dtag, known_apos) for dtag in xmaps ])
+    known_apo_mask = np.array([is_known_apo(dtag, known_apos) for dtag in xmaps])
 
     # Get the correlation distance between maps
     correlation_matrix = get_distance_matrix(xmaps)
@@ -622,7 +621,6 @@ def get_comparators_closest_apo_cutoff(
                              labels,
                              known_apos_strings,
                              pandda_fs_model.pandda_dir / f"pca_umap.html")
-
 
     # Get known apo distances
     known_apo_closest_dtags = {}
