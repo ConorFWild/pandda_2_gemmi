@@ -62,6 +62,7 @@ from pandda_gemmi.pandda_functions import (
     get_shells,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
+    get_comparators_closest_apo_cutoff,
     truncate,
     validate_strategy_num_datasets,
     validate,
@@ -457,6 +458,7 @@ def process_pandda(
                             f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
                             f"dataset dtags: {list(datasets.keys())}"
                         )
+            print(f"Known apos are: {known_apos}")
 
             pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
 

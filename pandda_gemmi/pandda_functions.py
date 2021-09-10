@@ -611,10 +611,10 @@ def get_comparators_closest_apo_cutoff(
 
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in xmaps]
-    known_apos = [dtag.dtag for dtag in known_apos]
+    known_apos_strings = [dtag.dtag for dtag in known_apos]
     save_plot_pca_umap_bokeh(correlation_matrix,
                              labels,
-                             known_apos,
+                             known_apos_strings,
                              pandda_fs_model.pandda_dir / f"pca_umap.html")
 
 
@@ -622,10 +622,12 @@ def get_comparators_closest_apo_cutoff(
     known_apo_closest_dtags = {}
     known_apo_rows = correlation_matrix[known_apo_mask, :]
     for j, known_apo in enumerate(known_apos):
+        print(f"Known apo {known_apo.dtag} has distances: {distances}")
         distances = known_apo_rows[j, :].flatten()
         closest_dtags_indexes = np.flip(np.argsort(distances))
         closest_dtags = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)
         known_apo_closest_dtags = closest_dtags
+        print(f"Known apo {known_apo.dtag} has closest dtags: {known_apo_closest_dtags}")
 
     # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
     # Based on whether they are within the res cutoff
@@ -643,10 +645,13 @@ def get_comparators_closest_apo_cutoff(
 
         # Get closest known apo
         closest_dtags_indexes = np.flip(np.argsort(row_known_apos))
-        # closest_known_apo = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)[0]
+        closest_known_apo_distances = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)[0]
         closest_known_apo_index = closest_dtags_indexes
         closest_known_apo_dtag = index_to_known_apo[closest_known_apo_index]
         closest_known_apo_all_index = dtag_to_index[closest_known_apo_dtag]
+
+        print(f"\tDtag {dtag.dtag} has closest known apo: {closest_known_apo_dtag}")
+        print(f"\tOther known apo distances are: {closest_known_apo_distances}")
 
         # Get closest dtags to known apo
         closest_dtags = known_apo_closest_dtags[closest_known_apo_dtag]
