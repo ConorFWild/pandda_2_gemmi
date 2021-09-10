@@ -139,7 +139,7 @@ def process_pandda(
         increment: float = 0.05,
         output_multiplier: float = 2.0,
         # Comparater set finding options
-        comparison_strategy: str = "get_comparators_closest_cutoff",
+        comparison_strategy: str = "closest_cutoff",
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
@@ -447,7 +447,7 @@ def process_pandda(
                 comparison_max_comparators,
             )
 
-        elif comparison_strategy == "get_comparators_closest_cutoff":
+        elif comparison_strategy == "get_comparators_closest_apo_cutoff":
             if not known_apos:
                 known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
             else:

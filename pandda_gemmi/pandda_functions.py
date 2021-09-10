@@ -421,6 +421,7 @@ def get_comparators_closest_cutoff(
         resolution_cutoff,
         pandda_fs_model: PanDDAFSModel,
         process_local,
+        exclude_local=10
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -511,7 +512,10 @@ def get_comparators_closest_cutoff(
         # if so
 
         potential_comparator_dtags = []
-        for potential_comparator_dtag in closest_dtags:
+        for j, potential_comparator_dtag in enumerate(closest_dtags):
+
+            if j < exclude_local:
+                continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
@@ -522,6 +526,7 @@ def get_comparators_closest_cutoff(
             if len(potential_comparator_dtags) > comparison_min_comparators:
                 comparators[dtag] = potential_comparator_dtags
                 break
+
 
     return comparators
 
