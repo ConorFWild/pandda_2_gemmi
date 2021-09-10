@@ -626,8 +626,7 @@ def get_comparators_closest_apo_cutoff(
         print(f"Known apo {known_apo.dtag} has distances: {distances}")
 
         closest_dtags_indexes = np.flip(np.argsort(distances))
-        closest_dtags = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)
-        known_apo_closest_dtags = closest_dtags
+        known_apo_closest_dtags = np.take_along_axis(known_apo_array, closest_dtags_indexes, axis=0)
         print(f"Known apo {known_apo.dtag} has closest dtags: {known_apo_closest_dtags}")
 
     # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
@@ -647,7 +646,7 @@ def get_comparators_closest_apo_cutoff(
         # Get closest known apo
         closest_dtags_indexes = np.flip(np.argsort(row_known_apos))
         closest_known_apo_distances = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)[0]
-        closest_known_apo_index = closest_dtags_indexes
+        closest_known_apo_index = closest_dtags_indexes[0]
         closest_known_apo_dtag = index_to_known_apo[closest_known_apo_index]
         closest_known_apo_all_index = dtag_to_index[closest_known_apo_dtag]
 
