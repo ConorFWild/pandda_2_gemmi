@@ -138,10 +138,11 @@ def process_pandda(
         increment: float = 0.05,
         output_multiplier: float = 2.0,
         # Comparater set finding options
-        comparison_strategy: str = "closest_cutoff",
+        comparison_strategy: str = "get_comparators_closest_cutoff",
         comparison_res_cutoff: float = 0.5,
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
+        known_apos: Optional[List[str]] = None,
         # Processing settings
         local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
@@ -155,7 +156,7 @@ def process_pandda(
         distributed_cores_per_worker: int = 12,
         distributed_mem_per_core: int = 10,
         distributed_resource_spec: str = "m_mem_free=10G",
-        distributed_tmp:str = "/tmp",
+        distributed_tmp: str = "/tmp",
         job_extra: str = ["--exclusive", ],
         distributed_walltime="5:0:0",
         distributed_watcher=False,
@@ -443,6 +444,34 @@ def process_pandda(
                 datasets,
                 comparison_min_comparators,
                 comparison_max_comparators,
+            )
+
+        elif comparison_strategy == "get_comparators_closest_cutoff":
+            if not known_apos:
+                known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+            else:
+                known_apos = [Dtag(dtag) for dtag in known_apos]
+                for known_apo in known_apos:
+                    if known_apo not in datasets:
+                        raise Exception(
+                            f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
+                            f"dataset dtags: {list(datasets.keys())}"
+                        )
+
+            pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
+
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
+                datasets,
+                alignments,
+                grid,
+                comparison_min_comparators,
+                comparison_max_comparators,
+                structure_factors,
+                sample_rate,
+                comparison_res_cutoff,
+                pandda_fs_model,
+                process_local,
+                known_apos,
             )
 
         else:

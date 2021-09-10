@@ -53,6 +53,8 @@ LOG_LOW_RES: str = "Datasets filtered for being too low res"
 
 LOG_DATASETS: str = "Summary of input datasets"
 
+LOG_KNOWN_APOS: str = "Known apo dtags"
+
 LOG_SHELL_XMAP_TIME: str = "Time taken to generate aligned xmaps"
 LOG_SHELL_DATASET_LOGS: str = "Logs for each dataset in shell"
 LOG_SHELL_TIME: str = "Time taken to process shell"

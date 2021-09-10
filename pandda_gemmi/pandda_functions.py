@@ -526,6 +526,156 @@ def get_comparators_closest_cutoff(
     return comparators
 
 
+def get_comparators_closest_apo_cutoff(
+        datasets: Dict[Dtag, Dataset],
+        alignments,
+        grid,
+        comparison_min_comparators,
+        comparison_max_comparators,
+        structure_factors,
+        sample_rate,
+        resolution_cutoff,
+        pandda_fs_model: PanDDAFSModel,
+        process_local,
+        known_apos: List[Dtag],
+):
+    dtag_list = [dtag for dtag in datasets]
+    dtag_array = np.array(dtag_list)
+    known_apo_array = np.array(known_apos)
+    index_to_known_apo = {j: dtag for j, dtag in enumerate(known_apo_array)}
+    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
+
+    dtags_by_res = list(
+        sorted(
+            dtag_list,
+            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+        )
+    )
+
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    highest_res_datasets_max = max(
+        [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    # Load the xmaps
+    print("Truncating datasets...")
+    shell_truncated_datasets: Datasets = truncate(
+        datasets,
+        resolution=Resolution(highest_res_datasets_max),
+        structure_factors=structure_factors,
+    )
+
+    # Generate aligned xmaps
+    print("Loading xmaps")
+    start = time.time()
+    load_xmap_paramaterised = partial(
+        from_unaligned_dataset_c_flat,
+        grid=grid,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+    )
+
+    results = process_local(
+        [
+            partial(
+                load_xmap_paramaterised,
+                shell_truncated_datasets[key],
+                alignments[key],
+            )
+            for key
+            in shell_truncated_datasets
+        ]
+    )
+    print("Got xmaps!")
+
+    # Get the maps as arrays
+    print("Getting xmaps as arrays")
+    xmaps = {dtag: xmap
+             for dtag, xmap
+             in zip(datasets, results)
+             }
+
+    finish = time.time()
+    print(f"Mapped in {finish - start}")
+
+    # Get known apo mask
+    def is_known_apo(dtag: Dtag, known_apos: List[Dtag]):
+        if dtag in known_apos:
+            return True
+        else:
+            return False
+
+    known_apo_mask = np.array([is_known_apo(dtag, known_apos) for dtag in xmaps ])
+
+    # Get the correlation distance between maps
+    correlation_matrix = get_distance_matrix(xmaps)
+
+    # Save a bokeh plot
+    labels = [dtag.dtag for dtag in xmaps]
+    known_apos = [dtag.dtag for dtag in known_apos]
+    save_plot_pca_umap_bokeh(correlation_matrix,
+                             labels,
+                             known_apos,
+                             pandda_fs_model.pandda_dir / f"pca_umap.html")
+
+
+    # Get known apo distances
+    known_apo_closest_dtags = {}
+    known_apo_rows = correlation_matrix[known_apo_mask, :]
+    for j, known_apo in enumerate(known_apos):
+        distances = known_apo_rows[j, :].flatten()
+        closest_dtags_indexes = np.flip(np.argsort(distances))
+        closest_dtags = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)
+        known_apo_closest_dtags = closest_dtags
+
+    # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
+    # Based on whether they are within the res cutoff
+    comparators = {}
+    for j, dtag in enumerate(dtag_list):
+        print(f"Finding closest for dtag: {dtag}")
+        current_res = datasets[dtag].reflections.resolution().resolution
+
+        # Get dtags ordered by distance
+        row = correlation_matrix[j, :].flatten()
+        print(f"\tRow is: {row}")
+
+        # Get distances to known apos
+        row_known_apos = row[known_apo_mask]
+
+        # Get closest known apo
+        closest_dtags_indexes = np.flip(np.argsort(row_known_apos))
+        # closest_known_apo = np.take_along_axis(known_apo_mask, closest_dtags_indexes, axis=0)[0]
+        closest_known_apo_index = closest_dtags_indexes
+        closest_known_apo_dtag = index_to_known_apo[closest_known_apo_index]
+        closest_known_apo_all_index = dtag_to_index[closest_known_apo_dtag]
+
+        # Get closest dtags to known apo
+        closest_dtags = known_apo_closest_dtags[closest_known_apo_dtag]
+        print(f"\tClosest dtags are: {closest_dtags}")
+        print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
+
+        # Decide the res upper bound
+        truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
+        print(f"\tTrucation res is: {truncation_res}")
+
+        # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
+        # if so
+
+        potential_comparator_dtags = []
+        for potential_comparator_dtag in closest_dtags:
+
+            if datasets[dtag].reflections.resolution().resolution < truncation_res:
+                potential_comparator_dtags.append(potential_comparator_dtag)
+            else:
+                continue
+
+            # of enough accuulated, continue
+            if len(potential_comparator_dtags) > comparison_min_comparators:
+                comparators[dtag] = potential_comparator_dtags
+                break
+
+    return comparators
+
+
 def get_shells(
         datasets: Dict[Dtag, Dataset],
         comparators: Dict[Dtag, List[Dtag]],
