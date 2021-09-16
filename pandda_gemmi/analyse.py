@@ -96,7 +96,7 @@ def process_pandda(
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
         # PROCESS MANAGEMENT,
-        low_memory: bool = True,
+        low_memory: bool = False,
         # Dataset selection options
         ground_state_datasets: Optional[List[str]] = None,
         exclude_from_z_map_analysis: Optional[List[str]] = None,
