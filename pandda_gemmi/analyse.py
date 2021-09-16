@@ -144,6 +144,7 @@ def process_pandda(
         comparison_min_comparators: int = 30,
         comparison_max_comparators: int = 30,
         known_apos: Optional[List[str]] = None,
+        exclude_local: int = 5,
         # Processing settings
         local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
@@ -432,6 +433,7 @@ def process_pandda(
                 comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
+                exclude_local,
             )
 
         elif comparison_strategy == "high_res":

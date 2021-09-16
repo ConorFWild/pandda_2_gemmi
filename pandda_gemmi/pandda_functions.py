@@ -421,7 +421,7 @@ def get_comparators_closest_cutoff(
         resolution_cutoff,
         pandda_fs_model: PanDDAFSModel,
         process_local,
-        exclude_local=10
+        exclude_local=5
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
