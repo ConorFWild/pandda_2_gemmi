@@ -30,8 +30,6 @@ from functools import partial
 import multiprocessing as mp
 import inspect
 
-printer = pprint.PrettyPrinter()
-
 # Scientific python libraries
 import fire
 import numpy as np
@@ -79,7 +77,12 @@ from pandda_gemmi.autobuild import (
 )
 from pandda_gemmi.distribution.fscluster import FSCluster
 
-from pandda_gemmi.processing import process_shell
+from pandda_gemmi.processing import (
+    process_shell,
+    process_shell_low_mem,
+)
+
+printer = pprint.PrettyPrinter()
 
 
 def process_pandda(
@@ -92,6 +95,8 @@ def process_pandda(
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
+        # PROCESS MANAGEMENT,
+        low_memory: bool = True,
         # Dataset selection options
         ground_state_datasets: Optional[List[str]] = None,
         exclude_from_z_map_analysis: Optional[List[str]] = None,
@@ -276,7 +281,7 @@ def process_pandda(
                 if not rhofit_path:
                     raise Exception("PanDDA Rhofit requires rhofit to be in path!")
                 if not pandda_rhofit_path:
-                    raise Exception("PanDDA Rhofit rquires pandda_rhofit.sh to be in path!")
+                    raise Exception("PanDDA Rhofit requires pandda_rhofit.sh to be in path!")
 
                 autobuild_parametrized = partial(
                     autobuild_rhofit,
@@ -292,21 +297,39 @@ def process_pandda(
                 raise Exception(f"Autobuild strategy: {autobuild_strategy} is not valid!")
 
         # Parameterise
-        process_shell_paramaterised = partial(
-            process_shell,
-            process_local=process_local,
-            structure_factors=structure_factors,
-            sample_rate=sample_rate,
-            contour_level=contour_level,
-            cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-            min_blob_volume=min_blob_volume,
-            min_blob_z_peak=min_blob_z_peak,
-            outer_mask=outer_mask,
-            inner_mask_symmetry=inner_mask_symmetry,
-            max_site_distance_cutoff=max_site_distance_cutoff,
-            min_bdc=min_bdc,
-            max_bdc=max_bdc,
-        )
+        if low_memory:
+            process_shell_paramaterised = partial(
+                process_shell_low_mem,
+                process_local=process_local,
+                structure_factors=structure_factors,
+                sample_rate=sample_rate,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                min_blob_volume=min_blob_volume,
+                min_blob_z_peak=min_blob_z_peak,
+                outer_mask=outer_mask,
+                inner_mask_symmetry=inner_mask_symmetry,
+                max_site_distance_cutoff=max_site_distance_cutoff,
+                min_bdc=min_bdc,
+                max_bdc=max_bdc,
+            )
+
+        else:
+            process_shell_paramaterised = partial(
+                process_shell,
+                process_local=process_local,
+                structure_factors=structure_factors,
+                sample_rate=sample_rate,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                min_blob_volume=min_blob_volume,
+                min_blob_z_peak=min_blob_z_peak,
+                outer_mask=outer_mask,
+                inner_mask_symmetry=inner_mask_symmetry,
+                max_site_distance_cutoff=max_site_distance_cutoff,
+                min_bdc=min_bdc,
+                max_bdc=max_bdc,
+            )
 
         ###################################################################
         # # Pre-pandda
@@ -702,8 +725,10 @@ def process_pandda(
             pandda_log
         )
 
-        save_json_log(pandda_log,
-                      out_dir / constants.PANDDA_LOG_FILE)
+        save_json_log(
+            pandda_log,
+            out_dir / constants.PANDDA_LOG_FILE,
+        )
 
 
 if __name__ == '__main__':

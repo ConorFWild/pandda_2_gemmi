@@ -74,6 +74,7 @@ LOG_DATASET_MERGED_CLUSTERS_NUM: str = "Number of clusters after merging cluster
 LOG_DATASET_CLUSTER_TIME: str = "Time taken to cluster z map"
 LOG_DATASET_EVENT_TIME: str = "Time taken to get events"
 LOG_DATASET_EVENT_MAP_TIME: str = "Time taken to generate event map"
+LOG_DATASET_XMAP_TIME: str = "Time taken to generate aligned xmaps"
 
 LOG_AUTOBUILD_TIME: str = "Time taken to autobuild events"
 LOG_AUTOBUILD_SELECTED_BUILDS: str = "Build selected for each dataset"

@@ -115,7 +115,7 @@ mtz=""
 map=""
 out="."
 cut=1.0
-vol=20
+vol=15
 while [ $# -gt 0 ]
 do
   case $1 in
