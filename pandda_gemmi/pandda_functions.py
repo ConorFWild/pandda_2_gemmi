@@ -10,10 +10,12 @@ import secrets
 import numpy as np
 import multiprocessing as mp
 import joblib
+from scipy import spatial as spsp, cluster as spc
 
 from sklearn import decomposition
 import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
+import hdbscan
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi import constants
@@ -671,6 +673,191 @@ def get_comparators_closest_apo_cutoff(
 
         potential_comparator_dtags = []
         for potential_comparator_dtag in closest_dtags:
+
+            if datasets[dtag].reflections.resolution().resolution < truncation_res:
+                potential_comparator_dtags.append(potential_comparator_dtag)
+            else:
+                continue
+
+            # of enough accuulated, continue
+            if len(potential_comparator_dtags) > comparison_min_comparators:
+                comparators[dtag] = potential_comparator_dtags
+                break
+
+    return comparators
+
+
+def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
+    # Make a pairwise matrix
+    correlation_matrix = np.zeros((len(samples), len(samples)))
+
+    for x, reference_sample in enumerate(samples.values()):
+
+        reference_sample_mean = np.mean(reference_sample)
+        reference_sample_demeaned = reference_sample - reference_sample_mean
+        reference_sample_denominator = np.sqrt(np.sum(np.square(reference_sample_demeaned)))
+
+        for y, sample in enumerate(samples.values()):
+            sample_mean = np.mean(sample)
+            sample_demeaned = sample - sample_mean
+            sample_denominator = np.sqrt(np.sum(np.square(sample_demeaned)))
+
+            nominator = np.sum(reference_sample_demeaned * sample_demeaned)
+            denominator = sample_denominator * reference_sample_denominator
+
+            correlation = nominator / denominator
+
+            correlation_matrix[x, y] = correlation
+
+    correlation_matrix = np.nan_to_num(correlation_matrix)
+
+    # distance_matrix = np.ones(correlation_matrix.shape) - correlation_matrix
+
+    for j in range(correlation_matrix.shape[0]):
+        correlation_matrix[j, j] = 1.0
+
+    return correlation_matrix
+
+
+def get_linkage_from_correlation_matrix(correlation_matrix):
+    condensed = spsp.distance.squareform(1.0 - correlation_matrix)
+    linkage = spc.hierarchy.linkage(condensed, method='complete')
+    # linkage = spc.linkage(condensed, method='ward')
+
+    return linkage
+
+
+def cluster_linkage(linkage, cutoff):
+    idx = spc.hierarchy.fcluster(linkage, cutoff, 'distance')
+
+    return idx
+
+
+def cluster_density(linkage: np.ndarray, cutoff: float) -> np.ndarray:
+    # Get the linkage matrix
+    # Cluster the datasets
+    clusters: np.ndarray = cluster_linkage(linkage, cutoff)
+    # Determine which clusters have known apos in them
+
+    return clusters
+
+
+def get_comparators_closest_cluster(
+        datasets: Dict[Dtag, Dataset],
+        alignments,
+        grid,
+        comparison_min_comparators,
+        comparison_max_comparators,
+        structure_factors,
+        sample_rate,
+        resolution_cutoff,
+        pandda_fs_model: PanDDAFSModel,
+        process_local,
+        exclude_local=5
+):
+    dtag_list = [dtag for dtag in datasets]
+    dtag_array = np.array(dtag_list)
+
+    dtags_by_res = list(
+        sorted(
+            dtag_list,
+            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+        )
+    )
+
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    highest_res_datasets_max = max(
+        [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    # Load the xmaps
+    print("Truncating datasets...")
+    shell_truncated_datasets: Datasets = truncate(
+        datasets,
+        resolution=Resolution(highest_res_datasets_max),
+        structure_factors=structure_factors,
+    )
+
+    # Generate aligned xmaps
+    print("Loading xmaps")
+    start = time.time()
+    load_xmap_paramaterised = partial(
+        from_unaligned_dataset_c_flat,
+        grid=grid,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+    )
+
+    results = process_local(
+        [
+            partial(
+                load_xmap_paramaterised,
+                shell_truncated_datasets[key],
+                alignments[key],
+            )
+            for key
+            in shell_truncated_datasets
+        ]
+    )
+    print("Got xmaps!")
+
+    # Get the maps as arrays
+    print("Getting xmaps as arrays")
+    xmaps = {dtag: xmap
+             for dtag, xmap
+             in zip(datasets, results)
+             }
+
+    finish = time.time()
+    print(f"Mapped in {finish - start}")
+
+    # Get the correlation distance between maps
+    distance_matrix = get_distance_matrix(xmaps)
+
+    # Build the tree
+    # linkage = get_linkage_from_distance_matrix(distance_matrix)
+    # cluster_linkage(linkage, cutoff)
+    # tree = spc.hierarchy.to_tree(linkage)
+    # nuggets: Dict[int, np.ndarray] = get_nuggets(tree, 25, 35)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=30, metric='precomputed')
+    clusterer.fit(distance_matrix)
+    labels = clusterer.labels_
+
+    # Save a bokeh plot
+    labels = [dtag.dtag for dtag in xmaps]
+    known_apos = [dtag.dtag for dtag, dataset in datasets.items()]
+    save_plot_pca_umap_bokeh(correlation_matrix,
+                             labels,
+                             known_apos,
+                             pandda_fs_model.pandda_dir / f"pca_umap.html")
+
+    # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
+    # Based on whether they are within the res cutoff
+    comparators = {}
+    for j, dtag in enumerate(dtag_list):
+        print(f"Finding closest for dtag: {dtag}")
+        current_res = datasets[dtag].reflections.resolution().resolution
+
+        # Get dtags ordered by distance
+        row = correlation_matrix[j, :].flatten()
+        print(f"\tRow is: {row}")
+        closest_dtags_indexes = np.flip(np.argsort(row))
+        closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
+        print(f"\tClosest dtags are: {closest_dtags}")
+        print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
+
+        # Decide the res upper bound
+        truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
+        print(f"\tTrucation res is: {truncation_res}")
+
+        # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
+        # if so
+
+        potential_comparator_dtags = []
+        for j, potential_comparator_dtag in enumerate(closest_dtags):
+
+            if j < exclude_local:
+                if j > 0:
+                    continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
