@@ -459,6 +459,21 @@ def process_pandda(
                 exclude_local,
             )
 
+        elif comparison_strategy == "closest_cluster":
+            # Closest datasets after clustering as long as they are not too poor res
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
+                datasets,
+                alignments,
+                grid,
+                comparison_min_comparators,
+                comparison_max_comparators,
+                structure_factors,
+                sample_rate,
+                comparison_res_cutoff,
+                pandda_fs_model,
+                process_local,
+            )
+
         elif comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
             raise NotImplementedError()

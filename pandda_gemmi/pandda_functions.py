@@ -686,37 +686,37 @@ def get_comparators_closest_apo_cutoff(
 
     return comparators
 
-
-def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
-    # Make a pairwise matrix
-    correlation_matrix = np.zeros((len(samples), len(samples)))
-
-    for x, reference_sample in enumerate(samples.values()):
-
-        reference_sample_mean = np.mean(reference_sample)
-        reference_sample_demeaned = reference_sample - reference_sample_mean
-        reference_sample_denominator = np.sqrt(np.sum(np.square(reference_sample_demeaned)))
-
-        for y, sample in enumerate(samples.values()):
-            sample_mean = np.mean(sample)
-            sample_demeaned = sample - sample_mean
-            sample_denominator = np.sqrt(np.sum(np.square(sample_demeaned)))
-
-            nominator = np.sum(reference_sample_demeaned * sample_demeaned)
-            denominator = sample_denominator * reference_sample_denominator
-
-            correlation = nominator / denominator
-
-            correlation_matrix[x, y] = correlation
-
-    correlation_matrix = np.nan_to_num(correlation_matrix)
-
-    # distance_matrix = np.ones(correlation_matrix.shape) - correlation_matrix
-
-    for j in range(correlation_matrix.shape[0]):
-        correlation_matrix[j, j] = 1.0
-
-    return correlation_matrix
+#
+# def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
+#     # Make a pairwise matrix
+#     correlation_matrix = np.zeros((len(samples), len(samples)))
+#
+#     for x, reference_sample in enumerate(samples.values()):
+#
+#         reference_sample_mean = np.mean(reference_sample)
+#         reference_sample_demeaned = reference_sample - reference_sample_mean
+#         reference_sample_denominator = np.sqrt(np.sum(np.square(reference_sample_demeaned)))
+#
+#         for y, sample in enumerate(samples.values()):
+#             sample_mean = np.mean(sample)
+#             sample_demeaned = sample - sample_mean
+#             sample_denominator = np.sqrt(np.sum(np.square(sample_demeaned)))
+#
+#             nominator = np.sum(reference_sample_demeaned * sample_demeaned)
+#             denominator = sample_denominator * reference_sample_denominator
+#
+#             correlation = nominator / denominator
+#
+#             correlation_matrix[x, y] = correlation
+#
+#     correlation_matrix = np.nan_to_num(correlation_matrix)
+#
+#     # distance_matrix = np.ones(correlation_matrix.shape) - correlation_matrix
+#
+#     for j in range(correlation_matrix.shape[0]):
+#         correlation_matrix[j, j] = 1.0
+#
+#     return correlation_matrix
 
 
 def get_linkage_from_correlation_matrix(correlation_matrix):
@@ -753,7 +753,6 @@ def get_comparators_closest_cluster(
         resolution_cutoff,
         pandda_fs_model: PanDDAFSModel,
         process_local,
-        exclude_local=5
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -814,18 +813,35 @@ def get_comparators_closest_cluster(
     distance_matrix = get_distance_matrix(xmaps)
 
     # Build the tree
-    # linkage = get_linkage_from_distance_matrix(distance_matrix)
-    # cluster_linkage(linkage, cutoff)
-    # tree = spc.hierarchy.to_tree(linkage)
-    # nuggets: Dict[int, np.ndarray] = get_nuggets(tree, 25, 35)
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=30, metric='precomputed')
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=30,
+        metric='precomputed',
+    )
     clusterer.fit(distance_matrix)
     labels = clusterer.labels_
+    probabilities = clusterer.probabilities_
+
+    # Get the cores of each cluster
+    cluster_cores = {}
+    for n in np.unique(labels):
+        if n != -1:
+            indexes = np.arange(len(labels))
+            cluster_member_mask = labels == n
+            cluster_member_indexes = np.nonzero(cluster_member_mask)
+            cluster_member_values = probabilities[cluster_member_mask]
+            cluster_members_sorted_indexes = np.argsort(cluster_member_values)
+
+            if np.sum(cluster_member_indexes) >= 30:
+                cluster_cores[n] = cluster_member_indexes[cluster_member_mask][cluster_members_sorted_indexes][:30]
+
+            else:
+                print(f"There were less than 30 members of the cluster!")
+
 
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in xmaps]
-    known_apos = [dtag.dtag for dtag, dataset in datasets.items()]
-    save_plot_pca_umap_bokeh(correlation_matrix,
+    known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
+    save_plot_pca_umap_bokeh(distance_matrix,
                              labels,
                              known_apos,
                              pandda_fs_model.pandda_dir / f"pca_umap.html")
@@ -838,7 +854,7 @@ def get_comparators_closest_cluster(
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
-        row = correlation_matrix[j, :].flatten()
+        row = distance_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
         closest_dtags_indexes = np.flip(np.argsort(row))
         closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
@@ -853,11 +869,12 @@ def get_comparators_closest_cluster(
         # if so
 
         potential_comparator_dtags = []
+        # j = 0
         for j, potential_comparator_dtag in enumerate(closest_dtags):
 
-            if j < exclude_local:
-                if j > 0:
-                    continue
+            # if j < exclude_local:
+            #     if j > 0:
+            #         continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
