@@ -16,6 +16,7 @@ from sklearn import decomposition
 import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 import hdbscan
+from matplotlib import pyplot as plt
 
 from pandda_gemmi.pandda_types import *
 from pandda_gemmi import constants
@@ -820,6 +821,18 @@ def get_comparators_closest_cluster(
     clusterer.fit(distance_matrix)
     labels = clusterer.labels_
     probabilities = clusterer.probabilities_
+
+    # Plot cluster results
+    fig, ax = plt.subplots(figsize=(60, 60))
+
+    clusterer.condensed_tree_.plot(
+        select_clusters=True,
+        axis=ax,
+    )
+
+    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan.png"))
+    fig.clear()
+    plt.close(fig)
 
     # Get the cores of each cluster
     cluster_cores = {}

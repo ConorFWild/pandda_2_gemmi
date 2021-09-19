@@ -61,6 +61,7 @@ from pandda_gemmi.pandda_functions import (
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
     get_comparators_closest_apo_cutoff,
+    get_comparators_closest_cluster,
     truncate,
     validate_strategy_num_datasets,
     validate,
