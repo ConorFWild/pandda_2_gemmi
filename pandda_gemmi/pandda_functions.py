@@ -788,78 +788,115 @@ def get_comparators_closest_cluster(
         structure_factors=structure_factors,
         sample_rate=sample_rate,
     )
-    if batch:
-        total_sample_size = len(shell_truncated_datasets)
-        print(f"Total sample size = {total_sample_size}")
-        batch_size = min(101, total_sample_size)
-        print(f"Batch size is: {batch_size}")
-        num_batches = (total_sample_size // batch_size) + 1
-        print(f"Num batches is: {num_batches}")
-        batches = [np.arange(x*batch_size, min((x+1)*batch_size, num_batches)) for x in range(0, num_batches)]
-        print(f"Batches are:")
-        print(batches)
 
-        from sklearn.decomposition import PCA, IncrementalPCA
-        ipca = IncrementalPCA(n_components=min(200, batch_size))
+    # Get reduced array
+    total_sample_size = len(shell_truncated_datasets)
+    print(f"Total sample size = {total_sample_size}")
+    batch_size = min(101, total_sample_size)
+    print(f"Batch size is: {batch_size}")
+    num_batches = (total_sample_size // batch_size) + 1
+    print(f"Num batches is: {num_batches}")
+    batches = [np.arange(x*batch_size, min((x+1)*batch_size, num_batches)) for x in range(0, num_batches)]
+    print(f"Batches are:")
+    print(batches)
 
-        for batch in batches:
-            results = process_local(
-                [
-                    partial(
-                        load_xmap_paramaterised,
-                        shell_truncated_datasets[key],
-                        alignments[key],
-                    )
-                    for key
-                    in dtag_array[batch]
-                ]
-            )
-            print("Got xmaps!")
-
-            # Get the maps as arrays
-            print("Getting xmaps as arrays")
-            xmaps = {dtag: xmap
-                     for dtag, xmap
-                     in zip(datasets, results)
-                     }
-
-            finish = time.time()
-            print(f"Mapped in {finish - start}")
-
-            # Get pca
-            xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-            ipca.partial_fit(xmap_array)
-
-    results = process_local(
-        [
-            partial(
-                load_xmap_paramaterised,
-                shell_truncated_datasets[key],
-                alignments[key],
-            )
-            for key
-            in shell_truncated_datasets
-        ]
-    )
-    print("Got xmaps!")
-
-    # Get the maps as arrays
-    print("Getting xmaps as arrays")
-    xmaps = {dtag: xmap
-             for dtag, xmap
-             in zip(datasets, results)
-             }
-
-    finish = time.time()
-    print(f"Mapped in {finish - start}")
-
-    # Get the correlation distance between maps
-    distance_matrix = get_distance_matrix(xmaps)
-
-    # Get pca
     from sklearn.decomposition import PCA, IncrementalPCA
-    xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-    reduced_array = PCA(n_components=min(200, xmap_array.shape[0])).fit_transform(xmap_array)
+    ipca = IncrementalPCA(n_components=min(200, batch_size))
+
+    print("Fitting!")
+    for batch in batches:
+        results = process_local(
+            [
+                partial(
+                    load_xmap_paramaterised,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
+        print("Got xmaps!")
+
+        # Get the maps as arrays
+        print("Getting xmaps as arrays")
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(datasets, results)
+                 }
+
+        finish = time.time()
+        print(f"Mapped in {finish - start}")
+
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        ipca.partial_fit(xmap_array)
+
+    # Transform
+    print(f"Transforming!")
+    transformed_arrays = []
+    for batch in batches:
+        results = process_local(
+            [
+                partial(
+                    load_xmap_paramaterised,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
+        print("Got xmaps!")
+
+        # Get the maps as arrays
+        print("Getting xmaps as arrays")
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(datasets, results)
+                 }
+
+        finish = time.time()
+        print(f"Mapped in {finish - start}")
+
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        transformed_arrays.append(ipca.transform(xmap_array))
+
+    reduced_array = np.vstack(transformed_arrays)
+
+    print(f"Reduced array shape: {reduced_array.shape}")
+
+    # results = process_local(
+    #     [
+    #         partial(
+    #             load_xmap_paramaterised,
+    #             shell_truncated_datasets[key],
+    #             alignments[key],
+    #         )
+    #         for key
+    #         in shell_truncated_datasets
+    #     ]
+    # )
+    # print("Got xmaps!")
+    #
+    # # Get the maps as arrays
+    # print("Getting xmaps as arrays")
+    # xmaps = {dtag: xmap
+    #          for dtag, xmap
+    #          in zip(datasets, results)
+    #          }
+    #
+    # finish = time.time()
+    # print(f"Mapped in {finish - start}")
+    #
+    # # Get the correlation distance between maps
+    # distance_matrix = get_distance_matrix(xmaps)
+    #
+    # # Get pca
+    # from sklearn.decomposition import PCA, IncrementalPCA
+    # xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+    # reduced_array = PCA(n_components=min(200, xmap_array.shape[0])).fit_transform(xmap_array)
 
     # Build the tree
 
