@@ -895,6 +895,7 @@ def get_comparators_closest_cluster(
     )
     clusterer.fit(reduced_array)
     labels = clusterer.labels_
+    print(f"Labels are: {labels}")
     probabilities = clusterer.probabilities_
 
     # Plot cluster results
