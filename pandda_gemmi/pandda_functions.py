@@ -968,11 +968,13 @@ def get_comparators_closest_cluster(
         # if node.count > min_samples:
         if node.left.count >= min_samples:
             left_clusters = recurse_node(node.left, min_samples)
-            _clusters.append(left_clusters)
+            for left_cluster in left_clusters:
+                _clusters.append(left_cluster)
 
         if node.right.count >= min_samples:
             right_clusters = recurse_node(node.right, min_samples)
-            _clusters.append(right_clusters)
+            for right_cluster in right_clusters:
+                _clusters.append(right_cluster)
 
         if node.count >= min_samples:
             if (node.right.count < min_samples) and (node.left.count < min_samples):
