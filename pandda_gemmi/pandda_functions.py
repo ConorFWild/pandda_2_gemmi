@@ -817,6 +817,7 @@ def get_comparators_closest_cluster(
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
         metric='precomputed',
+        cluster_selection_method="leaf",
     )
     clusterer.fit(distance_matrix)
     labels = clusterer.labels_
@@ -850,17 +851,21 @@ def get_comparators_closest_cluster(
             else:
                 print(f"There were less than 30 members of the cluster!")
 
-
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in xmaps]
-    known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
+    # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
+    known_apos = []
+    for cluster, cluster_core_dtags in cluster_cores.items():
+        print(f"\tCluster {cluster} dtags are {cluster_core_dtags}")
+        for cluster_core_dtag in cluster_core_dtags:
+            known_apos.append(cluster_core_dtag.dtag)
+
     save_plot_pca_umap_bokeh(distance_matrix,
                              labels,
                              known_apos,
                              pandda_fs_model.pandda_dir / f"pca_umap.html")
 
-    # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
-    # Based on whether they are within the res cutoff
+    # Get the comparators: for each dataset, get cluster with closest median distance
     comparators = {}
     for j, dtag in enumerate(dtag_list):
         print(f"Finding closest for dtag: {dtag}")
@@ -882,12 +887,8 @@ def get_comparators_closest_cluster(
         # if so
 
         potential_comparator_dtags = []
-        # j = 0
         for j, potential_comparator_dtag in enumerate(closest_dtags):
 
-            # if j < exclude_local:
-            #     if j > 0:
-            #         continue
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
