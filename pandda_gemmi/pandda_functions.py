@@ -781,7 +781,7 @@ def get_comparators_closest_cluster(
 
     # Generate aligned xmaps
     print("Loading xmaps")
-    start = time.time()
+
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
         grid=grid,
@@ -805,6 +805,7 @@ def get_comparators_closest_cluster(
 
     print("Fitting!")
     for batch in batches:
+        start = time.time()
         results = process_local(
             [
                 partial(
@@ -836,6 +837,7 @@ def get_comparators_closest_cluster(
     print(f"Transforming!")
     transformed_arrays = []
     for batch in batches:
+        start = time.time()
         results = process_local(
             [
                 partial(
