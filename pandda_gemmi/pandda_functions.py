@@ -829,7 +829,7 @@ def get_comparators_closest_cluster(
     # clusterer.fit(distance_matrix)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
-        metric='precomputed',
+        # metric='precomputed',
         cluster_selection_method="leaf",
     )
     clusterer.fit(reduced_array)
