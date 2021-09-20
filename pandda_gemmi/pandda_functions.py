@@ -796,7 +796,10 @@ def get_comparators_closest_cluster(
     print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
     print(f"Num batches is: {num_batches}")
-    batches = [np.arange(x*batch_size, min((x+1)*batch_size, batch_size)) for x in range(0, num_batches)]
+    batches = [
+        np.arange(x*batch_size, min((x+1)*batch_size, total_sample_size))
+        for x
+        in range(0, num_batches)]
     print(f"Batches are:")
     print(batches)
 
