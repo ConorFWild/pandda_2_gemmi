@@ -871,48 +871,9 @@ def get_comparators_closest_cluster(
 
     print(f"Reduced array shape: {reduced_array.shape}")
 
-    # results = process_local(
-    #     [
-    #         partial(
-    #             load_xmap_paramaterised,
-    #             shell_truncated_datasets[key],
-    #             alignments[key],
-    #         )
-    #         for key
-    #         in shell_truncated_datasets
-    #     ]
-    # )
-    # print("Got xmaps!")
-    #
-    # # Get the maps as arrays
-    # print("Getting xmaps as arrays")
-    # xmaps = {dtag: xmap
-    #          for dtag, xmap
-    #          in zip(datasets, results)
-    #          }
-    #
-    # finish = time.time()
-    # print(f"Mapped in {finish - start}")
-    #
-    # # Get the correlation distance between maps
-    # distance_matrix = get_distance_matrix(xmaps)
-    #
-    # # Get pca
-    # from sklearn.decomposition import PCA, IncrementalPCA
-    # xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-    # reduced_array = PCA(n_components=min(200, xmap_array.shape[0])).fit_transform(xmap_array)
 
-    # Build the tree
-
-    # clusterer = hdbscan.HDBSCAN(
-    #     min_cluster_size=30,
-    #     metric='precomputed',
-    #     cluster_selection_method="leaf",
-    # )
-    # clusterer.fit(distance_matrix)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
-        # metric='precomputed',
         cluster_selection_method="leaf",
     )
     clusterer.fit(reduced_array)
