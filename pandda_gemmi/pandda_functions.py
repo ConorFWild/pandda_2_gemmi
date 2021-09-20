@@ -805,6 +805,7 @@ def get_comparators_closest_cluster(
 
     print("Fitting!")
     for batch in batches:
+        print(f"\tLoading dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -837,6 +838,7 @@ def get_comparators_closest_cluster(
     print(f"Transforming!")
     transformed_arrays = []
     for batch in batches:
+        print(f"\tTransforming dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
