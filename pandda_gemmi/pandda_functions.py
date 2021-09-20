@@ -754,6 +754,7 @@ def get_comparators_closest_cluster(
         resolution_cutoff,
         pandda_fs_model: PanDDAFSModel,
         process_local,
+        batch=False,
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -787,6 +788,40 @@ def get_comparators_closest_cluster(
         structure_factors=structure_factors,
         sample_rate=sample_rate,
     )
+    if batch:
+        batch_size = 101
+        print(f"Batch size is: {batch_size}")
+        total_sample_size = len(shell_truncated_datasets)
+        print(f"Total sample size = {total_sample_size}")
+        num_batches = (total_sample_size // batch_size) + 1
+        print(f"Num batches is: {num_batches}")
+        batches = [np.arange(x*batch_size, min((x+1)*batch_size, num_batches)) for x in range(0, num_batches)]
+        print(f"Batches are:")
+        print(batches)
+
+        for batch in batches:
+            results = process_local(
+                [
+                    partial(
+                        load_xmap_paramaterised,
+                        shell_truncated_datasets[key],
+                        alignments[key],
+                    )
+                    for key
+                    in dtag_array[batch]
+                ]
+            )
+            print("Got xmaps!")
+
+            # Get the maps as arrays
+            print("Getting xmaps as arrays")
+            xmaps = {dtag: xmap
+                     for dtag, xmap
+                     in zip(datasets, results)
+                     }
+
+            finish = time.time()
+            print(f"Mapped in {finish - start}")
 
     results = process_local(
         [
@@ -815,8 +850,8 @@ def get_comparators_closest_cluster(
     distance_matrix = get_distance_matrix(xmaps)
 
     # Get pca
-    from sklearn.decomposition import PCA
-    xmap_array = np.vstack([xmap.to_array().flatten() for xmap in xmaps.values()])
+    from sklearn.decomposition import PCA, IncrementalPCA
+    xmap_array = np.vstack([xmap for xmap in xmaps.values()])
     reduced_array = PCA(n_components=min(200, xmap_array.shape[0])).fit_transform(xmap_array)
 
     # Build the tree
