@@ -851,6 +851,8 @@ def get_comparators_closest_cluster(
             else:
                 print(f"There were less than 30 members of the cluster!")
 
+    print(cluster_cores)
+
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in xmaps]
     # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
@@ -874,8 +876,11 @@ def get_comparators_closest_cluster(
         # Get dtags ordered by distance
         row = distance_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
-        closest_dtags_indexes = np.flip(np.argsort(row))
+        # closest_dtags_indexes = np.flip(np.argsort(row))
+        for
         closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
+
+
         print(f"\tClosest dtags are: {closest_dtags}")
         print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
