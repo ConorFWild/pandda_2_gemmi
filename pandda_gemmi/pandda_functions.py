@@ -871,7 +871,6 @@ def get_comparators_closest_cluster(
 
     print(f"Reduced array shape: {reduced_array.shape}")
 
-
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
         cluster_selection_method="leaf",
@@ -881,7 +880,7 @@ def get_comparators_closest_cluster(
     probabilities = clusterer.probabilities_
 
     # Plot cluster results
-    fig, ax = plt.subplots()# figsize=(60, 60))
+    fig, ax = plt.subplots()
 
     clusterer.condensed_tree_.plot(
         select_clusters=True,
