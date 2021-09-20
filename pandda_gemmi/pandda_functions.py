@@ -789,15 +789,18 @@ def get_comparators_closest_cluster(
         sample_rate=sample_rate,
     )
     if batch:
-        batch_size = 101
-        print(f"Batch size is: {batch_size}")
         total_sample_size = len(shell_truncated_datasets)
         print(f"Total sample size = {total_sample_size}")
+        batch_size = min(101, total_sample_size)
+        print(f"Batch size is: {batch_size}")
         num_batches = (total_sample_size // batch_size) + 1
         print(f"Num batches is: {num_batches}")
         batches = [np.arange(x*batch_size, min((x+1)*batch_size, num_batches)) for x in range(0, num_batches)]
         print(f"Batches are:")
         print(batches)
+
+        from sklearn.decomposition import PCA, IncrementalPCA
+        ipca = IncrementalPCA(n_components=min(200, batch_size))
 
         for batch in batches:
             results = process_local(
@@ -822,6 +825,20 @@ def get_comparators_closest_cluster(
 
             finish = time.time()
             print(f"Mapped in {finish - start}")
+
+            # Get the maps as arrays
+            print("Getting xmaps as arrays")
+            xmaps = {dtag: xmap
+                     for dtag, xmap
+                     in zip(datasets, results)
+                     }
+
+            finish = time.time()
+            print(f"Mapped in {finish - start}")
+
+            # Get pca
+            xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+            ipca.partial_fit(xmap_array)
 
     results = process_local(
         [
