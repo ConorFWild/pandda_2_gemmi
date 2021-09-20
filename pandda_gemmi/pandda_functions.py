@@ -947,7 +947,7 @@ def get_comparators_closest_cluster(
     print(cluster_cores)
 
     # Save a bokeh plot
-    labels = [dtag.dtag for dtag in xmaps]
+    labels = [dtag.dtag for dtag in dtag_list]
     # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
     known_apos = []
     for cluster, cluster_core_dtags in cluster_cores.items():
