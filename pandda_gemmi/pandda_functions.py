@@ -792,7 +792,7 @@ def get_comparators_closest_cluster(
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
     print(f"Total sample size = {total_sample_size}")
-    batch_size = min(101, total_sample_size)
+    batch_size = min(90, total_sample_size)
     print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
     print(f"Num batches is: {num_batches}")
@@ -810,7 +810,7 @@ def get_comparators_closest_cluster(
         j = j + 1
 
         if any(len(batch) < batch_size for batch in new_batches):
-            batches = tmp_batches[j-1]
+            batches = tmp_batches[j-2]
             break
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
