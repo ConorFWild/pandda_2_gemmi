@@ -958,7 +958,7 @@ def get_comparators_closest_cluster(
     print(f"Labels are: {labels}")
     print(f"Known apos are: {known_apos}")
 
-    save_plot_pca_umap_bokeh(distance_matrix,
+    save_plot_pca_umap_bokeh(reduced_array,
                              labels,
                              known_apos,
                              pandda_fs_model.pandda_dir / f"pca_umap.html")
