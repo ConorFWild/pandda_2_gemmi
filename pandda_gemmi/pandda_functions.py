@@ -804,7 +804,7 @@ def get_comparators_closest_cluster(
     j = 1
     while True:
         print(f"\tJ is: {j}")
-        new_batches = np.array_split(np.array(total_sample_size), j)
+        new_batches = np.array_split(np.arange(total_sample_size), j)
         print(f"\t\tlen of new batches is {len(new_batches)}")
         tmp_batches[j] = new_batches
         j = j + 1
