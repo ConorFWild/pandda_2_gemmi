@@ -362,7 +362,7 @@ def embed_umap(distance_matrix):
     return transform
 
 
-def bokeh_scatter_plot(embedding, labels, know_apos, plot_file):
+def bokeh_scatter_plot(embedding, labels, known_apos, plot_file):
     output_file(str(plot_file))
 
     source = ColumnDataSource(
@@ -370,7 +370,7 @@ def bokeh_scatter_plot(embedding, labels, know_apos, plot_file):
             x=embedding[:, 0].tolist(),
             y=embedding[:, 1].tolist(),
             dtag=labels,
-            apo=["green" if label in know_apos else "pink" for label in labels]
+            apo=["green" if label in known_apos else "pink" for label in labels]
         ))
 
     TOOLTIPS = [
@@ -757,6 +757,7 @@ def get_comparators_closest_cluster(
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
+    dtag_to_index = {dtag: j for k, dtag in enumerate(dtag_list)}
 
     dtags_by_res = list(
         sorted(
@@ -851,6 +852,7 @@ def get_comparators_closest_cluster(
             else:
                 print(f"There were less than 30 members of the cluster!")
 
+    print(f"Cluster cores are:")
     print(cluster_cores)
 
     # Save a bokeh plot
@@ -861,6 +863,9 @@ def get_comparators_closest_cluster(
         print(f"\tCluster {cluster} dtags are {cluster_core_dtags}")
         for cluster_core_dtag in cluster_core_dtags:
             known_apos.append(cluster_core_dtag.dtag)
+
+    print(f"Labels are: {labels}")
+    print(f"Known apos are: {known_apos}")
 
     save_plot_pca_umap_bokeh(distance_matrix,
                              labels,
@@ -877,12 +882,16 @@ def get_comparators_closest_cluster(
         row = distance_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
         # closest_dtags_indexes = np.flip(np.argsort(row))
-        for
-        closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
+        for cluster, cluster_core_dtags in cluster_cores.items():
 
+            closest_dtags =cluster_core_dtags
 
-        print(f"\tClosest dtags are: {closest_dtags}")
-        print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
+            distances = row[np.array([dtag_to_index[_dtag] for _dtag in closest_dtags])]
+            median_distance = np.median(distances)
+            print(f"\t\tMedian distance to cluster {cluster} is: {median_distance}")
+
+            # print(f"\tClosest dtags are: {closest_dtags}")
+            # print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
