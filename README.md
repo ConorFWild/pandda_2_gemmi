@@ -7,7 +7,7 @@ It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda envi
 ```bash
 conda create -n pandda2 python=3.9
 conda activate pandda2
-conda install -c conda-forge fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue
+conda install -c conda-forge fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd /path/to/cloned/repository
 pip install .
