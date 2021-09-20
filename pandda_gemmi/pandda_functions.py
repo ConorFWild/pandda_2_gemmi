@@ -995,7 +995,7 @@ def get_comparators_closest_cluster(
 
     save_dendrogram_plot(linkage,
                          [
-                             f"{_dtag.dtag}_{dtag_to_cluster[j]}" if _dtag in dtag_to_cluster else _dtag.dtag
+                             f"{_dtag.dtag}_{dtag_to_cluster[_dtag]}" if _dtag in dtag_to_cluster else _dtag.dtag
                              for _dtag
                              in dtag_list
                          ],
