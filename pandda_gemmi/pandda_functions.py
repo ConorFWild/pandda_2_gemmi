@@ -728,6 +728,12 @@ def get_linkage_from_correlation_matrix(correlation_matrix):
     return linkage
 
 
+def get_linkage_from_observations(observations):
+    linkage = spc.hierarchy.linkage(observations, method='complete')
+
+    return linkage
+
+
 def cluster_linkage(linkage, cutoff):
     idx = spc.hierarchy.fcluster(linkage, cutoff, 'distance')
 
@@ -741,6 +747,17 @@ def cluster_density(linkage: np.ndarray, cutoff: float) -> np.ndarray:
     # Determine which clusters have known apos in them
 
     return clusters
+
+def save_dendrogram_plot(linkage,
+                         labels,
+                         dendrogram_plot_file,
+                         threshold=0.3
+                         ):
+    fig, ax = plt.subplots(figsize=(0.2 * len(labels), 40))
+    dn = spc.hierarchy.dendrogram(linkage, ax=ax, labels=labels, leaf_font_size=10, color_threshold=threshold)
+    fig.savefig(str(dendrogram_plot_file))
+    fig.clear()
+    plt.close(fig)
 
 
 def get_comparators_closest_cluster(
@@ -889,38 +906,39 @@ def get_comparators_closest_cluster(
 
     print(f"Reduced array shape: {reduced_array.shape}")
 
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=30,
-        min_samples=1,
-        cluster_selection_method="leaf",
-    )
-    clusterer.fit(reduced_array)
-    labels = clusterer.labels_
-    print(f"Labels are: {labels}")
-    probabilities = clusterer.probabilities_
+    # clusterer = hdbscan.HDBSCAN(
+    #     min_cluster_size=30,
+    #     min_samples=1,
+    #     cluster_selection_method="leaf",
+    # )
+    # clusterer.fit(reduced_array)
+    # labels = clusterer.labels_
+    # print(f"Labels are: {labels}")
+    # probabilities = clusterer.probabilities_
+    #
+    # # Plot cluster results
+    # fig, ax = plt.subplots()
+    #
+    # clusterer.condensed_tree_.plot(
+    #     select_clusters=True,
+    #     axis=ax,
+    # )
+    #
+    # fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_condensed_tree.png"))
+    # fig.clear()
+    # plt.close(fig)
+    #
+    # # Plot cluster results
+    # fig, ax = plt.subplots()
+    #
+    # clusterer.single_linkage_tree_.plot(
+    #     axis=ax,
+    # )
+    #
+    # fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_single_linkage_tree.png"))
+    # fig.clear()
+    # plt.close(fig)
 
-    # Plot cluster results
-    fig, ax = plt.subplots()
-
-    clusterer.condensed_tree_.plot(
-        select_clusters=True,
-        axis=ax,
-    )
-
-    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_condensed_tree.png"))
-    fig.clear()
-    plt.close(fig)
-
-    # Plot cluster results
-    fig, ax = plt.subplots()
-
-    clusterer.single_linkage_tree_.plot(
-        axis=ax,
-    )
-
-    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_single_linkage_tree.png"))
-    fig.clear()
-    plt.close(fig)
 
     # # Plot cluster results
     # fig, ax = plt.subplots()
@@ -932,6 +950,15 @@ def get_comparators_closest_cluster(
     # fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_minimum_spanning_tree.png"))
     # fig.clear()
     # plt.close(fig)
+
+    linkage = get_linkage_from_observations(reduced_array)
+
+    save_dendrogram_plot(linkage,
+                         [_dtag.dtag for _dtag in dtag_list],
+                         str(pandda_fs_model.pandda_dir / f"dendrogram.png"),
+                         threshold=0.3,
+                         )
+
 
     # Get the cores of each cluster
     cluster_cores = {}
