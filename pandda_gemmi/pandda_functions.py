@@ -906,7 +906,29 @@ def get_comparators_closest_cluster(
         axis=ax,
     )
 
-    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan.png"))
+    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_condensed_tree.png"))
+    fig.clear()
+    plt.close(fig)
+
+    # Plot cluster results
+    fig, ax = plt.subplots()
+
+    clusterer.single_linkage_tree_.plot(
+        axis=ax,
+    )
+
+    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_single_linkage_tree.png"))
+    fig.clear()
+    plt.close(fig)
+
+    # Plot cluster results
+    fig, ax = plt.subplots()
+
+    clusterer.minimum_spanning_tree_.plot(
+        axis=ax,
+    )
+
+    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_minimum_spanning_tree.png"))
     fig.clear()
     plt.close(fig)
 
