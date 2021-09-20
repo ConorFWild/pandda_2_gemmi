@@ -687,6 +687,7 @@ def get_comparators_closest_apo_cutoff(
 
     return comparators
 
+
 #
 # def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
 #     # Make a pairwise matrix
@@ -747,6 +748,7 @@ def cluster_density(linkage: np.ndarray, cutoff: float) -> np.ndarray:
     # Determine which clusters have known apos in them
 
     return clusters
+
 
 def save_dendrogram_plot(linkage,
                          labels,
@@ -827,7 +829,7 @@ def get_comparators_closest_cluster(
         j = j + 1
 
         if any(len(batch) < batch_size for batch in new_batches):
-            batches = tmp_batches[j-2]
+            batches = tmp_batches[j - 2]
             break
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
@@ -939,7 +941,6 @@ def get_comparators_closest_cluster(
     # fig.clear()
     # plt.close(fig)
 
-
     # # Plot cluster results
     # fig, ax = plt.subplots()
     #
@@ -959,6 +960,28 @@ def get_comparators_closest_cluster(
                          threshold=0.3,
                          )
 
+    rootnode, nodelist = spc.hierarchy.to_tree(linkage, rd=True)
+
+    def recurse_node(node, min_samples):
+
+        _clusters = []
+        # if node.count > min_samples:
+        if node.left.count > min_samples:
+            left_clusters = recurse_node(node.left, min_samples)
+            _clusters.append(left_clusters)
+
+        if node.right.count > min_samples:
+            right_clusters = recurse_node(node.right, min_samples)
+            _clusters.append(right_clusters)
+
+        if node.count > min_samples:
+            if (node.right.count < min_samples) and (node.left.count < min_samples):
+                _clusters.append([node.pre_order(lambda x: x.id)])
+
+        return _clusters
+
+    clusters = recurse_node(rootnode, 30)
+    print(clusters)
 
     # Get the cores of each cluster
     cluster_cores = {}
@@ -1007,8 +1030,7 @@ def get_comparators_closest_cluster(
         print(f"\tRow is: {row}")
         # closest_dtags_indexes = np.flip(np.argsort(row))
         for cluster, cluster_core_dtags in cluster_cores.items():
-
-            closest_dtags =cluster_core_dtags
+            closest_dtags = cluster_core_dtags
 
             distances = row[np.array([dtag_to_index[_dtag] for _dtag in closest_dtags])]
             median_distance = np.median(distances)
@@ -1026,7 +1048,6 @@ def get_comparators_closest_cluster(
 
         potential_comparator_dtags = []
         for j, potential_comparator_dtag in enumerate(closest_dtags):
-
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
