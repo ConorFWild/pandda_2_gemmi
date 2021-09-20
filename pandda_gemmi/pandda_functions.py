@@ -814,13 +814,25 @@ def get_comparators_closest_cluster(
     # Get the correlation distance between maps
     distance_matrix = get_distance_matrix(xmaps)
 
+    # Get pca
+    from sklearn.decomposition import PCA
+    xmap_array = np.vstack([xmap.to_array().flatten() for xmap in xmaps.values()])
+    reduced_array = PCA(n_components=min(200, xmap_array.shape[0])).fit_transform(xmap_array)
+
     # Build the tree
+
+    # clusterer = hdbscan.HDBSCAN(
+    #     min_cluster_size=30,
+    #     metric='precomputed',
+    #     cluster_selection_method="leaf",
+    # )
+    # clusterer.fit(distance_matrix)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
         metric='precomputed',
         cluster_selection_method="leaf",
     )
-    clusterer.fit(distance_matrix)
+    clusterer.fit(reduced_array)
     labels = clusterer.labels_
     probabilities = clusterer.probabilities_
 
