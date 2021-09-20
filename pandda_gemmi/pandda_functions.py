@@ -824,7 +824,7 @@ def get_comparators_closest_cluster(
         print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
-                 in zip(datasets, results)
+                 in zip(dtag_list, results)
                  }
 
         finish = time.time()
@@ -857,7 +857,7 @@ def get_comparators_closest_cluster(
         print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
-                 in zip(datasets, results)
+                 in zip(dtag_list, results)
                  }
 
         finish = time.time()
