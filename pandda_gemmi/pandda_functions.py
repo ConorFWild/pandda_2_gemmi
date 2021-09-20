@@ -966,15 +966,15 @@ def get_comparators_closest_cluster(
 
         _clusters = []
         # if node.count > min_samples:
-        if node.left.count > min_samples:
+        if node.left.count >= min_samples:
             left_clusters = recurse_node(node.left, min_samples)
             _clusters.append(left_clusters)
 
-        if node.right.count > min_samples:
+        if node.right.count >= min_samples:
             right_clusters = recurse_node(node.right, min_samples)
             _clusters.append(right_clusters)
 
-        if node.count > min_samples:
+        if node.count >= min_samples:
             if (node.right.count < min_samples) and (node.left.count < min_samples):
                 _clusters.append([node.pre_order(lambda x: x.id)])
 
