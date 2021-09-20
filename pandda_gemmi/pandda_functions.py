@@ -826,16 +826,6 @@ def get_comparators_closest_cluster(
             finish = time.time()
             print(f"Mapped in {finish - start}")
 
-            # Get the maps as arrays
-            print("Getting xmaps as arrays")
-            xmaps = {dtag: xmap
-                     for dtag, xmap
-                     in zip(datasets, results)
-                     }
-
-            finish = time.time()
-            print(f"Mapped in {finish - start}")
-
             # Get pca
             xmap_array = np.vstack([xmap for xmap in xmaps.values()])
             ipca.partial_fit(xmap_array)
