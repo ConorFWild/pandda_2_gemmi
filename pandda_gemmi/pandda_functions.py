@@ -891,7 +891,7 @@ def get_comparators_closest_cluster(
 
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
-        min_samples=5,
+        min_samples=1,
         cluster_selection_method="leaf",
     )
     clusterer.fit(reduced_array)
@@ -922,16 +922,16 @@ def get_comparators_closest_cluster(
     fig.clear()
     plt.close(fig)
 
-    # Plot cluster results
-    fig, ax = plt.subplots()
-
-    clusterer.minimum_spanning_tree_.plot(
-        axis=ax,
-    )
-
-    fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_minimum_spanning_tree.png"))
-    fig.clear()
-    plt.close(fig)
+    # # Plot cluster results
+    # fig, ax = plt.subplots()
+    #
+    # clusterer.minimum_spanning_tree_.plot(
+    #     axis=ax,
+    # )
+    #
+    # fig.savefig(str(pandda_fs_model.pandda_dir / f"hdbscan_minimum_spanning_tree.png"))
+    # fig.clear()
+    # plt.close(fig)
 
     # Get the cores of each cluster
     cluster_cores = {}
