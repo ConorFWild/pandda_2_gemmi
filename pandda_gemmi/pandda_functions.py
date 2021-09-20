@@ -1044,7 +1044,6 @@ def get_comparators_closest_cluster(
     )
 
     #
-
     cophenetic_matrix = spsp.distance.squareform(spc.hierarchy.cophenet(linkage))
 
 
