@@ -957,7 +957,7 @@ def get_comparators_closest_cluster(
     save_dendrogram_plot(linkage,
                          [_dtag.dtag for _dtag in dtag_list],
                          str(pandda_fs_model.pandda_dir / f"dendrogram.png"),
-                         threshold=0.3,
+                         # threshold=0.3,
                          )
 
     rootnode, nodelist = spc.hierarchy.to_tree(linkage, rd=True)
@@ -983,24 +983,44 @@ def get_comparators_closest_cluster(
     clusters = recurse_node(rootnode, 30)
     print(clusters)
 
-    # Get the cores of each cluster
-    cluster_cores = {}
-    for n in np.unique(labels):
-        if n != -1:
-            indexes = np.arange(len(labels))
-            cluster_member_mask = labels == n
-            cluster_member_indexes = np.nonzero(cluster_member_mask)
-            cluster_member_values = probabilities[cluster_member_mask]
-            cluster_members_sorted_indexes = np.argsort(cluster_member_values)
+    clusters_dict = {}
+    dtag_to_cluster = {}
+    for j, cluster in enumerate(clusters):
+        clusters_dict[j] = dtag_array[np.array(cluster)]
+        for dtag in clusters_dict[j]:
+            dtag_to_cluster[dtag] = j
+    print(clusters_dict)
 
-            if np.sum(cluster_member_indexes) >= 30:
-                cluster_cores[n] = cluster_member_indexes[cluster_member_mask][cluster_members_sorted_indexes][:30]
+    save_dendrogram_plot(linkage,
+                         [
+                             f"{_dtag.dtag}_{dtag_to_cluster[j]}" if _dtag in dtag_to_cluster else _dtag.dtag
+                             for _dtag
+                             in dtag_list
+                         ],
+                         str(pandda_fs_model.pandda_dir / f"dendrogram_with_clusters.png"),
+                         # threshold=0.3,
+                         )
 
-            else:
-                print(f"There were less than 30 members of the cluster!")
-
-    print(f"Cluster cores are:")
-    print(cluster_cores)
+    #
+    #
+    # # Get the cores of each cluster
+    # cluster_cores = {}
+    # for n in np.unique(labels):
+    #     if n != -1:
+    #         indexes = np.arange(len(labels))
+    #         cluster_member_mask = labels == n
+    #         cluster_member_indexes = np.nonzero(cluster_member_mask)
+    #         cluster_member_values = probabilities[cluster_member_mask]
+    #         cluster_members_sorted_indexes = np.argsort(cluster_member_values)
+    #
+    #         if np.sum(cluster_member_indexes) >= 30:
+    #             cluster_cores[n] = cluster_member_indexes[cluster_member_mask][cluster_members_sorted_indexes][:30]
+    #
+    #         else:
+    #             print(f"There were less than 30 members of the cluster!")
+    #
+    # print(f"Cluster cores are:")
+    # print(cluster_cores)
 
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in dtag_list]
