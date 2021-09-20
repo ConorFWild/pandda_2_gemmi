@@ -757,7 +757,7 @@ def get_comparators_closest_cluster(
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
-    dtag_to_index = {dtag: j for k, dtag in enumerate(dtag_list)}
+    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
 
     dtags_by_res = list(
         sorted(
