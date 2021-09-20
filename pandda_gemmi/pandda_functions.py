@@ -891,6 +891,7 @@ def get_comparators_closest_cluster(
 
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=30,
+        min_samples=15,
         cluster_selection_method="leaf",
     )
     clusterer.fit(reduced_array)
