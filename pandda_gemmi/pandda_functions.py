@@ -365,12 +365,19 @@ def embed_umap(distance_matrix):
 def bokeh_scatter_plot(embedding, labels, known_apos, plot_file):
     output_file(str(plot_file))
 
+    apos = []
+    for label in labels:
+        if label in known_apos:
+            apos.append("green")
+        else:
+            apos.append("pink")
+
     source = ColumnDataSource(
         data=dict(
             x=embedding[:, 0].tolist(),
             y=embedding[:, 1].tolist(),
             dtag=labels,
-            apo=["green" if label in known_apos else "pink" for label in labels]
+            apo=apos
         ))
 
     TOOLTIPS = [
