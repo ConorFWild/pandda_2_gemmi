@@ -1079,7 +1079,8 @@ def get_comparators_closest_cluster(
         cluster_medians[cluster] = cluster_median
     print(f"Cluster medians are: {cluster_medians}")
 
-    median_of_medians = np.median(np.vstack([x for x in cluster_medians.values()]), axis=0)
+    median_of_medians = np.median(np.vstack([x for x in cluster_medians.values()]), axis=0).reshape(1,
+                                                                                                    cluster_coords.shape[1])
     print(f"Global median of clusters is: {median_of_medians}")
 
     centermost_cluster = min(
