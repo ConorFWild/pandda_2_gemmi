@@ -369,7 +369,7 @@ def process_shell(
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
                                             shell.train_dtags[test_dtag]},
-                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag]},
+                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag].union({test_dtag,})},
             )
             for test_dtag
             in shell.train_dtags
