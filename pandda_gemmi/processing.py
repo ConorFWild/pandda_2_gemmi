@@ -185,9 +185,12 @@ def process_dataset(
             }
     dataset_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
         cluster_num: cluster_sizes[cluster_num]
-        for cluster_num
-        in sorted(
-            cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"])
+        for j, cluster_num
+        in enumerate(sorted(
+            cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
+        reverse=True,
+        ))
+        if j < 10
     }
 
     # Filter out small clusters
