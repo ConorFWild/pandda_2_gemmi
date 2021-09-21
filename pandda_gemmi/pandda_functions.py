@@ -1089,6 +1089,13 @@ def get_comparators_closest_cluster(
         closest_cluster_dtags = clusters_dict[closest_cluster]
         print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
+        distances_to_cluster = {_dtag: dtag_distance_to_cluster[_dtag][closest_cluster]
+                                for _dtag
+                                in dtag_distance_to_cluster}
+        dtags_by_distance_to_cluster = [x for x in sorted(distances_to_cluster, key=lambda y: distances_to_cluster[y])]
+        print(f"Distances to cluster: {distances_to_cluster}")
+        print(f"Dtags by distance to cluster: {dtags_by_distance_to_cluster}")
+
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
         print(f"\tTrucation res is: {truncation_res}")
@@ -1096,7 +1103,7 @@ def get_comparators_closest_cluster(
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
         potential_comparator_dtags = []
-        for j, potential_comparator_dtag in enumerate(closest_cluster_dtags):
+        for j, potential_comparator_dtag in enumerate(dtags_by_distance_to_cluster):
 
             if datasets[dtag].reflections.resolution().resolution < truncation_res:
                 potential_comparator_dtags.append(potential_comparator_dtag)
