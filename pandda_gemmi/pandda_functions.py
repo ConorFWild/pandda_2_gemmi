@@ -1054,7 +1054,7 @@ def get_comparators_closest_cluster(
             cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
             cluster_coords = reduced_array[cluster_indexes, :]
 
-            cluster_squared_vectors = np.sum(np.square(cluster_coords - dtag_coord), axis=1)
+            cluster_squared_vectors = np.sqrt(np.sum(np.square(cluster_coords - dtag_coord), axis=1))
 
             median_squared_distance = np.median(cluster_squared_vectors)
 
