@@ -368,7 +368,7 @@ def process_shell(
                 process_dataset_paramaterized,
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
-                                            shell.train_dtags[test_dtag]},
+                                            shell.train_dtags[test_dtag].union({test_dtag,})},
                 dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag].union({test_dtag,})},
             )
             for test_dtag
