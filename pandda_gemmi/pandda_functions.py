@@ -1045,6 +1045,20 @@ def get_comparators_closest_cluster(
 
     #
     cophenetic_matrix = spsp.distance.squareform(spc.hierarchy.cophenet(linkage))
+    dtag_distance_to_cluster = {}
+    for dtag in dtag_list:
+        dtag_index = dtag_to_index[dtag]
+        dtag_distance_to_cluster[dtag] = {}
+        dtag_coord = reduced_array[dtag_index, :]
+        for cluster, cluster_dtags in clusters_dict.items():
+            cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
+            cluster_coords = reduced_array[cluster_indexes, :]
+
+            cluster_squared_vectors = np.sum(np.square(cluster_coords - dtag_coord), axis=1)
+
+            median_squared_distance = np.median(cluster_squared_vectors)
+
+            dtag_distance_to_cluster[dtag][cluster] = median_squared_distance
 
 
     # Get the comparators: for each dataset, get cluster with closest median distance
@@ -1057,16 +1071,17 @@ def get_comparators_closest_cluster(
         row = cophenetic_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
         # closest_dtags_indexes = np.flip(np.argsort(row))
-        cluster_distances = {}
-        for cluster_num, cluster_dtags in clusters_dict.items():
-
-            distances = row[np.array([dtag_to_index[_dtag] for _dtag in cluster_dtags])]
-            median_distance = np.median(distances)
-            print(f"\t\tMedian distance to cluster {cluster_num} is: {median_distance}")
-            cluster_distances[cluster_num] = median_distance
+        # cluster_distances = {}
+        # for cluster_num, cluster_dtags in clusters_dict.items():
+        #     distances = row[np.array([dtag_to_index[_dtag] for _dtag in cluster_dtags])]
+        #     median_distance = np.median(distances)
+        #     print(f"\t\tMedian distance to cluster {cluster_num} is: {median_distance}")
+        #     cluster_distances[cluster_num] = median_distance
 
             # print(f"\tClosest dtags are: {closest_dtags}")
             # print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
+
+        cluster_distances = dtag_distance_to_cluster[dtag]
 
         print(cluster_distances)
         closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
@@ -1080,7 +1095,6 @@ def get_comparators_closest_cluster(
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
-
         potential_comparator_dtags = []
         for j, potential_comparator_dtag in enumerate(closest_cluster_dtags):
 
@@ -1093,6 +1107,15 @@ def get_comparators_closest_cluster(
             if len(potential_comparator_dtags) > comparison_min_comparators:
                 comparators[dtag] = potential_comparator_dtags
                 break
+
+        if len(potential_comparator_dtags) < comparison_min_comparators:
+            raise Exception(
+                (
+                    f"Dtag {dtag} has too few comparators: "
+                    f"only {len(potential_comparator_dtags)}:"
+                    f" {potential_comparator_dtags}"
+                )
+            )
 
     return comparators
 
