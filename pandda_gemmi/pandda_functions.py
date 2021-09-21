@@ -781,7 +781,7 @@ def get_comparators_closest_cluster(
         pandda_fs_model: PanDDAFSModel,
         process_local,
         batch=False,
-        cluster_selection="far"
+        cluster_selection="close"
 ):
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -1120,7 +1120,7 @@ def get_comparators_closest_cluster(
 
         cluster_distances = dtag_distance_to_cluster[dtag]
 
-        if cluster_selection == "closest":
+        if cluster_selection == "close":
 
             print(cluster_distances)
             closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
