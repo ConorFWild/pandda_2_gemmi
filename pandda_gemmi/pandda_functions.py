@@ -1125,6 +1125,10 @@ def get_comparators_closest_cluster(
         closest_cluster_dtags = clusters_dict[closest_cluster]
         print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
+        # TODO: remboce this
+        closest_cluster = centermost_cluster
+        closest_cluster_dtags = clusters_dict[closest_cluster]
+
         distances_to_cluster = {_dtag: dtag_distance_to_cluster[_dtag][closest_cluster]
                                 for _dtag
                                 in dtag_distance_to_cluster}
