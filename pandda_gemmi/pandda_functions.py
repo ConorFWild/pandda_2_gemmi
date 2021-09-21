@@ -1064,8 +1064,8 @@ def get_comparators_closest_cluster(
     for cluster, cluster_dtags in clusters_dict.items():
         cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
         cluster_coords = reduced_array[cluster_indexes, :]
-        cluster_median = np.median(cluster_coords, axis=1).reshape((1,cluster_coords.shape[1]))
-        cluster_median_deviation = np.median(np.abs(cluster_coords - cluster_median))
+        cluster_median = np.median(cluster_coords, axis=0).reshape((1,cluster_coords.shape[1]))
+        cluster_median_deviation = np.median(np.sqrt(np.sum(np.square(cluster_coords - cluster_median), axis=1)))
         cluster_widths[cluster] = cluster_median_deviation
 
     print(f"Cluster median absolute deviation is: {cluster_widths}")
@@ -1075,7 +1075,7 @@ def get_comparators_closest_cluster(
     for cluster, cluster_dtags in clusters_dict.items():
         cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
         cluster_coords = reduced_array[cluster_indexes, :]
-        cluster_median = np.median(cluster_coords, axis=1).reshape((1, cluster_coords.shape[1]))
+        cluster_median = np.median(cluster_coords, axis=0).reshape((1, cluster_coords.shape[1]))
         cluster_medians[cluster] = cluster_median
     print(f"Cluster medians are: {cluster_medians}")
 
