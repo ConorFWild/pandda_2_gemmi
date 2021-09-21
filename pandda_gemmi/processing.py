@@ -176,6 +176,15 @@ def process_dataset(
     )
     dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings.clusterings.values()])
+    cluster_sizes = {}
+    for dtag, clustering in clusterings.clusterings.items():
+        for cluster_num, cluster in clustering.clustering.items():
+            cluster_sizes[cluster_num] = {
+                "size": cluster.size(grid),
+                "centroid": cluster.centroid,
+            }
+    dataset_log[constants.LOG_DATASET_CLUSTER_SIZES] = {cluster_num: cluster_sizes[cluster_num] for cluster_num in sorted(
+        cluster_sizes, key= lambda _cluster_num: cluster_sizes[_cluster_num]["size"])}
 
     # Filter out small clusters
     clusterings_large: Clusterings = clusterings.filter_size(grid,
