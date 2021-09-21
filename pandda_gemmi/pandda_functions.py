@@ -1070,6 +1070,25 @@ def get_comparators_closest_cluster(
 
     print(f"Cluster median absolute deviation is: {cluster_widths}")
 
+    # Get the centermost cluster
+    cluster_medians = {}
+    for cluster, cluster_dtags in clusters_dict.items():
+        cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
+        cluster_coords = reduced_array[cluster_indexes, :]
+        cluster_median = np.median(cluster_coords, axis=1).reshape((1, cluster_coords.shape[1]))
+        cluster_medians[cluster] = cluster_median
+    print(f"Cluster medians are: {cluster_medians}")
+
+    median_of_medians = np.median(np.vstack([x for x in cluster_medians.values()]), axis=1)
+    print(f"Global median of clusters is: {median_of_medians}")
+
+    centermost_cluster = min(
+        cluster_medians,
+        key=lambda _cluster_num: np.sqrt(np.sum(np.square((median_of_medians - cluster_medians[_cluster_num])))),
+    )
+    print(f"Centermost cluster is: {centermost_cluster}")
+
+
     # Get the comparators: for each dataset, get cluster with closest median distance
     comparators = {}
     for j, dtag in enumerate(dtag_list):
