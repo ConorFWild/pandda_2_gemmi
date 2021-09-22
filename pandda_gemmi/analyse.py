@@ -324,7 +324,7 @@ def process_pandda(
 
         # Get datasets
         print("Loading datasets")
-        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model)
+        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model,)
         print(f"\tThere are initially: {len(datasets_initial)} datasets")
 
         # If structure factors not given, check if any common ones are available
@@ -348,17 +348,19 @@ def process_pandda(
         pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
-        datasets_low_res: Datasets = datasets_invalid.remove_low_resolution_datasets(
+        datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
+
+        datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
             low_resolution_completeness)
-        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_invalid if dtag not in datasets_low_res]
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: low res"))
+        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if dtag not in datasets_low_res]
+        validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: rfree"))
+        validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
 
         datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
             max_wilson_plot_z_score)  # TODO
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: wilson"))
+        validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
         # Select refernce
         print("Getting reference")
@@ -380,18 +382,18 @@ def process_pandda(
             reference,
             max_rmsd_to_reference,
         )
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure"))
+        validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
 
         print("Removing models with large gaps")
         datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
         for dtag in datasets_gaps:
             if dtag not in datasets_diss_struc.datasets:
                 print(f"WARNING: Removed dataset {dtag} due to a large gap")
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: structure gaps"))
+        validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
 
         print("Removing dissimilar space groups")
         datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: space group"))
+        validate_paramterized(datasets_diss_space, exception=Exception("Too few datasets after filter: space group"))
 
         datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
         pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
