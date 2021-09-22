@@ -577,7 +577,7 @@ class Reflections:
 
         # Add columns
         for column in self.reflections.columns:
-            if column.label in ["H", "K", "L", "F", "SIGF", free_flag, structure_factors.f, structure_factors.phi]:
+            if column.label in ["H", "K", "L", free_flag, structure_factors.f, structure_factors.phi]:
                 new_reflections.add_column(column.label, column.type)
 
         # Get data
@@ -588,7 +588,7 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
 
         # Truncate by columns
-        data_indexed = data[["F", "SIGF", free_flag, structure_factors.f, structure_factors.phi]]
+        data_indexed = data[[free_flag, structure_factors.f, structure_factors.phi]]
 
         # To numpy
         data_dropped_array = data_indexed.to_numpy()
