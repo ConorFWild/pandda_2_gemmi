@@ -561,9 +561,23 @@ class Reflections:
         # Add dataset
         new_reflections.add_dataset("truncated")
 
+        free_flag = None
+
+        for column in self.reflections.columns:
+            if column.label == "FREE":
+                free_flag = "FREE"
+                break
+            if column.label == "FreeR_flag":
+                free_flag = "FreeR_flag"
+                break
+
+        if not free_flag:
+            raise Exception("No RFree Flag found!")
+
+
         # Add columns
         for column in self.reflections.columns:
-            if column.label in ["H", "K", "L", "F", "SIGF", "FREE", structure_factors.f, structure_factors.phi]:
+            if column.label in ["H", "K", "L", "F", "SIGF", free_flag, structure_factors.f, structure_factors.phi]:
                 new_reflections.add_column(column.label, column.type)
 
         # Get data
@@ -574,7 +588,7 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
 
         # Truncate by columns
-        data_indexed = data[["F", "SIGF", "FREE", structure_factors.f, structure_factors.phi]]
+        data_indexed = data[["F", "SIGF", free_flag, structure_factors.f, structure_factors.phi]]
 
         # To numpy
         data_dropped_array = data_indexed.to_numpy()
