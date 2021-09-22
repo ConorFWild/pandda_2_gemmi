@@ -563,7 +563,8 @@ class Reflections:
 
         # Add columns
         for column in self.reflections.columns:
-            new_reflections.add_column(column.label, column.type)
+            if column.label in ["H", "K", "L", "F", "SIGF", "FREE", structure_factors.f, structure_factors.phi]:
+                new_reflections.add_column(column.label, column.type)
 
         # Get data
         data_array = np.array(self.reflections, copy=True)
