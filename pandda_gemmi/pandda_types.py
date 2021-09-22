@@ -592,7 +592,6 @@ class Reflections:
 
         return Reflections(new_reflections)
 
-
     def spacegroup(self):
         return self.reflections.spacegroup
 
@@ -756,7 +755,7 @@ class Dataset:
     smoothing_factor: float = 0.0
 
     @staticmethod
-    def from_files(pdb_file: Path, mtz_file: Path,):
+    def from_files(pdb_file: Path, mtz_file: Path, ):
         strucure: Structure = Structure.from_file(pdb_file)
         reflections: Reflections = Reflections.from_file(mtz_file)
 
@@ -987,7 +986,7 @@ class Datasets:
         return Datasets(datasets)
 
     @staticmethod
-    def from_dir(pandda_fs_model: PanDDAFSModel,):
+    def from_dir(pandda_fs_model: PanDDAFSModel, ):
         datasets = {}
         for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
             dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
