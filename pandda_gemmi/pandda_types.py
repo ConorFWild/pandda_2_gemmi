@@ -574,7 +574,6 @@ class Reflections:
         if not free_flag:
             raise Exception("No RFree Flag found!")
 
-
         # Add columns
         for column in self.reflections.columns:
             if column.label in ["H", "K", "L", free_flag, structure_factors.f, structure_factors.phi]:
