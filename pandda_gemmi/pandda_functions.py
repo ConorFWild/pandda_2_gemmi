@@ -1054,19 +1054,19 @@ def get_comparators_closest_cluster(
     #
     cophenetic_matrix = spsp.distance.squareform(spc.hierarchy.cophenet(linkage))
     dtag_distance_to_cluster = {}
-    for dtag in dtag_list:
-        dtag_index = dtag_to_index[dtag]
-        dtag_distance_to_cluster[dtag] = {}
+    for _dtag in dtag_list:
+        dtag_index = dtag_to_index[_dtag]
+        dtag_distance_to_cluster[_dtag] = {}
         dtag_coord = reduced_array[dtag_index, :]
         for cluster, cluster_dtags in clusters_dict.items():
-            cluster_indexes = np.array([dtag_to_index[cluster_dtag] for cluster_dtag in cluster_dtags])
+            cluster_indexes = np.array([dtag_to_index[_cluster_dtag] for _cluster_dtag in cluster_dtags])
             cluster_coords = reduced_array[cluster_indexes, :]
 
             cluster_squared_vectors = np.sqrt(np.sum(np.square(cluster_coords - dtag_coord), axis=1))
 
             median_squared_distance = np.median(cluster_squared_vectors)
 
-            dtag_distance_to_cluster[dtag][cluster] = median_squared_distance
+            dtag_distance_to_cluster[_dtag][cluster] = median_squared_distance
 
     cluster_widths = {}
     for cluster, cluster_dtags in clusters_dict.items():
@@ -1124,18 +1124,20 @@ def get_comparators_closest_cluster(
 
             print(cluster_distances)
             closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
-            print(f"\tClosest cluster is: {closest_cluster}")
-            closest_cluster_dtags = clusters_dict[closest_cluster]
-            print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
+            # print(f"\tClosest cluster is: {closest_cluster}")
+            # closest_cluster_dtags = clusters_dict[closest_cluster]
+            # print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
         elif cluster_selection == "center":
-
-            # TODO: remboce this
             closest_cluster = centermost_cluster
-            closest_cluster_dtags = clusters_dict[closest_cluster]
+            # closest_cluster_dtags = clusters_dict[closest_cluster]
 
         elif cluster_selection == "far":
             closest_cluster = max(cluster_distances, key=lambda x: cluster_distances[x])
+
+        print(f"\tClosest cluster is: {closest_cluster}")
+        closest_cluster_dtags = clusters_dict[closest_cluster]
+        print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
         distances_to_cluster = {_dtag: dtag_distance_to_cluster[_dtag][closest_cluster]
                                 for _dtag

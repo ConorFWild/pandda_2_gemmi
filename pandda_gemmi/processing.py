@@ -296,6 +296,7 @@ def process_shell(
         max_site_distance_cutoff,
         min_bdc,
         max_bdc,
+        low_mem,
 ):
     time_shell_start = time.time()
     shell_log = {}
@@ -357,6 +358,13 @@ def process_shell(
     # # Process each test dataset
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
+    if low_mem:
+        process_local_in_dataset = process_local
+        process_local_over_datasets = process_local_serial
+    else:
+        process_local_in_dataset = process_local_serial
+        process_local_over_datasets = process_local
+
     process_dataset_paramaterized = partial(
         process_dataset,
         shell=shell,
@@ -374,11 +382,11 @@ def process_shell(
         max_site_distance_cutoff=max_site_distance_cutoff,
         min_bdc=min_bdc,
         max_bdc=max_bdc,
-        process_local=process_local_serial,
+        process_local=process_local_in_dataset,
     )
 
     # Process each dataset in the shell
-    results = process_local(
+    results = process_local_over_datasets(
         [
             partial(
                 process_dataset_paramaterized,

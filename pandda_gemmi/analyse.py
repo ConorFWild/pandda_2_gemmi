@@ -151,10 +151,12 @@ def process_pandda(
         comparison_max_comparators: int = 30,
         known_apos: Optional[List[str]] = None,
         exclude_local: int = 5,
+        cluster_selection: str ="close",
         # Processing settings
         local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
         global_processing: str = "serial",
+        low_mem: bool = False,
         job_params_file: Optional[str] = None,
         # Distributed settings
         distributed_scheduler: str = "SGE",
@@ -177,6 +179,7 @@ def process_pandda(
         rank_method: str = "size",
         # Debug settings
         debug: bool = True,
+
 ):
     ###################################################################
     # # Configuration
@@ -298,39 +301,22 @@ def process_pandda(
                 raise Exception(f"Autobuild strategy: {autobuild_strategy} is not valid!")
 
         # Parameterise
-        if low_memory:
-            process_shell_paramaterised = partial(
-                process_shell_low_mem,
-                process_local=process_local,
-                structure_factors=structure_factors,
-                sample_rate=sample_rate,
-                contour_level=contour_level,
-                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-                min_blob_volume=min_blob_volume,
-                min_blob_z_peak=min_blob_z_peak,
-                outer_mask=outer_mask,
-                inner_mask_symmetry=inner_mask_symmetry,
-                max_site_distance_cutoff=max_site_distance_cutoff,
-                min_bdc=min_bdc,
-                max_bdc=max_bdc,
-            )
-
-        else:
-            process_shell_paramaterised = partial(
-                process_shell,
-                process_local=process_local,
-                structure_factors=structure_factors,
-                sample_rate=sample_rate,
-                contour_level=contour_level,
-                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-                min_blob_volume=min_blob_volume,
-                min_blob_z_peak=min_blob_z_peak,
-                outer_mask=outer_mask,
-                inner_mask_symmetry=inner_mask_symmetry,
-                max_site_distance_cutoff=max_site_distance_cutoff,
-                min_bdc=min_bdc,
-                max_bdc=max_bdc,
-            )
+        process_shell_paramaterised = partial(
+            process_shell,
+            process_local=process_local,
+            structure_factors=structure_factors,
+            sample_rate=sample_rate,
+            contour_level=contour_level,
+            cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+            min_blob_volume=min_blob_volume,
+            min_blob_z_peak=min_blob_z_peak,
+            outer_mask=outer_mask,
+            inner_mask_symmetry=inner_mask_symmetry,
+            max_site_distance_cutoff=max_site_distance_cutoff,
+            min_bdc=min_bdc,
+            max_bdc=max_bdc,
+            low_mem=low_mem,
+        )
 
         ###################################################################
         # # Pre-pandda
@@ -473,6 +459,7 @@ def process_pandda(
                 comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
+                cluster_selection=cluster_selection,
             )
 
         elif comparison_strategy == "high_res":
