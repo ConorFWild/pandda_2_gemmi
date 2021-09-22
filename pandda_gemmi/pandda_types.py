@@ -584,6 +584,7 @@ class Reflections:
                               data_dropped_array,
                               ]
                              )
+        print(new_data.shape)
 
         # Update
         new_reflections.set_data(new_data)
