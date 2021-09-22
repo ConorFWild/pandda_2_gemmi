@@ -359,7 +359,7 @@ def process_shell(
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
     if low_mem:
-        process_local_in_dataset = process_local
+        process_local_in_dataset = process_local_serial
         process_local_over_datasets = process_local_serial
     else:
         process_local_in_dataset = process_local_serial
