@@ -574,7 +574,7 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
 
         # Truncate by columns
-        data_indexed = data[["H", "K", "L", "F", "SIGF", "FREE", structure_factors.f, structure_factors.phi]]
+        data_indexed = data[["F", "SIGF", "FREE", structure_factors.f, structure_factors.phi]]
 
         # To numpy
         data_dropped_array = data_indexed.to_numpy()
