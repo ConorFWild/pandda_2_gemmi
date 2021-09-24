@@ -80,7 +80,7 @@ from pandda_gemmi.distribution.fscluster import FSCluster
 
 from pandda_gemmi.processing import (
     process_shell,
-    process_shell_low_mem,
+    # process_shell_low_mem,
 )
 
 printer = pprint.PrettyPrinter()
