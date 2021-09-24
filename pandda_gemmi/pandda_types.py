@@ -2589,6 +2589,7 @@ class Resolution:
 @dataclasses.dataclass()
 class Shell:
     # number: int
+    res: float
     test_dtags: typing.Set[Dtag]
     train_dtags: typing.Dict[Dtag, Set[Dtag]]
     all_dtags: typing.Set[Dtag]
@@ -5139,6 +5140,7 @@ class ProcessedDataset:
     input_ligand_smiles: Path
     source_ligand_dir: Union[LigandDir, None]
     input_ligand_dir: Path
+    log_path :Path
 
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
@@ -5164,6 +5166,8 @@ class ProcessedDataset:
         source_ligand_dir = dataset_dir.ligand_dir
         input_ligand_dir = processed_dataset_dir / PANDDA_LIGAND_FILES_DIR
 
+        log_path = processed_dataset_dir / "log.json"
+
         return ProcessedDataset(
             path=processed_dataset_dir,
             dataset_models=DatasetModels.from_dir(dataset_models_dir),
@@ -5181,6 +5185,7 @@ class ProcessedDataset:
             input_ligand_smiles=input_ligand_smiles,
             source_ligand_dir=source_ligand_dir,
             input_ligand_dir=input_ligand_dir,
+            log_path=log_path,
         )
 
     def build(self):
@@ -5240,10 +5245,13 @@ class ProcessedDatasets:
 @dataclasses.dataclass()
 class ShellDir:
     path: Path
+    log_path: Path
 
     @staticmethod
     def from_shell(shells_dir, shell_res):
-        return ShellDir(shells_dir / shell_res)
+        shell_dir = shells_dir / shell_res
+        log_path = shell_dir / "log.json"
+        return ShellDir(shell_dir, log_path)
 
     def build(self):
         if not self.path.exists():

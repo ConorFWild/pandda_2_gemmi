@@ -60,6 +60,7 @@ LOG_SHELL_XMAP_TIME: str = "Time taken to generate aligned xmaps"
 LOG_SHELL_DATASET_LOGS: str = "Logs for each dataset in shell"
 LOG_SHELL_TIME: str = "Time taken to process shell"
 LOG_SHELLS: str = "Logs for each shell"
+LOG_SHELL_DATASETS: str = "Datasets in shell"
 
 LOG_DATASET_TIME: str = "TIme taken to process dataset"
 LOG_DATASET_TRAIN: str = "Datasets density charactersied against"

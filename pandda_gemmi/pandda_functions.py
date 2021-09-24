@@ -1228,6 +1228,7 @@ def get_shells(
 
         # Create the shell
         shell = Shell(
+            res,
             shells_test[res],
             shells_train[res],
             all_dtags,
