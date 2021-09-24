@@ -5249,7 +5249,7 @@ class ShellDir:
 
     @staticmethod
     def from_shell(shells_dir, shell_res):
-        shell_dir = shells_dir / shell_res
+        shell_dir = shells_dir / str(shell_res)
         log_path = shell_dir / "log.json"
         return ShellDir(shell_dir, log_path)
 
