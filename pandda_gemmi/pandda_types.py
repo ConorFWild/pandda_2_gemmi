@@ -5289,7 +5289,7 @@ class PanDDAFSModel:
     analyses: Analyses
     processed_datasets: ProcessedDatasets
     log_file: Path
-    shell_dirs: ShellDirs
+    shell_dirs: Optional[ShellDirs]
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -5310,6 +5310,7 @@ class PanDDAFSModel:
                              analyses=analyses,
                              processed_datasets=processed_datasets,
                              log_file=log_path,
+                             shell_dirs=None,
                              )
 
     def build(self, overwrite=False):

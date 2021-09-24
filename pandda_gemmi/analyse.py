@@ -41,7 +41,7 @@ from pandda_gemmi.logs import (
     summarise_datasets
 )
 from pandda_gemmi.pandda_types import (
-    PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
+    PanDDAFSModel, ShellDirs, Dataset, Datasets, Reference, Resolution,
     Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
     XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
     EventID, Event, Events, SiteTable, EventTable,
@@ -526,6 +526,7 @@ def process_pandda(
             max_shell_datasets,
             high_res_increment,
         )
+        pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
 
         print("Shells are:")
         if debug:
