@@ -3,6 +3,7 @@
 ###################################################################
 
 PANDDA_ANALYSES_DIR = "analyses"
+PANDDA_SHELL_DIR = "shells"
 PANDDA_ANALYSE_EVENTS_FILE = "pandda_analyse_events.csv"
 PANDDA_ANALYSE_SITES_FILE = "pandda_analyse_sites.csv"
 PANDDA_HTML_SUMMARIES_DIR = "html_summaries"

@@ -5238,12 +5238,50 @@ class ProcessedDatasets:
 
 
 @dataclasses.dataclass()
+class ShellDir:
+    path: Path
+
+    @staticmethod
+    def from_shell(shells_dir, shell_res):
+        return ShellDir(shells_dir / shell_res)
+
+    def build(self):
+        if not self.path.exists():
+            os.mkdir(self.path)
+
+
+@dataclasses.dataclass()
+class ShellDirs:
+    path: Path
+    shell_dirs: Dict[float, ShellDir]
+
+    @staticmethod
+    def from_pandda_dir(pandda_dir: Path, shells: Shells):
+
+        shells_dir = pandda_dir / PANDDA_SHELL_DIR
+
+        shell_dirs = {}
+        for shell_res, shell in shells.shells.items():
+            shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
+
+        return ShellDirs(shells_dir, shell_dirs)
+
+    def build(self):
+        if not self.path.exists():
+            os.mkdir(self.path)
+
+        for shell_res, shell_dir in self.shell_dirs.items():
+            shell_dir.build()
+
+
+@dataclasses.dataclass()
 class PanDDAFSModel:
     pandda_dir: Path
     data_dirs: DataDirs
     analyses: Analyses
     processed_datasets: ProcessedDatasets
     log_file: Path
+    shell_dirs: ShellDirs
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
