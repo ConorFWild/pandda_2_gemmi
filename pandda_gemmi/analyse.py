@@ -527,10 +527,13 @@ def process_pandda(
             high_res_increment,
         )
         pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
+        pandda_fs_model.shell_dirs.build()
 
         print("Shells are:")
         if debug:
             printer.pprint(shells)
+
+
 
         # Process the shells
         time_shells_start = time.time()
