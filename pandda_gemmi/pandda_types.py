@@ -5140,7 +5140,7 @@ class ProcessedDataset:
     input_ligand_smiles: Path
     source_ligand_dir: Union[LigandDir, None]
     input_ligand_dir: Path
-    log_path :Path
+    log_path: Path
 
     @staticmethod
     def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
