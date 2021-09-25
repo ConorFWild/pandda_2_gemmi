@@ -156,7 +156,7 @@ def process_pandda(
         local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
         global_processing: str = "serial",
-        low_mem: bool = False,
+        memory_availability: str = "high",
         job_params_file: Optional[str] = None,
         # Distributed settings
         distributed_scheduler: str = "SGE",
@@ -315,7 +315,7 @@ def process_pandda(
             max_site_distance_cutoff=max_site_distance_cutoff,
             min_bdc=min_bdc,
             max_bdc=max_bdc,
-            low_mem=low_mem,
+            memory_availability=memory_availability,
         )
 
         ###################################################################

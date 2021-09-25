@@ -324,7 +324,7 @@ def process_shell(
         max_site_distance_cutoff,
         min_bdc,
         max_bdc,
-        low_mem,
+        memory_availability,
 ):
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
@@ -390,10 +390,13 @@ def process_shell(
     # # Process each test dataset
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
-    if low_mem:
+    if memory_availability == "very_low":
         process_local_in_dataset = process_local_serial
         process_local_over_datasets = process_local_serial
-    else:
+    elif memory_availability == "low":
+        process_local_in_dataset = process_local
+        process_local_over_datasets = process_local_serial
+    elif memory_availability == "high":
         process_local_in_dataset = process_local_serial
         process_local_over_datasets = process_local
 
