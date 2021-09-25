@@ -1135,6 +1135,13 @@ def get_comparators_closest_cluster(
         elif cluster_selection == "far":
             closest_cluster = max(cluster_distances, key=lambda x: cluster_distances[x])
 
+        elif cluster_selection == "next":
+            cluster_distances_sorted = sorted(cluster_distances, key = lambda x: cluster_distances[x])
+            if len(cluster_distances) <2:
+                closest_cluster = cluster_distances_sorted[0]
+            else:
+                closest_cluster = cluster_distances_sorted[1]
+
         print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
         print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
