@@ -443,6 +443,8 @@ def process_shell(
 
     time_shell_finish = time.time()
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
+    update_log(shell_log, shell_log_path)
+
 
     return ShellResult(
         shell=shell,
