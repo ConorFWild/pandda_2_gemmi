@@ -24,7 +24,7 @@ from pandda_gemmi.logs import (
 )
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
-    Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
+    Grid, Alignments, Partitioning, Shell, Xmap, Xmaps, Zmap,
     XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
     EventID, Event, Events, SiteTable, EventTable,
     StructureFactors, Xmap,
@@ -83,8 +83,8 @@ def process_dataset(
         inner_mask_symmetry,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
+        sample_rate,
         process_local=process_local_serial,
-
 ):
     time_dataset_start = time.time()
 
@@ -155,8 +155,24 @@ def process_dataset(
 
     for dtag in zmaps:
         zmap = zmaps[dtag]
+        partitioning = Partitioning.from_structure_multiprocess(
+                    dataset_truncated_datasets[test_dtag].structure,
+                    grid,
+                    outer_mask,
+                    inner_mask_symmetry,
+                )
         # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
-        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_native_frame_zmap(zmap)
+        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_native_frame_zmap(
+            zmap,
+            dataset_truncated_datasets[test_dtag],
+            alignments[test_dtag],
+            grid,
+            structure_factors,
+            outer_mask,
+            inner_mask_symmetry,
+            partitioning,
+            sample_rate,
+        )
 
     ###################################################################
     # # Cluster the outlying density
@@ -276,17 +292,19 @@ def process_dataset(
     # Save the event maps!
     print("print events")
     printer.pprint(events)
-    events.save_event_maps(dataset_truncated_datasets,
-                           alignments,
-                           dataset_xmaps,
-                           model,
-                           pandda_fs_model,
-                           grid,
-                           structure_factors,
-                           outer_mask,
-                           inner_mask_symmetry,
-                           mapper=process_local_serial,
-                           )
+    events.save_event_maps(
+        dataset_truncated_datasets,
+        alignments,
+        dataset_xmaps,
+        model,
+        pandda_fs_model,
+        grid,
+        structure_factors,
+        outer_mask,
+        inner_mask_symmetry,
+        sample_rate,
+        mapper=process_local_serial,
+    )
 
     time_event_map_finish = time.time()
     dataset_log[constants.LOG_DATASET_EVENT_MAP_TIME] = time_event_map_finish - time_event_map_start
@@ -416,6 +434,7 @@ def process_shell(
         max_site_distance_cutoff=max_site_distance_cutoff,
         min_bdc=min_bdc,
         max_bdc=max_bdc,
+        sample_rate=sample_rate,
         process_local=process_local_in_dataset,
     )
 

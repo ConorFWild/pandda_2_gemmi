@@ -4611,6 +4611,7 @@ class Events:
             structure_factors,
             outer_mask,
             inner_mask_symmetry,
+            sample_rate,
             mapper=False,
     ):
 
@@ -4672,7 +4673,8 @@ class Events:
                     structure_factors,
                     outer_mask,
                     inner_mask_symmetry,
-                    partitioning_dict[event_id.dtag]
+                    partitioning_dict[event_id.dtag],
+                    sample_rate,
                 )
                 for event_id
                 in event_id_list
@@ -4698,11 +4700,9 @@ class ZMapFile:
         ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
 
-    def save_native_frame(
+    def save_native_frame_zmap(
             self,
             zmap: Zmap,
-            model: Model,
-            event: Event,
             dataset: Dataset,
             alignment: Alignment,
             grid: Grid,
@@ -4777,6 +4777,7 @@ class EventMapFile:
              mask_radius: float,
              mask_radius_symmetry: float,
              partitioning: Partitioning,
+             sample_rate: float,
              ):
         reference_xmap_grid = xmap.xmap
         reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
@@ -4810,6 +4811,7 @@ class EventMapFile:
             mask_radius,
             partitioning,
             mask_radius_symmetry,
+            sample_rate
         )
 
         # # # Get the event bounding box
