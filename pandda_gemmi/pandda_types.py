@@ -4715,16 +4715,16 @@ class ZMapFile:
         reference_frame_zmap_grid = zmap.zmap
         # reference_frame_zmap_grid_array = np.array(reference_frame_zmap_grid, copy=True)
 
-        z_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
-                                                 reference_frame_zmap_grid.nv,
-                                                 reference_frame_zmap_grid.nw,
-                                                 ]
-                                               )
-        z_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-        z_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+        # z_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+        #                                          reference_frame_zmap_grid.nv,
+        #                                          reference_frame_zmap_grid.nw,
+        #                                          ]
+        #                                        )
+        # z_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        # z_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
 
         event_map_grid = Xmap.from_aligned_map_c(
-            z_map_reference_grid,
+            reference_frame_zmap_grid,
             dataset,
             alignment,
             grid,
