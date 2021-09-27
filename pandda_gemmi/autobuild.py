@@ -348,15 +348,38 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 # # rhofit
 # #####################
 
+def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
+                    out_dir: Path, cut: float = 2.0,
+           ):
+    # Make rhofit commands
+    pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
 
-def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path,
+    rhofit_command: str = constants.RHOFIT_COMMAND.format(
+        pandda_rhofit=pandda_rhofit,
+        event_map=str(truncated_xmap_path),
+        mtz=str(mtz_path),
+        pdb=str(truncated_model_path),
+        cif=str(cif_path),
+        out_dir=str(out_dir),
+        cut=cut,
+    )
+    print(f"rhofit_command is: {rhofit_command}")
+
+    # Execute job script
+    execute(rhofit_command)
+
+    return rhofit_command
+
+
+def rhofit_to_coord(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
+                    out_dir: Path,
            coord: Coord,
            cut: float = 2.0,
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
 
-    rhofit_command: str = constants.RHOFIT_COMMAND.format(
+    rhofit_command: str = constants.RHOFIT_COMMAND_COORD.format(
         pandda_rhofit=pandda_rhofit,
         event_map=str(truncated_xmap_path),
         mtz=str(mtz_path),
@@ -531,7 +554,9 @@ def autobuild_rhofit(dataset: Dataset,
                      event: Event,
                      pandda_fs: PanDDAFSModel,
                      cif_strategy,
-                     cut: float = 2.0):
+                     cut: float = 2.0,
+                     rhofit_coord: bool = False,
+                     ):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -570,13 +595,14 @@ def autobuild_rhofit(dataset: Dataset,
     truncated_model_path = truncate_model(model_path, coord, out_dir)
     print(f"\tTruncated model")
 
-    # # Truncate the ed map
-    # truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
-    # print(f"\tTruncated xmap")
-    #
-    # # Make cut out map
-    # cut_out_xmap(build_map_path, coord, out_dir)
-    # print(f"\tCut out xmap")
+    # Truncate the ed map
+    if not rhofit_coord:
+        truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
+        print(f"\tTruncated xmap")
+
+        # Make cut out map
+        cut_out_xmap(build_map_path, coord, out_dir)
+        print(f"\tCut out xmap")
 
     # Generate the cif
     if cif_strategy == "default":
@@ -666,7 +692,10 @@ def autobuild_rhofit(dataset: Dataset,
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit_command = rhofit(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord, cut,)
+    if rhofit_coord:
+        rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord, cut,)
+    else:
+        rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut,)
     print(f"\tRhofit")
 
     # Score rhofit builds
