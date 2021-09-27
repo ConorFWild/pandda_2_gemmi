@@ -180,7 +180,6 @@ def process_pandda(
         rank_method: str = "size",
         # Debug settings
         debug: bool = True,
-
 ):
     ###################################################################
     # # Configuration
