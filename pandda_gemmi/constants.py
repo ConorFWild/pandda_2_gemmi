@@ -116,7 +116,7 @@ PANDDA_RHOFIT_SCRIPT_FILE = "pandda_rhofit.sh"
 RHOFIT_COMMAND = (
     "#!/bin/bash \n"
     "source ~/.bashrc \n"
-    "pandda_rhofit.sh -map {event_map} -mtz {mtz} -pdb {pdb} -cif {cif} -out {out_dir} -cut {cut}"
+    "pandda_rhofit.sh -map {event_map} -mtz {mtz} -pdb {pdb} -cif {cif} -out {out_dir} -x {x} {y} {z} -cut {cut}"
 )
 MASKED_PDB_FILE = "masked.pdb"
 TRUNCATED_EVENT_MAP_FILE = "truncated.ccp4"

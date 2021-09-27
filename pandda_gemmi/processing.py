@@ -65,8 +65,6 @@ def update_log(shell_log, shell_log_path):
         json.dump(shell_log, f)
 
 
-
-
 def process_dataset(
         test_dtag,
         shell,
@@ -445,13 +443,11 @@ def process_shell(
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
     update_log(shell_log, shell_log_path)
 
-
     return ShellResult(
         shell=shell,
         dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
         log=shell_log,
     )
-
 
 ###################################################################
 # # LOW MEMORY VERSIONS

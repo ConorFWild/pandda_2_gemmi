@@ -350,6 +350,7 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path, out_dir: Path,
+           coord: Coord,
            cut: float = 2.0,
            ):
     # Make rhofit commands
@@ -362,6 +363,9 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
         pdb=str(truncated_model_path),
         cif=str(cif_path),
         out_dir=str(out_dir),
+        x=coord.x,
+        y=coord.y,
+        z=coord.z,
         cut=cut,
     )
     print(f"rhofit_command is: {rhofit_command}")
@@ -566,13 +570,13 @@ def autobuild_rhofit(dataset: Dataset,
     truncated_model_path = truncate_model(model_path, coord, out_dir)
     print(f"\tTruncated model")
 
-    # Truncate the ed map
-    truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
-    print(f"\tTruncated xmap")
-
-    # Make cut out map
-    cut_out_xmap(build_map_path, coord, out_dir)
-    print(f"\tCut out xmap")
+    # # Truncate the ed map
+    # truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
+    # print(f"\tTruncated xmap")
+    #
+    # # Make cut out map
+    # cut_out_xmap(build_map_path, coord, out_dir)
+    # print(f"\tCut out xmap")
 
     # Generate the cif
     if cif_strategy == "default":
@@ -662,7 +666,7 @@ def autobuild_rhofit(dataset: Dataset,
     print(f"\tGenerated cif")
 
     # Call rhofit
-    rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut)
+    rhofit_command = rhofit(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord, cut,)
     print(f"\tRhofit")
 
     # Score rhofit builds
