@@ -155,7 +155,8 @@ def process_dataset(
 
     for dtag in zmaps:
         zmap = zmaps[dtag]
-        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save(zmap)
+        # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
+        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_native_frame_zmap(zmap)
 
     ###################################################################
     # # Cluster the outlying density

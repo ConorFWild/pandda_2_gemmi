@@ -2956,17 +2956,29 @@ class Xmap:
         return new_grid
 
     @staticmethod
-    def from_aligned_map_c(event_map_reference_grid: gemmi.FloatGrid,
-                           dataset: Dataset, alignment: Alignment, grid: Grid,
-                           structure_factors: StructureFactors, mask_radius: float,
-                           partitioning: Partitioning,
-                           mask_radius_symmetry: float):
+    def from_aligned_map_c(
+            event_map_reference_grid: gemmi.FloatGrid,
+            dataset: Dataset,
+            alignment: Alignment,
+            grid: Grid,
+            structure_factors: StructureFactors,
+            mask_radius: float,
+            partitioning: Partitioning,
+            mask_radius_symmetry: float,
+            sample_rate: float,
+    ):
 
-        new_grid = gemmi.FloatGrid(*[event_map_reference_grid.nu,
-                                     event_map_reference_grid.nv,
-                                     event_map_reference_grid.nw])
+        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(
+            structure_factors.f,
+            structure_factors.phi,
+            sample_rate=sample_rate,
+        )
+
+        new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu,
+                                     moving_xmap_grid.nv,
+                                     moving_xmap_grid.nw])
         new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        new_grid.set_unit_cell(event_map_reference_grid.unit_cell)
+        new_grid.set_unit_cell(moving_xmap_grid.unit_cell)
 
         # Unpack the points, poitions and transforms
         point_list = []
@@ -4679,11 +4691,54 @@ class ZMapFile:
     def from_dir(path: Path, dtag: str):
         return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag=dtag))
 
-    def save(self, zmap: Zmap):
+    def save_reference_frame_zmap(self, zmap: Zmap):
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = zmap.zmap
         ccp4.update_ccp4_header(2, True)
         ccp4.grid.symmetrize_max()
+        ccp4.write_ccp4_map(str(self.path))
+
+    def save_native_frame(
+            self,
+            zmap: Zmap,
+            model: Model,
+            event: Event,
+            dataset: Dataset,
+            alignment: Alignment,
+            grid: Grid,
+            structure_factors: StructureFactors,
+            mask_radius: float,
+            mask_radius_symmetry: float,
+            partitioning: Partitioning,
+            sample_rate: float,
+    ):
+        reference_frame_zmap_grid = zmap.zmap
+        # reference_frame_zmap_grid_array = np.array(reference_frame_zmap_grid, copy=True)
+
+        z_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+                                                 reference_frame_zmap_grid.nv,
+                                                 reference_frame_zmap_grid.nw,
+                                                 ]
+                                               )
+        z_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        z_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+        event_map_grid = Xmap.from_aligned_map_c(
+            z_map_reference_grid,
+            dataset,
+            alignment,
+            grid,
+            structure_factors,
+            mask_radius,
+            partitioning,
+            mask_radius_symmetry,
+            sample_rate,
+        )
+
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = event_map_grid.xmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.setup()
         ccp4.write_ccp4_map(str(self.path))
 
 
@@ -4746,15 +4801,16 @@ class EventMapFile:
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
-        event_map_grid = Xmap.from_aligned_map_c(event_map_reference_grid,
-                                                 dataset,
-                                                 alignment,
-                                                 grid,
-                                                 structure_factors,
-                                                 mask_radius,
-                                                 partitioning,
-                                                 mask_radius_symmetry,
-                                                 )
+        event_map_grid = Xmap.from_aligned_map_c(
+            event_map_reference_grid,
+            dataset,
+            alignment,
+            grid,
+            structure_factors,
+            mask_radius,
+            partitioning,
+            mask_radius_symmetry,
+        )
 
         # # # Get the event bounding box
         # # Find the min and max positions
