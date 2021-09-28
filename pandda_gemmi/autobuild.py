@@ -509,7 +509,7 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
 
     nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(positions_array)
     distances, indices = nbrs.kneighbors(samples_arrays_array)
-    valid_samples = samples_arrays_array[distances > 0.95 * radius]
+    valid_samples = samples_arrays_array[(distances > 0.95 * radius).flatten(), :]
 
     # Interpolate at ones left over
     samples_are_noise = []
