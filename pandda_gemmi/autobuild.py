@@ -495,7 +495,7 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
         deltas_array = (np.random.rand(num_samples, 3) - 0.5) * 2
 
         # Scale them to radius
-        scaled_deltas_array = (radius / np.linalg.norm(position_array)) * deltas_array
+        scaled_deltas_array = (radius / np.linalg.norm(deltas_array, axis=1)).reshape((num_samples, 1)) * deltas_array
 
         # Add them to pos
         samples_array = position_array + scaled_deltas_array
