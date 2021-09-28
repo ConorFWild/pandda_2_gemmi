@@ -349,7 +349,7 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 # #####################
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
-                    out_dir: Path, cut: float = 2.0,
+           out_dir: Path, cut: float = 2.0,
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -373,9 +373,9 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
 
 def rhofit_to_coord(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
                     out_dir: Path,
-           coord: Coord,
-           cut: float = 2.0,
-           ):
+                    coord: Coord,
+                    cut: float = 2.0,
+                    ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
 
@@ -444,6 +444,7 @@ def score_structure(structure, xmap):
 
     return float(score)
 
+
 def get_loci(_structure):
     loci = []
     for model in _structure:
@@ -469,6 +470,7 @@ def get_loci(_structure):
 
     return loci
 
+
 def signal(positions, xmap, cutoff):
     signal_list = []
     for position in positions:
@@ -478,7 +480,8 @@ def signal(positions, xmap, cutoff):
         else:
             signal_list.append(0)
 
-        return sum(signal_list) / len(signal_list)
+        return sum(signal_list) #/ len(signal_list)
+
 
 def noise(positions, xmap, cutoff, radius, num_samples=100):
     # for each position
@@ -525,8 +528,8 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
 
     return sum(samples_are_noise) / len(samples_are_noise)
 
-def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.7):
 
+def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.7):
     loci = get_loci(structure)
 
     # Getfraction of nearby points that are noise
@@ -535,7 +538,7 @@ def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.7):
     # Get fraction of bonds/atoms which are signal
     _signal = signal(loci, xmap, cutoff)
 
-    return (1-_noise) * _signal
+    return (1 - _noise) * _signal
 
 
 def score_structure_path(path: Path, xmap):
@@ -787,9 +790,10 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Call rhofit
     if rhofit_coord:
-        rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord, cut,)
+        rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord,
+                                         cut, )
     else:
-        rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut,)
+        rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, )
     print(f"\tRhofit")
 
     # Score rhofit builds
