@@ -444,10 +444,104 @@ def score_structure(structure, xmap):
 
     return float(score)
 
+def get_loci(_structure):
+    loci = []
+    for model in _structure:
+        for chain in model:
+            for residue in chain:
+                for atom_1 in residue:
+                    if atom_1.element.name == "H":
+                        continue
+                    pos_1 = atom_1.pos
+
+                    for atom_2 in residue:
+                        if atom_2.element.name == "H":
+                            continue
+                        pos_2 = atom_2.pos
+                        if pos_1.dist(pos_2) < 2.0:
+                            new_pos = gemmi.Position(
+                                (pos_1.x + pos_2.x) / 2,
+                                (pos_1.y + pos_2.y) / 2,
+                                (pos_1.z + pos_2.z) / 2,
+
+                            )
+                            loci.append(new_pos)
+
+    return loci
+
+def signal(positions, xmap, cutoff):
+    signal_list = []
+    for position in positions:
+        val = xmap.interpolate_value(position)
+        if val > cutoff:
+            signal_list.append(1)
+        else:
+            signal_list.append(0)
+
+        return sum(signal_list) / len(signal_list)
+
+def noise(positions, xmap, cutoff, radius, num_samples=100):
+    # for each position
+    positions_list = []
+    samples_arrays_list = []
+    for position in positions:
+        # Get some random vectors
+        position_array = np.array([position.x, position.y, position.z]).reshape((1, 3))
+        positions_list.append(position_array)
+
+        deltas_array = (np.random.rand(num_samples, 3) - 0.5) * 2
+
+        # Scale them to radius
+        scaled_deltas_array = (radius / np.linalg.norm(position_array)) * deltas_array
+
+        # Add them to pos
+        samples_array = position_array + scaled_deltas_array
+        samples_arrays_list.append(samples_array)
+
+    positions_array = np.vstack(positions_list)
+    samples_arrays_array = np.vstack(samples_arrays_list)
+
+    # Get rid of ones near other points
+    from sklearn.neighbors import NearestNeighbors
+
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(positions_array)
+    distances, indices = nbrs.kneighbors(samples_arrays_array)
+    valid_samples = samples_arrays_array[distances > 0.95 * radius]
+
+    # Interpolate at ones left over
+    samples_are_noise = []
+    for sample in valid_samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value > cutoff:
+            samples_are_noise.append(1)
+        else:
+            samples_are_noise.append(0)
+
+        # Count the number of noise points
+
+    return sum(samples_are_noise) / len(samples_are_noise)
+
+def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.7):
+
+    loci = get_loci(structure)
+
+    # Getfraction of nearby points that are noise
+    _noise = noise(loci, xmap, cutoff, radius)
+
+    # Get fraction of bonds/atoms which are signal
+    _signal = signal(loci, xmap, cutoff)
+
+    return (1-_noise) * _signal
+
 
 def score_structure_path(path: Path, xmap):
     structure = gemmi.read_structure(str(path))
-    score = score_structure(structure, xmap)
+    # score = score_structure(structure, xmap)
+    score = score_structure_signal_to_noise(structure, xmap)
 
     return score
 
