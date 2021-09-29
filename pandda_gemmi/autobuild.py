@@ -529,7 +529,7 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     return sum(samples_are_noise) / len(samples_are_noise)
 
 
-def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.7):
+def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
     loci = get_loci(structure)
 
     # Getfraction of nearby points that are noise
