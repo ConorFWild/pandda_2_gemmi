@@ -485,7 +485,9 @@ def signal(positions, xmap, cutoff):
     signal_log["signal_points"] = sum(signal_list)
     signal_log["num_points"] = len(signal_list)
 
-    return sum(signal_list), signal_log
+    _signal = sum(signal_list) * (sum(signal_list) / len(signal_list))
+
+    return _signal, signal_log
 
 
 def noise(positions, xmap, cutoff, radius, num_samples=100):
