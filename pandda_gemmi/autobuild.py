@@ -593,7 +593,7 @@ def score_builds(rhofit_dir: Path, xmap_path):
     for model_path in rhofit_dir.glob(regex):
         score, rescore_log = score_structure_path(model_path, xmap)
         scores[str(model_path)] = score
-        rescoring_log[model_path] = rescore_log
+        rescoring_log[str(model_path)] = rescore_log
 
     return scores, rescoring_log
 
@@ -855,7 +855,7 @@ def autobuild_rhofit(dataset: Dataset,
         print(f"\t\t{score_dictionary[path]}: {path}")
 
     autobuilding_log["scores"] = {
-        str(path): score_dictionary[path]
+        str(path): float(score_dictionary[path])
         for path
         in sorted(score_dictionary, key=lambda _path: score_dictionary[_path])
     }
