@@ -472,6 +472,8 @@ def get_loci(_structure):
 
 
 def signal(positions, xmap, cutoff):
+    signal_log = {}
+
     signal_list = []
     for position in positions:
         val = xmap.interpolate_value(position)
@@ -480,10 +482,15 @@ def signal(positions, xmap, cutoff):
         else:
             signal_list.append(0)
 
-        return sum(signal_list) #/ len(signal_list)
+    signal_log["signal_points"] = sum(signal_list)
+    signal_log["num_points"] = len(signal_list)
+
+    return sum(signal_list), signal_log
 
 
 def noise(positions, xmap, cutoff, radius, num_samples=100):
+    noise_log = {}
+
     # for each position
     positions_list = []
     samples_arrays_list = []
@@ -504,12 +511,19 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     positions_array = np.vstack(positions_list)
     samples_arrays_array = np.vstack(samples_arrays_list)
 
+    noise_log["positions_array"] = positions_array.tolist()
+    noise_log["samples_array"] = samples_arrays_array.tolist()
+
+
     # Get rid of ones near other points
     from sklearn.neighbors import NearestNeighbors
 
     nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(positions_array)
     distances, indices = nbrs.kneighbors(samples_arrays_array)
     valid_samples = samples_arrays_array[(distances > 0.95 * radius).flatten(), :]
+
+    noise_log["valid_samples_array"] = valid_samples.tolist()
+
 
     # Interpolate at ones left over
     samples_are_noise = []
@@ -526,41 +540,62 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
 
         # Count the number of noise points
 
-    return sum(samples_are_noise) / len(samples_are_noise)
+    noise_log["noise_samples"] = sum(samples_are_noise)
+    noise_log["total_valid_samples"] = len(samples_are_noise)
+
+    return sum(samples_are_noise) / len(samples_are_noise), noise_log
 
 
 def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
+    rescore_log = {
+        "cutoff": float(cutoff),
+        "radius": float(radius)
+    }
+
+
     loci = get_loci(structure)
+    rescore_log["loci"] = [(float(pos.x), float(pos.y), float(pos.z))
+                           for pos
+                           in loci]
+    rescore_log["num_loci"] = len(loci)
 
     # Getfraction of nearby points that are noise
-    _noise = noise(loci, xmap, cutoff, radius)
+    _noise, noise_log = noise(loci, xmap, cutoff, radius)
+    rescore_log["noise"] = _noise
+    rescore_log["noise_log"] = noise_log
 
     # Get fraction of bonds/atoms which are signal
-    _signal = signal(loci, xmap, cutoff)
+    _signal, signal_log = signal(loci, xmap, cutoff)
+    rescore_log["signal"] = _signal
+    rescore_log["signal_log"] = signal_log
 
-    return (1 - _noise) * _signal
+    return (1 - _noise) * _signal, rescore_log
 
 
 def score_structure_path(path: Path, xmap):
     structure = gemmi.read_structure(str(path))
     # score = score_structure(structure, xmap)
-    score = score_structure_signal_to_noise(structure, xmap)
+    score, rescore_log = score_structure_signal_to_noise(structure, xmap)
 
-    return score
+    return score, rescore_log
 
 
 def score_builds(rhofit_dir: Path, xmap_path):
     scores = {}
+    rescoring_log = {}
+
 
     regex = "Hit_*.pdb"
+    rescoring_log["regex"] = regex
 
     xmap = get_ccp4_map(xmap_path).grid
 
     for model_path in rhofit_dir.glob(regex):
-        score = score_structure_path(model_path, xmap)
+        score, rescore_log = score_structure_path(model_path, xmap)
         scores[str(model_path)] = score
+        rescoring_log[model_path] = rescore_log
 
-    return scores
+    return scores, rescoring_log
 
 
 def save_score_dictionary(score_dictionary, path):
@@ -654,6 +689,8 @@ def autobuild_rhofit(dataset: Dataset,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
                      ):
+
+
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -669,6 +706,12 @@ def autobuild_rhofit(dataset: Dataset,
         os.mkdir(str(out_dir))
     except Exception as e:
         print(e)
+
+    # Log
+    autobuilding_log_file = out_dir / "log.json"
+    autobuilding_log = {}
+
+    #
 
     model_path = Path(model_path)
     build_map_path = Path(build_map_path)
@@ -796,14 +839,26 @@ def autobuild_rhofit(dataset: Dataset,
         rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, )
     print(f"\tRhofit")
 
+    autobuilding_log["rhofit_command"] = str(rhofit_command)
+
     # Score rhofit builds
-    score_dictionary = score_builds(
+    score_dictionary, rescoring_log = score_builds(
         out_dir / "rhofit",
         score_map_path,
     )
+
+    autobuilding_log["rescoring_log"] = rescoring_log
+
+
     print(f"\tRescored")
     for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
         print(f"\t\t{score_dictionary[path]}: {path}")
+
+    autobuilding_log["scores"] = {
+        str(path): score_dictionary[path]
+        for path
+        in sorted(score_dictionary, key=lambda _path: score_dictionary[_path])
+    }
 
     # Write scores
     save_score_dictionary(score_dictionary, out_dir / "scores.json")
@@ -821,6 +876,10 @@ def autobuild_rhofit(dataset: Dataset,
             score_dictionary,
             key=lambda _path: score_dictionary[_path],
         )
+
+    with open(autobuilding_log_file, "w") as f:
+        json.dump(autobuilding_log, f)
+
 
     # return result
     return AutobuildResult(
