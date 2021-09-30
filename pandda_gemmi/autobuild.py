@@ -485,7 +485,10 @@ def signal(positions, xmap, cutoff):
     signal_log["signal_points"] = sum(signal_list)
     signal_log["num_points"] = len(signal_list)
 
-    _signal = sum(signal_list) * (sum(signal_list) / len(signal_list))
+    # _signal = sum(signal_list) * (sum(signal_list) / len(signal_list))
+
+    _signal = sum(signal_list) / len(signal_list)
+
 
     return _signal, signal_log
 
@@ -545,7 +548,9 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     noise_log["noise_samples"] = sum(samples_are_noise)
     noise_log["total_valid_samples"] = len(samples_are_noise)
 
-    return sum(samples_are_noise) / len(samples_are_noise), noise_log
+    _noise = sum(samples_are_noise) / len(samples_are_noise)
+
+    return _noise, noise_log
 
 
 def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
