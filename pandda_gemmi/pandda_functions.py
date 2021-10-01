@@ -100,7 +100,7 @@ def get_dask_client(scheduler="SGE",
                     distributed_mem_per_core=10,
                     resource_spec="",
                     job_extra=("",),
-                    walltime="20:00:00",
+                    walltime="30:00:00",
                     watcher=True,
                     ):
     import dask

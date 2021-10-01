@@ -168,7 +168,7 @@ def process_pandda(
         distributed_resource_spec: str = "m_mem_free=10G",
         distributed_tmp: str = "/tmp",
         job_extra: str = ["--exclusive", ],
-        distributed_walltime="5:0:0",
+        distributed_walltime="30:00:00",
         distributed_watcher=False,
         distributed_slurm_partition=None,
         # Autobuild settings
@@ -238,21 +238,21 @@ def process_pandda(
                 client=client,
                 tmp_dir=distributed_tmp
             )
-        elif global_processing == "fs":
-            process_global = FSCluster(
-                scheduler=distributed_scheduler,
-                num_workers=distributed_num_workers,
-                queue=distributed_queue,
-                project=distributed_project,
-                cores_per_worker=local_cpus,
-                distributed_mem_per_core=distributed_mem_per_core,
-                resource_spec=distributed_resource_spec,
-                job_extra=job_extra,
-                walltime=distributed_walltime,
-                watcher=distributed_watcher,
-                slurm_partition=distributed_slurm_partition,
-                output_dir=distributed_tmp,
-            )
+        # elif global_processing == "fs":
+        #     process_global = FSCluster(
+        #         scheduler=distributed_scheduler,
+        #         num_workers=distributed_num_workers,
+        #         queue=distributed_queue,
+        #         project=distributed_project,
+        #         cores_per_worker=local_cpus,
+        #         distributed_mem_per_core=distributed_mem_per_core,
+        #         resource_spec=distributed_resource_spec,
+        #         job_extra=job_extra,
+        #         walltime=distributed_walltime,
+        #         watcher=distributed_watcher,
+        #         slurm_partition=distributed_slurm_partition,
+        #         output_dir=distributed_tmp,
+        #     )
 
         else:
             raise Exception()
