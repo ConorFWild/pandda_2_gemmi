@@ -488,10 +488,20 @@ def signal(positions, xmap, cutoff):
     # _signal = sum(signal_list) * (sum(signal_list) / len(signal_list))
 
     # _signal = sum(signal_list) / len(signal_list)
+    #
+    # _signal = (2*sum(signal_list)) - len(signal_list)
 
+    total_signal = sum(signal_list)
 
+    expectected_signal = len(signal_list)
 
-    _signal = (2*sum(signal_list)) - len(signal_list)
+    fractional_signal = total_signal / expectected_signal
+
+    if fractional_signal > 0.4:
+        _signal = sum(signal_list)
+
+    else:
+        _signal = 10000.0
 
     return _signal, signal_log
 
