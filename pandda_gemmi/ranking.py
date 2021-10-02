@@ -42,7 +42,12 @@ def rank_events_autobuild(
     # Rank events with a score
     ranked_event_ids = list(
         sorted(
-            [event_id for event_id in events.keys() if len(autobuild_results[event_id].scores) != 0],
+            [
+                event_id
+                for event_id
+                in events.keys()
+                if len(autobuild_results[event_id].scores) != 0
+            ],
             key=lambda event_id: max(autobuild_results[event_id].scores.values()),
             reverse=True,
         )

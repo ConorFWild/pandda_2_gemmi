@@ -4563,6 +4563,7 @@ class Events:
     @staticmethod
     def from_all_events(event_dict: typing.Dict[EventID, Event], grid: Grid, cutoff: float):
 
+        # Get the sites
         all_clusterings_dict = {}
         for event_id in event_dict:
             if event_id.dtag not in all_clusterings_dict:
@@ -4578,6 +4579,7 @@ class Events:
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
+        # Add sites to events
         events: typing.Dict[EventID, Event] = {}
         for event_id in event_dict:
             event = event_dict[event_id]

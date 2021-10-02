@@ -489,7 +489,9 @@ def signal(positions, xmap, cutoff):
 
     # _signal = sum(signal_list) / len(signal_list)
 
-    _signal = sum(signal_list)
+
+
+    _signal = (2*sum(signal_list)) - len(signal_list)
 
     return _signal, signal_log
 
@@ -860,7 +862,6 @@ def autobuild_rhofit(dataset: Dataset,
     )
 
     autobuilding_log["rescoring_log"] = rescoring_log
-
 
     print(f"\tRescored")
     for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
