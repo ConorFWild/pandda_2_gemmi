@@ -501,7 +501,7 @@ def signal(positions, xmap, cutoff):
         _signal = sum(signal_list)
 
     else:
-        _signal = 10000.0
+        _signal = -10000.0
 
     return _signal, signal_log
 
