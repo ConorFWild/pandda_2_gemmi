@@ -532,7 +532,6 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     noise_log["positions_array"] = positions_array.tolist()
     noise_log["samples_array"] = samples_arrays_array.tolist()
 
-
     # Get rid of ones near other points
     from sklearn.neighbors import NearestNeighbors
 
@@ -541,7 +540,6 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     valid_samples = samples_arrays_array[(distances > 0.95 * radius).flatten(), :]
 
     noise_log["valid_samples_array"] = valid_samples.tolist()
-
 
     # Interpolate at ones left over
     samples_are_noise = []
@@ -568,12 +566,200 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
     return _noise, noise_log
 
 
-def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
+def get_samples(positions,
+                sample_density=10,
+                # radius_inner_0=0.0,
+                # radius_inner_1=0.2,
+                # radius_outer_0=1.2,
+                # radius_outer_1=1.5,
+                # radius=1.3
+                ):
+    positions_list = []
+    samples_arrays_list = []
+    # for position in positions:
+    #     # Get some random vectors
+    #     position_array = np.array([position.x, position.y, position.z]).reshape((1, 3))
+    #     positions_list.append(position_array)
+    #
+    #     deltas_array = (np.random.rand(num_samples, 3) - 0.5) * 2
+    #
+    #     # Scale them to radius
+    #     scaled_deltas_array = ((np.random.rand(num_samples) * radius) / np.linalg.norm(deltas_array, axis=1)).reshape((
+    #         num_samples, 1)) * deltas_array
+    #
+    #     # Add them to pos
+    #     samples_array = position_array + scaled_deltas_array
+    #     samples_arrays_list.append(samples_array)
+    #
+    # positions_array = np.vstack(positions_list)
+    # samples_arrays_array = np.vstack(samples_arrays_list)
+
+    for position in positions:
+        # get positions in an arrart
+        position_array = np.array([position.x, position.y, position.z]).reshape((1, 3))
+        positions_list.append(position_array)
+
+    positions_array = np.vstack(positions_list)
+
+    min_pos = np.min(positions_array, axis=0)
+    max_pos = np.max(positions_array, axis=0)
+
+    xs = np.linspace(min_pos[0], max_pos[0], num=(max_pos[0] - min_pos[0]) / sample_density)
+    ys = np.linspace(min_pos[1], max_pos[1], num=(max_pos[1] - min_pos[1]) / sample_density)
+    zs = np.linspace(min_pos[2], max_pos[2], num=(max_pos[2] - min_pos[2]) / sample_density)
+
+    grid_x, grid_y, grid_z = np.meshgrid(xs, ys, zs)
+
+    flat_grid_x = grid_x.flatten()
+    flat_grid_y = grid_y.flatten()
+    flat_grid_z = grid_z.flatten()
+
+    coords_array = np.hstack(
+        [
+            flat_grid_x.reshape((len(flat_grid_x), 1)),
+            flat_grid_y.reshape((len(flat_grid_y), 1)),
+            flat_grid_z.reshape((len(flat_grid_z), 1)),
+        ])
+
+    return positions_array, coords_array
+
+
+def get_sample_distances(
+        positions_array,
+        samples_array,
+):
+    from sklearn.neighbors import NearestNeighbors
+
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(positions_array)
+    distances, indices = nbrs.kneighbors(samples_array)
+
+    return distances
+    # valid_samples = samples_array[(distances > 0.95 * radius).flatten(), :]
+
+
+def truncate_samples(samples, distances, r_0, r_1):
+    r_0_mask = (distances > r_0).flatten()
+    r_1_mask = (distances < r_1).flatten()
+    mask = r_0_mask * r_1_mask
+    valid_samples = samples[mask, :]
+    return valid_samples
+
+
+def noise_from_samples(noise_samples, xmap, cutoff):
+    noise_log = {}
+    samples_are_noise = []
+    for sample in noise_samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value > cutoff:
+            samples_are_noise.append(1)
+        else:
+            samples_are_noise.append(0)
+
+        # Count the number of noise points
+
+    noise_log["noise_samples"] = sum(samples_are_noise)
+    noise_log["total_valid_samples"] = len(samples_are_noise)
+
+    _noise = sum(samples_are_noise)
+
+    return _noise, noise_log
+
+
+def signal_from_samples(noise_samples, xmap, cutoff):
+    signal_log = {}
+    samples_are_sginal = []
+    for sample in noise_samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value > cutoff:
+            samples_are_sginal.append(1)
+        else:
+            samples_are_sginal.append(-1)
+
+    signal_log["signal_samples"] = sum(samples_are_sginal)
+    signal_log["signal_samples_signal"] = sum([_sample for _sample in samples_are_sginal if _sample > 0])
+    signal_log["signal_samples_noise"] = sum([_sample for _sample in samples_are_sginal if _sample < 0])
+    signal_log["total_valid_samples"] = len(samples_are_sginal)
+
+    _signal = sum(samples_are_sginal)
+
+    return _signal, signal_log
+
+
+def score_structure_signal_to_noise(structure, xmap,
+                                    cutoff=2.0,
+                                    radius_inner_0=0.0,
+                                    radius_outer_0=1.2,
+                                    radius_outer_1=1.5,
+                                    ):
+    rescore_log = {
+        "cutoff": float(cutoff),
+        "radius_inner_0": float(radius_inner_0),
+        "radius_outer_0": float(radius_outer_0),
+        "radius_outer_1": float(radius_outer_1),
+    }
+
+    loci = get_loci(structure)
+    rescore_log["loci"] = [(float(pos.x), float(pos.y), float(pos.z))
+                           for pos
+                           in loci]
+    rescore_log["num_loci"] = len(loci)
+
+    # Get sample points
+    positions_array, samples = get_samples(loci)
+
+    # Get distances
+    distances = get_sample_distances(positions_array, samples)
+
+    # Get noise samples
+    noise_samples = truncate_samples(samples, distances, radius_outer_0, radius_outer_1)
+    rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
+
+    # Get signal samples: change radius until similar number of points
+    signal_samples_dict = {}
+    previous_radii = radius_inner_0
+    for radii in np.linspace(radius_inner_0, radius_outer_0, num=10):
+        signal_samples_dict[radii] = truncate_samples(samples, distances, previous_radii, radii)
+        previous_radii = radii
+
+    selected_radii = min(
+        signal_samples_dict,
+        key=lambda _radii: np.abs(signal_samples_dict[_radii].size - noise_samples.size)
+    )
+    rescore_log["selected_radii"] = selected_radii
+
+    signal_samples = signal_samples_dict[selected_radii]
+    rescore_log["signal_samples_shape"] = int(signal_samples.shape[0])
+
+    # Getfraction of nearby points that are noise
+    _noise, noise_log = noise_from_samples(noise_samples, xmap, cutoff)
+    rescore_log["noise"] = _noise
+    rescore_log["noise_log"] = noise_log
+
+    # Get fraction of bonds/atoms which are signal
+    _signal, signal_log = signal_from_samples(signal_samples, xmap, cutoff)
+    rescore_log["signal"] = _signal
+    rescore_log["signal_log"] = signal_log
+
+    # return (1 - _noise) * _signal, rescore_log
+
+    _score = _signal - _noise
+
+    return _score, rescore_log
+
+
+def score_structure_signal_to_noise_density(structure, xmap, cutoff=2.0, radius=1.2):
     rescore_log = {
         "cutoff": float(cutoff),
         "radius": float(radius)
     }
-
 
     loci = get_loci(structure)
     rescore_log["loci"] = [(float(pos.x), float(pos.y), float(pos.z))
@@ -593,13 +779,13 @@ def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
 
     # return (1 - _noise) * _signal, rescore_log
 
-    return _signal-_noise, rescore_log
+    return _signal - _noise, rescore_log
 
 
 def score_structure_path(path: Path, xmap):
     structure = gemmi.read_structure(str(path))
     # score = score_structure(structure, xmap)
-    score, rescore_log = score_structure_signal_to_noise(structure, xmap)
+    score, rescore_log = score_structure_signal_to_noise_density(structure, xmap)
 
     return score, rescore_log
 
@@ -607,7 +793,6 @@ def score_structure_path(path: Path, xmap):
 def score_builds(rhofit_dir: Path, xmap_path):
     scores = {}
     rescoring_log = {}
-
 
     regex = "Hit_*.pdb"
     rescoring_log["regex"] = regex
@@ -713,8 +898,6 @@ def autobuild_rhofit(dataset: Dataset,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
                      ):
-
-
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
     score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
@@ -902,7 +1085,6 @@ def autobuild_rhofit(dataset: Dataset,
 
     with open(autobuilding_log_file, "w") as f:
         json.dump(autobuilding_log, f)
-
 
     # return result
     return AutobuildResult(
