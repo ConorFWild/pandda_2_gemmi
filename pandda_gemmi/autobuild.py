@@ -730,7 +730,7 @@ def score_structure_signal_to_noise_density(
     signal_samples_dict = {}
     previous_radii = radius_inner_0
     for radii in np.linspace(radius_inner_0, radius_outer_0, num=10):
-        signal_samples_dict[radii] = truncate_samples(samples_array, distances, previous_radii, radii)
+        signal_samples_dict[radii] = truncate_samples(samples_array, distances, radius_inner_0, radii)
         previous_radii = radii
 
     selected_radii = min(

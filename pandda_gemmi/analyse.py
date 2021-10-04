@@ -469,7 +469,6 @@ def process_pandda(
                 cluster_selection=cluster_selection,
             )
 
-
         elif comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
             raise NotImplementedError()
