@@ -639,7 +639,7 @@ def get_sample_distances(
 
 def truncate_samples(samples, distances, r_0, r_1):
     r_0_mask = (distances > r_0).flatten()
-    r_1_mask = (distances < r_1).flatten()
+    r_1_mask = (distances <= r_1).flatten()
     mask = r_0_mask * r_1_mask
     valid_samples = samples[mask, :]
     return valid_samples
