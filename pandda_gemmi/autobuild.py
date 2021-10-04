@@ -568,14 +568,14 @@ def noise(positions, xmap, cutoff, radius, num_samples=100):
 
 def get_samples(positions,
                 sample_density=10,
+                buffer=2.0,
                 # radius_inner_0=0.0,
                 # radius_inner_1=0.2,
                 # radius_outer_0=1.2,
                 # radius_outer_1=1.5,
                 # radius=1.3
                 ):
-    positions_list = []
-    samples_arrays_list = []
+    positions_array_list = []
     # for position in positions:
     #     # Get some random vectors
     #     position_array = np.array([position.x, position.y, position.z]).reshape((1, 3))
@@ -597,12 +597,12 @@ def get_samples(positions,
     for position in positions:
         # get positions in an arrart
         position_array = np.array([position.x, position.y, position.z]).reshape((1, 3))
-        positions_list.append(position_array)
+        positions_array_list.append(position_array)
 
-    positions_array = np.vstack(positions_list)
+    positions_array = np.vstack(positions_array_list)
 
-    min_pos = np.min(positions_array, axis=0)
-    max_pos = np.max(positions_array, axis=0)
+    min_pos = np.min(positions_array, axis=0) - buffer
+    max_pos = np.max(positions_array, axis=0) + buffer
 
     xs = np.linspace(min_pos[0], max_pos[0], num=int((max_pos[0] - min_pos[0]) * sample_density))
     ys = np.linspace(min_pos[1], max_pos[1], num=int((max_pos[1] - min_pos[1]) * sample_density))
@@ -614,14 +614,14 @@ def get_samples(positions,
     flat_grid_y = grid_y.flatten()
     flat_grid_z = grid_z.flatten()
 
-    coords_array = np.hstack(
+    samples_array = np.hstack(
         [
             flat_grid_x.reshape((len(flat_grid_x), 1)),
             flat_grid_y.reshape((len(flat_grid_y), 1)),
             flat_grid_z.reshape((len(flat_grid_z), 1)),
         ])
 
-    return positions_array, coords_array
+    return positions_array, samples_array
 
 
 def get_sample_distances(
@@ -714,20 +714,23 @@ def score_structure_signal_to_noise_density(
     rescore_log["num_loci"] = len(loci)
 
     # Get sample points
-    positions_array, samples = get_samples(loci)
+    positions_array, samples_array = get_samples(loci)
+    assert samples_array.shape[0] != 0
+    assert samples_array.shape[1] == 3
+    assert positions_array.shape[0] != 0
 
     # Get distances
-    distances = get_sample_distances(positions_array, samples)
+    distances = get_sample_distances(positions_array, samples_array)
 
     # Get noise samples
-    noise_samples = truncate_samples(samples, distances, radius_outer_0, radius_outer_1)
+    noise_samples = truncate_samples(samples_array, distances, radius_outer_0, radius_outer_1)
     rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
 
     # Get signal samples: change radius until similar number of points
     signal_samples_dict = {}
     previous_radii = radius_inner_0
     for radii in np.linspace(radius_inner_0, radius_outer_0, num=10):
-        signal_samples_dict[radii] = truncate_samples(samples, distances, previous_radii, radii)
+        signal_samples_dict[radii] = truncate_samples(samples_array, distances, previous_radii, radii)
         previous_radii = radii
 
     selected_radii = min(
