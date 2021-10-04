@@ -604,9 +604,9 @@ def get_samples(positions,
     min_pos = np.min(positions_array, axis=0)
     max_pos = np.max(positions_array, axis=0)
 
-    xs = np.linspace(min_pos[0], max_pos[0], num=int((max_pos[0] - min_pos[0]) / sample_density))
-    ys = np.linspace(min_pos[1], max_pos[1], num=int((max_pos[1] - min_pos[1]) / sample_density))
-    zs = np.linspace(min_pos[2], max_pos[2], num=int((max_pos[2] - min_pos[2]) / sample_density))
+    xs = np.linspace(min_pos[0], max_pos[0], num=int((max_pos[0] - min_pos[0]) * sample_density))
+    ys = np.linspace(min_pos[1], max_pos[1], num=int((max_pos[1] - min_pos[1]) * sample_density))
+    zs = np.linspace(min_pos[2], max_pos[2], num=int((max_pos[2] - min_pos[2]) * sample_density))
 
     grid_x, grid_y, grid_z = np.meshgrid(xs, ys, zs)
 
