@@ -693,12 +693,13 @@ def signal_from_samples(noise_samples, xmap, cutoff):
     return _signal, signal_log
 
 
-def score_structure_signal_to_noise(structure, xmap,
-                                    cutoff=2.0,
-                                    radius_inner_0=0.0,
-                                    radius_outer_0=1.2,
-                                    radius_outer_1=1.5,
-                                    ):
+def score_structure_signal_to_noise_density(
+        structure, xmap,
+        cutoff=2.0,
+        radius_inner_0=0.0,
+        radius_outer_0=1.2,
+        radius_outer_1=1.5,
+):
     rescore_log = {
         "cutoff": float(cutoff),
         "radius_inner_0": float(radius_inner_0),
@@ -755,7 +756,7 @@ def score_structure_signal_to_noise(structure, xmap,
     return _score, rescore_log
 
 
-def score_structure_signal_to_noise_density(structure, xmap, cutoff=2.0, radius=1.2):
+def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
     rescore_log = {
         "cutoff": float(cutoff),
         "radius": float(radius)
