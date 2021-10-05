@@ -735,7 +735,7 @@ def score_structure_signal_to_noise_density(
 
     selected_radii = min(
         signal_samples_dict,
-        key=lambda _radii: np.abs(signal_samples_dict[_radii].size - (noise_samples.size/2))
+        key=lambda _radii: np.abs(signal_samples_dict[_radii].size - noise_samples.size)
     )
     rescore_log["selected_radii"] = selected_radii
 
