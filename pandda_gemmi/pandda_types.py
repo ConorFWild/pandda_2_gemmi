@@ -4763,7 +4763,7 @@ class MeanMapFile:
         ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
 
-    def save_native_frame_zmap(
+    def save_native_frame_mean_map(
             self,
             model: Model,
             zmap: Zmap,
@@ -4819,7 +4819,7 @@ class StdMapFile:
         ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
 
-    def save_native_frame_zmap(
+    def save_native_frame_std_map(
             self,
             dtag: Dtag,
             model: Model,

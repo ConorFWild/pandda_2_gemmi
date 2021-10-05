@@ -178,7 +178,7 @@ def process_dataset(
         if statmaps:
             mean_map_file = MeanMapFile.from_zmap_file(
                 pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file)
-            mean_map_file.save_native_frame_zmap(
+            mean_map_file.save_native_frame_mean_map(
                 model,
                 zmap,
                 dataset_truncated_datasets[test_dtag],
@@ -193,7 +193,7 @@ def process_dataset(
 
             std_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
                                                           dtag].z_map_file)
-            std_map_file.save_native_frame_zmap(
+            std_map_file.save_native_frame_std_map(
                 dtag,
                 model,
                 zmap,
