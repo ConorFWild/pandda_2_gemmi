@@ -4778,7 +4778,7 @@ class MeanMapFile:
     ):
         reference_frame_zmap_grid = zmap.zmap
 
-        reference_frame_zmap_array = np.array(reference_frame_zmap_grid)
+        reference_frame_zmap_array = np.array(reference_frame_zmap_grid, copy=False)
         reference_frame_zmap_array[:, :, :] = model.mean
 
         event_map_grid = Xmap.from_aligned_map_c(
@@ -4835,7 +4835,7 @@ class StdMapFile:
     ):
         reference_frame_zmap_grid = zmap.zmap
 
-        reference_frame_zmap_array = np.array(reference_frame_zmap_grid)
+        reference_frame_zmap_array = np.array(reference_frame_zmap_grid, copy=False)
         reference_frame_zmap_array[:, :, :] = (np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
 
         event_map_grid = Xmap.from_aligned_map_c(

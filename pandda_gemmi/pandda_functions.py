@@ -284,6 +284,150 @@ def process_global_dask(
     return results_loaded
 
 
+def load_and_reduce(
+        datasets: Dict[Dtag, Dataset],
+        alignments,
+        grid,
+        comparison_min_comparators,
+        comparison_max_comparators,
+        structure_factors,
+        sample_rate,
+        resolution_cutoff,
+        pandda_fs_model: PanDDAFSModel,
+        process_local,
+        batch=False,
+        cluster_selection="close"
+):
+    dtag_list = [dtag for dtag in datasets]
+    dtag_array = np.array(dtag_list)
+    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
+
+    dtags_by_res = list(
+        sorted(
+            dtag_list,
+            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+        )
+    )
+
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    highest_res_datasets_max = max(
+        [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    # Load the xmaps
+    print("Truncating datasets...")
+    shell_truncated_datasets: Datasets = truncate(
+        datasets,
+        resolution=Resolution(highest_res_datasets_max),
+        structure_factors=structure_factors,
+    )
+
+    # Generate aligned xmaps
+    print("Loading xmaps")
+
+    load_xmap_paramaterised = partial(
+        from_unaligned_dataset_c_flat,
+        grid=grid,
+        structure_factors=structure_factors,
+        sample_rate=sample_rate,
+    )
+
+    # Get reduced array
+    total_sample_size = len(shell_truncated_datasets)
+    print(f"Total sample size = {total_sample_size}")
+    batch_size = min(90, total_sample_size)
+    print(f"Batch size is: {batch_size}")
+    num_batches = (total_sample_size // batch_size) + 1
+    print(f"Num batches is: {num_batches}")
+    tmp_batches = {}
+    j = 1
+    while True:
+        print(f"\tJ is: {j}")
+        new_batches = np.array_split(np.arange(total_sample_size), j)
+        print(f"\t\tlen of new batches is {len(new_batches)}")
+        tmp_batches[j] = new_batches
+        j = j + 1
+
+        if any(len(batch) < batch_size for batch in new_batches):
+            batches = tmp_batches[j - 2]
+            break
+        else:
+            print("\t\tAll batches larger than batch size, trying smaller split!")
+            continue
+    print(f"Batches are:")
+    print(batches)
+
+    from sklearn.decomposition import PCA, IncrementalPCA
+    ipca = IncrementalPCA(n_components=min(200, batch_size))
+
+    print("Fitting!")
+    for batch in batches:
+        print(f"\tLoading dtags: {dtag_array[batch]}")
+        start = time.time()
+        results = process_local(
+            [
+                partial(
+                    load_xmap_paramaterised,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
+        print("Got xmaps!")
+
+        # Get the maps as arrays
+        print("Getting xmaps as arrays")
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(dtag_list, results)
+                 }
+
+        finish = time.time()
+        print(f"Mapped in {finish - start}")
+
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        ipca.partial_fit(xmap_array)
+
+    # Transform
+    print(f"Transforming!")
+    transformed_arrays = []
+    for batch in batches:
+        print(f"\tTransforming dtags: {dtag_array[batch]}")
+        start = time.time()
+        results = process_local(
+            [
+                partial(
+                    load_xmap_paramaterised,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
+        print("Got xmaps!")
+
+        # Get the maps as arrays
+        print("Getting xmaps as arrays")
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(dtag_list, results)
+                 }
+
+        finish = time.time()
+        print(f"Mapped in {finish - start}")
+
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        transformed_arrays.append(ipca.transform(xmap_array))
+
+    reduced_array = np.vstack(transformed_arrays)
+
+    return reduced_array
+
+
 def get_comparators_high_res(
         datasets: Dict[Dtag, Dataset],
         comparison_min_comparators,
@@ -302,7 +446,6 @@ def get_comparators_high_res(
 
     comparators = {}
     for dtag in dtag_list:
-
         comparators[dtag] = highest_res_datasets
 
     return comparators
