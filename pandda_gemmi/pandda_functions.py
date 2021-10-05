@@ -967,7 +967,7 @@ def get_clusters_nn(
             cluster_num += 1
 
     print(f"Cluster leaders are: {cluster_leader_dict}")
-    print(f"Cluster dcit is : {clusters_dict}")
+    print(f"Cluster dict is : {clusters_dict}")
 
 
     # Get cluster medians
