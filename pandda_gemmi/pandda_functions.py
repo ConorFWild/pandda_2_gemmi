@@ -994,8 +994,8 @@ def get_clusters_nn(
         dtag_coord = reduced_array[dtag_index, :].reshape((1, -1))
         for cluster, cluster_median in cluster_medians.items():
             print([cluster_median.shape, dtag_coord.shape])
-            assert cluster_median.shape[0] == dtag_coord[0]
-            assert cluster_median.shape[1] == dtag_coord[1]
+            assert cluster_median.shape[0] == dtag_coord.shape[0]
+            assert cluster_median.shape[1] == dtag_coord.shape[1]
             distance = np.linalg.norm(cluster_median - dtag_coord)
 
             dtag_distance_to_cluster[_dtag][cluster] = distance
