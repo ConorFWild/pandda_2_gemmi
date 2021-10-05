@@ -969,7 +969,6 @@ def get_clusters_nn(
     print(f"Cluster leaders are: {cluster_leader_dict}")
     print(f"Cluster dict is : {clusters_dict}")
 
-
     # Get cluster medians
     cluster_medians = {}
     for cluster, cluster_dtags in clusters_dict.items():
@@ -1209,7 +1208,7 @@ def get_comparators_closest_cluster(
 
         elif cluster_selection == "narrow":
             cluster_widths_sorted = list(sorted(cluster_widths, key=lambda x: cluster_widths[x]))
-            closest_cluster = cluster_widths_sorted[0]
+            closest_cluster = cluster_widths_sorted[-1]
 
         print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
