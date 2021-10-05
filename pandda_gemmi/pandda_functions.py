@@ -973,7 +973,7 @@ def get_clusters_nn(
     for cluster, cluster_dtags in clusters_dict.items():
         cluster_leader_dtag = cluster_leader_dict[cluster]
         cluster_leader_index = dtag_to_index[cluster_leader_dtag]
-        cluster_medians[cluster] = reduced_array[cluster_leader_index, :].respace((1, -1))
+        cluster_medians[cluster] = reduced_array[cluster_leader_index, :].reshape((1, -1))
     print(f"Cluster medians are: {cluster_medians}")
 
     # Get centermost cluster
