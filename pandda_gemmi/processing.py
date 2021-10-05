@@ -191,9 +191,9 @@ def process_dataset(
                 sample_rate,
             )
 
-            mean_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
+            std_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
                                                           dtag].z_map_file)
-            mean_map_file.save_native_frame_zmap(
+            std_map_file.save_native_frame_zmap(
                 dtag,
                 model,
                 zmap,
