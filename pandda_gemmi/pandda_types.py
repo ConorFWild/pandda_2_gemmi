@@ -4793,10 +4793,8 @@ class MeanMapFile:
 
         event_map_reference_grid_array[:, :, :] = model.mean
 
-
-
         event_map_grid = Xmap.from_aligned_map_c(
-            event_map_reference_grid_array,
+            event_map_reference_grid,
             dataset,
             alignment,
             grid,
