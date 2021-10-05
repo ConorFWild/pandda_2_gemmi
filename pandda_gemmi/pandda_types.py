@@ -3288,10 +3288,11 @@ class Model:
         sigma_s_m = np.zeros(total_mask.shape, dtype=np.float32)
         sigma_s_m[total_mask == 1] = sigma_s_m_flat
 
-        return Model(mean,
-                     sigma_is,
-                     sigma_s_m,
-                     )
+        return Model(
+            mean,
+            sigma_is,
+            sigma_s_m,
+        )
 
     # @staticmethod
     # def from_xmaps(xmaps: Xmaps, grid: Grid, cut: float):
