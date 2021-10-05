@@ -950,6 +950,7 @@ def get_clusters_nn(
     cluster_num = 0
     clusters_dict = {}
     cluster_leader_dict = {}
+    cluster_widths = {}
     for index in radii_sorted:
         nearest_neighbour_indexes = indices[index, :]
 
@@ -961,6 +962,7 @@ def get_clusters_nn(
             clusters_dict[cluster_num] = [dtag_array[j] for j in nearest_neighbour_indexes]
 
             cluster_leader_dict[cluster_num] = dtag_array[index]
+            cluster_widths[cluster_num] = radii_sorted[index]
 
             cluster_num += 1
 
@@ -1019,7 +1021,7 @@ def get_clusters_nn(
         pandda_fs_model.pandda_dir / f"pca_umap.html",
     )
 
-    return distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, radii
+    return distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, cluster_widths
 
 
 def get_comparators_closest_cluster(
