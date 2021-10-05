@@ -1075,10 +1075,6 @@ def get_comparators_closest_cluster(
     print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
     print(f"Num batches is: {num_batches}")
-    # batches = [
-    #     np.arange(x*batch_size, min((x+1)*batch_size, total_sample_size))
-    #     for x
-    #     in range(0, num_batches)]
     tmp_batches = {}
     j = 1
     while True:
@@ -1186,16 +1182,6 @@ def get_comparators_closest_cluster(
         # Get dtags ordered by distance
         row = distance_matrix[j, :].flatten()
         print(f"\tRow is: {row}")
-        # closest_dtags_indexes = np.flip(np.argsort(row))
-        # cluster_distances = {}
-        # for cluster_num, cluster_dtags in clusters_dict.items():
-        #     distances = row[np.array([dtag_to_index[_dtag] for _dtag in cluster_dtags])]
-        #     median_distance = np.median(distances)
-        #     print(f"\t\tMedian distance to cluster {cluster_num} is: {median_distance}")
-        #     cluster_distances[cluster_num] = median_distance
-
-        # print(f"\tClosest dtags are: {closest_dtags}")
-        # print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
         cluster_distances = dtag_distance_to_cluster[dtag]
 
@@ -1203,13 +1189,9 @@ def get_comparators_closest_cluster(
 
             print(cluster_distances)
             closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
-            # print(f"\tClosest cluster is: {closest_cluster}")
-            # closest_cluster_dtags = clusters_dict[closest_cluster]
-            # print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
         elif cluster_selection == "center":
             closest_cluster = centermost_cluster
-            # closest_cluster_dtags = clusters_dict[closest_cluster]
 
         elif cluster_selection == "far":
             closest_cluster = max(cluster_distances, key=lambda x: cluster_distances[x])
