@@ -1375,7 +1375,7 @@ def get_comparators_closest_cluster(
 
         elif cluster_selection == "narrow":
             cluster_widths_sorted = list(sorted(cluster_widths, key=lambda x: cluster_widths[x]))
-            closest_cluster = cluster_widths_sorted[-1]
+            closest_cluster = cluster_widths_sorted[0]
 
         print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
