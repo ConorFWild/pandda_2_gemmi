@@ -58,6 +58,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     process_global_dask,
     get_shells,
+get_comparators_high_res,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
     get_comparators_closest_apo_cutoff,
@@ -474,8 +475,12 @@ def process_pandda(
 
         elif comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
-            raise NotImplementedError()
-            comparators: Dict[Dtag, List[Dtag]] = ...
+
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
+                datasets,
+                comparison_min_comparators,
+                comparison_max_comparators,
+            )
 
         elif comparison_strategy == "high_res_random":
             # Old pandda strategy: random datasets that are higher resolution

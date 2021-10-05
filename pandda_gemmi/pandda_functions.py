@@ -284,6 +284,30 @@ def process_global_dask(
     return results_loaded
 
 
+def get_comparators_high_res(
+        datasets: Dict[Dtag, Dataset],
+        comparison_min_comparators,
+        comparison_max_comparators,
+):
+    dtag_list = [dtag for dtag in datasets]
+
+    dtags_by_res = list(
+        sorted(
+            dtag_list,
+            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+        )
+    )
+
+    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+
+    comparators = {}
+    for dtag in dtag_list:
+
+        comparators[dtag] = highest_res_datasets
+
+    return comparators
+
+
 def get_comparators_high_res_random(
         datasets: Dict[Dtag, Dataset],
         comparison_min_comparators,
