@@ -4779,11 +4779,24 @@ class MeanMapFile:
     ):
         reference_frame_zmap_grid = zmap.zmap
 
-        reference_frame_zmap_array = np.array(reference_frame_zmap_grid, copy=False)
-        reference_frame_zmap_array[:, :, :] = model.mean
+        event_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+                                                     reference_frame_zmap_grid.nv,
+                                                     reference_frame_zmap_grid.nw,
+                                                     ]
+                                                   )
+        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        event_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+        event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                                  copy=False,
+                                                  )
+
+        event_map_reference_grid_array[:, :, :] = model.mean
+
+
 
         event_map_grid = Xmap.from_aligned_map_c(
-            reference_frame_zmap_grid,
+            event_map_reference_grid_array,
             dataset,
             alignment,
             grid,
@@ -4836,11 +4849,24 @@ class StdMapFile:
     ):
         reference_frame_zmap_grid = zmap.zmap
 
-        reference_frame_zmap_array = np.array(reference_frame_zmap_grid, copy=False)
-        reference_frame_zmap_array[:, :, :] = (np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
+        event_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+                                                     reference_frame_zmap_grid.nv,
+                                                     reference_frame_zmap_grid.nw,
+                                                     ]
+                                                   )
+        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        event_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+        event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                                  copy=False,
+                                                  )
+
+
+        event_map_reference_grid_array[:, :, :] = (np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
+
 
         event_map_grid = Xmap.from_aligned_map_c(
-            reference_frame_zmap_grid,
+            event_map_reference_grid,
             dataset,
             alignment,
             grid,
