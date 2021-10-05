@@ -4744,15 +4744,117 @@ class ZMapFile:
         ccp4.write_ccp4_map(str(self.path))
 
 
-# @dataclasses.dataclass()
-# apFiles:
-#
-#     @staticmethod
-#     def from_zmaps(zmaps: Zmaps, pandda_fs_model: PanDDAFSModel):
-#         for dtag in zmaps:
-#             processed_dataset = pandda_fs_model.processed_datasets[dtag]
-#
-#             zmaps[dtag].save()
+@dataclasses.dataclass()
+class MeanMapFile:
+    path: Path
+
+    @staticmethod
+    def from_zmap_file(zmap: ZMapFile):
+        return MeanMapFile(zmap.path.parent / "mean.ccp4")
+
+    @staticmethod
+    def from_dir(path: Path, dtag: str):
+        return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag=dtag))
+
+    def save_reference_frame_zmap(self, zmap: Zmap):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = zmap.zmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.grid.symmetrize_max()
+        ccp4.write_ccp4_map(str(self.path))
+
+    def save_native_frame_zmap(
+            self,
+            model: Model,
+            zmap: Zmap,
+            dataset: Dataset,
+            alignment: Alignment,
+            grid: Grid,
+            structure_factors: StructureFactors,
+            mask_radius: float,
+            mask_radius_symmetry: float,
+            partitioning: Partitioning,
+            sample_rate: float,
+    ):
+        reference_frame_zmap_grid = zmap.zmap
+
+        reference_frame_zmap_array = np.array(reference_frame_zmap_grid)
+        reference_frame_zmap_array[:, :, :] = model.mean
+
+        event_map_grid = Xmap.from_aligned_map_c(
+            reference_frame_zmap_grid,
+            dataset,
+            alignment,
+            grid,
+            structure_factors,
+            mask_radius,
+            partitioning,
+            mask_radius_symmetry,
+            sample_rate,
+        )
+
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = event_map_grid.xmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.setup()
+        ccp4.write_ccp4_map(str(self.path))
+
+
+@dataclasses.dataclass()
+class StdMapFile:
+    path: Path
+
+    @staticmethod
+    def from_zmap_file(zmap: ZMapFile):
+        return MeanMapFile(zmap.path.parent / "std.ccp4")
+
+    @staticmethod
+    def from_dir(path: Path, dtag: str):
+        return ZMapFile(path / PANDDA_Z_MAP_FILE.format(dtag=dtag))
+
+    def save_reference_frame_zmap(self, zmap: Zmap):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = zmap.zmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.grid.symmetrize_max()
+        ccp4.write_ccp4_map(str(self.path))
+
+    def save_native_frame_zmap(
+            self,
+            dtag: Dtag,
+            model: Model,
+            zmap: Zmap,
+            dataset: Dataset,
+            alignment: Alignment,
+            grid: Grid,
+            structure_factors: StructureFactors,
+            mask_radius: float,
+            mask_radius_symmetry: float,
+            partitioning: Partitioning,
+            sample_rate: float,
+    ):
+        reference_frame_zmap_grid = zmap.zmap
+
+        reference_frame_zmap_array = np.array(reference_frame_zmap_grid)
+        reference_frame_zmap_array[:, :, :] = (np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
+
+        event_map_grid = Xmap.from_aligned_map_c(
+            reference_frame_zmap_grid,
+            dataset,
+            alignment,
+            grid,
+            structure_factors,
+            mask_radius,
+            partitioning,
+            mask_radius_symmetry,
+            sample_rate,
+        )
+
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = event_map_grid.xmap
+        ccp4.update_ccp4_header(2, True)
+        ccp4.setup()
+        ccp4.write_ccp4_map(str(self.path))
 
 
 @dataclasses.dataclass()

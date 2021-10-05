@@ -98,6 +98,7 @@ def process_pandda(
         ligand_cif_regex: str = "*.cif",
         ligand_pdb_regex: str = "*.pdb",
         ligand_smiles_regex: str = "*.smiles",
+        statmaps: bool = False,
         # PROCESS MANAGEMENT,
         low_memory: bool = False,
         # Dataset selection options
@@ -319,6 +320,7 @@ def process_pandda(
             min_bdc=min_bdc,
             max_bdc=max_bdc,
             memory_availability=memory_availability,
+            statmaps=statmaps,
         )
 
         ###################################################################

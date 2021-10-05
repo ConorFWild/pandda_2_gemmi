@@ -24,7 +24,7 @@ from pandda_gemmi.logs import (
 )
 from pandda_gemmi.pandda_types import (
     PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
-    Grid, Alignments, Partitioning, Shell, Xmap, Xmaps, Zmap,
+    Grid, Alignments, Partitioning, Shell, Xmap, Xmaps, Zmap, MeanMapFile, StdMapFile,
     XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
     EventID, Event, Events, SiteTable, EventTable,
     StructureFactors, Xmap,
@@ -84,6 +84,7 @@ def process_dataset(
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         sample_rate,
+        statmaps,
         process_local=process_local_serial,
 ):
     time_dataset_start = time.time()
@@ -156,11 +157,11 @@ def process_dataset(
     for dtag in zmaps:
         zmap = zmaps[dtag]
         partitioning = Partitioning.from_structure_multiprocess(
-                    dataset_truncated_datasets[test_dtag].structure,
-                    grid,
-                    outer_mask,
-                    inner_mask_symmetry,
-                )
+            dataset_truncated_datasets[test_dtag].structure,
+            grid,
+            outer_mask,
+            inner_mask_symmetry,
+        )
         # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
         pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_native_frame_zmap(
             zmap,
@@ -173,6 +174,38 @@ def process_dataset(
             partitioning,
             sample_rate,
         )
+
+        if statmaps:
+            mean_map_file = MeanMapFile.from_zmap_file(
+                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file)
+            mean_map_file.save_native_frame_zmap(
+                model,
+                zmap,
+                dataset_truncated_datasets[test_dtag],
+                alignments[test_dtag],
+                grid,
+                structure_factors,
+                outer_mask,
+                inner_mask_symmetry,
+                partitioning,
+                sample_rate,
+            )
+
+            mean_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
+                                                          dtag].z_map_file)
+            mean_map_file.save_native_frame_zmap(
+                dtag,
+                model,
+                zmap,
+                dataset_truncated_datasets[test_dtag],
+                alignments[test_dtag],
+                grid,
+                structure_factors,
+                outer_mask,
+                inner_mask_symmetry,
+                partitioning,
+                sample_rate,
+            )
 
     ###################################################################
     # # Cluster the outlying density
@@ -342,6 +375,7 @@ def process_shell(
         min_bdc,
         max_bdc,
         memory_availability,
+        statmaps,
 ):
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
@@ -435,6 +469,7 @@ def process_shell(
         min_bdc=min_bdc,
         max_bdc=max_bdc,
         sample_rate=sample_rate,
+        statmaps=statmaps,
         process_local=process_local_in_dataset,
     )
 
