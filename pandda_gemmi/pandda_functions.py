@@ -973,7 +973,7 @@ def get_clusters_nn(
     for cluster, cluster_dtags in clusters_dict.items():
         cluster_leader_dtag = cluster_leader_dict[cluster]
         cluster_leader_index = dtag_to_index[cluster_leader_dtag]
-        cluster_medians[cluster] = reduced_array[cluster_leader_index, :]
+        cluster_medians[cluster] = reduced_array[cluster_leader_index, :].respace((1, -1))
     print(f"Cluster medians are: {cluster_medians}")
 
     # Get centermost cluster
@@ -991,7 +991,7 @@ def get_clusters_nn(
     for _dtag in dtag_list:
         dtag_index = dtag_to_index[_dtag]
         dtag_distance_to_cluster[_dtag] = {}
-        dtag_coord = reduced_array[dtag_index, :]
+        dtag_coord = reduced_array[dtag_index, :].reshape((1, -1))
         for cluster, cluster_median in cluster_medians.items():
             assert cluster_median.shape[0] == dtag_coord[0]
             assert cluster_median.shape[1] == dtag_coord[1]
