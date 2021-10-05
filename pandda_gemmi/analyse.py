@@ -62,6 +62,7 @@ from pandda_gemmi.pandda_functions import (
     get_comparators_closest_cutoff,
     get_comparators_closest_apo_cutoff,
     get_clusters_linkage,
+    get_clusters_nn,
     get_comparators_closest_cluster,
     truncate,
     validate_strategy_num_datasets,
@@ -452,7 +453,7 @@ def process_pandda(
 
         elif comparison_strategy == "closest_cluster":
 
-            get_clusters = get_clusters_linkage
+            get_clusters = get_clusters_nn #get_clusters_linkage
             # Closest datasets after clustering as long as they are not too poor res
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
                 datasets,

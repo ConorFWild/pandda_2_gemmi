@@ -12,7 +12,7 @@ import multiprocessing as mp
 import joblib
 from scipy import spatial as spsp, cluster as spc
 
-from sklearn import decomposition
+from sklearn import decomposition, metrics
 import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 import hdbscan
@@ -914,7 +914,8 @@ def get_clusters_linkage(
     )
     print(f"Centermost cluster is: {centermost_cluster}")
 
-    return cophenetic_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict
+    return cophenetic_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, cluster_widths
+
 
 def get_clusters_nn(
         reduced_array,
@@ -923,7 +924,8 @@ def get_clusters_nn(
         dtag_to_index,
         pandda_fs_model,
 ):
-
+    # Get distance matrix
+    distance_matrix = metrics.pairwise_distances(reduced_array)
 
     # Get the n nearest neighbours for each point
     from sklearn.neighbors import NearestNeighbors
@@ -937,13 +939,64 @@ def get_clusters_nn(
         mean_distance = np.mean(row)
         radii[j] = mean_distance
 
+    print(f"Cluster median absolute deviation is: {radii}")
+
     # Sort datasets by radii
     radii_sorted = {index: radii[index] for index in sorted(radii, key=lambda _index: radii[_index])}
 
     # Loop over datasets from narrowest to broadest, checking whether any of their neighbours have been claimed
     # If so, skip to next
+    claimed = []
+    cluster_num = 0
+    clusters_dict = {}
+    cluster_leader_dict = {}
     for index in radii_sorted:
-        ...
+        nearest_neighbour_indexes = indices[index, :]
+
+        if not any([(j in claimed) for j in nearest_neighbour_indexes]):
+            # CLaim indicies
+            for j in nearest_neighbour_indexes:
+                claimed.append(j)
+
+            clusters_dict[cluster_num] = [dtag_array[j] for j in nearest_neighbour_indexes]
+
+            cluster_leader_dict[cluster_num] = dtag_array[index]
+
+            cluster_num += 1
+
+    print(f"Cluster leaders are: {cluster_leader_dict}")
+    print(f"Cluster dcit is : {clusters_dict}")
+
+
+    # Get cluster medians
+    cluster_medians = {}
+    for cluster, cluster_dtags in clusters_dict.items():
+        cluster_leader_dtag = cluster_leader_dict[cluster]
+        cluster_leader_index = dtag_to_index[cluster_leader_dtag]
+        cluster_medians[cluster] = reduced_array[cluster_leader_index, :]
+    print(f"Cluster medians are: {cluster_medians}")
+
+    # Get centermost cluster
+    median_of_medians = np.median(
+        np.vstack([x for x in cluster_medians.values()]), axis=0
+    ).reshape(1, reduced_array.shape[
+        1])
+    centermost_cluster = min(
+        cluster_medians,
+        key=lambda _cluster_num: np.sqrt(np.sum(np.square((median_of_medians - cluster_medians[_cluster_num])))),
+    )
+
+    # Get dtag cluster distance
+    dtag_distance_to_cluster = {}
+    for _dtag in dtag_list:
+        dtag_index = dtag_to_index[_dtag]
+        dtag_distance_to_cluster[_dtag] = {}
+        dtag_coord = reduced_array[dtag_index, :]
+        for cluster, cluster_median in cluster_medians.items():
+            assert cluster_median.shape == dtag_coord
+            distance = np.linalg.norm(cluster_median - dtag_coord)
+
+            dtag_distance_to_cluster[_dtag][cluster] = distance
 
     # Save a bokeh plot
     labels = [dtag.dtag for dtag in dtag_list]
@@ -964,10 +1017,7 @@ def get_clusters_nn(
         pandda_fs_model.pandda_dir / f"pca_umap.html",
     )
 
-    #
-
-    return distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict
-
+    return distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, radii
 
 
 def get_comparators_closest_cluster(
@@ -1119,7 +1169,7 @@ def get_comparators_closest_cluster(
     print(f"Reduced array shape: {reduced_array.shape}")
 
     # Cluster
-    distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict = get_clusters(
+    distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, cluster_widths = get_clusters(
         reduced_array,
         dtag_list,
         dtag_array,
@@ -1170,6 +1220,10 @@ def get_comparators_closest_cluster(
                 closest_cluster = cluster_distances_sorted[0]
             else:
                 closest_cluster = cluster_distances_sorted[1]
+
+        elif cluster_selection == "narrow":
+            cluster_widths_sorted = list(sorted(cluster_widths, key=lambda x: cluster_widths[x]))
+            closest_cluster = cluster_widths_sorted[0]
 
         print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
