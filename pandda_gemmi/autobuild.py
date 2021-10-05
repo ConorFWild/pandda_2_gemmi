@@ -679,7 +679,7 @@ def signal_from_samples(noise_samples, xmap, cutoff):
 
         # Check if they are over cutoff
         if value > cutoff:
-            samples_are_sginal.append(1)
+            samples_are_sginal.append(0)
         else:
             samples_are_sginal.append(-1)
 
