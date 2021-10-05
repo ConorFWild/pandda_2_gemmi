@@ -4806,7 +4806,7 @@ class StdMapFile:
 
     @staticmethod
     def from_zmap_file(zmap: ZMapFile):
-        return MeanMapFile(zmap.path.parent / "std.ccp4")
+        return StdMapFile(zmap.path.parent / "std.ccp4")
 
     @staticmethod
     def from_dir(path: Path, dtag: str):

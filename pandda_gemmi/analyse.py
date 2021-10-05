@@ -475,7 +475,6 @@ def process_pandda(
 
         elif comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
-
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
                 datasets,
                 comparison_min_comparators,
