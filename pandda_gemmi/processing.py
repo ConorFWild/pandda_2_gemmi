@@ -397,11 +397,13 @@ def process_shell(
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
     print("Truncating datasets")
+    shell_working_resolution = Resolution(min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
-        resolution=Resolution(min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags])),
+        resolution=shell_working_resolution,
         structure_factors=structure_factors,
     )
+    shell_log["Shell Working Resolution"] = shell_working_resolution.resolution
 
     ###################################################################
     # # Generate aligned Xmaps
