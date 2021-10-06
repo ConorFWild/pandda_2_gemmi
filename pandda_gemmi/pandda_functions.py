@@ -1857,7 +1857,10 @@ def get_shells(
     # in the set of the first shell of sufficiently low res
 
     for dtag, comparison_dtags in comparators.items():
-        low_res = max([resolutions[comparison_dtag] for comparison_dtag in comparison_dtags])
+        dtag_res = resolutions[dtag]
+        comparators_low_res = max([resolutions[comparison_dtag] for comparison_dtag in comparison_dtags])
+
+        low_res = max([dtag_res, comparators_low_res])
 
         # Find the first shell whose res is higher
         for res in reses:
