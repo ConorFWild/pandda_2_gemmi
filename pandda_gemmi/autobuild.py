@@ -697,12 +697,14 @@ def score_structure_signal_to_noise_density(
         structure, xmap,
         cutoff=2.0,
         radius_inner_0=0.0,
+        radius_inner_1=0.5,
         radius_outer_0=1.2,
         radius_outer_1=1.5,
 ):
     rescore_log = {
         "cutoff": float(cutoff),
         "radius_inner_0": float(radius_inner_0),
+        "radius_inner_1": float(radius_inner_1),
         "radius_outer_0": float(radius_outer_0),
         "radius_outer_1": float(radius_outer_1),
     }
@@ -722,25 +724,23 @@ def score_structure_signal_to_noise_density(
     # Get distances
     distances = get_sample_distances(positions_array, samples_array)
 
-    # Get noise samples
-    noise_samples = truncate_samples(samples_array, distances, radius_outer_0, radius_outer_1)
-    rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
-
     # Get signal samples: change radius until similar number of points
-    signal_samples_dict = {}
-    previous_radii = radius_inner_0
-    for radii in np.linspace(radius_inner_0, radius_outer_0, num=15):
-        signal_samples_dict[radii] = truncate_samples(samples_array, distances, radius_inner_0, radii)
-        previous_radii = radii
+    signal_samples = truncate_samples(samples_array, distances, radius_inner_0, radius_inner_1)
+    rescore_log["signal_samples_shape"] = int(signal_samples.shape[0])
+
+    # Get noise samples
+    noise_samples_dict = {}
+    for radii in np.linspace(radius_outer_0, radius_outer_1, num=15):
+        noise_samples_dict[radii] = truncate_samples(samples_array, distances, radius_outer_0, radii)
 
     selected_radii = min(
-        signal_samples_dict,
-        key=lambda _radii: np.abs(signal_samples_dict[_radii].size - noise_samples.size)
+        noise_samples_dict,
+        key=lambda _radii: np.abs(noise_samples_dict[_radii].size - signal_samples.size)
     )
     rescore_log["selected_radii"] = selected_radii
 
-    signal_samples = signal_samples_dict[selected_radii]
-    rescore_log["signal_samples_shape"] = int(signal_samples.shape[0])
+    noise_samples = truncate_samples(samples_array, distances, radius_outer_0, selected_radii)
+    rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
 
     # Getfraction of nearby points that are noise
     _noise, noise_log = noise_from_samples(noise_samples, xmap, cutoff)
