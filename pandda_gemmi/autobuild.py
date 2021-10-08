@@ -679,7 +679,7 @@ def signal_from_samples(noise_samples, xmap, cutoff):
 
         # Check if they are over cutoff
         if value > cutoff:
-            samples_are_sginal.append(0)
+            samples_are_sginal.append(1)
         else:
             samples_are_sginal.append(-1)
 
@@ -924,7 +924,6 @@ def autobuild_rhofit(dataset: Dataset,
     autobuilding_log = {}
 
     #
-
     model_path = Path(model_path)
     build_map_path = Path(build_map_path)
     mtz_path = Path(mtz_path)
