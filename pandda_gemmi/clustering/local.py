@@ -199,13 +199,14 @@ def get_comparators_local(
 
     for resid, rscc_matrix in rsccs.items():
         print(f"Reduced array shape: {rscc_matrix.shape}")
+        print(f"RSCC matric top corner: {rscc_matrix[:5,:5]}")
 
         # Save a bokeh plot
         labels = [dtag.dtag for dtag in dtag_list]
         known_apos = [dtag.dtag for dtag in dtag_list]
 
-        print(f"Labels are: {labels}")
-        print(f"Known apos are: {known_apos}")
+        # print(f"Labels are: {labels}")
+        # print(f"Known apos are: {known_apos}")
 
         save_plot_pca_umap_bokeh(
             rscc_matrix,
