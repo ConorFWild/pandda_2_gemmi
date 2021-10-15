@@ -154,7 +154,7 @@ def get_comparators_local(
     # Get indexes
     partitioning_index_dict = get_index_dict(grid)
 
-    data = {}
+    data = {_residue_id: {} for _residue_id in partitioning_index_dict}
     print("Fitting!")
     for batch in batches:
         print(f"\tLoading dtags: {dtag_array[batch]}")
@@ -183,7 +183,7 @@ def get_comparators_local(
         print(f"Mapped in {finish - start}")
 
         for residue_id, indexes in partitioning_index_dict.items():
-            data[residue_id] = {_dtag: xmap[indexes] for _dtag, xmap in zip(dtag_array[batch], xmaps.values())}
+            data[residue_id].update({_dtag: xmap[indexes] for _dtag, xmap in zip(dtag_array[batch], xmaps.values())})
 
     rsccs = {}
     start = time.time()
@@ -195,8 +195,7 @@ def get_comparators_local(
                 density_2 = dtag_to_density_dict[dtag_2]
                 rsccs[residue_id][j, k] = get_correlation(density_1, density_2)
     finish = time.time()
-    print(f'Got rsccs in {finish-start}')
-
+    print(f'Got rsccs in {finish - start}')
 
     for resid, rscc_matrix in rsccs.items():
         print(f"Reduced array shape: {rscc_matrix.shape}")
