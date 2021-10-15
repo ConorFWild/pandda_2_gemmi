@@ -186,6 +186,7 @@ def get_comparators_local(
             data[residue_id] = {_dtag: xmap[indexes] for _dtag, xmap in zip(dtag_array[batch], xmaps.values())}
 
     rsccs = {}
+    start = time.time()
     for residue_id, dtag_to_density_dict in data.items():
         rsccs[residue_id] = np.zeros((len(dtag_to_density_dict), len(dtag_to_density_dict)))
         for j, dtag_1 in enumerate(dtag_to_density_dict):
@@ -193,6 +194,9 @@ def get_comparators_local(
             for k, dtag_2 in enumerate(dtag_to_density_dict):
                 density_2 = dtag_to_density_dict[dtag_2]
                 rsccs[residue_id][j, k] = get_correlation(density_1, density_2)
+    finish = time.time()
+    print(f'Got rsccs in {finish-start}')
+
 
     for resid, rscc_matrix in rsccs.items():
         print(f"Reduced array shape: {rscc_matrix.shape}")
