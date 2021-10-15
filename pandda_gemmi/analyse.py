@@ -86,6 +86,8 @@ from pandda_gemmi.processing import (
     # process_shell_low_mem,
 )
 
+from pandda_gemmi.clustering import get_comparators_local
+
 printer = pprint.PrettyPrinter()
 
 
@@ -517,6 +519,21 @@ def process_pandda(
                 process_local,
                 known_apos,
             )
+
+        elif comparison_strategy == "local":
+            comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
+                reference,
+                datasets,
+                alignments,
+                grid,
+                comparison_min_comparators,
+                comparison_max_comparators,
+                structure_factors,
+                sample_rate,
+                comparison_res_cutoff,
+                pandda_fs_model,
+                process_local,
+                )
 
         else:
             raise Exception("Unrecognised comparison strategy")
