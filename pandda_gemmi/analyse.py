@@ -238,14 +238,21 @@ def process_pandda(
         process_local = ...
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
+
     elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+        process_local_load = partial(process_local_multiprocessing, n_jobs=local_cpus*5, method="forkserver")
+
     elif local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
+        process_local_load = partial(process_local_multiprocessing, n_jobs=local_cpus*5, method="spawn")
     else:
         raise Exception()
+
+
 
     print("FSmodel building")
     time_fs_model_building_start = time.time()
@@ -258,9 +265,9 @@ def process_pandda(
         ligand_cif_regex,
         ligand_pdb_regex,
         ligand_smiles_regex,
-        process_local=process_local
+        process_local=process_local_load
     )
-    pandda_fs_model.build()
+    pandda_fs_model.build(process_local=process_local_load)
     time_fs_model_building_finish = time.time()
     pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 

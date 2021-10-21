@@ -4859,9 +4859,8 @@ class StdMapFile:
                                                   copy=False,
                                                   )
 
-
-        event_map_reference_grid_array[:, :, :] = (np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
-
+        event_map_reference_grid_array[:, :, :] = (
+            np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
 
         event_map_grid = Xmap.from_aligned_map_c(
             event_map_reference_grid,
@@ -5410,15 +5409,17 @@ class ProcessedDatasets:
         if process_local:
             results = process_local(
                 [
-                    ProcessedDataset.from_dataset_dir(dataset_dir,
-                                                      processed_datasets_dir / dtag.dtag,
-                                                      )
+                    partial(
+                        ProcessedDataset.from_dataset_dir,
+                        dataset_dir,
+                        processed_datasets_dir / dtag.dtag,
+                    )
                     for dtag, dataset_dir
                     in data_dirs.dataset_dirs.items()
                 ]
             )
 
-            processed_datasets = {dtag: result for dtag, result in zip(results, data_dirs.dataset_dirs) }
+            processed_datasets = {dtag: result for dtag, result in zip(results, data_dirs.dataset_dirs)}
 
         else:
             for dtag, dataset_dir in data_dirs.dataset_dirs.items():
@@ -5436,12 +5437,23 @@ class ProcessedDatasets:
         for dtag in self.processed_datasets:
             yield dtag
 
-    def build(self):
+    def build(self, process_local=None):
         if not self.path.exists():
             os.mkdir(str(self.path))
 
-        for dtag in self.processed_datasets:
-            self.processed_datasets[dtag].build()
+        if process_local:
+            process_local(
+                [
+                    self.processed_datasets[dtag].build
+                    for dtag
+                    in self.processed_datasets
+                ]
+            )
+
+        else:
+
+            for dtag in self.processed_datasets:
+                self.processed_datasets[dtag].build()
 
 
 @dataclasses.dataclass()
@@ -5517,11 +5529,11 @@ class PanDDAFSModel:
                              shell_dirs=None,
                              )
 
-    def build(self, overwrite=False):
+    def build(self, overwrite=False, process_local=None):
         if not self.pandda_dir.exists():
             os.mkdir(str(self.pandda_dir))
 
-        self.processed_datasets.build()
+        self.processed_datasets.build(process_local=process_local)
         self.analyses.build()
 
 
