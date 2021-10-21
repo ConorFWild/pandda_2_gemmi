@@ -248,6 +248,7 @@ def process_pandda(
         raise Exception()
 
     print("FSmodel building")
+    time_fs_model_building_start = time.time()
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
         data_dirs,
         out_dir,
@@ -260,6 +261,9 @@ def process_pandda(
         process_local=process_local
     )
     pandda_fs_model.build()
+    time_fs_model_building_finish = time.time()
+    pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
+
 
     print("Getting multiprocessor")
     try:
