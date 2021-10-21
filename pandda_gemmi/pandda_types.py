@@ -5404,12 +5404,27 @@ class ProcessedDatasets:
     processed_datasets: typing.Dict[Dtag, ProcessedDataset]
 
     @staticmethod
-    def from_data_dirs(data_dirs: DataDirs, processed_datasets_dir: Path):
+    def from_data_dirs(data_dirs: DataDirs, processed_datasets_dir: Path, process_local=None):
         processed_datasets = {}
-        for dtag, dataset_dir in data_dirs.dataset_dirs.items():
-            processed_datasets[dtag] = ProcessedDataset.from_dataset_dir(dataset_dir,
-                                                                         processed_datasets_dir / dtag.dtag,
-                                                                         )
+
+        if process_local:
+            results = process_local(
+                [
+                    ProcessedDataset.from_dataset_dir(dataset_dir,
+                                                      processed_datasets_dir / dtag.dtag,
+                                                      )
+                    for dtag, dataset_dir
+                    in data_dirs.dataset_dirs.items()
+                ]
+            )
+
+            processed_datasets = {dtag: result for dtag, result in zip(results, data_dirs.dataset_dirs) }
+
+        else:
+            for dtag, dataset_dir in data_dirs.dataset_dirs.items():
+                processed_datasets[dtag] = ProcessedDataset.from_dataset_dir(dataset_dir,
+                                                                             processed_datasets_dir / dtag.dtag,
+                                                                             )
 
         return ProcessedDatasets(processed_datasets_dir,
                                  processed_datasets)
@@ -5483,12 +5498,14 @@ class PanDDAFSModel:
                  output_out_dir: Path,
                  pdb_regex: str, mtz_regex: str,
                  ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
+                 process_local=None,
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
         data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
                                       ligand_pdb_regex, ligand_smiles_regex)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
+                                                              process_local,
                                                               )
         log_path = output_out_dir / PANDDA_LOG_FILE
 

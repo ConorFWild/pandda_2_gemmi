@@ -208,6 +208,45 @@ def process_pandda(
     pandda_log[constants.LOG_START] = time.time()
     pandda_log[constants.LOG_ARGUMENTS] = initial_arg_values
 
+    # Get global processor
+    if global_processing == "serial":
+        process_global = process_global_serial
+    elif global_processing == "distributed":
+        client = get_dask_client(
+            scheduler=distributed_scheduler,
+            num_workers=distributed_num_workers,
+            queue=distributed_queue,
+            project=distributed_project,
+            cores_per_worker=local_cpus,
+            distributed_mem_per_core=distributed_mem_per_core,
+            resource_spec=distributed_resource_spec,
+            job_extra=job_extra,
+            walltime=distributed_walltime,
+            watcher=distributed_watcher,
+        )
+        process_global = partial(
+            process_global_dask,
+            client=client,
+            tmp_dir=distributed_tmp
+        )
+    else:
+        raise Exception()
+
+    # Get local processor
+    if local_processing == "serial":
+        raise NotImplementedError()
+        process_local = ...
+    elif local_processing == "joblib":
+        process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
+    elif local_processing == "multiprocessing_forkserver":
+        mp.set_start_method("forkserver")
+        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
+    elif local_processing == "multiprocessing_spawn":
+        mp.set_start_method("spawn")
+        process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
+    else:
+        raise Exception()
+
     print("FSmodel building")
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
         data_dirs,
@@ -218,65 +257,13 @@ def process_pandda(
         ligand_cif_regex,
         ligand_pdb_regex,
         ligand_smiles_regex,
+        process_local=process_local
     )
     pandda_fs_model.build()
 
     print("Getting multiprocessor")
     try:
-        # Get global processor
-        if global_processing == "serial":
-            process_global = process_global_serial
-        elif global_processing == "distributed":
-            client = get_dask_client(
-                scheduler=distributed_scheduler,
-                num_workers=distributed_num_workers,
-                queue=distributed_queue,
-                project=distributed_project,
-                cores_per_worker=local_cpus,
-                distributed_mem_per_core=distributed_mem_per_core,
-                resource_spec=distributed_resource_spec,
-                job_extra=job_extra,
-                walltime=distributed_walltime,
-                watcher=distributed_watcher,
-            )
-            process_global = partial(
-                process_global_dask,
-                client=client,
-                tmp_dir=distributed_tmp
-            )
-        # elif global_processing == "fs":
-        #     process_global = FSCluster(
-        #         scheduler=distributed_scheduler,
-        #         num_workers=distributed_num_workers,
-        #         queue=distributed_queue,
-        #         project=distributed_project,
-        #         cores_per_worker=local_cpus,
-        #         distributed_mem_per_core=distributed_mem_per_core,
-        #         resource_spec=distributed_resource_spec,
-        #         job_extra=job_extra,
-        #         walltime=distributed_walltime,
-        #         watcher=distributed_watcher,
-        #         slurm_partition=distributed_slurm_partition,
-        #         output_dir=distributed_tmp,
-        #     )
 
-        else:
-            raise Exception()
-
-        # Get local processor
-        if local_processing == "serial":
-            raise NotImplementedError()
-            process_local = ...
-        elif local_processing == "joblib":
-            process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
-        elif local_processing == "multiprocessing_forkserver":
-            mp.set_start_method("forkserver")
-            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        elif local_processing == "multiprocessing_spawn":
-            mp.set_start_method("spawn")
-            process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        else:
-            raise Exception()
 
         # Set up autobuilding
         if autobuild:
