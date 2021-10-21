@@ -268,7 +268,6 @@ def process_pandda(
     print("Getting multiprocessor")
     try:
 
-
         # Set up autobuilding
         if autobuild:
 
