@@ -5419,7 +5419,7 @@ class ProcessedDatasets:
                 ]
             )
 
-            processed_datasets = {dtag: result for dtag, result in zip(results, data_dirs.dataset_dirs)}
+            processed_datasets = {dtag: result for dtag, result in zip(data_dirs.dataset_dirs, results, )}
 
         else:
             for dtag, dataset_dir in data_dirs.dataset_dirs.items():
