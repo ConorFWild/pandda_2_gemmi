@@ -59,7 +59,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     process_global_dask,
     get_shells,
-get_comparators_high_res,
+    get_comparators_high_res,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
     get_comparators_closest_apo_cutoff,
@@ -158,7 +158,7 @@ def process_pandda(
         comparison_max_comparators: int = 30,
         known_apos: Optional[List[str]] = None,
         exclude_local: int = 5,
-        cluster_selection: str ="close",
+        cluster_selection: str = "close",
         # Processing settings
         local_processing: str = "multiprocessing_spawn",
         local_cpus: int = 12,
@@ -239,21 +239,19 @@ def process_pandda(
         process_local = ...
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0, prefer="processes")
-        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus * 5, verbose=0)
 
     elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus * 5, verbose=0)
 
     elif local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus * 5, verbose=0)
     else:
         raise Exception()
-
-
 
     print("FSmodel building")
     time_fs_model_building_start = time.time()
@@ -271,7 +269,6 @@ def process_pandda(
     pandda_fs_model.build(process_local=process_local_load)
     time_fs_model_building_finish = time.time()
     pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
-
 
     print("Getting multiprocessor")
     try:
@@ -330,7 +327,7 @@ def process_pandda(
 
         # Get datasets
         print("Loading datasets")
-        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model,)
+        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
         print(f"\tThere are initially: {len(datasets_initial)} datasets")
 
         # If structure factors not given, check if any common ones are available
@@ -358,7 +355,8 @@ def process_pandda(
 
         datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
             low_resolution_completeness)
-        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if dtag not in datasets_low_res]
+        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
+                                             dtag not in datasets_low_res]
         validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
@@ -456,7 +454,7 @@ def process_pandda(
 
         elif comparison_strategy == "closest_cluster":
 
-            get_clusters = get_clusters_nn #get_clusters_linkage
+            get_clusters = get_clusters_nn  # get_clusters_linkage
             # Closest datasets after clustering as long as they are not too poor res
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
                 datasets,
@@ -531,7 +529,7 @@ def process_pandda(
                 comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
-                )
+            )
 
         else:
             raise Exception("Unrecognised comparison strategy")
@@ -559,8 +557,6 @@ def process_pandda(
         print("Shells are:")
         if debug:
             printer.pprint(shells)
-
-
 
         # Process the shells
         time_shells_start = time.time()
