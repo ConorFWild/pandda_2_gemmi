@@ -34,6 +34,7 @@ import inspect
 import fire
 import numpy as np
 import shutil
+import joblib
 
 ## Custom Imports
 from pandda_gemmi.logs import (
@@ -237,18 +238,18 @@ def process_pandda(
         raise NotImplementedError()
         process_local = ...
     elif local_processing == "joblib":
-        process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0)
+        process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0, prefer="processes")
         process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
 
     elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        process_local_load = partial(process_local_multiprocessing, n_jobs=local_cpus*5, method="forkserver")
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
 
     elif local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        process_local_load = partial(process_local_multiprocessing, n_jobs=local_cpus*5, method="spawn")
+        process_local_load = partial(process_local_joblib, n_jobs=local_cpus*5, verbose=0)
     else:
         raise Exception()
 

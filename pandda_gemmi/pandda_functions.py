@@ -34,10 +34,11 @@ def process_local_serial(funcs):
     return results
 
 
-def process_local_joblib(n_jobs, verbosity, funcs):
+def process_local_joblib(n_jobs, verbosity, funcs, prefer="threads"):
     mapper = joblib.Parallel(n_jobs=n_jobs,
                              verbose=verbosity,
                              backend="loky",
+                             prefer=prefer,
                              )
 
     results = mapper(joblib.delayed(func)() for func in funcs)
@@ -57,6 +58,14 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
             mp.set_start_method("spawn")
         except Exception as e:
             print(e)
+
+    elif method == "threads":
+        try:
+            mp.set_start_method("threads")
+        except Exception as e:
+            print(e)
+
+
 
     else:
         raise Exception(
