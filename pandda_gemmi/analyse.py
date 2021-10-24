@@ -239,17 +239,17 @@ def process_pandda(
         process_local = ...
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0, prefer="processes")
-        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbosity=0, prefer="threads")
 
     elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbosity=0, prefer="threads")
 
     elif local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbose=0)
+        process_local_load = partial(process_local_joblib, n_jobs=(local_cpus * 5), verbosity=0, prefer="threads")
     else:
         raise Exception()
 
