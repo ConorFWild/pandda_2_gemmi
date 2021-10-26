@@ -34,10 +34,8 @@ def process_local_serial(funcs):
     return results
 
 
-def process_local_joblib(n_jobs, verbosity, prefer, funcs):
+def process_local_joblib(n_jobs, prefer, funcs):
     mapper = joblib.Parallel(n_jobs=n_jobs,
-                             verbose=verbosity,
-                             backend="loky",
                              prefer=prefer,
                              )
 

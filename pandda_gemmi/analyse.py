@@ -239,21 +239,22 @@ def process_pandda(
         process_local = ...
     elif local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=local_cpus, verbose=0, prefer="processes")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), 0, "threads")
+        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
     elif local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="forkserver")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), 0, "threads")
+        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
     elif local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=local_cpus, method="spawn")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), 0, "threads")
+        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
     else:
         raise Exception()
 
     print("FSmodel building")
+    print(f"Num cpus is: {joblib.cpu_count()}")
     time_fs_model_building_start = time.time()
     pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
         data_dirs,
@@ -266,6 +267,7 @@ def process_pandda(
         ligand_smiles_regex,
         process_local=process_local_load
     )
+    print(f"Starting copy of data after {time.time() - time_fs_model_building_start}")
     pandda_fs_model.build(process_local=process_local_load)
     time_fs_model_building_finish = time.time()
     pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
