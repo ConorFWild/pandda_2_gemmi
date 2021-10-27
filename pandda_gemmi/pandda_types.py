@@ -5315,7 +5315,6 @@ class DataDirs:
                 if result:
                     dataset_dirs[dtag] = result
 
-
         else:
 
             for dataset_dir_path in dataset_dir_paths:
@@ -5539,10 +5538,10 @@ class PanDDAFSModel:
                  ):
         analyses = Analyses.from_pandda_dir(output_out_dir)
         data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
-                                      ligand_pdb_regex, ligand_smiles_regex)
+                                      ligand_pdb_regex, ligand_smiles_regex, process_local=process_local)
         processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
                                                               output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
-                                                              process_local,
+                                                              process_local=process_local,
                                                               )
         log_path = output_out_dir / PANDDA_LOG_FILE
 
