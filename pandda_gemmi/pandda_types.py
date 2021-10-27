@@ -5239,44 +5239,48 @@ class DatasetDir:
                   ligand_dir_name: str,
                   ligand_cif_regex: str, ligand_pdb_regex: str,
                   ligand_smiles_regex: str):
-        input_pdb_file: Path = next(path.glob(pdb_regex))
-        input_mtz_file: Path = next(path.glob(mtz_regex))
-
-        source_ligand_dir = path / ligand_dir_name
-
-        if source_ligand_dir.exists():
-            ligand_dir = LigandDir.from_path(source_ligand_dir)
-            ligand_search_path = source_ligand_dir
-        else:
-            ligand_dir = None
-            ligand_search_path = path
 
         try:
-            ligands = ligand_search_path.rglob(ligand_cif_regex)
-            source_ligand_cif = next(ligands)
-        except:
-            source_ligand_cif = None
+            input_pdb_file: Path = next(path.glob(pdb_regex))
+            input_mtz_file: Path = next(path.glob(mtz_regex))
 
-        try:
-            ligands = ligand_search_path.rglob(ligand_pdb_regex)
-            source_ligand_pdb = next(ligands)
-        except:
-            source_ligand_pdb = None
+            source_ligand_dir = path / ligand_dir_name
 
-        try:
-            source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
-        except:
-            source_ligand_smiles = None
+            if source_ligand_dir.exists():
+                ligand_dir = LigandDir.from_path(source_ligand_dir)
+                ligand_search_path = source_ligand_dir
+            else:
+                ligand_dir = None
+                ligand_search_path = path
 
-        return DatasetDir(
-            path=path,
-            input_pdb_file=input_pdb_file,
-            input_mtz_file=input_mtz_file,
-            ligand_dir=ligand_dir,
-            source_ligand_cif=source_ligand_cif,
-            source_ligand_pdb=source_ligand_pdb,
-            source_ligand_smiles=source_ligand_smiles
-        )
+            try:
+                ligands = ligand_search_path.rglob(ligand_cif_regex)
+                source_ligand_cif = next(ligands)
+            except:
+                source_ligand_cif = None
+
+            try:
+                ligands = ligand_search_path.rglob(ligand_pdb_regex)
+                source_ligand_pdb = next(ligands)
+            except:
+                source_ligand_pdb = None
+
+            try:
+                source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
+            except:
+                source_ligand_smiles = None
+
+            return DatasetDir(
+                path=path,
+                input_pdb_file=input_pdb_file,
+                input_mtz_file=input_mtz_file,
+                ligand_dir=ligand_dir,
+                source_ligand_cif=source_ligand_cif,
+                source_ligand_pdb=source_ligand_pdb,
+                source_ligand_smiles=source_ligand_smiles
+            )
+        except:
+            return None
 
 
 @dataclasses.dataclass()
@@ -5286,21 +5290,42 @@ class DataDirs:
     @staticmethod
     def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_dir_name, ligand_cif_regex: str,
                  ligand_pdb_regex: str,
-                 ligand_smiles_regex: str):
+                 ligand_smiles_regex: str, process_local=None):
         dataset_dir_paths = list(directory.glob("*"))
 
         dataset_dirs = {}
 
-        for dataset_dir_path in dataset_dir_paths:
-            dtag = Dtag(dataset_dir_path.name)
-            try:
+        if process_local:
+            dtags = []
+            for dataset_dir_path in dataset_dir_paths:
+                dtag = Dtag(dataset_dir_path.name)
+                dtags.append(dtag)
+
+            results = process_local(
+                [
+                    DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
+                                         ligand_cif_regex,
+                                         ligand_pdb_regex, ligand_smiles_regex)
+                    for dataset_dir_path
+                    in dataset_dir_paths
+                ]
+            )
+
+            for dtag, result in zip(dtags, results):
+                if result:
+                    dataset_dirs[dtag] = result
+
+
+        else:
+
+            for dataset_dir_path in dataset_dir_paths:
+                dtag = Dtag(dataset_dir_path.name)
+
                 dataset_dir = DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
                                                    ligand_cif_regex,
                                                    ligand_pdb_regex, ligand_smiles_regex)
-                dataset_dirs[dtag] = dataset_dir
-            except Exception as e:
-                print(e)
-                continue
+                if dataset_dir:
+                    dataset_dirs[dtag] = dataset_dir
 
         return DataDirs(dataset_dirs)
 
