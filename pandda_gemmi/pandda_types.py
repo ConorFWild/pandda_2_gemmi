@@ -5303,7 +5303,8 @@ class DataDirs:
 
             results = process_local(
                 [
-                    DatasetDir.from_path(dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
+                    partial(DatasetDir.from_path,
+                            dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
                                          ligand_cif_regex,
                                          ligand_pdb_regex, ligand_smiles_regex)
                     for dataset_dir_path
