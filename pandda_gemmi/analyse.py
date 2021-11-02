@@ -265,10 +265,10 @@ def process_pandda(
         ligand_cif_regex,
         ligand_pdb_regex,
         ligand_smiles_regex,
-        process_local=process_local
+        process_local=None
     )
     print(f"Starting copy of data after {time.time() - time_fs_model_building_start}")
-    pandda_fs_model.build(process_local=process_local)
+    pandda_fs_model.build(process_local=None)
     time_fs_model_building_finish = time.time()
     pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
