@@ -51,6 +51,10 @@ LOG_TIME: str = "Time taken to complete PanDDA"
 
 LOG_INVALID: str = "Datasets filtered for being invalid"
 LOG_LOW_RES: str = "Datasets filtered for being too low res"
+LOG_RFREE: str = "Datasets filtered for having high RFree"
+LOG_DISSIMILAR_STRUCTURE: str = "Datasets filtered for having dissimilar structures"
+LOG_GAPS: str = "Datasets filtered for having large gaps"
+LOG_SG: str = "Datasets filtered for having a different spacegroup"
 
 LOG_DATASETS: str = "Summary of input datasets"
 

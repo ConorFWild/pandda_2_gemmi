@@ -363,6 +363,8 @@ def process_pandda(
         validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
 
         datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
+        pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
+                                             dtag not in datasets_rfree]
         validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
 
         datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
@@ -389,17 +391,23 @@ def process_pandda(
             reference,
             max_rmsd_to_reference,
         )
+        pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
+                                           dtag not in datasets_diss_struc]
         validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
 
         print("Removing models with large gaps")
-        datasets_gaps: Datasets = datasets_smoother.remove_models_with_large_gaps(reference, )
+        datasets_gaps: Datasets = datasets_diss_struc.remove_models_with_large_gaps(reference, )
         for dtag in datasets_gaps:
             if dtag not in datasets_diss_struc.datasets:
                 print(f"WARNING: Removed dataset {dtag} due to a large gap")
+        pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
+                                           dtag not in datasets_gaps]
         validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
 
         print("Removing dissimilar space groups")
         datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
+        pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
+                                          dtag not in datasets_diss_space]
         validate_paramterized(datasets_diss_space, exception=Exception("Too few datasets after filter: space group"))
 
         datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
