@@ -111,4 +111,5 @@ def save_json_log(log_dict: Dict, path: Path):
     with open(str(path), "w") as f:
         json.dump(log_dict,
                   f,
+                  indent=4,
                   )
