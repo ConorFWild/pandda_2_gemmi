@@ -103,6 +103,16 @@ class PanDDAArgs:
             help=constants.ARGS_OUT_DIR_HELP,
         )
         parser.add_argument(
+            constants.ARGS_PDB_REGEX,
+            type=str,
+            help=constants.ARGS_PDB_REGEX_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_MTZ_REGEX,
+            type=str,
+            help=constants.ARGS_MTZ_REGEX_HELP,
+        )
+        parser.add_argument(
             constants.ARGS_LIGAND_CIF_REGEX,
             type=str,
             default='*.cif',
