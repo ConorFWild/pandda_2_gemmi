@@ -207,10 +207,10 @@ class PanDDAArgs:
             help=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_HELP,
         )
         parser.add_argument(
-            constants.ARGS_MEM_PER_CORE,
+            constants.ARGS_DISTRIBUTED_MEM_PER_CORE,
             type=int,
             default=10,
-            help=constants.ARGS_MEM_PER_CORE_HELP,
+            help=constants.ARGS_DISTRIBUTED_MEM_PER_CORE_HELP,
         )
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_RESOURCE_SPEC,
