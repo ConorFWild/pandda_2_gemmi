@@ -502,6 +502,12 @@ class PanDDAArgs:
             default=1.5,
             help=constants.ARGS_CLUSTERING_CUTOFF_HELP,
         )
+        parser.add_argument(
+            constants.ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER,
+            type=float,
+            default=1.5,
+            help=constants.ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER_HELP,
+        )
 
         # Site finding options
         parser.add_argument(
