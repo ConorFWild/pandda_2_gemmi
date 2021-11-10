@@ -240,6 +240,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             structure_factors)
         pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
         validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+        print("Filtered invalid")
 
         datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
 
