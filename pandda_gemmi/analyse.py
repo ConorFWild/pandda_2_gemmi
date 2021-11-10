@@ -222,6 +222,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 raise Exception(
                     "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
 
+        print(structure_factors)
+
         # Make dataset validator
         validation_strategy = partial(
             validate_strategy_num_datasets,
