@@ -33,7 +33,7 @@ PANDDA_SIGMA_S_M_FILE = "sigma_s_m_{number}_{res}.ccp4"
 ###################################################################
 COMMON_F_PHI_LABEL_PAIRS = (
     ("FWT", "PHWT"),
-    ("2FOFCWT", "2PHFOFCWT"),
+    ("2FOFCWT", "PH2FOFCWT"),
     ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
     ("2FOFCWT_fill", "PH2FOFCWT_fill",),
 )
