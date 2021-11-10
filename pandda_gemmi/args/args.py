@@ -553,7 +553,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_AUTOBUILD_STRATEGY,
             type=str,
-            default=False,
+            default="rhofit",
             help=constants.ARGS_AUTOBUILD_STRATEGY_HELP,
         )
         parser.add_argument(
