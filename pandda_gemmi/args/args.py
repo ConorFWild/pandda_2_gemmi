@@ -283,16 +283,16 @@ class PanDDAArgs:
             help=constants.ARGS_MAX_RFREE_HELP,
         )
         parser.add_argument(
-            constants.ARGS_MAX_WILDSON_PLOT_Z_SCORES,
+            constants.ARGS_MAX_WILSON_PLOT_Z_SCORES,
             type=float,
             default=0.4,
-            help=constants.ARGS_MAX_WILDSON_PLOT_Z_SCORES_HELP,
+            help=constants.ARGS_MAX_WILSON_PLOT_Z_SCORES_HELP,
         )
         parser.add_argument(
-            constants.ARGS_SAME_SAPCE_GROUP_ONLY,
+            constants.ARGS_SAME_SPACE_GROUP_ONLY,
             type=bool,
             default=False,
-            help=constants.ARGS_SAME_SAPCE_GROUP_ONLY_HELP,
+            help=constants.ARGS_SAME_SPACE_GROUP_ONLY_HELP,
         )
         parser.add_argument(
             constants.ARGS_SIMILAR_MODELS_ONLY,
