@@ -246,18 +246,18 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
 
         datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
-            low_resolution_completeness)
+            args.low_resolution_completeness)
         pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
                                              dtag not in datasets_low_res]
         validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
 
-        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(max_rfree)
+        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(args.max_rfree)
         pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
                                            dtag not in datasets_rfree]
         validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
 
         datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-            max_wilson_plot_z_score)  # TODO
+            args.max_wilson_plot_z_score)  # TODO
         validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
         # Select refernce
