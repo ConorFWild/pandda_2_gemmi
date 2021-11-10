@@ -201,10 +201,10 @@ class PanDDAArgs:
             help=constants.ARGS_DISTRIBUTED_NUM_WORKERS_HELP,
         )
         parser.add_argument(
-            constants.ARGS_CORES_PER_WORKER,
+            constants.ARGS_DISTRIBUTED_CORES_PER_WORKER,
             type=int,
             default=12,
-            help=constants.ARGS_CORES_PER_WORKER_HELP,
+            help=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_HELP,
         )
         parser.add_argument(
             constants.ARGS_MEM_PER_CORE,
