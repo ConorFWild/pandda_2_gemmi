@@ -225,7 +225,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Make dataset validator
         validation_strategy = partial(
             validate_strategy_num_datasets,
-            min_characterisation_datasets=min_characterisation_datasets,
+            min_characterisation_datasets=args.min_characterisation_datasets,
         )
         validate_paramterized = partial(
             validate,
