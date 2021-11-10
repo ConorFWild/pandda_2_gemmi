@@ -293,10 +293,10 @@ class PanDDAArgs:
             help=constants.ARGS_MAX_RFREE_HELP,
         )
         parser.add_argument(
-            constants.ARGS_MAX_WILSON_PLOT_Z_SCORES,
+            constants.ARGS_MAX_WILSON_PLOT_Z_SCORE,
             type=float,
             default=0.4,
-            help=constants.ARGS_MAX_WILSON_PLOT_Z_SCORES_HELP,
+            help=constants.ARGS_MAX_WILSON_PLOT_Z_SCORE_HELP,
         )
         parser.add_argument(
             constants.ARGS_SAME_SPACE_GROUP_ONLY,
