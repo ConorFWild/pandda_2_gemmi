@@ -143,7 +143,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         args.out_dir,
         args.pdb_regex,
         args.mtz_regex,
-        args.ligand_dir_name,
+        args.ligand_dir_regex,
         args.ligand_cif_regex,
         args.ligand_pdb_regex,
         args.ligand_smiles_regex,
