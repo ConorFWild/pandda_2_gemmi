@@ -495,10 +495,10 @@ class PanDDAArgs:
 
         # Site finding options
         parser.add_argument(
-            constants.ARGS_CLUSTERING_CUTOFF,
+            constants.ARGS_MAX_SITE_DISTANCE_CUTOFF,
             type=float,
             default=1.732,
-            help=constants.ARGS_CLUSTERING_CUTOFF_HELP,
+            help=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP,
         )
 
         # BDC calculation options
