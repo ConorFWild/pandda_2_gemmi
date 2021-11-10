@@ -586,7 +586,7 @@ class PanDDAArgs:
             out_dir=args.out_dir,
             pdb_regex=args.pdb_regex,
             mtz_regex=args.mtz_regex,
-            ligand_dir_name=args.ligand_dir_name,
+            ligand_dir_regex=args.ligand_dir_regex,
             ligand_cif_regex=args.ligand_cif_regex,
             ligand_pdb_regex=args.ligand_pdb_regex,
             ligand_smiles_regex=args.ligand_smiles_regex,
