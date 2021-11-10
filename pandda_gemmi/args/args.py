@@ -183,7 +183,7 @@ class PanDDAArgs:
             help=constants.ARGS_DISTRIBUTED_SCHEDULER_HELP,
         )
         parser.add_argument(
-            constants.ARGS_DISTIRBUTED_QUEUE,
+            constants.ARGS_DISTRIBUTED_QUEUE,
             type=str,
             default='medium.q',
             help=constants.ARGS_DISTRIBUTED_QUEUE_HELP,
