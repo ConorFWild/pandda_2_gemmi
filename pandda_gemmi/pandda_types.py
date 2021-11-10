@@ -1040,6 +1040,9 @@ class Datasets:
     def remove_invalid_structure_factor_datasets(self,
                                                  structure_factors: StructureFactors,
                                                  ) -> Datasets:
+
+        print(structure_factors)
+        print([self.datasets[dtag].reflections.columns() for dtag in self.datasets])
         new_dtags = filter(
             lambda dtag: (structure_factors.f in self.datasets[dtag].reflections.columns()) and (
                 structure_factors.phi in self.datasets[dtag].reflections.columns()),

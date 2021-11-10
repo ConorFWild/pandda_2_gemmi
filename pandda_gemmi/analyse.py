@@ -236,6 +236,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Initial filters
         print("Filtering invalid datasaets")
+        print()
         datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
             structure_factors)
         pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
