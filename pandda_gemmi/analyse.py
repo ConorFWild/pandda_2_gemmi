@@ -186,24 +186,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             else:
                 raise Exception(f"Autobuild strategy: {args.autobuild_strategy} is not valid!")
 
-        # Parameterise
-        process_shell_paramaterised = partial(
-            process_shell,
-            process_local=process_local,
-            structure_factors=structure_factors,
-            sample_rate=args.sample_rate,
-            contour_level=args.contour_level,
-            cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
-            min_blob_volume=args.min_blob_volume,
-            min_blob_z_peak=args.min_blob_z_peak,
-            outer_mask=args.outer_mask,
-            inner_mask_symmetry=args.inner_mask_symmetry,
-            max_site_distance_cutoff=args.max_site_distance_cutoff,
-            min_bdc=args.min_bdc,
-            max_bdc=args.max_bdc,
-            memory_availability=args.memory_availability,
-            statmaps=args.statmaps,
-        )
+
 
         ###################################################################
         # # Pre-pandda
@@ -457,6 +440,25 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         print("Shells are:")
         if args.debug:
             printer.pprint(shells)
+
+        # Parameterise
+        process_shell_paramaterised = partial(
+            process_shell,
+            process_local=process_local,
+            structure_factors=structure_factors,
+            sample_rate=args.sample_rate,
+            contour_level=args.contour_level,
+            cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
+            min_blob_volume=args.min_blob_volume,
+            min_blob_z_peak=args.min_blob_z_peak,
+            outer_mask=args.outer_mask,
+            inner_mask_symmetry=args.inner_mask_symmetry,
+            max_site_distance_cutoff=args.max_site_distance_cutoff,
+            min_bdc=args.min_bdc,
+            max_bdc=args.max_bdc,
+            memory_availability=args.memory_availability,
+            statmaps=args.statmaps,
+        )
 
         # Process the shells
         time_shells_start = time.time()
