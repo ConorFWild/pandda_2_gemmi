@@ -331,12 +331,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         print("Assigning comparison datasets...")
 
         # Assign comparator set for each dataset
-        if comparison_strategy == "closest":
+        if args.comparison_strategy == "closest":
             # Closest datasets after clustering
             raise NotImplementedError()
             comparators: Dict[Dtag, List[Dtag]] = ...
 
-        elif comparison_strategy == "closest_cutoff":
+        elif args.comparison_strategy == "closest_cutoff":
             # Closest datasets after clustering as long as they are not too poor res
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
                 datasets,
@@ -352,7 +352,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 args.exclude_local,
             )
 
-        elif comparison_strategy == "closest_cluster":
+        elif args.comparison_strategy == "closest_cluster":
 
             get_clusters = get_clusters_nn  # get_clusters_linkage
             # Closest datasets after clustering as long as they are not too poor res
@@ -371,7 +371,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 cluster_selection=cluster_selection,
             )
 
-        elif comparison_strategy == "high_res":
+        elif args.comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
                 datasets,
@@ -379,7 +379,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 args.comparison_max_comparators,
             )
 
-        elif comparison_strategy == "high_res_random":
+        elif args.comparison_strategy == "high_res_random":
             # Old pandda strategy: random datasets that are higher resolution
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
                 datasets,
@@ -387,7 +387,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 args.comparison_max_comparators,
             )
 
-        elif comparison_strategy == "get_comparators_closest_apo_cutoff":
+        elif args.comparison_strategy == "get_comparators_closest_apo_cutoff":
             if not known_apos:
                 known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
             else:
@@ -416,7 +416,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 known_apos,
             )
 
-        elif comparison_strategy == "local":
+        elif args.comparison_strategy == "local":
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
                 reference,
                 datasets,

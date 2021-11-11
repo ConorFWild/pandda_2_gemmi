@@ -44,27 +44,38 @@ COMMON_F_PHI_LABEL_PAIRS = (
 
 ARGS_DESCRIPTION = "Perform a Pan-Dataset Density Analysis"
 ARGS_DATA_DIRS = "--data_dirs"
-ARGS_DATA_DIRS_HELP = "The "
+ARGS_DATA_DIRS_HELP = "The path to the directory containing the dataset directories. This directory must only contain other directories, one for each crystal to be analysed in PanDDA, each with a unique name and containing a file for the reflections from that crystal and a model of those reflections. The name of that model must match the pattern given in --pdb_regex and the name of the reflections file must match the pattern given in --mtz_regex"
 ARGS_OUT_DIR = "--out_dir"
-ARGS_OUT_DIR_HELP = "FIX"
+ARGS_OUT_DIR_HELP = "The path to the directory in which to store the results of the PanDDA."
 ARGS_PDB_REGEX = "--pdb_regex"
-ARGS_PDB_REGEX_HELP = "FIX"
+ARGS_PDB_REGEX_HELP = "A grep pattern matching the name of the model of the crystal data in each crystal directory in the directory given by --data_dirs."
 ARGS_MTZ_REGEX = "--mtz_regex"
-ARGS_MTZ_REGEX_HELP = "FIX"
+ARGS_MTZ_REGEX_HELP = "A grep pattern matching the name of the reflections of each crystal in each crystal directory " \
+                      "in the directory given by --data_dirs. "
 ARGS_LIGAND_CIF_REGEX = "--ligand_cif_regex"
-ARGS_LIGAND_CIF_REGEX_HELP = "FIX"
+ARGS_LIGAND_CIF_REGEX_HELP = "A grep pattern matching the restraints associated with each ligand that might be bound " \
+                             "in the crystal."
 ARGS_LIGAND_SMILES_REGEX = "--ligand_smiles_regex"
-ARGS_LIGAND_SMILES_REGEX_HELP = "FIX"
+ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated with each ligand that may be bound in " \
+                                "the crystal."
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
-ARGS_LIGAND_PDB_REGEX_HELP = "FIX"
+ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
+                             "bound in the crystal."
 ARGS_LIGAND_DIR_REGEX = "--ligand_dir_regex"
-ARGS_LIGAND_DIR_REGEX_HELP = "FIX"
+ARGS_LIGAND_DIR_REGEX_HELP = "A grep pattern matching a directory in each crystal directory in the directory given by --data_dirs. If this is given, then other cif regexs will only be searched for inside this directory, if it can be found."
 ARGS_LOCAL_PROCESSING = "--local_processing"
-ARGS_LOCAL_PROCESSING_HELP = "FIX"
+ARGS_LOCAL_PROCESSING_HELP = "A string from 'serial', 'joblib', 'multiprocessing_forkserver' or " \
+                             "'multiprocessing_spawn' that gives how node-local parallelism should be used in the " \
+                             "program. If serial, then no parallelism will be used. If joblib, then a pool of joblib " \
+                             "workers will handle multiprocessing. If multiprocessing_forkserver, then a forkserver " \
+                             "will handle multiprocessing. If multiprocessing_spawn then spaened processes will be " \
+                             "used."
 ARGS_LOCAL_CPUS = "--local_cpus"
-ARGS_LOCAL_CPUS_HELP = "FIX"
+ARGS_LOCAL_CPUS_HELP = "An integer that gives number of node-local cpus to use for multiprocessing."
 ARGS_GLOBAL_PROCESSING = "--global_processing"
-ARGS_GLOBAL_PROCESSING_HELP = "FIX"
+ARGS_GLOBAL_PROCESSING_HELP = "A string from 'serial' and 'distributed'. that gives how to handle processing each " \
+                              "resolution shell. If serial then shells will be processed on one computer. If " \
+                              "distributed then a dask scheduler will attempt to exploit cluster resources to process shells simulatainiously."
 ARGS_MEMORY_AVAILABILITY = "--memory_availability"
 ARGS_MEMORY_AVAILABILITY_HELP = "FIX"
 ARGS_JOB_PARAMS_FILE = "--job_params_file"
