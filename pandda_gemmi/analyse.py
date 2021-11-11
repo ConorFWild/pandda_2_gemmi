@@ -435,7 +435,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             raise Exception("Unrecognised comparison strategy")
 
         print("Comparators are:")
-        if debug:
+        if args.debug:
             printer.pprint(comparators)
 
         ###################################################################
@@ -455,7 +455,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_fs_model.shell_dirs.build()
 
         print("Shells are:")
-        if debug:
+        if args.debug:
             printer.pprint(shells)
 
         # Process the shells
