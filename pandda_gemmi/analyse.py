@@ -190,7 +190,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         process_shell_paramaterised = partial(
             process_shell,
             process_local=process_local,
-            structure_factors=args.structure_factors,
+            structure_factors=structure_factors,
             sample_rate=args.sample_rate,
             contour_level=args.contour_level,
             cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
