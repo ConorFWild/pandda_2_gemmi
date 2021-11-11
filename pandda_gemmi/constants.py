@@ -44,7 +44,7 @@ COMMON_F_PHI_LABEL_PAIRS = (
 
 ARGS_DESCRIPTION = "Perform a Pan-Dataset Density Analysis"
 ARGS_DATA_DIRS = "--data_dirs"
-ARGS_DATA_DIRS_HELP = "FIX"
+ARGS_DATA_DIRS_HELP = "The "
 ARGS_OUT_DIR = "--out_dir"
 ARGS_OUT_DIR_HELP = "FIX"
 ARGS_PDB_REGEX = "--pdb_regex"
