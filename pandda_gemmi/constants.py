@@ -42,7 +42,13 @@ COMMON_F_PHI_LABEL_PAIRS = (
 # # Args
 ###################################################################
 
-ARGS_DESCRIPTION = "Perform a Pan-Dataset Density Analysis"
+ARGS_DESCRIPTION = (
+    "Perform a Pan-Dataset Density Analysis.\n"
+    "\n"
+    "Typical usage is:\n"
+    "python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex='dimple.pdb' --mtz_regex='dimple.mtz' "
+    "--autobuild=True <options>\n"
+)
 ARGS_DATA_DIRS = "--data_dirs"
 ARGS_DATA_DIRS_HELP = "The path to the directory containing the dataset directories. This directory must only contain other directories, one for each crystal to be analysed in PanDDA, each with a unique name and containing a file for the reflections from that crystal and a model of those reflections. The name of that model must match the pattern given in --pdb_regex and the name of the reflections file must match the pattern given in --mtz_regex"
 ARGS_OUT_DIR = "--out_dir"
