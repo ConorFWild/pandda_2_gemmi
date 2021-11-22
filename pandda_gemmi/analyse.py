@@ -16,6 +16,7 @@ import joblib
 
 ## Custom Imports
 from pandda_gemmi.args import PanDDAArgs
+from pandda_gemmi.logging import STDOUTManager
 from pandda_gemmi.logs import (
     summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
     summarise_datasets
@@ -72,123 +73,122 @@ from pandda_gemmi.clustering import get_comparators_local
 printer = pprint.PrettyPrinter()
 
 
-def process_pandda(args: PanDDAArgs, ):
+def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
     ###################################################################
     time_start = time.time()
-    print("Getting config")
 
     # Process args
     initial_arg_values = inspect.getargvalues(inspect.currentframe())
     printer.pprint(initial_arg_values)
-    data_dirs = Path(args.data_dirs)
-    out_dir = Path(args.out_dir)
-    distributed_tmp = Path(args.distributed_tmp)
+    distributed_tmp = Path(pandda_args.distributed_tmp)
 
     # CHeck dependencies
-    check_dependencies(args)
+    with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
+        check_dependencies(pandda_args)
 
     # Initialise log
-    print("Initialising log...")
-    pandda_log: Dict = {}
-    pandda_log[constants.LOG_START] = time.time()
-    pandda_log[constants.LOG_ARGUMENTS] = initial_arg_values
+    with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
+        pandda_log: Dict = {}
+        pandda_log[constants.LOG_START] = time.time()
+        pandda_log[constants.LOG_ARGUMENTS] = initial_arg_values
 
     # Get global processor
-    if args.global_processing == "serial":
-        process_global = process_global_serial
-    elif args.global_processing == "distributed":
-        client = get_dask_client(
-            scheduler=args.distributed_scheduler,
-            num_workers=args.distributed_num_workers,
-            queue=args.distributed_queue,
-            project=args.distributed_project,
-            cores_per_worker=args.local_cpus,
-            distributed_mem_per_core=args.distributed_mem_per_core,
-            resource_spec=args.distributed_resource_spec,
-            job_extra=args.distributed_job_extra,
-            walltime=args.distributed_walltime,
-            watcher=args.distributed_watcher,
-        )
-        process_global = partial(
-            process_global_dask,
-            client=client,
-            tmp_dir=distributed_tmp
-        )
-    else:
-        raise Exception()
+    with STDOUTManager('Getting global processor...', '\tGot global processor!'):
+        if pandda_args.global_processing == "serial":
+            process_global = process_global_serial
+        elif pandda_args.global_processing == "distributed":
+            client = get_dask_client(
+                scheduler=pandda_args.distributed_scheduler,
+                num_workers=pandda_args.distributed_num_workers,
+                queue=pandda_args.distributed_queue,
+                project=pandda_args.distributed_project,
+                cores_per_worker=pandda_args.local_cpus,
+                distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+                resource_spec=pandda_args.distributed_resource_spec,
+                job_extra=pandda_args.distributed_job_extra,
+                walltime=pandda_args.distributed_walltime,
+                watcher=pandda_args.distributed_watcher,
+            )
+            process_global = partial(
+                process_global_dask,
+                client=client,
+                tmp_dir=distributed_tmp
+            )
+        else:
+            raise Exception()
 
     # Get local processor
-    if args.local_processing == "serial":
-        raise NotImplementedError()
-        process_local = ...
-    elif args.local_processing == "joblib":
-        process_local = partial(process_local_joblib, n_jobs=args.local_cpus, verbose=0, prefer="processes")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+    with STDOUTManager('Getting local processor...', '\tGot local processor!'):
+        if pandda_args.local_processing == "serial":
+            raise NotImplementedError()
+            process_local = ...
+        elif pandda_args.local_processing == "joblib":
+            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=0, prefer="processes")
+            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
-    elif args.local_processing == "multiprocessing_forkserver":
-        mp.set_start_method("forkserver")
-        process_local = partial(process_local_multiprocessing, n_jobs=args.local_cpus, method="forkserver")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        elif pandda_args.local_processing == "multiprocessing_forkserver":
+            mp.set_start_method("forkserver")
+            process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
+            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
-    elif args.local_processing == "multiprocessing_spawn":
-        mp.set_start_method("spawn")
-        process_local = partial(process_local_multiprocessing, n_jobs=args.local_cpus, method="spawn")
-        process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-    else:
-        raise Exception()
+        elif pandda_args.local_processing == "multiprocessing_spawn":
+            mp.set_start_method("spawn")
+            process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
+            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        else:
+            raise Exception()
 
-    print("FSmodel building")
-    print(f"Num cpus is: {joblib.cpu_count()}")
-    time_fs_model_building_start = time.time()
-    pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
-        args.data_dirs,
-        args.out_dir,
-        args.pdb_regex,
-        args.mtz_regex,
-        args.ligand_dir_regex,
-        args.ligand_cif_regex,
-        args.ligand_pdb_regex,
-        args.ligand_smiles_regex,
-        process_local=None
-    )
-    print(f"Starting copy of data after {time.time() - time_fs_model_building_start}")
-    pandda_fs_model.build(process_local=None)
-    time_fs_model_building_finish = time.time()
-    pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
+    with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
+                       '\tBuilt file system model!'):
+        time_fs_model_building_start = time.time()
+        pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
+            pandda_args.data_dirs,
+            pandda_args.out_dir,
+            pandda_args.pdb_regex,
+            pandda_args.mtz_regex,
+            pandda_args.ligand_dir_regex,
+            pandda_args.ligand_cif_regex,
+            pandda_args.ligand_pdb_regex,
+            pandda_args.ligand_smiles_regex,
+            process_local=None
+        )
+        pandda_fs_model.build(process_local=None)
+        time_fs_model_building_finish = time.time()
+        pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
-    print("Getting multiprocessor")
     try:
 
         # Set up autobuilding
-        if args.autobuild:
+        if pandda_args.autobuild:
 
-            if args.autobuild_strategy == "rhofit":
-                ana_pdbmaps_path = shutil.which("ana_pdbmaps")
-                rhofit_path = shutil.which("rhofit")
-                pandda_rhofit_path = shutil.which("pandda_rhofit.sh")
+            with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+                if pandda_args.autobuild_strategy == "rhofit":
+                    ana_pdbmaps_path = shutil.which("ana_pdbmaps")
+                    rhofit_path = shutil.which("rhofit")
+                    pandda_rhofit_path = shutil.which("pandda_rhofit.sh")
 
-                if not ana_pdbmaps_path:
-                    raise Exception("PanDDA Rhofit requires ana_pdbmaps to be in path!")
-                if not rhofit_path:
-                    raise Exception("PanDDA Rhofit requires rhofit to be in path!")
-                if not pandda_rhofit_path:
-                    raise Exception("PanDDA Rhofit requires pandda_rhofit.sh to be in path!")
+                    if not ana_pdbmaps_path:
+                        raise Exception("PanDDA Rhofit requires ana_pdbmaps to be in path!")
+                    if not rhofit_path:
+                        raise Exception("PanDDA Rhofit requires rhofit to be in path!")
+                    if not pandda_rhofit_path:
+                        raise Exception("PanDDA Rhofit requires pandda_rhofit.sh to be in path!")
 
-                autobuild_parametrized = partial(
-                    autobuild_rhofit,
-                    cif_strategy=args.cif_strategy,
-                    rhofit_coord=args.rhofit_coord,
-                )
+                    autobuild_parametrized = partial(
+                        autobuild_rhofit,
+                        cif_strategy=pandda_args.cif_strategy,
+                        rhofit_coord=pandda_args.rhofit_coord,
+                    )
 
-            elif args.autobuild_strategy == "inbuilt":
-                autobuild_parametrized = partial(
-                    autobuild_inbuilt,
-                )
+                elif pandda_args.autobuild_strategy == "inbuilt":
+                    autobuild_parametrized = partial(
+                        autobuild_inbuilt,
+                    )
 
-            else:
-                raise Exception(f"Autobuild strategy: {args.autobuild_strategy} is not valid!")
+                else:
+                    raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
 
 
@@ -197,24 +197,23 @@ def process_pandda(args: PanDDAArgs, ):
         ###################################################################
 
         # Get datasets
-        print("Loading datasets")
-        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
-        print(f"\tThere are initially: {len(datasets_initial)} datasets")
+        with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
+            datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
 
         # If structure factors not given, check if any common ones are available
-        if not args.structure_factors:
-            structure_factors = get_common_structure_factors(datasets_initial)
-            # If still no structure factors
-            if not structure_factors:
-                raise Exception(
-                    "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
+        with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
+            if not pandda_args.structure_factors:
+                structure_factors = get_common_structure_factors(datasets_initial)
+                # If still no structure factors
+                if not structure_factors:
+                    raise Exception(
+                        "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
 
-        print(structure_factors)
 
         # Make dataset validator
         validation_strategy = partial(
             validate_strategy_num_datasets,
-            min_characterisation_datasets=args.min_characterisation_datasets,
+            min_characterisation_datasets=pandda_args.min_characterisation_datasets,
         )
         validate_paramterized = partial(
             validate,
@@ -222,29 +221,30 @@ def process_pandda(args: PanDDAArgs, ):
         )
 
         # Initial filters
-        print("Filtering invalid datasaets")
-        print()
-        datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
-            structure_factors)
-        pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
-        validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
-        print("Filtered invalid")
 
-        datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
+        with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
+            datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
+                structure_factors)
+            pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
+            validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
-        datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
-            args.low_resolution_completeness)
-        pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
-                                             dtag not in datasets_low_res]
-        validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
+        with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!!'):
+            datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
 
-        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(args.max_rfree)
+        with STDOUTManager('Loading datasets...', f'\tDone!'):
+            datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
+                pandda_args.low_resolution_completeness)
+            pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
+                                                 dtag not in datasets_low_res]
+            validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
+
+        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
         pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
                                            dtag not in datasets_rfree]
         validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
 
         datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-            args.max_wilson_plot_z_score)  # TODO
+            pandda_args.max_wilson_plot_z_score)  # TODO
         validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
         # Select refernce
@@ -265,7 +265,7 @@ def process_pandda(args: PanDDAArgs, ):
         print("Removing dissimilar models")
         datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
             reference,
-            args.max_rmsd_to_reference,
+            pandda_args.max_rmsd_to_reference,
         )
         pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
                                                           dtag not in datasets_diss_struc]
@@ -292,12 +292,12 @@ def process_pandda(args: PanDDAArgs, ):
         # Grid
         print("Getting grid")
         grid: Grid = Grid.from_reference(reference,
-                                         args.outer_mask,
-                                         args.inner_mask_symmetry,
-                                         sample_rate=args.sample_rate,
+                                         pandda_args.outer_mask,
+                                         pandda_args.inner_mask_symmetry,
+                                         sample_rate=pandda_args.sample_rate,
                                          )
 
-        if args.debug:
+        if pandda_args.debug:
             print("Summarising protein mask")
             summarise_grid(grid.partitioning.protein_mask)
             print("Summarising symmetry mask")
@@ -318,28 +318,28 @@ def process_pandda(args: PanDDAArgs, ):
         print("Assigning comparison datasets...")
 
         # Assign comparator set for each dataset
-        if args.comparison_strategy == "closest":
+        if pandda_args.comparison_strategy == "closest":
             # Closest datasets after clustering
             raise NotImplementedError()
             comparators: Dict[Dtag, List[Dtag]] = ...
 
-        elif args.comparison_strategy == "closest_cutoff":
+        elif pandda_args.comparison_strategy == "closest_cutoff":
             # Closest datasets after clustering as long as they are not too poor res
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
                 datasets,
                 alignments,
                 grid,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
                 structure_factors,
-                args.sample_rate,
-                args.comparison_res_cutoff,
+                pandda_args.sample_rate,
+                pandda_args.comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
-                args.exclude_local,
+                pandda_args.exclude_local,
             )
 
-        elif args.comparison_strategy == "closest_cluster":
+        elif pandda_args.comparison_strategy == "closest_cluster":
 
             get_clusters = get_clusters_nn  # get_clusters_linkage
             # Closest datasets after clustering as long as they are not too poor res
@@ -347,34 +347,34 @@ def process_pandda(args: PanDDAArgs, ):
                 datasets,
                 alignments,
                 grid,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
                 structure_factors,
-                args.sample_rate,
-                args.comparison_res_cutoff,
+                pandda_args.sample_rate,
+                pandda_args.comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
                 get_clusters,
-                cluster_selection=args.cluster_selection,
+                cluster_selection=pandda_args.cluster_selection,
             )
 
-        elif args.comparison_strategy == "high_res":
+        elif pandda_args.comparison_strategy == "high_res":
             # Almost Old PanDDA strategy: highest res datasets
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
                 datasets,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
             )
 
-        elif args.comparison_strategy == "high_res_random":
+        elif pandda_args.comparison_strategy == "high_res_random":
             # Old pandda strategy: random datasets that are higher resolution
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
                 datasets,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
             )
 
-        elif args.comparison_strategy == "get_comparators_closest_apo_cutoff":
+        elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
             if not known_apos:
                 known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
             else:
@@ -393,27 +393,27 @@ def process_pandda(args: PanDDAArgs, ):
                 datasets,
                 alignments,
                 grid,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
                 structure_factors,
-                args.sample_rate,
-                args.comparison_res_cutoff,
+                pandda_args.sample_rate,
+                pandda_args.comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
                 known_apos,
             )
 
-        elif args.comparison_strategy == "local":
+        elif pandda_args.comparison_strategy == "local":
             comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
                 reference,
                 datasets,
                 alignments,
                 grid,
-                args.comparison_min_comparators,
-                args.comparison_max_comparators,
+                pandda_args.comparison_min_comparators,
+                pandda_args.comparison_max_comparators,
                 structure_factors,
-                args.sample_rate,
-                args.comparison_res_cutoff,
+                pandda_args.sample_rate,
+                pandda_args.comparison_res_cutoff,
                 pandda_fs_model,
                 process_local,
             )
@@ -422,7 +422,7 @@ def process_pandda(args: PanDDAArgs, ):
             raise Exception("Unrecognised comparison strategy")
 
         print("Comparators are:")
-        if args.debug:
+        if pandda_args.debug:
             printer.pprint(comparators)
 
         ###################################################################
@@ -434,15 +434,15 @@ def process_pandda(args: PanDDAArgs, ):
         shells = get_shells(
             datasets,
             comparators,
-            args.min_characterisation_datasets,
-            args.max_shell_datasets,
-            args.high_res_increment,
+            pandda_args.min_characterisation_datasets,
+            pandda_args.max_shell_datasets,
+            pandda_args.high_res_increment,
         )
         pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
         pandda_fs_model.shell_dirs.build()
 
         print("Shells are:")
-        if args.debug:
+        if pandda_args.debug:
             printer.pprint(shells)
 
         # Parameterise
@@ -450,18 +450,18 @@ def process_pandda(args: PanDDAArgs, ):
             process_shell,
             process_local=process_local,
             structure_factors=structure_factors,
-            sample_rate=args.sample_rate,
-            contour_level=args.contour_level,
-            cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
-            min_blob_volume=args.min_blob_volume,
-            min_blob_z_peak=args.min_blob_z_peak,
-            outer_mask=args.outer_mask,
-            inner_mask_symmetry=args.inner_mask_symmetry,
-            max_site_distance_cutoff=args.max_site_distance_cutoff,
-            min_bdc=args.min_bdc,
-            max_bdc=args.max_bdc,
-            memory_availability=args.memory_availability,
-            statmaps=args.statmaps,
+            sample_rate=pandda_args.sample_rate,
+            contour_level=pandda_args.contour_level,
+            cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+            min_blob_volume=pandda_args.min_blob_volume,
+            min_blob_z_peak=pandda_args.min_blob_z_peak,
+            outer_mask=pandda_args.outer_mask,
+            inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+            max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+            min_bdc=pandda_args.min_bdc,
+            max_bdc=pandda_args.max_bdc,
+            memory_availability=pandda_args.memory_availability,
+            statmaps=pandda_args.statmaps,
         )
 
         # Process the shells
@@ -508,7 +508,7 @@ def process_pandda(args: PanDDAArgs, ):
         ###################################################################
 
         # Autobuild the results if set to
-        if autobuild:
+        if pandda_args.autobuild:
             print("Attempting to autobuild!...")
 
             time_autobuild_start = time.time()
@@ -595,16 +595,16 @@ def process_pandda(args: PanDDAArgs, ):
         ###################################################################
         # # Rank Events
         ###################################################################
-        if args.rank_method == "size":
+        if pandda_args.rank_method == "size":
             all_events_ranked = rank_events_size(all_events, grid)
-        elif args.rank_method == "size_delta":
+        elif pandda_args.rank_method == "size_delta":
             raise NotImplementedError()
             all_events_ranked = rank_events_size_delta()
-        elif args.rank_method == "cnn":
+        elif pandda_args.rank_method == "cnn":
             raise NotImplementedError()
             all_events_ranked = rank_events_cnn()
 
-        elif args.rank_method == "autobuild":
+        elif pandda_args.rank_method == "autobuild":
             if not autobuild:
                 raise Exception("Cannot rank on autobuilds if autobuild is not set!")
             else:
@@ -615,7 +615,7 @@ def process_pandda(args: PanDDAArgs, ):
                     pandda_fs_model,
                 )
         else:
-            raise Exception(f"Ranking method: {args.rank_method} is unknown!")
+            raise Exception(f"Ranking method: {pandda_args.rank_method} is unknown!")
 
         ###################################################################
         # # Assign Sites
@@ -633,7 +633,7 @@ def process_pandda(args: PanDDAArgs, ):
         event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
-        site_table: SiteTable = SiteTable.from_events(all_events_events, args.max_site_distance_cutoff)
+        site_table: SiteTable = SiteTable.from_events(all_events_events, pandda_args.max_site_distance_cutoff)
         site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()
@@ -644,7 +644,7 @@ def process_pandda(args: PanDDAArgs, ):
         printer.pprint(pandda_log)
         save_json_log(
             pandda_log,
-            out_dir / constants.PANDDA_LOG_FILE,
+            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
         )
 
     ###################################################################
@@ -657,7 +657,7 @@ def process_pandda(args: PanDDAArgs, ):
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
-        print(f"Saving PanDDA log to: {out_dir / constants.PANDDA_LOG_FILE}")
+        print(f"Saving PanDDA log to: {pandda_args.out_dir / constants.PANDDA_LOG_FILE}")
 
         printer.pprint(
             pandda_log
@@ -665,10 +665,12 @@ def process_pandda(args: PanDDAArgs, ):
 
         save_json_log(
             pandda_log,
-            out_dir / constants.PANDDA_LOG_FILE,
+            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
         )
 
 
 if __name__ == '__main__':
-    args = PanDDAArgs.from_command_line()
+    with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
+        args = PanDDAArgs.from_command_line()
+
     process_pandda(args)
