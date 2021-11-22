@@ -72,7 +72,7 @@ from pandda_gemmi.clustering import get_comparators_local
 printer = pprint.PrettyPrinter()
 
 
-def process_pandda(pandda_args: PanDDAArgs, ):
+def process_pandda(args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
     ###################################################################
