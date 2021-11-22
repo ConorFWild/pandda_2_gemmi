@@ -46,6 +46,7 @@ ARGS_DESCRIPTION = (
     "Perform a Pan-Dataset Density Analysis.\n"
     "\n"
     "Typical usage is:\n"
+    "\n"
     "python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex='dimple.pdb' --mtz_regex='dimple.mtz' "
     "--autobuild=True <options>\n"
 )
