@@ -228,74 +228,75 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
             validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
 
-        with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!!'):
+        with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!'):
             datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
 
-        with STDOUTManager('Loading datasets...', f'\tDone!'):
+        with STDOUTManager('Removing datasets with poor low resolution completeness...', f'\tDone!'):
             datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
                 pandda_args.low_resolution_completeness)
             pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
                                                  dtag not in datasets_low_res]
             validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
 
-        datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
-        pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
-                                           dtag not in datasets_rfree]
-        validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
+        with STDOUTManager('Removing datasets with poor rfree...', f'\tDone!'):
+            datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
+            pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
+                                               dtag not in datasets_rfree]
+            validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
 
-        datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-            pandda_args.max_wilson_plot_z_score)  # TODO
-        validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
+        with STDOUTManager('Removing datasets with poor wilson rmsd...', f'\tDone!'):
+            datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
+                pandda_args.max_wilson_plot_z_score)  # TODO
+            validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
         # Select refernce
-        print("Getting reference")
-        reference: Reference = Reference.from_datasets(datasets_wilson)
+        with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
+            reference: Reference = Reference.from_datasets(datasets_wilson)
 
         # Post-reference filters
-        print("smoothing")
-        start = time.time()
-        datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
-            reference,
-            structure_factors=structure_factors,
-            mapper=process_local,
-        )
-        finish = time.time()
-        print(f"Smoothed in {finish - start}")
+        with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
+            start = time.time()
+            datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
+                reference,
+                structure_factors=structure_factors,
+                mapper=process_local,
+            )
+            finish = time.time()
 
-        print("Removing dissimilar models")
-        datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
-            reference,
-            pandda_args.max_rmsd_to_reference,
-        )
-        pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
-                                                          dtag not in datasets_diss_struc]
-        validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
+        with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
+            datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
+                reference,
+                pandda_args.max_rmsd_to_reference,
+            )
+            pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
+                                                              dtag not in datasets_diss_struc]
+            validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
 
-        print("Removing models with large gaps")
-        datasets_gaps: Datasets = datasets_diss_struc.remove_models_with_large_gaps(reference, )
-        for dtag in datasets_gaps:
-            if dtag not in datasets_diss_struc.datasets:
-                print(f"WARNING: Removed dataset {dtag} due to a large gap")
-        pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
-                                          dtag not in datasets_gaps]
-        validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
+        with STDOUTManager('Removing datasets whose models have large gaps...', f'\tDone!'):
+            datasets_gaps: Datasets = datasets_diss_struc.remove_models_with_large_gaps(reference, )
+            for dtag in datasets_gaps:
+                if dtag not in datasets_diss_struc.datasets:
+                    print(f"WARNING: Removed dataset {dtag} due to a large gap")
+            pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
+                                              dtag not in datasets_gaps]
+            validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
 
-        print("Removing dissimilar space groups")
-        datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-        pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
-                                        dtag not in datasets_diss_space]
-        validate_paramterized(datasets_diss_space, exception=Exception("Too few datasets after filter: space group"))
+        with STDOUTManager('Removing datasets with dissimilar spacegroups to the reference...', f'\tDone!'):
+            datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
+            pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
+                                            dtag not in datasets_diss_space]
+            validate_paramterized(datasets_diss_space, exception=Exception("Too few datasets after filter: space group"))
 
-        datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
-        pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
+            datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
+            pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
 
         # Grid
-        print("Getting grid")
-        grid: Grid = Grid.from_reference(reference,
-                                         pandda_args.outer_mask,
-                                         pandda_args.inner_mask_symmetry,
-                                         sample_rate=pandda_args.sample_rate,
-                                         )
+        with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
+            grid: Grid = Grid.from_reference(reference,
+                                             pandda_args.outer_mask,
+                                             pandda_args.inner_mask_symmetry,
+                                             sample_rate=pandda_args.sample_rate,
+                                             )
 
         if pandda_args.debug:
             print("Summarising protein mask")
@@ -305,121 +306,121 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             print("Summarising total mask")
             summarise_grid(grid.partitioning.total_mask)
 
-        print("Getting alignments")
-        alignments: Alignments = Alignments.from_datasets(
+        with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
+            alignments: Alignments = Alignments.from_datasets(
             reference,
             datasets,
-        )
+            )
 
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
 
-        print("Assigning comparison datasets...")
+        with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
+                           f'\tDone!'):
+            # Assign comparator set for each dataset
+            if pandda_args.comparison_strategy == "closest":
+                # Closest datasets after clustering
+                raise NotImplementedError()
+                comparators: Dict[Dtag, List[Dtag]] = ...
 
-        # Assign comparator set for each dataset
-        if pandda_args.comparison_strategy == "closest":
-            # Closest datasets after clustering
-            raise NotImplementedError()
-            comparators: Dict[Dtag, List[Dtag]] = ...
+            elif pandda_args.comparison_strategy == "closest_cutoff":
+                # Closest datasets after clustering as long as they are not too poor res
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                    structure_factors,
+                    pandda_args.sample_rate,
+                    pandda_args.comparison_res_cutoff,
+                    pandda_fs_model,
+                    process_local,
+                    pandda_args.exclude_local,
+                )
 
-        elif pandda_args.comparison_strategy == "closest_cutoff":
-            # Closest datasets after clustering as long as they are not too poor res
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
-                datasets,
-                alignments,
-                grid,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-                structure_factors,
-                pandda_args.sample_rate,
-                pandda_args.comparison_res_cutoff,
-                pandda_fs_model,
-                process_local,
-                pandda_args.exclude_local,
-            )
+            elif pandda_args.comparison_strategy == "closest_cluster":
 
-        elif pandda_args.comparison_strategy == "closest_cluster":
+                get_clusters = get_clusters_nn  # get_clusters_linkage
+                # Closest datasets after clustering as long as they are not too poor res
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                    structure_factors,
+                    pandda_args.sample_rate,
+                    pandda_args.comparison_res_cutoff,
+                    pandda_fs_model,
+                    process_local,
+                    get_clusters,
+                    cluster_selection=pandda_args.cluster_selection,
+                )
 
-            get_clusters = get_clusters_nn  # get_clusters_linkage
-            # Closest datasets after clustering as long as they are not too poor res
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
-                datasets,
-                alignments,
-                grid,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-                structure_factors,
-                pandda_args.sample_rate,
-                pandda_args.comparison_res_cutoff,
-                pandda_fs_model,
-                process_local,
-                get_clusters,
-                cluster_selection=pandda_args.cluster_selection,
-            )
+            elif pandda_args.comparison_strategy == "high_res":
+                # Almost Old PanDDA strategy: highest res datasets
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
+                    datasets,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                )
 
-        elif pandda_args.comparison_strategy == "high_res":
-            # Almost Old PanDDA strategy: highest res datasets
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
-                datasets,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-            )
+            elif pandda_args.comparison_strategy == "high_res_random":
+                # Old pandda strategy: random datasets that are higher resolution
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
+                    datasets,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                )
 
-        elif pandda_args.comparison_strategy == "high_res_random":
-            # Old pandda strategy: random datasets that are higher resolution
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
-                datasets,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-            )
+            elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
+                if not known_apos:
+                    known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+                else:
+                    known_apos = [Dtag(dtag) for dtag in known_apos]
+                    for known_apo in known_apos:
+                        if known_apo not in datasets:
+                            raise Exception(
+                                f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
+                                f"dataset dtags: {list(datasets.keys())}"
+                            )
+                print(f"Known apos are: {known_apos}")
 
-        elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
-            if not known_apos:
-                known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+                pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
+
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                    structure_factors,
+                    pandda_args.sample_rate,
+                    pandda_args.comparison_res_cutoff,
+                    pandda_fs_model,
+                    process_local,
+                    known_apos,
+                )
+
+            elif pandda_args.comparison_strategy == "local":
+                comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
+                    reference,
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_args.comparison_min_comparators,
+                    pandda_args.comparison_max_comparators,
+                    structure_factors,
+                    pandda_args.sample_rate,
+                    pandda_args.comparison_res_cutoff,
+                    pandda_fs_model,
+                    process_local,
+                )
+
             else:
-                known_apos = [Dtag(dtag) for dtag in known_apos]
-                for known_apo in known_apos:
-                    if known_apo not in datasets:
-                        raise Exception(
-                            f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
-                            f"dataset dtags: {list(datasets.keys())}"
-                        )
-            print(f"Known apos are: {known_apos}")
-
-            pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
-
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
-                datasets,
-                alignments,
-                grid,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-                structure_factors,
-                pandda_args.sample_rate,
-                pandda_args.comparison_res_cutoff,
-                pandda_fs_model,
-                process_local,
-                known_apos,
-            )
-
-        elif pandda_args.comparison_strategy == "local":
-            comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
-                reference,
-                datasets,
-                alignments,
-                grid,
-                pandda_args.comparison_min_comparators,
-                pandda_args.comparison_max_comparators,
-                structure_factors,
-                pandda_args.sample_rate,
-                pandda_args.comparison_res_cutoff,
-                pandda_fs_model,
-                process_local,
-            )
-
-        else:
-            raise Exception("Unrecognised comparison strategy")
+                raise Exception("Unrecognised comparison strategy")
 
         print("Comparators are:")
         if pandda_args.debug:
@@ -431,17 +432,18 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
         # sake of computational efficiency
-        shells = get_shells(
-            datasets,
-            comparators,
-            pandda_args.min_characterisation_datasets,
-            pandda_args.max_shell_datasets,
-            pandda_args.high_res_increment,
-        )
-        pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
-        pandda_fs_model.shell_dirs.build()
+        with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
+                           f'\tDone!'):
+            shells = get_shells(
+                datasets,
+                comparators,
+                pandda_args.min_characterisation_datasets,
+                pandda_args.max_shell_datasets,
+                pandda_args.high_res_increment,
+            )
+            pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
+            pandda_fs_model.shell_dirs.build()
 
-        print("Shells are:")
         if pandda_args.debug:
             printer.pprint(shells)
 
@@ -465,30 +467,31 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         )
 
         # Process the shells
-        time_shells_start = time.time()
-        shell_results: List[ShellResult] = process_global(
-            [
-                partial(
-                    process_shell_paramaterised,
-                    shell,
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_fs_model,
-                    reference,
-                )
-                for res, shell
-                in shells.items()
-            ],
-        )
-        time_shells_finish = time.time()
-        print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
-        pandda_log[constants.LOG_SHELLS] = {
-            res: shell_result.log
-            for res, shell_result
-            in zip(shells, shell_results)
-            if shell_result
-        }
+        with STDOUTManager('Processing the shells...', f'\tDone!'):
+            time_shells_start = time.time()
+            shell_results: List[ShellResult] = process_global(
+                [
+                    partial(
+                        process_shell_paramaterised,
+                        shell,
+                        datasets,
+                        alignments,
+                        grid,
+                        pandda_fs_model,
+                        reference,
+                    )
+                    for res, shell
+                    in shells.items()
+                ],
+            )
+            time_shells_finish = time.time()
+            print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
+            pandda_log[constants.LOG_SHELLS] = {
+                res: shell_result.log
+                for res, shell_result
+                in zip(shells, shell_results)
+                if shell_result
+            }
 
         all_events: Dict[EventId, Event] = {}
         for shell_result in shell_results:
@@ -509,143 +512,151 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Autobuild the results if set to
         if pandda_args.autobuild:
-            print("Attempting to autobuild!...")
+            with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
-            time_autobuild_start = time.time()
-            autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
-                [
-                    partial(
-                        autobuild_parametrized,
-                        datasets[event_id.dtag],
-                        all_events[event_id],
-                        pandda_fs_model,
-                    )
-                    for event_id
-                    in all_events
-                ]
-            )
-
-            time_autobuild_finish = time.time()
-            pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
-
-            autobuild_results: Dict[EventID, AutobuildResult] = {
-                event_id: autobuild_result
-                for event_id, autobuild_result
-                in zip(all_events, autobuild_results_list)
-            }
-            printer.pprint(autobuild_results)
-
-            # Save results
-            pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
-            for event_id, autobuild_result in autobuild_results.items():
-                dtag = str(event_id.dtag.dtag)
-                if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
-                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
-
-                event_idx = int(event_id.event_idx.event_idx)
-
-                pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
-
-            # Add the best fragment by scoring method to default model
-            pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
-            pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
-            for dtag in datasets:
-                print(f"Finding best autobuild for dataset: {dtag}")
-                dataset_autobuild_results = {
-                    event_id: autobuild_result
-                    for event_id, autobuild_result
-                    in autobuild_results.items()
-                    if dtag == event_id.dtag
-                }
-
-                if len(dataset_autobuild_results) == 0:
-                    print("\tNo autobuilds for this dataset!")
-                    continue
-
-                all_scores = {}
-                for event_id, autobuild_result in dataset_autobuild_results.items():
-                    for path, score in autobuild_result.scores.items():
-                        all_scores[path] = score
-
-                if len(all_scores) == 0:
-                    print(f"\tNo autobuilds for this dataset!")
-                    continue
-
-                printer.pprint(all_scores)
-
-                # Select fragment build
-                selected_fragement_path = max(
-                    all_scores,
-                    key=lambda _path: all_scores[_path],
+                time_autobuild_start = time.time()
+                autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
+                    [
+                        partial(
+                            autobuild_parametrized,
+                            datasets[event_id.dtag],
+                            all_events[event_id],
+                            pandda_fs_model,
+                        )
+                        for event_id
+                        in all_events
+                    ]
                 )
 
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(
-                    all_scores[selected_fragement_path])
+                time_autobuild_finish = time.time()
+                pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
 
-                print(f"Selected fragment path: {selected_fragement_path}")
+                autobuild_results: Dict[EventID, AutobuildResult] = {
+                    event_id: autobuild_result
+                    for event_id, autobuild_result
+                    in zip(all_events, autobuild_results_list)
+                }
+                printer.pprint(autobuild_results)
 
-                # Copy to pandda models
-                model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
-                pandda_model_path = pandda_fs_model.processed_datasets[
-                                        dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag.dtag)
-                merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
-                save_pdb_file(merged_structure, pandda_model_path)
+                # Save results
+                pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
+                for event_id, autobuild_result in autobuild_results.items():
+                    dtag = str(event_id.dtag.dtag)
+                    if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
+                        pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
+
+                    event_idx = int(event_id.event_idx.event_idx)
+
+                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
+
+            with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
+                # Add the best fragment by scoring method to default model
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
+                for dtag in datasets:
+                    print(f"Finding best autobuild for dataset: {dtag}")
+                    dataset_autobuild_results = {
+                        event_id: autobuild_result
+                        for event_id, autobuild_result
+                        in autobuild_results.items()
+                        if dtag == event_id.dtag
+                    }
+
+                    if len(dataset_autobuild_results) == 0:
+                        print("\tNo autobuilds for this dataset!")
+                        continue
+
+                    all_scores = {}
+                    for event_id, autobuild_result in dataset_autobuild_results.items():
+                        for path, score in autobuild_result.scores.items():
+                            all_scores[path] = score
+
+                    if len(all_scores) == 0:
+                        print(f"\tNo autobuilds for this dataset!")
+                        continue
+
+                    printer.pprint(all_scores)
+
+                    # Select fragment build
+                    selected_fragement_path = max(
+                        all_scores,
+                        key=lambda _path: all_scores[_path],
+                    )
+
+                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
+                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(
+                        all_scores[selected_fragement_path])
+
+                    print(f"Selected fragment path: {selected_fragement_path}")
+
+                    # Copy to pandda models
+                    model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
+                    pandda_model_path = pandda_fs_model.processed_datasets[
+                                            dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag.dtag)
+                    merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
+                    save_pdb_file(merged_structure, pandda_model_path)
 
         ###################################################################
         # # Rank Events
         ###################################################################
-        if pandda_args.rank_method == "size":
-            all_events_ranked = rank_events_size(all_events, grid)
-        elif pandda_args.rank_method == "size_delta":
-            raise NotImplementedError()
-            all_events_ranked = rank_events_size_delta()
-        elif pandda_args.rank_method == "cnn":
-            raise NotImplementedError()
-            all_events_ranked = rank_events_cnn()
+        with STDOUTManager('Ranking events...', f'\tDone!'):
+            if pandda_args.rank_method == "size":
+                all_events_ranked = rank_events_size(all_events, grid)
+            elif pandda_args.rank_method == "size_delta":
+                raise NotImplementedError()
+                all_events_ranked = rank_events_size_delta()
+            elif pandda_args.rank_method == "cnn":
+                raise NotImplementedError()
+                all_events_ranked = rank_events_cnn()
 
-        elif pandda_args.rank_method == "autobuild":
-            if not autobuild:
-                raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+            elif pandda_args.rank_method == "autobuild":
+                if not autobuild:
+                    raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+                else:
+                    all_events_ranked = rank_events_autobuild(
+                        all_events,
+                        autobuild_results,
+                        datasets,
+                        pandda_fs_model,
+                    )
             else:
-                all_events_ranked = rank_events_autobuild(
-                    all_events,
-                    autobuild_results,
-                    datasets,
-                    pandda_fs_model,
-                )
-        else:
-            raise Exception(f"Ranking method: {pandda_args.rank_method} is unknown!")
+                raise Exception(f"Ranking method: {pandda_args.rank_method} is unknown!")
 
         ###################################################################
         # # Assign Sites
         ###################################################################
 
         # Get the events and assign sites to them
-        all_events_events = Events.from_all_events(all_events_ranked, grid, max_site_distance_cutoff)
+        with STDOUTManager('Assigning sites to each event', f'\tDone!'):
+            all_events_events = Events.from_all_events(all_events_ranked, grid, max_site_distance_cutoff)
 
         ###################################################################
         # # Output pandda summary information
         ###################################################################
 
         # Output a csv of the events
-        event_table: EventTable = EventTable.from_events(all_events_events)
-        event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
+        with STDOUTManager('Building and outputting event table...', f'\tDone!'):
+            event_table: EventTable = EventTable.from_events(all_events_events)
+            event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
-        site_table: SiteTable = SiteTable.from_events(all_events_events, pandda_args.max_site_distance_cutoff)
-        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+        with STDOUTManager('Building and outputting site table...', f'\tDone!'):
+            site_table: SiteTable = SiteTable.from_events(all_events_events, pandda_args.max_site_distance_cutoff)
+            site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()
-        print(f"PanDDA ran in: {time_finish - time_start}")
         pandda_log[constants.LOG_TIME] = time_finish - time_start
 
         # Output json log
-        printer.pprint(pandda_log)
-        save_json_log(
-            pandda_log,
-            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
-        )
+        with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
+            printer.pprint(pandda_log)
+            save_json_log(
+                pandda_log,
+                pandda_args.out_dir / constants.PANDDA_LOG_FILE,
+            )
+
+        print(f"PanDDA ran in: {time_finish - time_start}")
+
 
     ###################################################################
     # # Handle Exceptions
