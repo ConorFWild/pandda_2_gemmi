@@ -91,7 +91,7 @@ class PanDDAArgs:
     def from_command_line():
         parser = argparse.ArgumentParser(
             description=constants.ARGS_DESCRIPTION,
-            formatter_class=argparse.RawTextHelpFormatter,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
         )
 
         # IO
