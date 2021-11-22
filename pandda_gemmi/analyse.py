@@ -30,6 +30,7 @@ from pandda_gemmi.pandda_types import (
     AutobuildResult
 )
 from pandda_gemmi import constants
+from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
@@ -84,6 +85,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     data_dirs = Path(args.data_dirs)
     out_dir = Path(args.out_dir)
     distributed_tmp = Path(args.distributed_tmp)
+
+    # CHeck dependencies
+    check_dependencies(args)
 
     # Initialise log
     print("Initialising log...")
