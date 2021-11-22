@@ -351,7 +351,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
                 process_local,
                 get_clusters,
-                cluster_selection=cluster_selection,
+                cluster_selection=args.cluster_selection,
             )
 
         elif args.comparison_strategy == "high_res":
