@@ -16,7 +16,7 @@ import joblib
 
 ## Custom Imports
 from pandda_gemmi.args import PanDDAArgs
-from pandda_gemmi.logging import STDOUTManager
+from pandda_gemmi.pandda_logging import STDOUTManager
 from pandda_gemmi.logs import (
     summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
     summarise_datasets

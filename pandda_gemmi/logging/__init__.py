@@ -1,1 +1,0 @@
-from pandda_gemmi.logging.stdout_manager import STDOUTManager
