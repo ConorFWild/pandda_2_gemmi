@@ -89,7 +89,10 @@ class PanDDAArgs:
 
     @staticmethod
     def from_command_line():
-        parser = argparse.ArgumentParser(description=constants.ARGS_DESCRIPTION)
+        parser = argparse.ArgumentParser(
+            description=constants.ARGS_DESCRIPTION,
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
 
         # IO
         parser.add_argument(
