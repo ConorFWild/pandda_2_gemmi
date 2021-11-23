@@ -628,7 +628,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Get the events and assign sites to them
         with STDOUTManager('Assigning sites to each event', f'\tDone!'):
-            all_events_events = Events.from_all_events(all_events_ranked, grid, max_site_distance_cutoff)
+            all_events_events = Events.from_all_events(all_events_ranked, grid, pandda_args.max_site_distance_cutoff)
 
         ###################################################################
         # # Output pandda summary information
