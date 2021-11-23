@@ -610,7 +610,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 all_events_ranked = rank_events_cnn()
 
             elif pandda_args.rank_method == "autobuild":
-                if not autobuild:
+                if not pandda_args.autobuild:
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")
                 else:
                     all_events_ranked = rank_events_autobuild(
