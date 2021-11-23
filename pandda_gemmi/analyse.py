@@ -16,7 +16,7 @@ import joblib
 
 ## Custom Imports
 from pandda_gemmi.args import PanDDAArgs
-from pandda_gemmi.pandda_logging import STDOUTManager
+from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
 from pandda_gemmi.logs import (
     summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
     summarise_datasets
@@ -80,8 +80,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     time_start = time.time()
 
     # Process args
-    initial_arg_values = inspect.getargvalues(inspect.currentframe())
-    printer.pprint(initial_arg_values)
+    # initial_arg_values = inspect.getargvalues(inspect.currentframe())
+    # printer.pprint(initial_arg_values)
     distributed_tmp = Path(pandda_args.distributed_tmp)
 
     # CHeck dependencies
@@ -92,7 +92,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
         pandda_log: Dict = {}
         pandda_log[constants.LOG_START] = time.time()
-        pandda_log[constants.LOG_ARGUMENTS] = initial_arg_values
+        initial_args = log_arguments(pandda_args, )
+
+        pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
     # Get global processor
     with STDOUTManager('Getting global processor...', '\tGot global processor!'):
