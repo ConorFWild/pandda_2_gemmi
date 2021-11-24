@@ -66,7 +66,8 @@ class Sites:
         return self.site_to_event[item]
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, cutoff: float):
+    def from_clusters(clusterings,#: Clusterings,
+                      cutoff: float):
         flat_clusters = {}
         for dtag in clusterings:
             for event_idx in clusterings[dtag]:

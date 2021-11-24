@@ -17,6 +17,7 @@ from pandda_gemmi.edalignment import Grid, Xmap, Alignment, Xmaps, Partitioning
 from pandda_gemmi.model import Zmap, Zmaps, Model
 from pandda_gemmi.sites import Sites
 
+
 def save_event_map(
         path,
          xmap: Xmap,
