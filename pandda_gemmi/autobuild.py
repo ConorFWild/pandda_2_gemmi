@@ -6,12 +6,34 @@ import subprocess
 from pathlib import Path
 import json
 
+from typing import *
+
 import fire
 import numpy as np
 import gemmi
 
 from pandda_gemmi import constants
-from pandda_gemmi.pandda_types import *
+
+from pandda_gemmi.constants import *
+# from pandda_gemmi.python_types import *
+from pandda_gemmi.common import Dtag, EventID, EventIDX
+from pandda_gemmi.fs import PanDDAFSModel
+from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
+                                  Resolution, Reference)
+from pandda_gemmi.shells import Shell
+from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Partitioning, Xmap
+from pandda_gemmi.model import Zmap, Model
+from pandda_gemmi.event import Event
+
+
+@dataclasses.dataclass()
+class AutobuildResult:
+    status: bool
+    paths: List[str]
+    scores: Dict[str, float]
+    cif_path: str
+    selected_fragment_path: Optional[str]
+    command: str
 
 
 def execute(command: str):
@@ -934,7 +956,6 @@ def autobuild_rhofit(dataset: Dataset,
         cif_path = Path(cif_path)
 
     out_dir = Path(out_dir)
-    print(f"\tEvent native centroid: {event.native_centroid}")
     coord = Coord(
         event.native_centroid[0],
         event.native_centroid[1],
@@ -944,16 +965,13 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Truncate the model
     truncated_model_path = truncate_model(model_path, coord, out_dir)
-    print(f"\tTruncated model")
 
     # Truncate the ed map
     if not rhofit_coord:
         truncated_xmap_path = truncate_xmap(build_map_path, coords, out_dir)
-        print(f"\tTruncated xmap")
 
         # Make cut out map
         cut_out_xmap(build_map_path, coord, out_dir)
-        print(f"\tCut out xmap")
 
     # Generate the cif
     if cif_strategy == "default":
@@ -1040,15 +1058,12 @@ def autobuild_rhofit(dataset: Dataset,
     else:
         raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
 
-    print(f"\tGenerated cif")
-
     # Call rhofit
     if rhofit_coord:
         rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord,
                                          cut, )
     else:
         rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, )
-    print(f"\tRhofit")
 
     autobuilding_log["rhofit_command"] = str(rhofit_command)
 
@@ -1060,9 +1075,8 @@ def autobuild_rhofit(dataset: Dataset,
 
     autobuilding_log["rescoring_log"] = rescoring_log
 
-    print(f"\tRescored")
-    for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
-        print(f"\t\t{score_dictionary[path]}: {path}")
+    # for path in sorted(score_dictionary, key=lambda _path: score_dictionary[_path]):
+    #     print(f"\t\t{score_dictionary[path]}: {path}")
 
     autobuilding_log["scores"] = {
         str(path): float(score_dictionary[path])
@@ -1072,10 +1086,8 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Write scores
     save_score_dictionary(score_dictionary, out_dir / "scores.json")
-    print(f"\tSaved scores")
 
     # Remove the big map
-    print(f"Removing truncated map")
     # os.remove(str(truncated_xmap_path))
 
     # Select fragment build

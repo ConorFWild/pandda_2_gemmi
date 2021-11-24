@@ -1,60 +1,51 @@
 from __future__ import annotations
 
 # Base python
-import traceback
-from typing import Dict, Optional, List, Tuple
+import dataclasses
 import time
-from pathlib import Path
 import pprint
 from functools import partial
-import multiprocessing as mp
 import os
 import json
 
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
-import fire
-import numpy as np
-import shutil
+
 
 ## Custom Imports
 from pandda_gemmi.logs import (
-    summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
+    summarise_array,
 )
-from pandda_gemmi.pandda_types import (
-    PanDDAFSModel, Dataset, Datasets, Reference, Resolution,
-    Grid, Alignments, Partitioning, Shell, Xmap, Xmaps, Zmap, MeanMapFile, StdMapFile,
-    XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
-    EventID, Event, Events, SiteTable, EventTable,
-    StructureFactors, Xmap,
-    DatasetResult, ShellResult,
-)
+
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
-    process_local_joblib,
-    process_local_multiprocessing,
-    get_dask_client,
-    process_global_serial,
-    process_global_dask,
-    get_shells,
-    get_comparators_high_res_random,
-    get_comparators_closest_cutoff,
     truncate,
-    validate_strategy_num_datasets,
-    validate,
+)
+from pandda_gemmi.python_types import *
+from pandda_gemmi.common import Dtag, EventID
+from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
+from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
+                                  Resolution, )
+from pandda_gemmi.shells import Shell
+from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray
+from pandda_gemmi.model import Zmap, Model, Zmaps
+from pandda_gemmi.event import Event, Clusterings, Clustering, Events
 
-)
-from pandda_gemmi.ranking import (
-    rank_events_size,
-    rank_events_autobuild,
-)
-from pandda_gemmi.autobuild import (
-    autobuild_rhofit,
-    merge_ligand_into_structure_from_paths,
-    save_pdb_file,
-)
+
+@dataclasses.dataclass()
+class DatasetResult:
+    dtag: Dtag
+    events: Dict[EventID, Event]
+    log: Dict
+
+
+@dataclasses.dataclass()
+class ShellResult:
+    shell: Shell
+    dataset_results: Dict[Dtag, DatasetResult]
+    log: Dict
 
 
 def update_log(shell_log, shell_log_path):
@@ -192,7 +183,7 @@ def process_dataset(
             )
 
             std_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
-                                                          dtag].z_map_file)
+                                                         dtag].z_map_file)
             std_map_file.save_native_frame_std_map(
                 dtag,
                 model,
@@ -397,7 +388,8 @@ def process_shell(
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
     print("Truncating datasets")
-    shell_working_resolution = Resolution(min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
+    shell_working_resolution = Resolution(
+        min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
         resolution=shell_working_resolution,

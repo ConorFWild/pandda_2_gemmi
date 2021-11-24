@@ -1,37 +1,28 @@
 # Base python
 import traceback
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List
 import time
 from pathlib import Path
 import pprint
 from functools import partial
 import multiprocessing as mp
-import inspect
 
 # Scientific python libraries
-import fire
-import numpy as np
-import shutil
 import joblib
 
 ## Custom Imports
+from pandda_gemmi import constants
+from pandda_gemmi.common import Dtag, EventID
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
-from pandda_gemmi.logs import (
-    summarise_grid, summarise_event, summarise_structure, summarise_mtz, summarise_array, save_json_log,
-    summarise_datasets
-)
-from pandda_gemmi.pandda_types import (
-    PanDDAFSModel, ShellDirs, Dataset, Datasets, Reference, Resolution,
-    Grid, Alignments, Shell, Xmap, Xmaps, Zmap,
-    XmapArray, Model, Dtag, Zmaps, Clustering, Clusterings,
-    EventID, Event, Events, SiteTable, EventTable,
-    StructureFactors, Xmap,
-    DatasetResult, ShellResult,
-    AutobuildResult
-)
-from pandda_gemmi import constants
 from pandda_gemmi.dependencies import check_dependencies
+from pandda_gemmi.dataset import Datasets, Reference
+from pandda_gemmi.edalignment import Grid, Alignments
+
+from pandda_gemmi.logs import (
+    summarise_grid, save_json_log, summarise_datasets
+)
+
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
@@ -44,31 +35,32 @@ from pandda_gemmi.pandda_functions import (
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
     get_comparators_closest_apo_cutoff,
-    get_clusters_linkage,
     get_clusters_nn,
     get_comparators_closest_cluster,
-    truncate,
     validate_strategy_num_datasets,
     validate,
     get_common_structure_factors,
 )
+from pandda_gemmi.event import Event, Events
 from pandda_gemmi.ranking import (
     rank_events_size,
     rank_events_autobuild,
 )
 from pandda_gemmi.autobuild import (
+    AutobuildResult,
     autobuild_rhofit,
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
 )
-from pandda_gemmi.distribution.fscluster import FSCluster
-
+from pandda_gemmi.tables import (
+    EventTable,
+    SiteTable,
+    )
+from pandda_gemmi.fs import PanDDAFSModel, ShellDirs
 from pandda_gemmi.processing import (
     process_shell,
-    # process_shell_low_mem,
+    ShellResult
 )
-
-from pandda_gemmi.clustering import get_comparators_local
 
 printer = pprint.PrettyPrinter()
 
@@ -125,7 +117,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     with STDOUTManager('Getting local processor...', '\tGot local processor!'):
         if pandda_args.local_processing == "serial":
             raise NotImplementedError()
-            process_local = ...
+            # process_local = ...
         elif pandda_args.local_processing == "joblib":
             process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=0, prefer="processes")
             process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
@@ -167,16 +159,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
             with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
                 if pandda_args.autobuild_strategy == "rhofit":
-                    ana_pdbmaps_path = shutil.which("ana_pdbmaps")
-                    rhofit_path = shutil.which("rhofit")
-                    pandda_rhofit_path = shutil.which("pandda_rhofit.sh")
-
-                    if not ana_pdbmaps_path:
-                        raise Exception("PanDDA Rhofit requires ana_pdbmaps to be in path!")
-                    if not rhofit_path:
-                        raise Exception("PanDDA Rhofit requires rhofit to be in path!")
-                    if not pandda_rhofit_path:
-                        raise Exception("PanDDA Rhofit requires pandda_rhofit.sh to be in path!")
 
                     autobuild_parametrized = partial(
                         autobuild_rhofit,
@@ -324,7 +306,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.comparison_strategy == "closest":
                 # Closest datasets after clustering
                 raise NotImplementedError()
-                comparators: Dict[Dtag, List[Dtag]] = ...
+                # comparators: Dict[Dtag, List[Dtag]] = ...
 
             elif pandda_args.comparison_strategy == "closest_cutoff":
                 # Closest datasets after clustering as long as they are not too poor res
@@ -378,17 +360,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 )
 
             elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
-                if not known_apos:
+                if not pandda_args.known_apos:
                     known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
                 else:
-                    known_apos = [Dtag(dtag) for dtag in known_apos]
+                    known_apos = [Dtag(dtag) for dtag in pandda_args.known_apos]
                     for known_apo in known_apos:
                         if known_apo not in datasets:
                             raise Exception(
                                 f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
                                 f"dataset dtags: {list(datasets.keys())}"
                             )
-                print(f"Known apos are: {known_apos}")
 
                 pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
 
@@ -406,26 +387,26 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     known_apos,
                 )
 
-            elif pandda_args.comparison_strategy == "local":
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
-                    reference,
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                    structure_factors,
-                    pandda_args.sample_rate,
-                    pandda_args.comparison_res_cutoff,
-                    pandda_fs_model,
-                    process_local,
-                )
+            # elif pandda_args.comparison_strategy == "local":
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
+            #         reference,
+            #         datasets,
+            #         alignments,
+            #         grid,
+            #         pandda_args.comparison_min_comparators,
+            #         pandda_args.comparison_max_comparators,
+            #         structure_factors,
+            #         pandda_args.sample_rate,
+            #         pandda_args.comparison_res_cutoff,
+            #         pandda_fs_model,
+            #         process_local,
+            #     )
 
             else:
                 raise Exception("Unrecognised comparison strategy")
 
-        print("Comparators are:")
         if pandda_args.debug:
+            print("Comparators are:")
             printer.pprint(comparators)
 
         ###################################################################
@@ -487,7 +468,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 ],
             )
             time_shells_finish = time.time()
-            print(f"Finished processing shells in: {time_shells_finish - time_shells_start}")
             pandda_log[constants.LOG_SHELLS] = {
                 res: shell_result.log
                 for res, shell_result
@@ -495,18 +475,15 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if shell_result
             }
 
-        all_events: Dict[EventId, Event] = {}
+        all_events: Dict[EventID, Event] = {}
         for shell_result in shell_results:
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
-                    print(type(dataset_result.events))
                     all_events.update(dataset_result.events.events)
 
         # Add the event maps to the fs
         for event_id, event in all_events.items():
             pandda_fs_model.processed_datasets[event_id.dtag].event_map_files.add_event(event)
-
-        printer.pprint(all_events)
 
         ###################################################################
         # # Autobuilding
@@ -556,7 +533,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
                 for dtag in datasets:
-                    print(f"Finding best autobuild for dataset: {dtag}")
                     dataset_autobuild_results = {
                         event_id: autobuild_result
                         for event_id, autobuild_result
@@ -565,7 +541,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     }
 
                     if len(dataset_autobuild_results) == 0:
-                        print("\tNo autobuilds for this dataset!")
+                        # print("\tNo autobuilds for this dataset!")
                         continue
 
                     all_scores = {}
@@ -574,7 +550,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                             all_scores[path] = score
 
                     if len(all_scores) == 0:
-                        print(f"\tNo autobuilds for this dataset!")
+                        # print(f"\tNo autobuilds for this dataset!")
                         continue
 
                     printer.pprint(all_scores)
@@ -588,8 +564,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
                     pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(
                         all_scores[selected_fragement_path])
-
-                    print(f"Selected fragment path: {selected_fragement_path}")
 
                     # Copy to pandda models
                     model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
@@ -606,10 +580,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 all_events_ranked = rank_events_size(all_events, grid)
             elif pandda_args.rank_method == "size_delta":
                 raise NotImplementedError()
-                all_events_ranked = rank_events_size_delta()
+                # all_events_ranked = rank_events_size_delta()
             elif pandda_args.rank_method == "cnn":
                 raise NotImplementedError()
-                all_events_ranked = rank_events_cnn()
+                # all_events_ranked = rank_events_cnn()
 
             elif pandda_args.rank_method == "autobuild":
                 if not pandda_args.autobuild:

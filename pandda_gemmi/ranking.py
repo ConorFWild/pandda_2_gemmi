@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from typing import *
-from functools import partial
-import json
 
-import numpy as np
-import multiprocessing as mp
-import joblib
-
-from pandda_gemmi.pandda_types import *
+from pandda_gemmi.common import EventID, Dtag
+from pandda_gemmi.dataset import Dataset
+from pandda_gemmi.fs import PanDDAFSModel
+from pandda_gemmi.edalignment import Grid
+from pandda_gemmi.event import Event
+from pandda_gemmi.autobuild import AutobuildResult
 
 
 def rank_events_size(events: Dict[EventID, Event], grid: Grid):
