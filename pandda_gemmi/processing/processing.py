@@ -308,7 +308,7 @@ def process_dataset(
     time_event_map_start = time.time()
 
     # Save the event maps!
-    printer.pprint(events)
+    # printer.pprint(events)
     events.save_event_maps(
         dataset_truncated_datasets,
         alignments,
