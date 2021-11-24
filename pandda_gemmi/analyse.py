@@ -516,7 +516,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     for event_id, autobuild_result
                     in zip(all_events, autobuild_results_list)
                 }
-                printer.pprint(autobuild_results)
 
                 # Save results
                 pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
@@ -554,7 +553,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         # print(f"\tNo autobuilds for this dataset!")
                         continue
 
-                    printer.pprint(all_scores)
 
                     # Select fragment build
                     selected_fragement_path = max(
