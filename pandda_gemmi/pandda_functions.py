@@ -12,18 +12,20 @@ import numpy as np
 import multiprocessing as mp
 import joblib
 from scipy import spatial as spsp, cluster as spc
-
 from sklearn import decomposition, metrics
 import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 from matplotlib import pyplot as plt
+import gemmi
 
 from pandda_gemmi import constants
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
 from pandda_gemmi.shells import Shell
-from pandda_gemmi.edalignment import Alignment, Grid, Xmap
+from pandda_gemmi.edalignment import Alignment, Grid, Xmap, Partitioning
+from pandda_gemmi.model import Model, Zmap
+from pandda_gemmi.event import Event
 
 
 def run(func):
@@ -1977,3 +1979,222 @@ def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
 
     # If couldn't find common names in any dataset return None
     return None
+
+
+def save_native_frame_zmap(
+        path,
+        zmap: Zmap,
+        dataset: Dataset,
+        alignment: Alignment,
+        grid: Grid,
+        structure_factors: StructureFactors,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        partitioning: Partitioning,
+        sample_rate: float,
+):
+    reference_frame_zmap_grid = zmap.zmap
+    # reference_frame_zmap_grid_array = np.array(reference_frame_zmap_grid, copy=True)
+
+    # z_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+    #                                          reference_frame_zmap_grid.nv,
+    #                                          reference_frame_zmap_grid.nw,
+    #                                          ]
+    #                                        )
+    # z_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    # z_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+    event_map_grid = Xmap.from_aligned_map_c(
+        reference_frame_zmap_grid,
+        dataset,
+        alignment,
+        grid,
+        structure_factors,
+        mask_radius,
+        partitioning,
+        mask_radius_symmetry,
+        sample_rate,
+    )
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = event_map_grid.xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
+
+def save_native_frame_mean_map(
+        self,
+        model: Model,
+        zmap: Zmap,
+        dataset: Dataset,
+        alignment: Alignment,
+        grid: Grid,
+        structure_factors: StructureFactors,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        partitioning: Partitioning,
+        sample_rate: float,
+):
+    reference_frame_zmap_grid = zmap.zmap
+
+    event_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+                                                 reference_frame_zmap_grid.nv,
+                                                 reference_frame_zmap_grid.nw,
+                                                 ]
+                                               )
+    event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    event_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    event_map_reference_grid_array[:, :, :] = model.mean
+
+    event_map_grid = Xmap.from_aligned_map_c(
+        event_map_reference_grid,
+        dataset,
+        alignment,
+        grid,
+        structure_factors,
+        mask_radius,
+        partitioning,
+        mask_radius_symmetry,
+        sample_rate,
+    )
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = event_map_grid.xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(self.path))
+
+
+def save_native_frame_std_map(
+        self,
+        dtag: Dtag,
+        model: Model,
+        zmap: Zmap,
+        dataset: Dataset,
+        alignment: Alignment,
+        grid: Grid,
+        structure_factors: StructureFactors,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        partitioning: Partitioning,
+        sample_rate: float,
+):
+    reference_frame_zmap_grid = zmap.zmap
+
+    event_map_reference_grid = gemmi.FloatGrid(*[reference_frame_zmap_grid.nu,
+                                                 reference_frame_zmap_grid.nv,
+                                                 reference_frame_zmap_grid.nw,
+                                                 ]
+                                               )
+    event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    event_map_reference_grid.set_unit_cell(reference_frame_zmap_grid.unit_cell)
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    event_map_reference_grid_array[:, :, :] = (
+        np.sqrt(np.square(model.sigma_s_m) + np.square(model.sigma_is[dtag])))
+
+    event_map_grid = Xmap.from_aligned_map_c(
+        event_map_reference_grid,
+        dataset,
+        alignment,
+        grid,
+        structure_factors,
+        mask_radius,
+        partitioning,
+        mask_radius_symmetry,
+        sample_rate,
+    )
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = event_map_grid.xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(self.path))
+
+
+def save_event_map(
+        path,
+         xmap: Xmap,
+         model: Model,
+         event: Event,
+         dataset: Dataset,
+         alignment: Alignment,
+         grid: Grid,
+         structure_factors: StructureFactors,
+         mask_radius: float,
+         mask_radius_symmetry: float,
+         partitioning: Partitioning,
+         sample_rate: float,
+         ):
+    reference_xmap_grid = xmap.xmap
+    reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
+
+    # moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+    #                                                                                          structure_factors.phi,
+    #                                                                                          )
+
+    event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+                                                 reference_xmap_grid.nv,
+                                                 reference_xmap_grid.nw,
+                                                 ]
+                                               )
+    event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    mean_array = model.mean
+    event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+            1 - event.bdc.bdc)
+
+    event_map_grid = Xmap.from_aligned_map_c(
+        event_map_reference_grid,
+        dataset,
+        alignment,
+        grid,
+        structure_factors,
+        mask_radius,
+        partitioning,
+        mask_radius_symmetry,
+        sample_rate
+    )
+
+    # # # Get the event bounding box
+    # # Find the min and max positions
+    # min_array = np.array(event.native_positions[0])
+    # max_array = np.array(event.native_positions[0])
+    # for position in event.native_positions:
+    #     position_array = np.array(position)
+    #     min_array = np.min(np.vstack(min_array, position_array), axis=0)
+    #     max_array = np.max(np.vstack(max_array, position_array), axis=0)
+    #
+    #
+    # # Get them as fractional bounding box
+    # print(min_array)
+    # print(max_array)
+    # print(event.native_positions[0])
+    # print(event.native_centroid)
+    # print(event.cluster.centroid)
+    #
+    # box = gemmi.FractionalBox()
+    # box.minimum = gemmi.Fractional(min_array[0], min_array[1], min_array[2])
+    # box.maximum = gemmi.Fractional(max_array[0], max_array[1], max_array[2])
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = event_map_grid.xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    # ccp4.set_extent(box)
+    # ccp4.grid.symmetrize_max()
+    ccp4.write_ccp4_map(str(path))

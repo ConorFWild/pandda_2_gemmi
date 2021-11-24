@@ -22,6 +22,7 @@ from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
     truncate,
+    save_native_frame_zmap
 )
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventID
@@ -154,7 +155,9 @@ def process_dataset(
             inner_mask_symmetry,
         )
         # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
-        pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_native_frame_zmap(
+
+        save_native_frame_zmap(
+            pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.path,
             zmap,
             dataset_truncated_datasets[test_dtag],
             alignments[test_dtag],

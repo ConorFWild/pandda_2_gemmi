@@ -9,6 +9,7 @@ from sklearn.cluster import DBSCAN
 from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 
+from pandda_gemmi.pandda_functions import save_event_map
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import EventIDX, EventID, SiteID, Dtag, PositionsArray, delayed
 from pandda_gemmi.dataset import Reference
@@ -705,7 +706,8 @@ class Events:
 
             results = mapper(
                 delayed(
-                    processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].save)(
+                    save_event_map)(
+                    processed_datasets[event_id.dtag].event_map_files[event_id.event_idx].path,
                     xmaps[event_id.dtag],
                     model,
                     self[event_id],
