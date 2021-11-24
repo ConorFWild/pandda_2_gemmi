@@ -26,7 +26,6 @@ from pandda_gemmi.shells import Shell
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 
 
-
 def run(func):
     return func()
 
