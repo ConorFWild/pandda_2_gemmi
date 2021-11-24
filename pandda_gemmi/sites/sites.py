@@ -1,49 +1,16 @@
 from __future__ import annotations
 
-from types import FunctionType, MethodType
-
 import typing
 import dataclasses
 
-import os
-import time
-from typing import Any, Union
-import psutil
-import shutil
-import re
-import itertools
-from pathlib import Path
-
-import numpy as np
-import scipy
-from scipy import spatial
-from scipy import stats
 from scipy.cluster.hierarchy import fclusterdata
-from sklearn.cluster import DBSCAN
-
-import joblib
 from joblib.externals.loky import set_loky_pickler
 
 set_loky_pickler('pickle')
 
-from typing import *
-from functools import partial
-
-from scipy import optimize
-from sklearn import neighbors
-
-import pandas as pd
-import gemmi
-
-from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventID, EventIDX, SiteID, PositionsArray
-from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
-    Resolution, Reference)
-from pandda_gemmi.shells import Shell
-from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Partitioning, Xmap
-from pandda_gemmi.model import Zmap, Model
-from pandda_gemmi.event import Event, Clusterings
+
 
 
 @dataclasses.dataclass()
