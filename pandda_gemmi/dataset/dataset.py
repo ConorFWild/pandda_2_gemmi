@@ -17,7 +17,7 @@ import pandas as pd
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
-from pandda_gemmi.fs import PanDDAFSModel
+# from pandda_gemmi.fs import PanDDAFSModel
 # from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
 #                                   Resolution, Reference)
 from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Xmap
@@ -968,7 +968,6 @@ class RMSD:
         return self.rmsd
 
 
-
 @dataclasses.dataclass()
 class Datasets:
     datasets: typing.Dict[Dtag, Dataset]
@@ -997,7 +996,8 @@ class Datasets:
         return Datasets(datasets)
 
     @staticmethod
-    def from_dir(pandda_fs_model: PanDDAFSModel, ):
+    def from_dir(pandda_fs_model#: PanDDAFSModel,
+    ):
         datasets = {}
         for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
             dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,

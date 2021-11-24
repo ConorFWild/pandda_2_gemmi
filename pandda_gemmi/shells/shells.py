@@ -13,7 +13,6 @@ from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Datasets, Resolution
 
 
-
 @dataclasses.dataclass()
 class Shell:
     # number: int
