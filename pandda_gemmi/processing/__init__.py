@@ -1,2 +1,2 @@
-from pandda_gemmi.processing.processing import autobuild_rhofit, process_shell, ShellResult
+from pandda_gemmi.processing.processing import process_shell, ShellResult
 
