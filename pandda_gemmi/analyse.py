@@ -18,6 +18,7 @@ from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import Datasets, Reference
 from pandda_gemmi.edalignment import Grid, Alignments
+from pandda_gemmi.filters import remove_models_with_large_gaps
 
 from pandda_gemmi.logs import (
     summarise_grid, save_json_log, summarise_datasets
@@ -257,7 +258,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
 
         with STDOUTManager('Removing datasets whose models have large gaps...', f'\tDone!'):
-            datasets_gaps: Datasets = datasets_diss_struc.remove_models_with_large_gaps(reference, )
+            datasets_gaps: Datasets = remove_models_with_large_gaps(datasets_diss_struc, reference, )
             for dtag in datasets_gaps:
                 if dtag not in datasets_diss_struc.datasets:
                     print(f"WARNING: Removed dataset {dtag} due to a large gap")
