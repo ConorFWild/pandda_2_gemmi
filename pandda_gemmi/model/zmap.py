@@ -201,9 +201,7 @@ class Model:
         # print(sigma_ms.shape)
         #
         means_batches = np.array_split(mean, 12)
-        print(means_batches.shape)
         arrays_batches = np.array_split(arrays, 12, axis=1)
-        print(arrays_batches.shape)
 
         sigma_ms_batches = process_local(
             [
@@ -424,8 +422,6 @@ class Model:
         # Mean map
         mean_array = self.mean
 
-        print(mean_array.shape)
-
         mean_grid = gemmi.FloatGrid(*mean_array.shape)
         mean_grid_array = np.array(mean_grid, copy=False)
         mean_array_typed = mean_array.astype(mean_grid_array.dtype)
@@ -472,8 +468,6 @@ class Zmap:
     @staticmethod
     def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
 
-        print(f"Spacegorup is: {xmap.xmap.spacegroup.xhm()}")
-
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
 
@@ -482,36 +476,27 @@ class Zmap:
         new_zmap_array_pos = np.array(new_zmap_grid_pos, copy=False)
         new_zmap_array_pos[:, :, :] = zmap_array[:, :, :]
         new_zmap_grid_pos.symmetrize_max()
-        print([np.min(new_zmap_array_pos), np.max(new_zmap_array_pos)])
 
         # Symmetrize Negative values
         new_zmap_grid_neg = xmap.new_grid()
         new_zmap_array_neg = np.array(new_zmap_grid_neg, copy=False)
         new_zmap_array_neg[:, :, :] = -zmap_array[:, :, :]
         new_zmap_grid_neg.symmetrize_max()
-        print([np.min(new_zmap_array_neg), np.max(new_zmap_array_neg)])
 
         # Get merged map
         new_zmap_grid_symm = xmap.new_grid()
         new_zmap_array_symm = np.array(new_zmap_grid_symm, copy=False)
         new_zmap_array_symm[:, :, :] = new_zmap_array_pos[:, :, :] - new_zmap_array_neg[:, :, :]
-        print([np.min(new_zmap_array_symm), np.max(new_zmap_array_symm)])
 
         # Get mean and std
         zmap_mean = np.mean(zmap_array)
         zmap_std = np.std(zmap_array)
 
-        print(f"Unsymm mean+std: {zmap_mean} {zmap_std}")
-
         zmap_symm_mean = np.mean(new_zmap_array_symm)
         zmap_symm_std = np.std(new_zmap_array_symm)
 
-        print(f"Symm mean+std: {zmap_symm_mean} {zmap_symm_std}")
-
         zmap_sparse_mean = np.mean(zmap_array[zmap_array != 0.0])
         zmap_sparse_std = np.std(zmap_array[zmap_array != 0.0])
-
-        print(f"Sparse mean+std: {zmap_sparse_mean} {zmap_sparse_std}")
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 

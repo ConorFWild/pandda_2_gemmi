@@ -327,7 +327,6 @@ def load_and_reduce(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
-    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
@@ -335,7 +334,6 @@ def load_and_reduce(
     )
 
     # Generate aligned xmaps
-    print("Loading xmaps")
 
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
@@ -346,17 +344,12 @@ def load_and_reduce(
 
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
-    print(f"Total sample size = {total_sample_size}")
     batch_size = min(90, total_sample_size)
-    print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
-    print(f"Num batches is: {num_batches}")
     tmp_batches = {}
     j = 1
     while True:
-        print(f"\tJ is: {j}")
         new_batches = np.array_split(np.arange(total_sample_size), j)
-        print(f"\t\tlen of new batches is {len(new_batches)}")
         tmp_batches[j] = new_batches
         j = j + 1
 
@@ -366,15 +359,12 @@ def load_and_reduce(
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-    print(f"Batches are:")
-    print(batches)
+
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
-    print("Fitting!")
     for batch in batches:
-        print(f"\tLoading dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -387,27 +377,22 @@ def load_and_reduce(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         ipca.partial_fit(xmap_array)
 
     # Transform
-    print(f"Transforming!")
     transformed_arrays = []
     for batch in batches:
-        print(f"\tTransforming dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -420,17 +405,14 @@ def load_and_reduce(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
@@ -628,7 +610,6 @@ def get_comparators_closest_cutoff(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
-    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
@@ -636,7 +617,6 @@ def get_comparators_closest_cutoff(
     )
 
     # Generate aligned xmaps
-    print("Loading xmaps")
     start = time.time()
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
@@ -656,17 +636,14 @@ def get_comparators_closest_cutoff(
             in shell_truncated_datasets
         ]
     )
-    print("Got xmaps!")
 
     # Get the maps as arrays
-    print("Getting xmaps as arrays")
     xmaps = {dtag: xmap
              for dtag, xmap
              in zip(datasets, results)
              }
 
     finish = time.time()
-    print(f"Mapped in {finish - start}")
 
     # Get the correlation distance between maps
     correlation_matrix = get_distance_matrix(xmaps)
@@ -683,20 +660,15 @@ def get_comparators_closest_cutoff(
     # Based on whether they are within the res cutoff
     comparators = {}
     for j, dtag in enumerate(dtag_list):
-        print(f"Finding closest for dtag: {dtag}")
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
         row = correlation_matrix[j, :].flatten()
-        print(f"\tRow is: {row}")
         closest_dtags_indexes = np.flip(np.argsort(row))
         closest_dtags = np.take_along_axis(dtag_array, closest_dtags_indexes, axis=0)
-        print(f"\tClosest dtags are: {closest_dtags}")
-        print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
-        print(f"\tTrucation res is: {truncation_res}")
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
@@ -752,7 +724,6 @@ def get_comparators_closest_apo_cutoff(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
-    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
@@ -760,7 +731,6 @@ def get_comparators_closest_apo_cutoff(
     )
 
     # Generate aligned xmaps
-    print("Loading xmaps")
     start = time.time()
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
@@ -780,17 +750,14 @@ def get_comparators_closest_apo_cutoff(
             in shell_truncated_datasets
         ]
     )
-    print("Got xmaps!")
 
     # Get the maps as arrays
-    print("Getting xmaps as arrays")
     xmaps = {dtag: xmap
              for dtag, xmap
              in zip(datasets, results)
              }
 
     finish = time.time()
-    print(f"Mapped in {finish - start}")
 
     # Get known apo mask
     def is_known_apo(dtag: Dtag, known_apos: List[Dtag]):
@@ -817,22 +784,18 @@ def get_comparators_closest_apo_cutoff(
     known_apo_rows = correlation_matrix[known_apo_mask, :]
     for j, known_apo in enumerate(known_apos):
         distances = known_apo_rows[j, :].flatten()
-        print(f"Known apo {known_apo.dtag} has distances: {distances}")
 
         closest_dtags_indexes = np.flip(np.argsort(distances))
         known_apo_closest_dtags = np.take_along_axis(known_apo_array, closest_dtags_indexes, axis=0)
-        print(f"Known apo {known_apo.dtag} has closest dtags: {known_apo_closest_dtags}")
 
     # Get the comparators: for each dataset rank all comparators, then go along accepting or rejecting them
     # Based on whether they are within the res cutoff
     comparators = {}
     for j, dtag in enumerate(dtag_list):
-        print(f"Finding closest for dtag: {dtag}")
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
         row = correlation_matrix[j, :].flatten()
-        print(f"\tRow is: {row}")
 
         # Get distances to known apos
         row_known_apos = row[known_apo_mask]
@@ -844,17 +807,11 @@ def get_comparators_closest_apo_cutoff(
         closest_known_apo_dtag = index_to_known_apo[closest_known_apo_index]
         closest_known_apo_all_index = dtag_to_index[closest_known_apo_dtag]
 
-        print(f"\tDtag {dtag.dtag} has closest known apo: {closest_known_apo_dtag}")
-        print(f"\tOther known apo distances are: {closest_known_apo_distances}")
-
         # Get closest dtags to known apo
         closest_dtags = known_apo_closest_dtags[closest_known_apo_dtag]
-        print(f"\tClosest dtags are: {closest_dtags}")
-        print(f"\tdistances are: {np.take_along_axis(row, closest_dtags_indexes, axis=0)}")
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
-        print(f"\tTrucation res is: {truncation_res}")
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
@@ -987,7 +944,6 @@ def get_clusters_linkage(
         return _clusters
 
     clusters = recurse_node(rootnode, 30)
-    print(clusters)
 
     clusters_dict = {}
     dtag_to_cluster = {}
@@ -995,7 +951,6 @@ def get_clusters_linkage(
         clusters_dict[j] = dtag_array[np.array(cluster)]
         for dtag in clusters_dict[j]:
             dtag_to_cluster[dtag] = j
-    print(clusters_dict)
 
     save_dendrogram_plot(linkage,
                          [
@@ -1033,12 +988,8 @@ def get_clusters_linkage(
     # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
     known_apos = []
     for cluster_num, cluster_dtags in clusters_dict.items():
-        print(f"\tCluster {cluster_num} dtags are {cluster_dtags}")
         for cluster_core_dtag in cluster_dtags:
             known_apos.append(cluster_core_dtag.dtag)
-
-    print(f"Labels are: {labels}")
-    print(f"Known apos are: {known_apos}")
 
     save_plot_pca_umap_bokeh(
         reduced_array,
@@ -1072,8 +1023,6 @@ def get_clusters_linkage(
         cluster_median_deviation = np.median(np.sqrt(np.sum(np.square(cluster_coords - cluster_median), axis=1)))
         cluster_widths[cluster] = cluster_median_deviation
 
-    print(f"Cluster median absolute deviation is: {cluster_widths}")
-
     # Get the centermost cluster
     cluster_medians = {}
     for cluster, cluster_dtags in clusters_dict.items():
@@ -1081,18 +1030,14 @@ def get_clusters_linkage(
         cluster_coords = reduced_array[cluster_indexes, :]
         cluster_median = np.median(cluster_coords, axis=0).reshape((1, cluster_coords.shape[1]))
         cluster_medians[cluster] = cluster_median
-    print(f"Cluster medians are: {cluster_medians}")
 
     median_of_medians = np.median(np.vstack([x for x in cluster_medians.values()]), axis=0).reshape(1,
                                                                                                     cluster_coords.shape[
                                                                                                         1])
-    print(f"Global median of clusters is: {median_of_medians}")
-
     centermost_cluster = min(
         cluster_medians,
         key=lambda _cluster_num: np.sqrt(np.sum(np.square((median_of_medians - cluster_medians[_cluster_num])))),
     )
-    print(f"Centermost cluster is: {centermost_cluster}")
 
     return cophenetic_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, cluster_widths
 
@@ -1119,8 +1064,6 @@ def get_clusters_nn(
         mean_distance = np.mean(row)
         radii[j] = mean_distance
 
-    print(f"Cluster median absolute deviation is: {radii}")
-
     # Sort datasets by radii
     radii_sorted = {index: radii[index] for index in sorted(radii, key=lambda _index: radii[_index])}
 
@@ -1146,16 +1089,12 @@ def get_clusters_nn(
 
             cluster_num += 1
 
-    print(f"Cluster leaders are: {cluster_leader_dict}")
-    print(f"Cluster dict is : {clusters_dict}")
-
     # Get cluster medians
     cluster_medians = {}
     for cluster, cluster_dtags in clusters_dict.items():
         cluster_leader_dtag = cluster_leader_dict[cluster]
         cluster_leader_index = dtag_to_index[cluster_leader_dtag]
         cluster_medians[cluster] = reduced_array[cluster_leader_index, :].reshape((1, -1))
-    print(f"Cluster medians are: {cluster_medians}")
 
     # Get centermost cluster
     median_of_medians = np.median(
@@ -1174,7 +1113,6 @@ def get_clusters_nn(
         dtag_distance_to_cluster[_dtag] = {}
         dtag_coord = reduced_array[dtag_index, :].reshape((1, -1))
         for cluster, cluster_median in cluster_medians.items():
-            print([cluster_median.shape, dtag_coord.shape])
             assert cluster_median.shape[0] == dtag_coord.shape[0]
             assert cluster_median.shape[1] == dtag_coord.shape[1]
             distance = np.linalg.norm(cluster_median - dtag_coord)
@@ -1186,12 +1124,9 @@ def get_clusters_nn(
     # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
     known_apos = []
     for cluster_num, cluster_dtags in clusters_dict.items():
-        print(f"\tCluster {cluster_num} dtags are {cluster_dtags}")
         for cluster_core_dtag in cluster_dtags:
             known_apos.append(cluster_core_dtag.dtag)
 
-    print(f"Labels are: {labels}")
-    print(f"Known apos are: {known_apos}")
 
     save_plot_pca_umap_bokeh(
         reduced_array,
@@ -1234,7 +1169,6 @@ def get_comparators_closest_cluster(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
-    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
@@ -1242,7 +1176,6 @@ def get_comparators_closest_cluster(
     )
 
     # Generate aligned xmaps
-    print("Loading xmaps")
 
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
@@ -1253,17 +1186,12 @@ def get_comparators_closest_cluster(
 
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
-    print(f"Total sample size = {total_sample_size}")
     batch_size = min(90, total_sample_size)
-    print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
-    print(f"Num batches is: {num_batches}")
     tmp_batches = {}
     j = 1
     while True:
-        print(f"\tJ is: {j}")
         new_batches = np.array_split(np.arange(total_sample_size), j)
-        print(f"\t\tlen of new batches is {len(new_batches)}")
         tmp_batches[j] = new_batches
         j = j + 1
 
@@ -1273,15 +1201,12 @@ def get_comparators_closest_cluster(
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-    print(f"Batches are:")
-    print(batches)
+
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
-    print("Fitting!")
     for batch in batches:
-        print(f"\tLoading dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -1294,27 +1219,22 @@ def get_comparators_closest_cluster(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         ipca.partial_fit(xmap_array)
 
     # Transform
-    print(f"Transforming!")
     transformed_arrays = []
     for batch in batches:
-        print(f"\tTransforming dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -1327,25 +1247,20 @@ def get_comparators_closest_cluster(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         transformed_arrays.append(ipca.transform(xmap_array))
 
     reduced_array = np.vstack(transformed_arrays)
-
-    print(f"Reduced array shape: {reduced_array.shape}")
 
     # Cluster
     distance_matrix, dtag_distance_to_cluster, centermost_cluster, clusters_dict, cluster_widths = get_clusters(
@@ -1359,18 +1274,14 @@ def get_comparators_closest_cluster(
     # Get the comparators: for each dataset, get cluster with closest median distance
     comparators = {}
     for j, dtag in enumerate(dtag_list):
-        print(f"Finding closest for dtag: {dtag}")
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
         row = distance_matrix[j, :].flatten()
-        print(f"\tRow is: {row}")
 
         cluster_distances = dtag_distance_to_cluster[dtag]
 
         if cluster_selection == "close":
-
-            print(cluster_distances)
             closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
 
         elif cluster_selection == "center":
@@ -1390,20 +1301,15 @@ def get_comparators_closest_cluster(
             cluster_widths_sorted = list(sorted(cluster_widths, key=lambda x: cluster_widths[x]))
             closest_cluster = cluster_widths_sorted[0]
 
-        print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
-        print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
         distances_to_cluster = {_dtag: dtag_distance_to_cluster[_dtag][closest_cluster]
                                 for _dtag
                                 in dtag_distance_to_cluster}
         dtags_by_distance_to_cluster = [x for x in sorted(distances_to_cluster, key=lambda y: distances_to_cluster[y])]
-        print(f"Distances to cluster: {distances_to_cluster}")
-        print(f"Dtags by distance to cluster: {dtags_by_distance_to_cluster}")
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
-        print(f"\tTrucation res is: {truncation_res}")
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
@@ -1462,7 +1368,6 @@ def get_comparators_closest_cluster_neighbours(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
     # Load the xmaps
-    print("Truncating datasets...")
     shell_truncated_datasets: Datasets = truncate(
         datasets,
         resolution=Resolution(highest_res_datasets_max),
@@ -1470,8 +1375,6 @@ def get_comparators_closest_cluster_neighbours(
     )
 
     # Generate aligned xmaps
-    print("Loading xmaps")
-
     load_xmap_paramaterised = partial(
         from_unaligned_dataset_c_flat,
         grid=grid,
@@ -1481,11 +1384,8 @@ def get_comparators_closest_cluster_neighbours(
 
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
-    print(f"Total sample size = {total_sample_size}")
     batch_size = min(90, total_sample_size)
-    print(f"Batch size is: {batch_size}")
     num_batches = (total_sample_size // batch_size) + 1
-    print(f"Num batches is: {num_batches}")
     # batches = [
     #     np.arange(x*batch_size, min((x+1)*batch_size, total_sample_size))
     #     for x
@@ -1493,9 +1393,7 @@ def get_comparators_closest_cluster_neighbours(
     tmp_batches = {}
     j = 1
     while True:
-        print(f"\tJ is: {j}")
         new_batches = np.array_split(np.arange(total_sample_size), j)
-        print(f"\t\tlen of new batches is {len(new_batches)}")
         tmp_batches[j] = new_batches
         j = j + 1
 
@@ -1505,15 +1403,12 @@ def get_comparators_closest_cluster_neighbours(
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-    print(f"Batches are:")
-    print(batches)
+
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
-    print("Fitting!")
     for batch in batches:
-        print(f"\tLoading dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -1526,27 +1421,22 @@ def get_comparators_closest_cluster_neighbours(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         ipca.partial_fit(xmap_array)
 
     # Transform
-    print(f"Transforming!")
     transformed_arrays = []
     for batch in batches:
-        print(f"\tTransforming dtags: {dtag_array[batch]}")
         start = time.time()
         results = process_local(
             [
@@ -1559,17 +1449,14 @@ def get_comparators_closest_cluster_neighbours(
                 in dtag_array[batch]
             ]
         )
-        print("Got xmaps!")
 
         # Get the maps as arrays
-        print("Getting xmaps as arrays")
         xmaps = {dtag: xmap
                  for dtag, xmap
                  in zip(dtag_list, results)
                  }
 
         finish = time.time()
-        print(f"Mapped in {finish - start}")
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
@@ -1577,7 +1464,6 @@ def get_comparators_closest_cluster_neighbours(
 
     reduced_array = np.vstack(transformed_arrays)
 
-    print(f"Reduced array shape: {reduced_array.shape}")
 
     # clusterer = hdbscan.HDBSCAN(
     #     min_cluster_size=30,
@@ -1654,7 +1540,6 @@ def get_comparators_closest_cluster_neighbours(
         return _clusters
 
     clusters = recurse_node(rootnode, 30)
-    print(clusters)
 
     clusters_dict = {}
     dtag_to_cluster = {}
@@ -1662,7 +1547,6 @@ def get_comparators_closest_cluster_neighbours(
         clusters_dict[j] = dtag_array[np.array(cluster)]
         for dtag in clusters_dict[j]:
             dtag_to_cluster[dtag] = j
-    print(clusters_dict)
 
     save_dendrogram_plot(linkage,
                          [
@@ -1700,12 +1584,8 @@ def get_comparators_closest_cluster_neighbours(
     # known_apos = [dtag.dtag for dtag, dataset in datasets.items() if any(dtag in x for x in cluster_cores.values())]
     known_apos = []
     for cluster_num, cluster_dtags in clusters_dict.items():
-        print(f"\tCluster {cluster_num} dtags are {cluster_dtags}")
         for cluster_core_dtag in cluster_dtags:
             known_apos.append(cluster_core_dtag.dtag)
-
-    print(f"Labels are: {labels}")
-    print(f"Known apos are: {known_apos}")
 
     save_plot_pca_umap_bokeh(
         reduced_array,
@@ -1739,8 +1619,6 @@ def get_comparators_closest_cluster_neighbours(
         cluster_median_deviation = np.median(np.sqrt(np.sum(np.square(cluster_coords - cluster_median), axis=1)))
         cluster_widths[cluster] = cluster_median_deviation
 
-    print(f"Cluster median absolute deviation is: {cluster_widths}")
-
     # Get the centermost cluster
     cluster_medians = {}
     for cluster, cluster_dtags in clusters_dict.items():
@@ -1748,28 +1626,23 @@ def get_comparators_closest_cluster_neighbours(
         cluster_coords = reduced_array[cluster_indexes, :]
         cluster_median = np.median(cluster_coords, axis=0).reshape((1, cluster_coords.shape[1]))
         cluster_medians[cluster] = cluster_median
-    print(f"Cluster medians are: {cluster_medians}")
 
     median_of_medians = np.median(np.vstack([x for x in cluster_medians.values()]), axis=0).reshape(1,
                                                                                                     cluster_coords.shape[
                                                                                                         1])
-    print(f"Global median of clusters is: {median_of_medians}")
 
     centermost_cluster = min(
         cluster_medians,
         key=lambda _cluster_num: np.sqrt(np.sum(np.square((median_of_medians - cluster_medians[_cluster_num])))),
     )
-    print(f"Centermost cluster is: {centermost_cluster}")
 
     # Get the comparators: for each dataset, get cluster with closest median distance
     comparators = {}
     for j, dtag in enumerate(dtag_list):
-        print(f"Finding closest for dtag: {dtag}")
         current_res = datasets[dtag].reflections.resolution().resolution
 
         # Get dtags ordered by distance
         row = cophenetic_matrix[j, :].flatten()
-        print(f"\tRow is: {row}")
         # closest_dtags_indexes = np.flip(np.argsort(row))
         # cluster_distances = {}
         # for cluster_num, cluster_dtags in clusters_dict.items():
@@ -1785,7 +1658,6 @@ def get_comparators_closest_cluster_neighbours(
 
         if cluster_selection == "close":
 
-            print(cluster_distances)
             closest_cluster = min(cluster_distances, key=lambda x: cluster_distances[x])
             # print(f"\tClosest cluster is: {closest_cluster}")
             # closest_cluster_dtags = clusters_dict[closest_cluster]
@@ -1805,20 +1677,16 @@ def get_comparators_closest_cluster_neighbours(
             else:
                 closest_cluster = cluster_distances_sorted[1]
 
-        print(f"\tClosest cluster is: {closest_cluster}")
         closest_cluster_dtags = clusters_dict[closest_cluster]
-        print(f"\tClosest cluster dtags ate: {closest_cluster_dtags}")
 
         distances_to_cluster = {_dtag: dtag_distance_to_cluster[_dtag][closest_cluster]
                                 for _dtag
                                 in dtag_distance_to_cluster}
         dtags_by_distance_to_cluster = [x for x in sorted(distances_to_cluster, key=lambda y: distances_to_cluster[y])]
-        print(f"Distances to cluster: {distances_to_cluster}")
-        print(f"Dtags by distance to cluster: {dtags_by_distance_to_cluster}")
+
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
-        print(f"\tTrucation res is: {truncation_res}")
 
         # Go down the list of closes datasets seeing if they fall within truncation res and adding them to comparators
         # if so
@@ -1939,14 +1807,11 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
     for dtag in dataset_resolution_truncated:
         reflections = dataset_resolution_truncated[dtag].reflections.reflections
         reflections_array = np.array(reflections)
-        print(f"{dtag}")
-        print(f"{reflections_array.shape}")
 
         truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                                                     )
         reflections = truncated_dataset.reflections.reflections
         reflections_array = np.array(reflections)
-        print(f"{dtag}: {reflections_array.shape}")
 
         new_datasets_reflections[dtag] = truncated_dataset
 
@@ -1962,7 +1827,6 @@ def validate_strategy_num_datasets(datasets, min_characterisation_datasets=30):
 
 def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
     if not strategy(datasets):
-        print(datasets)
         raise exception
 
 

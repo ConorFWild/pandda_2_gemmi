@@ -45,8 +45,6 @@ def execute(command: str):
                          )
 
     stdout, stderr = p.communicate()
-    print(stdout)
-    print(stderr)
 
 
 @dataclasses.dataclass()
@@ -150,18 +148,12 @@ def get_cut_out_event_map(
     # print(f"Spacegroup: {mask_grid.spacegroup.xhm()}")
     # mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 21 21 21")  #  gemmi.find_spacegroup_by_name("P 1")#event_map.spacegroup
     mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # event_map.spacegroup
-    print(f"Spacegroup: {mask_grid.spacegroup.xhm()}")
-    print(f"grid: {mask_grid}")
     mask_grid_array = np.array(mask_grid)
-    print(f"Mask grid array: {mask_grid_array.shape}")
-    print(f"Mask grid array: {mask_grid_array.size}")
-    print(f"Mask grid array: {np.sum(np.isfinite(mask_grid_array))}")
 
     # print(f"Grid size: {mask_grid.size}")
     mask_grid.set_unit_cell(event_map.unit_cell)
 
     for position_python in coords:
-        print(f"\t{position_python}")
         position = gemmi.Position(*position_python)
         mask_grid.set_points_around(position,
                                     radius=radius,
@@ -185,19 +177,13 @@ def get_cut_out_event_map(
 
 def get_event_map(event_map_file: Path) -> gemmi.FloatGrid:
     m = gemmi.read_ccp4_map(str(event_map_file))
-    print(m.grid.spacegroup.xhm())
 
     # m.grid.spacegroup = gemmi.find_spacegroup_by_name("P 21 21 21")
     m.grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    print(m.grid.spacegroup.xhm())
 
     m.setup()
 
     grid_array = np.array(m.grid, copy=True)
-
-    print(m.grid.spacegroup.xhm())
-    print(m.grid)
-    print(grid_array.shape)
 
     new_grid = gemmi.FloatGrid(*grid_array.shape)
     new_grid.spacegroup = m.grid.spacegroup  # gemmi.find_spacegroup_by_name("P 1")
@@ -339,7 +325,6 @@ def get_grade_command(smiles_file: Path, out_dir: Path) -> str:
 def generate_cif_grade(smiles_path: Path, out_dir: Path):
     # Get the command to run elbow
     grade_command = get_grade_command(smiles_path, out_dir)
-    print(grade_command)
 
     # Run the command
     execute(grade_command)
@@ -358,7 +343,6 @@ def get_grade2_command(smiles_file: Path, out_dir: Path) -> str:
 def generate_cif_grade2(smiles_path: Path, out_dir: Path):
     # Get the command to run elbow
     grade_2_command = get_grade2_command(smiles_path, out_dir)
-    print(grade_2_command)
 
     # Run the command
     execute(grade_2_command)
@@ -385,7 +369,6 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
         out_dir=str(out_dir),
         cut=cut,
     )
-    print(f"rhofit_command is: {rhofit_command}")
 
     # Execute job script
     execute(rhofit_command)
@@ -413,7 +396,6 @@ def rhofit_to_coord(truncated_model_path: Path, truncated_xmap_path: Path, mtz_p
         z=coord.z,
         cut=cut,
     )
-    print(f"rhofit_command is: {rhofit_command}")
 
     # Execute job script
     execute(rhofit_command)

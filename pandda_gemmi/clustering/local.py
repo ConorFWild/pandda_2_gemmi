@@ -76,8 +76,6 @@ def get_batches(total_sample_size, batch_size):
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-    print(f"Batches are:")
-    print(batches)
 
     return batches
 

@@ -479,7 +479,6 @@ class Reflections:
                               data_dropped_array,
                               ]
                              )
-        print(new_data.shape)
 
         # Update
         new_reflections.set_data(new_data)
@@ -907,7 +906,6 @@ class RMSD:
 
         # for residues_id in structure_1.protein_residue_ids():
         for residues_id in structure_1.protein_residue_ids():
-            print(f"Residue id is: {residues_id}")
 
             res_1 = structure_1[residues_id][0]
             try:
@@ -979,7 +977,6 @@ class Datasets:
     def from_data_dirs(path: Path, pdb_regex: str, mtz_regex: str):
         datasets = {}
         for directory in path.glob("*"):
-            print(directory)
             if directory.is_dir():
                 dtag = Dtag(directory.name)
 
@@ -1148,14 +1145,11 @@ class Datasets:
         for dtag in dataset_resolution_truncated:
             reflections = dataset_resolution_truncated[dtag].reflections.reflections
             reflections_array = np.array(reflections)
-            print(f"{dtag}")
-            print(f"{reflections_array.shape}")
 
             truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                                                         )
             reflections = truncated_dataset.reflections.reflections
             reflections_array = np.array(reflections)
-            print(f"{dtag}: {reflections_array.shape}")
 
             new_datasets_reflections[dtag] = truncated_dataset
 

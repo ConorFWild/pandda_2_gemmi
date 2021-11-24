@@ -376,7 +376,6 @@ def process_pandda(
     ###################################################################
 
     print("Assigning comparison datasets...")
-
     get_clusters = get_clusters_nn
     # Closest datasets after clustering as long as they are not too poor res
     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
@@ -394,7 +393,6 @@ def process_pandda(
         cluster_selection=cluster_selection,
     )
 
-    print(comparators)
 
 
 if __name__ == '__main__':

@@ -91,7 +91,6 @@ def process_dataset(
         grid,
     )
 
-    print(f"\t\tProcessing dtag: {test_dtag}: {shell.train_dtags[test_dtag]}")
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
         [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
 
@@ -101,13 +100,11 @@ def process_dataset(
     time_model_start = time.time()
 
     # Determine the parameters of the model to find outlying electron density
-    print("Fitting model")
     mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
                                                         )  # Size of grid.partitioning.total_mask > 0
     dataset_log[constants.LOG_DATASET_MEAN] = summarise_array(mean_array)
     update_log(dataset_log, dataset_log_path)
 
-    print("fitting sigma i")
     sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
                                                                  mean_array,
                                                                  1.5,
@@ -115,7 +112,6 @@ def process_dataset(
     dataset_log[constants.LOG_DATASET_SIGMA_I] = {_dtag.dtag: float(sigma_i) for _dtag, sigma_i in sigma_is.items()}
     update_log(dataset_log, dataset_log_path)
 
-    print("fitting sigma s m")
     sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
                                                        mean_array,
                                                        sigma_is,
@@ -133,10 +129,8 @@ def process_dataset(
     time_model_finish = time.time()
     dataset_log[constants.LOG_DATASET_MODEL_TIME] = time_model_finish - time_model_start
     update_log(dataset_log, dataset_log_path)
-    print(f"Calculated model s in: {dataset_log[constants.LOG_DATASET_MODEL_TIME]}")
 
     # Calculate z maps
-    print("Getting zmaps")
     time_z_maps_start = time.time()
     zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
         model=model,
@@ -207,7 +201,6 @@ def process_dataset(
     time_cluster_start = time.time()
 
     # Get the clustered electron desnity outliers
-    print("clusting")
     cluster_paramaterised = partial(
         Clustering.from_zmap,
         reference=reference,
@@ -224,17 +217,17 @@ def process_dataset(
         ]
     )
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
-    print("\t\tIntially found clusters: {}".format(
-        {
-            dtag: (
-                len(clustering),
-                max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
-                max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
-            )
-            for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
-        }
-    )
-    )
+    # print("\t\tIntially found clusters: {}".format(
+    #     {
+    #         dtag: (
+    #             len(clustering),
+    #             max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
+    #             max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
+    #         )
+    #         for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
+    #     }
+    # )
+    # )
     dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
@@ -260,9 +253,9 @@ def process_dataset(
     clusterings_large: Clusterings = clusterings.filter_size(grid,
                                                              min_blob_volume,
                                                              )
-    print("\t\tAfter filtering: large: {}".format(
-        {dtag: len(cluster) for dtag, cluster in
-         zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+    # print("\t\tAfter filtering: large: {}".format(
+    #     {dtag: len(cluster) for dtag, cluster in
+    #      zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
     dataset_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_large.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
@@ -270,17 +263,17 @@ def process_dataset(
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
                                                                     min_blob_z_peak)
-    print("\t\tAfter filtering: peak: {}".format(
-        {dtag: len(cluster) for dtag, cluster in
-         zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+    # print("\t\tAfter filtering: peak: {}".format(
+    #     {dtag: len(cluster) for dtag, cluster in
+    #      zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
     dataset_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
 
     clusterings_merged = clusterings_peaked.merge_clusters()
-    print("\t\tAfter filtering: merged: {}".format(
-        {dtag: len(_cluster) for dtag, _cluster in
-         zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
+    # print("\t\tAfter filtering: merged: {}".format(
+    #     {dtag: len(_cluster) for dtag, _cluster in
+    #      zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
     dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_merged.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
@@ -294,8 +287,6 @@ def process_dataset(
     ###################################################################
     time_event_start = time.time()
     # Calculate the shell events
-    print("getting events")
-    print(f"\tGot {len(clusterings_merged.clusterings)} clusters")
     events: Events = Events.from_clusters(
         clusterings_merged,
         model,
@@ -317,7 +308,6 @@ def process_dataset(
     time_event_map_start = time.time()
 
     # Save the event maps!
-    print("print events")
     printer.pprint(events)
     events.save_event_maps(
         dataset_truncated_datasets,
@@ -375,8 +365,6 @@ def process_shell(
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
     shell_log = {}
 
-    print(f"Working on shell: {shell}")
-
     # Seperate out test and train datasets
     shell_datasets: Dict[Dtag, Dataset] = {
         dtag: dataset
@@ -390,7 +378,6 @@ def process_shell(
     ###################################################################
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
-    print("Truncating datasets")
     shell_working_resolution = Resolution(
         min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
@@ -403,7 +390,6 @@ def process_shell(
     ###################################################################
     # # Generate aligned Xmaps
     ###################################################################
-    print("Loading xmaps")
     time_xmaps_start = time.time()
 
     load_xmap_paramaterised = partial(
@@ -430,7 +416,6 @@ def process_shell(
     }
 
     time_xmaps_finish = time.time()
-    print(f"Mapped {len(xmaps)} xmaps in {time_xmaps_finish - time_xmaps_start}")
     shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish - time_xmaps_start
     update_log(shell_log, shell_log_path)
 

@@ -223,11 +223,6 @@ class Alignment:
         tree = spatial.KDTree(reference_positions)
         dist, inds = tree.query(positions)
 
-        print(dist)
-        print(inds)
-        print(positions.shape)
-        print(reference_positions.shape)
-
         results = []
         for pos, ind in zip(positions, inds):
             transform = transforms_list[ind]
@@ -422,7 +417,6 @@ class Alignments:
     def from_datasets(reference: Reference, datasets: Datasets):
         alignments = {}
         for dtag in datasets:
-            print(f"Getting alignment for dataset: {dtag} against reference: {reference.dtag}")
             alignments[dtag] = Alignment.from_dataset(reference, datasets[dtag])
 
         return Alignments(alignments)

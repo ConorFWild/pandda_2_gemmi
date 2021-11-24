@@ -104,12 +104,12 @@ class Partitioning:
                        coord_array[:, 1],
                        coord_array[:, 2],
                        )
-        print((
-            f"coord_tuple - points in the refence grid\n"
-            f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
-            f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
-            f"Length: {coord_tuple[0].shape}"
-        ))
+        # print((
+        #     f"coord_tuple - points in the refence grid\n"
+        #     f"min: {np.min(coord_tuple[0])} {np.min(coord_tuple[1])} {np.min(coord_tuple[2])} \n"
+        #     f"Max: {np.max(coord_tuple[0])} {np.max(coord_tuple[1])} {np.max(coord_tuple[2])} \n"
+        #     f"Length: {coord_tuple[0].shape}"
+        # ))
 
         # Get the corresponding protein grid
         protein_grid = gemmi.Int8Grid(
@@ -145,12 +145,12 @@ class Partitioning:
                                  np.mod(coord_tuple[1], grid.nv),
                                  np.mod(coord_tuple[2], grid.nw),
                                  )
-        print((
-            f"coord_unit_cell_tuple - points in the reference grid normalised to the unit cell\n"
-            f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
-            f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
-            f"Length: {coord_unit_cell_tuple[0].shape}"
-        ))
+        # print((
+        #     f"coord_unit_cell_tuple - points in the reference grid normalised to the unit cell\n"
+        #     f"min: {np.min(coord_unit_cell_tuple[0])} {np.min(coord_unit_cell_tuple[1])} {np.min(coord_unit_cell_tuple[2])} \n"
+        #     f"Max: {np.max(coord_unit_cell_tuple[0])} {np.max(coord_unit_cell_tuple[1])} {np.max(coord_unit_cell_tuple[2])} \n"
+        #     f"Length: {coord_unit_cell_tuple[0].shape}"
+        # ))
 
         # Get the corresponging protein_grid points
         coord_mask_grid_tuple = (
@@ -158,12 +158,12 @@ class Partitioning:
             coord_tuple[1] - grid_min_coord[1],
             coord_tuple[2] - grid_min_coord[2],
         )
-        print((
-            f"coord_mask_grid_tuple - points in the portein frame grid\n"
-            f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
-            f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
-            f"Length: {coord_mask_grid_tuple[0].shape}"
-        ))
+        # print((
+        #     f"coord_mask_grid_tuple - points in the portein frame grid\n"
+        #     f"min: {np.min(coord_mask_grid_tuple[0])} {np.min(coord_mask_grid_tuple[1])} {np.min(coord_mask_grid_tuple[2])} \n"
+        #     f"Max: {np.max(coord_mask_grid_tuple[0])} {np.max(coord_mask_grid_tuple[1])} {np.max(coord_mask_grid_tuple[2])} \n"
+        #     f"Length: {coord_mask_grid_tuple[0].shape}"
+        # ))
 
         # Check which of them are in the mask
         mask_array = np.array(protein_grid, copy=False, dtype=np.int8)
@@ -176,22 +176,22 @@ class Partitioning:
             coord_tuple[1][in_mask_array],
             coord_tuple[2][in_mask_array],
         )
-        print((
-            f"coord_array_in_mask - points in the reference grid in the mask\n"
-            f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
-            f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
-        ))
+        # print((
+        #     f"coord_array_in_mask - points in the reference grid in the mask\n"
+        #     f"min: {np.min(coord_array_in_mask[0])} {np.min(coord_array_in_mask[1])} {np.min(coord_array_in_mask[2])} \n"
+        #     f"Max: {np.max(coord_array_in_mask[0])} {np.max(coord_array_in_mask[1])} {np.max(coord_array_in_mask[2])} \n"
+        # ))
 
         coord_array_unit_cell_in_mask = (
             coord_unit_cell_tuple[0][in_mask_array],
             coord_unit_cell_tuple[1][in_mask_array],
             coord_unit_cell_tuple[2][in_mask_array],
         )
-        print((
-            f"coord_array_unit_cell_in_mask - points in the reference grid nomralise to the unit cell in the mask\n"
-            f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
-            f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
-        ))
+        # print((
+        #     f"coord_array_unit_cell_in_mask - points in the reference grid nomralise to the unit cell in the mask\n"
+        #     f"min: {np.min(coord_array_unit_cell_in_mask[0])} {np.min(coord_array_unit_cell_in_mask[1])} {np.min(coord_array_unit_cell_in_mask[2])} \n"
+        #     f"Max: {np.max(coord_array_unit_cell_in_mask[0])} {np.max(coord_array_unit_cell_in_mask[1])} {np.max(coord_array_unit_cell_in_mask[2])} \n"
+        # ))
 
         return coord_array_in_mask, coord_array_unit_cell_in_mask
 
@@ -263,21 +263,14 @@ class Partitioning:
 
         # Mask by protein
         protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
-        print(f"protein_mask_indicies shape : {protein_mask_indicies.shape}")
-        print(np.sum(protein_mask_indicies))
 
         # Mask by symmetry
         symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
-        print(f"symmetry_mask_indicies shape : {symmetry_mask_indicies.shape}")
-        print(np.sum(symmetry_mask_indicies))
 
         # Combine masks
         combined_indicies = np.zeros(symmetry_mask_indicies.shape)
         combined_indicies[protein_mask_indicies == 1] = 1
         combined_indicies[symmetry_mask_indicies == 1] = 0
-
-        print(f"Combined indicies shape : {combined_indicies.shape}")
-        print(np.sum(combined_indicies))
 
         # Resample coords
         coord_tuple = (coord_tuple_source[0][combined_indicies == 1],

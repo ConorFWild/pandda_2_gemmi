@@ -44,7 +44,6 @@ class Sites:
         centroids: typing.List[gemmi.Position] = [cluster.centroid for cluster in flat_clusters.values()]
         positions_array = PositionsArray.from_positions(centroids)
 
-        print(positions_array.to_array().shape)
         # If there is no events
         if positions_array.to_array().shape[0] == 0:
             return Sites({}, {}, {})

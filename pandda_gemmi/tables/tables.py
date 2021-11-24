@@ -138,12 +138,8 @@ class SiteTable:
             _clusterings[dtag] = Clustering(dtag_clusters[dtag])
 
         clusterings = Clusterings(_clusterings)
-        print(clusterings)
 
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
-
-        print(sites)
-        print(sites.centroids)
 
         records = []
         for site_id in sites:
