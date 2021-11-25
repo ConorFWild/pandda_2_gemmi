@@ -624,7 +624,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Output json log
         with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
-            printer.pprint(pandda_log)
+            if pandda_args.debug:
+                printer.pprint(pandda_log)
             save_json_log(
                 pandda_log,
                 pandda_args.out_dir / constants.PANDDA_LOG_FILE,
