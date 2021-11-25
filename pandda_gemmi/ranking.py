@@ -51,7 +51,6 @@ def rank_events_autobuild(
             reverse=True,
         )
     )
-    print(ranked_event_ids)
 
     # Add events missing any autobuilds
     for event_id in autobuild_results.keys():
@@ -59,6 +58,5 @@ def rank_events_autobuild(
             ranked_event_ids.append(event_id)
 
     events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
-    print(events_ranked)
 
     return events_ranked
