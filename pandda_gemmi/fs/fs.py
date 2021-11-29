@@ -280,7 +280,7 @@ class EventMapFile:
 
     @staticmethod
     def from_event(event: Event, path: Path):
-        rounded_bdc = round(event.bdc.bdc, 2)
+        rounded_bdc = round(1-event.bdc.bdc, 2)
         event_map_path = path / PANDDA_EVENT_MAP_FILE.format(dtag=event.event_id.dtag.dtag,
                                                              event_idx=event.event_id.event_idx.event_idx,
                                                              bdc=rounded_bdc,

@@ -517,7 +517,8 @@ class Clusterings:
 @dataclasses.dataclass()
 class BDC:
     bdc: float
-    fraction: float
+    mean_fraction: float
+    feature_fraction: float
 
     @staticmethod
     def from_float(bdc: float):
@@ -559,7 +560,11 @@ class BDC:
                             key=lambda x: vals[x],
                             )
 
-        return BDC(mean_fraction, 1 - mean_fraction)
+        return BDC(
+            mean_fraction,
+            mean_fraction,
+            1 - mean_fraction,
+        )
 
 
 @dataclasses.dataclass()
