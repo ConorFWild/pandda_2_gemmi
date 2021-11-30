@@ -91,7 +91,7 @@ def get_models(
     )
 
     models = {}
-    for comparison_set_id, comparison_set_dtags in comparison_sets:
+    for comparison_set_id, comparison_set_dtags in comparison_sets.items():
         comparison_set_dtags = ...
 
         # Get the relevant dtags' xmaps
