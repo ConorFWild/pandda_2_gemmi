@@ -80,7 +80,7 @@ def select_model(model_results):
 
 
 def get_models(
-        comparison_sets: Dict[int, Set[Dtag]],
+        comparison_sets: Dict[int, List[Dtag]],
         shell_xmaps,
         grid: Grid,
         process_local,
@@ -92,7 +92,7 @@ def get_models(
 
     models = {}
     for comparison_set_id, comparison_set_dtags in comparison_sets.items():
-        comparison_set_dtags = ...
+        # comparison_set_dtags =
 
         # Get the relevant dtags' xmaps
         masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
