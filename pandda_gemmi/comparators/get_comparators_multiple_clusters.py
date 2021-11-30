@@ -1,32 +1,17 @@
 from __future__ import annotations
 
-import os
 from typing import *
 import time
-from time import sleep
 from functools import partial
-import pickle
-import secrets
+
 import dataclasses
 
 import numpy as np
-import multiprocessing as mp
-import joblib
-from scipy import spatial as spsp, cluster as spc
-from sklearn import decomposition, metrics
-import umap
-from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
-from matplotlib import pyplot as plt
-import gemmi
+from sklearn import metrics
 
-from pandda_gemmi import constants
 from pandda_gemmi.common import Dtag
-from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
-from pandda_gemmi.fs import PanDDAFSModel
-from pandda_gemmi.shells import Shell
-from pandda_gemmi.edalignment import Alignment, Grid, Xmap, Partitioning
-from pandda_gemmi.model import Model, Zmap
-from pandda_gemmi.event import Event
+from pandda_gemmi.dataset import Dataset, Datasets, Resolution
+
 
 
 @dataclasses.dataclass()
