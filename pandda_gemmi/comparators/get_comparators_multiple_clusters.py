@@ -12,6 +12,8 @@ from sklearn import metrics
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
+
+
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
 def from_unaligned_dataset_c_flat(dataset: Dataset,
@@ -31,6 +33,7 @@ def from_unaligned_dataset_c_flat(dataset: Dataset,
     masked_array = xmap_array[grid.partitioning.total_mask == 1]
 
     return masked_array
+
 
 def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
     new_datasets_resolution = {}
@@ -60,6 +63,7 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
         new_datasets_reflections[dtag] = truncated_dataset
 
     return new_datasets_reflections
+
 
 @dataclasses.dataclass()
 class ComparatorCluster:
@@ -165,7 +169,7 @@ def get_reduced_array(
         process_local,
         dtag_array,
         dtag_list,
-load_xmap_paramaterised,
+        load_xmap_paramaterised,
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
