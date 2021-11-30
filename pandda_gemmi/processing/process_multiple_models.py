@@ -343,7 +343,6 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Decide which model to use...
     ###################################################################
-    # TODO
 
     selected_model_number = select_model(model_results)
     selected_model = models[selected_model_number]
