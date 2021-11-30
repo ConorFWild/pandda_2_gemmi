@@ -162,16 +162,16 @@ def process_dataset_multiple_models(
     model_results = {}
     for model_number, model in models:
 
-        dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[test_dtag]]
+        dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[model_number]]
         update_log(dataset_log, dataset_log_path)
 
-        masked_xmap_array = XmapArray.from_xmaps(
-            dataset_xmaps,
-            grid,
-        )
+        # masked_xmap_array = XmapArray.from_xmaps(
+        #     dataset_xmaps,
+        #     grid,
+        # )
 
-        masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-            [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
+        # masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
+        #     [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
 
         ###################################################################
         # # Generate the statistical model of the dataset
@@ -536,14 +536,17 @@ def process_shell_multiple_models(
     )
 
     # Process each dataset in the shell
+    all_train_dtags = [_dtag for l in shell.train_dtags for _dtag in l]
+    # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
+    dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
     results = process_local_over_datasets(
         [
             partial(
                 process_dataset_paramaterized,
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
-                                            shell.train_dtags[test_dtag].union({test_dtag, })},
-                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })},
+                                            dataset_dtags[test_dtag]},
+                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
             )
             for test_dtag
             in shell.train_dtags
