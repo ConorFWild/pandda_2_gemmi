@@ -263,6 +263,7 @@ def get_multiple_comparator_sets(
         sample_rate,
         resolution_cutoff,
         process_local,
+        debug=False,
 ) -> Dict[int, ComparatorCluster]:
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -289,6 +290,8 @@ def get_multiple_comparator_sets(
         dtag for dtag in dtags_by_res if datasets[dtag].reflections.resolution().resolution < resolution_cutoff
     ]
     suitable_datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in suitable_datasets_list}
+    if debug:
+        print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
     # Load the xmaps
     shell_truncated_datasets: Datasets = truncate(
@@ -296,6 +299,8 @@ def get_multiple_comparator_sets(
         resolution=Resolution(highest_res_datasets_max),
         structure_factors=structure_factors,
     )
+    if debug:
+        print('\tTruncated suitable datasets to common resolution')
 
     # Generate aligned xmaps
     load_xmap_paramaterised = partial(
@@ -313,6 +318,8 @@ def get_multiple_comparator_sets(
         dtag_list,
         load_xmap_paramaterised
     )
+    if debug:
+        print('\tLoaded in datasets and found dimension reduced feature vectors')
 
     distance_matrix, clusters = get_clusters_nn(
         reduced_array,
@@ -320,5 +327,7 @@ def get_multiple_comparator_sets(
         dtag_array,
         dtag_to_index,
     )
+    if debug:
+        print(f'\tFound clusters! Found {len(clusters)} clusters!')
 
     return clusters

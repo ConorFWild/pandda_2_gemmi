@@ -34,6 +34,7 @@ def get_shells_multiple_models(
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,
+        debug=False
 ):
     # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
     # Common reoslution

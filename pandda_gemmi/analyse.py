@@ -416,6 +416,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     # TODO: add option: pandda_args.resolution_cutoff,
                     3.0,
                     process_local,
+                    debug=pandda_args.debug,
                 )
                 # TODO
                 if pandda_args.debug:
@@ -445,6 +446,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.min_characterisation_datasets,
                     pandda_args.max_shell_datasets,
                     pandda_args.high_res_increment,
+                    debug=pandda_args.debug,
                 )
                 # TODO
                 if pandda_args.debug:
