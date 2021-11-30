@@ -79,6 +79,7 @@ def select_model(model_results: Dict[int, Dict]):
 
 
 def get_models(
+        test_dtags,
         comparison_sets: Dict[int, List[Dtag]],
         shell_xmaps,
         grid: Grid,
@@ -94,22 +95,24 @@ def get_models(
         # comparison_set_dtags =
 
         # Get the relevant dtags' xmaps
-        masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-            comparison_set_dtags)
+        masked_train_characterisation_xmap_array: XmapArray = masked_xmap_array.from_dtags(
+            comparison_set_dtags )
+        masked_train_all_xmap_array: XmapArray = masked_xmap_array.from_dtags(
+            comparison_set_dtags + [test_dtag for test_dtag in test_dtags])
 
-        mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_xmap_array,
+        mean_array: np.ndarray = Model.mean_from_xmap_array(masked_train_characterisation_xmap_array,
                                                             )  # Size of grid.partitioning.total_mask > 0
         # dataset_log[constants.LOG_DATASET_MEAN] = summarise_array(mean_array)
         # update_log(dataset_log, dataset_log_path)
 
-        sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_xmap_array,
+        sigma_is: Dict[Dtag, float] = Model.sigma_is_from_xmap_array(masked_train_all_xmap_array,
                                                                      mean_array,
                                                                      1.5,
                                                                      )  # size of n
         # dataset_log[constants.LOG_DATASET_SIGMA_I] = {_dtag.dtag: float(sigma_i) for _dtag, sigma_i in sigma_is.items()}
         # update_log(dataset_log, dataset_log_path)
 
-        sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_xmap_array,
+        sigma_s_m: np.ndarray = Model.sigma_sms_from_xmaps(masked_train_characterisation_xmap_array,
                                                            mean_array,
                                                            sigma_is,
                                                            process_local,
@@ -494,6 +497,7 @@ def process_shell_multiple_models(
     # # Get the models to test
     ###################################################################
     models = get_models(
+        shell.test_dtags,
         shell.train_dtags,
         xmaps,
         grid,
