@@ -1,6 +1,6 @@
 # Base python
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Set
 import time
 from pathlib import Path
 import pprint
@@ -19,7 +19,8 @@ from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import Datasets, Reference
 from pandda_gemmi.edalignment import Grid, Alignments
 from pandda_gemmi.filters import remove_models_with_large_gaps
-
+from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
+from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
     summarise_grid, save_json_log, summarise_datasets
 )
@@ -32,6 +33,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     process_global_dask,
     get_shells,
+    get_shells_clustered,
     get_comparators_high_res,
     get_comparators_high_res_random,
     get_comparators_closest_cutoff,
@@ -56,10 +58,11 @@ from pandda_gemmi.autobuild import (
 from pandda_gemmi.tables import (
     EventTable,
     SiteTable,
-    )
+)
 from pandda_gemmi.fs import PanDDAFSModel, ShellDirs
 from pandda_gemmi.processing import (
     process_shell,
+    process_shell_multiple_models,
     ShellResult
 )
 
@@ -175,8 +178,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 else:
                     raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
-
-
         ###################################################################
         # # Pre-pandda
         ###################################################################
@@ -193,7 +194,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if not structure_factors:
                     raise Exception(
                         "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
-
 
         # Make dataset validator
         validation_strategy = partial(
@@ -270,7 +270,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
             pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
                                             dtag not in datasets_diss_space]
-            validate_paramterized(datasets_diss_space, exception=Exception("Too few datasets after filter: space group"))
+            validate_paramterized(datasets_diss_space,
+                                  exception=Exception("Too few datasets after filter: space group"))
 
             datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
             pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
@@ -293,8 +294,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
             alignments: Alignments = Alignments.from_datasets(
-            reference,
-            datasets,
+                reference,
+                datasets,
             )
 
         ###################################################################
@@ -362,7 +363,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
             elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
                 if not pandda_args.known_apos:
-                    known_apos = [dtag for dtag in datasets if pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+                    known_apos = [dtag for dtag in datasets if
+                                  pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
                 else:
                     known_apos = [Dtag(dtag) for dtag in pandda_args.known_apos]
                     for known_apo in known_apos:
@@ -403,6 +405,24 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             #         process_local,
             #     )
 
+            elif pandda_args.comparison_strategy == "cluster":
+                comparators: Dict[int, ComparatorCluster] = get_multiple_comparator_sets(
+                    datasets,
+                    alignments,
+                    grid,
+                    pandda_args.comparison_min_comparators,
+                    structure_factors,
+                    pandda_args.sample_rate,
+                    # TODO: add option: pandda_args.resolution_cutoff,
+                    3.0,
+                    process_local,
+                )
+                # TODO
+                if pandda_args.debug:
+                    print('Got comparison set from clustering')
+                    for cluster_num, cluster in comparators.items():
+                        print(f'\tCluster num: {cluster_num}: {cluster.dtag}: {cluster.core_dtags[:5]}')
+
             else:
                 raise Exception("Unrecognised comparison strategy")
 
@@ -418,13 +438,31 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # sake of computational efficiency
         with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
                            f'\tDone!'):
-            shells = get_shells(
-                datasets,
-                comparators,
-                pandda_args.min_characterisation_datasets,
-                pandda_args.max_shell_datasets,
-                pandda_args.high_res_increment,
-            )
+            if pandda_args.comparison_strategy == "cluster":
+                shells = get_shells_multiple_models(
+                    datasets,
+                    comparators,
+                    pandda_args.min_characterisation_datasets,
+                    pandda_args.max_shell_datasets,
+                    pandda_args.high_res_increment,
+                )
+                # TODO
+                if pandda_args.debug:
+                    print('Got shells that support multiple models')
+                    for shell_res, shell in shells:
+                        print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
+                        for cluster_num, dtags in shell.train_dtags:
+                            print(f'\t\t{cluster_num}: {dtags[:5]}')
+
+
+            else:
+                shells = get_shells(
+                    datasets,
+                    comparators,
+                    pandda_args.min_characterisation_datasets,
+                    pandda_args.max_shell_datasets,
+                    pandda_args.high_res_increment,
+                )
             pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()
 
@@ -432,23 +470,43 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             printer.pprint(shells)
 
         # Parameterise
-        process_shell_paramaterised = partial(
-            process_shell,
-            process_local=process_local,
-            structure_factors=structure_factors,
-            sample_rate=pandda_args.sample_rate,
-            contour_level=pandda_args.contour_level,
-            cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-            min_blob_volume=pandda_args.min_blob_volume,
-            min_blob_z_peak=pandda_args.min_blob_z_peak,
-            outer_mask=pandda_args.outer_mask,
-            inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-            max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-            min_bdc=pandda_args.min_bdc,
-            max_bdc=pandda_args.max_bdc,
-            memory_availability=pandda_args.memory_availability,
-            statmaps=pandda_args.statmaps,
-        )
+        if pandda_args.comparison_strategy == "cluster":
+            process_shell_paramaterised = partial(
+                process_shell_multiple_models,
+                process_local=process_local,
+                structure_factors=structure_factors,
+                sample_rate=pandda_args.sample_rate,
+                contour_level=pandda_args.contour_level,
+                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                min_blob_volume=pandda_args.min_blob_volume,
+                min_blob_z_peak=pandda_args.min_blob_z_peak,
+                outer_mask=pandda_args.outer_mask,
+                inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                min_bdc=pandda_args.min_bdc,
+                max_bdc=pandda_args.max_bdc,
+                memory_availability=pandda_args.memory_availability,
+                statmaps=pandda_args.statmaps,
+                debug=pandda_args.debug,
+            )
+        else:
+            process_shell_paramaterised = partial(
+                process_shell,
+                process_local=process_local,
+                structure_factors=structure_factors,
+                sample_rate=pandda_args.sample_rate,
+                contour_level=pandda_args.contour_level,
+                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                min_blob_volume=pandda_args.min_blob_volume,
+                min_blob_z_peak=pandda_args.min_blob_z_peak,
+                outer_mask=pandda_args.outer_mask,
+                inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                min_bdc=pandda_args.min_bdc,
+                max_bdc=pandda_args.max_bdc,
+                memory_availability=pandda_args.memory_availability,
+                statmaps=pandda_args.statmaps,
+            )
 
         # Process the shells
         with STDOUTManager('Processing the shells...', f'\tDone!'):
@@ -552,7 +610,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     if len(all_scores) == 0:
                         # print(f"\tNo autobuilds for this dataset!")
                         continue
-
 
                     # Select fragment build
                     selected_fragement_path = max(

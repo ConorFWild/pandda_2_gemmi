@@ -1788,6 +1788,79 @@ def get_shells(
     return shells
 
 
+def get_shells_clustered(
+        datasets: Dict[Dtag, Dataset],
+        comparators: Dict[Dtag, List[Dtag]],
+        min_characterisation_datasets,
+        max_shell_datasets,
+        high_res_increment,
+):
+    # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
+    # Common reoslution
+
+    # Get the dictionary of resolutions for convenience
+    resolutions = {dtag: datasets[dtag].reflections.resolution().resolution for dtag in datasets}
+
+    # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the
+    # Lowest res dataset
+    reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
+    shells_test = {res: set() for res in reses}
+    shells_train = {res: {} for res in reses}
+
+    # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
+    # in the set of the first shell of sufficiently low res
+
+    for dtag, comparison_dtags in comparators.items():
+        dtag_res = resolutions[dtag]
+        comparators_low_res = max([resolutions[comparison_dtag] for comparison_dtag in comparison_dtags])
+
+        low_res = max([dtag_res, comparators_low_res])
+
+        # Find the first shell whose res is higher
+        for res in reses:
+            if res > low_res:
+                shells_test[res] = shells_test[res].union({dtag, })
+                shells_train[res][dtag] = set(comparison_dtags)
+
+                # Make sure they only appear in one shell
+                break
+
+    # Create shells
+    shells = {}
+    for j, res in enumerate(reses):
+
+        # Collect a set of all dtags
+        all_dtags = set()
+
+        # Add all the test dtags
+        for dtag in shells_test[res]:
+            all_dtags = all_dtags.union({dtag, })
+
+        # Add all the train dtags
+        for test_dtag, train_dtags in shells_train[res].items():
+            all_dtags = all_dtags.union(train_dtags)
+
+        # Create the shell
+        shell = Shell(
+            res,
+            shells_test[res],
+            shells_train[res],
+            all_dtags,
+        )
+        shells[res] = shell
+
+    # Delete any shells that are empty
+    shells_to_delete = []
+    for res in reses:
+        if len(shells_test[res]) == 0 or len(shells_train[res]) == 0:
+            shells_to_delete.append(res)
+
+    for res in shells_to_delete:
+        del shells[res]
+
+    return shells
+
+
 def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
     new_datasets_resolution = {}
 
