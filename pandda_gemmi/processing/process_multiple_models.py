@@ -549,7 +549,7 @@ def process_shell_multiple_models(
                 dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
             )
             for test_dtag
-            in shell.train_dtags
+            in shell.test_dtags
         ],
     )
 
