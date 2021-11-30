@@ -19,7 +19,7 @@ from pandda_gemmi.comparators import ComparatorCluster
 class ShellMultipleModels:
     # number: int
     res: float
-    test_dtags: typing.Set[Dtag]
+    test_dtags: typing.List[Dtag]
     train_dtags: typing.Dict[int, Set[Dtag]]
     all_dtags: typing.Set[Dtag]
     # datasets: Datasets
@@ -98,7 +98,7 @@ def get_shells_multiple_models(
         # Create the shell
         shell = ShellMultipleModels(
             res,
-            shells_test[res],
+            [x for x in shells_test[res]],
             shells_train[res],
             all_dtags,
         )
