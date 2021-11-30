@@ -11,6 +11,7 @@ from sklearn import metrics
 
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution
+from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
 
 @dataclasses.dataclass()
@@ -117,7 +118,7 @@ def get_reduced_array(
         process_local,
         dtag_array,
         dtag_list,
-
+load_xmap_paramaterised,
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
@@ -259,6 +260,7 @@ def get_multiple_comparator_sets(
         process_local,
         dtag_array,
         dtag_list,
+        load_xmap_paramaterised
     )
 
     distance_matrix, clusters = get_clusters_nn(
