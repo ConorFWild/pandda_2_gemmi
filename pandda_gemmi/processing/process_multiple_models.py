@@ -160,6 +160,8 @@ def process_dataset_multiple_models(
 
     model_results = {}
     for model_number, model in models.items():
+        if debug:
+            print(f'\tAnalysing model: {model_number}')
 
         dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[model_number]]
         update_log(dataset_log, dataset_log_path)
