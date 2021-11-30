@@ -284,13 +284,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                              sample_rate=pandda_args.sample_rate,
                                              )
 
-        if pandda_args.debug:
-            print("Summarising protein mask")
-            summarise_grid(grid.partitioning.protein_mask)
-            print("Summarising symmetry mask")
-            summarise_grid(grid.partitioning.symmetry_mask)
-            print("Summarising total mask")
-            summarise_grid(grid.partitioning.total_mask)
+        # if pandda_args.debug:
+        #     print("Summarising protein mask")
+        #     summarise_grid(grid.partitioning.protein_mask)
+        #     print("Summarising symmetry mask")
+        #     summarise_grid(grid.partitioning.symmetry_mask)
+        #     print("Summarising total mask")
+        #     summarise_grid(grid.partitioning.total_mask)
 
         with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
             alignments: Alignments = Alignments.from_datasets(
