@@ -54,7 +54,7 @@ def get_shells_multiple_models(
     # Lowest res dataset
     # reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
     # reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
-    reses = np.arange(lowest_valid_res, max(resolutions.values()), lowest_valid_res + high_res_increment)
+    reses = np.arange(lowest_valid_res, max(resolutions.values()), high_res_increment)
 
     shells_test = {res: set() for res in reses}
     shells_train = {res: {} for res in reses}
