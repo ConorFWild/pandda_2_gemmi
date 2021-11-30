@@ -63,7 +63,7 @@ def get_shells_multiple_models(
             # comparison set is full
             for dtag in sorted_distance_to_cluster:
                 if datasets[dtag].reflections.resolution().resolution < res:
-                    shells_train[res][cluster_num].apend(dtag)
+                    shells_train[res][cluster_num].append(dtag)
 
                     # If enough datasets for training, exit loop and move onto next cluster
                     if len(shells_train[res][cluster_num]) >= min_characterisation_datasets:

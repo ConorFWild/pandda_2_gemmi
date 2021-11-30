@@ -194,6 +194,9 @@ def get_reduced_array(
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
 
+    if debug:
+        print(f'\t\tBatches are: {batches}')
+
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
