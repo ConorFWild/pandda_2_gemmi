@@ -4,7 +4,6 @@ import typing
 import dataclasses
 
 from joblib.externals.loky import set_loky_pickler
-
 set_loky_pickler('pickle')
 
 from typing import *

@@ -170,6 +170,7 @@ def get_reduced_array(
         dtag_array,
         dtag_list,
         load_xmap_paramaterised,
+        debug=False
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
@@ -197,6 +198,8 @@ def get_reduced_array(
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
     for batch in batches:
+        if debug:
+            print(f'\t\t\tProcessing batch: {batch}')
         start = time.time()
         results = process_local(
             [
@@ -217,6 +220,8 @@ def get_reduced_array(
                  }
 
         finish = time.time()
+        if debug:
+            print(f'\t\t\tProcessing batch: {batch} in {finish-start}')
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
