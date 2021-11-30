@@ -453,7 +453,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     print('Got shells that support multiple models')
                     for shell_res, shell in shells.items():
                         print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
-                        for cluster_num, dtags in shell.train_dtags:
+                        for cluster_num, dtags in shell.train_dtags.items():
                             print(f'\t\t{cluster_num}: {dtags[:5]}')
 
 
