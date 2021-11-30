@@ -41,9 +41,21 @@ def get_shells_multiple_models(
     # Get the dictionary of resolutions for convenience
     resolutions = {dtag: datasets[dtag].reflections.resolution().resolution for dtag in datasets}
 
+    # Find the minimum resolutioin with enough training data
+    dtags_by_resolution = [ x for x in sorted(resolutions,
+           key=lambda _dtag: resolutions[_dtag])]
+    lowest_valid_res = datasets[dtags_by_resolution[min_characterisation_datasets+1]].reflections.resolution(
+
+    ).resolution
+    if debug:
+        print(f'\tLowest valid resolution is: {lowest_valid_res}')
+
     # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the
     # Lowest res dataset
-    reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
+    # reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
+    # reses = np.arange(min(resolutions.values()), max(resolutions.values()), high_res_increment)
+    reses = np.arange(lowest_valid_res, max(resolutions.values()), lowest_valid_res + high_res_increment)
+
     shells_test = {res: set() for res in reses}
     shells_train = {res: {} for res in reses}
 
