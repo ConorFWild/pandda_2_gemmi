@@ -536,7 +536,7 @@ def process_shell_multiple_models(
     )
 
     # Process each dataset in the shell
-    all_train_dtags = [_dtag for l in shell.train_dtags for _dtag in l]
+    all_train_dtags = [_dtag for l in shell.train_dtags.values() for _dtag in l]
     # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
     dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
     results = process_local_over_datasets(
