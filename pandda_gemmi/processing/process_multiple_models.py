@@ -57,11 +57,10 @@ def update_log(shell_log, shell_log_path):
     with open(shell_log_path, "w") as f:
         json.dump(shell_log, f)
 
-
-def select_model(model_results):
+def select_model(model_results: Dict[int, Dict]):
     model_scores = {}
-    for model_number in model_results:
-        num_merged_clusters = len(model_results['clusterings_merged'])
+    for model_number, model_result in model_results.items():
+        num_merged_clusters = len(model_result['clusterings_merged'])
         if num_merged_clusters == 0:
             model_score = 0
         elif num_merged_clusters < 6:
