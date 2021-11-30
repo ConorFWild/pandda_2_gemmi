@@ -13,14 +13,13 @@ from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution
 
 
-
 @dataclasses.dataclass()
 class ComparatorCluster:
     dtag: Dtag
     core_dtags: List[Dtag]
     core_dtags_median: np.array
     core_dtags_width: np.array
-    dtag_distance_to_cluster: Dict[Dtag,  float]
+    dtag_distance_to_cluster: Dict[Dtag, float]
 
 
 def get_clusters_nn(
