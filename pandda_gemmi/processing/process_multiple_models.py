@@ -333,7 +333,7 @@ def process_dataset_multiple_models(
         update_log(dataset_log, dataset_log_path)
 
         model_results[model_number] = {
-            'zmap': zmaps[dtag],
+            'zmap': zmaps[test_dtag],
             'clusterings': clusterings,
             'clusterings_large': clusterings_large,
             'clusterings_merged': clusterings_merged,
