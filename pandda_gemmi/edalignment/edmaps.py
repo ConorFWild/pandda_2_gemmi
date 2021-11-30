@@ -578,4 +578,4 @@ class XmapArray:
 
         view = self.xmap_array[mask_array]
 
-        return XmapArray(dtags, view)
+        return XmapArray([_dtag for _dtag in self.dtag_list if _dtag in dtags], view)
