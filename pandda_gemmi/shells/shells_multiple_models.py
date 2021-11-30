@@ -104,8 +104,8 @@ def get_shells_multiple_models(
             all_dtags = all_dtags.union({dtag, })
 
         # Add all the train dtags
-        for test_dtag, train_dtags in shells_train[res].items():
-            all_dtags = all_dtags.union(train_dtags)
+        for cluster_num, cluster_dtags in shells_train[res].items():
+            all_dtags = all_dtags.union(cluster_dtags)
 
         # Create the shell
         shell = ShellMultipleModels(
