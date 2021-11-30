@@ -152,6 +152,8 @@ def process_dataset_multiple_models(
         process_local=process_local_serial,
         debug=False,
 ):
+    if debug:
+        print(f'\tProcessing dtag: {test_dtag}')
     time_dataset_start = time.time()
 
     dataset_log_path = pandda_fs_model.processed_datasets.processed_datasets[test_dtag].log_path
