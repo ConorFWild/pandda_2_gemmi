@@ -224,7 +224,7 @@ def get_reduced_array(
 
         finish = time.time()
         if debug:
-            print(f'\t\t\tProcessing batch: {batch} in {finish-start}')
+            print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
@@ -262,6 +262,48 @@ def get_reduced_array(
     return reduced_array
 
 
+def get_distances_between_clusters(clusters):
+    num_clusters = len(clusters)
+    distance_matrix = np.zeros((num_clusters, num_clusters))
+
+    for cluster_1_num, cluster_1_median in clusters.items():
+        for cluster_2_num, cluster_2_median in clusters.items():
+            distance_matrix[cluster_1_num, cluster_2_num] = np.linalg.norm(cluster_2_median - cluster_1_median)
+
+    return distance_matrix
+
+
+def renumber_clusters(clusters: Dict[int, ComparatorCluster]):
+    new_clusters = {}
+    for j, cluster_num in enumerate(clusters):
+        new_clusters[j] = clusters[cluster_num]
+
+    return new_clusters
+
+
+def refine_comparator_clusters(clusters: Dict[int, ComparatorCluster], max_comparator_sets):
+    new_clusters = {}
+
+    while len(new_clusters) > max_comparator_sets:
+        new_clusters = renumber_clusters(new_clusters)
+
+        distance_matrix = get_distances_between_clusters(new_clusters)
+        closest_cluster_indexes = np.unravel_index(np.argmin(distance_matrix), distance_matrix.shape)
+        broader_cluster_index = max(
+            closest_cluster_indexes,
+            key=lambda index: new_clusters[index].core_dtags_width,
+        )
+        # del clusters[broader_cluster_index]
+        new_clusters = {
+            cluster_index: new_clusters[cluster_index]
+            for cluster_index
+            in new_clusters
+            if cluster_index != broader_cluster_index
+        }
+
+    return clusters
+
+
 def get_multiple_comparator_sets(
         datasets: Dict[Dtag, Dataset],
         alignments,
@@ -271,6 +313,7 @@ def get_multiple_comparator_sets(
         sample_rate,
         resolution_cutoff,
         process_local,
+        max_comparator_sets=None,
         debug=False,
 ) -> Dict[int, ComparatorCluster]:
     dtag_list = [dtag for dtag in datasets]
@@ -341,5 +384,8 @@ def get_multiple_comparator_sets(
     )
     if debug:
         print(f'\tFound clusters! Found {len(clusters)} clusters!')
+
+    if max_comparator_sets:
+        clusters = refine_comparator_clusters(clusters, max_comparator_sets)
 
     return clusters
