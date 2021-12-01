@@ -301,6 +301,10 @@ def get_multiple_comparator_sets(
     if debug:
         print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
+    dtag_list = [dtag for dtag in suitable_datasets_list]
+    dtag_array = np.array(dtag_list)
+    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
+
     # Load the xmaps
     shell_truncated_datasets: Datasets = truncate(
         suitable_datasets,
