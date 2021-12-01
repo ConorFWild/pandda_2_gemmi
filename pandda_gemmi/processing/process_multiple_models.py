@@ -572,6 +572,6 @@ def process_shell_multiple_models(
 
     return ShellResult(
         shell=shell,
-        dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
+        dataset_results={dtag: result for dtag, result in zip(shell.test_dtags, results) if result},
         log=shell_log,
     )
