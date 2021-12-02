@@ -105,8 +105,6 @@ class Cluster:
     values: np.ndarray
     centroid: Tuple[float, float, float]
     event_mask_indicies: np.ndarray
-    time_get_orth: Optional[float] = 0.0
-    time_fcluster: Optional[float] = 0.0
     time_event_mask: Optional[float] = 0.0
 
     def size(self, grid: Grid):
@@ -122,10 +120,19 @@ class Cluster:
 @dataclasses.dataclass()
 class Clustering:
     clustering: typing.Dict[int, Cluster]
+    time_cluster: Optional[float] = 0.0
+    time_np: Optional[float] = 0.0
+    time_event_masking: Optional[float] = 0.0
+    time_get_orth: Optional[float] = 0.0
+    time_fcluster: Optional[float] = 0.0
 
     @staticmethod
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float,
                   cluster_cutoff_distance_multiplier: float = 1.3):
+        time_cluster_start = time.time()
+
+        time_np_start = time.time()
+
         zmap_array = zmap.to_array(copy=True)
 
         # Get the protein mask
@@ -205,6 +212,8 @@ class Clustering:
             clusters = {}
             return Clustering(clusters)
 
+        time_np_finish=time.time()
+
         # TODO: possible bottleneck
         time_fcluster_start = time.time()
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
@@ -217,6 +226,7 @@ class Clustering:
         time_fcluster_finish = time.time()
 
         clusters = {}
+        time_event_masking_start = time.time()
         for unique_cluster in np.unique(cluster_ids_array):
             if unique_cluster == -1:
                 continue
@@ -265,13 +275,22 @@ class Clustering:
                               values,
                               centroid,
                               event_mask_indicies,
-                              time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
-                              time_fcluster=time_fcluster_finish-time_fcluster_start,
+                              # time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
+                              # time_fcluster=time_fcluster_finish-time_fcluster_start,
                               time_event_mask=time_event_mask_finish-time_event_mask_start,
                               )
             clusters[unique_cluster] = cluster
+        time_event_masking_finish = time.time()
 
-        return Clustering(clusters)
+        time_cluster_finish = time.time()
+
+        return Clustering(clusters,
+                          time_cluster=time_cluster_finish-time_cluster_start,
+                          time_np=time_np_finish-time_np_start,
+                          time_event_masking=time_event_masking_finish-time_event_masking_start,
+                          time_get_orth=time_get_orth_pos_finish - time_get_orth_pos_start,
+                          time_fcluster=time_fcluster_finish - time_fcluster_start,
+                          )
 
     def __iter__(self):
         for cluster_num in self.clustering:
