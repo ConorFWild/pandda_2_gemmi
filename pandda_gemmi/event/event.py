@@ -104,7 +104,7 @@ class Cluster:
     cluster_positions_array: np.array
     values: np.ndarray
     centroid: Tuple[float, float, float]
-    event_mask_indicies: np.ndarray
+    event_mask_indicies: Optional[np.ndarray]
     time_event_mask: Optional[float] = 0.0
 
     def size(self, grid: Grid):
@@ -117,6 +117,25 @@ class Cluster:
         return np.max(self.values)
 
 
+def get_event_mask_indicies(zmap: Zmap, cluster_positions_array: np.ndarray):
+    # cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
+    positions = PositionsArray(cluster_positions_array).to_positions()
+    event_mask = gemmi.Int8Grid(*zmap.shape())
+    event_mask.spacegroup = zmap.spacegroup()
+    event_mask.set_unit_cell(zmap.unit_cell())
+    for position in positions:
+        event_mask.set_points_around(position,
+                                     radius=3.0,
+                                     value=1,
+                                     )
+
+    # event_mask.symmetrize_max()
+
+    event_mask_array = np.array(event_mask, copy=True, dtype=np.int8)
+    event_mask_indicies = np.nonzero(event_mask_array)
+    return event_mask_indicies
+
+
 @dataclasses.dataclass()
 class Clustering:
     clustering: typing.Dict[int, Cluster]
@@ -125,6 +144,7 @@ class Clustering:
     time_event_masking: Optional[float] = 0.0
     time_get_orth: Optional[float] = 0.0
     time_fcluster: Optional[float] = 0.0
+
 
     @staticmethod
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float,
@@ -246,23 +266,27 @@ class Clustering:
             values = zmap_array[cluster_points_tuple]
 
             # Generate event mask
-            time_event_mask_start = time.time()
             cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
-            positions = PositionsArray(cluster_positions_array).to_positions()
-            event_mask = gemmi.Int8Grid(*zmap.shape())
-            event_mask.spacegroup = zmap.spacegroup()
-            event_mask.set_unit_cell(zmap.unit_cell())
-            for position in positions:
-                event_mask.set_points_around(position,
-                                             radius=3.0,
-                                             value=1,
-                                             )
+            ###
+
+            time_event_mask_start = time.time()
+            # positions = PositionsArray(cluster_positions_array).to_positions()
+            # event_mask = gemmi.Int8Grid(*zmap.shape())
+            # event_mask.spacegroup = zmap.spacegroup()
+            # event_mask.set_unit_cell(zmap.unit_cell())
+            # for position in positions:
+            #     event_mask.set_points_around(position,
+            #                                  radius=3.0,
+            #                                  value=1,
+            #                                  )
 
             # event_mask.symmetrize_max()
 
-            event_mask_array = np.array(event_mask, copy=True, dtype=np.int8)
-            event_mask_indicies = np.nonzero(event_mask_array)
+            # event_mask_array = np.array(event_mask, copy=True, dtype=np.int8)
+            # event_mask_indicies = np.nonzero(event_mask_array)
+
             time_event_mask_finish = time.time()
+            ###
 
             centroid_array = np.mean(cluster_positions_array,
                                      axis=0)
@@ -274,7 +298,7 @@ class Clustering:
                               cluster_positions_array,
                               values,
                               centroid,
-                              event_mask_indicies,
+                              None,
                               # time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
                               # time_fcluster=time_fcluster_finish-time_fcluster_start,
                               time_event_mask=time_event_mask_finish-time_event_mask_start,

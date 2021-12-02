@@ -32,7 +32,7 @@ from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
 from pandda_gemmi.shells import Shell
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray
 from pandda_gemmi.model import Zmap, Model, Zmaps
-from pandda_gemmi.event import Event, Clusterings, Clustering, Events
+from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies
 
 
 @dataclasses.dataclass()
@@ -277,6 +277,11 @@ def process_dataset(
     dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_merged.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
+
+    # Add the event mask
+    for clustering_id, clustering in clusterings_merged.clusterings.items():
+        for cluster_id, cluster in clustering.clustering.items():
+            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
 
     time_cluster_finish = time.time()
     dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
