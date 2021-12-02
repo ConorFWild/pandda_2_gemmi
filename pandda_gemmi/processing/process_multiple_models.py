@@ -55,7 +55,8 @@ def update_log(shell_log, shell_log_path):
         os.remove(shell_log_path)
 
     with open(shell_log_path, "w") as f:
-        json.dump(shell_log, f)
+        json.dump(shell_log, f, indent=4)
+
 
 def select_model(model_results: Dict[int, Dict]):
     model_scores = {}
@@ -255,6 +256,7 @@ def process_dataset_multiple_models(
         time_cluster_start = time.time()
 
         # Get the clustered electron desnity outliers
+
         cluster_paramaterised = partial(
             Clustering.from_zmap,
             reference=reference,
@@ -262,26 +264,26 @@ def process_dataset_multiple_models(
             contour_level=contour_level,
             cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
         )
-
-        clusterings = process_local(
+        time_cluster_z_start = time.time()
+        clusterings: List[Clustering] = process_local(
             [
                 partial(cluster_paramaterised, zmaps[dtag], )
                 for dtag
                 in zmaps
             ]
         )
-        clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
-        # print("\t\tIntially found clusters: {}".format(
-        #     {
-        #         dtag: (
-        #             len(clustering),
-        #             max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
-        #             max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
-        #         )
-        #         for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
-        #     }
-        # )
-        # )
+        time_cluster_z_finish = time.time()
+        if debug:
+            dataset_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
+            dataset_log['time_event_mask'] = {}
+            for j, clustering in enumerate(clusterings):
+                for cluster_num, cluster in clustering.clustering.items():
+                    dataset_log['time_get_orth'] = cluster.time_get_orth
+                    dataset_log['time_fcluster'] = cluster.time_fcluster
+                    dataset_log['time_event_mask'][j] = cluster.time_event_mask
+
+        clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+
         dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
             [len(clustering) for clustering in clusterings.clusterings.values()])
         update_log(dataset_log, dataset_log_path)

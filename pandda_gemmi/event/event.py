@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import typing
 from typing import *
 import dataclasses
@@ -104,6 +105,9 @@ class Cluster:
     values: np.ndarray
     centroid: Tuple[float, float, float]
     event_mask_indicies: np.ndarray
+    time_get_orth: Optional[float] = 0.0
+    time_fcluster: Optional[float] = 0.0
+    time_event_mask: Optional[float] = 0.0
 
     def size(self, grid: Grid):
         grid_volume = grid.volume()
@@ -164,11 +168,16 @@ class Clustering:
         extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape(
             (1, 3))
 
+        # TODO: possible bottleneck
+        time_get_orth_pos_start = time.time()
         positions_orthogonal = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional[0],
                                                                                    fractional[1],
                                                                                    fractional[2],
                                                                                    )) for fractional in
                                 extrema_fractional_array]
+        time_get_orth_pos_finish = time.time()
+
+
         positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
 
         # positions = []
@@ -196,6 +205,8 @@ class Clustering:
             clusters = {}
             return Clustering(clusters)
 
+        # TODO: possible bottleneck
+        time_fcluster_start = time.time()
         cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
                                          # t=blob_finding.clustering_cutoff,
                                          t=clustering_cutoff,
@@ -203,6 +214,7 @@ class Clustering:
                                          metric='euclidean',
                                          method='single',
                                          )
+        time_fcluster_finish = time.time()
 
         clusters = {}
         for unique_cluster in np.unique(cluster_ids_array):
@@ -224,6 +236,7 @@ class Clustering:
             values = zmap_array[cluster_points_tuple]
 
             # Generate event mask
+            time_event_mask_start = time.time()
             cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
             positions = PositionsArray(cluster_positions_array).to_positions()
             event_mask = gemmi.Int8Grid(*zmap.shape())
@@ -239,6 +252,7 @@ class Clustering:
 
             event_mask_array = np.array(event_mask, copy=True, dtype=np.int8)
             event_mask_indicies = np.nonzero(event_mask_array)
+            time_event_mask_finish = time.time()
 
             centroid_array = np.mean(cluster_positions_array,
                                      axis=0)
@@ -251,6 +265,9 @@ class Clustering:
                               values,
                               centroid,
                               event_mask_indicies,
+                              time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
+                              time_fcluster=time_fcluster_finish-time_fcluster_start,
+                              time_event_mask=time_event_mask_finish-time_event_mask_start,
                               )
             clusters[unique_cluster] = cluster
 
