@@ -283,7 +283,7 @@ def process_dataset_multiple_models(
                 dataset_log['time_get_orth'] = clustering.time_get_orth
                 dataset_log['time_fcluster'] = clustering.time_fcluster
                 for cluster_num, cluster in clustering.clustering.items():
-                    dataset_log['time_event_mask'][cluster_num] = cluster.time_event_mask
+                    dataset_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
 
         clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
 
