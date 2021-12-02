@@ -195,60 +195,7 @@ def process_dataset_multiple_models(
         dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
         update_log(dataset_log, dataset_log_path)
 
-        for dtag in zmaps:
-            zmap = zmaps[dtag]
-            partitioning = Partitioning.from_structure_multiprocess(
-                dataset_truncated_datasets[test_dtag].structure,
-                grid,
-                outer_mask,
-                inner_mask_symmetry,
-            )
-            # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
 
-            save_native_frame_zmap(
-                pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.path,
-                zmap,
-                dataset_truncated_datasets[test_dtag],
-                alignments[test_dtag],
-                grid,
-                structure_factors,
-                outer_mask,
-                inner_mask_symmetry,
-                partitioning,
-                sample_rate,
-            )
-
-            if statmaps:
-                mean_map_file = MeanMapFile.from_zmap_file(
-                    pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file)
-                mean_map_file.save_native_frame_mean_map(
-                    model,
-                    zmap,
-                    dataset_truncated_datasets[test_dtag],
-                    alignments[test_dtag],
-                    grid,
-                    structure_factors,
-                    outer_mask,
-                    inner_mask_symmetry,
-                    partitioning,
-                    sample_rate,
-                )
-
-                std_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
-                                                             dtag].z_map_file)
-                std_map_file.save_native_frame_std_map(
-                    dtag,
-                    model,
-                    zmap,
-                    dataset_truncated_datasets[test_dtag],
-                    alignments[test_dtag],
-                    grid,
-                    structure_factors,
-                    outer_mask,
-                    inner_mask_symmetry,
-                    partitioning,
-                    sample_rate,
-                )
 
         ###################################################################
         # # Cluster the outlying density
@@ -363,8 +310,70 @@ def process_dataset_multiple_models(
     selected_model_number = select_model(model_results)
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
+    zmap = model_results[selected_model_number]['zmap']
     if debug:
         print(f'\tSelected model is: {selected_model_number}')
+
+    ###################################################################
+    # # Output the z map
+    ###################################################################
+    time_output_zmap_start = time.time()
+
+    partitioning = Partitioning.from_structure_multiprocess(
+        dataset_truncated_datasets[test_dtag].structure,
+        grid,
+        outer_mask,
+        inner_mask_symmetry,
+    )
+    # pandda_fs_model.processed_datasets.processed_datasets[dtag].z_map_file.save_reference_frame_zmap(zmap)
+
+    save_native_frame_zmap(
+        pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path,
+        zmap,
+        dataset_truncated_datasets[test_dtag],
+        alignments[test_dtag],
+        grid,
+        structure_factors,
+        outer_mask,
+        inner_mask_symmetry,
+        partitioning,
+        sample_rate,
+    )
+
+    if statmaps:
+        mean_map_file = MeanMapFile.from_zmap_file(
+            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file)
+        mean_map_file.save_native_frame_mean_map(
+            selected_model,
+            zmap,
+            dataset_truncated_datasets[test_dtag],
+            alignments[test_dtag],
+            grid,
+            structure_factors,
+            outer_mask,
+            inner_mask_symmetry,
+            partitioning,
+            sample_rate,
+        )
+
+        std_map_file = StdMapFile.from_zmap_file(pandda_fs_model.processed_datasets.processed_datasets[
+                                                     test_dtag].z_map_file)
+        std_map_file.save_native_frame_std_map(
+            test_dtag,
+            selected_model,
+            zmap,
+            dataset_truncated_datasets[test_dtag],
+            alignments[test_dtag],
+            grid,
+            structure_factors,
+            outer_mask,
+            inner_mask_symmetry,
+            partitioning,
+            sample_rate,
+        )
+    time_output_zmap_finish = time.time()
+    dataset_log['Time to output z map'] = time_output_zmap_finish - time_output_zmap_start
+
 
     ###################################################################
     # # Find the events
