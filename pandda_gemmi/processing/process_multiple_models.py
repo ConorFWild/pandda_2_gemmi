@@ -277,10 +277,13 @@ def process_dataset_multiple_models(
             dataset_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
             dataset_log['time_event_mask'] = {}
             for j, clustering in enumerate(clusterings):
+                dataset_log['time_cluster'] = clustering.time_cluster
+                dataset_log['time_np'] = clustering.time_np
+                dataset_log['time_event_masking'] = clustering.time_event_masking
+                dataset_log['time_get_orth'] = clustering.time_get_orth
+                dataset_log['time_fcluster'] = clustering.time_fcluster
                 for cluster_num, cluster in clustering.clustering.items():
-                    dataset_log['time_get_orth'] = cluster.time_get_orth
-                    dataset_log['time_fcluster'] = cluster.time_fcluster
-                    dataset_log['time_event_mask'][j] = cluster.time_event_mask
+                    dataset_log['time_event_mask'][cluster_num] = cluster.time_event_mask
 
         clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
 
