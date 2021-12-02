@@ -8,6 +8,7 @@ import dataclasses
 from scipy.cluster.hierarchy import fclusterdata
 from sklearn.cluster import DBSCAN
 from joblib.externals.loky import set_loky_pickler
+
 set_loky_pickler('pickle')
 
 # from pandda_gemmi.pandda_functions import save_event_map
@@ -21,18 +22,18 @@ from pandda_gemmi.sites import Sites
 
 def save_event_map(
         path,
-         xmap: Xmap,
-         model: Model,
-         event: Event,
-         dataset: Dataset,
-         alignment: Alignment,
-         grid: Grid,
-         structure_factors: StructureFactors,
-         mask_radius: float,
-         mask_radius_symmetry: float,
-         partitioning: Partitioning,
-         sample_rate: float,
-         ):
+        xmap: Xmap,
+        model: Model,
+        event: Event,
+        dataset: Dataset,
+        alignment: Alignment,
+        grid: Grid,
+        structure_factors: StructureFactors,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        partitioning: Partitioning,
+        sample_rate: float,
+):
     reference_xmap_grid = xmap.xmap
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
@@ -145,7 +146,6 @@ class Clustering:
     time_get_orth: Optional[float] = 0.0
     time_fcluster: Optional[float] = 0.0
 
-
     @staticmethod
     def from_zmap(zmap: Zmap, reference: Reference, grid: Grid, contour_level: float,
                   cluster_cutoff_distance_multiplier: float = 1.3):
@@ -204,7 +204,6 @@ class Clustering:
                                 extrema_fractional_array]
         time_get_orth_pos_finish = time.time()
 
-
         positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
 
         # positions = []
@@ -232,7 +231,7 @@ class Clustering:
             clusters = {}
             return Clustering(clusters)
 
-        time_np_finish=time.time()
+        time_np_finish = time.time()
 
         # TODO: possible bottleneck
         time_fcluster_start = time.time()
@@ -301,7 +300,7 @@ class Clustering:
                               None,
                               # time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
                               # time_fcluster=time_fcluster_finish-time_fcluster_start,
-                              time_event_mask=time_event_mask_finish-time_event_mask_start,
+                              time_event_mask=time_event_mask_finish - time_event_mask_start,
                               )
             clusters[unique_cluster] = cluster
         time_event_masking_finish = time.time()
@@ -309,9 +308,9 @@ class Clustering:
         time_cluster_finish = time.time()
 
         return Clustering(clusters,
-                          time_cluster=time_cluster_finish-time_cluster_start,
-                          time_np=time_np_finish-time_np_start,
-                          time_event_masking=time_event_masking_finish-time_event_masking_start,
+                          time_cluster=time_cluster_finish - time_cluster_start,
+                          time_np=time_np_finish - time_np_start,
+                          time_event_masking=time_event_masking_finish - time_event_masking_start,
                           time_get_orth=time_get_orth_pos_finish - time_get_orth_pos_start,
                           time_fcluster=time_fcluster_finish - time_fcluster_start,
                           )
@@ -528,17 +527,24 @@ class Clusterings:
                 centroid = (centroid_array[0],
                             centroid_array[1],
                             centroid_array[2],)
-                event_mask_indicies = tuple(
-                    np.concatenate(
-                        [current_cluster.event_mask_indicies[i]
-                         for current_cluster
-                         in current_clusters
-                         ],
-                        axis=None,
-                    )
-                    for i
-                    in [0, 1, 2]
-                )
+
+                # event_mask_indicies_list = [current_cluster.event_mask_indicies[i]
+                #  for current_cluster
+                #  in current_clusters
+                #  if current_cluster.event_mask_indicies
+                #  ]
+                #
+                # if len(event_mask_indicies_list) > 1:
+                #     event_mask_indicies = tuple(
+                #         np.concatenate(
+                #             event_mask_indicies_list,
+                #             axis=None,
+                #         )
+                #         for i
+                #         in [0, 1, 2]
+                #     )
+                # else:
+                event_mask_indicies = None
 
                 new_cluster = Cluster(
                     cluster_points_tuple,
