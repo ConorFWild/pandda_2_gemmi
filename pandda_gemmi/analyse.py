@@ -554,8 +554,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.autobuild:
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
+                if process_global == 'serial':
+                    process_autobuilds = process_local
+                else:
+                    process_autobuilds = process_global
+
                 time_autobuild_start = time.time()
-                autobuild_results_list: Dict[EventID, AutobuildResult] = process_global(
+                autobuild_results_list: Dict[EventID, AutobuildResult] = process_autobuilds(
                     [
                         partial(
                             autobuild_parametrized,
