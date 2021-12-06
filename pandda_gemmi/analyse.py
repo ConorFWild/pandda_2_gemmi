@@ -724,5 +724,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 if __name__ == '__main__':
     with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
         args = PanDDAArgs.from_command_line()
+        print(args.only_datasets)
 
     process_pandda(args)
