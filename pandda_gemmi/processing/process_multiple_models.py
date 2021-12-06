@@ -93,16 +93,17 @@ def select_model(model_results: Dict[int, Dict], grid):
     signal_to_noise = {}
     for model_number, model_result in model_results.items():
         zmap = model_result['zmap']
-        cluster_sizes = [event_size for event_number, event_size in model_event_sizes[model_number]]
+        cluster_sizes = [event_size for event_number, event_size in model_event_sizes[model_number].items()]
         zmap_array = zmap.to_array()
-        zmap_size = zmap_array[zmap_array != 0.0].size
+        zmap_size = zmap_array[zmap_array > 0.0].size
         zmap_num_outliers = zmap_array[zmap_array > 2.0].size
         signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}")
 
-    return max(signal_to_noise,
+    return max(
+        signal_to_noise,
                key=lambda _model_number: signal_to_noise[_model_number]
     )
 
