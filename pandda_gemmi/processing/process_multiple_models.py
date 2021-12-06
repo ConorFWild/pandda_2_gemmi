@@ -383,6 +383,7 @@ def process_dataset_multiple_models(
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
     zmap = model_results[selected_model_number]['zmap']
     dataset_log['Selected model'] = selected_model
+    dataset_log['Model selection log'] = model_selection_log
 
     if debug:
         print(f'\tSelected model is: {selected_model_number}')
