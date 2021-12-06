@@ -247,6 +247,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 mapper=process_local,
             )
             finish = time.time()
+            pandda_log["Time to perform b factor smoothing"] = finish-start
 
         with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
             datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
