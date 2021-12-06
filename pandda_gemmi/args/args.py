@@ -90,7 +90,7 @@ class PanDDAArgs:
     @staticmethod
     def parse_only_datasets(string):
         if string:
-            return str(string).split(",")
+            return string.split(",")
         else:
             return None
 
