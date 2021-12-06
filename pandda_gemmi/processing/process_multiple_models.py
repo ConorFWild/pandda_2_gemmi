@@ -71,6 +71,8 @@ def select_model(model_results: Dict[int, Dict]):
         else:
             model_score = -1
 
+        #TODO Get number of z map points in large clusters vs outside them as signal to noise estimate
+
         model_scores[model_number] = model_score
     selected_model = max(
         model_scores,

@@ -88,6 +88,13 @@ class PanDDAArgs:
     debug: bool = True
 
     @staticmethod
+    def parse_only_datasets(string):
+        if string:
+            return str(string).split(",")
+        else:
+            return None
+
+    @staticmethod
     def from_command_line():
         parser = argparse.ArgumentParser(
             description=constants.ARGS_DESCRIPTION,
@@ -590,6 +597,8 @@ class PanDDAArgs:
 
         args = parser.parse_args()
 
+        only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
+
         return PanDDAArgs(
             data_dirs=args.data_dirs,
             out_dir=args.out_dir,
@@ -604,7 +613,7 @@ class PanDDAArgs:
             ground_state_datasets=args.ground_state_datasets,
             exclude_from_z_map_analysis=args.exclude_from_z_map_analysis,
             exclude_from_characterisation=args.exclude_from_characterisation,
-            only_datasets=args.only_datasets,
+            only_datasets=only_datasets,
             ignore_datasets=args.ignore_datasets,
             dynamic_res_limits=args.dynamic_res_limits,
             high_res_upper_limit=args.high_res_upper_limit,

@@ -446,6 +446,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.min_characterisation_datasets,
                     pandda_args.max_shell_datasets,
                     pandda_args.high_res_increment,
+                    pandda_args.only_datasets,
                     debug=pandda_args.debug,
                 )
                 # TODO

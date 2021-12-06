@@ -33,6 +33,7 @@ def get_shells_multiple_models(
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,
+        only_datasets: Optional[List[str]],
         debug=False
 ):
     # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
@@ -83,6 +84,11 @@ def get_shells_multiple_models(
 
     # Add each testing dtag to the appropriate shell
     for dtag in datasets:
+        # Check if only_datasets is set, and if so skip any dataset not in it
+        if only_datasets:
+            if dtag.dtag not in only_datasets:
+                continue
+
         # Find the first shell whose res is higher
         dtag_res = datasets[dtag].reflections.resolution().resolution
         for res in reses:
