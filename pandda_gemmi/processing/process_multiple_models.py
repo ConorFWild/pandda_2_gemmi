@@ -100,7 +100,7 @@ def select_model(model_results: Dict[int, Dict], grid):
         signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
-        print(f"\t\t{model_number}: signal: {signal}: noise: {noise}")
+        print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
 
     return max(
         signal_to_noise,
