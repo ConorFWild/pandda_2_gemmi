@@ -58,27 +58,96 @@ def update_log(shell_log, shell_log_path):
         json.dump(shell_log, f, indent=4)
 
 
-def select_model(model_results: Dict[int, Dict]):
+def select_model(model_results: Dict[int, Dict], grid):
     model_scores = {}
+    # for model_number, model_result in model_results.items():
+    #     num_merged_clusters = len(model_result['clusterings_merged'])
+    #     if num_merged_clusters == 0:
+    #         model_score = 0
+    #     elif num_merged_clusters < 6:
+    #         model_score = num_merged_clusters
+    #     elif num_merged_clusters < 12:
+    #         model_score = 0.5
+    #     else:
+    #         model_score = -1
+    #
+    #     #TODO Get number of z map points in large clusters vs outside them as signal to noise estimate
+    #
+    #     model_scores[model_number] = model_score
+    #
+    #
+
+    number_of_events = {
+        model_number: len(model_result['clusterings_merged'])
+        for model_number, model_result
+        in model_results.items()
+    }
+
+    model_event_sizes = {}
     for model_number, model_result in model_results.items():
-        num_merged_clusters = len(model_result['clusterings_merged'])
-        if num_merged_clusters == 0:
-            model_score = 0
-        elif num_merged_clusters < 6:
-            model_score = num_merged_clusters
-        elif num_merged_clusters < 12:
-            model_score = 0.5
-        else:
-            model_score = -1
+        model_event_sizes[model_number] = {}
+        for clustering_id, clustering in model_result['clusterings_merged'].clusterings.items():
+            for cluster_id, cluster in clustering.clustering.items():
+                model_event_sizes[model_number][cluster_id] = cluster.values.size #cluster.size(grid)
 
-        #TODO Get number of z map points in large clusters vs outside them as signal to noise estimate
+    signal_to_noise = {}
+    for model_number, model_result in model_results.items():
+        zmap = model_result['zmap']
+        cluster_sizes = [event_size for event_number, event_size in model_event_sizes[model_number]]
+        zmap_array = zmap.to_array()
+        zmap_size = zmap_array[zmap_array != 0.0].size
+        zmap_num_outliers = zmap_array[zmap_array > 2.0].size
+        signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
+        noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
+        signal_to_noise[model_number] = signal - noise
+        print(f"\t\t{model_number}: signal: {signal}: noise: {noise}")
 
-        model_scores[model_number] = model_score
-    selected_model = max(
-        model_scores,
-        key=lambda _number: model_scores[_number],
+    return max(signal_to_noise,
+               key=lambda _model_number: signal_to_noise[_model_number]
     )
-    return selected_model
+
+    #     model_number: {
+    #         cluster_number: cluster.size()
+    #         for cluster_number, cluster
+    #         in model_result['clusterings_merged'].items()
+    #     }
+    #     for model_number, model_result
+    #     in model_results.items()
+    # }
+    # model_largest_events = {
+    #     model_number: max(
+    #         model_event_sizes[model_number],
+    #         key=lambda _model_number: model_event_sizes[model_number][_model_number]
+    #     )
+    #     for model_number
+    #     in model_event_sizes
+    #     if number_of_events[model_number] != 0
+    # }
+    #
+    # sensible_models = [model_number for model_number in number_of_events
+    #                    if (number_of_events[model_number] > 0) & (number_of_events[model_number] < 7)]
+    #
+    # noisy_models = [model_number for model_number in number_of_events
+    #                 if (number_of_events[model_number] >= 7)]
+    #
+    # no_event_models = [model_number for model_number in number_of_events
+    #                    if number_of_events[model_number] == 0]
+    #
+    # if len(sensible_models) > 0:
+    #     return max(
+    #         model_largest_events,
+    #         key=lambda _number: model_largest_events[_number],
+    #     )
+    # else:
+    #     return no_event_models[0]
+
+    # Want maps with the largest events (highest % of map in large cluster) but the lowest % of map outlying
+
+        # selected_model = max(
+        #     model_scores,
+        #     key=lambda _number: model_scores[_number],
+        # )
+    # return selected_model
 
 
 def get_models(
@@ -99,7 +168,7 @@ def get_models(
 
         # Get the relevant dtags' xmaps
         masked_train_characterisation_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-            comparison_set_dtags )
+            comparison_set_dtags)
         masked_train_all_xmap_array: XmapArray = masked_xmap_array.from_dtags(
             comparison_set_dtags + [test_dtag for test_dtag in test_dtags])
 
@@ -165,7 +234,6 @@ def process_dataset_multiple_models(
     dataset_log_path = pandda_fs_model.processed_datasets.processed_datasets[test_dtag].log_path
     dataset_log = {}
 
-
     model_results = {}
     for model_number, model in models.items():
         if debug:
@@ -196,8 +264,6 @@ def process_dataset_multiple_models(
         time_z_maps_finish = time.time()
         dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
         update_log(dataset_log, dataset_log_path)
-
-
 
         ###################################################################
         # # Cluster the outlying density
@@ -309,7 +375,7 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Decide which model to use...
     ###################################################################
-    selected_model_number = select_model(model_results)
+    selected_model_number = select_model(model_results, grid)
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
     zmap = model_results[selected_model_number]['zmap']
@@ -375,7 +441,6 @@ def process_dataset_multiple_models(
         )
     time_output_zmap_finish = time.time()
     dataset_log['Time to output z map'] = time_output_zmap_finish - time_output_zmap_start
-
 
     ###################################################################
     # # Find the events
