@@ -280,7 +280,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_ONLY_DATASETS,
-            type=list,
+            # type=list,
             default=None,
             help=constants.ARGS_ONLY_DATASETS_HELP,
         )
