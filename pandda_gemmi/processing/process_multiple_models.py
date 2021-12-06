@@ -60,6 +60,7 @@ def update_log(shell_log, shell_log_path):
 
 def select_model(model_results: Dict[int, Dict], grid):
     model_scores = {}
+    model_selection_log = {}
     # for model_number, model_result in model_results.items():
     #     num_merged_clusters = len(model_result['clusterings_merged'])
     #     if num_merged_clusters == 0:
@@ -101,11 +102,12 @@ def select_model(model_results: Dict[int, Dict], grid):
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
+        model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}"
 
     return max(
         signal_to_noise,
                key=lambda _model_number: signal_to_noise[_model_number]
-    )
+    ), model_selection_log
 
     #     model_number: {
     #         cluster_number: cluster.size()
@@ -376,10 +378,12 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Decide which model to use...
     ###################################################################
-    selected_model_number = select_model(model_results, grid)
+    selected_model_number, model_selection_log = select_model(model_results, grid)
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
     zmap = model_results[selected_model_number]['zmap']
+    dataset_log['Selected model'] = selected_model
+
     if debug:
         print(f'\tSelected model is: {selected_model_number}')
 
