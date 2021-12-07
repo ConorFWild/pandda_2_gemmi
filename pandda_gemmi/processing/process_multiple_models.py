@@ -414,6 +414,21 @@ def process_dataset_multiple_models(
         sample_rate,
     )
 
+    if debug:
+        for model_number, model_result in model_results.items():
+            save_native_frame_zmap(
+                pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / f'{model_number}.ccp4',
+                model_result['zmap'],
+                dataset_truncated_datasets[test_dtag],
+                alignments[test_dtag],
+                grid,
+                structure_factors,
+                outer_mask,
+                inner_mask_symmetry,
+                partitioning,
+                sample_rate,
+            )
+
     if statmaps:
         mean_map_file = MeanMapFile.from_zmap_file(
             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file)
