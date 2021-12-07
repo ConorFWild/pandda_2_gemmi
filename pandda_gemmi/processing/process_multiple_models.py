@@ -94,7 +94,7 @@ def select_model(model_results: Dict[int, Dict], grid):
     signal_to_noise = {}
     for model_number, model_result in model_results.items():
         zmap = model_result['zmap']
-        cluster_sizes = [event_size for event_number, event_size in model_event_sizes[model_number].items()]
+        cluster_sizes = [int(event_size) for event_number, event_size in model_event_sizes[model_number].items()]
         zmap_array = zmap.to_array()
         zmap_size = zmap_array[zmap_array > 0.0].size
         zmap_num_outliers = zmap_array[zmap_array > 2.0].size
@@ -102,7 +102,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
-        model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}"
+        model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
+                                            f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: {cluster_sizes}"
 
     return max(
         signal_to_noise,
@@ -396,7 +397,7 @@ def process_dataset_multiple_models(
     native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
-            sample_rate=sample_rate*2,
+            sample_rate=sample_rate*2,  # TODO: make this d_min/0.5?
         )
 
     partitioning = Partitioning.from_structure_multiprocess(
