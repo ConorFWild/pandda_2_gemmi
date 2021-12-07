@@ -396,7 +396,7 @@ def process_dataset_multiple_models(
     native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
-            sample_rate=sample_rate,
+            sample_rate=sample_rate*2,
         )
 
     partitioning = Partitioning.from_structure_multiprocess(
