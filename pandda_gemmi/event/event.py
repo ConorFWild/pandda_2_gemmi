@@ -33,6 +33,7 @@ def save_event_map(
         mask_radius_symmetry: float,
         partitioning: Partitioning,
         sample_rate: float,
+        # native_grid,
 ):
     reference_xmap_grid = xmap.xmap
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
@@ -66,7 +67,7 @@ def save_event_map(
         mask_radius,
         partitioning,
         mask_radius_symmetry,
-        sample_rate
+        sample_rate*2, #TODO: remove?
     )
 
     # # # Get the event bounding box
