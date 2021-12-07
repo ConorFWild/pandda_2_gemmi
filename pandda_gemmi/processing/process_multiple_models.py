@@ -79,7 +79,7 @@ def select_model(model_results: Dict[int, Dict], grid):
     #
 
     number_of_events = {
-        model_number: len(model_result['clusterings_merged'])
+        model_number: len(model_result['clusterings_large'])
         for model_number, model_result
         in model_results.items()
     }
@@ -87,7 +87,7 @@ def select_model(model_results: Dict[int, Dict], grid):
     model_event_sizes = {}
     for model_number, model_result in model_results.items():
         model_event_sizes[model_number] = {}
-        for clustering_id, clustering in model_result['clusterings_merged'].clusterings.items():
+        for clustering_id, clustering in model_result['clusterings_large'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
                 model_event_sizes[model_number][cluster_id] = cluster.values.size #cluster.size(grid)
 
