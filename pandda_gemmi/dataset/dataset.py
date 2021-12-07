@@ -793,15 +793,27 @@ class Dataset:
         scales = []
         rmsds = []
 
+        knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+        knn_y.fit(r.reshape(-1, 1),
+                  (y * np.exp(0.0 * r)).reshape(-1, 1),
+                  )
+
+        # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+        y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
+
         # Optimise the scale factor
         for scale in np.linspace(-4, 4, 100):
             y_s = y * np.exp(scale * r)
-            knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-            knn_y.fit(r.reshape(-1, 1),
-                      y_s.reshape(-1, 1),
-                      )
+            # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+            # knn_y.fit(r.reshape(-1, 1),
+            #           y_s.reshape(-1, 1),
+            #           )
+            #
+            # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-            y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+            y_f = np.array([np.mean(y_s[y_n[1]]) for y_n in y_neighbours])
 
             rmsd = np.sum(np.abs(x_f - y_f))
 
