@@ -397,7 +397,8 @@ def process_dataset_multiple_models(
     native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
-            sample_rate=sample_rate*2,  # TODO: make this d_min/0.5?
+            # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
+        sample_rate=dataset_truncated_datasets[test_dtag].reflections.resolution().resolution/0.5
         )
 
     partitioning = Partitioning.from_structure_multiprocess(
@@ -585,7 +586,8 @@ def process_shell_multiple_models(
         Xmap.from_unaligned_dataset_c,
         grid=grid,
         structure_factors=structure_factors,
-        sample_rate=sample_rate,
+        # sample_rate=sample_rate,
+        sample_rate=shell.res/0.5
     )
 
     results = process_local(
@@ -651,7 +653,8 @@ def process_shell_multiple_models(
         max_site_distance_cutoff=max_site_distance_cutoff,
         min_bdc=min_bdc,
         max_bdc=max_bdc,
-        sample_rate=sample_rate,
+        # sample_rate=sample_rate,
+        sample_rate=shell.res/0.5,
         statmaps=statmaps,
         process_local=process_local_in_dataset,
         debug=debug,

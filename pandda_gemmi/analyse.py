@@ -282,7 +282,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             grid: Grid = Grid.from_reference(reference,
                                              pandda_args.outer_mask,
                                              pandda_args.inner_mask_symmetry,
-                                             sample_rate=pandda_args.sample_rate,
+                                             # sample_rate=pandda_args.sample_rate,
+                                             sample_rate=reference.dataset.reflections.resolution().resolution/0.5
                                              )
 
         # if pandda_args.debug:

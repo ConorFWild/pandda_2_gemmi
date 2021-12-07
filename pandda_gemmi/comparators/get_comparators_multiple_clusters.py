@@ -25,7 +25,8 @@ def from_unaligned_dataset_c_flat(dataset: Dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
-                                         sample_rate,
+                                         # sample_rate,
+                                         dataset.reflections.resolution().resolution/0.5
                                          )
 
     xmap_array = xmap.to_array()

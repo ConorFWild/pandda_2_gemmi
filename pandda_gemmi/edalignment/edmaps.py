@@ -327,7 +327,8 @@ class Xmap:
         moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
-            sample_rate=sample_rate,
+            # sample_rate=sample_rate,
+            sample_rate=dataset.reflections.resolution().resolution/0.5,
         )
 
         new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu,
