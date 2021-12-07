@@ -456,7 +456,8 @@ class Model:
         else:
             ccp4.grid.symmetrize_max()
         ccp4.update_ccp4_header(2, True)
-        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(number=shell.number,
+        ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(
+            number=shell.number,
                                                                           res=shell.res_min.resolution,
                                                                           )))
 

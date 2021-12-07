@@ -17,11 +17,12 @@ import pandas as pd
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
+
+
 # from pandda_gemmi.fs import PanDDAFSModel
 # from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
 #                                   Resolution, Reference)
 # from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Xmap
-
 
 
 @dataclasses.dataclass()
@@ -662,9 +663,10 @@ class Reference:
         for dtag in datasets:
             resolutions[dtag] = datasets[dtag].reflections.resolution()
 
-        min_resolution_dtag = min(resolutions,
-                                  key=lambda dtag: resolutions[dtag].to_float(),
-                                  )
+        min_resolution_dtag = min(
+            resolutions,
+            key=lambda dtag: resolutions[dtag].to_float(),
+        )
 
         min_resolution_structure = datasets[min_resolution_dtag].structure
         min_resolution_reflections = datasets[min_resolution_dtag].reflections
@@ -811,7 +813,6 @@ class Dataset:
             #           )
             #
             # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
-
 
             y_f = np.array([np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:,
                                                                                      np.newaxis].flatten())])
@@ -1006,8 +1007,8 @@ class Datasets:
         return Datasets(datasets)
 
     @staticmethod
-    def from_dir(pandda_fs_model#: PanDDAFSModel,
-    ):
+    def from_dir(pandda_fs_model  #: PanDDAFSModel,
+                 ):
         datasets = {}
         for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
             dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
@@ -1033,8 +1034,6 @@ class Datasets:
         new_datasets = {dtag: self.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
-
-
 
     def remove_invalid_structure_factor_datasets(self,
                                                  structure_factors: StructureFactors,
