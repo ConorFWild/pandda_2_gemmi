@@ -210,12 +210,12 @@ class Partitioning:
 
     @staticmethod
     def from_structure_multiprocess(structure: Structure,
-                                    grid: Grid,
+                                    grid,#: Grid,
                                     mask_radius: float,
                                     mask_radius_symmetry: float, ):
 
         return Partitioning.from_structure(structure,
-                                           grid.grid,
+                                           grid,
                                            mask_radius,
                                            mask_radius_symmetry, )
 

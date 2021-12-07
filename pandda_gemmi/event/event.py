@@ -800,6 +800,7 @@ class Events:
             outer_mask,
             inner_mask_symmetry,
             sample_rate,
+            native_grid,
             mapper=False,
     ):
 
@@ -839,7 +840,8 @@ class Events:
                 delayed(
                     Partitioning.from_structure_multiprocess)(
                     datasets[dtag].structure,
-                    grid,
+                    # grid,
+                    native_grid,
                     outer_mask,
                     inner_mask_symmetry,
                 )

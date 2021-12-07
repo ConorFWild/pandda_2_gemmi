@@ -393,9 +393,15 @@ def process_dataset_multiple_models(
     ###################################################################
     time_output_zmap_start = time.time()
 
+    native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
+            structure_factors.f,
+            structure_factors.phi,
+            sample_rate=sample_rate,
+        )
+
     partitioning = Partitioning.from_structure_multiprocess(
         dataset_truncated_datasets[test_dtag].structure,
-        grid,
+        native_grid,
         outer_mask,
         inner_mask_symmetry,
     )
@@ -501,6 +507,7 @@ def process_dataset_multiple_models(
         outer_mask,
         inner_mask_symmetry,
         sample_rate,
+        native_grid,
         mapper=process_local_serial,
     )
 
