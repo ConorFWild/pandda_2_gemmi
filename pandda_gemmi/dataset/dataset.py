@@ -813,7 +813,7 @@ class Dataset:
             # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
 
-            y_f = np.array([np.mean(y_s[y_n[1]]) for y_n in y_neighbours])
+            y_f = np.array([np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(r)])
 
             rmsd = np.sum(np.abs(x_f - y_f))
 
