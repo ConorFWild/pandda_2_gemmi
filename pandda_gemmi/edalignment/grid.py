@@ -20,6 +20,7 @@ from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 class Partitioning:
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
     protein_mask: gemmi.Int8Grid
+    inner_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
     total_mask: np.ndarray
 
@@ -251,6 +252,20 @@ class Partitioning:
                                    )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
 
+        # Get the inner mask
+        inner_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        inner_mask.set_unit_cell(grid.unit_cell)
+        for atom in structure.protein_atoms():
+            pos = atom.pos
+            inner_mask.set_points_around(pos,
+                                   radius=mask_radius_symmetry,
+                                   value=1,
+                                   )
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+
+
+        # Mask the symmetry points
         symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
         symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
 
@@ -324,7 +339,7 @@ class Partitioning:
             coord_array_unit_cell_in_mask[2][combined_indicies == 1],
         ] = 1
 
-        return Partitioning(partitions, mask, symmetry_mask, total_mask)
+        return Partitioning(partitions, mask, inner_mask, symmetry_mask, total_mask)
 
     def coord_tuple(self):
 
@@ -485,9 +500,11 @@ class Partitioning:
         # partitioning_python = PartitoningPython.from_gemmi(self.partitioning)
         partitioning_python = self.partitioning
         protein_mask_python = Int8GridPython.from_gemmi(self.protein_mask)
+        inner_mask_python = Int8GridPython.from_gemmi(self.inner_mask)
         symmetry_mask_python = Int8GridPython.from_gemmi(self.symmetry_mask)
         return (partitioning_python,
                 protein_mask_python,
+                inner_mask_python,
                 symmetry_mask_python,
                 self.total_mask
                 )
@@ -495,12 +512,14 @@ class Partitioning:
     def __setstate__(self, data):
         partitioning_gemmi = data[0]
         protein_mask_gemmi = data[1].to_gemmi()
-        symmetry_mask_gemmi = data[2].to_gemmi()
+        inner_mask_gemmi = data[2].to_gemmi()
+        symmetry_mask_gemmi = data[3].to_gemmi()
 
         self.partitioning = partitioning_gemmi
         self.protein_mask = protein_mask_gemmi
+        self.inner_mask = inner_mask_gemmi
         self.symmetry_mask = symmetry_mask_gemmi
-        self.total_mask = data[3]
+        self.total_mask = data[4]
 
 
 @dataclasses.dataclass()
@@ -571,6 +590,7 @@ class Grid:
         self.partitioning = Partitioning(data[1][0],
                                          data[1][1].to_gemmi(),
                                          data[1][2].to_gemmi(),
-                                         data[1][3],
+                                         data[1][3].to_gemmi(),
+                                         data[1][4],
                                          )
         self.grid = data[0].to_gemmi()
