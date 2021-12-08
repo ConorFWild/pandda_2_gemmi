@@ -108,6 +108,7 @@ class Cluster:
     centroid: Tuple[float, float, float]
     event_mask_indicies: Optional[np.ndarray]
     cluster_inner_protein_mask: np.array
+    cluster_contact_mask: np.array
     time_event_mask: Optional[float] = 0.0
 
     def size(self, grid: Grid):
@@ -169,6 +170,10 @@ class Clustering:
         # features
         inner_mask_grid = grid.partitioning.inner_mask
         inner_mask = np.array(inner_mask_grid, copy=False, dtype=np.int8)
+
+        # Get the contact mask for determining how much could be binding
+        contact_mask_grid = grid.partitioning.contact_mask
+        contact_mask = np.array(contact_mask_grid, copy=False, dtype=np.int8)
 
         # Don't consider outlying points away from the protein
         protein_mask_bool = np.full(protein_mask.shape, False)
@@ -277,6 +282,10 @@ class Clustering:
 
             # Generate event mask
             cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
+
+            # Generate the contact mask
+            cluster_contact_mask = contact_mask[cluster_points_tuple]
+
             ###
 
             time_event_mask_start = time.time()
@@ -310,6 +319,7 @@ class Clustering:
                               centroid,
                               None,
                               cluster_inner_protein_mask,
+                              cluster_contact_mask,
                               # time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
                               # time_fcluster=time_fcluster_finish-time_fcluster_start,
                               time_event_mask=time_event_mask_finish - time_event_mask_start,
@@ -539,6 +549,11 @@ class Clusterings:
                                          in current_clusters
                                          ], axis=None,
                                         )
+                cluster_contact_mask = np.concatenate([current_cluster.cluster_contact_mask
+                                         for current_cluster
+                                         in current_clusters
+                                         ], axis=None,
+                                        )
 
                 centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
 
@@ -571,6 +586,7 @@ class Clusterings:
                     centroid,
                     event_mask_indicies,
                     cluster_inner_protein_mask,
+                    cluster_contact_mask,
                 )
 
                 new_clusters[unique_cluster] = new_cluster

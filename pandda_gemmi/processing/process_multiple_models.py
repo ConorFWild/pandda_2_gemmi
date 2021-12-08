@@ -86,13 +86,17 @@ def select_model(model_results: Dict[int, Dict], grid):
 
     model_event_sizes = {}
     model_event_protein_mask_sizes = {}
+    model_event_contact_mask_sizes = {}
     for model_number, model_result in model_results.items():
         model_event_sizes[model_number] = {}
         model_event_protein_mask_sizes[model_number] = {}
+        model_event_contact_mask_sizes[model_number] = {}
         for clustering_id, clustering in model_result['clusterings_large'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
                 model_event_sizes[model_number][cluster_id] = cluster.values.size #cluster.size(grid)
                 model_event_protein_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_inner_protein_mask)
+                model_event_contact_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_contact_mask)
+
 
     signal_to_noise = {}
     for model_number, model_result in model_results.items():
@@ -102,6 +106,9 @@ def select_model(model_results: Dict[int, Dict], grid):
             model_number].items()]
         cluster_differences = [cluster_size - cluster_mask_size for cluster_size, cluster_mask_size in zip(
             cluster_sizes, cluster_mask_sizes)]
+        contact_mask_sizes = [int(contact_mask_size) for event_number, contact_mask_size in
+                              model_event_contact_mask_sizes[
+            model_number].items()]
         if len(cluster_differences) == 0:
             max_diff = 0
         else:
@@ -115,7 +122,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
         model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
                                             f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
-                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: {max_diff}"
+                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: {contact_mask_sizes}:" \
+                                            f" {max_diff}"
 
     return max(
         signal_to_noise,
