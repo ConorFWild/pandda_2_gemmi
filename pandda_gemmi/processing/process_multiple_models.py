@@ -100,7 +100,7 @@ def select_model(model_results: Dict[int, Dict], grid):
         cluster_sizes = [int(event_size) for event_number, event_size in model_event_sizes[model_number].items()]
         cluster_mask_sizes = [int(event_mask_size) for event_number, event_mask_size in model_event_protein_mask_sizes[
             model_number].items()]
-        cluster_differences = [cluster_size - cluster_mask_sizes for cluster_size, cluster_mask_size in zip(
+        cluster_differences = [cluster_size - cluster_mask_size for cluster_size, cluster_mask_size in zip(
             cluster_sizes, cluster_mask_sizes)]
         zmap_array = zmap.to_array()
         zmap_size = zmap_array[zmap_array > 0.0].size
