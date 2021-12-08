@@ -272,7 +272,7 @@ class Partitioning:
         for atom in structure.protein_atoms():
             pos = atom.pos
             contact_mask.set_points_around(pos,
-                                         radius=mask_radius_symmetry,
+                                         radius=4.0,
                                          value=1,
                                          )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
