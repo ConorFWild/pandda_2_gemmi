@@ -109,6 +109,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         contact_mask_sizes = [int(contact_mask_size) for event_number, contact_mask_size in
                               model_event_contact_mask_sizes[
             model_number].items()]
+        contact_differences = [contact_size - cluster_mask_size for contact_size, cluster_mask_size in zip(
+            contact_mask_sizes, cluster_mask_sizes)]
         if len(cluster_differences) == 0:
             max_diff = 0
         else:
@@ -122,7 +124,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
         model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
                                             f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
-                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: {contact_mask_sizes}:" \
+                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
+                                            f"{contact_mask_sizes}: {contact_differences}: " \
                                             f" {max_diff}"
 
     return max(
