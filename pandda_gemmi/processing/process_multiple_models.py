@@ -100,6 +100,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         cluster_sizes = [int(event_size) for event_number, event_size in model_event_sizes[model_number].items()]
         cluster_mask_sizes = [int(event_mask_size) for event_number, event_mask_size in model_event_protein_mask_sizes[
             model_number].items()]
+        cluster_differences = [cluster_size - cluster_mask_sizes for cluster_size, cluster_mask_size in zip(
+            cluster_sizes, cluster_mask_sizes)]
         zmap_array = zmap.to_array()
         zmap_size = zmap_array[zmap_array > 0.0].size
         zmap_num_outliers = zmap_array[zmap_array > 2.0].size
@@ -109,7 +111,7 @@ def select_model(model_results: Dict[int, Dict], grid):
         print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
         model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
                                             f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
-                                            f"{cluster_sizes}: {cluster_mask_sizes}"
+                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: {max(cluster_differences)}"
 
     return max(
         signal_to_noise,
