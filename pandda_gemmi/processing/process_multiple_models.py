@@ -115,6 +115,11 @@ def select_model(model_results: Dict[int, Dict], grid):
             max_diff = 0
         else:
             max_diff = max(cluster_differences)
+        if len(contact_differences) == 0:
+            max_contact_diff = 0
+        else:
+            max_contact_diff = max(contact_differences)
+
         zmap_array = zmap.to_array()
         zmap_size = zmap_array[zmap_array > 0.0].size
         zmap_num_outliers = zmap_array[zmap_array > 2.0].size
@@ -126,7 +131,7 @@ def select_model(model_results: Dict[int, Dict], grid):
                                             f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
                                             f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
                                             f"{contact_mask_sizes}: {contact_differences}: " \
-                                            f" {max_diff}"
+                                            f" {max_diff}: {max_contact_diff}"
 
     return max(
         signal_to_noise,
