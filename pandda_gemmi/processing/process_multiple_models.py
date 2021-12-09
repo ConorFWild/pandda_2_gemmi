@@ -134,7 +134,8 @@ def select_model(model_results: Dict[int, Dict], grid):
         cluster_stats = {}
         for clustering_id, clustering in model_result['clusterings_peaked'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
-                outer_hull_contoured_mask_array = contoured_zmap_array[cluster.event_mask_indicies]
+                outer_hull_array = zmap_array[cluster.event_mask_indicies]
+                outer_hull_contoured_mask_array = outer_hull_array > 2.0
                 cluster_size = int(cluster.values.size)
                 outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array)) - cluster_size
                 cluster_stats[int(cluster_id)] = {
