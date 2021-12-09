@@ -152,7 +152,7 @@ def select_model(model_results: Dict[int, Dict], grid):
                     'signal_to_noise': float(signal/(noise+1)),
                     'map_signal': sum(cluster_sizes),
                     'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
-                    'zmap_signal_to_noise': sum(cluster_sizes) / (zmap_num_outliers - sum(cluster_sizes)),
+                    'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
                     'zmap_num_outlier': zmap_num_outliers,
                     'zmap_size': zmap_size,
                 }
