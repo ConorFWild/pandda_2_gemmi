@@ -120,13 +120,24 @@ def select_model(model_results: Dict[int, Dict], grid):
         else:
             max_contact_diff = max(contact_differences)
 
+
         zmap_array = zmap.to_array()
+        contoured_zmap_array = zmap_array[zmap_array > 2.0]
         zmap_size = zmap_array[zmap_array > 0.0].size
-        zmap_num_outliers = zmap_array[zmap_array > 2.0].size
+        zmap_num_outliers = contoured_zmap_array.size
         signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
-        print(f"\t\t{model_number}: signal: {signal}: noise: {noise}: {sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}")
+
+
+        # Get cluster signal to noise
+        for clustering_id, clustering in model_result['clusterings_peaked'].clusterings.items():
+            for cluster_id, cluster in clustering.clustering.items():
+                outer_hull_contoured_mask_array = contoured_zmap_array[cluster.event_mask_indicies]
+                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array) - cluster.values.size)
+
+
+        # Print info
         model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
                                             f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
                                             f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
@@ -378,6 +389,12 @@ def process_dataset_multiple_models(
             [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
         update_log(dataset_log, dataset_log_path)
 
+        # Add the event mask
+        for clustering_id, clustering in clusterings_peaked.clusterings.items():
+            for cluster_id, cluster in clustering.clustering.items():
+                cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+
+        # Merge the clusters
         clusterings_merged = clusterings_peaked.merge_clusters()
         if debug:
             print("\t\tAfter filtering: merged: {}".format(
@@ -387,11 +404,7 @@ def process_dataset_multiple_models(
             [len(clustering) for clustering in clusterings_merged.clusterings.values()])
         update_log(dataset_log, dataset_log_path)
 
-        # Add the event mask
-        for clustering_id, clustering in clusterings_merged.clusterings.items():
-            for cluster_id, cluster in clustering.clustering.items():
-                cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
-
+        # Log the clustering
         time_cluster_finish = time.time()
         dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
         update_log(dataset_log, dataset_log_path)
@@ -400,6 +413,7 @@ def process_dataset_multiple_models(
             'zmap': zmaps[test_dtag],
             'clusterings': clusterings,
             'clusterings_large': clusterings_large,
+            'clusterings_peaked': clusterings_peaked,
             'clusterings_merged': clusterings_merged,
 
         }

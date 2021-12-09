@@ -129,7 +129,7 @@ def get_event_mask_indicies(zmap: Zmap, cluster_positions_array: np.ndarray):
     event_mask.set_unit_cell(zmap.unit_cell())
     for position in positions:
         event_mask.set_points_around(position,
-                                     radius=3.0,
+                                     radius=2.0,
                                      value=1,
                                      )
 
@@ -561,23 +561,23 @@ class Clusterings:
                             centroid_array[1],
                             centroid_array[2],)
 
-                # event_mask_indicies_list = [current_cluster.event_mask_indicies[i]
-                #  for current_cluster
-                #  in current_clusters
-                #  if current_cluster.event_mask_indicies
-                #  ]
-                #
+                # event_mask_indicies_list =
+
                 # if len(event_mask_indicies_list) > 1:
-                #     event_mask_indicies = tuple(
-                #         np.concatenate(
-                #             event_mask_indicies_list,
-                #             axis=None,
-                #         )
-                #         for i
-                #         in [0, 1, 2]
-                #     )
+                event_mask_indicies = tuple(
+                    np.concatenate(
+                        [current_cluster.event_mask_indicies[i]
+                         for current_cluster
+                         in current_clusters
+                         if current_cluster.event_mask_indicies
+                         ],
+                        axis=None,
+                    )
+                    for i
+                    in [0, 1, 2]
+                )
                 # else:
-                event_mask_indicies = None
+                # event_mask_indicies = None
 
                 new_cluster = Cluster(
                     cluster_points_tuple,
