@@ -131,18 +131,27 @@ def select_model(model_results: Dict[int, Dict], grid):
 
 
         # Get cluster signal to noise
+        cluster_stats = {}
         for clustering_id, clustering in model_result['clusterings_peaked'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
                 outer_hull_contoured_mask_array = contoured_zmap_array[cluster.event_mask_indicies]
-                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array) - cluster.values.size)
+                cluster_size = int(cluster.values.size)
+                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array)) - cluster_size
+                cluster_stats[int(cluster_id)] = {
+                    'cluster_size': cluster_size,
+                    'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
+                    'contact_mask_size': int(np.sum(cluster.cluster_contact_mask)),
+                    'protein_mask_size': int(np.sum(cluster.cluster_inner_protein_mask)),
+                }
 
 
         # Print info
-        model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
-                                            f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
-                                            f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
-                                            f"{contact_mask_sizes}: {contact_differences}: " \
-                                            f" {max_diff}: {max_contact_diff}"
+        # model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
+        #                                     f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
+        #                                     f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
+        #                                     f"{contact_mask_sizes}: {contact_differences}: " \
+        #                                     f" {max_diff}: {max_contact_diff}"
+        model_selection_log[model_number] = cluster_stats
 
     return max(
         signal_to_noise,
