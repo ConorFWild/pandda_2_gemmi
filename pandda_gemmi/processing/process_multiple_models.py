@@ -123,8 +123,8 @@ def select_model(model_results: Dict[int, Dict], grid):
 
         zmap_array = zmap.to_array()
         contoured_zmap_array = zmap_array[zmap_array > 2.0]
-        zmap_size = zmap_array[zmap_array > 0.0].size
-        zmap_num_outliers = contoured_zmap_array.size
+        zmap_size = int(zmap_array[zmap_array > 0.0].size)
+        zmap_num_outliers = int(contoured_zmap_array.size)
         signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
         signal_to_noise[model_number] = signal - noise
@@ -137,12 +137,24 @@ def select_model(model_results: Dict[int, Dict], grid):
                 outer_hull_array = zmap_array[cluster.event_mask_indicies]
                 outer_hull_contoured_mask_array = outer_hull_array > 2.0
                 cluster_size = int(cluster.values.size)
-                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array)) - cluster_size
+                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array))
+                protein_mask_size = int(np.sum(cluster.cluster_inner_protein_mask))
+                contact_mask_size = int(np.sum(cluster.cluster_contact_mask))
+                signal = contact_mask_size - protein_mask_size
+                noise = outer_hull_num_outliers - protein_mask_size
                 cluster_stats[int(cluster_id)] = {
                     'cluster_size': cluster_size,
                     'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
-                    'contact_mask_size': int(np.sum(cluster.cluster_contact_mask)),
-                    'protein_mask_size': int(np.sum(cluster.cluster_inner_protein_mask)),
+                    'contact_mask_size': contact_mask_size,
+                    'protein_mask_size': protein_mask_size,
+                    'signal': signal,
+                    'noise': noise,
+                    'signal_to_noise': float(signal/(noise+1)),
+                    'map_signal': sum(cluster_sizes),
+                    'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
+                    'zmap_signal_to_noise': sum(cluster_sizes) / (zmap_num_outliers - sum(cluster_sizes)),
+                    'zmap_num_outlier': zmap_num_outliers,
+                    'zmap_size': zmap_size,
                 }
 
 
