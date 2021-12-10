@@ -169,18 +169,7 @@ def select_model(model_results: Dict[int, Dict], grid):
                     'zmap_size': zmap_size,
                 }
 
-        flat_stats = {
-            (model_id, cluster_id): cluster_stats[model_id][cluster_id]
-            for model_id
-            in cluster_stats
-            for cluster_id
-            in cluster_stats[model_id]
-        }
-        ranked_stats = [flat_stats[x] for x in sorted(flat_stats, key=lambda _x: flat_stats[_x][
-            'signal_to_noise_with_protein_additive'])]
 
-
-        cluster_stats['ranked'] = ranked_stats
 
 
         # Print info
@@ -190,6 +179,24 @@ def select_model(model_results: Dict[int, Dict], grid):
         #                                     f"{contact_mask_sizes}: {contact_differences}: " \
         #                                     f" {max_diff}: {max_contact_diff}"
         model_selection_log[model_number] = cluster_stats
+
+    flat_stats = {
+        (model_id, cluster_id): model_selection_log[model_id][cluster_id]
+        for model_id
+        in model_selection_log
+        for cluster_id
+        in model_selection_log[model_id]
+    }
+    ranked_stats = [
+        flat_stats[x]
+        for x
+        in sorted(
+            flat_stats,
+            key=lambda _x: flat_stats[_x]['signal_to_noise_with_protein_additive']
+        )
+    ]
+
+    model_selection_log['ranked'] = ranked_stats
 
     return max(
         signal_to_noise,
