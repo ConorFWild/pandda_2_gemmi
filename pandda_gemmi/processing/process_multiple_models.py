@@ -167,6 +167,7 @@ def select_model(model_results: Dict[int, Dict], grid):
                     'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
                     'zmap_num_outlier': zmap_num_outliers,
                     'zmap_size': zmap_size,
+                    'score': ((cluster_size-protein_mask_size) + signal)-noise_with_protein
                 }
 
 
@@ -192,7 +193,7 @@ def select_model(model_results: Dict[int, Dict], grid):
         for x
         in sorted(
             flat_stats,
-            key=lambda _x: flat_stats[_x]['signal_to_noise_with_protein_additive']
+            key=lambda _x: flat_stats[_x]['score']
         )
     ]
 
