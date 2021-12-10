@@ -158,6 +158,7 @@ def select_model(model_results: Dict[int, Dict], grid):
                                                  'signal_to_noise_without_protein_scaled': float(signal/(
                                                          noise_without_protein+1))*(
                         contact_mask_size-protein_mask_size),
+                    'signal_to_noise_additive': cluster_size-noise_with_protein,
                     'map_signal': sum(cluster_sizes),
                     'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
                     'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
