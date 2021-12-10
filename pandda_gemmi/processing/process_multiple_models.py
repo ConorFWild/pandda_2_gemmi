@@ -141,15 +141,18 @@ def select_model(model_results: Dict[int, Dict], grid):
                 protein_mask_size = int(np.sum(cluster.cluster_inner_protein_mask))
                 contact_mask_size = int(np.sum(cluster.cluster_contact_mask))
                 signal = contact_mask_size - protein_mask_size
-                noise = outer_hull_num_outliers - protein_mask_size
+                noise_with_protein = (outer_hull_num_outliers - cluster_size) + protein_mask_size
+                noise_without_protein = outer_hull_num_outliers - cluster_size
                 cluster_stats[int(cluster_id)] = {
                     'cluster_size': cluster_size,
                     'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
                     'contact_mask_size': contact_mask_size,
                     'protein_mask_size': protein_mask_size,
                     'signal': signal,
-                    'noise': noise,
-                    'signal_to_noise': float(signal/(noise+1)),
+                    'noise_with_protein': noise_with_protein,
+                    'noise_without_protein': noise_without_protein,
+                    'signal_to_noise_with_protein': float(signal/(noise_with_protein+1)),
+                    'signal_to_noise_without_protein': float(signal / (noise_without_protein + 1)),
                     'map_signal': sum(cluster_sizes),
                     'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
                     'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
