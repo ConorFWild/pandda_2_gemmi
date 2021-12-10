@@ -144,6 +144,8 @@ def select_model(model_results: Dict[int, Dict], grid):
                 noise_with_protein = (outer_hull_num_outliers - cluster_size) + protein_mask_size
                 noise_without_protein = outer_hull_num_outliers - cluster_size
                 cluster_stats[int(cluster_id)] = {
+                    'model_id': int(model_number),
+                    'cluster_id': int(cluster_id),
                     'cluster_size': cluster_size,
                     'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
                     'contact_mask_size': contact_mask_size,
@@ -166,6 +168,19 @@ def select_model(model_results: Dict[int, Dict], grid):
                     'zmap_num_outlier': zmap_num_outliers,
                     'zmap_size': zmap_size,
                 }
+
+        flat_stats = {
+            (model_id, cluster_id): cluster_stats[model_id][cluster_id]
+            for model_id
+            in cluster_stats
+            for cluster_id
+            in cluster_stats[model_id]
+        }
+        ranked_stats = [flat_stats[x] for x in sorted(flat_stats, key=lambda _x: flat_stats[_x][
+            'signal_to_noise_with_protein_additive'])]
+
+
+        cluster_stats['ranked'] = ranked_stats
 
 
         # Print info
