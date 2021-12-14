@@ -101,7 +101,7 @@ def summarise_datasets(datasets: Dict[Dtag, Dataset], pandda_fs_model: PanDDAFSM
             "source_structure_path": str(processed_dir.source_pdb),
             "source_reflections_path": str(processed_dir.source_mtz),
             "ligand_cif_path": str(processed_dir.source_ligand_cif),
-            "ligand_smiles_path": str(processed_dir.source_ligand_pdb),
+            "ligand_smiles_path": str(processed_dir.source_ligand_smiles),
             "ligand_pdb_path": str(processed_dir.source_ligand_pdb),
             "smoothing_factor": float(dataset.smoothing_factor),
             "source_dir": str(processed_dir.path),
