@@ -77,6 +77,8 @@ def update_log(shell_log, shell_log_path):
 
 def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=False):
 
+    log = {}
+
     biggest_clusters = {}
     for model_number, model_result in model_results.items():
         cluster_sizes = {}
@@ -100,7 +102,9 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
     # Score the top clusters
     scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
 
-    return scores
+    log = scores
+
+    return scores, log
 
 #
 # def select_model(model_results: Dict[int, Dict], grid):

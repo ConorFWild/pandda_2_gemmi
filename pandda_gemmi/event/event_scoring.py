@@ -118,7 +118,6 @@ def structures_from_cif(source_ligand_cif, debug=False):
 
     structure = structure_from_small_structure(small_structure)
 
-
     # for atom in cc.atoms:
     #     G.add_node(atom.id, Z=atom.el.atomic_number)
     # for bond in cc.rt.bonds:
@@ -409,7 +408,6 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
-
     if debug:
         print(f"\tScoring cluster")
     score = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
@@ -417,10 +415,11 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debu
     return score
 
 
-def score_clusters(clusters: Dict[Tuple[int, int], Cluster],
-                   zmaps,
-                   fragment_dataset: ProcessedDataset,
-                   debug=False):
+def score_clusters(
+        clusters: Dict[Tuple[int, int], Cluster],
+        zmaps,
+        fragment_dataset: ProcessedDataset,
+        debug=False):
     if debug:
         print(f"Getting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
