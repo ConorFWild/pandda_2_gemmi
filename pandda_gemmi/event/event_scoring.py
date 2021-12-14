@@ -100,7 +100,7 @@ def structure_from_small_structure(small_structure):
     return structure
 
 
-def structures_from_cif(source_ligand_cif):
+def structures_from_cif(source_ligand_cif, debug=False):
     # doc = gemmi.cif.read_file(str(source_ligand_cif))
     # block = doc[-1]
     # cc = gemmi.make_chemcomp_from_block(block)
@@ -108,8 +108,11 @@ def structures_from_cif(source_ligand_cif):
     # small_structure = gemmi.read_small_structure(str(source_ligand_cif))
     cif_doc = gemmi.cif.read(str(source_ligand_cif))
     small_structure = gemmi.make_small_structure_from_block(cif_doc[0])
+    if debug:
+        print(small_structure)
 
     structure = structure_from_small_structure(small_structure)
+
 
     # for atom in cc.atoms:
     #     G.add_node(atom.id, Z=atom.el.atomic_number)
@@ -123,6 +126,7 @@ def get_conformers(
         pruning_threshold=3,
         num_pose_samples=50,
         max_conformers=10,
+        debug=False,
 ) -> MutableMapping[int, Chem.Mol]:
     # Decide how to load
     if fragment_dataset.source_ligand_smiles:
@@ -140,6 +144,9 @@ def get_conformers(
 
     elif fragment_dataset.source_ligand_cif:
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif)
+
+    if debug:
+        print(fragment_structures)
 
     return fragment_structures
 
@@ -396,7 +403,7 @@ def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps,
                    debug=False):
     if debug:
         print(f"Getting fragment conformers...")
-    fragment_conformers = get_conformers(fragment_dataset)
+    fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
     scores = {}
     for cluster_id, cluster in clusters.items():
