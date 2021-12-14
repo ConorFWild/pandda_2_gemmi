@@ -12,7 +12,7 @@ from pathlib import Path
 
 #
 from pandda_gemmi.dataset import Dataset
-from pandda_gemmi.fs import PanDDAFSModel
+from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
 from pandda_gemmi.autobuild import score_structure_signal_to_noise_density
 
@@ -55,15 +55,87 @@ def get_structures_from_mol(mol: Chem.Mol) -> MutableMapping[int, gemmi.Structur
     return fragmentstructures
 
 
-def get_conformers(mol, pruning_threshold=3, num_pose_samples=50, max_conformers=10) -> MutableMapping[int, Chem.Mol]:
-    # Generate conformers
-    m2: Chem.Mol = Chem.AddHs(mol)
+def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
+    smiles_path = dataset_smiles_path
 
-    # Generate conformers
-    cids = AllChem.EmbedMultipleConfs(m2, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
+    # Get smiels string
+    with open(str(smiles_path), "r") as f:
+        smiles_string: str = str(f.read())
 
-    # Translate to structures
-    fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2)
+    # Load the mol
+    m: Chem.Mol = Chem.MolFromSmiles(smiles_string)
+
+    return m
+
+
+def structure_from_small_structure(small_structure):
+    structure: gemmi.Structure = gemmi.Structure()
+    model: gemmi.Model = gemmi.Model(f"0")
+    chain: gemmi.Chain = gemmi.Chain(f"0")
+    residue: gemmi.Residue = gemmi.Residue()
+
+    # Loop over atoms, adding them to a gemmi residue
+    for j, site in enumerate(small_structure.sites):
+        # Get the atomic symbol
+        # atom_symbol: str = site.element
+        gemmi_element: gemmi.Element = site.element
+
+        # Get the position as a gemmi type
+        # pos: np.ndarray = positions[j, :]
+        gemmi_pos: gemmi.Position = site.orth(small_structure.cell)
+
+        # Get the
+        gemmi_atom: gemmi.Atom = gemmi.Atom()
+        gemmi_atom.name = site.label
+        gemmi_atom.pos = gemmi_pos
+        gemmi_atom.element = gemmi_element
+
+        # Add atom to residue
+        residue.add_atom(gemmi_atom)
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    structure.add_model(model)
+
+
+def structures_from_cif(source_ligand_cif):
+    # doc = gemmi.cif.read_file(str(source_ligand_cif))
+    # block = doc[-1]
+    # cc = gemmi.make_chemcomp_from_block(block)
+    # cc.remove_hydrogens()
+    small_structure = gemmi.read_small_structure(str(source_ligand_cif))
+
+    structure = structure_from_small_structure(small_structure)
+
+    # for atom in cc.atoms:
+    #     G.add_node(atom.id, Z=atom.el.atomic_number)
+    # for bond in cc.rt.bonds:
+    #     G.add_edge(bond.id1.atom, bond.id2.atom)
+    return {0: structure}
+
+
+def get_conformers(
+        fragment_dataset,
+        pruning_threshold=3,
+        num_pose_samples=50,
+        max_conformers=10,
+) -> MutableMapping[int, Chem.Mol]:
+    # Decide how to load
+    if fragment_dataset.source_ligand_smiles:
+
+        mol = get_fragment_mol_from_dataset_smiles_path(fragment_dataset.source_ligand_smiles)
+
+        # Generate conformers
+        m2: Chem.Mol = Chem.AddHs(mol)
+
+        # Generate conformers
+        cids = AllChem.EmbedMultipleConfs(m2, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
+
+        # Translate to structures
+        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2)
+
+    elif fragment_dataset.source_ligand_cif:
+        fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif)
 
     return fragment_structures
 
@@ -290,10 +362,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     return score
 
 
-def score_fragment_mol(cluster, fragment_model, zmap_grid, debug=False):
+def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=False):
     if debug:
         print("\t\tGetting fragment conformers from model")
-    fragment_conformers = get_conformers(fragment_model)
 
     if debug:
         print(f"\t\tScoring conformers")
@@ -307,33 +378,23 @@ def score_fragment_mol(cluster, fragment_model, zmap_grid, debug=False):
     return max(scores.values())
 
 
-def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
-    smiles_path = dataset_smiles_path
-
-    # Get smiels string
-    with open(str(smiles_path), "r") as f:
-        smiles_string: str = str(f.read())
-
-    # Load the mol
-    m: Chem.Mol = Chem.MolFromSmiles(smiles_string)
-
-    return m
-
-
-def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, dataset_smiles_path: Path, debug=False):
+def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
     if debug:
         print(f"\tGetting mol from path: {dataset_smiles_path}")
     fragment_mol = get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path)
 
     if debug:
         print(f"\tScoring cluster")
-    score = score_fragment_mol(cluster, fragment_mol, zmap_grid, debug)
+    score = score_fragment_mol(cluster, fragment_conformers, zmap_grid, debug)
 
     return score
 
 
-def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps, dataset_smiles_path: Path,
+def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps,
+                   fragment_dataset: ProcessedDataset,
                    debug=False):
+    fragment_conformers = get_conformers(fragment_dataset)
+
     scores = {}
     for cluster_id, cluster in clusters.items():
         if debug:
@@ -341,6 +402,6 @@ def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps, dataset_smil
 
         zmap_grid = zmaps[cluster_id]
 
-        scores[cluster_id] = score_cluster(cluster, zmap_grid, dataset_smiles_path, debug)
+        scores[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, debug)
 
     return scores
