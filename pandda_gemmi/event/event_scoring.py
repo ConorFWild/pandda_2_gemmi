@@ -103,7 +103,9 @@ def structures_from_cif(source_ligand_cif):
     # block = doc[-1]
     # cc = gemmi.make_chemcomp_from_block(block)
     # cc.remove_hydrogens()
-    small_structure = gemmi.read_small_structure(str(source_ligand_cif))
+    # small_structure = gemmi.read_small_structure(str(source_ligand_cif))
+    cif_doc = gemmi.cif.read(str(source_ligand_cif))
+    small_structure = gemmi.make_small_structure_from_block(cif_doc[-1])
 
     structure = structure_from_small_structure(small_structure)
 
