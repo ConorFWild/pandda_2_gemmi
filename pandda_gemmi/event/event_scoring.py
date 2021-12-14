@@ -110,6 +110,7 @@ def structures_from_cif(source_ligand_cif, debug=False):
     small_structure = gemmi.make_small_structure_from_block(cif_doc[0])
     if debug:
         print(small_structure)
+        print(small_structure.sites)
 
     structure = structure_from_small_structure(small_structure)
 
@@ -131,6 +132,8 @@ def get_conformers(
     # Decide how to load
     if fragment_dataset.source_ligand_smiles:
 
+        if debug:
+            print(f'\t\tGetting mol from ligand smiles')
         mol = get_fragment_mol_from_dataset_smiles_path(fragment_dataset.source_ligand_smiles)
 
         # Generate conformers
@@ -143,6 +146,8 @@ def get_conformers(
         fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2)
 
     elif fragment_dataset.source_ligand_cif:
+        if debug:
+            print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif)
 
     if debug:
@@ -312,7 +317,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     centroid_cart = cluster.centroid
 
     if debug:
-        print(f"\t\t\tCartesian centroid of fragment is: {centroid_cart}")
+        print(f"\t\t\tCartesian centroid of event is: {centroid_cart}")
 
     centered_structure = center_structure(
         conformer,
