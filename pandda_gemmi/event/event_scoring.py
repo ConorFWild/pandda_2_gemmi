@@ -97,6 +97,8 @@ def structure_from_small_structure(small_structure):
     model.add_chain(chain)
     structure.add_model(model)
 
+    return structure
+
 
 def structures_from_cif(source_ligand_cif):
     # doc = gemmi.cif.read_file(str(source_ligand_cif))
