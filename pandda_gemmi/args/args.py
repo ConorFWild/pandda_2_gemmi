@@ -131,7 +131,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_LIGAND_SMILES_REGEX,
             type=str,
-            default='*.cif',
+            default='*.smiles',
             help=constants.ARGS_LIGAND_SMILES_REGEX_HELP,
         )
         parser.add_argument(
