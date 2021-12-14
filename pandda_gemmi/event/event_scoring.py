@@ -417,7 +417,8 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debu
     return score
 
 
-def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps,
+def score_clusters(clusters: Dict[Tuple[int, int], Cluster],
+                   zmaps,
                    fragment_dataset: ProcessedDataset,
                    debug=False):
     if debug:

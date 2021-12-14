@@ -95,7 +95,7 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
 
                 if new_cluster_id == biggest_clusters[model_number]:
                     clusters[new_cluster_id] = cluster
-                    zmaps[new_cluster_id] = model_result['zmap']
+                    zmaps[new_cluster_id] = model_result['zmap'].zmap
 
     # Score the top clusters
     scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
