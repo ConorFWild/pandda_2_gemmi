@@ -107,13 +107,16 @@ def structures_from_cif(source_ligand_cif, debug=False):
     # cc.remove_hydrogens()
     # small_structure = gemmi.read_small_structure(str(source_ligand_cif))
     cif_doc = gemmi.cif.read(str(source_ligand_cif))
-    for block in cif_doc:
-        small_structure = gemmi.make_small_structure_from_block(block)
-        if debug:
-            print(f"\t\t\tsmall_structure: {small_structure}")
-            print(f"\t\t\tSmall structure sites: {small_structure.sites}")
+    # for block in cif_doc:
+    small_structure = gemmi.make_small_structure_from_block(cif_doc[-1])
+    if debug:
+        print(f"\t\t\tsmall_structure: {small_structure}")
+        print(f"\t\t\tSmall structure sites: {small_structure.sites}")
 
-        structure = structure_from_small_structure(small_structure)
+    if len(small_structure.sites) == 0:
+        return None
+
+    structure = structure_from_small_structure(small_structure)
 
 
     # for atom in cc.atoms:
@@ -151,10 +154,12 @@ def get_conformers(
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
 
-    elif fragment_dataset.source_ligand_pdb:
-        if debug:
-            print(f'\t\tGetting mol from ligand pdb')
-        fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+    if not fragment_structures:
+
+        if fragment_dataset.source_ligand_pdb:
+            if debug:
+                print(f'\t\tGetting mol from ligand pdb')
+            fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
 
     if debug:
         print(fragment_structures)
