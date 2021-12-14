@@ -107,12 +107,13 @@ def structures_from_cif(source_ligand_cif, debug=False):
     # cc.remove_hydrogens()
     # small_structure = gemmi.read_small_structure(str(source_ligand_cif))
     cif_doc = gemmi.cif.read(str(source_ligand_cif))
-    small_structure = gemmi.make_small_structure_from_block(cif_doc[0])
-    if debug:
-        print(small_structure)
-        print(small_structure.sites)
+    for block in cif_doc:
+        small_structure = gemmi.make_small_structure_from_block(block)
+        if debug:
+            print(f"\t\t\tsmall_structure: {small_structure}")
+            print(f"\t\t\tSmall structure sites: {small_structure.sites}")
 
-    structure = structure_from_small_structure(small_structure)
+        structure = structure_from_small_structure(small_structure)
 
 
     # for atom in cc.atoms:
@@ -148,7 +149,7 @@ def get_conformers(
     elif fragment_dataset.source_ligand_cif:
         if debug:
             print(f'\t\tGetting mol from cif')
-        fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif)
+        fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
 
     if debug:
         print(fragment_structures)

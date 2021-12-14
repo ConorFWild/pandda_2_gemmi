@@ -206,7 +206,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         )
 
         # Initial filters
-
         with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
             datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
                 structure_factors)
