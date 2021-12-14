@@ -295,8 +295,8 @@ def get_probe_structure(structure):
                     virtual_atom = edges[edge_index]
                     residue.add_atom(virtual_atom)
 
-    # print(f"Number of real atoms: {len(verticies)}")
-    # print(f"Number of virtual atoms: {len(edges)}")
+    print(f"Number of real atoms: {len(verticies)}")
+    print(f"Number of virtual atoms: {len(edges)}")
     return structure_clone
 
 
