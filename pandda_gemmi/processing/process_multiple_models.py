@@ -33,7 +33,7 @@ from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
 from pandda_gemmi.shells import Shell, ShellMultipleModels
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid
 from pandda_gemmi.model import Zmap, Model, Zmaps
-from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies
+from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_clusters
 
 
 @dataclasses.dataclass()
@@ -58,194 +58,241 @@ def update_log(shell_log, shell_log_path):
         json.dump(shell_log, f, indent=4)
 
 
-def select_model(model_results: Dict[int, Dict], grid):
-    model_scores = {}
-    model_selection_log = {}
-    # for model_number, model_result in model_results.items():
-    #     num_merged_clusters = len(model_result['clusterings_merged'])
-    #     if num_merged_clusters == 0:
-    #         model_score = 0
-    #     elif num_merged_clusters < 6:
-    #         model_score = num_merged_clusters
-    #     elif num_merged_clusters < 12:
-    #         model_score = 0.5
-    #     else:
-    #         model_score = -1
-    #
-    #     #TODO Get number of z map points in large clusters vs outside them as signal to noise estimate
-    #
-    #     model_scores[model_number] = model_score
-    #
-    #
+# def get_event_clusters(clusterings_list: Dict[int, Clusterings]):
+#
+#     cluster_ids = []
+#     event_coords = []
+#     for model_id, clusterings in clusterings_list.items():
+#         for clustering_id, clustering in clusterings.clusterings.items():
+#             for cluster_id, cluster in clustering.clustering.items():
+#                 cluster_ids.append((model_id, cluster_id))
+#                 event_coords.append(cluster.centroid)
+#
+#     centroids_array = np.array(event_coords)
+#
+#
+#
+#
+#     ...
 
-    number_of_events = {
-        model_number: len(model_result['clusterings_large'])
-        for model_number, model_result
-        in model_results.items()
-    }
+def select_model(model_results: Dict[int, Dict], grid, dataset_smiles_path):
 
-    model_event_sizes = {}
-    model_event_protein_mask_sizes = {}
-    model_event_contact_mask_sizes = {}
+    biggest_clusters = {}
     for model_number, model_result in model_results.items():
-        model_event_sizes[model_number] = {}
-        model_event_protein_mask_sizes[model_number] = {}
-        model_event_contact_mask_sizes[model_number] = {}
+        cluster_sizes = {}
         for clustering_id, clustering in model_result['clusterings_large'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
-                model_event_sizes[model_number][cluster_id] = cluster.values.size #cluster.size(grid)
-                model_event_protein_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_inner_protein_mask)
-                model_event_contact_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_contact_mask)
+                cluster_sizes[(int(model_number), int(cluster_id))] = int(cluster.values.size)
 
+        biggest_clusters[model_number] = max(cluster_sizes, key = lambda _x: cluster_sizes[_x])
 
-    signal_to_noise = {}
+    zmaps = {}
+    clusters = {}
     for model_number, model_result in model_results.items():
-        zmap = model_result['zmap']
-        cluster_sizes = [int(event_size) for event_number, event_size in model_event_sizes[model_number].items()]
-        cluster_mask_sizes = [int(event_mask_size) for event_number, event_mask_size in model_event_protein_mask_sizes[
-            model_number].items()]
-        cluster_differences = [cluster_size - cluster_mask_size for cluster_size, cluster_mask_size in zip(
-            cluster_sizes, cluster_mask_sizes)]
-        contact_mask_sizes = [int(contact_mask_size) for event_number, contact_mask_size in
-                              model_event_contact_mask_sizes[
-            model_number].items()]
-        contact_differences = [contact_size - cluster_mask_size for contact_size, cluster_mask_size in zip(
-            contact_mask_sizes, cluster_mask_sizes)]
-        if len(cluster_differences) == 0:
-            max_diff = 0
-        else:
-            max_diff = max(cluster_differences)
-        if len(contact_differences) == 0:
-            max_contact_diff = 0
-        else:
-            max_contact_diff = max(contact_differences)
-
-
-        zmap_array = zmap.to_array()
-        contoured_zmap_array = zmap_array[zmap_array > 2.0]
-        zmap_size = int(zmap_array[zmap_array > 0.0].size)
-        zmap_num_outliers = int(contoured_zmap_array.size)
-        signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
-        noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
-        signal_to_noise[model_number] = signal - noise
-
-
-        # Get cluster signal to noise
-        cluster_stats = {}
-        for clustering_id, clustering in model_result['clusterings_peaked'].clusterings.items():
+        for clustering_id, clustering in model_result['clusterings_large'].clusterings.items():
             for cluster_id, cluster in clustering.clustering.items():
-                outer_hull_array = zmap_array[cluster.event_mask_indicies]
-                outer_hull_contoured_mask_array = outer_hull_array > 2.0
-                cluster_size = int(cluster.values.size)
-                outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array))
-                protein_mask_size = int(np.sum(cluster.cluster_inner_protein_mask))
-                contact_mask_size = int(np.sum(cluster.cluster_contact_mask))
-                signal = contact_mask_size - protein_mask_size
-                noise_with_protein = (outer_hull_num_outliers - cluster_size) + protein_mask_size
-                noise_without_protein = outer_hull_num_outliers - cluster_size
-                cluster_stats[int(cluster_id)] = {
-                    'model_id': int(model_number),
-                    'cluster_id': int(cluster_id),
-                    'cluster_size': cluster_size,
-                    'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
-                    'contact_mask_size': contact_mask_size,
-                    'protein_mask_size': protein_mask_size,
-                    'signal': signal,
-                    'noise_with_protein': noise_with_protein,
-                    'noise_without_protein': noise_without_protein,
-                    'signal_to_noise_with_protein': float(signal/(noise_with_protein+1)),
-                    'signal_to_noise_without_protein': float(signal / (noise_without_protein + 1)),
-                    'signal_to_noise_with_protein_scaled': float(signal/(noise_with_protein+1))*(
-                        contact_mask_size-protein_mask_size),
-                                                 'signal_to_noise_without_protein_scaled': float(signal/(
-                                                         noise_without_protein+1))*(
-                        contact_mask_size-protein_mask_size),
-                    'signal_to_noise_with_protein_additive': cluster_size-noise_with_protein,
-                    'signal_to_noise_without_protein_additive': cluster_size - noise_without_protein,
-                    'map_signal': sum(cluster_sizes),
-                    'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
-                    'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
-                    'zmap_num_outlier': zmap_num_outliers,
-                    'zmap_size': zmap_size,
-                    'score': ((cluster_size-protein_mask_size) + signal)-noise_with_protein
-                }
+                new_cluster_id = (int(model_number), int(cluster_id),)
 
+                if new_cluster_id == biggest_clusters[model_number]:
+                    clusters[new_cluster_id] = cluster
+                    zmaps[new_cluster_id] = model_result['zmap']
 
+    # Score the top clusters
+    scores = score_clusters(clusters, zmaps, dataset_smiles_path)
 
+    return scores
 
-        # Print info
-        # model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
-        #                                     f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
-        #                                     f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
-        #                                     f"{contact_mask_sizes}: {contact_differences}: " \
-        #                                     f" {max_diff}: {max_contact_diff}"
-        model_selection_log[model_number] = cluster_stats
-
-    flat_stats = {
-        (model_id, cluster_id): model_selection_log[model_id][cluster_id]
-        for model_id
-        in model_selection_log
-        for cluster_id
-        in model_selection_log[model_id]
-    }
-    ranked_stats = [
-        flat_stats[x]
-        for x
-        in sorted(
-            flat_stats,
-            key=lambda _x: flat_stats[_x]['score']
-        )
-    ]
-
-    model_selection_log['ranked'] = ranked_stats
-
-    return max(
-        signal_to_noise,
-               key=lambda _model_number: signal_to_noise[_model_number]
-    ), model_selection_log
-
-    #     model_number: {
-    #         cluster_number: cluster.size()
-    #         for cluster_number, cluster
-    #         in model_result['clusterings_merged'].items()
-    #     }
-    #     for model_number, model_result
-    #     in model_results.items()
-    # }
-    # model_largest_events = {
-    #     model_number: max(
-    #         model_event_sizes[model_number],
-    #         key=lambda _model_number: model_event_sizes[model_number][_model_number]
-    #     )
-    #     for model_number
-    #     in model_event_sizes
-    #     if number_of_events[model_number] != 0
-    # }
-    #
-    # sensible_models = [model_number for model_number in number_of_events
-    #                    if (number_of_events[model_number] > 0) & (number_of_events[model_number] < 7)]
-    #
-    # noisy_models = [model_number for model_number in number_of_events
-    #                 if (number_of_events[model_number] >= 7)]
-    #
-    # no_event_models = [model_number for model_number in number_of_events
-    #                    if number_of_events[model_number] == 0]
-    #
-    # if len(sensible_models) > 0:
-    #     return max(
-    #         model_largest_events,
-    #         key=lambda _number: model_largest_events[_number],
-    #     )
-    # else:
-    #     return no_event_models[0]
-
-    # Want maps with the largest events (highest % of map in large cluster) but the lowest % of map outlying
-
-        # selected_model = max(
-        #     model_scores,
-        #     key=lambda _number: model_scores[_number],
-        # )
-    # return selected_model
+#
+# def select_model(model_results: Dict[int, Dict], grid):
+#     model_scores = {}
+#     model_selection_log = {}
+#     # for model_number, model_result in model_results.items():
+#     #     num_merged_clusters = len(model_result['clusterings_merged'])
+#     #     if num_merged_clusters == 0:
+#     #         model_score = 0
+#     #     elif num_merged_clusters < 6:
+#     #         model_score = num_merged_clusters
+#     #     elif num_merged_clusters < 12:
+#     #         model_score = 0.5
+#     #     else:
+#     #         model_score = -1
+#     #
+#     #     #TODO Get number of z map points in large clusters vs outside them as signal to noise estimate
+#     #
+#     #     model_scores[model_number] = model_score
+#     #
+#     #
+#
+#     number_of_events = {
+#         model_number: len(model_result['clusterings_large'])
+#         for model_number, model_result
+#         in model_results.items()
+#     }
+#
+#     model_event_sizes = {}
+#     model_event_protein_mask_sizes = {}
+#     model_event_contact_mask_sizes = {}
+#     for model_number, model_result in model_results.items():
+#         model_event_sizes[model_number] = {}
+#         model_event_protein_mask_sizes[model_number] = {}
+#         model_event_contact_mask_sizes[model_number] = {}
+#         for clustering_id, clustering in model_result['clusterings_large'].clusterings.items():
+#             for cluster_id, cluster in clustering.clustering.items():
+#                 model_event_sizes[model_number][cluster_id] = cluster.values.size #cluster.size(grid)
+#                 model_event_protein_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_inner_protein_mask)
+#                 model_event_contact_mask_sizes[model_number][cluster_id] = np.sum(cluster.cluster_contact_mask)
+#
+#     event_clusters = get_event_clusters([model_result['clusterings_large'] for model_result in model_results.values()])
+#
+#
+#     signal_to_noise = {}
+#     for model_number, model_result in model_results.items():
+#         zmap = model_result['zmap']
+#         cluster_sizes = [int(event_size) for event_number, event_size in model_event_sizes[model_number].items()]
+#         cluster_mask_sizes = [int(event_mask_size) for event_number, event_mask_size in model_event_protein_mask_sizes[
+#             model_number].items()]
+#         cluster_differences = [cluster_size - cluster_mask_size for cluster_size, cluster_mask_size in zip(
+#             cluster_sizes, cluster_mask_sizes)]
+#         contact_mask_sizes = [int(contact_mask_size) for event_number, contact_mask_size in
+#                               model_event_contact_mask_sizes[
+#             model_number].items()]
+#         contact_differences = [contact_size - cluster_mask_size for contact_size, cluster_mask_size in zip(
+#             contact_mask_sizes, cluster_mask_sizes)]
+#         if len(cluster_differences) == 0:
+#             max_diff = 0
+#         else:
+#             max_diff = max(cluster_differences)
+#         if len(contact_differences) == 0:
+#             max_contact_diff = 0
+#         else:
+#             max_contact_diff = max(contact_differences)
+#
+#
+#         zmap_array = zmap.to_array()
+#         contoured_zmap_array = zmap_array[zmap_array > 2.0]
+#         zmap_size = int(zmap_array[zmap_array > 0.0].size)
+#         zmap_num_outliers = int(contoured_zmap_array.size)
+#         signal = sum(cluster_sizes) / zmap_num_outliers  # Fraction of outliers that are clustered
+#         noise = zmap_num_outliers / zmap_size  # Fraction of map that is outliers
+#         signal_to_noise[model_number] = signal - noise
+#
+#
+#         # Get cluster signal to noise
+#         cluster_stats = {}
+#         for clustering_id, clustering in model_result['clusterings_peaked'].clusterings.items():
+#             for cluster_id, cluster in clustering.clustering.items():
+#                 outer_hull_array = zmap_array[cluster.event_mask_indicies]
+#                 outer_hull_contoured_mask_array = outer_hull_array > 2.0
+#                 cluster_size = int(cluster.values.size)
+#                 outer_hull_num_outliers = int(np.sum(outer_hull_contoured_mask_array))
+#                 protein_mask_size = int(np.sum(cluster.cluster_inner_protein_mask))
+#                 contact_mask_size = int(np.sum(cluster.cluster_contact_mask))
+#                 signal = contact_mask_size - protein_mask_size
+#                 noise_with_protein = (outer_hull_num_outliers - cluster_size) + protein_mask_size
+#                 noise_without_protein = outer_hull_num_outliers - cluster_size
+#                 cluster_stats[int(cluster_id)] = {
+#                     'model_id': int(model_number),
+#                     'cluster_id': int(cluster_id),
+#                     'cluster_size': cluster_size,
+#                     'cluster_outer_hull_num_outlier': outer_hull_num_outliers,
+#                     'contact_mask_size': contact_mask_size,
+#                     'protein_mask_size': protein_mask_size,
+#                     'signal': signal,
+#                     'noise_with_protein': noise_with_protein,
+#                     'noise_without_protein': noise_without_protein,
+#                     'signal_to_noise_with_protein': float(signal/(noise_with_protein+1)),
+#                     'signal_to_noise_without_protein': float(signal / (noise_without_protein + 1)),
+#                     'signal_to_noise_with_protein_scaled': float(signal/(noise_with_protein+1))*(
+#                         contact_mask_size-protein_mask_size),
+#                                                  'signal_to_noise_without_protein_scaled': float(signal/(
+#                                                          noise_without_protein+1))*(
+#                         contact_mask_size-protein_mask_size),
+#                     'signal_to_noise_with_protein_additive': cluster_size-noise_with_protein,
+#                     'signal_to_noise_without_protein_additive': cluster_size - noise_without_protein,
+#                     'map_signal': sum(cluster_sizes),
+#                     'map_noise': (zmap_num_outliers - sum(cluster_sizes)),
+#                     'zmap_signal_to_noise': sum(cluster_sizes) / ((zmap_num_outliers - sum(cluster_sizes))+1),
+#                     'zmap_num_outlier': zmap_num_outliers,
+#                     'zmap_size': zmap_size,
+#                     'score': ((cluster_size-protein_mask_size) + signal)-noise_with_protein
+#                 }
+#
+#
+#
+#
+#         # Print info
+#         # model_selection_log[model_number] = f"\t\t{model_number}: signal: {signal}: noise: {noise}: " \
+#         #                                     f"{sum(cluster_sizes)}: {zmap_num_outliers}: {zmap_size}: " \
+#         #                                     f"{cluster_sizes}: {cluster_mask_sizes}: {cluster_differences}: " \
+#         #                                     f"{contact_mask_sizes}: {contact_differences}: " \
+#         #                                     f" {max_diff}: {max_contact_diff}"
+#         model_selection_log[model_number] = cluster_stats
+#
+#     flat_stats = {
+#         (model_id, cluster_id): model_selection_log[model_id][cluster_id]
+#         for model_id
+#         in model_selection_log
+#         for cluster_id
+#         in model_selection_log[model_id]
+#     }
+#     ranked_stats = [
+#         flat_stats[x]
+#         for x
+#         in sorted(
+#             flat_stats,
+#             key=lambda _x: flat_stats[_x]['score']
+#         )
+#     ]
+#
+#     model_selection_log['ranked'] = ranked_stats
+#
+#     return max(
+#         signal_to_noise,
+#                key=lambda _model_number: signal_to_noise[_model_number]
+#     ), model_selection_log
+#
+#     #     model_number: {
+#     #         cluster_number: cluster.size()
+#     #         for cluster_number, cluster
+#     #         in model_result['clusterings_merged'].items()
+#     #     }
+#     #     for model_number, model_result
+#     #     in model_results.items()
+#     # }
+#     # model_largest_events = {
+#     #     model_number: max(
+#     #         model_event_sizes[model_number],
+#     #         key=lambda _model_number: model_event_sizes[model_number][_model_number]
+#     #     )
+#     #     for model_number
+#     #     in model_event_sizes
+#     #     if number_of_events[model_number] != 0
+#     # }
+#     #
+#     # sensible_models = [model_number for model_number in number_of_events
+#     #                    if (number_of_events[model_number] > 0) & (number_of_events[model_number] < 7)]
+#     #
+#     # noisy_models = [model_number for model_number in number_of_events
+#     #                 if (number_of_events[model_number] >= 7)]
+#     #
+#     # no_event_models = [model_number for model_number in number_of_events
+#     #                    if number_of_events[model_number] == 0]
+#     #
+#     # if len(sensible_models) > 0:
+#     #     return max(
+#     #         model_largest_events,
+#     #         key=lambda _number: model_largest_events[_number],
+#     #     )
+#     # else:
+#     #     return no_event_models[0]
+#
+#     # Want maps with the largest events (highest % of map in large cluster) but the lowest % of map outlying
+#
+#         # selected_model = max(
+#         #     model_scores,
+#         #     key=lambda _number: model_scores[_number],
+#         # )
+#     # return selected_model
 
 
 def get_models(
@@ -476,7 +523,11 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Decide which model to use...
     ###################################################################
-    selected_model_number, model_selection_log = select_model(model_results, grid)
+    selected_model_number, model_selection_log = select_model(
+        model_results,
+        grid,
+        pandda_fs_model.processed_datasets[test_dtag].source_ligand_smiles,
+    )
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
     zmap = model_results[selected_model_number]['zmap']
