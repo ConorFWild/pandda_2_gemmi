@@ -379,13 +379,10 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
-    if debug:
-        print(f"\tGetting mol from path: {dataset_smiles_path}")
-    fragment_mol = get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path)
 
     if debug:
         print(f"\tScoring cluster")
-    score = score_fragment_mol(cluster, fragment_conformers, zmap_grid, debug)
+    score = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
 
     return score
 
@@ -393,6 +390,8 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debu
 def score_clusters(clusters: Dict[Tuple[int, int], Cluster], zmaps,
                    fragment_dataset: ProcessedDataset,
                    debug=False):
+    if debug:
+        print(f"Getting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset)
 
     scores = {}
