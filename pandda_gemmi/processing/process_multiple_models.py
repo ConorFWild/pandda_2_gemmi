@@ -75,7 +75,7 @@ def update_log(shell_log, shell_log_path):
 #
 #     ...
 
-def select_model(model_results: Dict[int, Dict], grid, processed_dataset):
+def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=False):
 
     biggest_clusters = {}
     for model_number, model_result in model_results.items():
@@ -98,7 +98,7 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset):
                     zmaps[new_cluster_id] = model_result['zmap']
 
     # Score the top clusters
-    scores = score_clusters(clusters, zmaps, processed_dataset)
+    scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
 
     return scores
 
@@ -527,6 +527,7 @@ def process_dataset_multiple_models(
         model_results,
         grid,
         pandda_fs_model.processed_datasets[test_dtag],
+        debug=debug,
     )
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
