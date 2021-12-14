@@ -151,6 +151,11 @@ def get_conformers(
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
 
+    elif fragment_dataset.source_ligand_pdb:
+        if debug:
+            print(f'\t\tGetting mol from ligand pdb')
+        fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+
     if debug:
         print(fragment_structures)
 
