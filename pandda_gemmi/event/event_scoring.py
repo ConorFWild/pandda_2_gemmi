@@ -322,6 +322,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # Get the probe structure
     probe_structure = get_probe_structure(centered_structure)
 
+    if debug:
+        print(f"probe structure: {probe_structure}")
+
     # Optimise
     if debug:
         print(f"\t\t\tOptimizing structure fit...")
