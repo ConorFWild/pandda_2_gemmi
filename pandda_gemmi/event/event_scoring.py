@@ -353,15 +353,17 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             params
         ),
         [
-            (-3, 3), (-3, 3), (-3, 3),
+            # (-3, 3), (-3, 3), (-3, 3),
+            (-6, 6), (-6, 6), (-6, 6),
             (0, 360), (0, 360), (0, 360)
         ],
         sampling_method='sobol',
-        n=64*12,
+        n=64*12*8,
         iters=5*2,
     )
     if debug:
         print(f"\t\t\t6Optimisation result: {res.x} {res.fun}")
+        print(f"\t\t\t6Optimisation result: {res.xl} {res.funl}")
 
     # Get optimised fit
     x, y, z, rx, ry, rz = res.x
