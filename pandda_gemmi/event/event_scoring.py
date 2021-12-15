@@ -353,7 +353,10 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         [
             (-3, 3), (-3, 3), (-3, 3),
             (0, 360), (0, 360), (0, 360)
-        ]
+        ],
+        sampling_method='sobol',
+        n=64,
+        iters=3,
     )
     if debug:
         print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
