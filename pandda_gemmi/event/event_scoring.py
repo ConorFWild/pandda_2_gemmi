@@ -357,7 +357,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             (0, 360), (0, 360), (0, 360)
         ],
         sampling_method='sobol',
-        n=64*6,
+        n=64*12,
         iters=3,
     )
     if debug:
