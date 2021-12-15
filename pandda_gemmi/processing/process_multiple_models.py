@@ -101,7 +101,7 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
     # Score the top clusters
     scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
 
-    log = scores
+    log = {score_key[0]: score for score_key, score in scores.items()}
 
     selected_model_number = max(
         scores,
