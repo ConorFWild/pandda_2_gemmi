@@ -106,7 +106,7 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
     selected_model_number = max(
         scores,
         key=lambda _score: scores[_score],
-    )
+    )[0]
 
     return selected_model_number, log
 
