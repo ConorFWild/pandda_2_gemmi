@@ -388,7 +388,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\tScore is: {score}")
         print(f"\t\t\tScoring log results are: {log}")
 
-    return score
+    return float(score)
 
 
 def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=False):

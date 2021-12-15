@@ -76,7 +76,6 @@ def update_log(shell_log, shell_log_path):
 #     ...
 
 def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=False):
-
     log = {}
 
     biggest_clusters = {}
@@ -86,7 +85,7 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
             for cluster_id, cluster in clustering.clustering.items():
                 cluster_sizes[(int(model_number), int(cluster_id))] = int(cluster.values.size)
 
-        biggest_clusters[model_number] = max(cluster_sizes, key = lambda _x: cluster_sizes[_x])
+        biggest_clusters[model_number] = max(cluster_sizes, key=lambda _x: cluster_sizes[_x])
 
     zmaps = {}
     clusters = {}
@@ -104,7 +103,13 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
 
     log = scores
 
-    return scores, log
+    selected_model_number = max(
+        scores,
+        key=lambda _score: scores[_score],
+    )
+
+    return selected_model_number, log
+
 
 #
 # def select_model(model_results: Dict[int, Dict], grid):
@@ -548,11 +553,11 @@ def process_dataset_multiple_models(
     time_output_zmap_start = time.time()
 
     native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
-            structure_factors.f,
-            structure_factors.phi,
-            # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
-        sample_rate=dataset_truncated_datasets[test_dtag].reflections.resolution().resolution/0.5
-        )
+        structure_factors.f,
+        structure_factors.phi,
+        # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
+        sample_rate=dataset_truncated_datasets[test_dtag].reflections.resolution().resolution / 0.5
+    )
 
     partitioning = Partitioning.from_structure_multiprocess(
         dataset_truncated_datasets[test_dtag].structure,
@@ -578,7 +583,8 @@ def process_dataset_multiple_models(
     if debug:
         for model_number, model_result in model_results.items():
             save_native_frame_zmap(
-                pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / f'{model_number}.ccp4',
+                pandda_fs_model.processed_datasets.processed_datasets[
+                    test_dtag].z_map_file.path.parent / f'{model_number}.ccp4',
                 model_result['zmap'],
                 dataset_truncated_datasets[test_dtag],
                 alignments[test_dtag],
@@ -740,7 +746,7 @@ def process_shell_multiple_models(
         grid=grid,
         structure_factors=structure_factors,
         # sample_rate=sample_rate,
-        sample_rate=shell.res/0.5
+        sample_rate=shell.res / 0.5
     )
 
     results = process_local(
@@ -807,7 +813,7 @@ def process_shell_multiple_models(
         min_bdc=min_bdc,
         max_bdc=max_bdc,
         # sample_rate=sample_rate,
-        sample_rate=shell.res/0.5,
+        sample_rate=shell.res / 0.5,
         statmaps=statmaps,
         process_local=process_local_in_dataset,
         debug=debug,
