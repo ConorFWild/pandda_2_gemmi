@@ -375,6 +375,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         rotation_matrix
     )
 
+    optimised_structure.write_minimal_pdb(f"{str(res.x)}")
+
     # Score, by including the noise as well as signal
     if debug:
         print(f"\t\t\tScoring optimized result by signal to noise")
