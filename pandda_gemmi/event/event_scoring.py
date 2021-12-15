@@ -270,6 +270,7 @@ def score_fit(structure, grid, params):
 
 def get_probe_structure(structure):
     structure_clone = structure.clone()
+    structure_clone.remove_hydrogens()
 
     j = 0
     verticies = {}
