@@ -277,6 +277,7 @@ def get_probe_structure(structure):
         for chain in model:
             for residue in chain:
                 for atom_1 in residue:
+                    print(atom_1.element.name)
                     if atom_1.element.name != "H":
                         verticies[j] = atom_1
                         j = j + 1
