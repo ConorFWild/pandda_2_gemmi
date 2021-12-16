@@ -240,9 +240,9 @@ def score_fit(structure, grid, params):
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
         [
-            rx,
-            ry,
-            rz,
+            rx*360,
+            ry*360,
+            rz*360,
         ],
         degrees=True)
     rotation_matrix: np.ndarray = rotation.as_matrix()
@@ -357,7 +357,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         [
             # (-3, 3), (-3, 3), (-3, 3),
             (-6, 6), (-6, 6), (-6, 6),
-            (0, 360), (0, 360), (0, 360)
+            (0, 1), (0, 1), (0, 1)
         ],
         sampling_method='sobol',
         n=64*10,
@@ -379,7 +379,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         [
             # (-3, 3), (-3, 3), (-3, 3),
             (-6, 6), (-6, 6), (-6, 6),
-            (0, 360), (0, 360), (0, 360)
+            (0, 1), (0, 1), (0, 1)
         ],
     )
     finish_diff_ev = time.time()
@@ -407,9 +407,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
         [
-            rx,
-            ry,
-            rz,
+            rx*360,
+            ry*360,
+            rz*360,
         ],
         degrees=True)
     rotation_matrix: np.ndarray = rotation.as_matrix()
