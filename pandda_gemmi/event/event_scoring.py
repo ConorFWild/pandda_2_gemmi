@@ -347,26 +347,26 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     if debug:
         print(f"\t\t\tOptimizing structure fit...")
 
-    start_shgo = time.time()
-    res = optimize.shgo(
-        lambda params: score_fit(
-            probe_structure,
-            zmap_grid,
-            params
-        ),
-        [
-            # (-3, 3), (-3, 3), (-3, 3),
-            (-6, 6), (-6, 6), (-6, 6),
-            (0, 1), (0, 1), (0, 1)
-        ],
-        sampling_method='sobol',
-        n=64*10,
-        iters=5,
-    )
-    finish_shgo=time.time()
-    if debug:
-        print(f"\t\t\tSHGO in: {finish_shgo-start_shgo}")
-        print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+    # start_shgo = time.time()
+    # res = optimize.shgo(
+    #     lambda params: score_fit(
+    #         probe_structure,
+    #         zmap_grid,
+    #         params
+    #     ),
+    #     [
+    #         # (-3, 3), (-3, 3), (-3, 3),
+    #         (-6, 6), (-6, 6), (-6, 6),
+    #         (0, 1), (0, 1), (0, 1)
+    #     ],
+    #     sampling_method='sobol',
+    #     n=64*10,
+    #     iters=5,
+    # )
+    # finish_shgo=time.time()
+    # if debug:
+    #     print(f"\t\t\tSHGO in: {finish_shgo-start_shgo}")
+    #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
         # print(f"\t\t\tOptimisation result: {res.xl} {res.funl}")
     start_diff_ev=time.time()
 
@@ -387,19 +387,19 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\tdiff ev in: {finish_diff_ev-start_diff_ev}")
         print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
 
-    start_basin = time.time()
-    res = optimize.basinhopping(
-        lambda params: score_fit(
-            probe_structure,
-            zmap_grid,
-            params
-        ),
-        x0=[0.0,0.0,0.0,0.0,0.0,0.0],
-    )
-    finish_basin = time.time()
-    if debug:
-        print(f"\t\t\tbasin in: {finish_basin-start_basin}")
-        print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+    # start_basin = time.time()
+    # res = optimize.basinhopping(
+    #     lambda params: score_fit(
+    #         probe_structure,
+    #         zmap_grid,
+    #         params
+    #     ),
+    #     x0=[0.0,0.0,0.0,0.0,0.0,0.0],
+    # )
+    # finish_basin = time.time()
+    # if debug:
+    #     print(f"\t\t\tbasin in: {finish_basin-start_basin}")
+    #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
 
 
     # Get optimised fit
