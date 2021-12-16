@@ -436,7 +436,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     #     optimised_structure,
     #     zmap_grid,
     # )
-    score = float(res.fun) / int(cluster.values.size)
+    score = float(res.fun) / (int(cluster.values.size) + 1)
 
     if debug:
         print(f"\t\t\tCluster size is: {int(cluster.values.size)}")
