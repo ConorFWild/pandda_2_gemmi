@@ -85,7 +85,10 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
             for cluster_id, cluster in clustering.clustering.items():
                 cluster_sizes[(int(model_number), int(cluster_id))] = int(cluster.values.size)
 
-        biggest_clusters[model_number] = max(cluster_sizes, key=lambda _x: cluster_sizes[_x])
+        if len(cluster_sizes) == 0:
+            continue
+        else:
+            biggest_clusters[model_number] = max(cluster_sizes, key=lambda _x: cluster_sizes[_x])
 
     zmaps = {}
     clusters = {}
