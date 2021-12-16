@@ -23,7 +23,8 @@ from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
     truncate,
-    save_native_frame_zmap
+    save_native_frame_zmap,
+    save_reference_frame_zmap,
 )
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventID
@@ -589,7 +590,7 @@ def process_dataset_multiple_models(
         for model_number, model_result in model_results.items():
             save_native_frame_zmap(
                 pandda_fs_model.processed_datasets.processed_datasets[
-                    test_dtag].z_map_file.path.parent / f'{model_number}.ccp4',
+                    test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
                 model_result['zmap'],
                 dataset_truncated_datasets[test_dtag],
                 alignments[test_dtag],
@@ -600,6 +601,12 @@ def process_dataset_multiple_models(
                 partitioning,
                 sample_rate,
             )
+            save_reference_frame_zmap(
+                pandda_fs_model.processed_datasets.processed_datasets[
+                    test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
+                    model_result['zmap']
+            )
+
 
     if statmaps:
         mean_map_file = MeanMapFile.from_zmap_file(

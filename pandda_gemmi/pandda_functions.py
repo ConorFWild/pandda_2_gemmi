@@ -1959,6 +1959,14 @@ def save_native_frame_zmap(
     ccp4.setup()
     ccp4.write_ccp4_map(str(path))
 
+def save_reference_frame_zmap(path,
+        zmap: Zmap,):
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = zmap.zmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
 
 def save_native_frame_mean_map(
         self,

@@ -18,40 +18,45 @@ from pandda_gemmi.event import Cluster
 from pandda_gemmi.autobuild import score_structure_signal_to_noise_density
 
 
-def get_structures_from_mol(mol: Chem.Mol) -> MutableMapping[int, gemmi.Structure]:
+def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
     fragmentstructures: MutableMapping[int, gemmi.Structure] = {}
     for i, conformer in enumerate(mol.GetConformers()):
-        positions: np.ndarray = conformer.GetPositions()
+        if i > max_conformers:
+            continue
+        else:
+            positions: np.ndarray = conformer.GetPositions()
 
-        structure: gemmi.Structure = gemmi.Structure()
-        model: gemmi.Model = gemmi.Model(f"{i}")
-        chain: gemmi.Chain = gemmi.Chain(f"{i}")
-        residue: gemmi.Residue = gemmi.Residue()
+            structure: gemmi.Structure = gemmi.Structure()
+            model: gemmi.Model = gemmi.Model(f"{i}")
+            chain: gemmi.Chain = gemmi.Chain(f"{i}")
+            residue: gemmi.Residue = gemmi.Residue()
+            residue.name = "LIG"
+            residue.seqid = gemmi.SeqId(1, ' ')
 
-        # Loop over atoms, adding them to a gemmi residue
-        for j, atom in enumerate(mol.GetAtoms()):
-            # Get the atomic symbol
-            atom_symbol: str = atom.GetSymbol()
-            gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
+            # Loop over atoms, adding them to a gemmi residue
+            for j, atom in enumerate(mol.GetAtoms()):
+                # Get the atomic symbol
+                atom_symbol: str = atom.GetSymbol()
+                gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
 
-            # Get the position as a gemmi type
-            pos: np.ndarray = positions[j, :]
-            gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
+                # Get the position as a gemmi type
+                pos: np.ndarray = positions[j, :]
+                gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
 
-            # Get the
-            gemmi_atom: gemmi.Atom = gemmi.Atom()
-            gemmi_atom.name = atom_symbol
-            gemmi_atom.pos = gemmi_pos
-            gemmi_atom.element = gemmi_element
+                # Get the
+                gemmi_atom: gemmi.Atom = gemmi.Atom()
+                gemmi_atom.name = atom_symbol
+                gemmi_atom.pos = gemmi_pos
+                gemmi_atom.element = gemmi_element
 
-            # Add atom to residue
-            residue.add_atom(gemmi_atom)
+                # Add atom to residue
+                residue.add_atom(gemmi_atom)
 
-        chain.add_residue(residue)
-        model.add_chain(chain)
-        structure.add_model(model)
+            chain.add_residue(residue)
+            model.add_chain(chain)
+            structure.add_model(model)
 
-        fragmentstructures[i] = structure
+            fragmentstructures[i] = structure
 
     return fragmentstructures
 
@@ -74,6 +79,8 @@ def structure_from_small_structure(small_structure):
     model: gemmi.Model = gemmi.Model(f"0")
     chain: gemmi.Chain = gemmi.Chain(f"0")
     residue: gemmi.Residue = gemmi.Residue()
+    residue.name = "LIG"
+    residue.seqid = gemmi.SeqId(1, ' ')
 
     # Loop over atoms, adding them to a gemmi residue
     for j, site in enumerate(small_structure.sites):
@@ -128,8 +135,8 @@ def structures_from_cif(source_ligand_cif, debug=False):
 
 def get_conformers(
         fragment_dataset,
-        pruning_threshold=3,
-        num_pose_samples=50,
+        pruning_threshold=5,
+        num_pose_samples=100,
         max_conformers=10,
         debug=False,
 ) -> MutableMapping[int, Chem.Mol]:
@@ -147,7 +154,7 @@ def get_conformers(
         cids = AllChem.EmbedMultipleConfs(m2, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
 
         # Translate to structures
-        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2)
+        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
 
     elif fragment_dataset.source_ligand_cif:
         if debug:
