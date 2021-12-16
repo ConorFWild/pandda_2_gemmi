@@ -432,12 +432,15 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     if debug:
         print(f"\t\t\tScoring optimized result by signal to noise")
 
-    score, log = score_structure_signal_to_noise_density(
-        optimised_structure,
-        zmap_grid,
-    )
+    # score, log = score_structure_signal_to_noise_density(
+    #     optimised_structure,
+    #     zmap_grid,
+    # )
+    score = float(res.fun) / int(cluster.values.size)
 
     if debug:
+        print(f"\t\t\tCluster size is: {int(cluster.values.size)}")
+        print(f"\t\t\tModeled atoms % is: {float(1-res.fun)}")
         print(f"\t\t\tScore is: {score}")
         # print(f"\t\t\tScoring log results are: {log}")
 
