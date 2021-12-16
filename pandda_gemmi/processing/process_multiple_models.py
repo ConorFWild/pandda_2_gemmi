@@ -588,6 +588,11 @@ def process_dataset_multiple_models(
 
     if debug:
         for model_number, model_result in model_results.items():
+            save_reference_frame_zmap(
+                pandda_fs_model.processed_datasets.processed_datasets[
+                    test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
+                    model_result['zmap']
+            )
             save_native_frame_zmap(
                 pandda_fs_model.processed_datasets.processed_datasets[
                     test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
@@ -601,11 +606,7 @@ def process_dataset_multiple_models(
                 partitioning,
                 sample_rate,
             )
-            save_reference_frame_zmap(
-                pandda_fs_model.processed_datasets.processed_datasets[
-                    test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
-                    model_result['zmap']
-            )
+
 
 
     if statmaps:
