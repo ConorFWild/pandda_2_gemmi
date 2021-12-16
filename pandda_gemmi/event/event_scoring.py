@@ -286,7 +286,7 @@ def get_probe_structure(structure):
         for chain in model:
             for residue in chain:
                 for atom_1 in residue:
-                    print(atom_1.element.name)
+                    # print(atom_1.element.name)
                     if atom_1.element.name != "H":
                         verticies[j] = atom_1
                         j = j + 1
@@ -439,7 +439,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
     if debug:
         print(f"\t\t\tScore is: {score}")
-        print(f"\t\t\tScoring log results are: {log}")
+        # print(f"\t\t\tScoring log results are: {log}")
 
     return float(score)
 
