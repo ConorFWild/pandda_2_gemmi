@@ -535,6 +535,8 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Decide which model to use...
     ###################################################################
+    if debug:
+        print(f"\tSelecting model...")
     selected_model_number, model_selection_log = select_model(
         model_results,
         grid,
