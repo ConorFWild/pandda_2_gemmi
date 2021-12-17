@@ -430,6 +430,7 @@ def process_dataset_multiple_models(
         zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
             model=model,
             xmaps={test_dtag: dataset_xmaps[test_dtag], },
+            debug=debug,
         )
         time_z_maps_finish = time.time()
         dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start

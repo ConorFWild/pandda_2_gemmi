@@ -467,7 +467,7 @@ class Zmap:
     zmap: gemmi.FloatGrid
 
     @staticmethod
-    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag):
+    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, debug=False):
 
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
@@ -498,6 +498,11 @@ class Zmap:
 
         zmap_sparse_mean = np.mean(zmap_array[zmap_array != 0.0])
         zmap_sparse_std = np.std(zmap_array[zmap_array != 0.0])
+        if debug:
+            print(f"\t\tZmap mean is: {zmap_sparse_mean}")
+            print(f"\t\tZmap mean is: {zmap_sparse_std}")
+            print(f"\t\tZmap max is: {np.max(zmap_array[zmap_array != 0.0])}")
+
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 
@@ -551,11 +556,11 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: Model, xmaps: Xmaps):
+    def from_xmaps(model: Model, xmaps: Xmaps, debug=False):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
-            zmap = Zmap.from_xmap(model, xmap, dtag)
+            zmap = Zmap.from_xmap(model, xmap, dtag, debug=debug)
             zmaps[dtag] = zmap
 
         return Zmaps(zmaps)
