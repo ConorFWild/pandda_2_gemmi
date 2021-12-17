@@ -155,6 +155,7 @@ def get_conformers(
 
         # Translate to structures
         fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
+        return fragment_structures
 
     elif fragment_dataset.source_ligand_cif:
         if debug:

@@ -76,7 +76,7 @@ def update_log(shell_log, shell_log_path):
 #
 #     ...
 
-def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=False):
+def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, debug=False):
     log = {}
 
     biggest_clusters = {}
@@ -100,7 +100,19 @@ def select_model(model_results: Dict[int, Dict], grid, processed_dataset, debug=
 
                 if new_cluster_id == biggest_clusters[model_number]:
                     clusters[new_cluster_id] = cluster
-                    zmaps[new_cluster_id] = model_result['zmap'].zmap
+
+                    zmap: Zmap = model_result['zmap']
+                    zmap_array = np.array(zmap.zmap, copy=False)
+
+                    zmap_grid: gemmi.FloatGrid = zmap.grid_from_template(zmap, zmap_array)
+
+                    zmap_grid_array = np.array(zmap_grid, copy=False)
+
+                    inner_mask_array = np.array(inner_mask, copy=True, dtype=np.int8)
+
+                    zmap_grid_array[np.nonzero(inner_mask_array)] = 0.0
+
+                    zmaps[new_cluster_id] = zmap_grid
 
     # Score the top clusters
     scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
@@ -540,7 +552,7 @@ def process_dataset_multiple_models(
         print(f"\tSelecting model...")
     selected_model_number, model_selection_log = select_model(
         model_results,
-        grid,
+        grid.partitioning.inner_mask,
         pandda_fs_model.processed_datasets[test_dtag],
         debug=debug,
     )
