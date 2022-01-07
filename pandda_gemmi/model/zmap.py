@@ -501,7 +501,8 @@ class Zmap:
             print(f"\t\tZmap mean is: {zmap_sparse_std}")
             print(f"\t\tZmap max is: {np.max(zmap_array[zmap_array != 0.0])}")
 
-            sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
+            f = sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
+            f.savefig(f"{model_number}.png")
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 
