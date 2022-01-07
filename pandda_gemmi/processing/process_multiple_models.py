@@ -430,6 +430,7 @@ def process_dataset_multiple_models(
         zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
             model=model,
             xmaps={test_dtag: dataset_xmaps[test_dtag], },
+            model_number=model_number,
             debug=debug,
         )
         time_z_maps_finish = time.time()

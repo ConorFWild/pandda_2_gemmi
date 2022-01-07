@@ -3,15 +3,13 @@ from __future__ import annotations
 import typing
 import dataclasses
 from pathlib import Path
+from functools import partial
 
 from scipy import stats
 from joblib.externals.loky import set_loky_pickler
-
 set_loky_pickler('pickle')
-
-from functools import partial
-
 from scipy import optimize
+import seaborn as sns
 
 from pandda_gemmi.constants import *
 from pandda_gemmi.common import Dtag
@@ -467,7 +465,7 @@ class Zmap:
     zmap: gemmi.FloatGrid
 
     @staticmethod
-    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, debug=False):
+    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, model_number=0, debug=False):
 
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
@@ -502,6 +500,8 @@ class Zmap:
             print(f"\t\tZmap mean is: {zmap_sparse_mean}")
             print(f"\t\tZmap mean is: {zmap_sparse_std}")
             print(f"\t\tZmap max is: {np.max(zmap_array[zmap_array != 0.0])}")
+
+            sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 
@@ -568,11 +568,11 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: Model, xmaps: Xmaps, debug=False):
+    def from_xmaps(model: Model, xmaps: Xmaps, model_number=0, debug=False):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
-            zmap = Zmap.from_xmap(model, xmap, dtag, debug=debug)
+            zmap = Zmap.from_xmap(model, xmap, dtag, model_number=model_number, debug=debug)
             zmaps[dtag] = zmap
 
         return Zmaps(zmaps)
