@@ -10,6 +10,7 @@ from joblib.externals.loky import set_loky_pickler
 set_loky_pickler('pickle')
 from scipy import optimize
 import seaborn as sns
+sns.set_theme()
 
 from pandda_gemmi.constants import *
 from pandda_gemmi.common import Dtag
@@ -500,8 +501,13 @@ class Zmap:
             print(f"\t\tZmap mean is: {zmap_sparse_mean}")
             print(f"\t\tZmap mean is: {zmap_sparse_std}")
             print(f"\t\tZmap max is: {np.max(zmap_array[zmap_array != 0.0])}")
+            print(f"\t\tZmap >1 is: {zmap_array[zmap_array > 1.0].size}")
+            print(f"\t\tZmap >2 is: {zmap_array[zmap_array > 1.0].size}")
+            print(f"\t\tZmap >2.5 is: {zmap_array[zmap_array > 2.5].size}")
+            print(f"\t\tZmap >3 is: {zmap_array[zmap_array > 3.0].size}")
 
             f = sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
+            f.set(xlim=(-10,10))
             f.savefig(f"{model_number}.png")
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
