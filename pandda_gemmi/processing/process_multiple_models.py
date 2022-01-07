@@ -104,7 +104,7 @@ def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, 
                     zmap: Zmap = model_result['zmap']
                     zmap_array = np.array(zmap.zmap, copy=False)
 
-                    zmap_grid: gemmi.FloatGrid = zmap.grid_from_template(zmap, zmap_array)
+                    zmap_grid: gemmi.FloatGrid = zmap.grid_from_grid_template(zmap.zmap, zmap_array)
 
                     zmap_grid_array = np.array(zmap_grid, copy=False)
 

@@ -521,6 +521,19 @@ class Zmap:
 
         return new_grid
 
+    @staticmethod
+    def grid_from_grid_template(xmap: gemmi.FloatGrid, zmap_array: np.array):
+        spacing = [xmap.nu, xmap.nv, xmap.nw, ]
+        new_grid = gemmi.FloatGrid(*spacing)
+        # new_grid.spacegroup = xmap.xmap.spacegroup
+        new_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        new_grid.set_unit_cell(xmap.unit_cell)
+
+        new_grid_array = np.array(new_grid, copy=False)
+        new_grid_array[:, :, :] = zmap_array[:, :, :]
+
+        return new_grid
+
     def to_array(self, copy=True):
         return np.array(self.zmap, copy=copy)
 
