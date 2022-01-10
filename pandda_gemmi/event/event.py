@@ -337,6 +337,212 @@ class Clustering:
                           time_fcluster=time_fcluster_finish - time_fcluster_start,
                           )
 
+    @staticmethod
+    def from_event_map(
+            event_map_array,
+            zmap: Zmap,
+            reference: Reference,
+            grid: Grid,
+            contour_level: float,
+            cluster_cutoff_distance_multiplier: float = 1.3,
+    ):
+        time_cluster_start = time.time()
+
+        time_np_start = time.time()
+
+        zmap_array = zmap.to_array(copy=True)
+        # event_map_array = np.array(event_map, copy=True)
+
+        # Get the protein mask
+        protein_mask_grid = grid.partitioning.protein_mask
+        protein_mask = np.array(protein_mask_grid, copy=False, dtype=np.int8)
+
+        # Get the symmetry mask
+        symmetry_contact_mask_grid = grid.partitioning.symmetry_mask
+        symmetry_contact_mask = np.array(symmetry_contact_mask_grid, copy=False, dtype=np.int8)
+
+        # Get the protein inner mask for determining which cluster points can be associated with already modelled
+        # features
+        inner_mask_grid = grid.partitioning.inner_mask
+        inner_mask = np.array(inner_mask_grid, copy=False, dtype=np.int8)
+
+        # Get the contact mask for determining how much could be binding
+        contact_mask_grid = grid.partitioning.contact_mask
+        contact_mask = np.array(contact_mask_grid, copy=False, dtype=np.int8)
+
+        # Don't consider outlying points away from the protein
+        protein_mask_bool = np.full(protein_mask.shape, False)
+        protein_mask_bool[np.nonzero(protein_mask)] = True
+        zmap_array[~protein_mask_bool] = 0.0
+
+        # Don't consider outlying points at symmetry contacts
+        zmap_array[np.nonzero(symmetry_contact_mask)] = 0.0
+
+
+        # Don't consider the backbone or sidechains of the event mask unless they have a high z value
+        event_map_array[~protein_mask_bool] = 0.0
+        event_map_array[np.nonzero(symmetry_contact_mask)] = 0.0
+        inner_mask_array = np.array(grid.partitioning.inner_mask, copy=True)
+        inner_mask_array[zmap_array > contour_level] = 0.0
+        event_map_array[np.nonzero(inner_mask_array)] = 0.0
+
+
+
+
+        # Get the unwrapped coords, and convert them to unwrapped fractional positions, then orthogonal points for clustering
+        extrema_mask_array = event_map_array > contour_level
+
+        point_array = grid.partitioning.coord_array()
+        point_tuple = (point_array[:, 0],
+                       point_array[:, 1],
+                       point_array[:, 2],
+                       )
+        point_tuple_wrapped = (
+            np.mod(point_array[:, 0], grid.grid.nu),
+            np.mod(point_array[:, 1], grid.grid.nv),
+            np.mod(point_array[:, 2], grid.grid.nw),
+        )
+
+        extrema_point_mask = extrema_mask_array[point_tuple_wrapped] == 1
+        extrema_point_array = point_array[extrema_point_mask]
+        extrema_point_wrapped_tuple = (
+            point_tuple_wrapped[0][extrema_point_mask],
+            point_tuple_wrapped[1][extrema_point_mask],
+            point_tuple_wrapped[2][extrema_point_mask],
+        )
+        extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape(
+            (1, 3))
+
+        # TODO: possible bottleneck
+        time_get_orth_pos_start = time.time()
+        positions_orthogonal = [zmap.zmap.unit_cell.orthogonalize(gemmi.Fractional(fractional[0],
+                                                                                   fractional[1],
+                                                                                   fractional[2],
+                                                                                   )) for fractional in
+                                extrema_fractional_array]
+        time_get_orth_pos_finish = time.time()
+
+        positions = [[position.x, position.y, position.z] for position in positions_orthogonal]
+
+        # positions = []
+        # for point in extrema_grid_coords_array:
+        #     # position = gemmi.Fractional(*point)
+        #     point = grid.grid.get_point(*point)
+        #     # fractional = grid.grid.point_to_fractional(point)
+        #     # pos_orth = zmap.zmap.unit_cell.orthogonalize(fractional)
+        #     orthogonal = grid.grid.point_to_position(point)
+
+        #     pos_orth_array = [orthogonal[0],
+        #                       orthogonal[1],
+        #                       orthogonal[2], ]
+        #     positions.append(pos_orth_array)
+
+        extrema_cart_coords_array = np.array(positions)  # n, 3
+
+        point_000 = grid.grid.get_point(0, 0, 0)
+        point_111 = grid.grid.get_point(1, 1, 1)
+        position_000 = grid.grid.point_to_position(point_000)
+        position_111 = grid.grid.point_to_position(point_111)
+        clustering_cutoff = position_000.dist(position_111) * cluster_cutoff_distance_multiplier
+
+        if extrema_cart_coords_array.size < 10:
+            clusters = {}
+            return Clustering(clusters)
+
+        time_np_finish = time.time()
+
+        # TODO: possible bottleneck
+        time_fcluster_start = time.time()
+        cluster_ids_array = fclusterdata(X=extrema_cart_coords_array,
+                                         # t=blob_finding.clustering_cutoff,
+                                         t=clustering_cutoff,
+                                         criterion='distance',
+                                         metric='euclidean',
+                                         method='single',
+                                         )
+        time_fcluster_finish = time.time()
+
+        clusters = {}
+        time_event_masking_start = time.time()
+        for unique_cluster in np.unique(cluster_ids_array):
+            if unique_cluster == -1:
+                continue
+            cluster_mask = cluster_ids_array == unique_cluster  # n
+            cluster_indicies = np.nonzero(cluster_mask)  # (n')
+            # cluster_points_array = extrema_point_array[cluster_indicies]
+            # cluster_points_tuple = (cluster_points_array[:, 0],
+            #                         cluster_points_array[:, 1],
+            #                         cluster_points_array[:, 2],)
+
+            cluster_points_tuple = (
+                extrema_point_wrapped_tuple[0][cluster_indicies],
+                extrema_point_wrapped_tuple[1][cluster_indicies],
+                extrema_point_wrapped_tuple[2][cluster_indicies],
+            )
+
+            # Get the values of the z map at the cluster points
+            values = event_map_array[cluster_points_tuple]
+
+            # Get the inner protein mask applied to the cluster
+            cluster_inner_protein_mask = inner_mask[cluster_points_tuple]
+
+            # Generate event mask
+            cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
+
+            # Generate the contact mask
+            cluster_contact_mask = contact_mask[cluster_points_tuple]
+
+            ###
+
+            time_event_mask_start = time.time()
+            # positions = PositionsArray(cluster_positions_array).to_positions()
+            # event_mask = gemmi.Int8Grid(*zmap.shape())
+            # event_mask.spacegroup = zmap.spacegroup()
+            # event_mask.set_unit_cell(zmap.unit_cell())
+            # for position in positions:
+            #     event_mask.set_points_around(position,
+            #                                  radius=3.0,
+            #                                  value=1,
+            #                                  )
+
+            # event_mask.symmetrize_max()
+
+            # event_mask_array = np.array(event_mask, copy=True, dtype=np.int8)
+            # event_mask_indicies = np.nonzero(event_mask_array)
+
+            time_event_mask_finish = time.time()
+            ###
+
+            centroid_array = np.mean(cluster_positions_array,
+                                     axis=0)
+            centroid = (centroid_array[0],
+                        centroid_array[1],
+                        centroid_array[2],)
+
+            cluster = Cluster(cluster_points_tuple,
+                              cluster_positions_array,
+                              values,
+                              centroid,
+                              None,
+                              cluster_inner_protein_mask,
+                              cluster_contact_mask,
+                              # time_get_orth=time_get_orth_pos_finish-time_get_orth_pos_start,
+                              # time_fcluster=time_fcluster_finish-time_fcluster_start,
+                              time_event_mask=time_event_mask_finish - time_event_mask_start,
+                              )
+            clusters[unique_cluster] = cluster
+        time_event_masking_finish = time.time()
+
+        time_cluster_finish = time.time()
+
+        return Clustering(clusters,
+                          time_cluster=time_cluster_finish - time_cluster_start,
+                          time_np=time_np_finish - time_np_start,
+                          time_event_masking=time_event_masking_finish - time_event_masking_start,
+                          time_get_orth=time_get_orth_pos_finish - time_get_orth_pos_start,
+                          time_fcluster=time_fcluster_finish - time_fcluster_start,
+                          )
+
     def __iter__(self):
         for cluster_num in self.clustering:
             yield cluster_num
