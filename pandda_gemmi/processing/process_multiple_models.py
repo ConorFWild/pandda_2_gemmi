@@ -631,7 +631,7 @@ def process_dataset_multiple_models(
             model,
             dataset_xmaps,
             grid,
-            alignments[test_dtag],
+            alignments,
             max_site_distance_cutoff,
             min_bdc, max_bdc,
             reference,
