@@ -56,6 +56,7 @@ def blobfind_event_map_and_report_and_output(
         test_dtag,
         model_number,
         xmaps,
+        zmap,
         selected_model_clusterings,
         model,
         dataset_xmaps,
@@ -105,7 +106,7 @@ pandda_fs_model
         # Blobfind
         clustering = Clustering.from_event_map(
             event_map_reference_grid_array,
-            Zmap(event_map_reference_grid),
+            zmap,
             reference,
             grid,
             contour_level,
@@ -119,11 +120,24 @@ pandda_fs_model
             print(string)
 
         # Save event map
-        filename= f'{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+        filename= f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
         save_reference_frame_zmap(
             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
             Zmap(event_map_reference_grid)
         )
+
+        # Save z map
+        filename = f'z_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+        save_reference_frame_zmap(
+            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
+            zmap
+        )
+
+        # Save reference model
+        filename = f'ref.pdb'
+        reference_structure = reference.dataset.structure.structure
+        reference_structure.write_minimal_pdb(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
+
 
 
 def update_log(shell_log, shell_log_path):
@@ -627,6 +641,7 @@ def process_dataset_multiple_models(
             test_dtag,
             model_number,
             dataset_xmaps,
+            zmaps[test_dtag],
             clusterings_large,
             model,
             dataset_xmaps,

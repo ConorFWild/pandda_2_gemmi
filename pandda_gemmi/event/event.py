@@ -378,16 +378,12 @@ class Clustering:
         # Don't consider outlying points at symmetry contacts
         zmap_array[np.nonzero(symmetry_contact_mask)] = 0.0
 
-
         # Don't consider the backbone or sidechains of the event mask unless they have a high z value
         event_map_array[~protein_mask_bool] = 0.0
         event_map_array[np.nonzero(symmetry_contact_mask)] = 0.0
         inner_mask_array = np.array(grid.partitioning.inner_mask, copy=True)
         inner_mask_array[zmap_array > contour_level] = 0.0
         event_map_array[np.nonzero(inner_mask_array)] = 0.0
-
-
-
 
         # Get the unwrapped coords, and convert them to unwrapped fractional positions, then orthogonal points for clustering
         extrema_mask_array = event_map_array > contour_level
