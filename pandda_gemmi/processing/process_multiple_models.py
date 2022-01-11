@@ -81,7 +81,7 @@ pandda_fs_model
     )
 
     # Calculate the event maps
-    reference_xmap_grid = xmaps[reference.dtag].xmap
+    reference_xmap_grid = xmaps[test_dtag].xmap
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
     for event_id, event in events.events.items():
