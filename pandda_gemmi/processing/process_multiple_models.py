@@ -136,7 +136,9 @@ pandda_fs_model
         # Save reference model
         filename = f'ref.pdb'
         reference_structure = reference.dataset.structure.structure
-        reference_structure.write_minimal_pdb(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
+        reference_structure.write_minimal_pdb(
+            str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
+        )
 
 
 
