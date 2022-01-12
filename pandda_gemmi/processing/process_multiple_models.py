@@ -55,6 +55,7 @@ class ShellResult:
 def blobfind_event_map_and_report_and_output(
         test_dtag,
         model_number,
+        dataset,
         xmaps,
         zmap,
         selected_model_clusterings,
@@ -103,21 +104,31 @@ pandda_fs_model
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
-        # Blobfind
-        clustering = Clustering.from_event_map(
-            event_map_reference_grid_array,
-            zmap,
-            reference,
-            grid,
-            contour_level,
-            cluster_cutoff_distance_multiplier,
+        # # Blobfind
+        # clustering = Clustering.from_event_map(
+        #     event_map_reference_grid_array,
+        #     zmap,
+        #     reference,
+        #     grid,
+        #     contour_level,
+        #     cluster_cutoff_distance_multiplier,
+        # )
+
+        scores = score_clusters(
+            {(0,0): event.cluster},
+            Zmap(event_map_reference_grid),
+            dataset,
+
         )
 
 
         # Ouptut
-        for cluster_id, cluster in clustering.clustering.items():
-            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
-            print(string)
+        # for cluster_id, cluster in clustering.clustering.items():
+        #     string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
+        #     print(string)
+        for score_id, score in scores:
+            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
+
 
         # Save event map
         filename= f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
@@ -140,6 +151,69 @@ pandda_fs_model
             str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
         )
 
+def event_score_and_report(
+        test_dtag,
+        model_number,
+        processed_dataset,
+        xmaps,
+        zmap,
+        selected_model_clusterings,
+        model,
+        dataset_xmaps,
+        grid,
+        alignments,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        reference,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+pandda_fs_model
+):
+    # Get the events and their BDCs
+    events: Events = Events.from_clusters(
+        selected_model_clusterings,
+        model,
+        dataset_xmaps,
+        grid,
+        alignments[test_dtag],
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        None,
+    )
+
+    # Calculate the event maps
+    reference_xmap_grid = xmaps[test_dtag].xmap
+    reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
+
+    for event_id, event in events.events.items():
+
+        event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+                                                     reference_xmap_grid.nv,
+                                                     reference_xmap_grid.nw,
+                                                     ]
+                                                   )
+        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+        event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+
+        event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                                  copy=False,
+                                                  )
+
+        mean_array = model.mean
+        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+                1 - event.bdc.bdc)
+
+        # Score
+        scores = score_clusters(
+            {(0,0): event.cluster},
+            {(0,0): event_map_reference_grid},
+            processed_dataset,
+        )
+
+        # Ouptut
+        for score_id, score in scores.items():
+            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
+            print(string)
 
 
 def update_log(shell_log, shell_log_path):
@@ -639,22 +713,41 @@ def process_dataset_multiple_models(
         }
 
         # TODO: REMOVE: event blob analysis
-        blobfind_event_map_and_report_and_output(
-            test_dtag,
-            model_number,
-            dataset_xmaps,
-            zmaps[test_dtag],
-            clusterings_large,
-            model,
-            dataset_xmaps,
-            grid,
-            alignments,
-            max_site_distance_cutoff,
-            min_bdc, max_bdc,
-            reference,
-            contour_level,
-            cluster_cutoff_distance_multiplier,
-            pandda_fs_model
+        # blobfind_event_map_and_report_and_output(
+        #     test_dtag,
+        #     model_number,
+        #     dataset_truncated_datasets[test_dtag],
+        #     dataset_xmaps,
+        #     zmaps[test_dtag],
+        #     clusterings_large,
+        #     model,
+        #     dataset_xmaps,
+        #     grid,
+        #     alignments,
+        #     max_site_distance_cutoff,
+        #     min_bdc, max_bdc,
+        #     reference,
+        #     contour_level,
+        #     cluster_cutoff_distance_multiplier,
+        #     pandda_fs_model
+        # )
+        event_score_and_report(
+                test_dtag,
+                model_number,
+                pandda_fs_model.processed_datasets[test_dtag],
+                dataset_xmaps,
+                zmaps[test_dtag],
+                clusterings_large,
+                model,
+                dataset_xmaps,
+                grid,
+                alignments,
+                max_site_distance_cutoff,
+                min_bdc, max_bdc,
+                reference,
+                contour_level,
+                cluster_cutoff_distance_multiplier,
+                pandda_fs_model
         )
 
     ###################################################################
