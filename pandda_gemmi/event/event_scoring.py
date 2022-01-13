@@ -328,8 +328,8 @@ def get_probe_structure(structure):
                     virtual_atom = edges[edge_index]
                     residue.add_atom(virtual_atom)
 
-    print(f"Number of real atoms: {len(verticies)}")
-    print(f"Number of virtual atoms: {len(edges)}")
+    # print(f"Number of real atoms: {len(verticies)}")
+    # print(f"Number of virtual atoms: {len(edges)}")
     return structure_clone
 
 
@@ -433,11 +433,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     if debug:
         print(f"\t\t\tScoring optimized result by signal to noise")
 
-    # score, log = score_structure_signal_to_noise_density(
-    #     optimised_structure,
-    #     zmap_grid,
-    # )
-    score = float(res.fun) / (int(cluster.values.size) + 1)
+    score, log = score_structure_signal_to_noise_density(
+        optimised_structure,
+        zmap_grid,
+    )
+    # score = float(res.fun) / (int(cluster.values.size) + 1)
 
     if debug:
         print(f"\t\t\tCluster size is: {int(cluster.values.size)}")
