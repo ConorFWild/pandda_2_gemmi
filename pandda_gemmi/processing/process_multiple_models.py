@@ -104,6 +104,8 @@ pandda_fs_model
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
+        # Mask
+
         # # Blobfind
         # clustering = Clustering.from_event_map(
         #     event_map_reference_grid_array,
@@ -202,6 +204,18 @@ pandda_fs_model
         mean_array = model.mean
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
+
+        # Mask the protein except around the event
+        inner_mask = grid.partitioning.inner_mask
+        inner_mask_array = np.array(
+            inner_mask,
+            copy=False,
+            dtype=np.int8,
+        )
+        inner_mask_array[event.cluster.event_mask_indicies] = 0.0
+        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
+
+
 
         # Score
         scores = score_clusters(
