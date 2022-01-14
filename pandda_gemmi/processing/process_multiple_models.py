@@ -213,7 +213,8 @@ pandda_fs_model
             dtype=np.int8,
         )
         inner_mask_array[event.cluster.event_mask_indicies] = 0.0
-        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
+        # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
+        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -100.0
 
 
 
@@ -226,7 +227,8 @@ pandda_fs_model
 
         # Ouptut
         for score_id, score in scores.items():
-            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
+            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
+                     f"{event.cluster.values.size}"
             print(string)
 
 
