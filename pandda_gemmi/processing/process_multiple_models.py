@@ -187,6 +187,17 @@ pandda_fs_model
     reference_xmap_grid = xmaps[test_dtag].xmap
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
+    # Mask protein
+    inner_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+    inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask.set_unit_cell(grid.unit_cell)
+    for atom in reference.dataset.structure.protein_atoms():
+        pos = atom.pos
+        inner_mask.set_points_around(pos,
+                                     radius=1.0,
+                                     value=1,
+                                     )
+
     for event_id, event in events.events.items():
 
         event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
@@ -206,12 +217,13 @@ pandda_fs_model
                 1 - event.bdc.bdc)
 
         # Mask the protein except around the event
-        inner_mask = grid.partitioning.inner_mask
+        # inner_mask = grid.partitioning.inner_mask
         inner_mask_array = np.array(
             inner_mask,
             copy=False,
             dtype=np.int8,
         )
+
         inner_mask_array[event.cluster.event_mask_indicies] = 0.0
         # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
         event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -100.0
