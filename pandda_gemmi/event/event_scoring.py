@@ -281,6 +281,7 @@ def score_fit(structure, grid, params):
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
     return 1-score
 
+
 def get_probe_structure(structure):
     structure_clone = structure.clone()
     structure_clone.remove_hydrogens()
@@ -442,7 +443,6 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         zmap_grid,
     )
     # score = float(res.fun) / (int(cluster.values.size) + 1)
-
 
     if debug:
         print(f"\t\t\tCluster size is: {int(cluster.values.size)}")

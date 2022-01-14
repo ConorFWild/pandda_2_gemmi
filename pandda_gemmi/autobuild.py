@@ -696,6 +696,20 @@ def signal_from_samples(noise_samples, xmap, cutoff):
 
     return _signal, signal_log
 
+def penalty_from_samples(samples, xmap, cutoff):
+    samples_scores = []
+    for sample in samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value < cutoff:
+            samples_scores.append(1)
+
+    penalty = sum(samples_scores)
+
+    return penalty
 
 def score_structure_signal_to_noise_density(
         structure, xmap,
@@ -758,7 +772,16 @@ def score_structure_signal_to_noise_density(
 
     # return (1 - _noise) * _signal, rescore_log
 
-    _score = _signal - _noise
+    # TODO: remove if doesn't work
+    signal_overlapping_protein_penalty = penalty_from_samples(signal_samples, xmap, -10)
+    noise_overlapping_protein_penalty = penalty_from_samples(
+        noise_samples,
+        xmap, -10)
+    ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
+
+
+
+    _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
 
     return _score, rescore_log
 
