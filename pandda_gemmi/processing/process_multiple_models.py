@@ -190,7 +190,7 @@ pandda_fs_model
     # Mask protein
     inner_mask = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    inner_mask.set_unit_cell(grid.unit_cell)
+    inner_mask.set_unit_cell(grid.grid.unit_cell)
     for atom in reference.dataset.structure.protein_atoms():
         pos = atom.pos
         inner_mask.set_points_around(pos,
