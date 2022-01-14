@@ -188,7 +188,7 @@ pandda_fs_model
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
     # Mask protein
-    inner_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+    inner_mask = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask.set_unit_cell(grid.unit_cell)
     for atom in reference.dataset.structure.protein_atoms():
