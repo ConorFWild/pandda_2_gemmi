@@ -8,6 +8,8 @@ It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda envi
 conda create -n pandda2 python=3.9
 conda activate pandda2
 conda install -c conda-forge fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib
+conda install -c conda-forge seaborn
+conda install -c conda-forge rdkit
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd /path/to/cloned/repository
 pip install .
