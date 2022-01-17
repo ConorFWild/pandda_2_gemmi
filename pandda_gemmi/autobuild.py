@@ -779,7 +779,7 @@ def score_structure_signal_to_noise_density(
         xmap, -10)
     ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
 
-
+    print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
 
     _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
 
