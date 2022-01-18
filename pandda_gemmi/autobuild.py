@@ -696,6 +696,7 @@ def signal_from_samples(noise_samples, xmap, cutoff):
 
     return _signal, signal_log
 
+
 def penalty_from_samples(samples, xmap, cutoff):
     samples_scores = []
     for sample in samples:
@@ -882,6 +883,15 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     # Get distances
     distances = get_sample_distances(positions_array, samples_array)
 
+    # Get structure sample points
+    structure_samples = np.array(
+        [
+            (float(pos.x), float(pos.y), float(pos.z))
+            for pos
+            in loci
+        ]
+    )
+
     # Get signal samples: change radius until similar number of points
     signal_samples = truncate_samples(samples_array, distances, radius_inner_0, radius_inner_1)
     rescore_log["signal_samples_shape"] = int(signal_samples.shape[0])
@@ -906,7 +916,7 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     rescore_log["noise_log"] = noise_log
 
     # Get fraction of bonds/atoms which are signal
-    _signal, signal_log = EXPERIMENTAL_signal_from_samples(signal_samples, xmap, 0.5)
+    _signal, signal_log = EXPERIMENTAL_signal_from_samples(structure_samples, xmap, 0.5)
     rescore_log["signal"] = _signal
     rescore_log["signal_log"] = signal_log
 
@@ -915,10 +925,11 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     # TODO: remove if doesn't work
     signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
 
-    print(f"\t\t\tSignal {_signal} / {len(signal_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
+    print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
           f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
-    _score = ((_signal - _noise) - signal_overlapping_protein_penalty)
+    _score = ((_signal/len(structure_samples)) - (_noise/len(noise_samples))) - (
+            signal_overlapping_protein_penalty/len(signal_samples))
 
     return _score, rescore_log
 

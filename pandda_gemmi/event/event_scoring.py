@@ -275,7 +275,7 @@ def score_fit(structure, grid, params):
                         n = n + 1
 
     positive_score = sum([1 if val > 0.5 else 0 for val in vals])
-    penalty = sum([-1 if val < -0.5 else 0 for val in vals])
+    penalty = sum([-1 if val < -0.0 else 0 for val in vals])
     score = (positive_score + penalty) / n
 
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
