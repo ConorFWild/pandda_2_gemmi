@@ -194,7 +194,7 @@ pandda_fs_model
     for atom in reference.dataset.structure.protein_atoms():
         pos = atom.pos
         inner_mask.set_points_around(pos,
-                                     radius=1.0,
+                                     radius=2.0,
                                      value=1,
                                      )
 
@@ -216,6 +216,9 @@ pandda_fs_model
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
+        event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
+        event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
+
         # Mask the protein except around the event
         # inner_mask = grid.partitioning.inner_mask
         inner_mask_array = np.array(
@@ -226,7 +229,7 @@ pandda_fs_model
 
         inner_mask_array[event.cluster.event_mask_indicies] = 0.0
         # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
-        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -100.0
+        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
 
 
 

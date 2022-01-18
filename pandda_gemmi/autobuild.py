@@ -711,6 +711,71 @@ def penalty_from_samples(samples, xmap, cutoff):
 
     return penalty
 
+
+def EXPERIMENTAL_noise_from_samples(noise_samples, xmap, cutoff):
+    noise_log = {}
+    samples_are_noise = []
+    for sample in noise_samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value > cutoff:
+            samples_are_noise.append(1)
+        else:
+            samples_are_noise.append(0)
+
+        # Count the number of noise points
+
+    noise_log["noise_samples"] = sum(samples_are_noise)
+    noise_log["total_valid_samples"] = len(samples_are_noise)
+
+    _noise = sum(samples_are_noise)
+
+    return _noise, noise_log
+
+
+def EXPERIMENTAL_signal_from_samples(noise_samples, xmap, cutoff):
+    signal_log = {}
+    samples_are_sginal = []
+    for sample in noise_samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value > cutoff:
+            samples_are_sginal.append(1)
+        else:
+            samples_are_sginal.append(0)
+
+    signal_log["signal_samples"] = sum(samples_are_sginal)
+    signal_log["signal_samples_signal"] = sum([_sample for _sample in samples_are_sginal if _sample > 0])
+    signal_log["signal_samples_noise"] = sum([_sample for _sample in samples_are_sginal if _sample == 0])
+    signal_log["total_valid_samples"] = len(samples_are_sginal)
+
+    _signal = sum(samples_are_sginal)
+
+    return _signal, signal_log
+
+
+def EXPERIMENTAL_penalty_from_samples(samples, xmap, cutoff):
+    samples_scores = []
+    for sample in samples:
+        pos = gemmi.Position(*sample)
+
+        value = xmap.interpolate_value(pos)
+
+        # Check if they are over cutoff
+        if value < cutoff:
+            samples_scores.append(1)
+
+    penalty = sum(samples_scores)
+
+    return penalty
+
+
 def score_structure_signal_to_noise_density(
         structure, xmap,
         cutoff=2.0,
@@ -836,27 +901,24 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
 
     # Getfraction of nearby points that are noise
-    _noise, noise_log = noise_from_samples(noise_samples, xmap, cutoff)
+    _noise, noise_log = EXPERIMENTAL_noise_from_samples(noise_samples, xmap, 0.5)
     rescore_log["noise"] = _noise
     rescore_log["noise_log"] = noise_log
 
     # Get fraction of bonds/atoms which are signal
-    _signal, signal_log = signal_from_samples(signal_samples, xmap, cutoff)
+    _signal, signal_log = EXPERIMENTAL_signal_from_samples(signal_samples, xmap, 0.5)
     rescore_log["signal"] = _signal
     rescore_log["signal_log"] = signal_log
 
     # return (1 - _noise) * _signal, rescore_log
 
     # TODO: remove if doesn't work
-    signal_overlapping_protein_penalty = penalty_from_samples(signal_samples, xmap, -10)
-    noise_overlapping_protein_penalty = penalty_from_samples(
-        noise_samples,
-        xmap, -10)
-    ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
+    signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
 
-    print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
+    print(f"\t\t\tSignal {_signal} / {len(signal_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
+          f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
-    _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
+    _score = ((_signal - _noise) - signal_overlapping_protein_penalty)
 
     return _score, rescore_log
 
