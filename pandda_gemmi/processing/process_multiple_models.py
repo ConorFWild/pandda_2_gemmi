@@ -626,6 +626,8 @@ def process_dataset_multiple_models(
         time_model_start = time.time()
 
         # Calculate z maps
+        if debug:
+            print("\t\tCalculating zmaps")
         time_z_maps_start = time.time()
         zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
             model=model,
@@ -633,6 +635,10 @@ def process_dataset_multiple_models(
             model_number=model_number,
             debug=debug,
         )
+
+        if debug:
+            print("\t\tCalculated zmaps")
+
         time_z_maps_finish = time.time()
         dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
         update_log(dataset_log, dataset_log_path)
@@ -652,6 +658,10 @@ def process_dataset_multiple_models(
             cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
         )
         time_cluster_z_start = time.time()
+
+        if debug:
+            print("\t\tClustering")
+
         clusterings: List[Clustering] = process_local(
             [
                 partial(cluster_paramaterised, zmaps[dtag], )
@@ -660,6 +670,11 @@ def process_dataset_multiple_models(
             ]
         )
         time_cluster_z_finish = time.time()
+
+        if debug:
+            print("\t\tClustering finished")
+
+
         if debug:
             dataset_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
             dataset_log['time_event_mask'] = {}
