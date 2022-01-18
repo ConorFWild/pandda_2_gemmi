@@ -97,10 +97,27 @@ def process_shell_dask(funcs):
     return results
 
 
-def process_global_serial(funcs):
+def process_global_serial(funcs, print_estimated_timing=True):
     results = []
-    for func in funcs:
+    timings = []
+    for j, func in enumerate(funcs):
+
+        start_iteration_time = time.time()
+
         results.append(func())
+
+        finish_iteration_time = time.time()
+
+        timings.append(finish_iteration_time-start_iteration_time)
+
+        if print_estimated_timing:
+            running_average = sum(timings) / len(timings)
+            num_iterations_remaining = len(funcs) - j
+            estimated_esconds_remaining_of_processing = num_iterations_remaining*running_average
+            hours_of_processing = estimated_esconds_remaining_of_processing / (60*60)
+            print(f"\tTime / Dataset: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
+                  f"hours.")
+
 
     return results
 
