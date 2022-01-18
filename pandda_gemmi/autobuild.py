@@ -786,6 +786,81 @@ def score_structure_signal_to_noise_density(
     return _score, rescore_log
 
 
+def EXPERIMENTAL_score_structure_signal_to_noise_density(
+        structure, xmap,
+        cutoff=2.0,
+        radius_inner_0=0.0,
+        radius_inner_1=0.5,
+        radius_outer_0=1.2,
+        radius_outer_1=1.5,
+):
+    rescore_log = {
+        "cutoff": float(cutoff),
+        "radius_inner_0": float(radius_inner_0),
+        "radius_inner_1": float(radius_inner_1),
+        "radius_outer_0": float(radius_outer_0),
+        "radius_outer_1": float(radius_outer_1),
+    }
+
+    loci = get_loci(structure)
+    rescore_log["loci"] = [(float(pos.x), float(pos.y), float(pos.z))
+                           for pos
+                           in loci]
+    rescore_log["num_loci"] = len(loci)
+
+    # Get sample points
+    positions_array, samples_array = get_samples(loci)
+    assert samples_array.shape[0] != 0
+    assert samples_array.shape[1] == 3
+    assert positions_array.shape[0] != 0
+
+    # Get distances
+    distances = get_sample_distances(positions_array, samples_array)
+
+    # Get signal samples: change radius until similar number of points
+    signal_samples = truncate_samples(samples_array, distances, radius_inner_0, radius_inner_1)
+    rescore_log["signal_samples_shape"] = int(signal_samples.shape[0])
+
+    # Get noise samples
+    noise_samples_dict = {}
+    for radii in np.linspace(radius_outer_0, radius_outer_1, num=15):
+        noise_samples_dict[radii] = truncate_samples(samples_array, distances, radius_outer_0, radii)
+
+    selected_radii = min(
+        noise_samples_dict,
+        key=lambda _radii: np.abs(noise_samples_dict[_radii].size - signal_samples.size)
+    )
+    rescore_log["selected_radii"] = selected_radii
+
+    noise_samples = truncate_samples(samples_array, distances, radius_outer_0, selected_radii)
+    rescore_log["noise_samples_shape"] = int(noise_samples.shape[0])
+
+    # Getfraction of nearby points that are noise
+    _noise, noise_log = noise_from_samples(noise_samples, xmap, cutoff)
+    rescore_log["noise"] = _noise
+    rescore_log["noise_log"] = noise_log
+
+    # Get fraction of bonds/atoms which are signal
+    _signal, signal_log = signal_from_samples(signal_samples, xmap, cutoff)
+    rescore_log["signal"] = _signal
+    rescore_log["signal_log"] = signal_log
+
+    # return (1 - _noise) * _signal, rescore_log
+
+    # TODO: remove if doesn't work
+    signal_overlapping_protein_penalty = penalty_from_samples(signal_samples, xmap, -10)
+    noise_overlapping_protein_penalty = penalty_from_samples(
+        noise_samples,
+        xmap, -10)
+    ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
+
+    print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
+
+    _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
+
+    return _score, rescore_log
+
+
 def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
     rescore_log = {
         "cutoff": float(cutoff),
