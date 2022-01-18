@@ -315,10 +315,14 @@ def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, 
 
     log = {score_key[0]: score for score_key, score in scores.items()}
 
-    selected_model_number = max(
-        scores,
-        key=lambda _score: scores[_score],
-    )[0]
+    if len(scores) == 0:
+        return 0, log
+
+    else:
+        selected_model_number = max(
+            scores,
+            key=lambda _score: scores[_score],
+        )[0]
 
     return selected_model_number, log
 
