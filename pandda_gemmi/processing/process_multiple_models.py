@@ -169,9 +169,13 @@ def event_score_and_report(
         reference,
         contour_level,
         cluster_cutoff_distance_multiplier,
-pandda_fs_model
+pandda_fs_model,
+        debug=True,
 ):
     # Get the events and their BDCs
+    if debug:
+        print("\t\tGetting events...")
+
     events: Events = Events.from_clusters(
         selected_model_clusterings,
         model,
@@ -188,6 +192,8 @@ pandda_fs_model
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
     # Mask protein
+    if debug:
+        print("\t\tMasking protein...")
     inner_mask = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask.set_unit_cell(grid.grid.unit_cell)
@@ -198,8 +204,12 @@ pandda_fs_model
                                      value=1,
                                      )
 
+    if debug:
+        print("\t\tIterating events...")
     for event_id, event in events.events.items():
 
+        if debug:
+            print("\t\t\tCaclulating event maps...")
         event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
                                                      reference_xmap_grid.nv,
                                                      reference_xmap_grid.nw,
@@ -232,12 +242,15 @@ pandda_fs_model
         event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
 
 
+        if debug:
+            print("\t\t\tScoring...")
 
         # Score
         scores = score_clusters(
             {(0,0): event.cluster},
             {(0,0): event_map_reference_grid},
             processed_dataset,
+            debug=debug,
         )
 
         # Ouptut
@@ -780,6 +793,9 @@ def process_dataset_multiple_models(
         #     cluster_cutoff_distance_multiplier,
         #     pandda_fs_model
         # )
+
+        if debug:
+            print("\t\tScoring events...")
         event_score_and_report(
                 test_dtag,
                 model_number,
@@ -796,7 +812,8 @@ def process_dataset_multiple_models(
                 reference,
                 contour_level,
                 cluster_cutoff_distance_multiplier,
-                pandda_fs_model
+                pandda_fs_model,
+            debug=debug
         )
 
     ###################################################################
