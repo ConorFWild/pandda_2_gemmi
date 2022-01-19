@@ -359,10 +359,13 @@ def EXPERIMENTAL_select_model(
 
     # Score the top clusters
     model_scores = {
-        model_id: max([event_score for event_score in event_scores])
+        model_id: max([event_score for event_score in event_scores] + [0.0,])
         for model_id, event_scores
         in model_event_scores.items()
     }
+
+
+
     if debug:
         print(model_scores)
 
