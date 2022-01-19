@@ -674,7 +674,6 @@ def process_dataset_multiple_models(
         if debug:
             print("\t\tClustering finished")
 
-
         if debug:
             dataset_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
             dataset_log['time_event_mask'] = {}
@@ -993,6 +992,19 @@ def process_shell_multiple_models(
     if debug:
         print(f"Processing shell at resolution: {shell.res}")
 
+    if memory_availability == "very_low":
+        process_local_in_shell = process_local_serial
+        process_local_in_dataset = process_local_serial
+        process_local_over_datasets = process_local_serial
+    elif memory_availability == "low":
+        process_local_in_shell = process_local
+        process_local_in_dataset = process_local
+        process_local_over_datasets = process_local_serial
+    elif memory_availability == "high":
+        process_local_in_shell = process_local
+        process_local_in_dataset = process_local_serial
+        process_local_over_datasets = process_local
+
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
     shell_log = {}
@@ -1037,7 +1049,7 @@ def process_shell_multiple_models(
         sample_rate=shell.res / 0.5
     )
 
-    results = process_local(
+    results = process_local_in_shell(
         partial(
             load_xmap_paramaterised,
             shell_truncated_datasets[key],
@@ -1067,22 +1079,14 @@ def process_shell_multiple_models(
         shell.train_dtags,
         xmaps,
         grid,
-        process_local,
+        process_local_in_shell,
     )
 
     ###################################################################
     # # Process each test dataset
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
-    if memory_availability == "very_low":
-        process_local_in_dataset = process_local_serial
-        process_local_over_datasets = process_local_serial
-    elif memory_availability == "low":
-        process_local_in_dataset = process_local
-        process_local_over_datasets = process_local_serial
-    elif memory_availability == "high":
-        process_local_in_dataset = process_local_serial
-        process_local_over_datasets = process_local
+
 
     process_dataset_paramaterized = partial(
         process_dataset_multiple_models,
