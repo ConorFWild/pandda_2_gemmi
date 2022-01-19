@@ -206,6 +206,9 @@ pandda_fs_model,
 
     if debug:
         print("\t\tIterating events...")
+
+    event_scores = {}
+
     for event_id, event in events.events.items():
 
         if debug:
@@ -258,6 +261,10 @@ pandda_fs_model,
             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
                      f"{event.cluster.values.size}"
             print(string)
+
+            event_scores[event_id.event_idx.event_idx] = score
+
+    return event_scores
 
 
 def update_log(shell_log, shell_log_path):
@@ -335,6 +342,39 @@ def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, 
         selected_model_number = max(
             scores,
             key=lambda _score: scores[_score],
+        )[0]
+
+    return selected_model_number, log
+
+
+def EXPERIMENTAL_select_model(
+        model_results: Dict[int, Dict],
+        inner_mask,
+        processed_dataset,
+        debug=False,
+):
+    log = {}
+
+    model_event_scores = {model_id: model['event_scores'] for model_id, model in model_results.items()}
+
+    # Score the top clusters
+    model_scores = {
+        model_id: max([event_score for event_score in event_scores])
+        for model_id, event_scores
+        in model_event_scores.items()
+    }
+    if debug:
+        print(model_scores)
+
+    log['model_scores'] = {model_id: score for model_id, score in model_scores.items()}
+
+    if len(model_scores) == 0:
+        return 0, log
+
+    else:
+        selected_model_number = max(
+            model_scores,
+            key=lambda _score: model_scores[_score],
         )[0]
 
     return selected_model_number, log
@@ -765,14 +805,7 @@ def process_dataset_multiple_models(
         dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
         update_log(dataset_log, dataset_log_path)
 
-        model_results[model_number] = {
-            'zmap': zmaps[test_dtag],
-            'clusterings': clusterings,
-            'clusterings_large': clusterings_large,
-            'clusterings_peaked': clusterings_peaked,
-            'clusterings_merged': clusterings_merged,
 
-        }
 
         # TODO: REMOVE: event blob analysis
         # blobfind_event_map_and_report_and_output(
@@ -796,7 +829,7 @@ def process_dataset_multiple_models(
 
         if debug:
             print("\t\tScoring events...")
-        event_score_and_report(
+        event_scores: Dict[int, float] = event_score_and_report(
                 test_dtag,
                 model_number,
                 pandda_fs_model.processed_datasets[test_dtag],
@@ -816,12 +849,21 @@ def process_dataset_multiple_models(
             debug=debug
         )
 
+        model_results[model_number] = {
+            'zmap': zmaps[test_dtag],
+            'clusterings': clusterings,
+            'clusterings_large': clusterings_large,
+            'clusterings_peaked': clusterings_peaked,
+            'clusterings_merged': clusterings_merged,
+            'event_scores': event_scores,
+        }
+
     ###################################################################
     # # Decide which model to use...
     ###################################################################
     if debug:
         print(f"\tSelecting model...")
-    selected_model_number, model_selection_log = select_model(
+    selected_model_number, model_selection_log = EXPERIMENTAL_select_model(
         model_results,
         grid.partitioning.inner_mask,
         pandda_fs_model.processed_datasets[test_dtag],
