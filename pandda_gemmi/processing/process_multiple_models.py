@@ -378,7 +378,7 @@ def EXPERIMENTAL_select_model(
         selected_model_number = max(
             model_scores,
             key=lambda _score: model_scores[_score],
-        )[0]
+        )#[0]
 
     return selected_model_number, log
 
