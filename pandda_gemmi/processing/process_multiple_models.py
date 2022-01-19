@@ -990,6 +990,9 @@ def process_shell_multiple_models(
         statmaps,
         debug=False,
 ):
+    if debug:
+        print(f"Processing shell at resolution: {shell.res}")
+
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
     shell_log = {}
@@ -1007,6 +1010,8 @@ def process_shell_multiple_models(
     ###################################################################
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
+    if debug:
+        print(f"\tTruncating shell datasets")
     shell_working_resolution = Resolution(
         min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
@@ -1019,6 +1024,9 @@ def process_shell_multiple_models(
     ###################################################################
     # # Generate aligned Xmaps
     ###################################################################
+    if debug:
+        print(f"\tLoading xmaps")
+
     time_xmaps_start = time.time()
 
     load_xmap_paramaterised = partial(
@@ -1052,6 +1060,8 @@ def process_shell_multiple_models(
     ###################################################################
     # # Get the models to test
     ###################################################################
+    if debug:
+        print(f"\tGetting models")
     models = get_models(
         shell.test_dtags,
         shell.train_dtags,
