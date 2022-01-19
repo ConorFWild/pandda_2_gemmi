@@ -1103,7 +1103,7 @@ def process_shell_multiple_models(
     all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
     all_train_dtags = []
     for _dtag in all_train_dtags_unmerged:
-        if not _dtag in all_train_dtags:
+        if _dtag not in all_train_dtags:
             all_train_dtags.append(_dtag)
 
     if debug:
