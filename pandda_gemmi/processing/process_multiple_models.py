@@ -369,7 +369,7 @@ def EXPERIMENTAL_select_model(
     if debug:
         print(model_scores)
 
-    log['model_scores'] = {model_id: score for model_id, score in model_scores.items()}
+    log['model_scores'] = {model_id: float(score) for model_id, score in model_scores.items()}
 
     if len(model_scores) == 0:
         return 0, log
@@ -380,7 +380,7 @@ def EXPERIMENTAL_select_model(
             key=lambda _score: model_scores[_score],
         )#[0]
 
-    return selected_model_number, log
+    return int(selected_model_number), log
 
 
 #
