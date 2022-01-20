@@ -380,7 +380,7 @@ def EXPERIMENTAL_select_model(
             key=lambda _score: model_scores[_score],
         )#[0]
 
-    return int(selected_model_number), log
+    return selected_model_number, log
 
 
 #
@@ -875,7 +875,7 @@ def process_dataset_multiple_models(
     selected_model = models[selected_model_number]
     selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
     zmap = model_results[selected_model_number]['zmap']
-    dataset_log['Selected model'] = selected_model_number
+    dataset_log['Selected model'] = int(selected_model_number)
     dataset_log['Model selection log'] = model_selection_log
 
     if debug:
