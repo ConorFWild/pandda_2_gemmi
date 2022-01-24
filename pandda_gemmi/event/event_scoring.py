@@ -15,7 +15,7 @@ import time
 from pandda_gemmi.dataset import Dataset
 from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
-from pandda_gemmi.autobuild import score_structure_signal_to_noise_density
+from pandda_gemmi.autobuild import score_structure_signal_to_noise_density, EXPERIMENTAL_score_structure_signal_to_noise_density
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
@@ -274,8 +274,8 @@ def score_fit(structure, grid, params):
                         )
                         n = n + 1
 
-    positive_score = sum([1 if val > 2.0 else 0 for val in vals])
-    penalty = sum([-1 if val < -10.0 else 0 for val in vals])
+    positive_score = sum([1 if val > 0.5 else 0 for val in vals])
+    penalty = sum([-1 if val < -0.0 else 0 for val in vals])
     score = (positive_score + penalty) / n
 
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
@@ -343,7 +343,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     centroid_cart = cluster.centroid
 
     if debug:
-        print(f"\t\t\tCartesian centroid of event is: {centroid_cart}")
+        print(f"\t\t\t\tCartesian centroid of event is: {centroid_cart}")
 
     centered_structure = center_structure(
         conformer,
@@ -354,11 +354,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     probe_structure = get_probe_structure(centered_structure)
 
     if debug:
-        print(f"probe structure: {probe_structure}")
+        print(f"\t\t\t\tprobe structure: {probe_structure}")
 
     # Optimise
     if debug:
-        print(f"\t\t\tOptimizing structure fit...")
+        print(f"\t\t\t\tOptimizing structure fit...")
 
     # start_shgo = time.time()
     # res = optimize.shgo(
@@ -398,8 +398,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     finish_diff_ev = time.time()
     # TODO: back to debug
     # if debug:
-    print(f"\t\t\tdiff ev in: {finish_diff_ev-start_diff_ev}")
-    print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+    print(f"\t\t\t\tdiff ev in: {finish_diff_ev-start_diff_ev}")
+    print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
@@ -437,18 +437,23 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
     # Score, by including the noise as well as signal
     if debug:
-        print(f"\t\t\tScoring optimized result by signal to noise")
+        print(f"\t\t\t\tScoring optimized result by signal to noise")
 
-    score, log = score_structure_signal_to_noise_density(
+    # score, log = score_structure_signal_to_noise_density(
+    #     optimised_structure,
+    #     zmap_grid,
+    # )
+    # score = float(res.fun) / (int(cluster.values.size) + 1)
+
+    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
         optimised_structure,
         zmap_grid,
     )
-    # score = float(res.fun) / (int(cluster.values.size) + 1)
 
     if debug:
-        print(f"\t\t\tCluster size is: {int(cluster.values.size)}")
-        print(f"\t\t\tModeled atoms % is: {float(1-res.fun)}")
-        print(f"\t\t\tScore is: {score}")
+        print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
+        print(f"\t\t\t\tModeled atoms % is: {float(1-res.fun)}")
+        print(f"\t\t\t\tScore is: {score}")
         # print(f"\t\t\tScoring log results are: {log}")
 
     return float(score)
@@ -456,23 +461,23 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
 def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=False):
     if debug:
-        print("\t\tGetting fragment conformers from model")
+        print("\t\t\t\tGetting fragment conformers from model")
 
     if debug:
-        print(f"\t\tScoring conformers")
+        print(f"\t\t\t\tScoring conformers")
     scores = {}
     for conformer_id, conformer in fragment_conformers.items():
         scores[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
 
     if debug:
-        print(f"\t\tConformer scores are: {scores}")
+        print(f"\t\t\t\tConformer scores are: {scores}")
 
     return max(scores.values())
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
     if debug:
-        print(f"\tScoring cluster")
+        print(f"\t\t\t\tScoring cluster")
     score = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
 
     return score
@@ -484,13 +489,13 @@ def score_clusters(
         fragment_dataset: ProcessedDataset,
         debug=False):
     if debug:
-        print(f"Getting fragment conformers...")
+        print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
     scores = {}
     for cluster_id, cluster in clusters.items():
         if debug:
-            print(f"Processing cluster: {cluster_id}")
+            print(f"\t\t\t\tProcessing cluster: {cluster_id}")
 
         zmap_grid = zmaps[cluster_id]
 
