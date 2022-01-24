@@ -16,7 +16,7 @@ from pandda_gemmi.common import Dtag, EventID
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
 from pandda_gemmi.dependencies import check_dependencies
-from pandda_gemmi.dataset import Datasets, Reference
+from pandda_gemmi.dataset import Datasets, Reference, StructureFactors
 from pandda_gemmi.edalignment import Grid, Alignments
 from pandda_gemmi.filters import remove_models_with_large_gaps
 from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
@@ -194,6 +194,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if not structure_factors:
                     raise Exception(
                         "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
+            else:
+                structure_factors = StructureFactors(pandda_args.structure_factors[0], pandda_args.structure_factors[1])
 
         # Make dataset validator
         validation_strategy = partial(
