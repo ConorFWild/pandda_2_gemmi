@@ -433,7 +433,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         rotation_matrix
     )
 
-    optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
+    # TODO: Remove althogether
+    # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
 
     # Score, by including the noise as well as signal
     if debug:
