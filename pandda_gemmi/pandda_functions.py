@@ -115,7 +115,7 @@ def process_global_serial(funcs, print_estimated_timing=True):
             num_iterations_remaining = len(funcs) - j
             estimated_esconds_remaining_of_processing = num_iterations_remaining*running_average
             hours_of_processing = estimated_esconds_remaining_of_processing / (60*60)
-            print(f"\tTime / Dataset: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
+            print(f"\tTime / Shell: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
                   f"hours.")
 
 

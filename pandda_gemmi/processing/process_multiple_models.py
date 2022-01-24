@@ -176,6 +176,8 @@ pandda_fs_model,
     if debug:
         print("\t\tGetting events...")
 
+    time_event_finding_start = time.time()
+
     events: Events = Events.from_clusters(
         selected_model_clusterings,
         model,
@@ -186,6 +188,10 @@ pandda_fs_model,
         min_bdc, max_bdc,
         None,
     )
+
+    time_event_finding_finish = time.time()
+    if debug:
+        print(f"\t\tTime to find events for model: {time_event_finding_finish-time_event_finding_start}")
 
     # Calculate the event maps
     reference_xmap_grid = xmaps[test_dtag].xmap
@@ -208,6 +214,8 @@ pandda_fs_model,
         print("\t\tIterating events...")
 
     event_scores = {}
+
+    time_event_scoring_start = time.time()
 
     for event_id, event in events.events.items():
 
@@ -249,12 +257,16 @@ pandda_fs_model,
             print("\t\t\tScoring...")
 
         # Score
+        time_scoring_start = time.time()
         scores = score_clusters(
             {(0,0): event.cluster},
             {(0,0): event_map_reference_grid},
             processed_dataset,
             debug=debug,
         )
+        time_scoring_finish = time.time()
+        if debug:
+            print(f"\t\t\tTime to actually score all events: {time_scoring_finish-time_scoring_start}")
 
         # Ouptut
         for score_id, score in scores.items():
@@ -263,6 +275,12 @@ pandda_fs_model,
             print(string)
 
             event_scores[event_id.event_idx.event_idx] = score
+
+    time_event_scoring_finish = time.time()
+
+    if debug:
+        print(f"\t\tTime to score all events: {time_event_scoring_finish-time_event_scoring_start}. Num events: "
+              f"{len(events.events)}")
 
     return event_scores
 
@@ -659,6 +677,8 @@ def process_dataset_multiple_models(
 
     dataset_log_path = pandda_fs_model.processed_datasets.processed_datasets[test_dtag].log_path
     dataset_log = {}
+    dataset_log["Model analysis time"] = {}
+
 
     model_results = {}
     for model_number, model in models.items():
@@ -679,7 +699,7 @@ def process_dataset_multiple_models(
         ###################################################################
         # # Generate the statistical model of the dataset
         ###################################################################
-        time_model_start = time.time()
+        time_model_analysis_start = time.time()
 
         # Calculate z maps
         if debug:
@@ -852,6 +872,8 @@ def process_dataset_multiple_models(
             debug=debug
         )
 
+        time_model_analysis_finish = time.time()
+
         model_results[model_number] = {
             'zmap': zmaps[test_dtag],
             'clusterings': clusterings,
@@ -860,6 +882,9 @@ def process_dataset_multiple_models(
             'clusterings_merged': clusterings_merged,
             'event_scores': event_scores,
         }
+        dataset_log["Model analysis time"][int(model_number)] = time_model_analysis_finish - time_model_analysis_start
+        if debug:
+            print(f"\t\tModel analysis time: {time_model_analysis_finish-time_model_analysis_start}")
 
     ###################################################################
     # # Decide which model to use...
