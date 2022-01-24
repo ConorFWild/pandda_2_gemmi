@@ -738,7 +738,7 @@ def process_dataset_multiple_models(
         if debug:
             print("\t\tClustering")
 
-        clusterings: List[Clustering] = process_local(
+        clusterings: List[Clustering] = process_local_serial(
             [
                 partial(cluster_paramaterised, zmaps[dtag], )
                 for dtag
