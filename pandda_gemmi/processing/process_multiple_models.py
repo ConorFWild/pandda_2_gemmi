@@ -900,18 +900,18 @@ def process_dataset_multiple_models(
     time_model_analysis_start = time.time()
     analyse_model_paramaterised = partial(
         analyse_model,
-        test_dtag,
-        dataset_xmaps[test_dtag],
-        reference,
-        grid,
-        pandda_fs_model.processed_datasets[test_dtag],
-        alignments,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
+        test_dtag=test_dtag,
+        dataset_xmap=dataset_xmaps[test_dtag],
+        reference=reference,
+        grid=grid,
+        dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
+        alignments=alignments,
+        max_site_distance_cutoff=max_site_distance_cutoff,
+        min_bdc=min_bdc, max_bdc=max_bdc,
+        contour_level=contour_level,
+        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+        min_blob_volume=min_blob_volume,
+        min_blob_z_peak=min_blob_z_peak,
         debug=False
     )
 
