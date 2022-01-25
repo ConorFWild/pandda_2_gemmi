@@ -861,15 +861,27 @@ def analyse_model(
 def dump_and_load(ob, name):
     print(f"Testing: {name}")
 
+    # time_dump_start = time.time()
+    # dumps = pickle.dumps(ob)
+    # time_dump_finish = time.time()
+    # print(f"\tDump time is: {time_dump_finish - time_dump_start}")
+    #
+    # time_load_start = time.time()
+    # loaded = pickle.loads(dumps)
+    # time_load_finish = time.time()
+    # print(f"\tLoad time is: {time_load_finish - time_load_start}")
+
     time_dump_start = time.time()
-    dumps = pickle.dumps(ob)
+    with open(f"{name}.pickle", 'wb') as f:
+        pickle.dump(ob, f)
     time_dump_finish = time.time()
-    print(f"\tDump time is: {time_dump_finish - time_dump_start}")
+    print(f"\tDump to disk time is: {time_dump_finish - time_dump_start}")
 
     time_load_start = time.time()
-    loaded = pickle.loads(dumps)
+    with open(f"{name}.pickle", 'rb') as f:
+        loaded = pickle.load(f)
     time_load_finish = time.time()
-    print(f"\tLoad time is: {time_load_finish - time_load_start}")
+    print(f"\tLoad from disk time is: {time_load_finish - time_load_start}")
 
 
 def process_dataset_multiple_models(
