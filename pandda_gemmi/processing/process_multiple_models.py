@@ -915,7 +915,7 @@ def process_dataset_multiple_models(
         debug=False
     )
 
-    results = analyse_model_paramaterised(
+    results = process_local(
         partial(
             analyse_model_paramaterised,
             model,
