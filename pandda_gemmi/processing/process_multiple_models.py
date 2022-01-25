@@ -966,6 +966,9 @@ def process_dataset_multiple_models(
 
     if debug:
         print(f"\tTime to analyse all models: {time_model_analysis_finish-time_model_analysis_start}")
+        for model_number, model_result in model_results.items():
+            model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
+            print(f"\t\tModel {model_number} processed in {model_time}")
 
     ###################################################################
     # # Decide which model to use...
