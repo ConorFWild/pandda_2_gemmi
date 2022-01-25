@@ -962,22 +962,22 @@ def process_dataset_multiple_models(
             model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
             print(f"\t\tModel {model_number} processed in {model_time}")
 
-    dump_and_load(dataset_xmaps[test_dtag], "xmap")
-    dump_and_load(reference, "reference")
-    dump_and_load(grid, "grid")
-    dump_and_load(pandda_fs_model.processed_datasets[test_dtag], "processed_dataset")
-    dump_and_load(alignments, "alignments")
-    # dump_and_load(alignments, "func")
-    dump_and_load([model for model in models.values()][0], "model")
-    dump_and_load(
-        partial(
-            analyse_model_paramaterised,
-            [model for model in models.values()][0],
-            [model_number for model_number in models.keys()][0],
-        ), "func")
-    dump_and_load(
-        results,
-        "results")
+    # dump_and_load(dataset_xmaps[test_dtag], "xmap")
+    # dump_and_load(reference, "reference")
+    # dump_and_load(grid, "grid")
+    # dump_and_load(pandda_fs_model.processed_datasets[test_dtag], "processed_dataset")
+    # dump_and_load(alignments, "alignments")
+    # # dump_and_load(alignments, "func")
+    # dump_and_load([model for model in models.values()][0], "model")
+    # dump_and_load(
+    #     partial(
+    #         analyse_model_paramaterised,
+    #         [model for model in models.values()][0],
+    #         [model_number for model_number in models.keys()][0],
+    #     ), "func")
+    # dump_and_load(
+    #     results,
+    #     "results")
 
     ###################################################################
     # # Decide which model to use...
