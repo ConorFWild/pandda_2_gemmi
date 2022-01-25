@@ -69,7 +69,7 @@ def blobfind_event_map_and_report_and_output(
         reference,
         contour_level,
         cluster_cutoff_distance_multiplier,
-pandda_fs_model
+        pandda_fs_model
 ):
     # Get the events and their BDCs
     events: Events = Events.from_clusters(
@@ -118,12 +118,11 @@ pandda_fs_model
         # )
 
         scores = score_clusters(
-            {(0,0): event.cluster},
+            {(0, 0): event.cluster},
             Zmap(event_map_reference_grid),
             dataset,
 
         )
-
 
         # Ouptut
         # for cluster_id, cluster in clustering.clustering.items():
@@ -132,9 +131,8 @@ pandda_fs_model
         for score_id, score in scores:
             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
 
-
         # Save event map
-        filename= f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+        filename = f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
         save_reference_frame_zmap(
             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
             Zmap(event_map_reference_grid)
@@ -153,6 +151,7 @@ pandda_fs_model
         reference_structure.write_minimal_pdb(
             str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
         )
+
 
 def event_score_and_report(
         test_dtag,
@@ -177,7 +176,7 @@ def event_score_and_report(
     events: Events = Events.from_clusters(
         selected_model_clusterings,
         model,
-        {test_dtag: dataset_xmap,},
+        {test_dtag: dataset_xmap, },
         grid,
         dataset_alignment,
         max_site_distance_cutoff,
@@ -187,7 +186,7 @@ def event_score_and_report(
 
     time_event_finding_finish = time.time()
     if debug:
-        print(f"\t\tTime to find events for model: {time_event_finding_finish-time_event_finding_start}")
+        print(f"\t\tTime to find events for model: {time_event_finding_finish - time_event_finding_start}")
 
     # Calculate the event maps
     reference_xmap_grid = dataset_xmap.xmap
@@ -248,21 +247,20 @@ def event_score_and_report(
         # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
         event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
 
-
         if debug:
             print("\t\t\tScoring...")
 
         # Score
         time_scoring_start = time.time()
         scores = score_clusters(
-            {(0,0): event.cluster},
-            {(0,0): event_map_reference_grid},
+            {(0, 0): event.cluster},
+            {(0, 0): event_map_reference_grid},
             processed_dataset,
             debug=debug,
         )
         time_scoring_finish = time.time()
         if debug:
-            print(f"\t\t\tTime to actually score all events: {time_scoring_finish-time_scoring_start}")
+            print(f"\t\t\tTime to actually score all events: {time_scoring_finish - time_scoring_start}")
 
         # Ouptut
         for score_id, score in scores.items():
@@ -275,7 +273,7 @@ def event_score_and_report(
     time_event_scoring_finish = time.time()
 
     if debug:
-        print(f"\t\tTime to score all events: {time_event_scoring_finish-time_event_scoring_start}. Num events: "
+        print(f"\t\tTime to score all events: {time_event_scoring_finish - time_event_scoring_start}. Num events: "
               f"{len(events.events)}")
 
     return event_scores
@@ -373,12 +371,10 @@ def EXPERIMENTAL_select_model(
 
     # Score the top clusters
     model_scores = {
-        model_id: max([event_scores[score_id] for score_id in event_scores] + [0.0,])
+        model_id: max([event_scores[score_id] for score_id in event_scores] + [0.0, ])
         for model_id, event_scores
         in model_event_scores.items()
     }
-
-
 
     if debug:
         print(model_scores)
@@ -392,7 +388,7 @@ def EXPERIMENTAL_select_model(
         selected_model_number = max(
             model_scores,
             key=lambda _score: model_scores[_score],
-        )#[0]
+        )  # [0]
 
     return selected_model_number, log
 
@@ -651,12 +647,12 @@ def analyse_model(
         reference,
         grid,
         dataset_processed_dataset,
-dataset_alignment,
+        dataset_alignment,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
-contour_level,
-cluster_cutoff_distance_multiplier,
-min_blob_volume,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
         min_blob_z_peak,
         debug=False
 ):
@@ -861,19 +857,19 @@ min_blob_volume,
 
     return model_results, model_log
 
-def dump_and_load(ob, name):
 
+def dump_and_load(ob, name):
     print(f"Testing: {name}")
 
     time_dump_start = time.time()
     dumps = pickle.dumps(ob)
     time_dump_finish = time.time()
-    print(f"\tDump time is: {time_dump_finish-time_dump_start}")
+    print(f"\tDump time is: {time_dump_finish - time_dump_start}")
 
     time_load_start = time.time()
     loaded = pickle.loads(dumps)
     time_load_finish = time.time()
-    print(f"\tLoad time is: {time_load_finish-time_load_start}")
+    print(f"\tLoad time is: {time_load_finish - time_load_start}")
 
 
 def process_dataset_multiple_models(
@@ -912,8 +908,6 @@ def process_dataset_multiple_models(
     # # Process the models...
     ###################################################################
 
-
-
     time_model_analysis_start = time.time()
     analyse_model_paramaterised = partial(
         analyse_model,
@@ -932,16 +926,29 @@ def process_dataset_multiple_models(
         debug=False
     )
 
-
     results = process_local(
-        [partial(
-            analyse_model_paramaterised,
-            model,
-            model_number,
-        )
-        for model_number, model
-        in models.items()]
+        [
+            partial(
+                analyse_model_paramaterised,
+                model,
+                model_number,
+            )
+            for model_number, model
+            in models.items()]
     )
+
+    model_results = {model_number: result[0] for model_number, result in zip(models, results)}
+    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}  #
+
+    time_model_analysis_finish = time.time()
+
+    dataset_log["Time to analyse all models"] = time_model_analysis_finish - time_model_analysis_start
+
+    if debug:
+        print(f"\tTime to analyse all models: {time_model_analysis_finish - time_model_analysis_start}")
+        for model_number, model_result in model_results.items():
+            model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
+            print(f"\t\tModel {model_number} processed in {model_time}")
 
     dump_and_load(dataset_xmaps[test_dtag], "xmap")
     dump_and_load(reference, "reference")
@@ -952,26 +959,13 @@ def process_dataset_multiple_models(
     dump_and_load([model for model in models.values()][0], "model")
     dump_and_load(
         partial(
-        analyse_model_paramaterised,
-        [model for model in models.values()][0],
-        [model_number for model_number in models.keys()][0],
-    ), "func")
+            analyse_model_paramaterised,
+            [model for model in models.values()][0],
+            [model_number for model_number in models.keys()][0],
+        ), "func")
     dump_and_load(
         results,
         "results")
-
-    model_results = {model_number: result[0] for model_number, result in zip(models, results)}
-    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}#
-
-    time_model_analysis_finish = time.time()
-
-    dataset_log["Time to analyse all models"] = time_model_analysis_finish-time_model_analysis_start
-
-    if debug:
-        print(f"\tTime to analyse all models: {time_model_analysis_finish-time_model_analysis_start}")
-        for model_number, model_result in model_results.items():
-            model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
-            print(f"\t\tModel {model_number} processed in {model_time}")
 
     ###################################################################
     # # Decide which model to use...
@@ -1228,9 +1222,9 @@ def process_shell_multiple_models(
             shell_truncated_datasets[key],
             alignments[key],
         )
-        for key
-        in shell_truncated_datasets
-            ]
+            for key
+            in shell_truncated_datasets
+        ]
     )
 
     xmaps = {
@@ -1260,7 +1254,6 @@ def process_shell_multiple_models(
     # # Process each test dataset
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
-
 
     process_dataset_paramaterized = partial(
         process_dataset_multiple_models,
