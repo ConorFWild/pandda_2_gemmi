@@ -157,19 +157,14 @@ def event_score_and_report(
         test_dtag,
         model_number,
         processed_dataset,
-        xmaps,
-        zmap,
+        dataset_xmap,
         selected_model_clusterings,
         model,
-        dataset_xmaps,
         grid,
         alignments,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         reference,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-pandda_fs_model,
         debug=True,
 ):
     # Get the events and their BDCs
@@ -181,7 +176,7 @@ pandda_fs_model,
     events: Events = Events.from_clusters(
         selected_model_clusterings,
         model,
-        dataset_xmaps,
+        {test_dtag: dataset_xmap,},
         grid,
         alignments[test_dtag],
         max_site_distance_cutoff,
@@ -194,7 +189,7 @@ pandda_fs_model,
         print(f"\t\tTime to find events for model: {time_event_finding_finish-time_event_finding_start}")
 
     # Calculate the event maps
-    reference_xmap_grid = xmaps[test_dtag].xmap
+    reference_xmap_grid = dataset_xmap.xmap
     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
     # Mask protein
@@ -647,6 +642,225 @@ def get_models(
     return models
 
 
+def analyse_model(
+        model,
+        model_number,
+        test_dtag,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+alignments,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+contour_level,
+cluster_cutoff_distance_multiplier,
+min_blob_volume,
+        min_blob_z_peak,
+        debug=False
+):
+    if debug:
+        print(f'\tAnalysing model: {model_number}')
+
+    model_log = {}
+
+    # model_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[model_number]]
+    # update_log(dataset_log, dataset_log_path)
+
+    # masked_xmap_array = XmapArray.from_xmaps(
+    #     dataset_xmaps,
+    #     grid,
+    # )
+
+    # masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
+    #     [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
+
+    ###################################################################
+    # # Generate the statistical model of the dataset
+    ###################################################################
+    time_model_analysis_start = time.time()
+
+    # Calculate z maps
+    if debug:
+        print("\t\tCalculating zmaps")
+    time_z_maps_start = time.time()
+    zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
+        model=model,
+        xmaps={test_dtag: dataset_xmap, },
+        model_number=model_number,
+        debug=debug,
+    )
+
+    if debug:
+        print("\t\tCalculated zmaps")
+
+    time_z_maps_finish = time.time()
+    model_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
+    # update_log(dataset_log, dataset_log_path)
+
+    ###################################################################
+    # # Cluster the outlying density
+    ###################################################################
+    time_cluster_start = time.time()
+
+    # Get the clustered electron desnity outliers
+
+    cluster_paramaterised = partial(
+        Clustering.from_zmap,
+        reference=reference,
+        grid=grid,
+        contour_level=contour_level,
+        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+    )
+    time_cluster_z_start = time.time()
+
+    if debug:
+        print("\t\tClustering")
+
+    clusterings: List[Clustering] = process_local_serial(
+        [
+            partial(cluster_paramaterised, zmaps[dtag], )
+            for dtag
+            in zmaps
+        ]
+    )
+    time_cluster_z_finish = time.time()
+
+    if debug:
+        print("\t\tClustering finished")
+
+    if debug:
+        model_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
+        model_log['time_event_mask'] = {}
+        for j, clustering in enumerate(clusterings):
+            model_log['time_cluster'] = clustering.time_cluster
+            model_log['time_np'] = clustering.time_np
+            model_log['time_event_masking'] = clustering.time_event_masking
+            model_log['time_get_orth'] = clustering.time_get_orth
+            model_log['time_fcluster'] = clustering.time_fcluster
+            for cluster_num, cluster in clustering.clustering.items():
+                model_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
+
+    clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+
+    model_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+    cluster_sizes = {}
+    for dtag, clustering in clusterings.clusterings.items():
+        for cluster_num, cluster in clustering.clustering.items():
+            cluster_sizes[int(cluster_num)] = {
+                "size": float(cluster.size(grid)),
+                "centroid": (float(cluster.centroid[0]), float(cluster.centroid[1]), float(cluster.centroid[2])),
+            }
+    model_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
+        cluster_num: cluster_sizes[cluster_num]
+        for j, cluster_num
+        in enumerate(sorted(
+            cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
+            reverse=True,
+        ))
+        if j < 10
+    }
+    # update_log(dataset_log, dataset_log_path)
+
+    # Filter out small clusters
+    clusterings_large: Clusterings = clusterings.filter_size(grid,
+                                                             min_blob_volume,
+                                                             )
+    if debug:
+        print("\t\tAfter filtering: large: {}".format(
+            {dtag: len(cluster) for dtag, cluster in
+             zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+    model_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_large.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+
+    # Filter out weak clusters (low peak z score)
+    clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
+                                                                    min_blob_z_peak)
+    if debug:
+        print("\t\tAfter filtering: peak: {}".format(
+            {dtag: len(cluster) for dtag, cluster in
+             zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+    model_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+
+    # Add the event mask
+    for clustering_id, clustering in clusterings_peaked.clusterings.items():
+        for cluster_id, cluster in clustering.clustering.items():
+            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+
+    # Merge the clusters
+    clusterings_merged = clusterings_peaked.merge_clusters()
+    if debug:
+        print("\t\tAfter filtering: merged: {}".format(
+            {dtag: len(_cluster) for dtag, _cluster in
+             zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
+    model_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_merged.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+
+    # Log the clustering
+    time_cluster_finish = time.time()
+    model_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
+    # update_log(dataset_log, dataset_log_path)
+
+    # TODO: REMOVE: event blob analysis
+    # blobfind_event_map_and_report_and_output(
+    #     test_dtag,
+    #     model_number,
+    #     dataset_truncated_datasets[test_dtag],
+    #     dataset_xmaps,
+    #     zmaps[test_dtag],
+    #     clusterings_large,
+    #     model,
+    #     dataset_xmaps,
+    #     grid,
+    #     alignments,
+    #     max_site_distance_cutoff,
+    #     min_bdc, max_bdc,
+    #     reference,
+    #     contour_level,
+    #     cluster_cutoff_distance_multiplier,
+    #     pandda_fs_model
+    # )
+
+    if debug:
+        print("\t\tScoring events...")
+    event_scores: Dict[int, float] = event_score_and_report(
+        test_dtag,
+        model_number,
+        dataset_processed_dataset,
+        dataset_xmap,
+        clusterings_large,
+        model,
+        grid,
+        alignments,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        reference,
+        debug=debug
+    )
+
+    time_model_analysis_finish = time.time()
+
+    model_results = {
+        'zmap': zmaps[test_dtag],
+        'clusterings': clusterings,
+        'clusterings_large': clusterings_large,
+        'clusterings_peaked': clusterings_peaked,
+        'clusterings_merged': clusterings_merged,
+        'event_scores': event_scores,
+    }
+    model_log["Model analysis time"][int(model_number)] = time_model_analysis_finish - time_model_analysis_start
+    if debug:
+        print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
+
+    return model_results, model_log
+
+
 def process_dataset_multiple_models(
         test_dtag,
         models,
@@ -679,212 +893,39 @@ def process_dataset_multiple_models(
     dataset_log = {}
     dataset_log["Model analysis time"] = {}
 
+    ###################################################################
+    # # Process the models...
+    ###################################################################
 
-    model_results = {}
-    for model_number, model in models.items():
-        if debug:
-            print(f'\tAnalysing model: {model_number}')
+    analyse_model_paramaterised = partial(
+        analyse_model,
+        test_dtag,
+        dataset_xmaps[test_dtag],
+        reference,
+        grid,
+        pandda_fs_model.processed_datasets[test_dtag],
+        alignments,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        debug=False
+    )
 
-        dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[model_number]]
-        update_log(dataset_log, dataset_log_path)
-
-        # masked_xmap_array = XmapArray.from_xmaps(
-        #     dataset_xmaps,
-        #     grid,
-        # )
-
-        # masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-        #     [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
-
-        ###################################################################
-        # # Generate the statistical model of the dataset
-        ###################################################################
-        time_model_analysis_start = time.time()
-
-        # Calculate z maps
-        if debug:
-            print("\t\tCalculating zmaps")
-        time_z_maps_start = time.time()
-        zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
-            model=model,
-            xmaps={test_dtag: dataset_xmaps[test_dtag], },
-            model_number=model_number,
-            debug=debug,
+    results = analyse_model_paramaterised(
+        partial(
+            analyse_model_paramaterised,
+            model,
+            model_number,
         )
+        for model_number, model
+        in models.items()
+    )
 
-        if debug:
-            print("\t\tCalculated zmaps")
-
-        time_z_maps_finish = time.time()
-        dataset_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
-        update_log(dataset_log, dataset_log_path)
-
-        ###################################################################
-        # # Cluster the outlying density
-        ###################################################################
-        time_cluster_start = time.time()
-
-        # Get the clustered electron desnity outliers
-
-        cluster_paramaterised = partial(
-            Clustering.from_zmap,
-            reference=reference,
-            grid=grid,
-            contour_level=contour_level,
-            cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-        )
-        time_cluster_z_start = time.time()
-
-        if debug:
-            print("\t\tClustering")
-
-        clusterings: List[Clustering] = process_local_serial(
-            [
-                partial(cluster_paramaterised, zmaps[dtag], )
-                for dtag
-                in zmaps
-            ]
-        )
-        time_cluster_z_finish = time.time()
-
-        if debug:
-            print("\t\tClustering finished")
-
-        if debug:
-            dataset_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
-            dataset_log['time_event_mask'] = {}
-            for j, clustering in enumerate(clusterings):
-                dataset_log['time_cluster'] = clustering.time_cluster
-                dataset_log['time_np'] = clustering.time_np
-                dataset_log['time_event_masking'] = clustering.time_event_masking
-                dataset_log['time_get_orth'] = clustering.time_get_orth
-                dataset_log['time_fcluster'] = clustering.time_fcluster
-                for cluster_num, cluster in clustering.clustering.items():
-                    dataset_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
-
-        clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
-
-        dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings.clusterings.values()])
-        update_log(dataset_log, dataset_log_path)
-        cluster_sizes = {}
-        for dtag, clustering in clusterings.clusterings.items():
-            for cluster_num, cluster in clustering.clustering.items():
-                cluster_sizes[int(cluster_num)] = {
-                    "size": float(cluster.size(grid)),
-                    "centroid": (float(cluster.centroid[0]), float(cluster.centroid[1]), float(cluster.centroid[2])),
-                }
-        dataset_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
-            cluster_num: cluster_sizes[cluster_num]
-            for j, cluster_num
-            in enumerate(sorted(
-                cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
-                reverse=True,
-            ))
-            if j < 10
-        }
-        update_log(dataset_log, dataset_log_path)
-
-        # Filter out small clusters
-        clusterings_large: Clusterings = clusterings.filter_size(grid,
-                                                                 min_blob_volume,
-                                                                 )
-        if debug:
-            print("\t\tAfter filtering: large: {}".format(
-                {dtag: len(cluster) for dtag, cluster in
-                 zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
-        dataset_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_large.clusterings.values()])
-        update_log(dataset_log, dataset_log_path)
-
-        # Filter out weak clusters (low peak z score)
-        clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
-                                                                        min_blob_z_peak)
-        if debug:
-            print("\t\tAfter filtering: peak: {}".format(
-                {dtag: len(cluster) for dtag, cluster in
-                 zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
-        dataset_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
-        update_log(dataset_log, dataset_log_path)
-
-        # Add the event mask
-        for clustering_id, clustering in clusterings_peaked.clusterings.items():
-            for cluster_id, cluster in clustering.clustering.items():
-                cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
-
-        # Merge the clusters
-        clusterings_merged = clusterings_peaked.merge_clusters()
-        if debug:
-            print("\t\tAfter filtering: merged: {}".format(
-                {dtag: len(_cluster) for dtag, _cluster in
-                 zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
-        dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_merged.clusterings.values()])
-        update_log(dataset_log, dataset_log_path)
-
-        # Log the clustering
-        time_cluster_finish = time.time()
-        dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
-        update_log(dataset_log, dataset_log_path)
-
-
-
-        # TODO: REMOVE: event blob analysis
-        # blobfind_event_map_and_report_and_output(
-        #     test_dtag,
-        #     model_number,
-        #     dataset_truncated_datasets[test_dtag],
-        #     dataset_xmaps,
-        #     zmaps[test_dtag],
-        #     clusterings_large,
-        #     model,
-        #     dataset_xmaps,
-        #     grid,
-        #     alignments,
-        #     max_site_distance_cutoff,
-        #     min_bdc, max_bdc,
-        #     reference,
-        #     contour_level,
-        #     cluster_cutoff_distance_multiplier,
-        #     pandda_fs_model
-        # )
-
-        if debug:
-            print("\t\tScoring events...")
-        event_scores: Dict[int, float] = event_score_and_report(
-                test_dtag,
-                model_number,
-                pandda_fs_model.processed_datasets[test_dtag],
-                dataset_xmaps,
-                zmaps[test_dtag],
-                clusterings_large,
-                model,
-                dataset_xmaps,
-                grid,
-                alignments,
-                max_site_distance_cutoff,
-                min_bdc, max_bdc,
-                reference,
-                contour_level,
-                cluster_cutoff_distance_multiplier,
-                pandda_fs_model,
-            debug=debug
-        )
-
-        time_model_analysis_finish = time.time()
-
-        model_results[model_number] = {
-            'zmap': zmaps[test_dtag],
-            'clusterings': clusterings,
-            'clusterings_large': clusterings_large,
-            'clusterings_peaked': clusterings_peaked,
-            'clusterings_merged': clusterings_merged,
-            'event_scores': event_scores,
-        }
-        dataset_log["Model analysis time"][int(model_number)] = time_model_analysis_finish - time_model_analysis_start
-        if debug:
-            print(f"\t\tModel analysis time: {time_model_analysis_finish-time_model_analysis_start}")
+    model_results = {model_number: result[0] for model_number, result in zip(models, results)}
+    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}
 
     ###################################################################
     # # Decide which model to use...
