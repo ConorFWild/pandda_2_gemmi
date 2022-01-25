@@ -956,6 +956,9 @@ def process_dataset_multiple_models(
         [model for model in models.values()][0],
         [model_number for model_number in models.keys()][0],
     ), "func")
+    dump_and_load(
+        results,
+        "results")
 
     model_results = {model_number: result[0] for model_number, result in zip(models, results)}
     dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}#
