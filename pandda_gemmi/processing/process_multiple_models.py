@@ -922,7 +922,7 @@ def process_dataset_multiple_models(
         reference=reference,
         grid=grid,
         dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
-        alignments=alignments[test_dtag],
+        dataset_alignment=alignments[test_dtag],
         max_site_distance_cutoff=max_site_distance_cutoff,
         min_bdc=min_bdc, max_bdc=max_bdc,
         contour_level=contour_level,
