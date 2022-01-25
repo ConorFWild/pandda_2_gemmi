@@ -854,7 +854,7 @@ min_blob_volume,
         'clusterings_merged': clusterings_merged,
         'event_scores': event_scores,
     }
-    model_log["Model analysis time"][int(model_number)] = time_model_analysis_finish - time_model_analysis_start
+    model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
     if debug:
         print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
 
