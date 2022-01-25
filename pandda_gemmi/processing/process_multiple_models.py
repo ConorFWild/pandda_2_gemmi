@@ -871,7 +871,7 @@ def dump_and_load(ob, name):
     print(f"\tDump time is: {time_dump_finish-time_dump_start}")
 
     time_load_start = time.time()
-    loaded = pickle.loads(ob)
+    loaded = pickle.loads(dumps)
     time_load_finish = time.time()
     print(f"\tLoad time is: {time_load_finish-time_load_start}")
 
