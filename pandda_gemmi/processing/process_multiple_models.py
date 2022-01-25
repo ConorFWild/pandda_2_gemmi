@@ -8,6 +8,7 @@ from functools import partial
 import os
 import json
 from typing import Set
+import pickle
 
 printer = pprint.PrettyPrinter()
 
@@ -860,6 +861,20 @@ min_blob_volume,
 
     return model_results, model_log
 
+def dump_and_load(ob, name):
+
+    print(f"Testing: {name}")
+
+    time_dump_start = time.time()
+    dumps = pickle.dumps(ob)
+    time_dump_finish = time.time()
+    print(f"\tDump time is: {time_dump_finish-time_dump_start}")
+
+    time_load_start = time.time()
+    loaded = pickle.loads(ob)
+    time_load_finish = time.time()
+    print(f"\tLoad time is: {time_load_finish-time_load_start}")
+
 
 def process_dataset_multiple_models(
         test_dtag,
@@ -897,6 +912,8 @@ def process_dataset_multiple_models(
     # # Process the models...
     ###################################################################
 
+
+
     time_model_analysis_start = time.time()
     analyse_model_paramaterised = partial(
         analyse_model,
@@ -915,15 +932,30 @@ def process_dataset_multiple_models(
         debug=False
     )
 
+
     results = process_local(
-        partial(
+        [partial(
             analyse_model_paramaterised,
             model,
             model_number,
         )
         for model_number, model
-        in models.items()
+        in models.items()]
     )
+
+    dump_and_load(dataset_xmaps[test_dtag], "xmap")
+    dump_and_load(reference, "reference")
+    dump_and_load(grid, "grid")
+    dump_and_load(pandda_fs_model.processed_datasets[test_dtag], "processed_dataset")
+    dump_and_load(alignments, "alignments")
+    dump_and_load(alignments, "func")
+    dump_and_load([model for model in models.values()][0], "model")
+    dump_and_load(
+        partial(
+        analyse_model_paramaterised,
+        [model for model in models.values()][0],
+        [model_number for model_number in models.keys()][0],
+    ), "func")
 
     model_results = {model_number: result[0] for model_number, result in zip(models, results)}
     dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}#
@@ -1185,13 +1217,14 @@ def process_shell_multiple_models(
     )
 
     results = process_local_in_shell(
-        partial(
+        [partial(
             load_xmap_paramaterised,
             shell_truncated_datasets[key],
             alignments[key],
         )
         for key
         in shell_truncated_datasets
+            ]
     )
 
     xmaps = {
