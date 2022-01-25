@@ -897,6 +897,7 @@ def process_dataset_multiple_models(
     # # Process the models...
     ###################################################################
 
+    time_model_analysis_start = time.time()
     analyse_model_paramaterised = partial(
         analyse_model,
         test_dtag,
@@ -925,7 +926,14 @@ def process_dataset_multiple_models(
     )
 
     model_results = {model_number: result[0] for model_number, result in zip(models, results)}
-    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}
+    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}#
+
+    time_model_analysis_finish = time.time()
+
+    dataset_log["Time to analyse all models"] = time_model_analysis_finish-time_model_analysis_start
+
+    if debug:
+        print(f"\tTime to analyse all models: {time_model_analysis_finish-time_model_analysis_start}")
 
     ###################################################################
     # # Decide which model to use...
