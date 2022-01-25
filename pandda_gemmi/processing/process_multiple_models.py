@@ -955,7 +955,7 @@ def process_dataset_multiple_models(
     dump_and_load(grid, "grid")
     dump_and_load(pandda_fs_model.processed_datasets[test_dtag], "processed_dataset")
     dump_and_load(alignments, "alignments")
-    dump_and_load(alignments, "func")
+    # dump_and_load(alignments, "func")
     dump_and_load([model for model in models.values()][0], "model")
     dump_and_load(
         partial(
