@@ -1178,13 +1178,15 @@ class Datasets:
             keys = list(self.datasets.keys())
 
             results = mapper(
-                delayed(
+                [
+                    delayed(
                     self[key].smooth)(
                     reference,
                     structure_factors
                 )
                 for key
                 in keys
+                    ]
             )
 
             smoothed_datasets = {keys[i]: results[i]
