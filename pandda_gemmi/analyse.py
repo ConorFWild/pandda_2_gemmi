@@ -539,6 +539,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 in zip(shells, shell_results)
                 if shell_result
             }
+            pandda_log["Time to process all shells"] = time_shells_finish-time_shells_start
+            if pandda_args.debug:
+                print(f"Time to process all shells: {time_shells_finish-time_shells_start:}")
 
         all_events: Dict[EventID, Event] = {}
         for shell_result in shell_results:
@@ -558,7 +561,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.autobuild:
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
-                if process_global == 'serial':
+                if pandda_args.global_processing == 'serial':
                     process_autobuilds = process_local
                 else:
                     process_autobuilds = process_global
