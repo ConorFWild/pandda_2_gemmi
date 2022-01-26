@@ -91,6 +91,7 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
             results_async.append(r)
 
         num_results = len(results_async)
+        print(f"\tResults to compute: {num_results}")
         while True:
             time.sleep(1)
 
