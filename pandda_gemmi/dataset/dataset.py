@@ -4,10 +4,11 @@ import typing
 from typing import Tuple
 import dataclasses
 from pathlib import Path
+from functools import partial
+
 import scipy
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
-
 set_loky_pickler('pickle')
 
 from sklearn import neighbors
@@ -1179,8 +1180,10 @@ class Datasets:
 
             results = mapper(
                 [
-                    delayed(
-                    self[key].smooth)(
+                    # delayed(
+                    # self[key].smooth)(
+                    partial(
+                        self[key].smooth,
                     reference,
                     structure_factors
                 )
