@@ -123,7 +123,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             raise NotImplementedError()
             # process_local = ...
         elif pandda_args.local_processing == "joblib":
-            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=0)
+            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50)
             process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
         elif pandda_args.local_processing == "multiprocessing_forkserver":
