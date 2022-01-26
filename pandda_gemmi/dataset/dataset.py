@@ -9,6 +9,7 @@ from functools import partial
 import scipy
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
+
 set_loky_pickler('pickle')
 
 from sklearn import neighbors
@@ -1184,12 +1185,12 @@ class Datasets:
                     # self[key].smooth)(
                     partial(
                         self[key].smooth,
-                    reference,
-                    structure_factors
-                )
-                for key
-                in keys
-                    ]
+                        reference,
+                        structure_factors
+                    )
+                    for key
+                    in keys
+                ]
             )
 
             smoothed_datasets = {keys[i]: results[i]
