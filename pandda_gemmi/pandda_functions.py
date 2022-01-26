@@ -113,7 +113,6 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
                         f" {estimated_time_to_completion}")
                     break
 
-
         results = [r.get() for r in results_async]
 
         time_closing_pool = time.time()
