@@ -541,7 +541,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             }
             pandda_log["Time to process all shells"] = time_shells_finish-time_shells_start
             if pandda_args.debug:
-                print(f"Time to process all shells: {time_shells_finish-time_shells_start:}")
+                print(f"Time to process all shells: {time_shells_finish-time_shells_start}")
 
         all_events: Dict[EventID, Event] = {}
         for shell_result in shell_results:
