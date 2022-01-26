@@ -40,9 +40,9 @@ def process_local_serial(funcs):
     return results
 
 
-def process_local_joblib(n_jobs, prefer, funcs):
+def process_local_joblib(funcs, n_jobs=6, verbose=0,):
     mapper = joblib.Parallel(n_jobs=n_jobs,
-                             prefer=prefer,
+                             # prefer=prefer,
                              )
 
     results = mapper(joblib.delayed(func)() for func in funcs)
