@@ -40,10 +40,11 @@ def process_local_serial(funcs):
     return results
 
 
-def process_local_joblib(funcs, n_jobs=6, verbose=0,):
+def process_local_joblib(funcs, n_jobs=6, verbose=0, max_nbytes=None):
     joblib.externals.loky.set_loky_pickler('pickle')
     mapper = joblib.Parallel(n_jobs=n_jobs,
                              verbose=verbose,
+                             max_nbytes=max_nbytes,
                              # prefer=prefer,
                              )
 
