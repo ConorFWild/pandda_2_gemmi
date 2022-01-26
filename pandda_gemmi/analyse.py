@@ -127,17 +127,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             # process_local = ...
         elif pandda_args.local_processing == "joblib":
             process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
         elif pandda_args.local_processing == "multiprocessing_forkserver":
             mp.set_start_method("forkserver")
             process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
         elif pandda_args.local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
             process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
         elif pandda_args.local_processing == "dask":
             client = Client(n_workers=pandda_args.local_cpus)
             process_local = partial(
