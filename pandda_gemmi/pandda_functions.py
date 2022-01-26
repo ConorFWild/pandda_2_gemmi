@@ -97,18 +97,21 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
             current_time = time.time() - time_opened_pool
 
             num_completed = len([r for r in results_async if r.ready()])
-            estimated_time_per_iteration = num_completed / current_time
-            estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
 
-            if current_time % 60 == 0:
-                print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
-                      f" {estimated_time_to_completion}\r")
+            if num_completed != 0:
 
-            if num_completed == num_results:
-                print(
-                    f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
-                    f" {estimated_time_to_completion}")
-                break
+                estimated_time_per_iteration = num_completed / current_time
+                estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
+
+                if current_time % 60 == 0:
+                    print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                          f" {estimated_time_to_completion}\r")
+
+                if num_completed == num_results:
+                    print(
+                        f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                        f" {estimated_time_to_completion}")
+                    break
 
 
         results = [r.get() for r in results_async]
