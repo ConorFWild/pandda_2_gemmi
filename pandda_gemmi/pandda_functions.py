@@ -47,7 +47,12 @@ def process_local_joblib(funcs, n_jobs=6, verbose=0,):
                              # prefer=prefer,
                              )
 
-    results = mapper(joblib.delayed(func)() for func in funcs)
+    results = mapper(
+        # joblib.delayed(func)()
+        func
+        for func
+        in funcs
+    )
 
 
     return results
