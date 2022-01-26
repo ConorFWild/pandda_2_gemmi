@@ -42,6 +42,7 @@ def process_local_serial(funcs):
 
 def process_local_joblib(funcs, n_jobs=6, verbose=0,):
     mapper = joblib.Parallel(n_jobs=n_jobs,
+                             verbose=verbose,
                              # prefer=prefer,
                              )
 
