@@ -50,7 +50,7 @@ def process_local_joblib(n_jobs, prefer, funcs):
     return results
 
 
-def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
+def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimate_times=False):
     if method == "forkserver":
         try:
             mp.set_start_method("forkserver")
@@ -69,55 +69,57 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
         except Exception as e:
             print(e)
 
-
-
     else:
         raise Exception(
             f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
 
-    # time_open_pool = time.time()
-    # with mp.Pool(n_jobs) as pool:
-    #     time_opened_pool = time.time()
-    #     results = pool.map(run, funcs)
-    #     time_closing_pool = time.time()
-    # time_closed_pool = time.time()
+    if not estimate_times:
 
-    time_open_pool = time.time()
-    with mp.Pool(n_jobs) as pool:
-        time_opened_pool = time.time()
-        results_async = []
-        for f in funcs:
-            r = pool.apply_async(run, (f,))
-            results_async.append(r)
+        time_open_pool = time.time()
+        with mp.Pool(n_jobs) as pool:
+            time_opened_pool = time.time()
+            results = pool.map(run, funcs)
+            time_closing_pool = time.time()
+        time_closed_pool = time.time()
 
-        num_results = len(results_async)
-        print(f"\tResults to compute: {num_results}")
-        while True:
-            time.sleep(1)
+    else:
 
-            current_time = time.time() - time_opened_pool
+        time_open_pool = time.time()
+        with mp.Pool(n_jobs) as pool:
+            time_opened_pool = time.time()
+            results_async = []
+            for f in funcs:
+                r = pool.apply_async(run, (f,))
+                results_async.append(r)
 
-            num_completed = len([r for r in results_async if r.ready()])
+            num_results = len(results_async)
+            print(f"\tResults to compute: {num_results}")
+            while True:
+                time.sleep(1)
 
-            if num_completed != 0:
+                current_time = time.time() - time_opened_pool
 
-                estimated_time_per_iteration = num_completed / current_time
-                estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
+                num_completed = len([r for r in results_async if r.ready()])
 
-                if current_time % 60 == 0:
-                    print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
-                          f" {estimated_time_to_completion}\r")
+                if num_completed != 0:
 
-                if num_completed == num_results:
-                    print(
-                        f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
-                        f" {estimated_time_to_completion}")
-                    break
+                    estimated_time_per_iteration = num_completed / current_time
+                    estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
 
-        results = [r.get() for r in results_async]
+                    if current_time % 60 == 0:
+                        print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                              f" {estimated_time_to_completion}\r")
 
-        time_closing_pool = time.time()
-    time_closed_pool = time.time()
+                    if num_completed == num_results:
+                        print(
+                            f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                            f" {estimated_time_to_completion}")
+                        break
+
+            results = [r.get() for r in results_async]
+
+            time_closing_pool = time.time()
+        time_closed_pool = time.time()
 
     print(f"Opened pool in {time_opened_pool-time_open_pool}, closed pool in {time_closed_pool-time_closing_pool}, "
           f"mapped in {time_closing_pool-time_opened_pool}")
