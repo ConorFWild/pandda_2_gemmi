@@ -8,6 +8,7 @@ from functools import partial
 import pickle
 import secrets
 
+from dask.distributed import progress
 import numpy as np
 import multiprocessing as mp
 import joblib
@@ -138,6 +139,7 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimat
 
 def process_local_dask(funcs, client=None):
     processes = [client.submit(func) for func in funcs]
+    progress(processes)
     results = client.gather(processes)
     return results
 

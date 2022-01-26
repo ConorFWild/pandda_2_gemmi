@@ -8,6 +8,7 @@ from functools import partial
 import multiprocessing as mp
 
 # Scientific python libraries
+from dask.distributed import Client
 import joblib
 joblib.externals.loky.set_loky_pickler('pickle')
 
@@ -30,6 +31,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
     process_local_multiprocessing,
+    process_local_dask,
     get_dask_client,
     process_global_serial,
     process_global_dask,
@@ -136,6 +138,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             mp.set_start_method("spawn")
             process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
             process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        elif pandda_args.local_processing == "dask":
+            client = Client(n_workers=pandda_args.local_cpus)
+            process_local = partial(
+                process_local_dask,
+                client=client
+            )
         else:
             raise Exception()
 
