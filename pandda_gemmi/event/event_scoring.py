@@ -13,7 +13,7 @@ import time
 
 #
 from pandda_gemmi.dataset import Dataset
-from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
+# from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
 from pandda_gemmi.autobuild import score_structure_signal_to_noise_density, EXPERIMENTAL_score_structure_signal_to_noise_density
 
@@ -487,7 +487,7 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debu
 def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
-        fragment_dataset: ProcessedDataset,
+        fragment_dataset,
         debug=False):
     if debug:
         print(f"\t\t\tGetting fragment conformers...")

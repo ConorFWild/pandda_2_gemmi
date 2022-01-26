@@ -9,6 +9,7 @@ import multiprocessing as mp
 
 # Scientific python libraries
 import joblib
+joblib.externals.loky.set_loky_pickler('pickle')
 
 ## Custom Imports
 from pandda_gemmi import constants
