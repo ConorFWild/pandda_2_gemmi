@@ -82,21 +82,21 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
     #     time_closing_pool = time.time()
     # time_closed_pool = time.time()
 
-
+    time_open_pool = time.time()
     with mp.Pool(n_jobs) as pool:
         time_opened_pool = time.time()
-        results = []
+        results_async = []
         for f in funcs:
             r = pool.apply_async(run, f)
-            results.append(r)
+            results_async.append(r)
 
-        num_results = len(results)
+        num_results = len(results_async)
         while True:
             time.sleep(1)
 
             current_time = time.time() - time_opened_pool
 
-            num_completed = len([r for r in results if r.ready()])
+            num_completed = len([r for r in results_async if r.ready()])
             estimated_time_per_iteration = num_completed / current_time
             estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
 
@@ -110,6 +110,8 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
                     f" {estimated_time_to_completion}")
                 break
 
+
+        results = [r.get() for r in results_async]
 
         time_closing_pool = time.time()
     time_closed_pool = time.time()
