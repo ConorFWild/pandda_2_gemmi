@@ -87,7 +87,7 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
         time_opened_pool = time.time()
         results_async = []
         for f in funcs:
-            r = pool.apply_async(run, f)
+            r = pool.apply_async(run, (f,))
             results_async.append(r)
 
         num_results = len(results_async)
