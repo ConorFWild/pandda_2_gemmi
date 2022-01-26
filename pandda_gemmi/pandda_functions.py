@@ -75,12 +75,45 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
         raise Exception(
             f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
 
-    time_open_pool = time.time()
+    # time_open_pool = time.time()
+    # with mp.Pool(n_jobs) as pool:
+    #     time_opened_pool = time.time()
+    #     results = pool.map(run, funcs)
+    #     time_closing_pool = time.time()
+    # time_closed_pool = time.time()
+
+
     with mp.Pool(n_jobs) as pool:
         time_opened_pool = time.time()
-        results = pool.map(run, funcs)
+        results = []
+        for f in funcs:
+            r = pool.apply_async(run, f)
+            results.append(r)
+
+        num_results = len(results)
+        while True:
+            time.sleep(1)
+
+            current_time = time.time() - time_opened_pool
+
+            num_completed = len([r for r in results if r.ready()])
+            estimated_time_per_iteration = num_completed / current_time
+            estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
+
+            if current_time % 60 == 0:
+                print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                      f" {estimated_time_to_completion}\r")
+
+            if num_completed == num_results:
+                print(
+                    f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                    f" {estimated_time_to_completion}")
+                break
+
+
         time_closing_pool = time.time()
     time_closed_pool = time.time()
+
     print(f"Opened pool in {time_opened_pool-time_open_pool}, closed pool in {time_closed_pool-time_closing_pool}, "
           f"mapped in {time_closing_pool-time_opened_pool}")
 
