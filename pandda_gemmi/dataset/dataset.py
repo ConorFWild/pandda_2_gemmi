@@ -1183,8 +1183,8 @@ class Datasets:
                 [
                     # delayed(
                     # self[key].smooth)(
-                    partial(
-                        delayed(self[key].smooth),
+                    # partial(
+                        delayed(self[key].smooth)(
                         reference,
                         structure_factors
                     )
