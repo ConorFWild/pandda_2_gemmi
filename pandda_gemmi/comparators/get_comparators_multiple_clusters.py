@@ -272,7 +272,7 @@ def get_reduced_array(
         finish = time.time()
         if debug:
             # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
-            print(f'\t\t\tProcessing batch in {finish - start}')
+            print(f'\t\t\tProcessing batch for transform in {finish - start}')
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         transformed_arrays.append(ipca.transform(xmap_array))
