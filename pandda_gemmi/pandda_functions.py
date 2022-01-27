@@ -150,10 +150,13 @@ def process_local_dask(funcs, client=None):
     processes = [client.submit(func) for func in funcs]
     progress(processes)
     results = client.gather(processes)
-    print("TRIMMING!")
+    print("COLLECTING!")
     client.run(gc.collect)
+    print("TRIMMING!")
     client.run(trim_memory)
+    print("RESTARTING!")
     client.restart()
+    print("RESTARTED!")
 
     return results
 
