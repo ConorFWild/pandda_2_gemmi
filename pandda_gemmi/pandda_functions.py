@@ -56,7 +56,6 @@ def process_local_joblib(funcs, n_jobs=6, verbose=0, max_nbytes=None):
         in funcs
     )
 
-
     return results
 
 
@@ -117,8 +116,9 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimat
                     estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
 
                     if current_time % 60 == 0:
-                        print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
-                              f" {estimated_time_to_completion}\r")
+                        print(
+                            f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                            f" {estimated_time_to_completion}\r")
 
                     if num_completed == num_results:
                         print(
@@ -131,8 +131,8 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimat
             time_closing_pool = time.time()
         time_closed_pool = time.time()
 
-    print(f"Opened pool in {time_opened_pool-time_open_pool}, closed pool in {time_closed_pool-time_closing_pool}, "
-          f"mapped in {time_closing_pool-time_opened_pool}")
+    print(f"Opened pool in {time_opened_pool - time_open_pool}, closed pool in {time_closed_pool - time_closing_pool}, "
+          f"mapped in {time_closing_pool - time_opened_pool}")
 
     return results
 
@@ -140,10 +140,10 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimat
 import ctypes
 import gc
 
+
 def trim_memory() -> int:
     libc = ctypes.CDLL("libc.so.6")
     return libc.malloc_trim(0)
-
 
 
 def process_local_dask(funcs, client=None):
@@ -156,10 +156,6 @@ def process_local_dask(funcs, client=None):
     client.restart()
 
     return results
-
-
-
-
 
 
 def process_shell_dask(funcs):
@@ -184,16 +180,15 @@ def process_global_serial(funcs, print_estimated_timing=True):
 
         finish_iteration_time = time.time()
 
-        timings.append(finish_iteration_time-start_iteration_time)
+        timings.append(finish_iteration_time - start_iteration_time)
 
         if print_estimated_timing:
             running_average = sum(timings) / len(timings)
             num_iterations_remaining = len(funcs) - j
-            estimated_esconds_remaining_of_processing = num_iterations_remaining*running_average
-            hours_of_processing = estimated_esconds_remaining_of_processing / (60*60)
+            estimated_esconds_remaining_of_processing = num_iterations_remaining * running_average
+            hours_of_processing = estimated_esconds_remaining_of_processing / (60 * 60)
             print(f"\tTime / Shell: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
                   f"hours.")
-
 
     return results
 
@@ -452,7 +447,6 @@ def load_and_reduce(
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
@@ -1220,7 +1214,6 @@ def get_clusters_nn(
         for cluster_core_dtag in cluster_dtags:
             known_apos.append(cluster_core_dtag.dtag)
 
-
     save_plot_pca_umap_bokeh(
         reduced_array,
         labels,
@@ -1294,7 +1287,6 @@ def get_comparators_closest_cluster(
         else:
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
-
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
@@ -1497,7 +1489,6 @@ def get_comparators_closest_cluster_neighbours(
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
 
-
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
@@ -1556,7 +1547,6 @@ def get_comparators_closest_cluster_neighbours(
         transformed_arrays.append(ipca.transform(xmap_array))
 
     reduced_array = np.vstack(transformed_arrays)
-
 
     # clusterer = hdbscan.HDBSCAN(
     #     min_cluster_size=30,
@@ -1776,7 +1766,6 @@ def get_comparators_closest_cluster_neighbours(
                                 for _dtag
                                 in dtag_distance_to_cluster}
         dtags_by_distance_to_cluster = [x for x in sorted(distances_to_cluster, key=lambda y: distances_to_cluster[y])]
-
 
         # Decide the res upper bound
         truncation_res = max(current_res + resolution_cutoff, highest_res_datasets_max)
@@ -2043,7 +2032,7 @@ def save_native_frame_zmap(
         mask_radius,
         partitioning,
         mask_radius_symmetry,
-        sample_rate*2, # TODO: delete 2
+        sample_rate * 2,  # TODO: delete 2
     )
 
     ccp4 = gemmi.Ccp4Map()
@@ -2052,8 +2041,9 @@ def save_native_frame_zmap(
     ccp4.setup()
     ccp4.write_ccp4_map(str(path))
 
+
 def save_reference_frame_zmap(path,
-        zmap: Zmap,):
+                              zmap: Zmap, ):
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = zmap.zmap
     ccp4.update_ccp4_header(2, True)
@@ -2157,5 +2147,3 @@ def save_native_frame_std_map(
     ccp4.update_ccp4_header(2, True)
     ccp4.setup()
     ccp4.write_ccp4_map(str(self.path))
-
-
