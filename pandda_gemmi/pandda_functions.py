@@ -149,6 +149,7 @@ def process_local_dask(funcs, client=None):
     processes = [client.submit(func) for func in funcs]
     progress(processes)
     results = client.gather(processes)
+    print("TRIMMING!")
     client.run(trim_memory)
 
     return results
