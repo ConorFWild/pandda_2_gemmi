@@ -153,6 +153,7 @@ def process_local_dask(funcs, client=None):
     print("TRIMMING!")
     client.run(gc.collect)
     client.run(trim_memory)
+    client.restart()
 
     return results
 

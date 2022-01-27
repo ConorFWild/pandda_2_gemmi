@@ -308,6 +308,13 @@ def process_dataset(
         [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
     update_log(dataset_log, dataset_log_path)
 
+    # Add the event masks
+    for clustering_id, clustering in clusterings_peaked.clusterings.items():
+        for cluster_id, cluster in clustering.clustering.items():
+            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+
+
+    # Merge the clusters
     clusterings_merged = clusterings_peaked.merge_clusters()
     # print("\t\tAfter filtering: merged: {}".format(
     #     {dtag: len(_cluster) for dtag, _cluster in
