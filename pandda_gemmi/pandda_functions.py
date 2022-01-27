@@ -8,6 +8,7 @@ from functools import partial
 import pickle
 import secrets
 
+from dask.distributed import progress
 import numpy as np
 import multiprocessing as mp
 import joblib
@@ -40,17 +41,26 @@ def process_local_serial(funcs):
     return results
 
 
-def process_local_joblib(n_jobs, prefer, funcs):
+def process_local_joblib(funcs, n_jobs=6, verbose=0, max_nbytes=None):
+    joblib.externals.loky.set_loky_pickler('pickle')
     mapper = joblib.Parallel(n_jobs=n_jobs,
-                             prefer=prefer,
+                             verbose=verbose,
+                             max_nbytes=max_nbytes,
+                             # prefer=prefer,
                              )
 
-    results = mapper(joblib.delayed(func)() for func in funcs)
+    results = mapper(
+        joblib.delayed(run)(func)
+        # func
+        for func
+        in funcs
+    )
+
 
     return results
 
 
-def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
+def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimate_times=False):
     if method == "forkserver":
         try:
             mp.set_start_method("forkserver")
@@ -69,22 +79,86 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver"):
         except Exception as e:
             print(e)
 
-
-
     else:
         raise Exception(
             f"Method {method} is not a valid multiprocessing start method: try spawn (stable) or forkserver (fast)")
 
-    with mp.Pool(n_jobs) as pool:
-        results = pool.map(run, funcs)
+    if not estimate_times:
+
+        time_open_pool = time.time()
+        with mp.Pool(n_jobs) as pool:
+            time_opened_pool = time.time()
+            results = pool.map(run, funcs)
+            time_closing_pool = time.time()
+        time_closed_pool = time.time()
+
+    else:
+
+        time_open_pool = time.time()
+        with mp.Pool(n_jobs) as pool:
+            time_opened_pool = time.time()
+            results_async = []
+            for f in funcs:
+                r = pool.apply_async(run, (f,))
+                results_async.append(r)
+
+            num_results = len(results_async)
+            print(f"\tResults to compute: {num_results}")
+            while True:
+                time.sleep(1)
+
+                current_time = time.time() - time_opened_pool
+
+                num_completed = len([r for r in results_async if r.ready()])
+
+                if num_completed != 0:
+
+                    estimated_time_per_iteration = num_completed / current_time
+                    estimated_time_to_completion = (num_results - num_completed) / estimated_time_per_iteration
+
+                    if current_time % 60 == 0:
+                        print(f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                              f" {estimated_time_to_completion}\r")
+
+                    if num_completed == num_results:
+                        print(
+                            f"\tEstimated time per iteration is: {estimated_time_per_iteration}. Estimated time to completion:"
+                            f" {estimated_time_to_completion}")
+                        break
+
+            results = [r.get() for r in results_async]
+
+            time_closing_pool = time.time()
+        time_closed_pool = time.time()
+
+    print(f"Opened pool in {time_opened_pool-time_open_pool}, closed pool in {time_closed_pool-time_closing_pool}, "
+          f"mapped in {time_closing_pool-time_opened_pool}")
 
     return results
+
+
+import ctypes
+import gc
+
+def trim_memory() -> int:
+    libc = ctypes.CDLL("libc.so.6")
+    return libc.malloc_trim(0)
+
 
 
 def process_local_dask(funcs, client=None):
     processes = [client.submit(func) for func in funcs]
+    progress(processes)
     results = client.gather(processes)
+    print("TRIMMING!")
+    client.run(gc.collect)
+    client.run(trim_memory)
+
     return results
+
+
+
+
 
 
 def process_shell_dask(funcs):
@@ -94,6 +168,7 @@ def process_shell_dask(funcs):
         # Multiprocess
         processes = [client.submit(func) for func in funcs]
         results = client.gather(processes)
+
     return results
 
 
@@ -115,7 +190,7 @@ def process_global_serial(funcs, print_estimated_timing=True):
             num_iterations_remaining = len(funcs) - j
             estimated_esconds_remaining_of_processing = num_iterations_remaining*running_average
             hours_of_processing = estimated_esconds_remaining_of_processing / (60*60)
-            print(f"\tTime / Dataset: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
+            print(f"\tTime / Shell: {running_average}. Estimated time to completion: {round(hours_of_processing)} "
                   f"hours.")
 
 

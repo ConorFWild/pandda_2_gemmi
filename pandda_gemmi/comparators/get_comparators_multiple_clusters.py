@@ -195,15 +195,15 @@ def get_reduced_array(
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
 
-    if debug:
-        print(f'\t\tBatches are: {batches}')
+    # if debug:
+    #     print(f'\t\tBatches are: {batches}')
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
     for batch in batches:
-        if debug:
-            print(f'\t\t\tProcessing batch: {batch}')
+        # if debug:
+        #     print(f'\t\t\tProcessing batch: {batch}')
         start = time.time()
         results = process_local(
             [
@@ -225,7 +225,9 @@ def get_reduced_array(
 
         finish = time.time()
         if debug:
-            print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+            # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+            print(f'\t\t\tProcessing batch in {finish - start}')
+
 
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
@@ -372,7 +374,8 @@ def get_multiple_comparator_sets(
         process_local,
         dtag_array,
         dtag_list,
-        load_xmap_paramaterised
+        load_xmap_paramaterised,
+        debug=debug
     )
     if debug:
         print('\tLoaded in datasets and found dimension reduced feature vectors')

@@ -4,6 +4,8 @@ import typing
 from typing import Tuple
 import dataclasses
 from pathlib import Path
+from functools import partial
+
 import scipy
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
@@ -1178,13 +1180,17 @@ class Datasets:
             keys = list(self.datasets.keys())
 
             results = mapper(
-                delayed(
-                    self[key].smooth)(
-                    reference,
-                    structure_factors
-                )
-                for key
-                in keys
+                [
+                    # delayed(
+                    # self[key].smooth)(
+                    # partial(
+                        delayed(self[key].smooth)(
+                        reference,
+                        structure_factors
+                    )
+                    for key
+                    in keys
+                ]
             )
 
             smoothed_datasets = {keys[i]: results[i]

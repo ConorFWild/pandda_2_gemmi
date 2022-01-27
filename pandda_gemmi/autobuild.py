@@ -17,7 +17,7 @@ from pandda_gemmi import constants
 from pandda_gemmi.constants import *
 # from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventID, EventIDX
-from pandda_gemmi.fs import PanDDAFSModel
+# from pandda_gemmi.fs import PanDDAFSModel
 from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
                                   Resolution, Reference)
 from pandda_gemmi.shells import Shell
@@ -1072,7 +1072,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 
 def autobuild_rhofit(dataset: Dataset,
                      event: Event,
-                     pandda_fs: PanDDAFSModel,
+                     pandda_fs,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,

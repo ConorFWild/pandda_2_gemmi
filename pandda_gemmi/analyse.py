@@ -8,7 +8,9 @@ from functools import partial
 import multiprocessing as mp
 
 # Scientific python libraries
+from dask.distributed import Client
 import joblib
+joblib.externals.loky.set_loky_pickler('pickle')
 
 ## Custom Imports
 from pandda_gemmi import constants
@@ -29,6 +31,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_serial,
     process_local_joblib,
     process_local_multiprocessing,
+    process_local_dask,
     get_dask_client,
     process_global_serial,
     process_global_dask,
@@ -123,18 +126,24 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             raise NotImplementedError()
             # process_local = ...
         elif pandda_args.local_processing == "joblib":
-            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=0, prefer="processes")
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
         elif pandda_args.local_processing == "multiprocessing_forkserver":
             mp.set_start_method("forkserver")
             process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
         elif pandda_args.local_processing == "multiprocessing_spawn":
             mp.set_start_method("spawn")
             process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
-            process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        elif pandda_args.local_processing == "dask":
+            client = Client(n_workers=pandda_args.local_cpus)
+            process_local = partial(
+                process_local_dask,
+                client=client
+            )
         else:
             raise Exception()
 
@@ -539,6 +548,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 in zip(shells, shell_results)
                 if shell_result
             }
+            pandda_log["Time to process all shells"] = time_shells_finish-time_shells_start
+            if pandda_args.debug:
+                print(f"Time to process all shells: {time_shells_finish-time_shells_start}")
 
         all_events: Dict[EventID, Event] = {}
         for shell_result in shell_results:
@@ -558,7 +570,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.autobuild:
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
-                if process_global == 'serial':
+                if pandda_args.global_processing == 'serial':
                     process_autobuilds = process_local
                 else:
                     process_autobuilds = process_global

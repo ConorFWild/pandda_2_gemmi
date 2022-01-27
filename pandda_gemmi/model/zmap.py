@@ -507,10 +507,11 @@ class Zmap:
             print(f"\t\tZmap >2.5 is: {zmap_array[zmap_array > 2.5].size}")
             print(f"\t\tZmap >3 is: {zmap_array[zmap_array > 3.0].size}")
 
-            f = sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
-            f.set(xlim=(-10,10))
-            f.savefig(f"{model_number}.png")
-            plt.close('all')
+            # TODO:L Remove altogether
+            # f = sns.displot(x=zmap_array[zmap_array != 0.0], kind="ecdf")
+            # f.set(xlim=(-10,10))
+            # f.savefig(f"{model_number}.png")
+            # plt.close('all')
 
         normalised_zmap_array = (zmap_array - zmap_sparse_mean) / zmap_sparse_std
 

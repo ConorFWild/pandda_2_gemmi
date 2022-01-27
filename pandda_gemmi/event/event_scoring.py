@@ -13,7 +13,7 @@ import time
 
 #
 from pandda_gemmi.dataset import Dataset
-from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
+# from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
 from pandda_gemmi.autobuild import score_structure_signal_to_noise_density, EXPERIMENTAL_score_structure_signal_to_noise_density
 
@@ -433,7 +433,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         rotation_matrix
     )
 
-    optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
+    # TODO: Remove althogether
+    # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
 
     # Score, by including the noise as well as signal
     if debug:
@@ -486,7 +487,7 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debu
 def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
-        fragment_dataset: ProcessedDataset,
+        fragment_dataset,
         debug=False):
     if debug:
         print(f"\t\t\tGetting fragment conformers...")
