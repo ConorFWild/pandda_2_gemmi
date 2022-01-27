@@ -8,6 +8,7 @@ import dataclasses
 
 import numpy as np
 from sklearn import metrics
+from matplotlib import pyplot as plt
 
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
@@ -202,36 +203,48 @@ def get_reduced_array(
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
     for batch in batches:
-        # if debug:
-        #     print(f'\t\t\tProcessing batch: {batch}')
-        start = time.time()
-        results = process_local(
-            [
-                partial(
-                    load_xmap_paramaterised,
-                    shell_truncated_datasets[key],
-                    alignments[key],
-                )
-                for key
-                in dtag_array[batch]
-            ]
-        )
+        from dask.distributed.diagnostics import MemorySampler
 
-        # Get the maps as arrays
-        xmaps = {dtag: xmap
-                 for dtag, xmap
-                 in zip(dtag_list, results)
-                 }
+        ms = MemorySampler()
+        with ms.sample(f"collection {batch}"):
 
-        finish = time.time()
-        if debug:
-            # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
-            print(f'\t\t\tProcessing batch in {finish - start}')
+            # if debug:
+            #     print(f'\t\t\tProcessing batch: {batch}')
+            start = time.time()
+            results = process_local(
+                [
+                    partial(
+                        load_xmap_paramaterised,
+                        shell_truncated_datasets[key],
+                        alignments[key],
+                    )
+                    for key
+                    in dtag_array[batch]
+                ]
+            )
+
+            # Get the maps as arrays
+            xmaps = {dtag: xmap
+                     for dtag, xmap
+                     in zip(dtag_list, results)
+                     }
+
+            finish = time.time()
+            if debug:
+                # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+                print(f'\t\t\tProcessing batch in {finish - start}')
 
 
-        # Get pca
-        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-        ipca.partial_fit(xmap_array)
+            # Get pca
+            xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+            ipca.partial_fit(xmap_array)
+
+        ax = ms.plot(align=True)
+        f = plt.figure()
+        f.axes.append(ax)
+        f.savefig(f"{batch}.png")
+        plt.close('all')
+
 
     # Transform
     transformed_arrays = []
