@@ -202,11 +202,12 @@ def get_reduced_array(
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
-    for batch in batches:
-        from dask.distributed.diagnostics import MemorySampler
+    from dask.distributed import performance_report
 
-        ms = MemorySampler()
-        with ms.sample(f"collection {batch}"):
+    for batch in batches:
+
+        # ms = MemorySampler()
+        with performance_report(filename=f"collection_{batch}.html"):
 
             # if debug:
             #     print(f'\t\t\tProcessing batch: {batch}')
@@ -239,11 +240,11 @@ def get_reduced_array(
             xmap_array = np.vstack([xmap for xmap in xmaps.values()])
             ipca.partial_fit(xmap_array)
 
-        ax = ms.plot(align=True)
-        f = plt.figure()
-        f.axes.append(ax)
-        f.savefig(f"{batch}.png")
-        plt.close('all')
+        # ax = ms.plot(align=True)
+        # f = plt.figure()
+        # f.axes.append(ax)
+        # f.savefig(f"{batch}.png")
+        # plt.close('all')
 
 
     # Transform
