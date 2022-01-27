@@ -137,11 +137,25 @@ def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimat
     return results
 
 
+import ctypes
+
+def trim_memory() -> int:
+    libc = ctypes.CDLL("libc.so.6")
+    return libc.malloc_trim(0)
+
+
+
 def process_local_dask(funcs, client=None):
     processes = [client.submit(func) for func in funcs]
     progress(processes)
     results = client.gather(processes)
+    client.run(trim_memory)
+
     return results
+
+
+
+
 
 
 def process_shell_dask(funcs):
@@ -151,6 +165,7 @@ def process_shell_dask(funcs):
         # Multiprocess
         processes = [client.submit(func) for func in funcs]
         results = client.gather(processes)
+
     return results
 
 
