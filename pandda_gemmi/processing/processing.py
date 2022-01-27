@@ -324,9 +324,9 @@ def process_dataset(
     update_log(dataset_log, dataset_log_path)
 
     # Add the event mask
-    for clustering_id, clustering in clusterings_merged.clusterings.items():
-        for cluster_id, cluster in clustering.clustering.items():
-            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+    # for clustering_id, clustering in clusterings_merged.clusterings.items():
+    #     for cluster_id, cluster in clustering.clustering.items():
+    #         cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
 
     time_cluster_finish = time.time()
     dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
