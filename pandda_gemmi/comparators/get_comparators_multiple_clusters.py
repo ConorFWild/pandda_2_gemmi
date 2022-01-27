@@ -207,38 +207,38 @@ def get_reduced_array(
     for batch in batches:
 
         # ms = MemorySampler()
-        with performance_report(filename=f"collection_{batch}.html"):
+        # with performance_report(filename=f"collection_{batch}.html"):
 
             # if debug:
             #     print(f'\t\t\tProcessing batch: {batch}')
-            start = time.time()
-            results = process_local(
-                [
-                    partial(
-                        load_xmap_paramaterised,
-                        shell_truncated_datasets[key],
-                        alignments[key],
-                    )
-                    for key
-                    in dtag_array[batch]
-                ]
-            )
+        start = time.time()
+        results = process_local(
+            [
+                partial(
+                    load_xmap_paramaterised,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
 
-            # Get the maps as arrays
-            xmaps = {dtag: xmap
-                     for dtag, xmap
-                     in zip(dtag_list, results)
-                     }
+        # Get the maps as arrays
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(dtag_list, results)
+                 }
 
-            finish = time.time()
-            if debug:
-                # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
-                print(f'\t\t\tProcessing batch in {finish - start}')
+        finish = time.time()
+        if debug:
+            # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+            print(f'\t\t\tProcessing batch in {finish - start}')
 
 
-            # Get pca
-            xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-            ipca.partial_fit(xmap_array)
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        ipca.partial_fit(xmap_array)
 
         # ax = ms.plot(align=True)
         # f = plt.figure()
