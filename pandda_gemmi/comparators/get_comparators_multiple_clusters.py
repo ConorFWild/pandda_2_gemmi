@@ -9,14 +9,16 @@ import dataclasses
 import numpy as np
 from sklearn import metrics
 from matplotlib import pyplot as plt
+import ray
 
-from pandda_gemmi.common import Dtag
+from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 
 
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
+@ray.remote
 def from_unaligned_dataset_c_flat(dataset: Dataset,
                                   alignment: Alignment,
                                   grid: Grid,
@@ -172,6 +174,7 @@ def get_reduced_array(
         dtag_array,
         dtag_list,
         load_xmap_paramaterised,
+grid, structure_factors, sample_rate,
         debug=False
 ):
     # Get reduced array
@@ -212,17 +215,35 @@ def get_reduced_array(
             # if debug:
             #     print(f'\t\t\tProcessing batch: {batch}')
         start = time.time()
+        # results = process_local(
+        #     [
+        #         partial(
+        #             load_xmap_paramaterised,
+        #             shell_truncated_datasets[key],
+        #             alignments[key],
+        #         )
+        #         for key
+        #         in dtag_array[batch]
+        #     ]
+        # )
+
         results = process_local(
             [
-                partial(
-                    load_xmap_paramaterised,
+                Partial(
+                    from_unaligned_dataset_c_flat,
                     shell_truncated_datasets[key],
                     alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate=sample_rate
+                    ,
                 )
                 for key
                 in dtag_array[batch]
             ]
         )
+
+
 
         # Get the maps as arrays
         xmaps = {dtag: xmap
@@ -391,6 +412,7 @@ def get_multiple_comparator_sets(
         dtag_array,
         dtag_list,
         load_xmap_paramaterised,
+        grid, structure_factors, sample_rate,
         debug=debug
     )
     if debug:
