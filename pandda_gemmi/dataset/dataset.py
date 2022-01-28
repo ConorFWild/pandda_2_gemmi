@@ -900,7 +900,7 @@ class Dataset:
     #     # return
     #     return correlation
 
-@ray.remote()
+@ray.remote
 def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     reference_dataset = reference.dataset
 
