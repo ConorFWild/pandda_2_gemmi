@@ -20,6 +20,7 @@ import ray
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
+from pandda_gemmi.common import Partial
 
 
 # from pandda_gemmi.fs import PanDDAFSModel
@@ -1310,11 +1311,12 @@ class Datasets:
                     # delayed(
                     # self[key].smooth)(
                     # partial(
-                        smooth(
+                        Partial(
+                            smooth,
                             self[key],
                         reference,
                         structure_factors
-                    )
+                        )
                     for key
                     in keys
                 ]
