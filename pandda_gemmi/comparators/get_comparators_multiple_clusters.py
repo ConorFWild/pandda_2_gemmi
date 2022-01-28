@@ -235,8 +235,7 @@ grid, structure_factors, sample_rate,
                     alignments[key],
                     grid,
                     structure_factors,
-                    sample_rate=sample_rate
-                    ,
+                    sample_rate=sample_rate,
                 )
                 for key
                 in dtag_array[batch]
