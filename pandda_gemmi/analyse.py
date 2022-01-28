@@ -11,6 +11,7 @@ import multiprocessing as mp
 from dask.distributed import Client
 import joblib
 joblib.externals.loky.set_loky_pickler('pickle')
+import ray
 
 ## Custom Imports
 from pandda_gemmi import constants
@@ -32,6 +33,7 @@ from pandda_gemmi.pandda_functions import (
     process_local_joblib,
     process_local_multiprocessing,
     process_local_dask,
+    process_local_ray,
     get_dask_client,
     process_global_serial,
     process_global_dask,
@@ -144,6 +146,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 process_local_dask,
                 client=client
             )
+        elif pandda_args.local_processing == "ray":
+            ray.init(num_cpus=pandda_args.local_cpus)
+            process_local = partial(process_local_ray,)
         else:
             raise Exception()
 

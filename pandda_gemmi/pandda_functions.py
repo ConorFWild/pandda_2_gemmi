@@ -18,6 +18,7 @@ import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 from matplotlib import pyplot as plt
 import gemmi
+import ray
 
 from pandda_gemmi import constants
 from pandda_gemmi.common import Dtag
@@ -158,6 +159,12 @@ def process_local_dask(funcs, client=None):
     client.restart()
     print("RESTARTED!")
 
+    return results
+
+def process_local_ray(funcs):
+    assert ray.is_initialized() == True
+    tasks = [ray.remote(func).remote() for func in funcs]
+    results = ray.get(tasks)
     return results
 
 
