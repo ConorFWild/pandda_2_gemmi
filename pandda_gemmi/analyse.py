@@ -15,7 +15,7 @@ import ray
 
 ## Custom Imports
 from pandda_gemmi import constants
-from pandda_gemmi.common import Dtag, EventID
+from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
 from pandda_gemmi.dependencies import check_dependencies
@@ -57,6 +57,7 @@ from pandda_gemmi.ranking import (
 from pandda_gemmi.autobuild import (
     AutobuildResult,
     autobuild_rhofit,
+    autobuild_rhofit_ray,
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
 )
@@ -178,11 +179,15 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
                 if pandda_args.autobuild_strategy == "rhofit":
 
-                    autobuild_parametrized = partial(
+                    autobuild_parametrized = Partial(
                         autobuild_rhofit,
                         cif_strategy=pandda_args.cif_strategy,
                         rhofit_coord=pandda_args.rhofit_coord,
                     )
+                    if pandda_args.local_processing == "ray":
+                        autobuild_func = autobuild_rhofit_ray
+                    else:
+                        autobuild_func = autobuild_rhofit
 
                 elif pandda_args.autobuild_strategy == "inbuilt":
                     autobuild_parametrized = partial(
@@ -583,12 +588,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 time_autobuild_start = time.time()
                 autobuild_results_list: Dict[EventID, AutobuildResult] = process_autobuilds(
                     [
-                        partial(
-                            autobuild_parametrized,
+                        Partial(
+                            autobuild_func,
                             datasets[event_id.dtag],
                             all_events[event_id],
                             pandda_fs_model,
-                        )
+                            cif_strategy=pandda_args.cif_strategy,
+                            rhofit_coord=pandda_args.rhofit_coord,
+                )
                         for event_id
                         in all_events
                     ]

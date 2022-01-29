@@ -273,7 +273,7 @@ grid, structure_factors, sample_rate,
         start = time.time()
         results = process_local(
             [
-                partial(
+                Partial(
                     load_xmap_paramaterised,
                     shell_truncated_datasets[key],
                     alignments[key],

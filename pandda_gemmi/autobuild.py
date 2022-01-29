@@ -11,6 +11,7 @@ from typing import *
 import fire
 import numpy as np
 import gemmi
+import ray
 
 from pandda_gemmi import constants
 
@@ -1263,4 +1264,19 @@ def autobuild_rhofit(dataset: Dataset,
         cif_path,
         selected_fragement_path,
         rhofit_command
+    )
+
+@ray.remote
+def autobuild_rhofit_ray(dataset: Dataset,
+                     event: Event,
+                     pandda_fs,
+                     cif_strategy,
+                     cut: float = 2.0,
+                     rhofit_coord: bool = False,):
+    return autobuild_rhofit(dataset,
+                     event,
+                     pandda_fs,
+                     cif_strategy,
+                     cut,
+                     rhofit_coord,
     )
