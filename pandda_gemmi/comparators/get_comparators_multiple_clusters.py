@@ -271,12 +271,26 @@ grid, structure_factors, sample_rate,
     transformed_arrays = []
     for batch in batches:
         start = time.time()
+        # results = process_local(
+        #     [
+        #         Partial(
+        #             load_xmap_paramaterised,
+        #             shell_truncated_datasets[key],
+        #             alignments[key],
+        #         )
+        #         for key
+        #         in dtag_array[batch]
+        #     ]
+        # )
         results = process_local(
             [
                 Partial(
-                    load_xmap_paramaterised,
+                    from_unaligned_dataset_c_flat,
                     shell_truncated_datasets[key],
                     alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate=sample_rate,
                 )
                 for key
                 in dtag_array[batch]
