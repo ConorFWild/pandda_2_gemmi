@@ -208,6 +208,40 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
     return comparators_func
 
 
+def get_process_local(pandda_args):
+    if pandda_args.local_processing == "serial":
+        raise NotImplementedError()
+        # process_local = ...
+    elif pandda_args.local_processing == "joblib":
+        process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+        # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+
+    elif pandda_args.local_processing == "multiprocessing_forkserver":
+        mp.set_start_method("forkserver")
+        process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
+        # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+
+    elif pandda_args.local_processing == "multiprocessing_spawn":
+        mp.set_start_method("spawn")
+        process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
+        # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+    elif pandda_args.local_processing == "dask":
+        client = Client(n_workers=pandda_args.local_cpus)
+        process_local = partial(
+            process_local_dask,
+            client=client
+        )
+
+    elif pandda_args.local_processing == "ray":
+        ray.init(num_cpus=pandda_args.local_cpus)
+        process_local = partial(process_local_ray, )
+
+
+    else:
+        raise Exception()
+
+    return process_local
+
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -258,36 +292,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Get local processor
     with STDOUTManager('Getting local processor...', '\tGot local processor!'):
-        if pandda_args.local_processing == "serial":
-            raise NotImplementedError()
-            # process_local = ...
-        elif pandda_args.local_processing == "joblib":
-            process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
-            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-
-        elif pandda_args.local_processing == "multiprocessing_forkserver":
-            mp.set_start_method("forkserver")
-            process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
-            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-
-        elif pandda_args.local_processing == "multiprocessing_spawn":
-            mp.set_start_method("spawn")
-            process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
-            # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-        elif pandda_args.local_processing == "dask":
-            client = Client(n_workers=pandda_args.local_cpus)
-            process_local = partial(
-                process_local_dask,
-                client=client
-            )
-
-        elif pandda_args.local_processing == "ray":
-            ray.init(num_cpus=pandda_args.local_cpus)
-            process_local = partial(process_local_ray,)
-
-
-        else:
-            raise Exception()
+        process_local = get_process_local(pandda_args)
 
     if pandda_args.local_processing == "ray":
         smooth_func = smooth_ray
