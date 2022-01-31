@@ -290,17 +290,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             raise Exception()
 
     if pandda_args.local_processing == "ray":
-        smooth_func = smooth
+        smooth_func = smooth_ray
         load_xmap_func = from_unaligned_dataset_c_ray
         load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
-        analyse_model_func = analyse_model
+        analyse_model_func = analyse_model_ray
 
 
     else:
-        smooth_func = smooth_ray
+        smooth_func = smooth
         load_xmap_func = from_unaligned_dataset_c
         load_xmap_flat_func = from_unaligned_dataset_c_flat
-        analyse_model_func = analyse_model_ray
+        analyse_model_func = analyse_model
 
     comparators_func = get_comparator_func(
         pandda_args,
