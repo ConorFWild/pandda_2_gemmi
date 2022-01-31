@@ -155,6 +155,39 @@ def get_process_local(pandda_args):
     return process_local
 
 
+def get_smooth_func(pandda_args):
+    if pandda_args.local_processing == "ray":
+        smooth_func = smooth_ray
+    else:
+        smooth_func = smooth
+
+    return smooth_func
+
+
+def get_load_xmap_func(pandda_args):
+    if pandda_args.local_processing == "ray":
+        load_xmap_func = from_unaligned_dataset_c_ray
+    else:
+        load_xmap_func = from_unaligned_dataset_c
+    return load_xmap_func
+
+
+def get_load_xmap_flat_func(pandda_args):
+    if pandda_args.local_processing == "ray":
+        load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
+    else:
+        load_xmap_flat_func = from_unaligned_dataset_c_flat
+    return load_xmap_flat_func
+
+
+def get_analyse_model_func(pandda_args):
+    if pandda_args.local_processing == "ray":
+        analyse_model_func = analyse_model_ray
+    else:
+        analyse_model_func = analyse_model
+    return analyse_model_func
+
+
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -205,17 +238,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     with STDOUTManager('Getting local processor...', '\tGot local processor!'):
         process_local = get_process_local(pandda_args)
 
-    if pandda_args.local_processing == "ray":
-        smooth_func = smooth_ray
-        load_xmap_func = from_unaligned_dataset_c_ray
-        load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
-        analyse_model_func = analyse_model_ray
-
-    else:
-        smooth_func = smooth
-        load_xmap_func = from_unaligned_dataset_c
-        load_xmap_flat_func = from_unaligned_dataset_c_flat
-        analyse_model_func = analyse_model
+    smooth_func = get_smooth_func(pandda_args)
+    load_xmap_func = get_load_xmap_func(pandda_args)
+    load_xmap_flat_func = get_load_xmap_flat_func(pandda_args)
+    analyse_model_func = get_analyse_model_func(pandda_args)
 
     comparators_func = get_comparator_func(
         pandda_args,
