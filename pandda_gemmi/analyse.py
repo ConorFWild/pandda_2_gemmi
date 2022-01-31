@@ -19,8 +19,10 @@ from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
 from pandda_gemmi.dependencies import check_dependencies
-from pandda_gemmi.dataset import Datasets, Reference, StructureFactors
-from pandda_gemmi.edalignment import Grid, Alignments
+from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray
+from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
+    from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray, from_unaligned_dataset_c_flat_ray,
+)
 from pandda_gemmi.filters import remove_models_with_large_gaps
 from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
 from pandda_gemmi.shells import get_shells_multiple_models
@@ -69,7 +71,9 @@ from pandda_gemmi.fs import PanDDAFSModel, ShellDirs
 from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
-    ShellResult
+    ShellResult,
+analyse_model,
+analyse_model_ray
 )
 
 printer = pprint.PrettyPrinter()
@@ -147,11 +151,27 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 process_local_dask,
                 client=client
             )
+
         elif pandda_args.local_processing == "ray":
             ray.init(num_cpus=pandda_args.local_cpus)
             process_local = partial(process_local_ray,)
+
+
         else:
             raise Exception()
+
+    if pandda_args.local_processing == "ray":
+        smooth_func = smooth
+        load_xmap_func = from_unaligned_dataset_c_ray
+        load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
+        analyse_model_func = analyse_model
+
+
+    else:
+        smooth_func = smooth_ray
+        load_xmap_func = from_unaligned_dataset_c
+        load_xmap_flat_func = from_unaligned_dataset_c_flat
+        analyse_model_func = analyse_model_ray
 
     with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
                        '\tBuilt file system model!'):
@@ -264,6 +284,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
                 reference,
                 structure_factors=structure_factors,
+                smooth_func=smooth_func,
                 mapper=process_local,
             )
             finish = time.time()
@@ -437,6 +458,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.sample_rate,
                     # TODO: add option: pandda_args.resolution_cutoff,
                     3.0,
+                    load_xmap_flat_func,
                     process_local,
                     debug=pandda_args.debug,
                 )
@@ -512,6 +534,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 max_bdc=pandda_args.max_bdc,
                 memory_availability=pandda_args.memory_availability,
                 statmaps=pandda_args.statmaps,
+                load_xmap_func=load_xmap_func,
+                analyse_model_func=analyse_model_func,
                 debug=pandda_args.debug,
             )
         else:
@@ -531,6 +555,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 max_bdc=pandda_args.max_bdc,
                 memory_availability=pandda_args.memory_availability,
                 statmaps=pandda_args.statmaps,
+                load_xmap_func=load_xmap_func,
             )
 
         # Process the shells

@@ -25,7 +25,7 @@ from pandda_gemmi.pandda_functions import (
     save_native_frame_zmap
 )
 from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID
+from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
 from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
                                   Resolution, )
@@ -411,6 +411,7 @@ def process_shell(
         max_bdc,
         memory_availability,
         statmaps,
+        load_xmap_func,
 ):
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
@@ -443,18 +444,21 @@ def process_shell(
     ###################################################################
     time_xmaps_start = time.time()
 
-    load_xmap_paramaterised = partial(
-        Xmap.from_unaligned_dataset_c,
-        grid=grid,
-        structure_factors=structure_factors,
-        sample_rate=sample_rate,
-    )
+    # load_xmap_paramaterised = partial(
+    #     Xmap.from_unaligned_dataset_c,
+    #     grid=grid,
+    #     structure_factors=structure_factors,
+    #     sample_rate=sample_rate,
+    # )
 
     results = process_local(
-        partial(
-            load_xmap_paramaterised,
+        Partial(
+            load_xmap_func,
             shell_truncated_datasets[key],
             alignments[key],
+            grid=grid,
+            structure_factors=structure_factors,
+            sample_rate=sample_rate,
         )
         for key
         in shell_truncated_datasets

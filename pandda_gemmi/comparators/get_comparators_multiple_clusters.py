@@ -18,25 +18,7 @@ from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
-@ray.remote
-def from_unaligned_dataset_c_flat(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
-                                  sample_rate: float = 3.0, ):
-    xmap = Xmap.from_unaligned_dataset_c(dataset,
-                                         alignment,
-                                         grid,
-                                         structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
-                                         )
 
-    xmap_array = xmap.to_array()
-
-    masked_array = xmap_array[grid.partitioning.total_mask == 1]
-
-    return masked_array
 
 
 def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
@@ -173,7 +155,7 @@ def get_reduced_array(
         process_local,
         dtag_array,
         dtag_list,
-        load_xmap_paramaterised,
+        load_xmap_flat_func,
 grid, structure_factors, sample_rate,
         debug=False
 ):
@@ -230,7 +212,7 @@ grid, structure_factors, sample_rate,
         results = process_local(
             [
                 Partial(
-                    from_unaligned_dataset_c_flat,
+                    load_xmap_flat_func,
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,
@@ -285,7 +267,7 @@ grid, structure_factors, sample_rate,
         results = process_local(
             [
                 Partial(
-                    from_unaligned_dataset_c_flat,
+                    load_xmap_flat_func,
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,
@@ -365,6 +347,7 @@ def get_multiple_comparator_sets(
         structure_factors,
         sample_rate,
         resolution_cutoff,
+        load_xmap_flat_func,
         process_local,
         max_comparator_sets=None,
         debug=False,
@@ -411,12 +394,12 @@ def get_multiple_comparator_sets(
         print('\tTruncated suitable datasets to common resolution')
 
     # Generate aligned xmaps
-    load_xmap_paramaterised = partial(
-        from_unaligned_dataset_c_flat,
-        grid=grid,
-        structure_factors=structure_factors,
-        sample_rate=sample_rate,
-    )
+    # load_xmap_paramaterised = partial(
+    #     from_unaligned_dataset_c_flat,
+    #     grid=grid,
+    #     structure_factors=structure_factors,
+    #     sample_rate=sample_rate,
+    # )
 
     reduced_array = get_reduced_array(
         shell_truncated_datasets,
@@ -424,7 +407,7 @@ def get_multiple_comparator_sets(
         process_local,
         dtag_array,
         dtag_list,
-        load_xmap_paramaterised,
+        load_xmap_flat_func,
         grid, structure_factors, sample_rate,
         debug=debug
     )

@@ -857,6 +857,41 @@ def analyse_model(
 
     return model_results, model_log
 
+@ray.remote
+def analyse_model_ray(
+        model,
+        model_number,
+        test_dtag,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        debug=False
+):
+    return analyse_model(
+        model,
+        model_number,
+        test_dtag,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        debug=False
+    )
 
 def dump_and_load(ob, name):
     print(f"Testing: {name}")
@@ -905,6 +940,7 @@ def process_dataset_multiple_models(
         min_bdc, max_bdc,
         sample_rate,
         statmaps,
+        analyse_model_func,
         process_local=process_local_serial,
         debug=False,
 ):
@@ -952,7 +988,7 @@ def process_dataset_multiple_models(
     results = process_local(
         [
             Partial(
-                analyse_model,
+                analyse_model_func,
                 model,
                 model_number,
                 test_dtag=test_dtag,
@@ -1190,6 +1226,8 @@ def process_shell_multiple_models(
         max_bdc,
         memory_availability,
         statmaps,
+        load_xmap_func,
+        analyse_model_func,
         debug=False,
 ):
     if debug:
@@ -1266,7 +1304,7 @@ def process_shell_multiple_models(
     results = process_local_in_shell(
         [
             Partial(
-            from_unaligned_dataset_c,
+            load_xmap_func,
             shell_truncated_datasets[key],
             alignments[key],
             grid = grid,
@@ -1327,6 +1365,7 @@ def process_shell_multiple_models(
         # sample_rate=sample_rate,
         sample_rate=shell.res / 0.5,
         statmaps=statmaps,
+        analyse_model_func=analyse_model_func,
         process_local=process_local_in_dataset,
         debug=debug,
     )

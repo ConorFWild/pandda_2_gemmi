@@ -901,7 +901,6 @@ class Dataset:
     #     # return
     #     return correlation
 
-@ray.remote
 def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     reference_dataset = reference.dataset
 
@@ -1026,6 +1025,10 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
                                )
 
     return smoothed_dataset
+
+@ray.remote
+def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactors):
+    return smooth(dataset, reference, structure_factors)
 
 @dataclasses.dataclass()
 class RMSD:
@@ -1300,6 +1303,7 @@ class Datasets:
                         reference: Reference,
                         structure_factors: StructureFactors,
                         cut=97.5,
+                        smooth_func=smooth,
                         mapper=False,
                         ):
 
@@ -1312,7 +1316,7 @@ class Datasets:
                     # self[key].smooth)(
                     # partial(
                         Partial(
-                            smooth,
+                            smooth_func,
                             self[key],
                         reference,
                         structure_factors
