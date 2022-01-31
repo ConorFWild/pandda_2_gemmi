@@ -295,7 +295,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
         analyse_model_func = analyse_model_ray
 
-
     else:
         smooth_func = smooth
         load_xmap_func = from_unaligned_dataset_c
