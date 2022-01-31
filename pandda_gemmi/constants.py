@@ -243,6 +243,14 @@ ARGS_RANK_METHOD_HELP = "A string giving the ranking method to be used from 'siz
 ARGS_DEBUG = "--debug"
 ARGS_DEBUG_HELP = "A boolean value giving whether or not to print debugging information."
 
+##########################
+ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT: int = 25
+ARGS_COMPARISON_STRATEGY_DEFAULT: str = "cluster"
+ARGS_LOCAL_PROCESSING_DEFAULT:str = "ray"
+ARGS_LOCAL_CPUS_DEFAULT: int = 6
+ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
+ARGS_AUTOBUILD_DEFAULT: bool = True
+
 ###################################################################
 # # Logging constants
 ###################################################################
