@@ -255,26 +255,21 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
             if pandda_args.autobuild_strategy == "rhofit":
 
-                autobuild_parametrized = Partial(
-                    autobuild_rhofit,
-                    cif_strategy=pandda_args.cif_strategy,
-                    rhofit_coord=pandda_args.rhofit_coord,
-                )
                 if pandda_args.local_processing == "ray":
-                    autobuild_func = Partial(autobuild_rhofit_ray,
-                                             cif_strategy=pandda_args.cif_strategy,
-                                             rhofit_coord=pandda_args.rhofit_coord, )
+                    autobuild_func = Partial(
+                        autobuild_rhofit_ray,
+                        cif_strategy=pandda_args.cif_strategy,
+                        rhofit_coord=pandda_args.rhofit_coord, )
                 else:
-                    autobuild_func = Partial(autobuild_rhofit,
-                                             cif_strategy=pandda_args.cif_strategy,
-                                             rhofit_coord=pandda_args.rhofit_coord,
-                                             )
+                    autobuild_func = Partial(
+                        autobuild_rhofit,
+                        cif_strategy=pandda_args.cif_strategy,
+                        rhofit_coord=pandda_args.rhofit_coord,
+                    )
 
             elif pandda_args.autobuild_strategy == "inbuilt":
                 raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
-                # autobuild_parametrized = partial(
-                #     autobuild_inbuilt,
-                # )
+
 
             else:
                 raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")

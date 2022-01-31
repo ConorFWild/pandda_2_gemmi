@@ -965,7 +965,9 @@ def score_structure_signal_to_noise(structure, xmap, cutoff=2.0, radius=1.2):
 def score_structure_path(path: Path, xmap):
     structure = gemmi.read_structure(str(path))
     # score = score_structure(structure, xmap)
-    score, rescore_log = score_structure_signal_to_noise_density(structure, xmap)
+    # score, rescore_log = score_structure_signal_to_noise_density(structure, xmap)
+    score, rescore_log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+        structure, xmap)
 
     return score, rescore_log
 
