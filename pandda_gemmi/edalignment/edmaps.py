@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Tuple
 
 from joblib.externals.loky import set_loky_pickler
-
 set_loky_pickler('pickle')
-
+import ray
 
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
@@ -580,3 +579,19 @@ class XmapArray:
         view = self.xmap_array[mask_array]
 
         return XmapArray([_dtag for _dtag in self.dtag_list if _dtag in dtags], view)
+
+@ray.remote
+def from_unaligned_dataset_c(dataset: Dataset,
+                                  alignment: Alignment,
+                                  grid: Grid,
+                                  structure_factors: StructureFactors,
+                                  sample_rate: float = 3.0, ):
+    xmap = Xmap.from_unaligned_dataset_c(dataset,
+                                         alignment,
+                                         grid,
+                                         structure_factors,
+                                         # sample_rate,
+                                         dataset.reflections.resolution().resolution/0.5
+                                         )
+
+    return xmap

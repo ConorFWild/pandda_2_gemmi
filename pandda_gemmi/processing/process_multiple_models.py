@@ -33,7 +33,7 @@ from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
 from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
                                   Resolution, )
 from pandda_gemmi.shells import Shell, ShellMultipleModels
-from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid
+from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_clusters
 
@@ -1264,8 +1264,9 @@ def process_shell_multiple_models(
     # )
 
     results = process_local_in_shell(
-        [Partial(
-            Xmap.from_unaligned_dataset_c,
+        [
+            Partial(
+            from_unaligned_dataset_c,
             shell_truncated_datasets[key],
             alignments[key],
             grid = grid,
