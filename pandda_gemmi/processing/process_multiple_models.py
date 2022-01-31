@@ -890,7 +890,7 @@ def analyse_model_ray(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
-        debug=False
+        debug
     )
 
 def dump_and_load(ob, name):
@@ -1003,7 +1003,7 @@ def process_dataset_multiple_models(
                 cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
                 min_blob_volume=min_blob_volume,
                 min_blob_z_peak=min_blob_z_peak,
-                debug=False
+                debug=debug
             )
             for model_number, model
             in models.items()]
