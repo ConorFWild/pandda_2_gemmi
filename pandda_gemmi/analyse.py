@@ -256,16 +256,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.autobuild_strategy == "rhofit":
 
                 if pandda_args.local_processing == "ray":
-                    autobuild_func = Partial(
-                        autobuild_rhofit_ray,
-                        cif_strategy=pandda_args.cif_strategy,
-                        rhofit_coord=pandda_args.rhofit_coord, )
+                    autobuild_func = autobuild_rhofit_ray
                 else:
-                    autobuild_func = Partial(
-                        autobuild_rhofit,
-                        cif_strategy=pandda_args.cif_strategy,
-                        rhofit_coord=pandda_args.rhofit_coord,
-                    )
+                    autobuild_func = autobuild_rhofit,
 
             elif pandda_args.autobuild_strategy == "inbuilt":
                 raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
