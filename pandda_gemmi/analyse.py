@@ -79,6 +79,135 @@ analyse_model_ray
 printer = pprint.PrettyPrinter()
 
 
+def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
+    if pandda_args.comparison_strategy == "closest":
+        # Closest datasets after clustering
+        raise NotImplementedError()
+        # comparators: Dict[Dtag, List[Dtag]] = ...
+    #
+    # elif pandda_args.comparison_strategy == "closest_cutoff":
+    #     # Closest datasets after clustering as long as they are not too poor res
+    #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
+    #         datasets,
+    #         alignments,
+    #         grid,
+    #         pandda_args.comparison_min_comparators,
+    #         pandda_args.comparison_max_comparators,
+    #         structure_factors,
+    #         pandda_args.sample_rate,
+    #         pandda_args.comparison_res_cutoff,
+    #         pandda_fs_model,
+    #         process_local,
+    #         pandda_args.exclude_local,
+    #     )
+    #
+    # elif pandda_args.comparison_strategy == "closest_cluster":
+    #
+    #     get_clusters = get_clusters_nn  # get_clusters_linkage
+    #     # Closest datasets after clustering as long as they are not too poor res
+    #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
+    #         datasets,
+    #         alignments,
+    #         grid,
+    #         pandda_args.comparison_min_comparators,
+    #         pandda_args.comparison_max_comparators,
+    #         structure_factors,
+    #         pandda_args.sample_rate,
+    #         pandda_args.comparison_res_cutoff,
+    #         pandda_fs_model,
+    #         process_local,
+    #         get_clusters,
+    #         cluster_selection=pandda_args.cluster_selection,
+    #     )
+
+    elif pandda_args.comparison_strategy == "high_res":
+        # Almost Old PanDDA strategy: highest res datasets
+        # comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
+        #     datasets,
+        #     pandda_args.comparison_min_comparators,
+        #     pandda_args.comparison_max_comparators,
+        # )
+        comparators_func = Partial(
+            get_comparators_high_res,
+            comparison_min_comparators=pandda_args.comparison_min_comparators,
+            comparison_max_comparators=pandda_args.comparison_max_comparators,
+        )
+
+    elif pandda_args.comparison_strategy == "high_res_random":
+        # Old pandda strategy: random datasets that are higher resolution
+        # comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
+        #     datasets,
+        #     pandda_args.comparison_min_comparators,
+        #     pandda_args.comparison_max_comparators,
+        # )
+        comparators_func= Partial(
+            get_comparators_high_res_random,
+            comparison_min_comparators=pandda_args.comparison_min_comparators,
+            comparison_max_comparators=pandda_args.comparison_max_comparators,
+        )
+
+    # elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
+    #     if not pandda_args.known_apos:
+    #         known_apos = [dtag for dtag in datasets if
+    #                       pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+    #     else:
+    #         known_apos = [Dtag(dtag) for dtag in pandda_args.known_apos]
+    #         for known_apo in known_apos:
+    #             if known_apo not in datasets:
+    #                 raise Exception(
+    #                     f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
+    #                     f"dataset dtags: {list(datasets.keys())}"
+    #                 )
+    #
+    #     pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
+    #
+    #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
+    #         datasets,
+    #         alignments,
+    #         grid,
+    #         structure_factors,
+    #         pandda_args.comparison_min_comparators,
+    #         pandda_args.comparison_max_comparators,
+    #         pandda_args.sample_rate,
+    #         pandda_args.comparison_res_cutoff,
+    #         pandda_fs_model,
+    #         process_local,
+    #         known_apos,
+    #     )
+
+    # elif pandda_args.comparison_strategy == "local":
+    #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
+    #         reference,
+    #         datasets,
+    #         alignments,
+    #         grid,
+    #         pandda_args.comparison_min_comparators,
+    #         pandda_args.comparison_max_comparators,
+    #         structure_factors,
+    #         pandda_args.sample_rate,
+    #         pandda_args.comparison_res_cutoff,
+    #         pandda_fs_model,
+    #         process_local,
+    #     )
+
+    elif pandda_args.comparison_strategy == "cluster":
+        comparators_func = Partial(
+            get_multiple_comparator_sets,
+            comparison_min_comparators=pandda_args.comparison_min_comparators,
+            sample_rate=pandda_args.sample_rate,
+            # TODO: add option: pandda_args.resolution_cutoff,
+            resolution_cutoff=3.0,
+            load_xmap_flat_func=load_xmap_flat_func,
+            process_local=process_local,
+            debug=pandda_args.debug,
+        )
+
+    else:
+        raise Exception("Unrecognised comparison strategy")
+
+    return comparators_func
+
+
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -173,49 +302,67 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         load_xmap_flat_func = from_unaligned_dataset_c_flat
         analyse_model_func = analyse_model_ray
 
-    with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
-                       '\tBuilt file system model!'):
-        time_fs_model_building_start = time.time()
-        pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
-            pandda_args.data_dirs,
-            pandda_args.out_dir,
-            pandda_args.pdb_regex,
-            pandda_args.mtz_regex,
-            pandda_args.ligand_dir_regex,
-            pandda_args.ligand_cif_regex,
-            pandda_args.ligand_pdb_regex,
-            pandda_args.ligand_smiles_regex,
-            process_local=None
-        )
-        pandda_fs_model.build(process_local=None)
-        time_fs_model_building_finish = time.time()
-        pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
+    comparators_func = get_comparator_func(
+        pandda_args,
+        load_xmap_flat_func,
+        process_local
+    )
+
+    # Set up autobuilding
+    if pandda_args.autobuild:
+
+        with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+            if pandda_args.autobuild_strategy == "rhofit":
+
+                autobuild_parametrized = Partial(
+                    autobuild_rhofit,
+                    cif_strategy=pandda_args.cif_strategy,
+                    rhofit_coord=pandda_args.rhofit_coord,
+                )
+                if pandda_args.local_processing == "ray":
+                    autobuild_func = Partial(autobuild_rhofit_ray,
+                                             cif_strategy=pandda_args.cif_strategy,
+                                             rhofit_coord=pandda_args.rhofit_coord,)
+                else:
+                    autobuild_func = Partial(autobuild_rhofit,
+                                             cif_strategy=pandda_args.cif_strategy,
+                                             rhofit_coord=pandda_args.rhofit_coord,
+                                             )
+
+            elif pandda_args.autobuild_strategy == "inbuilt":
+                autobuild_parametrized = partial(
+                    autobuild_inbuilt,
+                )
+
+            else:
+                raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+
+
+
 
     try:
 
-        # Set up autobuilding
-        if pandda_args.autobuild:
+        ###################################################################
+        # # Get datasets
+        ###################################################################
 
-            with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
-                if pandda_args.autobuild_strategy == "rhofit":
-
-                    autobuild_parametrized = Partial(
-                        autobuild_rhofit,
-                        cif_strategy=pandda_args.cif_strategy,
-                        rhofit_coord=pandda_args.rhofit_coord,
-                    )
-                    if pandda_args.local_processing == "ray":
-                        autobuild_func = autobuild_rhofit_ray
-                    else:
-                        autobuild_func = autobuild_rhofit
-
-                elif pandda_args.autobuild_strategy == "inbuilt":
-                    autobuild_parametrized = partial(
-                        autobuild_inbuilt,
-                    )
-
-                else:
-                    raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+        with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
+                           '\tBuilt file system model!'):
+            time_fs_model_building_start = time.time()
+            pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
+                pandda_args.data_dirs,
+                pandda_args.out_dir,
+                pandda_args.pdb_regex,
+                pandda_args.mtz_regex,
+                pandda_args.ligand_dir_regex,
+                pandda_args.ligand_cif_regex,
+                pandda_args.ligand_pdb_regex,
+                pandda_args.ligand_smiles_regex,
+                process_local=None
+            )
+            pandda_fs_model.build(process_local=None)
+            time_fs_model_building_finish = time.time()
+            pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
         ###################################################################
         # # Pre-pandda
@@ -347,95 +494,15 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
                            f'\tDone!'):
-            # Assign comparator set for each dataset
-            if pandda_args.comparison_strategy == "closest":
-                # Closest datasets after clustering
-                raise NotImplementedError()
-                # comparators: Dict[Dtag, List[Dtag]] = ...
-
-            elif pandda_args.comparison_strategy == "closest_cutoff":
-                # Closest datasets after clustering as long as they are not too poor res
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                    structure_factors,
-                    pandda_args.sample_rate,
-                    pandda_args.comparison_res_cutoff,
-                    pandda_fs_model,
-                    process_local,
-                    pandda_args.exclude_local,
-                )
-
-            elif pandda_args.comparison_strategy == "closest_cluster":
-
-                get_clusters = get_clusters_nn  # get_clusters_linkage
-                # Closest datasets after clustering as long as they are not too poor res
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                    structure_factors,
-                    pandda_args.sample_rate,
-                    pandda_args.comparison_res_cutoff,
-                    pandda_fs_model,
-                    process_local,
-                    get_clusters,
-                    cluster_selection=pandda_args.cluster_selection,
-                )
-
-            elif pandda_args.comparison_strategy == "high_res":
-                # Almost Old PanDDA strategy: highest res datasets
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
-                    datasets,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                )
-
-            elif pandda_args.comparison_strategy == "high_res_random":
-                # Old pandda strategy: random datasets that are higher resolution
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
-                    datasets,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                )
-
-            elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
-                if not pandda_args.known_apos:
-                    known_apos = [dtag for dtag in datasets if
-                                  pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
-                else:
-                    known_apos = [Dtag(dtag) for dtag in pandda_args.known_apos]
-                    for known_apo in known_apos:
-                        if known_apo not in datasets:
-                            raise Exception(
-                                f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
-                                f"dataset dtags: {list(datasets.keys())}"
-                            )
-
-                pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
-
-                comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_args.comparison_min_comparators,
-                    pandda_args.comparison_max_comparators,
-                    structure_factors,
-                    pandda_args.sample_rate,
-                    pandda_args.comparison_res_cutoff,
-                    pandda_fs_model,
-                    process_local,
-                    known_apos,
-                )
-
-            # elif pandda_args.comparison_strategy == "local":
-            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
-            #         reference,
+            # # Assign comparator set for each dataset
+            # if pandda_args.comparison_strategy == "closest":
+            #     # Closest datasets after clustering
+            #     raise NotImplementedError()
+            #     # comparators: Dict[Dtag, List[Dtag]] = ...
+            #
+            # elif pandda_args.comparison_strategy == "closest_cutoff":
+            #     # Closest datasets after clustering as long as they are not too poor res
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cutoff(
             #         datasets,
             #         alignments,
             #         grid,
@@ -446,30 +513,116 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             #         pandda_args.comparison_res_cutoff,
             #         pandda_fs_model,
             #         process_local,
+            #         pandda_args.exclude_local,
             #     )
-
-            elif pandda_args.comparison_strategy == "cluster":
-                comparators: Dict[int, ComparatorCluster] = get_multiple_comparator_sets(
-                    datasets,
-                    alignments,
-                    grid,
-                    pandda_args.comparison_min_comparators,
-                    structure_factors,
-                    pandda_args.sample_rate,
-                    # TODO: add option: pandda_args.resolution_cutoff,
-                    3.0,
-                    load_xmap_flat_func,
-                    process_local,
-                    debug=pandda_args.debug,
-                )
-                # TODO
-                if pandda_args.debug:
-                    print('Got comparison set from clustering')
-                    for cluster_num, cluster in comparators.items():
-                        print(f'\tCluster num: {cluster_num}: {cluster.dtag}: {cluster.core_dtags[:5]}')
-
-            else:
-                raise Exception("Unrecognised comparison strategy")
+            #
+            # elif pandda_args.comparison_strategy == "closest_cluster":
+            #
+            #     get_clusters = get_clusters_nn  # get_clusters_linkage
+            #     # Closest datasets after clustering as long as they are not too poor res
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_cluster(
+            #         datasets,
+            #         alignments,
+            #         grid,
+            #         pandda_args.comparison_min_comparators,
+            #         pandda_args.comparison_max_comparators,
+            #         structure_factors,
+            #         pandda_args.sample_rate,
+            #         pandda_args.comparison_res_cutoff,
+            #         pandda_fs_model,
+            #         process_local,
+            #         get_clusters,
+            #         cluster_selection=pandda_args.cluster_selection,
+            #     )
+            #
+            # elif pandda_args.comparison_strategy == "high_res":
+            #     # Almost Old PanDDA strategy: highest res datasets
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res(
+            #         datasets,
+            #         pandda_args.comparison_min_comparators,
+            #         pandda_args.comparison_max_comparators,
+            #     )
+            #
+            # elif pandda_args.comparison_strategy == "high_res_random":
+            #     # Old pandda strategy: random datasets that are higher resolution
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_high_res_random(
+            #         datasets,
+            #         pandda_args.comparison_min_comparators,
+            #         pandda_args.comparison_max_comparators,
+            #     )
+            #
+            # elif pandda_args.comparison_strategy == "get_comparators_closest_apo_cutoff":
+            #     if not pandda_args.known_apos:
+            #         known_apos = [dtag for dtag in datasets if
+            #                       pandda_fs_model.processed_datasets[dtag].source_ligand_cif]
+            #     else:
+            #         known_apos = [Dtag(dtag) for dtag in pandda_args.known_apos]
+            #         for known_apo in known_apos:
+            #             if known_apo not in datasets:
+            #                 raise Exception(
+            #                     f"Human specified known apo {known_apo} of known apos: {known_apos} not in "
+            #                     f"dataset dtags: {list(datasets.keys())}"
+            #                 )
+            #
+            #     pandda_log[constants.LOG_KNOWN_APOS] = [dtag.dtag for dtag in known_apos]
+            #
+            #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_closest_apo_cutoff(
+            #         datasets,
+            #         alignments,
+            #         grid,
+            #         pandda_args.comparison_min_comparators,
+            #         pandda_args.comparison_max_comparators,
+            #         structure_factors,
+            #         pandda_args.sample_rate,
+            #         pandda_args.comparison_res_cutoff,
+            #         pandda_fs_model,
+            #         process_local,
+            #         known_apos,
+            #     )
+            #
+            # # elif pandda_args.comparison_strategy == "local":
+            # #     comparators: Dict[Dtag, List[Dtag]] = get_comparators_local(
+            # #         reference,
+            # #         datasets,
+            # #         alignments,
+            # #         grid,
+            # #         pandda_args.comparison_min_comparators,
+            # #         pandda_args.comparison_max_comparators,
+            # #         structure_factors,
+            # #         pandda_args.sample_rate,
+            # #         pandda_args.comparison_res_cutoff,
+            # #         pandda_fs_model,
+            # #         process_local,
+            # #     )
+            #
+            # elif pandda_args.comparison_strategy == "cluster":
+            #     comparators: Dict[int, ComparatorCluster] = get_multiple_comparator_sets(
+            #         datasets,
+            #         alignments,
+            #         grid,
+            #         pandda_args.comparison_min_comparators,
+            #         structure_factors,
+            #         pandda_args.sample_rate,
+            #         # TODO: add option: pandda_args.resolution_cutoff,
+            #         3.0,
+            #         load_xmap_flat_func,
+            #         process_local,
+            #         debug=pandda_args.debug,
+            #     )
+            #     # TODO
+            #     if pandda_args.debug:
+            #         print('Got comparison set from clustering')
+            #         for cluster_num, cluster in comparators.items():
+            #             print(f'\tCluster num: {cluster_num}: {cluster.dtag}: {cluster.core_dtags[:5]}')
+            #
+            # else:
+            #     raise Exception("Unrecognised comparison strategy")
+            comparators = comparators_func(
+                datasets,
+                          alignments,
+                          grid,
+                          structure_factors,
+            )
 
         if pandda_args.debug:
             print("Comparators are:")

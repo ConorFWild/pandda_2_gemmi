@@ -522,7 +522,10 @@ def load_and_reduce(
 
 
 def get_comparators_high_res(
-        datasets: Dict[Dtag, Dataset],
+        datasets,
+        alignments,
+        grid,
+        structure_factors,
         comparison_min_comparators,
         comparison_max_comparators,
 ):
@@ -545,7 +548,10 @@ def get_comparators_high_res(
 
 
 def get_comparators_high_res_random(
-        datasets: Dict[Dtag, Dataset],
+        datasets,
+        alignments,
+        grid,
+        structure_factors,
         comparison_min_comparators,
         comparison_max_comparators,
 ):
