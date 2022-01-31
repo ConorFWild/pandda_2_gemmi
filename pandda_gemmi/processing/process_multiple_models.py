@@ -638,7 +638,6 @@ def get_models(
 
     return models
 
-@ray.remote
 def analyse_model(
         model,
         model_number,
@@ -856,6 +855,7 @@ def analyse_model(
         print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
 
     return model_results, model_log
+
 
 @ray.remote
 def analyse_model_ray(
@@ -1344,7 +1344,7 @@ def process_shell_multiple_models(
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
 
-    process_dataset_paramaterized = partial(
+    process_dataset_paramaterized = Partial(
         process_dataset_multiple_models,
         models=models,
         shell=shell,
