@@ -141,6 +141,7 @@ def get_conformers(
         debug=False,
 ) -> MutableMapping[int, Chem.Mol]:
     # Decide how to load
+    fragment_structures = {}
     if fragment_dataset.source_ligand_smiles:
 
         if debug:
@@ -161,13 +162,12 @@ def get_conformers(
         if debug:
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
+        return fragment_structures
 
-    if not fragment_structures:
-
-        if fragment_dataset.source_ligand_pdb:
-            if debug:
-                print(f'\t\tGetting mol from ligand pdb')
-            fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+    elif fragment_dataset.source_ligand_pdb:
+        if debug:
+            print(f'\t\tGetting mol from ligand pdb')
+        fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
 
     if debug:
         print(fragment_structures)
