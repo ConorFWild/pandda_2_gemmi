@@ -122,7 +122,7 @@ def structures_from_cif(source_ligand_cif, debug=False):
         print(f"\t\t\tSmall structure sites: {small_structure.sites}")
 
     if len(small_structure.sites) == 0:
-        return None
+        return {}
 
     structure = structure_from_small_structure(small_structure)
 
