@@ -972,17 +972,55 @@ def score_structure_path(path: Path, xmap):
     return score, rescore_log
 
 
-def score_builds(rhofit_dir: Path, xmap_path):
+def score_builds(rhofit_dir: Path, score_structure_path, xmap_path, zmap_path):
     scores = {}
     rescoring_log = {}
 
     regex = "Hit_*.pdb"
     rescoring_log["regex"] = regex
 
-    xmap = get_ccp4_map(xmap_path).grid
+    event_map_reference_grid = get_ccp4_map(xmap_path).grid
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    score_structure = Structure.from_file(score_structure_path)
+
+    inner_mask = gemmi.Int8Grid(*[event_map_reference_grid.nu, event_map_reference_grid.nv, event_map_reference_grid.nw])
+    inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask.set_unit_cell(event_map_reference_grid.unit_cell)
+    for atom in score_structure.protein_atoms():
+        pos = atom.pos
+        inner_mask.set_points_around(pos,
+                                     radius=2.0,
+                                     value=1,
+                                     )
+
+
+    event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
+    event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
+
+    # Mask the protein except around the event
+    # inner_mask = grid.partitioning.inner_mask
+    inner_mask_array = np.array(
+        inner_mask,
+        copy=False,
+        dtype=np.int8,
+    )
+
+    z_map_reference_grid = get_ccp4_map(zmap_path).grid
+
+    z_map_reference_grid_array = np.array(z_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    inner_mask_array[z_map_reference_grid_array > 2.0] = 0.0
+    # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
+    event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
 
     for model_path in rhofit_dir.glob(regex):
-        score, rescore_log = score_structure_path(model_path, xmap)
+        score, rescore_log = score_structure_path(model_path, event_map_reference_grid)
         scores[str(model_path)] = score
         rescoring_log[str(model_path)] = rescore_log
 
@@ -1082,8 +1120,10 @@ def autobuild_rhofit(dataset: Dataset,
                      ):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
+    score_model_path = processed_dataset_dir.source_pdb
     score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
     # build_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
+    zmap_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     build_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
     # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"{event.event_id.event_idx.event_idx}"
@@ -1226,7 +1266,9 @@ def autobuild_rhofit(dataset: Dataset,
     # Score rhofit builds
     score_dictionary, rescoring_log = score_builds(
         out_dir / "rhofit",
+        score_model_path,
         score_map_path,
+        zmap_path
     )
 
     autobuilding_log["rescoring_log"] = rescoring_log
