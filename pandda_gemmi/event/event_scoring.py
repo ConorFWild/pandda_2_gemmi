@@ -156,18 +156,22 @@ def get_conformers(
 
         # Translate to structures
         fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
-        return fragment_structures
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
-    elif fragment_dataset.source_ligand_cif:
+    if fragment_dataset.source_ligand_cif:
         if debug:
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
-        return fragment_structures
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
-    elif fragment_dataset.source_ligand_pdb:
+    if fragment_dataset.source_ligand_pdb:
         if debug:
             print(f'\t\tGetting mol from ligand pdb')
         fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
     if debug:
         print(fragment_structures)
