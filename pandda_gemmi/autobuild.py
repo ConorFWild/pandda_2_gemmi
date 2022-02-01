@@ -929,8 +929,8 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
           f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
-    _score = ((_signal/len(structure_samples)) - np.sqrt(_noise/len(noise_samples))) - np.sqrt(
-            signal_overlapping_protein_penalty/len(signal_samples))
+    _score = ((_signal / len(structure_samples)) - np.sqrt(_noise / len(noise_samples))) - np.sqrt(
+        signal_overlapping_protein_penalty / len(signal_samples))
 
     return _score, rescore_log
 
@@ -972,7 +972,7 @@ def score_structure_path(path: Path, xmap):
     return score, rescore_log
 
 
-def score_builds(rhofit_dir: Path, score_structure_path, xmap_path, zmap_path):
+def score_builds(rhofit_dir: Path, score_model_path, xmap_path, zmap_path):
     scores = {}
     rescoring_log = {}
 
@@ -985,18 +985,18 @@ def score_builds(rhofit_dir: Path, score_structure_path, xmap_path, zmap_path):
                                               copy=False,
                                               )
 
-    score_structure = Structure.from_file(score_structure_path)
+    score_model = Structure.from_file(score_model_path)
 
-    inner_mask = gemmi.Int8Grid(*[event_map_reference_grid.nu, event_map_reference_grid.nv, event_map_reference_grid.nw])
+    inner_mask = gemmi.Int8Grid(
+        *[event_map_reference_grid.nu, event_map_reference_grid.nv, event_map_reference_grid.nw])
     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask.set_unit_cell(event_map_reference_grid.unit_cell)
-    for atom in score_structure.protein_atoms():
+    for atom in score_model.protein_atoms():
         pos = atom.pos
         inner_mask.set_points_around(pos,
                                      radius=2.0,
                                      value=1,
                                      )
-
 
     event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
     event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
@@ -1012,8 +1012,8 @@ def score_builds(rhofit_dir: Path, score_structure_path, xmap_path, zmap_path):
     z_map_reference_grid = get_ccp4_map(zmap_path).grid
 
     z_map_reference_grid_array = np.array(z_map_reference_grid,
-                                              copy=False,
-                                              )
+                                          copy=False,
+                                          )
 
     inner_mask_array[z_map_reference_grid_array > 2.0] = 0.0
     # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
@@ -1310,17 +1310,18 @@ def autobuild_rhofit(dataset: Dataset,
         rhofit_command
     )
 
+
 @ray.remote
 def autobuild_rhofit_ray(dataset: Dataset,
-                     event: Event,
-                     pandda_fs,
-                     cif_strategy,
-                     cut: float = 2.0,
-                     rhofit_coord: bool = False,):
+                         event: Event,
+                         pandda_fs,
+                         cif_strategy,
+                         cut: float = 2.0,
+                         rhofit_coord: bool = False, ):
     return autobuild_rhofit(dataset,
-                     event,
-                     pandda_fs,
-                     cif_strategy,
-                     cut,
-                     rhofit_coord,
-    )
+                            event,
+                            pandda_fs,
+                            cif_strategy,
+                            cut,
+                            rhofit_coord,
+                            )
