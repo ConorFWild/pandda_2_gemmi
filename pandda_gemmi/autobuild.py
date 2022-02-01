@@ -986,7 +986,6 @@ def score_builds(rhofit_dir: Path, score_model_path, xmap_path, zmap_path):
                                               )
 
     score_model = Structure.from_file(score_model_path)
-
     inner_mask = gemmi.Int8Grid(
         *[event_map_reference_grid.nu, event_map_reference_grid.nv, event_map_reference_grid.nw])
     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
