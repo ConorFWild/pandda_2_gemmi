@@ -13,7 +13,7 @@ import pickle
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
-
+import ray
 
 ## Custom Imports
 from pandda_gemmi.logs import (
@@ -28,12 +28,12 @@ from pandda_gemmi.pandda_functions import (
     save_reference_frame_zmap,
 )
 from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID
+from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
 from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
                                   Resolution, )
 from pandda_gemmi.shells import Shell, ShellMultipleModels
-from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid
+from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_clusters
 
@@ -638,7 +638,6 @@ def get_models(
 
     return models
 
-
 def analyse_model(
         model,
         model_number,
@@ -858,6 +857,42 @@ def analyse_model(
     return model_results, model_log
 
 
+@ray.remote
+def analyse_model_ray(
+        model,
+        model_number,
+        test_dtag,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        debug=False
+):
+    return analyse_model(
+        model,
+        model_number,
+        test_dtag,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        debug
+    )
+
 def dump_and_load(ob, name):
     print(f"Testing: {name}")
 
@@ -905,6 +940,7 @@ def process_dataset_multiple_models(
         min_bdc, max_bdc,
         sample_rate,
         statmaps,
+        analyse_model_func,
         process_local=process_local_serial,
         debug=False,
 ):
@@ -921,29 +957,53 @@ def process_dataset_multiple_models(
     ###################################################################
 
     time_model_analysis_start = time.time()
-    analyse_model_paramaterised = partial(
-        analyse_model,
-        test_dtag=test_dtag,
-        dataset_xmap=dataset_xmaps[test_dtag],
-        reference=reference,
-        grid=grid,
-        dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
-        dataset_alignment=alignments[test_dtag],
-        max_site_distance_cutoff=max_site_distance_cutoff,
-        min_bdc=min_bdc, max_bdc=max_bdc,
-        contour_level=contour_level,
-        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-        min_blob_volume=min_blob_volume,
-        min_blob_z_peak=min_blob_z_peak,
-        debug=False
-    )
+    # analyse_model_paramaterised = partial(
+    #     analyse_model,
+    #     test_dtag=test_dtag,
+    #     dataset_xmap=dataset_xmaps[test_dtag],
+    #     reference=reference,
+    #     grid=grid,
+    #     dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
+    #     dataset_alignment=alignments[test_dtag],
+    #     max_site_distance_cutoff=max_site_distance_cutoff,
+    #     min_bdc=min_bdc, max_bdc=max_bdc,
+    #     contour_level=contour_level,
+    #     cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+    #     min_blob_volume=min_blob_volume,
+    #     min_blob_z_peak=min_blob_z_peak,
+    #     debug=False
+    # )
+    #
+    # results = process_local(
+    #     [
+    #         Partial(
+    #             analyse_model_paramaterised,
+    #             model,
+    #             model_number,
+    #         )
+    #         for model_number, model
+    #         in models.items()]
+    # )
 
     results = process_local(
         [
-            partial(
-                analyse_model_paramaterised,
+            Partial(
+                analyse_model_func,
                 model,
                 model_number,
+                test_dtag=test_dtag,
+                dataset_xmap=dataset_xmaps[test_dtag],
+                reference=reference,
+                grid=grid,
+                dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
+                dataset_alignment=alignments[test_dtag],
+                max_site_distance_cutoff=max_site_distance_cutoff,
+                min_bdc=min_bdc, max_bdc=max_bdc,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                min_blob_volume=min_blob_volume,
+                min_blob_z_peak=min_blob_z_peak,
+                debug=debug
             )
             for model_number, model
             in models.items()]
@@ -1166,6 +1226,8 @@ def process_shell_multiple_models(
         max_bdc,
         memory_availability,
         statmaps,
+        load_xmap_func,
+        analyse_model_func,
         debug=False,
 ):
     if debug:
@@ -1220,19 +1282,34 @@ def process_shell_multiple_models(
 
     time_xmaps_start = time.time()
 
-    load_xmap_paramaterised = partial(
-        Xmap.from_unaligned_dataset_c,
-        grid=grid,
-        structure_factors=structure_factors,
-        # sample_rate=sample_rate,
-        sample_rate=shell.res / 0.5
-    )
+    # load_xmap_paramaterised = partial(
+    #     Xmap.from_unaligned_dataset_c,
+    #     grid=grid,
+    #     structure_factors=structure_factors,
+    #     # sample_rate=sample_rate,
+    #     sample_rate=shell.res / 0.5
+    # )
+    #
+    # results = process_local_in_shell(
+    #     [partial(
+    #         load_xmap_paramaterised,
+    #         shell_truncated_datasets[key],
+    #         alignments[key],
+    #     )
+    #         for key
+    #         in shell_truncated_datasets
+    #     ]
+    # )
 
     results = process_local_in_shell(
-        [partial(
-            load_xmap_paramaterised,
+        [
+            Partial(
+            load_xmap_func,
             shell_truncated_datasets[key],
             alignments[key],
+            grid = grid,
+            structure_factors = structure_factors,
+            sample_rate = shell.res / 0.5,
         )
             for key
             in shell_truncated_datasets
@@ -1267,7 +1344,7 @@ def process_shell_multiple_models(
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
 
-    process_dataset_paramaterized = partial(
+    process_dataset_paramaterized = Partial(
         process_dataset_multiple_models,
         models=models,
         shell=shell,
@@ -1288,6 +1365,7 @@ def process_shell_multiple_models(
         # sample_rate=sample_rate,
         sample_rate=shell.res / 0.5,
         statmaps=statmaps,
+        analyse_model_func=analyse_model_func,
         process_local=process_local_in_dataset,
         debug=debug,
     )

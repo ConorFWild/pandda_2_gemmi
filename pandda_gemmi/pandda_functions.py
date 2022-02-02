@@ -18,9 +18,10 @@ import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 from matplotlib import pyplot as plt
 import gemmi
+import ray
 
 from pandda_gemmi import constants
-from pandda_gemmi.common import Dtag
+from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
 from pandda_gemmi.shells import Shell
@@ -29,7 +30,7 @@ from pandda_gemmi.model import Model, Zmap
 from pandda_gemmi.event import Event
 
 
-def run(func):
+def run(func: Partial):
     return func()
 
 
@@ -59,7 +60,7 @@ def process_local_joblib(funcs, n_jobs=6, verbose=0, max_nbytes=None):
     return results
 
 
-def process_local_multiprocessing(funcs, n_jobs=12, method="forkserver", estimate_times=False):
+def process_local_multiprocessing(funcs: List[Partial], n_jobs=12, method="forkserver", estimate_times=False):
     if method == "forkserver":
         try:
             mp.set_start_method("forkserver")
@@ -146,24 +147,34 @@ def trim_memory() -> int:
     return libc.malloc_trim(0)
 
 
-def process_local_dask(funcs, client=None):
-    processes = [client.submit(func) for func in funcs]
+def process_local_dask(funcs: List[Partial], client=None):
+    processes = [client.submit(f.func, *f.args, **f.kwargs) for f in funcs]
     progress(processes)
     results = client.gather(processes)
-    print("TRIMMING!")
+    print("COLLECTING!")
     client.run(gc.collect)
+    print("TRIMMING!")
     client.run(trim_memory)
+    print("RESTARTING!")
     client.restart()
+    print("RESTARTED!")
 
     return results
 
 
-def process_shell_dask(funcs):
+def process_local_ray(funcs):
+    assert ray.is_initialized() == True
+    tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
+    results = ray.get(tasks)
+    return results
+
+
+def process_shell_dask(funcs: List[Partial]):
     from dask.distributed import worker_client
 
     with worker_client() as client:
         # Multiprocess
-        processes = [client.submit(func) for func in funcs]
+        processes = [client.submit(f.func, *f.args, **f.kwargs) for f in funcs]
         results = client.gather(processes)
 
     return results
@@ -511,7 +522,10 @@ def load_and_reduce(
 
 
 def get_comparators_high_res(
-        datasets: Dict[Dtag, Dataset],
+        datasets,
+        alignments,
+        grid,
+        structure_factors,
         comparison_min_comparators,
         comparison_max_comparators,
 ):
@@ -534,7 +548,10 @@ def get_comparators_high_res(
 
 
 def get_comparators_high_res_random(
-        datasets: Dict[Dtag, Dataset],
+        datasets,
+        alignments,
+        grid,
+        structure_factors,
         comparison_min_comparators,
         comparison_max_comparators,
 ):

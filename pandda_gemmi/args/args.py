@@ -28,7 +28,7 @@ class PanDDAArgs:
     high_res_lower_limit: float = 4.0
     high_res_increment: float = 0.05
     max_shell_datasets: int = 60
-    min_characterisation_datasets: int = 15
+    min_characterisation_datasets: int = constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT
     structure_factors: Optional[Tuple[str, str]] = None
     all_data_are_valid_values: bool = True
     low_resolution_completeness: float = 4.0
@@ -56,17 +56,17 @@ class PanDDAArgs:
     max_bdc: float = 0.95
     increment: float = 0.05
     output_multiplier: float = 2.0
-    comparison_strategy: str = "closest_cutoff"
+    comparison_strategy: str = constants.ARGS_COMPARISON_STRATEGY_DEFAULT
     comparison_res_cutoff: float = 0.5
     comparison_min_comparators: int = 30
     comparison_max_comparators: int = 30
     known_apos: Optional[List[str]] = None
     exclude_local: int = 5
     cluster_selection: str = "close"
-    local_processing: str = "multiprocessing_spawn"
-    local_cpus: int = 12
+    local_processing: str = constants.ARGS_LOCAL_PROCESSING_DEFAULT
+    local_cpus: int = constants.ARGS_LOCAL_CPUS_DEFAULT
     global_processing: str = "serial"
-    memory_availability: str = "high"
+    memory_availability: str = constants.ARGS_MEMORY_AVAILABILITY_DEFAULT
     job_params_file: Optional[str] = None
     distributed_scheduler: str = "SGE"
     distributed_queue: str = "medium.q"
@@ -80,7 +80,7 @@ class PanDDAArgs:
     distributed_walltime: str = "30:00:00"
     distributed_watcher: bool = False
     distributed_slurm_partition: Optional[str] = None
-    autobuild: bool = False
+    autobuild: bool = constants.ARGS_AUTOBUILD_DEFAULT
     autobuild_strategy: str = "rhofit"
     rhofit_coord: bool = False
     cif_strategy: str = "elbow"
@@ -151,13 +151,13 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_LOCAL_PROCESSING,
             type=str,
-            default='multiprocessing_spawn',
+            default=constants.ARGS_LOCAL_PROCESSING_DEFAULT,
             help=constants.ARGS_LOCAL_PROCESSING_HELP,
         )
         parser.add_argument(
             constants.ARGS_LOCAL_CPUS,
             type=int,
-            default=12,
+            default=constants.ARGS_LOCAL_CPUS_DEFAULT,
             help=constants.ARGS_LOCAL_CPUS_HELP,
         )
         parser.add_argument(
@@ -169,7 +169,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_MEMORY_AVAILABILITY,
             type=str,
-            default='high',
+            default=constants.ARGS_MEMORY_AVAILABILITY_DEFAULT,
             help=constants.ARGS_MEMORY_AVAILABILITY_HELP,
         )
         parser.add_argument(
@@ -326,7 +326,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_COMPARISON_STRATEGY,
             type=str,
-            default='closest_cutoff',
+            default=constants.ARGS_COMPARISON_STRATEGY_DEFAULT,
             help=constants.ARGS_COMPARISON_STRATEGY_HELP,
         )
         parser.add_argument(
@@ -400,7 +400,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_MIN_CHARACTERISATION_DATASETS,
             type=int,
-            default=15,
+            default=constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT,
             help=constants.ARGS_MIN_CHARACTERISATION_DATASETS_HELP,
         )
 
@@ -557,7 +557,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_AUTOBUILD,
             type=bool,
-            default=False,
+            default=constants.ARGS_AUTOBUILD_DEFAULT,
             help=constants.ARGS_AUTOBUILD_HELP,
         )
         parser.add_argument(

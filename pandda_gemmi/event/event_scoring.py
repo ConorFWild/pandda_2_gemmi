@@ -122,7 +122,7 @@ def structures_from_cif(source_ligand_cif, debug=False):
         print(f"\t\t\tSmall structure sites: {small_structure.sites}")
 
     if len(small_structure.sites) == 0:
-        return None
+        return {}
 
     structure = structure_from_small_structure(small_structure)
 
@@ -141,6 +141,7 @@ def get_conformers(
         debug=False,
 ) -> MutableMapping[int, Chem.Mol]:
     # Decide how to load
+    fragment_structures = {}
     if fragment_dataset.source_ligand_smiles:
 
         if debug:
@@ -155,19 +156,22 @@ def get_conformers(
 
         # Translate to structures
         fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
-        return fragment_structures
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
-    elif fragment_dataset.source_ligand_cif:
+    if fragment_dataset.source_ligand_cif:
         if debug:
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
-    if not fragment_structures:
-
-        if fragment_dataset.source_ligand_pdb:
-            if debug:
-                print(f'\t\tGetting mol from ligand pdb')
-            fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+    if fragment_dataset.source_ligand_pdb:
+        if debug:
+            print(f'\t\tGetting mol from ligand pdb')
+        fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+        if len(fragment_structures) > 0:
+            return fragment_structures
 
     if debug:
         print(fragment_structures)
@@ -494,6 +498,10 @@ def score_clusters(
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
     scores = {}
+
+    if len(fragment_conformers) == 0:
+        return scores
+
     for cluster_id, cluster in clusters.items():
         if debug:
             print(f"\t\t\t\tProcessing cluster: {cluster_id}")

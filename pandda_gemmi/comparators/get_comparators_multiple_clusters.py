@@ -9,32 +9,16 @@ import dataclasses
 import numpy as np
 from sklearn import metrics
 from matplotlib import pyplot as plt
+import ray
 
-from pandda_gemmi.common import Dtag
+from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 
 
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
-def from_unaligned_dataset_c_flat(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
-                                  sample_rate: float = 3.0, ):
-    xmap = Xmap.from_unaligned_dataset_c(dataset,
-                                         alignment,
-                                         grid,
-                                         structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
-                                         )
 
-    xmap_array = xmap.to_array()
-
-    masked_array = xmap_array[grid.partitioning.total_mask == 1]
-
-    return masked_array
 
 
 def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
@@ -171,7 +155,8 @@ def get_reduced_array(
         process_local,
         dtag_array,
         dtag_list,
-        load_xmap_paramaterised,
+        load_xmap_flat_func,
+grid, structure_factors, sample_rate,
         debug=False
 ):
     # Get reduced array
@@ -202,60 +187,92 @@ def get_reduced_array(
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
 
-    for batch in batches:
-        from dask.distributed.diagnostics import MemorySampler
+    from dask.distributed import performance_report
 
-        ms = MemorySampler()
-        with ms.sample(f"collection {batch}"):
+    for batch in batches:
+
+        # ms = MemorySampler()
+        # with performance_report(filename=f"collection_{batch}.html"):
 
             # if debug:
             #     print(f'\t\t\tProcessing batch: {batch}')
-            start = time.time()
-            results = process_local(
-                [
-                    partial(
-                        load_xmap_paramaterised,
-                        shell_truncated_datasets[key],
-                        alignments[key],
-                    )
-                    for key
-                    in dtag_array[batch]
-                ]
-            )
+        start = time.time()
+        # results = process_local(
+        #     [
+        #         partial(
+        #             load_xmap_paramaterised,
+        #             shell_truncated_datasets[key],
+        #             alignments[key],
+        #         )
+        #         for key
+        #         in dtag_array[batch]
+        #     ]
+        # )
 
-            # Get the maps as arrays
-            xmaps = {dtag: xmap
-                     for dtag, xmap
-                     in zip(dtag_list, results)
-                     }
+        results = process_local(
+            [
+                Partial(
+                    load_xmap_flat_func,
+                    shell_truncated_datasets[key],
+                    alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate=sample_rate,
+                )
+                for key
+                in dtag_array[batch]
+            ]
+        )
 
-            finish = time.time()
-            if debug:
-                # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
-                print(f'\t\t\tProcessing batch in {finish - start}')
 
 
-            # Get pca
-            xmap_array = np.vstack([xmap for xmap in xmaps.values()])
-            ipca.partial_fit(xmap_array)
+        # Get the maps as arrays
+        xmaps = {dtag: xmap
+                 for dtag, xmap
+                 in zip(dtag_list, results)
+                 }
 
-        ax = ms.plot(align=True)
-        f = plt.figure()
-        f.axes.append(ax)
-        f.savefig(f"{batch}.png")
-        plt.close('all')
+        finish = time.time()
+        if debug:
+            # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+            print(f'\t\t\tProcessing batch in {finish - start}')
+
+
+        # Get pca
+        xmap_array = np.vstack([xmap for xmap in xmaps.values()])
+        ipca.partial_fit(xmap_array)
+
+        # ax = ms.plot(align=True)
+        # f = plt.figure()
+        # f.axes.append(ax)
+        # f.savefig(f"{batch}.png")
+        # plt.close('all')
 
 
     # Transform
     transformed_arrays = []
     for batch in batches:
         start = time.time()
+        # results = process_local(
+        #     [
+        #         Partial(
+        #             load_xmap_paramaterised,
+        #             shell_truncated_datasets[key],
+        #             alignments[key],
+        #         )
+        #         for key
+        #         in dtag_array[batch]
+        #     ]
+        # )
         results = process_local(
             [
-                partial(
-                    load_xmap_paramaterised,
+                Partial(
+                    load_xmap_flat_func,
                     shell_truncated_datasets[key],
                     alignments[key],
+                    grid,
+                    structure_factors,
+                    sample_rate=sample_rate,
                 )
                 for key
                 in dtag_array[batch]
@@ -269,7 +286,9 @@ def get_reduced_array(
                  }
 
         finish = time.time()
-
+        if debug:
+            # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
+            print(f'\t\t\tProcessing batch for transform in {finish - start}')
         # Get pca
         xmap_array = np.vstack([xmap for xmap in xmaps.values()])
         transformed_arrays.append(ipca.transform(xmap_array))
@@ -324,11 +343,12 @@ def get_multiple_comparator_sets(
         datasets: Dict[Dtag, Dataset],
         alignments,
         grid,
-        comparison_min_comparators,
         structure_factors,
-        sample_rate,
-        resolution_cutoff,
-        process_local,
+        comparison_min_comparators=None,
+        sample_rate=3.0,
+        resolution_cutoff=None,
+        load_xmap_flat_func=None,
+        process_local=None,
         max_comparator_sets=None,
         debug=False,
 ) -> Dict[int, ComparatorCluster]:
@@ -374,12 +394,12 @@ def get_multiple_comparator_sets(
         print('\tTruncated suitable datasets to common resolution')
 
     # Generate aligned xmaps
-    load_xmap_paramaterised = partial(
-        from_unaligned_dataset_c_flat,
-        grid=grid,
-        structure_factors=structure_factors,
-        sample_rate=sample_rate,
-    )
+    # load_xmap_paramaterised = partial(
+    #     from_unaligned_dataset_c_flat,
+    #     grid=grid,
+    #     structure_factors=structure_factors,
+    #     sample_rate=sample_rate,
+    # )
 
     reduced_array = get_reduced_array(
         shell_truncated_datasets,
@@ -387,7 +407,8 @@ def get_multiple_comparator_sets(
         process_local,
         dtag_array,
         dtag_list,
-        load_xmap_paramaterised,
+        load_xmap_flat_func,
+        grid, structure_factors, sample_rate,
         debug=debug
     )
     if debug:
