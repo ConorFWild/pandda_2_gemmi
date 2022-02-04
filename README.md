@@ -10,6 +10,7 @@ conda activate pandda2
 conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib
 conda install -c conda-forge -y seaborn
 conda install -c conda-forge -y rdkit
+pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd /path/to/cloned/repository
 pip install .
