@@ -392,6 +392,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
             pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
 
+        if pandda_args.debug:
+            print(pandda_log[constants.LOG_DATASETS])
+
         # Grid
         with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
             grid: Grid = Grid.from_reference(reference,

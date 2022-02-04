@@ -7,14 +7,12 @@ import os
 import shutil
 from pathlib import Path
 
-
 from joblib.externals.loky import set_loky_pickler
 
 set_loky_pickler('pickle')
 
 from typing import *
 from functools import partial
-
 
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
@@ -135,15 +133,30 @@ class DatasetDir:
                 source_ligand_cif = None
 
             try:
-                ligands = ligand_search_path.rglob(ligand_pdb_regex)
-                source_ligand_pdb = next(ligands)
-            except:
-                source_ligand_pdb = None
-
-            try:
                 source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
             except:
                 source_ligand_smiles = None
+
+            try:
+                ligands = ligand_search_path.rglob(ligand_pdb_regex)
+
+                if source_ligand_cif:
+                    stem = source_ligand_cif.stem
+
+                elif source_ligand_smiles:
+                    stem = source_ligand_smiles.stem
+
+                else:
+                    stem = None
+
+                source_ligand_pdb = None
+                if stem:
+                    for ligand_path in ligands:
+                        if ligand_path.stem == stem:
+                            source_ligand_pdb = ligand_path
+
+            except:
+                source_ligand_pdb = None
 
             return DatasetDir(
                 path=path,
@@ -228,8 +241,6 @@ class ZMapFile:
         ccp4.write_ccp4_map(str(self.path))
 
 
-
-
 @dataclasses.dataclass()
 class MeanMapFile:
     path: Path
@@ -248,8 +259,6 @@ class MeanMapFile:
         ccp4.update_ccp4_header(2, True)
         ccp4.grid.symmetrize_max()
         ccp4.write_ccp4_map(str(self.path))
-
-
 
 
 @dataclasses.dataclass()
@@ -272,22 +281,18 @@ class StdMapFile:
         ccp4.write_ccp4_map(str(self.path))
 
 
-
-
 @dataclasses.dataclass()
 class EventMapFile:
     path: Path
 
     @staticmethod
     def from_event(event: Event, path: Path):
-        rounded_bdc = round(1-event.bdc.bdc, 2)
+        rounded_bdc = round(1 - event.bdc.bdc, 2)
         event_map_path = path / PANDDA_EVENT_MAP_FILE.format(dtag=event.event_id.dtag.dtag,
                                                              event_idx=event.event_id.event_idx.event_idx,
                                                              bdc=rounded_bdc,
                                                              )
         return EventMapFile(event_map_path)
-
-
 
 
 @dataclasses.dataclass()
