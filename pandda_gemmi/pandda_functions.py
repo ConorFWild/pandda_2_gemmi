@@ -526,6 +526,7 @@ def get_comparators_high_res(
         alignments,
         grid,
         structure_factors,
+        pandda_fs_model,
         comparison_min_comparators,
         comparison_max_comparators,
 ):
@@ -552,6 +553,7 @@ def get_comparators_high_res_random(
         alignments,
         grid,
         structure_factors,
+        pandda_fs_model,
         comparison_min_comparators,
         comparison_max_comparators,
 ):

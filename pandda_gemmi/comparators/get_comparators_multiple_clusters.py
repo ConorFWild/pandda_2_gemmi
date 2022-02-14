@@ -14,7 +14,7 @@ import ray
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
-
+from pandda_gemmi.plots import save_plot_pca_umap_bokeh
 
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
@@ -344,6 +344,7 @@ def get_multiple_comparator_sets(
         alignments,
         grid,
         structure_factors,
+        pandda_fs_model,
         comparison_min_comparators=None,
         sample_rate=3.0,
         resolution_cutoff=None,
@@ -413,6 +414,16 @@ def get_multiple_comparator_sets(
     )
     if debug:
         print('\tLoaded in datasets and found dimension reduced feature vectors')
+
+    known_apos= [dtag.dtag for dtag in shell_truncated_datasets]
+    lables = [dtag.dtag for dtag in shell_truncated_datasets]
+    out_file = pandda_fs_model.pandda_dir / f"pca_umap.html"
+    save_plot_pca_umap_bokeh(
+        reduced_array,
+        lables,
+        known_apos,
+        out_file
+    )
 
     distance_matrix, clusters = get_clusters_nn(
         reduced_array,
