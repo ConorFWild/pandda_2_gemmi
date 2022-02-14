@@ -422,6 +422,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 alignments,
                 grid,
                 structure_factors,
+                pandda_fs_model,
             )
 
         if pandda_args.debug:
