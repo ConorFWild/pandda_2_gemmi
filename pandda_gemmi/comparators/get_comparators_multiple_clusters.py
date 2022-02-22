@@ -10,6 +10,7 @@ import numpy as np
 from sklearn import metrics
 from matplotlib import pyplot as plt
 import ray
+import hdbscan
 
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
