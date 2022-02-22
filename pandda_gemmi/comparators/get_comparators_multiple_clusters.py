@@ -430,11 +430,12 @@ def get_multiple_comparator_sets(
     if debug:
         print('\tLoaded in datasets and found dimension reduced feature vectors')
 
-    clusters = get_cluster_assignment_hdbscan(reduced_array)
-    cluster_assignments = {dtag: cluster for dtag, cluster in zip(shell_truncated_datasets, clusters)}
+    cluster_annotations = get_cluster_assignment_hdbscan(reduced_array)
+    cluster_cluster_annotations_dict = {dtag: cluster for dtag, cluster in zip(shell_truncated_datasets,
+                                                                           cluster_annotations)}
 
     # known_apos= [dtag.dtag for dtag in shell_truncated_datasets]
-    known_apos = clusters
+    known_apos = cluster_annotations
     lables = [dtag.dtag for dtag in shell_truncated_datasets]
     out_file = pandda_fs_model.pandda_dir / f"pca_umap.html"
     save_plot_pca_umap_bokeh(
@@ -456,4 +457,4 @@ def get_multiple_comparator_sets(
     if max_comparator_sets:
         clusters = refine_comparator_clusters(clusters, max_comparator_sets)
 
-    return clusters, cluster_assignments
+    return clusters, cluster_cluster_annotations_dict
