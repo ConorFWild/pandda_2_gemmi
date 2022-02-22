@@ -342,9 +342,9 @@ def refine_comparator_clusters(clusters: Dict[int, ComparatorCluster], max_compa
 
 def get_cluster_assignment_hdbscan(reduced_array):
     clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=30,
-        min_samples=1,
-        cluster_selection_method="leaf",
+        # min_cluster_size=30,
+        # min_samples=1,
+        # cluster_selection_method="leaf",
     )
     clusterer.fit(reduced_array)
     labels = clusterer.labels_
