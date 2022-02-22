@@ -250,6 +250,7 @@ ARGS_LOCAL_PROCESSING_DEFAULT:str = "ray"
 ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
+ARGS_RANK_METHOD_DEFAULT: str = "autobuild"
 
 ###################################################################
 # # Logging constants
