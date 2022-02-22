@@ -442,7 +442,7 @@ def get_multiple_comparator_sets(
     lables = [dtag.dtag for dtag in shell_truncated_datasets]
     out_file = pandda_fs_model.pandda_dir / f"pca_umap.html"
     bokeh_scatter_plot(
-        reduced_array,
+        embedding,
         lables,
         known_apos,
         out_file
