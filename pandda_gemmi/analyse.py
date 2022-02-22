@@ -426,7 +426,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             )
 
         pandda_log["Cluster Assignments"] = {dtag.dtag: cluster for dtag, cluster in cluster_assignments.items()}
-        pandda_log["Neighbourhood summaries"] = {neighbourhood_number: [dtag.dtag for dtag in neighbourhood.core_dtags]
+        pandda_log["Neighbourhood core dtags"] = {neighbourhood_number: [dtag.dtag for dtag in neighbourhood.core_dtags]
                                                  for neighbourhood_number, neighbourhood
                                                  in comparators.items()
                                                  }
@@ -434,6 +434,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         if pandda_args.debug:
             print("Comparators are:")
+            printer.pprint(pandda_log["Cluster Assignments"])
+            printer.pprint(pandda_log["Neighbourhood core dtags"])
             printer.pprint(comparators)
 
         ###################################################################
