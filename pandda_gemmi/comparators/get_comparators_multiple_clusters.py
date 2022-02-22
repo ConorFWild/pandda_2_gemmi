@@ -339,6 +339,20 @@ def refine_comparator_clusters(clusters: Dict[int, ComparatorCluster], max_compa
     return clusters
 
 
+def get_cluster_assignment_hdbscan(reduced_array):
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=30,
+        min_samples=1,
+        cluster_selection_method="leaf",
+    )
+    clusterer.fit(reduced_array)
+    labels = clusterer.labels_
+    print(f"Labels are: {labels}")
+    probabilities = clusterer.probabilities_
+
+    return labels
+
+
 def get_multiple_comparator_sets(
         datasets: Dict[Dtag, Dataset],
         alignments,
@@ -415,7 +429,11 @@ def get_multiple_comparator_sets(
     if debug:
         print('\tLoaded in datasets and found dimension reduced feature vectors')
 
-    known_apos= [dtag.dtag for dtag in shell_truncated_datasets]
+    clusters = get_cluster_assignment_hdbscan(reduced_array)
+    cluster_assignments = {dtag: cluster for dtag, cluster in zip(shell_truncated_datasets, clusters)}
+
+    # known_apos= [dtag.dtag for dtag in shell_truncated_datasets]
+    known_apos = clusters
     lables = [dtag.dtag for dtag in shell_truncated_datasets]
     out_file = pandda_fs_model.pandda_dir / f"pca_umap.html"
     save_plot_pca_umap_bokeh(
@@ -437,4 +455,4 @@ def get_multiple_comparator_sets(
     if max_comparator_sets:
         clusters = refine_comparator_clusters(clusters, max_comparator_sets)
 
-    return clusters
+    return clusters, cluster_assignments

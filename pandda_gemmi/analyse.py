@@ -417,13 +417,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
                            f'\tDone!'):
 
-            comparators = comparators_func(
+            comparators, cluster_assignments = comparators_func(
                 datasets,
                 alignments,
                 grid,
                 structure_factors,
                 pandda_fs_model,
             )
+
+        pandda_log["Cluster Assignments"] = {dtag.dtag: cluster for dtag, cluster in cluster_assignments.items()}
+        pandda_log["Neighbourhood summaries"] = {neighbourhood_number: [dtag.dtag for dtag in neighbourhood.core_dtags]
+                                                 for neighbourhood_number, neighbourhood
+                                                 in comparators.items()
+                                                 }
+
 
         if pandda_args.debug:
             print("Comparators are:")
