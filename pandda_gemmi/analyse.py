@@ -425,8 +425,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-        pandda_log["Cluster Assignments"] = {dtag.dtag: cluster for dtag, cluster in cluster_assignments.items()}
-        pandda_log["Neighbourhood core dtags"] = {neighbourhood_number: [dtag.dtag for dtag in neighbourhood.core_dtags]
+        pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
+        pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
+                                                                          neighbourhood.core_dtags]
                                                  for neighbourhood_number, neighbourhood
                                                  in comparators.items()
                                                  }
