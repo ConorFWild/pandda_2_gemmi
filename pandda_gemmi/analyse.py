@@ -1,4 +1,5 @@
 # Base python
+import os
 import traceback
 from typing import Dict, List, Set
 import time
@@ -6,6 +7,7 @@ from pathlib import Path
 import pprint
 from functools import partial
 import multiprocessing as mp
+import json
 
 # Scientific python libraries
 from dask.distributed import Client
@@ -79,6 +81,13 @@ from pandda_gemmi.processing import (
 )
 
 printer = pprint.PrettyPrinter()
+
+def update_log(shell_log, shell_log_path):
+    if shell_log_path.exists():
+        os.remove(shell_log_path)
+
+    with open(shell_log_path, "w") as f:
+        json.dump(shell_log, f, indent=2)
 
 
 def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
@@ -291,6 +300,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             time_fs_model_building_finish = time.time()
             pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
+        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
         ###################################################################
         # # Pre-pandda
         ###################################################################
@@ -410,6 +421,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 datasets,
             )
 
+        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
@@ -425,18 +438,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-        pandda_log["Cluster Assignments"] = {dtag.dtag: cluster for dtag, cluster in cluster_assignments.items()}
-        pandda_log["Neighbourhood core dtags"] = {neighbourhood_number: [dtag.dtag for dtag in neighbourhood.core_dtags]
+        pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
+        pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
+                                                                          neighbourhood.core_dtags]
                                                  for neighbourhood_number, neighbourhood
                                                  in comparators.items()
                                                  }
-
 
         if pandda_args.debug:
             print("Comparators are:")
             printer.pprint(pandda_log["Cluster Assignments"])
             printer.pprint(pandda_log["Neighbourhood core dtags"])
             printer.pprint(comparators)
+
+        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
         # # Process shells
@@ -559,6 +574,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         for event_id, event in all_events.items():
             pandda_fs_model.processed_datasets[event_id.dtag].event_map_files.add_event(event)
 
+        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
         ###################################################################
         # # Autobuilding
         ###################################################################
@@ -650,6 +667,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
                     save_pdb_file(merged_structure, pandda_model_path)
 
+            update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
         ###################################################################
         # # Rank Events
         ###################################################################
@@ -675,6 +694,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     )
             else:
                 raise Exception(f"Ranking method: {pandda_args.rank_method} is unknown!")
+
+            update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
         # # Assign Sites
