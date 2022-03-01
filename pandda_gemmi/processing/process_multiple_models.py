@@ -699,7 +699,7 @@ def analyse_model(
     ###################################################################
     time_cluster_start = time.time()
 
-    # Get the clustered electron desnity outliers
+    # Get the clustered electron density outliers
 
     cluster_paramaterised = partial(
         Clustering.from_zmap,
