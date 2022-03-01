@@ -1038,9 +1038,22 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
     for receptor_model in receptor:
         for receptor_chain in receptor_model:
 
+            seqid_nums = []
+            for receptor_res in receptor_chain:
+                num = receptor_res.seqid.num
+                seqid_nums.append(num)
+
+            if len(seqid_nums) == 0:
+                min_ligand_seqid = 1
+            else:
+                min_ligand_seqid = min(seqid_nums) + 1
+
             for model in ligand:
                 for chain in model:
                     for residue in chain:
+
+                        residue.seqid.num = min_ligand_seqid
+
                         receptor_chain.add_residue(residue, pos=-1)
 
             break

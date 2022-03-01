@@ -86,7 +86,7 @@ class PanDDAArgs:
     autobuild_strategy: str = "rhofit"
     rhofit_coord: bool = False
     cif_strategy: str = "elbow"
-    rank_method: str = "size"
+    rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
     debug: bool = True
 
     @staticmethod
@@ -585,7 +585,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_RANK_METHOD,
             type=str,
-            default='size',
+            default=constants.ARGS_RANK_METHOD_DEFAULT,
             help=constants.ARGS_RANK_METHOD_HELP,
         )
 
