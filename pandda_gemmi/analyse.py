@@ -31,7 +31,7 @@ from pandda_gemmi.filters import remove_models_with_large_gaps
 from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
-    summarise_grid, save_json_log, summarise_datasets
+    summarise_grid, save_json_log, summarise_datasets, dump_datasets, dump_datasets_bfactor, pandda_note, pandda_warning
 )
 
 from pandda_gemmi.pandda_functions import (
@@ -89,6 +89,7 @@ def update_log(shell_log, shell_log_path):
     with open(shell_log_path, "w") as f:
         json.dump(shell_log, f, indent=2)
 
+pp = pprint.PrettyPrinter(indent=4, compact=False, sort_dicts=True)
 
 def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
     if pandda_args.comparison_strategy == "closest":
@@ -134,29 +135,36 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
 def get_process_local(pandda_args):
     if pandda_args.local_processing == "serial":
         process_local = process_local_serial
+        pandda_note("using process_local_serial")
 
     elif pandda_args.local_processing == "joblib":
         process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+        pandda_note("using process_local_joblib")
 
     elif pandda_args.local_processing == "multiprocessing_forkserver":
         mp.set_start_method("forkserver")
         process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
         # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        pandda_note("using process_local_multiprocessing [forkserver]")
 
     elif pandda_args.local_processing == "multiprocessing_spawn":
         mp.set_start_method("spawn")
         process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
         # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+        pandda_note("using process_local_multiprocessing [spawn]")
+
     elif pandda_args.local_processing == "dask":
         client = Client(n_workers=pandda_args.local_cpus)
         process_local = partial(
             process_local_dask,
             client=client
         )
+        pandda_note("using process_local_dask")
 
     elif pandda_args.local_processing == "ray":
         ray.init(num_cpus=pandda_args.local_cpus)
         process_local = partial(process_local_ray, )
+        pandda_note("using process_local_ray")
 
     else:
         raise Exception()
@@ -167,8 +175,10 @@ def get_process_local(pandda_args):
 def get_smooth_func(pandda_args):
     if pandda_args.local_processing == "ray":
         smooth_func = smooth_ray
+        pandda_note("using smooth_ray")
     else:
         smooth_func = smooth
+        pandda_note("using smooth")
 
     return smooth_func
 
@@ -176,16 +186,20 @@ def get_smooth_func(pandda_args):
 def get_load_xmap_func(pandda_args):
     if pandda_args.local_processing == "ray":
         load_xmap_func = from_unaligned_dataset_c_ray
+        pandda_note("using from_unaligned_dataset_c_ray")
     else:
         load_xmap_func = from_unaligned_dataset_c
+        pandda_note("using from_unaligned_dataset_c")
     return load_xmap_func
 
 
 def get_load_xmap_flat_func(pandda_args):
     if pandda_args.local_processing == "ray":
         load_xmap_flat_func = from_unaligned_dataset_c_flat_ray
+        pandda_note("using from_unaligned_dataset_c_flat_ray")
     else:
         load_xmap_flat_func = from_unaligned_dataset_c_flat
+        pandda_note("using from_unaligned_dataset_c_flat")
     return load_xmap_flat_func
 
 
@@ -206,12 +220,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Process args
     distributed_tmp = Path(pandda_args.distributed_tmp)
 
-    # CHeck dependencies
-    with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
+    # Check dependencies
+    with STDOUTManager('Checking dependencies ...','All dependencies validated!'):
         check_dependencies(pandda_args)
 
     # Initialise log
-    with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
+    with STDOUTManager('Initialising log ...','PanDDA log initialised!'):
         pandda_log: Dict = {}
         pandda_log[constants.LOG_START] = time.time()
         initial_args = log_arguments(pandda_args, )
@@ -219,7 +233,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
     # Get global processor
-    with STDOUTManager('Getting global processor...', '\tGot global processor!'):
+    with STDOUTManager('Getting global processor ...','Got global processor!'):
         if pandda_args.global_processing == "serial":
             process_global = process_global_serial
         elif pandda_args.global_processing == "distributed":
@@ -244,7 +258,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             raise Exception()
 
     # Get local processor
-    with STDOUTManager('Getting local processor...', '\tGot local processor!'):
+    with STDOUTManager('Getting local processor ...','Got local processor!'):
         process_local = get_process_local(pandda_args)
 
     smooth_func = get_smooth_func(pandda_args)
@@ -261,7 +275,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Set up autobuilding
     if pandda_args.autobuild:
 
-        with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+        with STDOUTManager('Setting up autobuilding ...','Set up autobuilding!'):
             if pandda_args.autobuild_strategy == "rhofit":
 
                 if pandda_args.local_processing == "ray":
@@ -276,14 +290,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             else:
                 raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
+    else:
+        pandda_note("no auto-building requested")
+
     try:
 
         ###################################################################
         # # Get datasets
         ###################################################################
 
-        with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
-                           '\tBuilt file system model!'):
+        with STDOUTManager('Building model of file system in {pandda_args.data_dirs} ...',
+                           'Built file system model!'):
             time_fs_model_building_start = time.time()
             pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
                 pandda_args.data_dirs,
@@ -307,11 +324,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
 
         # Get datasets
-        with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
+        with STDOUTManager('Loading datasets ...','Loaded datasets!'):
             datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
 
+        dump_datasets(datasets_initial)
+
         # If structure factors not given, check if any common ones are available
-        with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
+        with STDOUTManager('Looking for common structure factors in datasets ...','Found structure factors!'):
             if not pandda_args.structure_factors:
                 structure_factors = get_common_structure_factors(datasets_initial)
                 # If still no structure factors
@@ -321,50 +340,76 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             else:
                 structure_factors = StructureFactors(pandda_args.structure_factors[0], pandda_args.structure_factors[1])
 
+        printer.pprint(structure_factors)
+
         # Make dataset validator
         validation_strategy = partial(
             validate_strategy_num_datasets,
             min_characterisation_datasets=pandda_args.min_characterisation_datasets,
         )
-        validate_paramterized = partial(
+        validate_parameterized = partial(
             validate,
             strategy=validation_strategy,
         )
 
-        # Initial filters
-        with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
+        # this filter code is using the dataset_xyz from the previous
+        # step, which makes it a bit triclky to switch on/off specific
+        # filters. Ideally, each filter should just Initial
+        # filtersreturn the latest lif of datasets for the next step
+        # (which itself can be active or deactivated)
+
+        with STDOUTManager('Filtering datasets with invalid structure factors ...','Done!'):
             datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
                 structure_factors)
             pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
-            validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+            validate_parameterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+        for dtag in datasets_initial:
+            if dtag not in datasets_invalid:
+                print(f'\tremoved = ',dtag)
 
-        with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!'):
+        with STDOUTManager('Truncating MTZ columns to only those needed for PanDDA ...','Done!'):
             datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
+        for dtag in datasets_invalid:
+            if dtag not in datasets_truncated_columns:
+                print(f'\tremoved = ',dtag)
 
-        with STDOUTManager('Removing datasets with poor low resolution completeness...', f'\tDone!'):
+        with STDOUTManager('Removing datasets with poor low resolution completeness ...','Done!'):
             datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
                 pandda_args.low_resolution_completeness)
             pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
                                                  dtag not in datasets_low_res]
-            validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
+            validate_parameterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
+        for dtag in datasets_truncated_columns:
+            if dtag not in datasets_low_res:
+                print(f'\tremoved = ',dtag)
 
-        with STDOUTManager('Removing datasets with poor rfree...', f'\tDone!'):
-            datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
-            pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
-                                               dtag not in datasets_rfree]
-            validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
+        if pandda_args.max_rfree < 1:
+            with STDOUTManager('Removing datasets with poor rfree ...','Done!'):
+                datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
+                pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
+                                                   dtag not in datasets_rfree]
+                validate_parameterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
+            for dtag in datasets_low_res:
+                if dtag not in datasets_rfree:
+                    print(f'\tremoved = ',dtag)
+        else:
+            datasets_rfree = datasets_low_res
 
-        with STDOUTManager('Removing datasets with poor wilson rmsd...', f'\tDone!'):
+        with STDOUTManager('Removing datasets with poor wilson rmsd ...','Done!'):
             datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
                 pandda_args.max_wilson_plot_z_score)  # TODO
-            validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
+            validate_parameterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
+        for dtag in datasets_rfree:
+            if dtag not in datasets_wilson:
+                print(f'\tremoved = ',dtag)
 
-        # Select refernce
-        with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
+        # Select reference
+        with STDOUTManager('Deciding on reference dataset ...','Done!'):
             reference: Reference = Reference.from_datasets(datasets_wilson)
+        pp.pprint(reference.dtag)
 
         # Post-reference filters
-        with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
+        with STDOUTManager('Performing b-factor smoothing ...','Done!'):
             start = time.time()
             datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
                 reference,
@@ -375,51 +420,67 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             finish = time.time()
             pandda_log["Time to perform b factor smoothing"] = finish - start
 
-        with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
+        # CV: how do we know something happened ... and what? I expect
+        # some kind of parameter (B-factor? Scale?) per dtag ...
+        #pp.pprint(datasets_smoother)
+        dump_datasets_bfactor(datasets_smoother)
+
+        with STDOUTManager('Removing datasets with dissimilar models ...','Done!'):
             datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
                 reference,
                 pandda_args.max_rmsd_to_reference,
             )
             pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
                                                               dtag not in datasets_diss_struc]
-            validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
+            validate_parameterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
+        for dtag in datasets_smoother:
+            if dtag not in datasets_diss_struc:
+                print(f'\tremoved = ',dtag)
 
-        with STDOUTManager('Removing datasets whose models have large gaps...', f'\tDone!'):
-            datasets_gaps: Datasets = remove_models_with_large_gaps(datasets_diss_struc, reference, )
+        with STDOUTManager('Removing datasets whose models have large gaps ...','Done!'):
+            datasets_gaps: Datasets = remove_models_with_large_gaps(datasets_diss_struc, reference )
             for dtag in datasets_gaps:
                 if dtag not in datasets_diss_struc.datasets:
                     print(f"WARNING: Removed dataset {dtag} due to a large gap")
             pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
                                               dtag not in datasets_gaps]
-            validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
+            validate_parameterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
+        for dtag in datasets_diss_struc:
+            if dtag not in datasets_gaps:
+                print(f'\tremoved = ',dtag)
 
-        with STDOUTManager('Removing datasets with dissimilar spacegroups to the reference...', f'\tDone!'):
+        with STDOUTManager('Removing datasets with dissimilar spacegroups to the reference ...','Done!'):
             datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
             pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
                                             dtag not in datasets_diss_space]
-            validate_paramterized(datasets_diss_space,
+            validate_parameterized(datasets_diss_space,
                                   exception=Exception("Too few datasets after filter: space group"))
 
             datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
             pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
+        for dtag in datasets_gaps:
+            if dtag not in datasets_diss_space:
+                print(f'\tremoved = ',dtag)
 
         if pandda_args.debug:
             print(pandda_log[constants.LOG_DATASETS])
 
         # Grid
-        with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
+        with STDOUTManager('Getting the analysis grid ...','Done!'):
             grid: Grid = Grid.from_reference(reference,
                                              pandda_args.outer_mask,
                                              pandda_args.inner_mask_symmetry,
                                              # sample_rate=pandda_args.sample_rate,
                                              sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
                                              )
+        #pp.pprint(grid.grid)
 
-        with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
+        with STDOUTManager('Getting local alignments of the electron density to the reference ...','Done!'):
             alignments: Alignments = Alignments.from_datasets(
                 reference,
                 datasets,
             )
+        #pp.pprint(alignments)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -427,8 +488,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Assign comparison datasets
         ###################################################################
 
-        with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
-                           f'\tDone!'):
+        with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse ...','Done!'):
 
             comparators, cluster_assignments = comparators_func(
                 datasets,
@@ -437,6 +497,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 structure_factors,
                 pandda_fs_model,
             )
+        pandda_note("comparators below")
+        pp.pprint(comparators)
 
         pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
         pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
@@ -460,8 +522,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
         # sake of computational efficiency
         with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
-                           f'\tDone!'):
+                           'Done!'):
             if pandda_args.comparison_strategy == "cluster":
+                pandda_note("using comparison strategy = \"cluster\"")
                 shells = get_shells_multiple_models(
                     datasets,
                     comparators,
@@ -489,6 +552,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 )
             pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()
+
+        pandda_note("results (in shells) follow below")
+        pp.pprint(shells)
 
         if pandda_args.debug:
             printer.pprint(shells)
@@ -534,9 +600,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 statmaps=pandda_args.statmaps,
                 load_xmap_func=load_xmap_func,
             )
+        pandda_note("process_shell_paramaterised below")
+        pp.pprint(process_shell_paramaterised)
 
         # Process the shells
-        with STDOUTManager('Processing the shells...', f'\tDone!'):
+        with STDOUTManager('Processing the shells ...','Done!'):
             time_shells_start = time.time()
             shell_results: List[ShellResult] = process_global(
                 [
@@ -582,7 +650,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Autobuild the results if set to
         if pandda_args.autobuild:
-            with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
+            with STDOUTManager('Attempting to autobuild events ...','Done!'):
 
                 if pandda_args.global_processing == 'serial':
                     process_autobuilds = process_local
@@ -625,7 +693,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                     pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
 
-            with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
+            with STDOUTManager('Updating the PanDDA models with best scoring fragment build ...','Done!'):
                 # Add the best fragment by scoring method to default model
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
@@ -672,17 +740,21 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Rank Events
         ###################################################################
-        with STDOUTManager('Ranking events...', f'\tDone!'):
+        with STDOUTManager('Ranking events ...','Done!'):
             if pandda_args.rank_method == "size":
+                pandda_note("ranking by size")
                 all_events_ranked = rank_events_size(all_events, grid)
             elif pandda_args.rank_method == "size_delta":
+                pandda_note("ranking by size_delta")
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_size_delta()
             elif pandda_args.rank_method == "cnn":
+                pandda_note("ranking by cnn")
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_cnn()
 
             elif pandda_args.rank_method == "autobuild":
+                pandda_note("ranking by autobuild")
                 if not pandda_args.autobuild:
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")
                 else:
@@ -697,25 +769,29 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
+        pp.print(all_events_ranked)
+
         ###################################################################
         # # Assign Sites
         ###################################################################
 
         # Get the events and assign sites to them
-        with STDOUTManager('Assigning sites to each event', f'\tDone!'):
+        with STDOUTManager('Assigning sites to each event ...','Done!'):
             all_events_events = Events.from_all_events(all_events_ranked, grid, pandda_args.max_site_distance_cutoff)
+
+        pp.print(all_events_events)
 
         ###################################################################
         # # Output pandda summary information
         ###################################################################
 
         # Output a csv of the events
-        with STDOUTManager('Building and outputting event table...', f'\tDone!'):
+        with STDOUTManager('Building and outputting event table ...','Done!'):
             event_table: EventTable = EventTable.from_events(all_events_events)
             event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
-        with STDOUTManager('Building and outputting site table...', f'\tDone!'):
+        with STDOUTManager('Building and outputting site table ...','Done!'):
             site_table: SiteTable = SiteTable.from_events(all_events_events, pandda_args.max_site_distance_cutoff)
             site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
@@ -723,7 +799,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_log[constants.LOG_TIME] = time_finish - time_start
 
         # Output json log
-        with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
+        with STDOUTManager('Saving json log with detailed information on run ...','Done!'):
             if pandda_args.debug:
                 printer.pprint(pandda_log)
             save_json_log(
@@ -756,9 +832,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
 
 if __name__ == '__main__':
-    with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
+    print('\n ======================= PanDDA2 version 2022-02-28 ===============================\n')
+    with STDOUTManager('Parsing command line args ...', 'Parsed command line arguments!'):
         args = PanDDAArgs.from_command_line()
-        print(args)
-        print(args.only_datasets)
+        print('\n'.join("          %s=\t%s" % item for item in vars(args).items()))
+        #print(args)
+        if args.only_datasets:
+            print(args.only_datasets)
 
     process_pandda(args)

@@ -179,7 +179,9 @@ class DataDirs:
     def from_dir(directory: Path, pdb_regex: str, mtz_regex: str, ligand_dir_name, ligand_cif_regex: str,
                  ligand_pdb_regex: str,
                  ligand_smiles_regex: str, process_local=None):
-        dataset_dir_paths = list(directory.glob("*"))
+
+        # ensure the directory/path given here ends in "/":
+        dataset_dir_paths = list(directory.joinpath('').glob("*"))
 
         dataset_dirs = {}
 

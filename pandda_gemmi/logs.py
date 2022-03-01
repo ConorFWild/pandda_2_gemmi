@@ -118,3 +118,18 @@ def save_json_log(log_dict: Dict, path: Path):
                   f,
                   indent=4,
                   )
+
+def dump_datasets(datasets: Dataset):
+    for dtag in datasets:
+        print('          ',dtag.dtag)
+
+def dump_datasets_bfactor(datasets: Dataset):
+    for dtag in datasets:
+        dataset = datasets[dtag]
+        print('          dtag, smoothing_factor =',dtag.dtag,dataset.smoothing_factor)
+
+def pandda_note(s):
+    print('\n NOTE: %s\n' % s)
+
+def pandda_warning(s):
+    print('\n WARNING: %s\n' % s)
