@@ -1,10 +1,12 @@
 import dataclasses
 from typing import *
 import argparse
+import ast
 from pathlib import Path
 
 from pandda_gemmi import constants
 
+# CV-20220301: regarding type=bool, see https://blog.actorsfit.com/a?ID=01750-2899f071-6f57-4ef7-aa9c-82624ceb73a9
 
 @dataclasses.dataclass()
 class PanDDAArgs:
@@ -180,7 +182,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_LOW_MEMORY,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_LOW_MEMORY_HELP,
         )
@@ -248,13 +250,13 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_WATCHER,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_DISTRIBUTED_WATCHER_HELP,
         )
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_SLURM_PARTITION,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_DISTRIBUTED_SLURM_PARTITION_HELP,
         )
@@ -310,13 +312,13 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_SAME_SPACE_GROUP_ONLY,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_SAME_SPACE_GROUP_ONLY_HELP,
         )
         parser.add_argument(
             constants.ARGS_SIMILAR_MODELS_ONLY,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_SIMILAR_MODELS_ONLY_HELP,
         )
@@ -369,7 +371,7 @@ class PanDDAArgs:
         # Shell determination
         parser.add_argument(
             constants.ARGS_DYNAMIC_RES_LIMITS,
-            type=bool,
+            type=ast.literal_eval,
             default=True,
             help=constants.ARGS_DYNAMIC_RES_LIMITS_HELP,
         )
@@ -413,7 +415,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_ALL_DATA_ARE_VALID_VALUES,
-            type=bool,
+            type=ast.literal_eval,
             default=True,
             help=constants.ARGS_ALL_DATA_ARE_VALID_VALUES_HELP,
         )
@@ -434,7 +436,7 @@ class PanDDAArgs:
 
         parser.add_argument(
             constants.ARGS_STATMAPS,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_STATMAPS_HELP,
         )
@@ -458,7 +460,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_DENSITY_SCALING,
-            type=bool,
+            type=ast.literal_eval,
             default=True,
             help=constants.ARGS_DENSITY_SCALING_HELP,
         )
@@ -490,7 +492,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_NEGATIVE_VALUES,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_NEGATIVE_VALUES_HELP,
         )
@@ -556,7 +558,7 @@ class PanDDAArgs:
         # Autobuilding
         parser.add_argument(
             constants.ARGS_AUTOBUILD,
-            type=bool,
+            type=ast.literal_eval,
             default=constants.ARGS_AUTOBUILD_DEFAULT,
             help=constants.ARGS_AUTOBUILD_HELP,
         )
@@ -568,7 +570,7 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_RHOFIT_COORD,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_RHOFIT_COORD_HELP,
         )
@@ -590,7 +592,7 @@ class PanDDAArgs:
         # Debug
         parser.add_argument(
             constants.ARGS_DEBUG,
-            type=bool,
+            type=ast.literal_eval,
             default=False,
             help=constants.ARGS_DEBUG_HELP,
         )
