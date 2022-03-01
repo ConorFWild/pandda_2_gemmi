@@ -7,7 +7,7 @@ class STDOUTManager(contextlib.ContextDecorator):
         self.exit_message = exit_message
 
     def __enter__(self, ):
-        print(self.enter_message)
+        print("\n ####",self.enter_message)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print(self.exit_message)
+        print("     ",self.exit_message)
