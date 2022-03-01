@@ -28,7 +28,6 @@ from pandda_gemmi.common import Partial
 #                                   Resolution, Reference)
 # from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Xmap
 
-
 @dataclasses.dataclass()
 class Resolution:
     resolution: float
@@ -1406,8 +1405,10 @@ class Datasets:
 
                 scales.append(scale)
                 rmsds.append(rmsd)
+                print('dtag, scale, rmsd = ',dtag,scale,rmsd)
 
             min_scale = scales[np.argmin(rmsds)]
+            print('min_scale =',min_scale)
 
             f_array = dtag_reflections_table[structure_factors.f]
 

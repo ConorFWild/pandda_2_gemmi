@@ -157,13 +157,20 @@ def get_reduced_array(
         dtag_array,
         dtag_list,
         load_xmap_flat_func,
-grid, structure_factors, sample_rate,
+        grid,
+        structure_factors,
+        sample_rate,
         debug=False
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
     batch_size = min(90, total_sample_size)
     num_batches = (total_sample_size // batch_size) + 1
+
+    print(f'\t\ttotal_sample_size=',total_sample_size)
+    print(f'\t\tbatch_size=',batch_size)
+    print(f'\t\tnum_batches=',num_batches)
+
     # batches = [
     #     np.arange(x*batch_size, min((x+1)*batch_size, total_sample_size))
     #     for x
@@ -182,8 +189,7 @@ grid, structure_factors, sample_rate,
             print("\t\tAll batches larger than batch size, trying smaller split!")
             continue
 
-    # if debug:
-    #     print(f'\t\tBatches are: {batches}')
+    print(f'\t\tBatches are: {batches}')
 
     from sklearn.decomposition import PCA, IncrementalPCA
     ipca = IncrementalPCA(n_components=min(200, batch_size))
@@ -380,6 +386,8 @@ def get_multiple_comparator_sets(
     )
 
     highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    print(f'\tHighest resolution dataset(s) =')
+    print(highest_res_datasets)
     highest_res_datasets_max = max(
         [
             datasets[dtag].reflections.resolution().resolution
@@ -387,12 +395,14 @@ def get_multiple_comparator_sets(
             in highest_res_datasets
         ]
     )
+    print(f'\tHighest resolution dataset(s) max = %.3f A' % highest_res_datasets_max)
 
     # Get the datasets below the upper cutoff for manifold characterisation
     suitable_datasets_list = [
         dtag for dtag in dtags_by_res if datasets[dtag].reflections.resolution().resolution < resolution_cutoff
     ]
     suitable_datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in suitable_datasets_list}
+    print(f'\tSuitable datasets for characterising clusters =',suitable_datasets)
     if debug:
         print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
@@ -438,6 +448,7 @@ def get_multiple_comparator_sets(
 
     # known_apos= [dtag.dtag for dtag in shell_truncated_datasets]
     known_apos = cluster_annotations
+    print(f'\tKnown APOS for PCA plot = ',known_apos)
 
     lables = [dtag.dtag for dtag in shell_truncated_datasets]
     out_file = pandda_fs_model.pandda_dir / f"pca_umap.html"

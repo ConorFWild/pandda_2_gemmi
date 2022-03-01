@@ -2006,9 +2006,11 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
 
 def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
     for dtag in datasets:
+        print(f'          dtag= ',dtag.dtag)
         dataset = datasets[dtag]
         reflections = dataset.reflections
         column_labels = reflections.columns()
+        print(f'          columns= ',column_labels)
         for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
 
             f_label = common_f_phi_label_pair[0]

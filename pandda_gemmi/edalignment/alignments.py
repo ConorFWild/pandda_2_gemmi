@@ -154,6 +154,7 @@ class Transform:
         de_meaned_ref = reference_selection - mean_ref
 
         rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+        print('   RMSD =',rmsd)
 
         com_reference = mean_ref
 
@@ -246,7 +247,9 @@ class Alignment:
 
     @staticmethod
     def from_dataset(reference: Reference, dataset: Dataset, marker_atom_search_radius=10.0):
+        # CV: 10A search radius? That seems excessive ...
 
+        print(' reference, dataset = ', reference.dtag, dataset.dtag)
         dataset_pos_list = []
         reference_pos_list = []
 
@@ -326,6 +329,7 @@ class Alignment:
             if dataset_selection.shape[0] == 0:
                 raise ExceptionUnmatchedAlignmentMarker(res_id)
 
+            print(' res_id =',res_id)
             transforms[res_id] = Transform.from_atoms(
                 dataset_selection,
                 reference_selection,
