@@ -362,6 +362,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
             reference: Reference = Reference.from_datasets(datasets_wilson)
+            pandda_log["Reference Dtag"] = reference.dtag.dtag
+            if pandda_args.debug:
+                print(reference.dtag)
 
         # Post-reference filters
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
