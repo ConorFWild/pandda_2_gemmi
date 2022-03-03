@@ -208,45 +208,49 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     distributed_tmp = Path(pandda_args.distributed_tmp)
 
     # CHeck dependencies
-    with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
-        check_dependencies(pandda_args)
+    # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
+    console.start_dependancy_check()
+    check_dependencies(pandda_args)
 
     # Initialise log
-    with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
-        pandda_log: Dict = {}
-        pandda_log[constants.LOG_START] = time.time()
-        initial_args = log_arguments(pandda_args, )
+    # with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
+    console.start_log()
+    pandda_log: Dict = {}
+    pandda_log[constants.LOG_START] = time.time()
+    initial_args = log_arguments(pandda_args, )
 
-        pandda_log[constants.LOG_ARGUMENTS] = initial_args
+    pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
     # Get global processor
-    with STDOUTManager('Getting global processor...', '\tGot global processor!'):
-        if pandda_args.global_processing == "serial":
-            process_global = process_global_serial
-        elif pandda_args.global_processing == "distributed":
-            client = get_dask_client(
-                scheduler=pandda_args.distributed_scheduler,
-                num_workers=pandda_args.distributed_num_workers,
-                queue=pandda_args.distributed_queue,
-                project=pandda_args.distributed_project,
-                cores_per_worker=pandda_args.local_cpus,
-                distributed_mem_per_core=pandda_args.distributed_mem_per_core,
-                resource_spec=pandda_args.distributed_resource_spec,
-                job_extra=pandda_args.distributed_job_extra,
-                walltime=pandda_args.distributed_walltime,
-                watcher=pandda_args.distributed_watcher,
-            )
-            process_global = partial(
-                process_global_dask,
-                client=client,
-                tmp_dir=distributed_tmp
-            )
-        else:
-            raise Exception()
+    # with STDOUTManager('Getting global processor...', '\tGot global processor!'):
+    console.start_initialise_shell_processor()
+    if pandda_args.global_processing == "serial":
+        process_global = process_global_serial
+    elif pandda_args.global_processing == "distributed":
+        client = get_dask_client(
+            scheduler=pandda_args.distributed_scheduler,
+            num_workers=pandda_args.distributed_num_workers,
+            queue=pandda_args.distributed_queue,
+            project=pandda_args.distributed_project,
+            cores_per_worker=pandda_args.local_cpus,
+            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+            resource_spec=pandda_args.distributed_resource_spec,
+            job_extra=pandda_args.distributed_job_extra,
+            walltime=pandda_args.distributed_walltime,
+            watcher=pandda_args.distributed_watcher,
+        )
+        process_global = partial(
+            process_global_dask,
+            client=client,
+            tmp_dir=distributed_tmp
+        )
+    else:
+        raise Exception()
 
     # Get local processor
-    with STDOUTManager('Getting local processor...', '\tGot local processor!'):
-        process_local = get_process_local(pandda_args)
+    # with STDOUTManager('Getting local processor...', '\tGot local processor!'):
+    console.start_initialise_multiprocessor()
+    process_local = get_process_local(pandda_args)
 
     smooth_func = get_smooth_func(pandda_args)
     load_xmap_func = get_load_xmap_func(pandda_args)
@@ -742,16 +746,18 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
 
     except Exception as e:
-        traceback.print_exc()
+        # traceback.print_exc()
+        console.print_exception(e, pandda_args.debug)
+        console.save(pandda_fs_model.console_log_file)
 
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
         print(f"Saving PanDDA log to: {pandda_args.out_dir / constants.PANDDA_LOG_FILE}")
 
-        printer.pprint(
-            pandda_log
-        )
+        # printer.pprint(
+        #     pandda_log
+        # )
 
         save_json_log(
             pandda_log,

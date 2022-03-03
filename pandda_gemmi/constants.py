@@ -253,6 +253,15 @@ ARGS_AUTOBUILD_DEFAULT: bool = True
 ARGS_RANK_METHOD_DEFAULT: str = "autobuild"
 
 ###################################################################
+# # Console constants
+###################################################################
+CONSOLE_START_DEPENDENCY_CHECK = "Checking dependencies..."
+CONSOLE_START_LOG = "Initialising log..."
+CONSOLE_START_INIT_SHELL_PROCCESS = "Getting shell processor..."
+CONSOLE_START_INIT_MULTIPROCESS = "Getting multiprocessor..."
+
+
+###################################################################
 # # Logging constants
 ###################################################################
 PANDDA_LOG_FILE = "pandda_log.json"
