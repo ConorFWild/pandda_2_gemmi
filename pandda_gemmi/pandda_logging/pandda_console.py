@@ -44,7 +44,7 @@ class PanDDAConsole:
     def indent_text(text, indent=4):
         return Padding(
             text,
-            (0,indent, 0, 0)
+            (0,0, 0, indent)
         )
 
     def summarise_fs_model(self, pandda_fs_model):
