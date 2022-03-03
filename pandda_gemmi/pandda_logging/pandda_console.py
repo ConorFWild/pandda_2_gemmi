@@ -90,7 +90,12 @@ class PanDDAConsole:
 
         # Resolutions
         ress = dataset_statistics.resolutions
-        self.console.print(f"Resolution range is: min {np.min(ress)} : mean {np.mean(ress)} : max {np.max(ress)}")
+        self.console.print(
+            Panel(
+                f"Resolution range is: min {np.min(ress)} : mean {np.mean(ress)} : max {np.max(ress)}",
+                title="[bold]Resolutions"
+            )
+        )
 
         # Spacegroups
         sgtable = Table(show_header=True, header_style="bold magenta", expand=True)
