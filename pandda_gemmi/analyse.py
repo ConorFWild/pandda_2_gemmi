@@ -318,7 +318,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_load_datasets()
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
         dataset_statistics = DatasetStatistics(datasets_initial)
-        console.summarise_datasets(datasets_initial, dataset_statistics)
+        console.summarise_datasets(datasets_initial.datasets, dataset_statistics)
 
 
         # If structure factors not given, check if any common ones are available
