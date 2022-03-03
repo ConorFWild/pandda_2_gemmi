@@ -79,12 +79,12 @@ class PanDDAConsole:
         ucalpha = dataset_statistics.unit_cells["a"]
         ucbeta = dataset_statistics.unit_cells["a"]
         ucgamma = dataset_statistics.unit_cells["a"]
-        unit_cell_table.add_row("a", float(np.min(uca)), float(np.mean(uca)), float(np.max(uca)))
-        unit_cell_table.add_row("b", float(np.min(ucb)), float(np.mean(ucb)), float(np.max(ucb)))
-        unit_cell_table.add_row("c", float(np.min(ucc)), float(np.mean(ucc)), float(np.max(ucc)))
-        unit_cell_table.add_row("alpha", float(np.min(ucalpha)), float(np.mean(ucalpha)), float(np.max(ucalpha)))
-        unit_cell_table.add_row("beta", float(np.min(ucbeta)), float(np.mean(ucbeta)), float(np.max(ucbeta)))
-        unit_cell_table.add_row("gamma", float(np.min(ucgamma)), float(np.mean(ucgamma)), float(np.max(ucgamma)))
+        unit_cell_table.add_row("a", str(np.min(uca)), str(np.mean(uca)), str(np.max(uca)))
+        unit_cell_table.add_row("b", str(np.min(ucb)), str(np.mean(ucb)), str(np.max(ucb)))
+        unit_cell_table.add_row("c", str(np.min(ucc)), str(np.mean(ucc)), str(np.max(ucc)))
+        unit_cell_table.add_row("alpha", str(np.min(ucalpha)), str(np.mean(ucalpha)), str(np.max(ucalpha)))
+        unit_cell_table.add_row("beta", str(np.min(ucbeta)), str(np.mean(ucbeta)), str(np.max(ucbeta)))
+        unit_cell_table.add_row("gamma", str(np.min(ucgamma)), str(np.mean(ucgamma)), str(np.max(ucgamma)))
 
         self.console.print(unit_cell_table)
 
@@ -98,7 +98,7 @@ class PanDDAConsole:
         sgtable.add_column("Count")
         values, counts = np.unique(dataset_statistics.spacegroups)
         for sg, count in zip(values, counts):
-            sgtable.add_row(sg, int(count))
+            sgtable.add_row(sg, str(count))
 
         self.console.print(sgtable)
 
@@ -108,7 +108,7 @@ class PanDDAConsole:
         chain_table.add_column("Count")
         values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains])
         for chains, count in zip(values, counts):
-            chain_table.add_row(chains, int(count))
+            chain_table.add_row(chains, str(count))
         self.console.print(chain_table)
 
         # Datasets
