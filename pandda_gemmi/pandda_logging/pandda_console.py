@@ -79,12 +79,12 @@ class PanDDAConsole:
         ucalpha = dataset_statistics.unit_cells["a"]
         ucbeta = dataset_statistics.unit_cells["a"]
         ucgamma = dataset_statistics.unit_cells["a"]
-        unit_cell_table.row("a", np.min(uca), np.mean(uca), np.max(uca))
-        unit_cell_table.row("b", np.min(ucb), np.mean(ucb), np.max(ucb))
-        unit_cell_table.row("c", np.min(ucc), np.mean(ucc), np.max(ucc))
-        unit_cell_table.row("alpha", np.min(ucalpha), np.mean(ucalpha), np.max(ucalpha))
-        unit_cell_table.row("beta", np.min(ucbeta), np.mean(ucbeta), np.max(ucbeta))
-        unit_cell_table.row("gamma", np.min(ucgamma), np.mean(ucgamma), np.max(ucgamma))
+        unit_cell_table.add_row("a", np.min(uca), np.mean(uca), np.max(uca))
+        unit_cell_table.add_row("b", np.min(ucb), np.mean(ucb), np.max(ucb))
+        unit_cell_table.add_row("c", np.min(ucc), np.mean(ucc), np.max(ucc))
+        unit_cell_table.add_row("alpha", np.min(ucalpha), np.mean(ucalpha), np.max(ucalpha))
+        unit_cell_table.add_row("beta", np.min(ucbeta), np.mean(ucbeta), np.max(ucbeta))
+        unit_cell_table.add_row("gamma", np.min(ucgamma), np.mean(ucgamma), np.max(ucgamma))
 
         self.console.print(unit_cell_table)
 
