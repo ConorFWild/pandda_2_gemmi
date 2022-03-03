@@ -670,10 +670,10 @@ class Reference:
         for dtag in datasets:
             resolutions[dtag] = datasets[dtag].reflections.resolution()
 
-        min_resolution_dtag = min(
-            resolutions,
-            key=lambda dtag: resolutions[dtag].to_float(),
-        )
+        # min_resolution_dtag = min(
+        #     resolutions,
+        #     key=lambda dtag: resolutions[dtag].to_float(),
+        # )
 
         for dtag in sorted(resolutions, key = lambda x: resolutions[x].to_float()):
             dataset = datasets[dtag]
