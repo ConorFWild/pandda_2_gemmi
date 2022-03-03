@@ -320,7 +320,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         dataset_statistics = DatasetStatistics(datasets_initial.datasets)
         console.summarise_datasets(datasets_initial.datasets, dataset_statistics)
 
-
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
             if not pandda_args.structure_factors:
@@ -372,10 +371,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
-            reference: Reference = Reference.from_datasets(datasets_wilson)
+            reference: Reference = Reference.from_datasets(datasets_wilson, dataset_statistics)
             pandda_log["Reference Dtag"] = reference.dtag.dtag
             if pandda_args.debug:
                 print(reference.dtag)
+
+
+
 
         # Post-reference filters
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
