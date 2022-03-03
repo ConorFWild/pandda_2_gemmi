@@ -94,6 +94,7 @@ class PanDDAConsole:
 
         # Spacegroups
         sgtable = Table(show_header=True, header_style="bold magenta", expand=True)
+        sgtable.title = "Spacegroups"
         sgtable.add_column("Spacegroup")
         sgtable.add_column("Count")
         values, counts = np.unique(dataset_statistics.spacegroups, return_counts=True)
@@ -104,6 +105,7 @@ class PanDDAConsole:
 
         # Chains
         chain_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        chain_table.title = "Chains"
         chain_table.add_column("Chains")
         chain_table.add_column("Count")
         values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains], return_counts=True)
@@ -116,10 +118,18 @@ class PanDDAConsole:
         table.title = "Datasets"
         # Columns
         table.add_column("Dtag")
+        table.add_column("Resolution")
+        table.add_column("Spacegroup")
 
         # Rows
-        for dtag, dataset in datasets_initial.items():
-            table.add_row(dtag.dtag,)
+        for dtag, dataset in sorted(datasets_initial, key = lambda x: x.dtag):
+            dataset = datasets_initial[dtag]
+            table.add_row(
+                dtag.dtag,
+                dataset.reflections.reflections.resolution_high(),
+                dataset.reflections.reflections.spacegroup.hm,
+            )
+
 
         self.console.print(table)
 
