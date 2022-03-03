@@ -126,7 +126,7 @@ class PanDDAConsole:
             dataset = datasets_initial[dtag]
             table.add_row(
                 dtag.dtag,
-                dataset.reflections.reflections.resolution_high(),
+                str(dataset.reflections.reflections.resolution_high()),
                 dataset.reflections.reflections.spacegroup.hm,
             )
 
