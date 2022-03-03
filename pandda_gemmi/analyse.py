@@ -20,7 +20,7 @@ import ray
 from pandda_gemmi import constants
 from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
-from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
+from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray
 from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
@@ -81,6 +81,7 @@ from pandda_gemmi.processing import (
 )
 
 printer = pprint.PrettyPrinter()
+console = PanDDAConsole()
 
 def update_log(shell_log, shell_log_path):
     if shell_log_path.exists():
@@ -763,5 +764,6 @@ if __name__ == '__main__':
         args = PanDDAArgs.from_command_line()
         print(args)
         print(args.only_datasets)
+        console.summarise_arguments(args)
 
     process_pandda(args)

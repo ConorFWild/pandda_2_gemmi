@@ -1,2 +1,3 @@
 from pandda_gemmi.pandda_logging.stdout_manager import STDOUTManager
 from pandda_gemmi.pandda_logging.log_arguments import log_arguments
+from pandda_gemmi.pandda_logging.pandda_console import PanDDAConsole

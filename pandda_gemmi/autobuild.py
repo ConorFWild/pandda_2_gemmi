@@ -1046,7 +1046,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
             if len(seqid_nums) == 0:
                 min_ligand_seqid = 1
             else:
-                min_ligand_seqid = min(seqid_nums) + 1
+                min_ligand_seqid = max(seqid_nums) + 1
 
             for model in ligand:
                 for chain in model:
