@@ -22,7 +22,7 @@ from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
-from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray
+from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray, DatasetStatistics
 from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
                                       from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
                                       from_unaligned_dataset_c_flat_ray,
@@ -266,20 +266,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Set up autobuilding
     if pandda_args.autobuild:
 
-        with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
-            if pandda_args.autobuild_strategy == "rhofit":
+        # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+        if pandda_args.autobuild_strategy == "rhofit":
 
-                if pandda_args.local_processing == "ray":
-                    autobuild_func = autobuild_rhofit_ray
-                else:
-                    autobuild_func = autobuild_rhofit,
-
-            elif pandda_args.autobuild_strategy == "inbuilt":
-                raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
-
-
+            if pandda_args.local_processing == "ray":
+                autobuild_func = autobuild_rhofit_ray
             else:
-                raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+                autobuild_func = autobuild_rhofit,
+
+        elif pandda_args.autobuild_strategy == "inbuilt":
+            raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
+
+
+        else:
+            raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
     try:
 
@@ -287,24 +287,26 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Get datasets
         ###################################################################
 
-        with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
-                           '\tBuilt file system model!'):
-            time_fs_model_building_start = time.time()
-            pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
-                pandda_args.data_dirs,
-                pandda_args.out_dir,
-                pandda_args.pdb_regex,
-                pandda_args.mtz_regex,
-                pandda_args.ligand_dir_regex,
-                pandda_args.ligand_cif_regex,
-                pandda_args.ligand_pdb_regex,
-                pandda_args.ligand_smiles_regex,
-                process_local=None
-            )
-            pandda_fs_model.build(process_local=None)
-            time_fs_model_building_finish = time.time()
-            pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
+        # with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
+        #                    '\tBuilt file system model!'):
+        console.start_fs_model()
+        time_fs_model_building_start = time.time()
+        pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
+            pandda_args.data_dirs,
+            pandda_args.out_dir,
+            pandda_args.pdb_regex,
+            pandda_args.mtz_regex,
+            pandda_args.ligand_dir_regex,
+            pandda_args.ligand_cif_regex,
+            pandda_args.ligand_pdb_regex,
+            pandda_args.ligand_smiles_regex,
+            process_local=None
+        )
+        pandda_fs_model.build(process_local=None)
+        time_fs_model_building_finish = time.time()
+        pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
+        console.summarise_fs_model(pandda_fs_model)
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
@@ -312,8 +314,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
 
         # Get datasets
-        with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
-            datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
+        # with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
+        console.start_load_datasets()
+        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
+        dataset_statistics = DatasetStatistics(datasets_initial)
+        console.summarise_datasets(datasets_initial, dataset_statistics)
+
 
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
