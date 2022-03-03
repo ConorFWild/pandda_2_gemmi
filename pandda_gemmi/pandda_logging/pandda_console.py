@@ -122,7 +122,7 @@ class PanDDAConsole:
         table.add_column("Spacegroup")
 
         # Rows
-        for dtag, dataset in sorted(datasets_initial, key = lambda x: x.dtag):
+        for dtag in sorted(datasets_initial, key = lambda x: x.dtag):
             dataset = datasets_initial[dtag]
             table.add_row(
                 dtag.dtag,
