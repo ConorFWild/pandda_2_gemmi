@@ -79,12 +79,12 @@ class PanDDAConsole:
         ucalpha = dataset_statistics.unit_cells["a"]
         ucbeta = dataset_statistics.unit_cells["a"]
         ucgamma = dataset_statistics.unit_cells["a"]
-        unit_cell_table.add_row("a", np.min(uca), np.mean(uca), np.max(uca))
-        unit_cell_table.add_row("b", np.min(ucb), np.mean(ucb), np.max(ucb))
-        unit_cell_table.add_row("c", np.min(ucc), np.mean(ucc), np.max(ucc))
-        unit_cell_table.add_row("alpha", np.min(ucalpha), np.mean(ucalpha), np.max(ucalpha))
-        unit_cell_table.add_row("beta", np.min(ucbeta), np.mean(ucbeta), np.max(ucbeta))
-        unit_cell_table.add_row("gamma", np.min(ucgamma), np.mean(ucgamma), np.max(ucgamma))
+        unit_cell_table.add_row("a", float(np.min(uca)), float(np.mean(uca)), float(np.max(uca)))
+        unit_cell_table.add_row("b", float(np.min(ucb)), float(np.mean(ucb)), float(np.max(ucb)))
+        unit_cell_table.add_row("c", float(np.min(ucc)), float(np.mean(ucc)), float(np.max(ucc)))
+        unit_cell_table.add_row("alpha", float(np.min(ucalpha)), float(np.mean(ucalpha)), float(np.max(ucalpha)))
+        unit_cell_table.add_row("beta", float(np.min(ucbeta)), float(np.mean(ucbeta)), float(np.max(ucbeta)))
+        unit_cell_table.add_row("gamma", float(np.min(ucgamma)), float(np.mean(ucgamma)), float(np.max(ucgamma)))
 
         self.console.print(unit_cell_table)
 
@@ -98,7 +98,7 @@ class PanDDAConsole:
         sgtable.add_column("Count")
         values, counts = np.unique(dataset_statistics.spacegroups)
         for sg, count in zip(values, counts):
-            sgtable.add_row(sg, count)
+            sgtable.add_row(sg, int(count))
 
         self.console.print(sgtable)
 
@@ -108,7 +108,7 @@ class PanDDAConsole:
         chain_table.add_column("Count")
         values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains])
         for chains, count in zip(values, counts):
-            chain_table.add_row(chains, count)
+            chain_table.add_row(chains, int(count))
         self.console.print(chain_table)
 
         # Datasets
