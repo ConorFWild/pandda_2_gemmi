@@ -49,7 +49,7 @@ class PanDDAConsole:
 
     def summarise_fs_model(self, pandda_fs_model):
         printable = self.indent_text(
-            f"Number of datasets found: {len(pandda_fs_model.processed_datasets)}",
+            f"Number of datasets found: {len(pandda_fs_model.processed_datasets.processed_datasets)}",
         )
         self.console.print(printable)
 
