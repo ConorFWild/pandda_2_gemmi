@@ -317,7 +317,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
         console.start_load_datasets()
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
-        dataset_statistics = DatasetStatistics(datasets_initial)
+        dataset_statistics = DatasetStatistics(datasets_initial.datasets)
         console.summarise_datasets(datasets_initial.datasets, dataset_statistics)
 
 
