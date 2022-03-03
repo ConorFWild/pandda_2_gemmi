@@ -74,11 +74,11 @@ class PanDDAConsole:
         unit_cell_table.add_column("Mean")
 
         uca = dataset_statistics.unit_cells["a"]
-        ucb = dataset_statistics.unit_cells["a"]
-        ucc = dataset_statistics.unit_cells["a"]
-        ucalpha = dataset_statistics.unit_cells["a"]
-        ucbeta = dataset_statistics.unit_cells["a"]
-        ucgamma = dataset_statistics.unit_cells["a"]
+        ucb = dataset_statistics.unit_cells["b"]
+        ucc = dataset_statistics.unit_cells["c"]
+        ucalpha = dataset_statistics.unit_cells["alpha"]
+        ucbeta = dataset_statistics.unit_cells["beta"]
+        ucgamma = dataset_statistics.unit_cells["gamma"]
         unit_cell_table.add_row("a", str(np.min(uca)), str(np.mean(uca)), str(np.max(uca)))
         unit_cell_table.add_row("b", str(np.min(ucb)), str(np.mean(ucb)), str(np.max(ucb)))
         unit_cell_table.add_row("c", str(np.min(ucc)), str(np.mean(ucc)), str(np.max(ucc)))
@@ -96,7 +96,7 @@ class PanDDAConsole:
         sgtable = Table(show_header=True, header_style="bold magenta", expand=True)
         sgtable.add_column("Spacegroup")
         sgtable.add_column("Count")
-        values, counts = np.unique(dataset_statistics.spacegroups)
+        values, counts = np.unique(dataset_statistics.spacegroups, return_counts=True)
         for sg, count in zip(values, counts):
             sgtable.add_row(sg, str(count))
 
@@ -106,7 +106,7 @@ class PanDDAConsole:
         chain_table = Table(show_header=True, header_style="bold magenta", expand=True)
         chain_table.add_column("Chains")
         chain_table.add_column("Count")
-        values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains])
+        values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains], return_counts=True)
         for chains, count in zip(values, counts):
             chain_table.add_row(chains, str(count))
         self.console.print(chain_table)
