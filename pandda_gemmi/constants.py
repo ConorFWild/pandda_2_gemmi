@@ -345,7 +345,7 @@ RESIDUE_NAMES = ["ALA",
 PANDDA_RHOFIT_SCRIPT_FILE = "pandda_rhofit.sh"
 RHOFIT_COMMAND = (
     "#!/bin/bash \n"
-    "source ~/.bashrc \n"
+    # "source ~/.bashrc \n"
     "pandda_rhofit.sh -map {event_map} -mtz {mtz} -pdb {pdb} -cif {cif} -out {out_dir} -cut {cut}"
 )
 RHOFIT_COMMAND_COORD = (
