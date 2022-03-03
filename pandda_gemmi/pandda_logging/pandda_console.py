@@ -90,13 +90,16 @@ class PanDDAConsole:
 
         # Resolutions
         ress = dataset_statistics.resolutions
+
+        resolution_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        resolution_table.title = "Resolutions"
+        resolution_table.add_column("Min")
+        resolution_table.add_column("Mean")
+        resolution_table.add_column("Max")
+        resolution_table.add_row(str(np.min(ress)), str(np.mean(ress)), str(np.max(ress)))
+
         self.console.print(
-            # Panel(
-                PanDDAConsole.indent_text(
-                    f"Resolution range is: min {np.min(ress)} : mean {np.mean(ress)} : max {np.max(ress)}"
-                )
-            #     title="[bold]Resolutions"
-            # )
+          resolution_table
         )
 
         # Spacegroups
