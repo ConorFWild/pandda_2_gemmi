@@ -20,9 +20,9 @@ import ray
 from pandda_gemmi import constants
 from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
-from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments
+from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
-from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray
+from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray, DatasetStatistics
 from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
                                       from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
                                       from_unaligned_dataset_c_flat_ray,
@@ -81,6 +81,7 @@ from pandda_gemmi.processing import (
 )
 
 printer = pprint.PrettyPrinter()
+console = PanDDAConsole()
 
 def update_log(shell_log, shell_log_path):
     if shell_log_path.exists():
@@ -207,45 +208,49 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     distributed_tmp = Path(pandda_args.distributed_tmp)
 
     # CHeck dependencies
-    with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
-        check_dependencies(pandda_args)
+    # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
+    console.start_dependancy_check()
+    check_dependencies(pandda_args)
 
     # Initialise log
-    with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
-        pandda_log: Dict = {}
-        pandda_log[constants.LOG_START] = time.time()
-        initial_args = log_arguments(pandda_args, )
+    # with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
+    console.start_log()
+    pandda_log: Dict = {}
+    pandda_log[constants.LOG_START] = time.time()
+    initial_args = log_arguments(pandda_args, )
 
-        pandda_log[constants.LOG_ARGUMENTS] = initial_args
+    pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
     # Get global processor
-    with STDOUTManager('Getting global processor...', '\tGot global processor!'):
-        if pandda_args.global_processing == "serial":
-            process_global = process_global_serial
-        elif pandda_args.global_processing == "distributed":
-            client = get_dask_client(
-                scheduler=pandda_args.distributed_scheduler,
-                num_workers=pandda_args.distributed_num_workers,
-                queue=pandda_args.distributed_queue,
-                project=pandda_args.distributed_project,
-                cores_per_worker=pandda_args.local_cpus,
-                distributed_mem_per_core=pandda_args.distributed_mem_per_core,
-                resource_spec=pandda_args.distributed_resource_spec,
-                job_extra=pandda_args.distributed_job_extra,
-                walltime=pandda_args.distributed_walltime,
-                watcher=pandda_args.distributed_watcher,
-            )
-            process_global = partial(
-                process_global_dask,
-                client=client,
-                tmp_dir=distributed_tmp
-            )
-        else:
-            raise Exception()
+    # with STDOUTManager('Getting global processor...', '\tGot global processor!'):
+    console.start_initialise_shell_processor()
+    if pandda_args.global_processing == "serial":
+        process_global = process_global_serial
+    elif pandda_args.global_processing == "distributed":
+        client = get_dask_client(
+            scheduler=pandda_args.distributed_scheduler,
+            num_workers=pandda_args.distributed_num_workers,
+            queue=pandda_args.distributed_queue,
+            project=pandda_args.distributed_project,
+            cores_per_worker=pandda_args.local_cpus,
+            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+            resource_spec=pandda_args.distributed_resource_spec,
+            job_extra=pandda_args.distributed_job_extra,
+            walltime=pandda_args.distributed_walltime,
+            watcher=pandda_args.distributed_watcher,
+        )
+        process_global = partial(
+            process_global_dask,
+            client=client,
+            tmp_dir=distributed_tmp
+        )
+    else:
+        raise Exception()
 
     # Get local processor
-    with STDOUTManager('Getting local processor...', '\tGot local processor!'):
-        process_local = get_process_local(pandda_args)
+    # with STDOUTManager('Getting local processor...', '\tGot local processor!'):
+    console.start_initialise_multiprocessor()
+    process_local = get_process_local(pandda_args)
 
     smooth_func = get_smooth_func(pandda_args)
     load_xmap_func = get_load_xmap_func(pandda_args)
@@ -261,20 +266,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Set up autobuilding
     if pandda_args.autobuild:
 
-        with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
-            if pandda_args.autobuild_strategy == "rhofit":
+        # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+        if pandda_args.autobuild_strategy == "rhofit":
 
-                if pandda_args.local_processing == "ray":
-                    autobuild_func = autobuild_rhofit_ray
-                else:
-                    autobuild_func = autobuild_rhofit,
-
-            elif pandda_args.autobuild_strategy == "inbuilt":
-                raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
-
-
+            if pandda_args.local_processing == "ray":
+                autobuild_func = autobuild_rhofit_ray
             else:
-                raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+                autobuild_func = autobuild_rhofit,
+
+        elif pandda_args.autobuild_strategy == "inbuilt":
+            raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
+
+
+        else:
+            raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
     try:
 
@@ -282,24 +287,26 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Get datasets
         ###################################################################
 
-        with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
-                           '\tBuilt file system model!'):
-            time_fs_model_building_start = time.time()
-            pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
-                pandda_args.data_dirs,
-                pandda_args.out_dir,
-                pandda_args.pdb_regex,
-                pandda_args.mtz_regex,
-                pandda_args.ligand_dir_regex,
-                pandda_args.ligand_cif_regex,
-                pandda_args.ligand_pdb_regex,
-                pandda_args.ligand_smiles_regex,
-                process_local=None
-            )
-            pandda_fs_model.build(process_local=None)
-            time_fs_model_building_finish = time.time()
-            pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
+        # with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
+        #                    '\tBuilt file system model!'):
+        console.start_fs_model()
+        time_fs_model_building_start = time.time()
+        pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
+            pandda_args.data_dirs,
+            pandda_args.out_dir,
+            pandda_args.pdb_regex,
+            pandda_args.mtz_regex,
+            pandda_args.ligand_dir_regex,
+            pandda_args.ligand_cif_regex,
+            pandda_args.ligand_pdb_regex,
+            pandda_args.ligand_smiles_regex,
+            process_local=None
+        )
+        pandda_fs_model.build(process_local=None)
+        time_fs_model_building_finish = time.time()
+        pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
+        console.summarise_fs_model(pandda_fs_model)
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
@@ -307,8 +314,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
 
         # Get datasets
-        with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
-            datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
+        # with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
+        console.start_load_datasets()
+        datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
+        dataset_statistics = DatasetStatistics(datasets_initial.datasets)
+        console.summarise_datasets(datasets_initial.datasets, dataset_statistics)
 
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
@@ -361,7 +371,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
-            reference: Reference = Reference.from_datasets(datasets_wilson)
+            reference: Reference = Reference.from_datasets(datasets_wilson, dataset_statistics)
+            pandda_log["Reference Dtag"] = reference.dtag.dtag
+            if pandda_args.debug:
+                print(reference.dtag)
+
+
+
 
         # Post-reference filters
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
@@ -738,16 +754,18 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
 
     except Exception as e:
-        traceback.print_exc()
+        # traceback.print_exc()
+        console.print_exception(e, pandda_args.debug)
+        console.save(pandda_fs_model.console_log_file)
 
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
         print(f"Saving PanDDA log to: {pandda_args.out_dir / constants.PANDDA_LOG_FILE}")
 
-        printer.pprint(
-            pandda_log
-        )
+        # printer.pprint(
+        #     pandda_log
+        # )
 
         save_json_log(
             pandda_log,
@@ -760,5 +778,6 @@ if __name__ == '__main__':
         args = PanDDAArgs.from_command_line()
         print(args)
         print(args.only_datasets)
+        console.summarise_arguments(args)
 
     process_pandda(args)
