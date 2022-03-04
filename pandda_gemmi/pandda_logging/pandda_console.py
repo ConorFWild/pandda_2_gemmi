@@ -57,6 +57,56 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_LOAD_DATASETS)
         self.console.print(printable)
 
+    def start_data_quality_filters(self):
+        printable = self.wrap_title(constants.CONSOLE_START_QUALITY_FILTERS)
+        self.console.print(printable)
+
+    def start_reference_selection(self):
+        printable = self.wrap_title(constants.CONSOLE_START_REF_SELEC)
+        self.console.print(printable)
+
+    def start_b_factor_smoothing(self):
+        printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
+        self.console.print(printable)
+
+    def start_reference_comparability_filters(self):
+        printable = self.wrap_title(constants.CONSOLE_START_REF_COMPAT_FILTERS)
+        self.console.print(printable)
+
+    def start_get_grid(self):
+        printable = self.wrap_title(constants.CONSOLE_START_GET_GRID)
+        self.console.print(printable)
+
+    def start_alignments(self):
+        printable = self.wrap_title(constants.CONSOLE_START_ALIGN)
+        self.console.print(printable)
+
+    def start_get_comparators(self):
+        printable = self.wrap_title(constants.CONSOLE_START_GET_COMPAR)
+        self.console.print(printable)
+
+    def start_process_shells(self):
+        printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
+        self.console.print(printable)
+
+    def start_autobuilding(self):
+        printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
+        self.console.print(printable)
+
+    def start_ranking(self):
+        printable = self.wrap_title(constants.CONSOLE_START_RANKING)
+        self.console.print(printable)
+
+    def start_assign_sites(self):
+        printable = self.wrap_title(constants.CONSOLE_START_ASSIGN_SITES)
+        self.console.print(printable)
+
+    def start_run_summary(self):
+        printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
+        self.console.print(printable)
+
+
+
     def summarise_datasets(self, datasets_initial, dataset_statistics):
 
         # Statistics

@@ -522,6 +522,7 @@ class PanDDAFSModel:
     processed_datasets: ProcessedDatasets
     log_file: Path
     shell_dirs: Optional[ShellDirs]
+    console_log_file: Path
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -539,12 +540,15 @@ class PanDDAFSModel:
                                                               )
         log_path = output_out_dir / PANDDA_LOG_FILE
 
+        console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
+
         return PanDDAFSModel(pandda_dir=output_out_dir,
                              data_dirs=data_dirs,
                              analyses=analyses,
                              processed_datasets=processed_datasets,
                              log_file=log_path,
                              shell_dirs=None,
+                             console_log_file=console_log_file
                              )
 
     def build(self, overwrite=False, process_local=None):
