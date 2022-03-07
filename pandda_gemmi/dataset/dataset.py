@@ -450,6 +450,8 @@ class Reflections:
 
         free_flag = None
 
+        # CV-20220303: should we really restrict ourself to some
+        #              hard-wired column names here?
         for column in self.reflections.columns:
             if column.label == "FREE":
                 free_flag = "FREE"
@@ -462,9 +464,17 @@ class Reflections:
             raise Exception("No RFree Flag found!")
 
         # Add columns
-        for column in self.reflections.columns:
-            if column.label in ["H", "K", "L", free_flag, structure_factors.f, structure_factors.phi]:
-                new_reflections.add_column(column.label, column.type)
+        expected_columns = ["H", "K", "L", free_flag, structure_factors.f, structure_factors.phi]
+
+        # CV-20220302: we need to work in the order of expected
+        #              columns here to ensure the data will end up in
+        #              that order as well - irrespective of the order
+        #              in the reflection/MTZ file
+        for e in expected_columns:
+            for column in self.reflections.columns:
+                if column.label == e:
+                    new_reflections.add_column(column.label, column.type)
+
 
         # Get data
         data_array = np.array(self.reflections, copy=True)
@@ -474,6 +484,9 @@ class Reflections:
         data.set_index(["H", "K", "L"], inplace=True)
 
         # Truncate by columns
+        # CV-20220303: this assumes an order - so above column
+        #              assignment also needs to have that order
+        #              enforced
         data_indexed = data[[free_flag, structure_factors.f, structure_factors.phi]]
 
         # To numpy
