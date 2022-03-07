@@ -61,7 +61,12 @@ Grid<float> interpolate_points(
         Fractional pos_moving_fractional = moving_map.unit_cell.fractionalize(pos_moving);
 
         // interpolate
-        float interpolated_value = moving_map.interpolate_value(pos_moving_fractional);
+
+        // CV-20220302: this should be done with tri-cubic
+        //              interpolation to take better care of
+        //              non-orthogonal cells ... right?
+        //float interpolated_value = moving_map.interpolate_value(pos_moving_fractional);
+        float interpolated_value = (float) moving_map.tricubic_interpolation(pos_moving_fractional);
 
         // assign
         interpolated_map.set_value(
