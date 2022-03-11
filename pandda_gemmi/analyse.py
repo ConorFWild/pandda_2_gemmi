@@ -655,6 +655,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                             pandda_fs_model,
                             cif_strategy=pandda_args.cif_strategy,
                             rhofit_coord=pandda_args.rhofit_coord,
+                            debug=pandda_args.debug,
                         )
                         for event_id
                         in all_events
