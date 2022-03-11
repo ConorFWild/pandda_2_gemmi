@@ -272,7 +272,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.local_processing == "ray":
                 autobuild_func = autobuild_rhofit_ray
             else:
-                autobuild_func = autobuild_rhofit,
+                autobuild_func = autobuild_rhofit
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
