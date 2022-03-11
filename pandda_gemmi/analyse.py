@@ -593,7 +593,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             time_shells_start = time.time()
             shell_results: List[ShellResult] = process_global(
                 [
-                    partial(
+                    Partial(
                         process_shell_paramaterised,
                         shell,
                         datasets,
@@ -659,7 +659,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         )
                         for event_id
                         in all_events
-                    ]
+                    ],
                 )
 
                 time_autobuild_finish = time.time()
