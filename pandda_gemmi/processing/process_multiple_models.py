@@ -840,6 +840,10 @@ def analyse_model(
         debug=debug
     )
 
+    model_log['score'] = {}
+    for event_num, score in event_scores.items():
+        model_log['score'][event_num] = score
+
     time_model_analysis_finish = time.time()
 
     model_results = {
