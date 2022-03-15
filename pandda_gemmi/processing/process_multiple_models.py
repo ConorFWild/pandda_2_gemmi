@@ -53,104 +53,104 @@ class ShellResult:
 
 
 # TODO: Remove
-def blobfind_event_map_and_report_and_output(
-        test_dtag,
-        model_number,
-        dataset,
-        xmaps,
-        zmap,
-        selected_model_clusterings,
-        model,
-        dataset_xmaps,
-        grid,
-        alignments,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        reference,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        pandda_fs_model
-):
-    # Get the events and their BDCs
-    events: Events = Events.from_clusters(
-        selected_model_clusterings,
-        model,
-        dataset_xmaps,
-        grid,
-        alignments[test_dtag],
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        None,
-    )
-
-    # Calculate the event maps
-    reference_xmap_grid = xmaps[test_dtag].xmap
-    reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
-
-    for event_id, event in events.events.items():
-
-        event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
-                                                     reference_xmap_grid.nv,
-                                                     reference_xmap_grid.nw,
-                                                     ]
-                                                   )
-        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-        event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
-
-        event_map_reference_grid_array = np.array(event_map_reference_grid,
-                                                  copy=False,
-                                                  )
-
-        mean_array = model.mean
-        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
-                1 - event.bdc.bdc)
-
-        # Mask
-
-        # # Blobfind
-        # clustering = Clustering.from_event_map(
-        #     event_map_reference_grid_array,
-        #     zmap,
-        #     reference,
-        #     grid,
-        #     contour_level,
-        #     cluster_cutoff_distance_multiplier,
-        # )
-
-        scores = score_clusters(
-            {(0, 0): event.cluster},
-            Zmap(event_map_reference_grid),
-            dataset,
-
-        )
-
-        # Ouptut
-        # for cluster_id, cluster in clustering.clustering.items():
-        #     string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
-        #     print(string)
-        for score_id, score in scores:
-            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
-
-        # Save event map
-        filename = f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
-        save_reference_frame_zmap(
-            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
-            Zmap(event_map_reference_grid)
-        )
-
-        # Save z map
-        filename = f'z_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
-        save_reference_frame_zmap(
-            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
-            zmap
-        )
-
-        # Save reference model
-        filename = f'ref.pdb'
-        reference_structure = reference.dataset.structure.structure
-        reference_structure.write_minimal_pdb(
-            str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
-        )
+# def blobfind_event_map_and_report_and_output(
+#         test_dtag,
+#         model_number,
+#         dataset,
+#         xmaps,
+#         zmap,
+#         selected_model_clusterings,
+#         model,
+#         dataset_xmaps,
+#         grid,
+#         alignments,
+#         max_site_distance_cutoff,
+#         min_bdc, max_bdc,
+#         reference,
+#         contour_level,
+#         cluster_cutoff_distance_multiplier,
+#         pandda_fs_model
+# ):
+#     # Get the events and their BDCs
+#     events: Events = Events.from_clusters(
+#         selected_model_clusterings,
+#         model,
+#         dataset_xmaps,
+#         grid,
+#         alignments[test_dtag],
+#         max_site_distance_cutoff,
+#         min_bdc, max_bdc,
+#         None,
+#     )
+#
+#     # Calculate the event maps
+#     reference_xmap_grid = xmaps[test_dtag].xmap
+#     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
+#
+#     for event_id, event in events.events.items():
+#
+#         event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+#                                                      reference_xmap_grid.nv,
+#                                                      reference_xmap_grid.nw,
+#                                                      ]
+#                                                    )
+#         event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+#         event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+#
+#         event_map_reference_grid_array = np.array(event_map_reference_grid,
+#                                                   copy=False,
+#                                                   )
+#
+#         mean_array = model.mean
+#         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+#                 1 - event.bdc.bdc)
+#
+#         # Mask
+#
+#         # # Blobfind
+#         # clustering = Clustering.from_event_map(
+#         #     event_map_reference_grid_array,
+#         #     zmap,
+#         #     reference,
+#         #     grid,
+#         #     contour_level,
+#         #     cluster_cutoff_distance_multiplier,
+#         # )
+#
+#         scores = score_clusters(
+#             {(0, 0): event.cluster},
+#             Zmap(event_map_reference_grid),
+#             dataset,
+#
+#         )
+#
+#         # Ouptut
+#         # for cluster_id, cluster in clustering.clustering.items():
+#         #     string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
+#         #     print(string)
+#         for score_id, score in scores:
+#             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
+#
+#         # Save event map
+#         filename = f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+#         save_reference_frame_zmap(
+#             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
+#             Zmap(event_map_reference_grid)
+#         )
+#
+#         # Save z map
+#         filename = f'z_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+#         save_reference_frame_zmap(
+#             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
+#             zmap
+#         )
+#
+#         # Save reference model
+#         filename = f'ref.pdb'
+#         reference_structure = reference.dataset.structure.structure
+#         reference_structure.write_minimal_pdb(
+#             str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
+#         )
 
 
 def event_score_and_report(
@@ -165,6 +165,7 @@ def event_score_and_report(
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         reference,
+        structure_output_folder,
         debug=True,
 ):
     # Get the events and their BDCs
@@ -252,7 +253,7 @@ def event_score_and_report(
 
         # Score
         time_scoring_start = time.time()
-        scores = score_clusters(
+        results = score_clusters(
             {(0, 0): event.cluster},
             {(0, 0): event_map_reference_grid},
             processed_dataset,
@@ -263,7 +264,18 @@ def event_score_and_report(
             print(f"\t\t\tTime to actually score all events: {time_scoring_finish - time_scoring_start}")
 
         # Ouptut
-        for score_id, score in scores.items():
+        for result_id, result in results.items():
+            score = result[0]
+            structure = result[1]
+
+            if debug:
+                structure.write_minimal_pdb(
+                    str(
+                        structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'
+                    )
+                )
+
+
             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
                      f"{event.cluster.values.size}"
             print(string)
@@ -343,7 +355,9 @@ def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, 
                     zmaps[new_cluster_id] = zmap_grid
 
     # Score the top clusters
-    scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
+    results = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
+
+
 
     log = {score_key[0]: score for score_key, score in scores.items()}
 
