@@ -858,7 +858,7 @@ def analyse_model(
 
     model_log['score'] = {}
     for event_num, score in event_scores.items():
-        model_log['score'][event_num] = score
+        model_log['score'][int(event_num)] = float(score)
 
     time_model_analysis_finish = time.time()
 
