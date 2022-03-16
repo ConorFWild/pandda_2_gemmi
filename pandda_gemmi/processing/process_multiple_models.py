@@ -893,6 +893,7 @@ def analyse_model_ray(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug=False
 ):
     return analyse_model(
@@ -910,6 +911,7 @@ def analyse_model_ray(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug
     )
 
