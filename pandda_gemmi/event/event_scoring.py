@@ -450,10 +450,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # )
     # score = float(res.fun) / (int(cluster.values.size) + 1)
 
-    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-        optimised_structure,
-        zmap_grid,
-    )
+    # score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+    #     optimised_structure,
+    #     zmap_grid,
+    # )
+    score = float(res.fun)
 
     if debug:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
