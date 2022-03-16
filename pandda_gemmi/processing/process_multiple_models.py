@@ -667,6 +667,7 @@ def analyse_model(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug=False
 ):
     if debug:
@@ -851,6 +852,7 @@ def analyse_model(
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         reference,
+        structure_output_folder=output_dir,
         debug=debug
     )
 
@@ -1021,6 +1023,7 @@ def process_dataset_multiple_models(
                 cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
                 min_blob_volume=min_blob_volume,
                 min_blob_z_peak=min_blob_z_peak,
+                output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
                 debug=debug
             )
             for model_number, model
