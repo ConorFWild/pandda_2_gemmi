@@ -1,5 +1,15 @@
 # PanDDA 2
 
+## Reporting Errors
+
+PanDDA 2 is still in development and feedback is always appreciated! 
+
+If you have a problem with installation, then it is most likely specific to your system and best to just email me.
+
+If the program errors while it runs, it is most helpful if you include the command line output and the json log in a github issue. 
+
+If you uncertain about the correctness of the results, then a github issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
+
 ## Installation
 
 It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda enviroment. This can be achieved by installing anaconda and then:
