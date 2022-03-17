@@ -38,9 +38,19 @@ Installing PanDDA 2 this way will add various scripts to your path, but only whi
 Once you have installed PanDDA 2 in a conda enviroment, running it is as simple as:
 
 ```bash
-python /path/to/analyse.py <data directories> <output directory> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("2FOFCWT","PH2FOFCWT")' <options>
+python /path/to/analyse.py <data directories> <output directory> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" <options>
 
 ```
+
+### A minimal run
+
+If you want to run the lightest possible PanDDA (no clustering of datasets, no autobuilding, ect: basically PanDDA 1), then a command like the following is appropriate:
+
+```bash
+python /path/to/analyse.py <data directories> <output directory> --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --autobuild=False --rank_method="size" --comparison_strategy="high_res_random" <options>
+
+```
+
 
 ### Running with autobuilding
 PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is setup in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2 with the autobuild flag on.
