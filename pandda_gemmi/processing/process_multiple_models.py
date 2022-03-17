@@ -1226,7 +1226,7 @@ def process_dataset_multiple_models(
 
     if debug:
         for model_number, model_result in model_results.items():
-            for event_id, event in model_results["events"].events.items():
+            for event_id, event in model_result["events"].events.items():
                 save_event_map(
                     pandda_fs_model.processed_datasets[event_id.dtag].path / f'{model_number}'
                                                                              f'_{event_id.event_idx.event_idx}.ccp4',
