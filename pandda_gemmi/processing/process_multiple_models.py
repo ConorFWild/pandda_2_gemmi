@@ -236,9 +236,6 @@ def event_score_and_report(
         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
                 1 - event.bdc.bdc)
 
-        event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
-        event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
-
         # Mask the protein except around the event
         # inner_mask_int_array = grid.partitioning.inner_mask
         inner_mask_int_array = np.array(
@@ -251,6 +248,15 @@ def event_score_and_report(
             copy=False,
             dtype=np.int8,
         )
+
+        high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        high_mask[event_map_reference_grid_array >= 2.0] = True
+        low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        low_mask[event_map_reference_grid_array < 2.0] = True
+
+        # Rescale the map
+        event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
+        event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
 
         # Event mask
         event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
@@ -267,10 +273,7 @@ def event_score_and_report(
         event_map_reference_grid_array[inner_mask & event_mask] = 0.0
 
         # Noise
-        high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-        high_mask[event_map_reference_grid_array >= 2.0] = True
-        low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-        low_mask[event_map_reference_grid_array < 2.0] = True
+
 
         noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
         num_noise_points = noise_points.size
