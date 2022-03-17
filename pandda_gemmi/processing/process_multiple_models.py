@@ -906,6 +906,8 @@ def analyse_model(
     )
 
     model_log['score'] = {}
+    model_log['noise'] = {}
+
     for event_num, score in event_scores.items():
         model_log['score'][int(event_num)] = float(score)
         model_log['noise'][int(event_num)] = noises[event_num]
