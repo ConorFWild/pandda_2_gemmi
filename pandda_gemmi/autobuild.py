@@ -356,7 +356,7 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 # #####################
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
-           out_dir: Path, cut: float = 2.0,
+           out_dir: Path, cut: float = 2.0, debug=False
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -381,6 +381,7 @@ def rhofit_to_coord(truncated_model_path: Path, truncated_xmap_path: Path, mtz_p
                     out_dir: Path,
                     coord: Coord,
                     cut: float = 2.0,
+                    debug=False
                     ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -1129,6 +1130,7 @@ def autobuild_rhofit(dataset: Dataset,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
+                     debug=False
                      ):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
@@ -1183,6 +1185,8 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Generate the cif
     if cif_strategy == "default":
+        if debug:
+            print(f"\t{event.event_id}   Making cif with default strategy using cif {cif_path}")
         if not cif_path:
             return AutobuildResult(
                 False,
@@ -1197,12 +1201,21 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Makinf with elbow
     elif cif_strategy == "elbow":
+        if debug:
+            print(f"\t{event.event_id}   Making cif with elbow")
+
         if cif_path:
+            if debug:
+                print(f"\t\t{event.event_id}   Making cif with elbow using cif: {cif_path}")
+
             cif_path = generate_cif(
                 cif_path,
                 out_dir,
             )
         elif smiles_path:
+            if debug:
+                print(f"\t\t{event.event_id}   Making cif with elbow using smiles: {smiles_path}")
+
             cif_path = generate_cif(
                 smiles_path,
                 out_dir,
@@ -1268,10 +1281,16 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Call rhofit
     if rhofit_coord:
+        if debug:
+            print(f"\t{event.event_id}   Using rhofit coord")
+
         rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord,
-                                         cut, )
+                                         cut, debug)
     else:
-        rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, )
+        if debug:
+            print(f"\t{event.event_id}   Using rhofit without coord")
+
+        rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, debug)
 
     autobuilding_log["rhofit_command"] = str(rhofit_command)
 
@@ -1329,11 +1348,13 @@ def autobuild_rhofit_ray(dataset: Dataset,
                          pandda_fs,
                          cif_strategy,
                          cut: float = 2.0,
-                         rhofit_coord: bool = False, ):
+                         rhofit_coord: bool = False,
+                         debug=False):
     return autobuild_rhofit(dataset,
                             event,
                             pandda_fs,
                             cif_strategy,
                             cut,
                             rhofit_coord,
+                            debug
                             )

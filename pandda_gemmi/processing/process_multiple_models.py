@@ -35,7 +35,10 @@ from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
 from pandda_gemmi.shells import Shell, ShellMultipleModels
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c
 from pandda_gemmi.model import Zmap, Model, Zmaps
-from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_clusters
+from pandda_gemmi.event import (
+    Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_clusters,
+    save_event_map,
+)
 
 
 @dataclasses.dataclass()
@@ -53,104 +56,104 @@ class ShellResult:
 
 
 # TODO: Remove
-def blobfind_event_map_and_report_and_output(
-        test_dtag,
-        model_number,
-        dataset,
-        xmaps,
-        zmap,
-        selected_model_clusterings,
-        model,
-        dataset_xmaps,
-        grid,
-        alignments,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        reference,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        pandda_fs_model
-):
-    # Get the events and their BDCs
-    events: Events = Events.from_clusters(
-        selected_model_clusterings,
-        model,
-        dataset_xmaps,
-        grid,
-        alignments[test_dtag],
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        None,
-    )
-
-    # Calculate the event maps
-    reference_xmap_grid = xmaps[test_dtag].xmap
-    reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
-
-    for event_id, event in events.events.items():
-
-        event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
-                                                     reference_xmap_grid.nv,
-                                                     reference_xmap_grid.nw,
-                                                     ]
-                                                   )
-        event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-        event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
-
-        event_map_reference_grid_array = np.array(event_map_reference_grid,
-                                                  copy=False,
-                                                  )
-
-        mean_array = model.mean
-        event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
-                1 - event.bdc.bdc)
-
-        # Mask
-
-        # # Blobfind
-        # clustering = Clustering.from_event_map(
-        #     event_map_reference_grid_array,
-        #     zmap,
-        #     reference,
-        #     grid,
-        #     contour_level,
-        #     cluster_cutoff_distance_multiplier,
-        # )
-
-        scores = score_clusters(
-            {(0, 0): event.cluster},
-            Zmap(event_map_reference_grid),
-            dataset,
-
-        )
-
-        # Ouptut
-        # for cluster_id, cluster in clustering.clustering.items():
-        #     string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
-        #     print(string)
-        for score_id, score in scores:
-            string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
-
-        # Save event map
-        filename = f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
-        save_reference_frame_zmap(
-            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
-            Zmap(event_map_reference_grid)
-        )
-
-        # Save z map
-        filename = f'z_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
-        save_reference_frame_zmap(
-            pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
-            zmap
-        )
-
-        # Save reference model
-        filename = f'ref.pdb'
-        reference_structure = reference.dataset.structure.structure
-        reference_structure.write_minimal_pdb(
-            str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
-        )
+# def blobfind_event_map_and_report_and_output(
+#         test_dtag,
+#         model_number,
+#         dataset,
+#         xmaps,
+#         zmap,
+#         selected_model_clusterings,
+#         model,
+#         dataset_xmaps,
+#         grid,
+#         alignments,
+#         max_site_distance_cutoff,
+#         min_bdc, max_bdc,
+#         reference,
+#         contour_level,
+#         cluster_cutoff_distance_multiplier,
+#         pandda_fs_model
+# ):
+#     # Get the events and their BDCs
+#     events: Events = Events.from_clusters(
+#         selected_model_clusterings,
+#         model,
+#         dataset_xmaps,
+#         grid,
+#         alignments[test_dtag],
+#         max_site_distance_cutoff,
+#         min_bdc, max_bdc,
+#         None,
+#     )
+#
+#     # Calculate the event maps
+#     reference_xmap_grid = xmaps[test_dtag].xmap
+#     reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
+#
+#     for event_id, event in events.events.items():
+#
+#         event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+#                                                      reference_xmap_grid.nv,
+#                                                      reference_xmap_grid.nw,
+#                                                      ]
+#                                                    )
+#         event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+#         event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+#
+#         event_map_reference_grid_array = np.array(event_map_reference_grid,
+#                                                   copy=False,
+#                                                   )
+#
+#         mean_array = model.mean
+#         event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+#                 1 - event.bdc.bdc)
+#
+#         # Mask
+#
+#         # # Blobfind
+#         # clustering = Clustering.from_event_map(
+#         #     event_map_reference_grid_array,
+#         #     zmap,
+#         #     reference,
+#         #     grid,
+#         #     contour_level,
+#         #     cluster_cutoff_distance_multiplier,
+#         # )
+#
+#         scores = score_clusters(
+#             {(0, 0): event.cluster},
+#             Zmap(event_map_reference_grid),
+#             dataset,
+#
+#         )
+#
+#         # Ouptut
+#         # for cluster_id, cluster in clustering.clustering.items():
+#         #     string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Cluster {cluster_id} size: {cluster.values.size} reference frame coords {cluster.centroid}"
+#         #     print(string)
+#         for score_id, score in scores:
+#             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score}"
+#
+#         # Save event map
+#         filename = f'event_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+#         save_reference_frame_zmap(
+#             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
+#             Zmap(event_map_reference_grid)
+#         )
+#
+#         # Save z map
+#         filename = f'z_{model_number}_{event_id.event_idx.event_idx}_ref.ccp4'
+#         save_reference_frame_zmap(
+#             pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename,
+#             zmap
+#         )
+#
+#         # Save reference model
+#         filename = f'ref.pdb'
+#         reference_structure = reference.dataset.structure.structure
+#         reference_structure.write_minimal_pdb(
+#             str(pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file.path.parent / filename)
+#         )
 
 
 def event_score_and_report(
@@ -158,13 +161,14 @@ def event_score_and_report(
         model_number,
         processed_dataset,
         dataset_xmap,
-        selected_model_clusterings,
+        events,
         model,
         grid,
         dataset_alignment,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         reference,
+        structure_output_folder,
         debug=True,
 ):
     # Get the events and their BDCs
@@ -172,17 +176,6 @@ def event_score_and_report(
         print("\t\tGetting events...")
 
     time_event_finding_start = time.time()
-
-    events: Events = Events.from_clusters(
-        selected_model_clusterings,
-        model,
-        {test_dtag: dataset_xmap, },
-        grid,
-        dataset_alignment,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        None,
-    )
 
     time_event_finding_finish = time.time()
     if debug:
@@ -195,15 +188,15 @@ def event_score_and_report(
     # Mask protein
     if debug:
         print("\t\tMasking protein...")
-    inner_mask = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
-    inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    inner_mask.set_unit_cell(grid.grid.unit_cell)
+    inner_mask_grid = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(grid.grid.unit_cell)
     for atom in reference.dataset.structure.protein_atoms():
         pos = atom.pos
-        inner_mask.set_points_around(pos,
-                                     radius=2.0,
-                                     value=1,
-                                     )
+        inner_mask_grid.set_points_around(pos,
+                                          radius=2.0,
+                                          value=1,
+                                          )
 
     if debug:
         print("\t\tIterating events...")
@@ -236,23 +229,31 @@ def event_score_and_report(
         event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
 
         # Mask the protein except around the event
-        # inner_mask = grid.partitioning.inner_mask
-        inner_mask_array = np.array(
-            inner_mask,
+        # inner_mask_int_array = grid.partitioning.inner_mask
+        inner_mask_int_array = np.array(
+            inner_mask_grid,
             copy=False,
             dtype=np.int8,
         )
 
-        inner_mask_array[event.cluster.event_mask_indicies] = 0.0
-        # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
-        event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
+        # Event mask
+        event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        event_mask[event.cluster.event_mask_indicies] = True
+        inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        inner_mask[np.nonzero(inner_mask_int_array)] = True
+
+        # Mask the protein except at event sites with a penalty
+        event_map_reference_grid_array[inner_mask & (~event_mask)] = -1.0
+
+        # Mask the protein-event overlaps with zeros
+        event_map_reference_grid_array[inner_mask & event_mask] = 0.0
 
         if debug:
             print("\t\t\tScoring...")
 
         # Score
         time_scoring_start = time.time()
-        scores = score_clusters(
+        results = score_clusters(
             {(0, 0): event.cluster},
             {(0, 0): event_map_reference_grid},
             processed_dataset,
@@ -263,7 +264,17 @@ def event_score_and_report(
             print(f"\t\t\tTime to actually score all events: {time_scoring_finish - time_scoring_start}")
 
         # Ouptut
-        for score_id, score in scores.items():
+        for result_id, result in results.items():
+            score = result[0]
+            structure = result[1]
+
+            if debug:
+                structure.write_minimal_pdb(
+                    str(
+                        structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'
+                    )
+                )
+
             string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
                      f"{event.cluster.values.size}"
             print(string)
@@ -343,7 +354,7 @@ def select_model(model_results: Dict[int, Dict], inner_mask, processed_dataset, 
                     zmaps[new_cluster_id] = zmap_grid
 
     # Score the top clusters
-    scores = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
+    results = score_clusters(clusters, zmaps, processed_dataset, debug=debug)
 
     log = {score_key[0]: score for score_key, score in scores.items()}
 
@@ -638,6 +649,7 @@ def get_models(
 
     return models
 
+
 def analyse_model(
         model,
         model_number,
@@ -653,6 +665,7 @@ def analyse_model(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug=False
 ):
     if debug:
@@ -823,6 +836,17 @@ def analyse_model(
     #     pandda_fs_model
     # )
 
+    events: Events = Events.from_clusters(
+        clusterings_large,
+        model,
+        {test_dtag: dataset_xmap, },
+        grid,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        None,
+    )
+
     if debug:
         print("\t\tScoring events...")
     event_scores: Dict[int, float] = event_score_and_report(
@@ -830,15 +854,20 @@ def analyse_model(
         model_number,
         dataset_processed_dataset,
         dataset_xmap,
-        clusterings_large,
+        events,
         model,
         grid,
         dataset_alignment,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         reference,
+        structure_output_folder=output_dir,
         debug=debug
     )
+
+    model_log['score'] = {}
+    for event_num, score in event_scores.items():
+        model_log['score'][int(event_num)] = float(score)
 
     time_model_analysis_finish = time.time()
 
@@ -848,6 +877,7 @@ def analyse_model(
         'clusterings_large': clusterings_large,
         'clusterings_peaked': clusterings_peaked,
         'clusterings_merged': clusterings_merged,
+        'events': events,
         'event_scores': event_scores,
     }
     model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
@@ -873,6 +903,7 @@ def analyse_model_ray(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug=False
 ):
     return analyse_model(
@@ -890,8 +921,10 @@ def analyse_model_ray(
         cluster_cutoff_distance_multiplier,
         min_blob_volume,
         min_blob_z_peak,
+        output_dir,
         debug
     )
+
 
 def dump_and_load(ob, name):
     print(f"Testing: {name}")
@@ -1003,6 +1036,7 @@ def process_dataset_multiple_models(
                 cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
                 min_blob_volume=min_blob_volume,
                 min_blob_z_peak=min_blob_z_peak,
+                output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
                 debug=debug
             )
             for model_number, model
@@ -1093,26 +1127,26 @@ def process_dataset_multiple_models(
     )
 
     # TODO: Remove altogether
-    # if debug:
-    #     for model_number, model_result in model_results.items():
-    #         save_reference_frame_zmap(
-    #             pandda_fs_model.processed_datasets.processed_datasets[
-    #                 test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
-    #                 model_result['zmap']
-    #         )
-    #         save_native_frame_zmap(
-    #             pandda_fs_model.processed_datasets.processed_datasets[
-    #                 test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
-    #             model_result['zmap'],
-    #             dataset_truncated_datasets[test_dtag],
-    #             alignments[test_dtag],
-    #             grid,
-    #             structure_factors,
-    #             outer_mask,
-    #             inner_mask_symmetry,
-    #             partitioning,
-    #             sample_rate,
-    #         )
+    if debug:
+        for model_number, model_result in model_results.items():
+            save_reference_frame_zmap(
+                pandda_fs_model.processed_datasets.processed_datasets[
+                    test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
+                model_result['zmap']
+            )
+            save_native_frame_zmap(
+                pandda_fs_model.processed_datasets.processed_datasets[
+                    test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
+                model_result['zmap'],
+                dataset_truncated_datasets[test_dtag],
+                alignments[test_dtag],
+                grid,
+                structure_factors,
+                outer_mask,
+                inner_mask_symmetry,
+                partitioning,
+                sample_rate,
+            )
 
     if statmaps:
         mean_map_file = MeanMapFile.from_zmap_file(
@@ -1189,6 +1223,25 @@ def process_dataset_multiple_models(
         native_grid,
         mapper=process_local_serial,
     )
+
+    if debug:
+        for model_number, model_result in model_results.items():
+            for event_id, event in model_result["events"].events.items():
+                save_event_map(
+                    pandda_fs_model.processed_datasets[event_id.dtag].path / f'{model_number}'
+                                                                             f'_{event_id.event_idx.event_idx}.ccp4',
+                    dataset_xmaps[event_id.dtag],
+                    models[model_number],
+                    event,
+                    dataset_truncated_datasets[event_id.dtag],
+                    alignments[event_id.dtag],
+                    grid,
+                    structure_factors,
+                    outer_mask,
+                    inner_mask_symmetry,
+                    partitioning,
+                    sample_rate,
+                )
 
     time_event_map_finish = time.time()
     dataset_log[constants.LOG_DATASET_EVENT_MAP_TIME] = time_event_map_finish - time_event_map_start
@@ -1304,13 +1357,13 @@ def process_shell_multiple_models(
     results = process_local_in_shell(
         [
             Partial(
-            load_xmap_func,
-            shell_truncated_datasets[key],
-            alignments[key],
-            grid = grid,
-            structure_factors = structure_factors,
-            sample_rate = shell.res / 0.5,
-        )
+                load_xmap_func,
+                shell_truncated_datasets[key],
+                alignments[key],
+                grid=grid,
+                structure_factors=structure_factors,
+                sample_rate=shell.res / 0.5,
+            )
             for key
             in shell_truncated_datasets
         ]

@@ -12,6 +12,7 @@ PANDDA_MODELLED_STRUCTURES_DIR = "modelled_structures"
 PANDDA_LIGAND_FILES_DIR = "ligand_files"
 PANDDA_PDB_FILE = "{}-pandda-input.pdb"
 PANDDA_MTZ_FILE = "{}-pandda-input.mtz"
+PANDDA_TEXT_LOG_FILE = "pandda_log.txt"
 
 PANDDA_LIGAND_CIF_FILE = "ligand.cif"
 PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
@@ -261,7 +262,18 @@ CONSOLE_START_INIT_SHELL_PROCCESS = "Getting shell processor..."
 CONSOLE_START_INIT_MULTIPROCESS = "Getting multiprocessor..."
 CONSOLE_START_FS_MODEL = "Building model of file system..."
 CONSOLE_START_LOAD_DATASETS = "'Loading datasets...'"
-
+CONSOLE_START_QUALITY_FILTERS = "Filtering datasets based on data quality..."
+CONSOLE_START_REF_SELEC = "Selecting reference structure for alignment..."
+CONSOLE_START_B_FACTOR_SMOOTHING = "Performing B factor smoothing of reflections..."
+CONSOLE_START_REF_COMPAT_FILTERS = "Filtering datasets on compatibility with reference..."
+CONSOLE_START_GET_GRID = "Getting grid to perform analysis on..."
+CONSOLE_START_ALIGN = "Aligning datasets to reference..."
+CONSOLE_START_GET_COMPAR = "Getting comparators for each dataset..."
+CONSOLE_START_PROCESS_SHELLS = "Processing resolution shells..."
+CONSOLE_START_AUTOBUILDING = "Autobuilding event maps..."
+CONSOLE_START_RANKING = "Ranking events..."
+CONSOLE_START_ASSIGN_SITES = "Assigning sites..."
+CONSOLE_START_SUMMARY = "Summarising PanDDA run..."
 
 ###################################################################
 # # Logging constants

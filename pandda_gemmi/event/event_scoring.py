@@ -450,10 +450,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # )
     # score = float(res.fun) / (int(cluster.values.size) + 1)
 
-    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-        optimised_structure,
-        zmap_grid,
-    )
+    # score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+    #     optimised_structure,
+    #     zmap_grid,
+    # )
+    score = float(res.fun)
 
     if debug:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
@@ -461,7 +462,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\t\tScore is: {score}")
         # print(f"\t\t\tScoring log results are: {log}")
 
-    return float(score)
+    return float(score), optimised_structure
 
 
 def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=False):
@@ -470,22 +471,29 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
 
     if debug:
         print(f"\t\t\t\tScoring conformers")
-    scores = {}
+    results = {}
     for conformer_id, conformer in fragment_conformers.items():
-        scores[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
+        results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
+
+    scores = {conformer_id: result[0] for conformer_id, result in results.items()}
+    structures = {conformer_id: result[1] for conformer_id, result in results.items()}
 
     if debug:
         print(f"\t\t\t\tConformer scores are: {scores}")
 
-    return max(scores.values())
+    highest_scoring_conformer = max(scores, key=lambda x: scores[x])
+    highest_score = scores[highest_scoring_conformer]
+    highest_scoring_structure = structures[highest_scoring_conformer]
+
+    return highest_score, highest_scoring_structure
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
     if debug:
         print(f"\t\t\t\tScoring cluster")
-    score = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
+    score, structure = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
 
-    return score
+    return score, structure
 
 
 def score_clusters(
@@ -497,10 +505,10 @@ def score_clusters(
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
-    scores = {}
+    results = {}
 
     if len(fragment_conformers) == 0:
-        return scores
+        return results
 
     for cluster_id, cluster in clusters.items():
         if debug:
@@ -508,6 +516,6 @@ def score_clusters(
 
         zmap_grid = zmaps[cluster_id]
 
-        scores[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, debug)
+        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, debug)
 
-    return scores
+    return results

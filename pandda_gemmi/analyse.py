@@ -272,7 +272,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.local_processing == "ray":
                 autobuild_func = autobuild_rhofit_ray
             else:
-                autobuild_func = autobuild_rhofit,
+                autobuild_func = autobuild_rhofit
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
@@ -341,6 +341,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             strategy=validation_strategy,
         )
 
+        ###################################################################
+        # # Data Quality filters
+        ###################################################################
+
+        console.start_data_quality_filters()
+
         # Initial filters
         with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
             datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
@@ -369,6 +375,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_args.max_wilson_plot_z_score)  # TODO
             validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
+        ###################################################################
+        # # Reference Selection
+        ###################################################################
+
+        console.start_reference_selection()
+
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
             reference: Reference = Reference.from_datasets(datasets_wilson, dataset_statistics)
@@ -376,10 +388,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.debug:
                 print(reference.dtag)
 
+        ###################################################################
+        # # B Factor smoothing
+        ###################################################################
 
+        console.start_b_factor_smoothing()
 
-
-        # Post-reference filters
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
             start = time.time()
             datasets_smoother: Datasets = datasets_wilson.smooth_datasets(
@@ -391,6 +405,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             finish = time.time()
             pandda_log["Time to perform b factor smoothing"] = finish - start
 
+        ###################################################################
+        # # Reference compatability filters
+        ###################################################################
+
+        console.start_reference_comparability_filters()
+
+        # Post-reference filters
         with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
             datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
                 reference,
@@ -422,6 +443,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.debug:
             print(pandda_log[constants.LOG_DATASETS])
 
+        ###################################################################
+        # # Getting grid
+        ###################################################################
+
+        console.start_get_grid()
+
         # Grid
         with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
             grid: Grid = Grid.from_reference(reference,
@@ -430,6 +457,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                              # sample_rate=pandda_args.sample_rate,
                                              sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
                                              )
+
+        ###################################################################
+        # # Getting alignments
+        ###################################################################
+
+        console.start_alignments()
 
         with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
             alignments: Alignments = Alignments.from_datasets(
@@ -442,6 +475,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
+
+        console.start_get_comparators()
 
         with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
                            f'\tDone!'):
@@ -472,6 +507,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Process shells
         ###################################################################
+
+        console.start_process_shells()
 
         # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
         # sake of computational efficiency
@@ -556,7 +593,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             time_shells_start = time.time()
             shell_results: List[ShellResult] = process_global(
                 [
-                    partial(
+                    Partial(
                         process_shell_paramaterised,
                         shell,
                         datasets,
@@ -598,6 +635,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Autobuild the results if set to
         if pandda_args.autobuild:
+
+            console.start_autobuilding()
+
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
                 if pandda_args.global_processing == 'serial':
@@ -615,10 +655,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                             pandda_fs_model,
                             cif_strategy=pandda_args.cif_strategy,
                             rhofit_coord=pandda_args.rhofit_coord,
+                            debug=pandda_args.debug,
                         )
                         for event_id
                         in all_events
-                    ]
+                    ],
                 )
 
                 time_autobuild_finish = time.time()
@@ -688,6 +729,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Rank Events
         ###################################################################
+
+        console.start_ranking()
+
         with STDOUTManager('Ranking events...', f'\tDone!'):
             if pandda_args.rank_method == "size":
                 all_events_ranked = rank_events_size(all_events, grid)
@@ -716,6 +760,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Assign Sites
         ###################################################################
+        console.start_assign_sites()
 
         # Get the events and assign sites to them
         with STDOUTManager('Assigning sites to each event', f'\tDone!'):
@@ -724,6 +769,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Output pandda summary information
         ###################################################################
+
+        console.start_run_summary()
 
         # Output a csv of the events
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
