@@ -42,6 +42,7 @@ python /path/to/analyse.py <data directories> <output directory> --pdb_regex="di
 
 ```
 
+
 ### A minimal run
 
 If you want to run the lightest possible PanDDA (no clustering of datasets, no autobuilding, ect: basically PanDDA 1), then a command like the following is appropriate:
