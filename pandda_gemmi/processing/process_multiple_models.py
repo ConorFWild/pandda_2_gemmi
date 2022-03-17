@@ -198,10 +198,21 @@ def event_score_and_report(
                                           value=1,
                                           )
 
+    outer_mask_grid = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
+    outer_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    outer_mask_grid.set_unit_cell(grid.grid.unit_cell)
+    for atom in reference.dataset.structure.protein_atoms():
+        pos = atom.pos
+        outer_mask_grid.set_points_around(pos,
+                                          radius=6.0,
+                                          value=1,
+                                          )
+
     if debug:
         print("\t\tIterating events...")
 
     event_scores = {}
+    noises = {}
 
     time_event_scoring_start = time.time()
 
@@ -235,18 +246,47 @@ def event_score_and_report(
             copy=False,
             dtype=np.int8,
         )
+        outer_mask_int_array = np.array(
+            outer_mask_grid,
+            copy=False,
+            dtype=np.int8,
+        )
 
         # Event mask
         event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
         event_mask[event.cluster.event_mask_indicies] = True
         inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
         inner_mask[np.nonzero(inner_mask_int_array)] = True
+        outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        outer_mask[np.nonzero(outer_mask_int_array)] = True
 
         # Mask the protein except at event sites with a penalty
         event_map_reference_grid_array[inner_mask & (~event_mask)] = -1.0
 
         # Mask the protein-event overlaps with zeros
         event_map_reference_grid_array[inner_mask & event_mask] = 0.0
+
+        # Noise
+        high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        high_mask[event_map_reference_grid_array >= 2.0] = True
+        low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+        low_mask[event_map_reference_grid_array < 2.0] = True
+
+        noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
+        num_noise_points = noise_points.size
+        potential_noise_points = event_map_reference_grid_array[outer_mask & (~inner_mask)]
+        num_potential_noise_points = potential_noise_points.size
+        percentage_noise = num_noise_points / num_potential_noise_points
+
+        noise = {
+            'num_noise_points': int(num_noise_points),
+            'num_potential_noise_points': int(num_potential_noise_points),
+            'percentage_noise': float(percentage_noise)
+        }
+        noises[event_id.event_idx.event_idx] = noise
+
+        if debug:
+            print(f"\t\t\tNoise is: {noise}")
 
         if debug:
             print("\t\t\tScoring...")
@@ -287,7 +327,7 @@ def event_score_and_report(
         print(f"\t\tTime to score all events: {time_event_scoring_finish - time_event_scoring_start}. Num events: "
               f"{len(events.events)}")
 
-    return event_scores
+    return event_scores, noises
 
 
 def update_log(shell_log, shell_log_path):
@@ -849,7 +889,7 @@ def analyse_model(
 
     if debug:
         print("\t\tScoring events...")
-    event_scores: Dict[int, float] = event_score_and_report(
+    event_scores, noises = event_score_and_report(
         test_dtag,
         model_number,
         dataset_processed_dataset,
@@ -868,6 +908,7 @@ def analyse_model(
     model_log['score'] = {}
     for event_num, score in event_scores.items():
         model_log['score'][int(event_num)] = float(score)
+        model_log['noise'][int(event_num)] = noises[event_num]
 
     time_model_analysis_finish = time.time()
 
