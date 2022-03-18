@@ -308,8 +308,13 @@ def event_score_and_report(
 
         # Ouptut
         for result_id, result in results.items():
-            score = result[0]
+            initial_score = result[0]
             structure = result[1]
+
+            if initial_score < 0.4:
+                score = 0
+            else:
+                score = initial_score / percentage_noise
 
             if debug:
                 structure.write_minimal_pdb(
