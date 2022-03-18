@@ -1370,7 +1370,7 @@ def process_shell_multiple_models(
     if debug:
         print(f"\tTruncating shell datasets")
     shell_working_resolution = Resolution(
-        min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
+        max([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
         resolution=shell_working_resolution,
