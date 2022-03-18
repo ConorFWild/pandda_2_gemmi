@@ -51,6 +51,7 @@ from pandda_gemmi.pandda_functions import (
     get_comparators_closest_apo_cutoff,
     get_clusters_nn,
     get_comparators_closest_cluster,
+    get_comparators_high_res_first,
     validate_strategy_num_datasets,
     validate,
     get_common_structure_factors,
@@ -113,6 +114,14 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
+
+    elif pandda_args.comparison_strategy == "highest_res_first":
+        comparators_func = Partial(
+            get_comparators_high_res_first,
+            comparison_min_comparators=pandda_args.comparison_min_comparators,
+            comparison_max_comparators=pandda_args.comparison_max_comparators,
+        )
+
 
     elif pandda_args.comparison_strategy == "cluster":
         comparators_func = Partial(
