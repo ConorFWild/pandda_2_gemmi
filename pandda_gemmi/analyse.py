@@ -84,6 +84,7 @@ from pandda_gemmi.processing import (
 printer = pprint.PrettyPrinter()
 console = PanDDAConsole()
 
+
 def update_log(shell_log, shell_log_path):
     if shell_log_path.exists():
         os.remove(shell_log_path)
@@ -121,7 +122,6 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
-
 
     elif pandda_args.comparison_strategy == "cluster":
         comparators_func = Partial(
@@ -498,12 +498,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-        pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
-        pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
-                                                                          neighbourhood.core_dtags]
-                                                 for neighbourhood_number, neighbourhood
-                                                 in comparators.items()
-                                                 }
+
+        if pandda_args.comparison_strategy == "cluster":
+            pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
+            pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
+                                                                                  neighbourhood.core_dtags]
+                                                      for neighbourhood_number, neighbourhood
+                                                      in comparators.items()
+                                                      }
 
         if pandda_args.debug:
             print("Comparators are:")
