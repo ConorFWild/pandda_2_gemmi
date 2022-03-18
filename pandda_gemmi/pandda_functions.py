@@ -545,7 +545,7 @@ def get_comparators_high_res(
     for dtag in dtag_list:
         comparators[dtag] = highest_res_datasets
 
-    return comparators, []
+    return comparators, {}
 
 
 def get_comparators_high_res_random(
@@ -587,7 +587,7 @@ def get_comparators_high_res_random(
             )
         )
 
-    return comparators, []
+    return comparators, {}
 
 
 def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
