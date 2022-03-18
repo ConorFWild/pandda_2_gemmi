@@ -115,7 +115,7 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
 
-    elif pandda_args.comparison_strategy == "highest_res_first":
+    elif pandda_args.comparison_strategy == "high_res_first":
         comparators_func = Partial(
             get_comparators_high_res_first,
             comparison_min_comparators=pandda_args.comparison_min_comparators,
