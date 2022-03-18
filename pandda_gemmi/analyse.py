@@ -509,8 +509,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         if pandda_args.debug:
             print("Comparators are:")
-            printer.pprint(pandda_log["Cluster Assignments"])
-            printer.pprint(pandda_log["Neighbourhood core dtags"])
+            # printer.pprint(pandda_log["Cluster Assignments"])
+            # printer.pprint(pandda_log["Neighbourhood core dtags"])
             printer.pprint(comparators)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
