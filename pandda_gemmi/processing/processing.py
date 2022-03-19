@@ -247,13 +247,19 @@ def process_dataset(
         cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
     )
 
-    clusterings = process_local(
-        [
+    # clusterings = process_local(
+    #     [
+    #         partial(cluster_paramaterised, zmaps[dtag], )
+    #         for dtag
+    #         in zmaps
+    #     ]
+    # )
+    clusterings = [
             partial(cluster_paramaterised, zmaps[dtag], )
             for dtag
             in zmaps
         ]
-    )
+
     clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
     # print("\t\tIntially found clusters: {}".format(
     #     {
