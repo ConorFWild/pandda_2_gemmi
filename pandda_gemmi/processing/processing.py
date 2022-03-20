@@ -255,7 +255,7 @@ def process_dataset(
     #     ]
     # )
     clusterings = [
-            partial(cluster_paramaterised, zmaps[dtag], )
+            partial(cluster_paramaterised, zmaps[dtag], )()
             for dtag
             in zmaps
         ]
