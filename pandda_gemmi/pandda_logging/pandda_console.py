@@ -207,3 +207,7 @@ class PanDDAConsole:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         ...
+
+
+def get_pandda_console():
+    return PanDDAConsole()

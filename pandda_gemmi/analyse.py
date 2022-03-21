@@ -1,7 +1,7 @@
 # Base python
 import os
 import traceback
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Callable
 import time
 from pathlib import Path
 import pprint
@@ -205,6 +205,7 @@ def get_analyse_model_func(pandda_args):
     else:
         analyse_model_func = analyse_model
     return analyse_model_func
+
 
 
 def process_pandda(pandda_args: PanDDAArgs, ):
@@ -550,6 +551,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.min_characterisation_datasets,
                     pandda_args.max_shell_datasets,
                     pandda_args.high_res_increment,
+                    pandda_args.only_datasets,
+
                 )
             pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()

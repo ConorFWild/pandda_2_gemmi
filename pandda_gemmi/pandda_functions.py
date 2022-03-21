@@ -1858,6 +1858,7 @@ def get_shells(
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,
+        only_datasets,
 ):
     # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
     # Common reoslution
@@ -1883,7 +1884,13 @@ def get_shells(
         # Find the first shell whose res is higher
         for res in reses:
             if res > low_res:
-                shells_test[res] = shells_test[res].union({dtag, })
+
+                if only_datasets:
+                    if dtag.dtag in only_datasets:
+                        shells_test[res] = shells_test[res].union({dtag, })
+                else:
+                    shells_test[res] = shells_test[res].union({dtag, })
+
                 shells_train[res][dtag] = set(comparison_dtags)
 
                 # Make sure they only appear in one shell
