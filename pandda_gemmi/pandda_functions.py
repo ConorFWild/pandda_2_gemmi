@@ -1888,10 +1888,12 @@ def get_shells(
                 if only_datasets:
                     if dtag.dtag in only_datasets:
                         shells_test[res] = shells_test[res].union({dtag, })
+                        shells_train[res][dtag] = set(comparison_dtags)
+
                 else:
                     shells_test[res] = shells_test[res].union({dtag, })
+                    shells_train[res][dtag] = set(comparison_dtags)
 
-                shells_train[res][dtag] = set(comparison_dtags)
 
                 # Make sure they only appear in one shell
                 break
