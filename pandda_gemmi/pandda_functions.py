@@ -621,7 +621,7 @@ def get_comparators_high_res_first(
         truncated_datasets = [dtag for dtag in dtag_list if
                               datasets[dtag].reflections.resolution().resolution < truncation_res]
 
-        comparators[dtag] = [dtag for dtag in sorted(truncated_datasets, key= lambda x: x.dtag)]
+        comparators[dtag] = [dtag for dtag in sorted(truncated_datasets, key= lambda x: x.dtag)][:comparison_min_comparators + 1]
 
     return comparators, {}
 
