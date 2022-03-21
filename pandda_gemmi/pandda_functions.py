@@ -1894,7 +1894,6 @@ def get_shells(
                     shells_test[res] = shells_test[res].union({dtag, })
                     shells_train[res][dtag] = set(comparison_dtags)
 
-
                 # Make sure they only appear in one shell
                 break
 
