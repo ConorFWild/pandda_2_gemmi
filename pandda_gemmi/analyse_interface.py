@@ -1,102 +1,164 @@
+from __future__ import annotations
 from typing import *
 from pathlib import Path
 
+T = TypeVar('T')
+
 
 # Analyse class interfaces
-class PanDDAConsoleInterface:
+class PanDDAConsoleInterface(Protocol):
     ...
 
 
-class ProcessorInterface:
+class ProcessorInterface(Protocol):
+    def __call__(self, funcs: List[Callable[..., T]]) -> List[T]:
+        ...
+
+
+class PanDDAFSModelInterface(Protocol):
+    # path: Path
+    # processed_dataset_dirs: Dict[DtagInterface, ProcessedDatasetInterface]
+    # shell_dirs: Dict[DtagInterface, ShellDirInterface]
+
+    def get_pandda_dir(self) -> Path:
+        ...
+
+    def get_dataset_dir(self, dtag: DtagInterface) -> Path:
+        ...
+
+    def get_dataset_structure_path(self, dtag: DtagInterface) -> Path:
+        ...
+
+    def get_dataset_reflections_path(self, dtag: DtagInterface) -> Path:
+        ...
+
+    def get_dataset_ligand_cif(self, dtag: DtagInterface) -> Optional[Path]:
+        ...
+
+    def get_dataset_ligand_pdb(self, dtag: DtagInterface) -> Optional[Path]:
+        ...
+
+    def get_dataset_ligand_smiles(self, dtag: DtagInterface) -> Optional[Path]:
+        ...
+
+    def get_dataset_output_dir(self, dtag: DtagInterface) -> Path:
+        ...
+
+    def get_event_map_path(self, dtag: DtagInterface) -> Path:
+        ...
+
+    def get_shell_dir(self, shell_id: int) -> Path:
+        ...
+
+    def get_event_table_path(self, ) -> Path:
+        ...
+
+    def get_site_table_path(self, ) -> Path:
+        ...
+
+    def get_log_path(self, ) -> Path:
+        ...
+
+
+class ShellDirInterface(Protocol):
     ...
 
 
-class PanDDAFSModelInterface:
+class StructureFactorsInterface(Protocol):
+    f: str
+    phi: str
+
+
+class ReferenceInterface(Protocol):
+    dtag: DtagInterface
+    dataset: DatasetInterface
+
+
+class DatasetInterface(Protocol):
+    structure: StructureInterface
+    reflections: ReflectionsInterface
+
+
+class StructureInterface(Protocol):
     ...
 
 
-class StructureFactorsInterface:
+class ReflectionsInterface(Protocol):
     ...
 
 
-class ReferenceInterface:
+class GridInterface(Protocol):
     ...
 
 
-class DatasetInterface:
+class AlignmentInterface(Protocol):
     ...
 
 
-class GridInterface:
+class ModelInterface(Protocol):
     ...
 
 
-class AlignmentInterface:
+class DtagInterface(Protocol):
     ...
 
 
-class ModelInterface:
+class XmapInterface(Protocol):
     ...
 
 
-class DtagInterface:
+class ProcessedDatasetInterface(Protocol):
     ...
 
 
-class XmapInterface:
+class ModelResultInterface(Protocol):
     ...
 
 
-class ProcessedDatasetInterface:
+class ComparatorsInterface(Protocol):
     ...
 
 
-class ModelResultInterface:
+class ShellInterface(Protocol):
     ...
 
 
-class ComparatorsInterface:
+class EventInterface(Protocol):
     ...
 
 
-class ShellInterface:
+class AutobuildResultInterface(Protocol):
+    paths: List[str]
+    scores: Dict[str, float]
+    selected_fragment_path: Optional[str]
+
+
+class EventRankingInterface(Protocol):
     ...
 
 
-class EventInterface:
+class EventIDInterface(Protocol):
     ...
 
 
-class AutobuildResultInterface:
+class SiteIDInterface(Protocol):
     ...
 
 
-class EventRankingInterface:
+class SiteInterface(Protocol):
     ...
 
 
-class EventIDInterface:
+class EventTableInterface(Protocol):
     ...
 
 
-class SiteIDInterface:
-    ...
-
-
-class SiteInterface:
-    ...
-
-
-class EventTableInterface:
-    ...
-
-
-class SiteTableInterface:
+class SiteTableInterface(Protocol):
     ...
 
 
 # Analyse Function Interfaces
-class SmoothBFactorsInterface:
+class SmoothBFactorsInterface(Protocol):
     def __call__(self,
                  dataset: DatasetInterface,
                  reference: ReferenceInterface,
@@ -105,7 +167,7 @@ class SmoothBFactorsInterface:
         ...
 
 
-class LoadXMapInterface:
+class LoadXMapInterface(Protocol):
     def __call__(self,
                  dataset: DatasetInterface,
                  alignment: AlignmentInterface,
@@ -116,7 +178,7 @@ class LoadXMapInterface:
         ...
 
 
-class AnalyseModelInterface:
+class AnalyseModelInterface(Protocol):
     def __call__(self,
                  model: ModelInterface,
                  model_number: int,
@@ -139,7 +201,7 @@ class AnalyseModelInterface:
         ...
 
 
-class FilterNoStructureFactorsInterface:
+class FilterNoStructureFactorsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  structure_factors: StructureFactorsInterface
@@ -147,7 +209,7 @@ class FilterNoStructureFactorsInterface:
         ...
 
 
-class FilterRFreeInterface:
+class FilterRFreeInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  max_rfree: float
@@ -155,7 +217,7 @@ class FilterRFreeInterface:
         ...
 
 
-class FilterResolutionDatasets:
+class FilterResolutionDatasets(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  low_resolution_completeness: float
@@ -163,7 +225,7 @@ class FilterResolutionDatasets:
         ...
 
 
-class FilterDissimilarModelsInterface:
+class FilterDissimilarModelsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
@@ -172,7 +234,7 @@ class FilterDissimilarModelsInterface:
         ...
 
 
-class FilterDifferentSpacegroupsInterface:
+class FilterDifferentSpacegroupsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
@@ -180,7 +242,7 @@ class FilterDifferentSpacegroupsInterface:
         ...
 
 
-class FilterIncompleteModelsInterface:
+class FilterIncompleteModelsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
@@ -188,7 +250,7 @@ class FilterIncompleteModelsInterface:
         ...
 
 
-class GetAlignmentsInterface:
+class GetAlignmentsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
@@ -196,7 +258,7 @@ class GetAlignmentsInterface:
         ...
 
 
-class GetGridInterface:
+class GetGridInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
@@ -207,7 +269,7 @@ class GetGridInterface:
         ...
 
 
-class GetComparatorsInterface:
+class GetComparatorsInterface(Protocol):
     def __call__(self,
                  datasets: Dict[DtagInterface, DatasetInterface],
                  alignments: Dict[DtagInterface, AlignmentInterface],
@@ -218,7 +280,7 @@ class GetComparatorsInterface:
         ...
 
 
-class ProcessShellInterface:
+class ProcessShellInterface(Protocol):
     def __call__(self,
                  shell: ShellInterface,
                  datasets: Dict[DtagInterface, DatasetInterface],
@@ -247,7 +309,7 @@ class ProcessShellInterface:
         ...
 
 
-class ProcessDatasetInterface:
+class ProcessDatasetInterface(Protocol):
     def __call__(self,
                  test_dtag,
                  models,
@@ -277,7 +339,7 @@ class ProcessDatasetInterface:
         ...
 
 
-class GetAutobuildResultInterface:
+class GetAutobuildResultInterface(Protocol):
     def __call__(self,
                  dataset: DatasetInterface,
                  event: EventInterface,
@@ -290,7 +352,7 @@ class GetAutobuildResultInterface:
         ...
 
 
-class GetEventRankingInterface:
+class GetEventRankingInterface(Protocol):
     def __call__(self,
                  all_events,
                  autobuild_results,
@@ -300,7 +362,7 @@ class GetEventRankingInterface:
         ...
 
 
-class GetSitesInterface:
+class GetSitesInterface(Protocol):
     def __call__(self,
                  all_events_ranked: Dict[EventIDInterface, EventInterface],
                  grid: GridInterface,
@@ -309,31 +371,25 @@ class GetSitesInterface:
         ...
 
 
-class GetSiteTable:
+class GetSiteTable(Protocol):
     def __call__(self,
                  sites: Dict[SiteIDInterface, SiteInterface]
                  ) -> SiteTableInterface:
         ...
 
 
-class GetEventTableInterface:
+class GetEventTableInterface(Protocol):
     def __call__(self,
                  events: Dict[EventIDInterface, EventInterface]
                  ) -> EventTableInterface:
         ...
 
-# GetPanDDAConsole = Callable[[], PanDDAConsoleInterface]
-# GetProcessLocal
-# GetProcessGlobal
-#
-# Smooth
-# LoadXMap
-# LoadXMapFlat
-# AnalyseModel
-# GetComparators
-#
-#
-# get_smooth_func
-# get_load_xmap_func
-# get_load_xmap_flat_func
-# get_analyse_model_func
+
+class GetEventClassInterface(Protocol):
+    def __call__(self, event: EventInterface, ) -> bool:
+        ...
+
+
+class GetEventClassAutobuildInterface(Protocol):
+    def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
+        ...

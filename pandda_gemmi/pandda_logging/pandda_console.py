@@ -105,7 +105,21 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
         self.console.print(printable)
 
+    def start_classification(self):
+        printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
+        self.console.print(printable)
 
+    def summarise_event_classifications(self, event_classifications):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Class")
+
+        for event_id, event_class in event_classifications.items():
+            event_class_table.add_column(event_id.dtag.dtag, event_id.event_idx.event_idx, event_class)
+
+        self.console.print(event_class_table)
 
     def summarise_datasets(self, datasets_initial, dataset_statistics):
 

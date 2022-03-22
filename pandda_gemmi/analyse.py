@@ -81,6 +81,9 @@ from pandda_gemmi.processing import (
     analyse_model_ray
 )
 
+from pandda_gemmi import event_classification
+from pandda_gemmi.analyse_interface import *
+
 printer = pprint.PrettyPrinter()
 console = PanDDAConsole()
 
@@ -207,7 +210,6 @@ def get_analyse_model_func(pandda_args):
     return analyse_model_func
 
 
-
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -266,6 +268,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     load_xmap_func = get_load_xmap_func(pandda_args)
     load_xmap_flat_func = get_load_xmap_flat_func(pandda_args)
     analyse_model_func = get_analyse_model_func(pandda_args)
+
+    if pandda_args.autobuild:
+        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4)
+    else:
+        get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
+
 
     comparators_func = get_comparator_func(
         pandda_args,
@@ -499,9 +507,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-
         if pandda_args.comparison_strategy == "cluster":
-            pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in cluster_assignments.items()}
+            pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in
+                                                 cluster_assignments.items()}
             pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
                                                                                   neighbourhood.core_dtags]
                                                       for neighbourhood_number, neighbourhood
@@ -739,6 +747,36 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     save_pdb_file(merged_structure, pandda_model_path)
 
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        ###################################################################
+        # # Classify Events
+        ###################################################################
+
+        console.start_classification()
+
+        if pandda_args.autobuild:
+            event_classifications: Dict[EventID, bool] = {
+                event_id: get_event_class(
+                    event,
+                    autobuild_results[event_id],
+                )
+                for event_id, event
+                in all_events.items()
+            }
+
+        else:
+            event_classifications: Dict[EventID, bool] = {
+                event_id: get_event_class(event)
+                for event_id, event
+                in all_events.items()
+            }
+
+        console.summarise_event_classifications(event_classifications)
+
+        update_log(
+            pandda_log,
+            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
+        )
 
         ###################################################################
         # # Rank Events
