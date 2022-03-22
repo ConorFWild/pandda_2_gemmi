@@ -1,6 +1,7 @@
 from typing import *
 from pathlib import Path
 
+
 # Analyse class interfaces
 class PanDDAConsoleInterface:
     ...
@@ -17,36 +18,80 @@ class PanDDAFSModelInterface:
 class StructureFactorsInterface:
     ...
 
+
 class ReferenceInterface:
     ...
+
 
 class DatasetInterface:
     ...
 
+
 class GridInterface:
     ...
+
 
 class AlignmentInterface:
     ...
 
+
 class ModelInterface:
     ...
+
 
 class DtagInterface:
     ...
 
+
 class XmapInterface:
     ...
+
 
 class ProcessedDatasetInterface:
     ...
 
+
 class ModelResultInterface:
     ...
+
+
 class ComparatorsInterface:
     ...
 
+
 class ShellInterface:
+    ...
+
+
+class EventInterface:
+    ...
+
+
+class AutobuildResultInterface:
+    ...
+
+
+class EventRankingInterface:
+    ...
+
+
+class EventIDInterface:
+    ...
+
+
+class SiteIDInterface:
+    ...
+
+
+class SiteInterface:
+    ...
+
+
+class EventTableInterface:
+    ...
+
+
+class SiteTableInterface:
     ...
 
 
@@ -59,6 +104,7 @@ class SmoothBFactorsInterface:
                  ) -> DatasetInterface:
         ...
 
+
 class LoadXMapInterface:
     def __call__(self,
                  dataset: DatasetInterface,
@@ -68,6 +114,7 @@ class LoadXMapInterface:
                  sample_rate: float = 3.0,
                  ) -> XmapInterface:
         ...
+
 
 class AnalyseModelInterface:
     def __call__(self,
@@ -91,24 +138,85 @@ class AnalyseModelInterface:
                  ) -> ModelResultInterface:
         ...
 
+
 class FilterNoStructureFactorsInterface:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 structure_factors: StructureFactorsInterface
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
+
 
 class FilterRFreeInterface:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 max_rfree: float
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
+
 
 class FilterResolutionDatasets:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 low_resolution_completeness: float
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
 
 
 class FilterDissimilarModelsInterface:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 reference: ReferenceInterface,
+                 max_rmsd_to_reference: float
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
+
 
 class FilterDifferentSpacegroupsInterface:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 reference: ReferenceInterface,
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
+
 
 class FilterIncompleteModelsInterface:
-    ...
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 reference: ReferenceInterface,
+                 ) -> Dict[DtagInterface, DatasetInterface]:
+        ...
+
+
+class GetAlignmentsInterface:
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 reference: ReferenceInterface,
+                 ) -> Dict[DtagInterface, AlignmentInterface]:
+        ...
+
+
+class GetGridInterface:
+    def __call__(self,
+                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 reference: ReferenceInterface,
+                 outer_mask: float,
+                 inner_mask_symmetry: float,
+                 sample_rate: float
+                 ) -> GridInterface:
+        ...
+
+
+class GetComparatorsInterface:
+    def __call__(self,
+                 datasets: Dict[DtagInterface, DatasetInterface],
+                 alignments: Dict[DtagInterface, AlignmentInterface],
+                 grid: GridInterface,
+                 structure_factors: StructureFactorsInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ):
+        ...
+
 
 class ProcessShellInterface:
     def __call__(self,
@@ -138,17 +246,18 @@ class ProcessShellInterface:
                  ):
         ...
 
+
 class ProcessDatasetInterface:
     def __call__(self,
                  test_dtag,
                  models,
-                 shell: ShellMultipleModels,
+                 shell: ShellInterface,
                  dataset_truncated_datasets,
-                 alignments,
-                 dataset_xmaps,
-                 pandda_fs_model: PanDDAFSModel,
-                 reference,
-                 grid,
+                 alignments: Dict[DtagInterface, AlignmentInterface],
+                 dataset_xmaps: Dict[DtagInterface, XmapInterface],
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 reference: ReferenceInterface,
+                 grid: GridInterface,
                  contour_level: float,
                  cluster_cutoff_distance_multiplier: float,
                  min_blob_volume: float,
@@ -165,6 +274,52 @@ class ProcessDatasetInterface:
                  process_local=ProcessorInterface,
                  debug=bool,
                  ):
+        ...
+
+
+class GetAutobuildResultInterface:
+    def __call__(self,
+                 dataset: DatasetInterface,
+                 event: EventInterface,
+                 pandda_fs: PanDDAFSModelInterface,
+                 cif_strategy: str,
+                 cut: float,
+                 rhofit_coord: bool,
+                 debug: bool
+                 ) -> AutobuildResultInterface:
+        ...
+
+
+class GetEventRankingInterface:
+    def __call__(self,
+                 all_events,
+                 autobuild_results,
+                 datasets,
+                 pandda_fs_model,
+                 ) -> EventRankingInterface:
+        ...
+
+
+class GetSitesInterface:
+    def __call__(self,
+                 all_events_ranked: Dict[EventIDInterface, EventInterface],
+                 grid: GridInterface,
+                 max_site_distance_cutoff: float,
+                 ) -> Dict[SiteIDInterface, SiteInterface]:
+        ...
+
+
+class GetSiteTable:
+    def __call__(self,
+                 sites: Dict[SiteIDInterface, SiteInterface]
+                 ) -> SiteTableInterface:
+        ...
+
+
+class GetEventTableInterface:
+    def __call__(self,
+                 events: Dict[EventIDInterface, EventInterface]
+                 ) -> EventTableInterface:
         ...
 
 # GetPanDDAConsole = Callable[[], PanDDAConsoleInterface]
