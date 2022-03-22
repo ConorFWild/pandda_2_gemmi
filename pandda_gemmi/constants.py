@@ -274,6 +274,7 @@ CONSOLE_START_AUTOBUILDING = "Autobuilding event maps..."
 CONSOLE_START_RANKING = "Ranking events..."
 CONSOLE_START_ASSIGN_SITES = "Assigning sites..."
 CONSOLE_START_SUMMARY = "Summarising PanDDA run..."
+CONSOLE_START_EVENT_CLASSIFICATION = "Starting classification of PanDDA Events..."
 
 ###################################################################
 # # Logging constants

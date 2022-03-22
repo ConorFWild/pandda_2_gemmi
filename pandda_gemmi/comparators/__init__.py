@@ -1,1 +1,4 @@
 from pandda_gemmi.comparators.get_comparators_multiple_clusters import get_multiple_comparator_sets, ComparatorCluster
+from pandda_gemmi.comparators.get_comparators_first import get_comparators_high_res_first
+from pandda_gemmi.comparators.get_comparators_hybrid import GetComparatorsHybrid
+

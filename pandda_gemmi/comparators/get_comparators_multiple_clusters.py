@@ -16,7 +16,7 @@ from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 from pandda_gemmi.plots import save_plot_pca_umap_bokeh, embed_umap, bokeh_scatter_plot
-
+from pandda_gemmi.analyse_interface import *
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
 
@@ -460,4 +460,49 @@ def get_multiple_comparator_sets(
     if max_comparator_sets:
         clusters = refine_comparator_clusters(clusters, max_comparator_sets)
 
-    return clusters, cluster_cluster_annotations_dict
+
+
+
+    # dtag_list = [dtag for dtag in datasets]
+    #
+    # dtags_by_res = list(
+    #     sorted(
+    #         dtag_list,
+    #         key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+    #     )
+    # )
+    #
+    # highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    # highest_res_datasets_max = max(
+    #     [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    comparators: ComparatorsInterface = {}
+    # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
+    # in the set of the first shell of sufficiently low res
+    for test_dtag in dtag_list:
+        current_res = datasets[test_dtag].reflections.resolution().resolution
+        truncation_res = max(current_res, highest_res_datasets_max)
+
+        for comparator_cluster_num, comparator_cluster in clusters.items():
+
+            # Sort dtags by distance to cluster
+            sorted_distance_to_cluster = sorted(
+                comparator_cluster.dtag_distance_to_cluster,
+                key=lambda _dtag: comparator_cluster.dtag_distance_to_cluster[_dtag]
+                                                )
+
+
+            # Iterate over dtags, from closest to cluster to furthest, adding those of the right resolution until
+            # comparison set is full
+            for dtag in sorted_distance_to_cluster:
+
+                if datasets[dtag].reflections.resolution().resolution < truncation_res:
+                    comparators[dtag][comparator_cluster_num].append(dtag)
+
+                    # If enough datasets for training, exit loop and move onto next cluster
+                    if len(comparators[dtag][comparator_cluster_num]) >= comparison_min_comparators:
+                        break
+
+    # comparators = clusters
+
+    return comparators, cluster_cluster_annotations_dict

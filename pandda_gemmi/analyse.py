@@ -28,6 +28,7 @@ from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c
                                       from_unaligned_dataset_c_flat_ray,
                                       )
 from pandda_gemmi.filters import remove_models_with_large_gaps
+from pandda_gemmi.comparators import GetComparatorsHybrid
 from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
@@ -139,9 +140,9 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
         )
 
     elif pandda_args.comparison_strategy == "hybrid":
-        comparators_func = Partial(
-            get_multiple_comparator_sets,
+        comparators_func = GetComparatorsHybrid(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
+            comparison_max_comparators=pandda_args.comparison_max_comparators,
             sample_rate=pandda_args.sample_rate,
             # TODO: add option: pandda_args.resolution_cutoff,
             resolution_cutoff=3.0,

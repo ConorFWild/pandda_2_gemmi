@@ -115,12 +115,20 @@ class ModelResultInterface(Protocol):
     ...
 
 
-class ComparatorsInterface(Protocol):
-    ...
+ComparatorsInterface = MutableMapping[DtagInterface, MutableMapping[int, List[DtagInterface]]]
+    # def get_comparators(self) -> List[DtagInterface]:
+    #     ...
 
 
 class ShellInterface(Protocol):
-    ...
+    def get_test_dtags(self) -> List[DtagInterface]:
+        ...
+
+    def get_train_dtags(self, dtag: DtagInterface) -> List[DtagInterface]:
+        ...
+
+    def get_all_dtags(self) -> List[DtagInterface]:
+        ...
 
 
 class EventInterface(Protocol):
