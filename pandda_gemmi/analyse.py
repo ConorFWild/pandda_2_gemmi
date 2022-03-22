@@ -138,6 +138,18 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
             debug=pandda_args.debug,
         )
 
+    elif pandda_args.comparison_strategy == "hybrid":
+        comparators_func = Partial(
+            get_multiple_comparator_sets,
+            comparison_min_comparators=pandda_args.comparison_min_comparators,
+            sample_rate=pandda_args.sample_rate,
+            # TODO: add option: pandda_args.resolution_cutoff,
+            resolution_cutoff=3.0,
+            load_xmap_flat_func=load_xmap_flat_func,
+            process_local=process_local,
+            debug=pandda_args.debug,
+        )
+
     else:
         raise Exception("Unrecognised comparison strategy")
 
