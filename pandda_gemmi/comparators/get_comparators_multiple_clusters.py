@@ -504,7 +504,7 @@ def get_multiple_comparator_sets(
                     comparators[test_dtag][comparator_cluster_num].append(dtag)
 
                     # If enough datasets for training, exit loop and move onto next cluster
-                    if len(comparators[dtag][comparator_cluster_num]) >= comparison_min_comparators:
+                    if len(comparators[test_dtag][comparator_cluster_num]) >= comparison_min_comparators:
                         break
 
     # comparators = clusters

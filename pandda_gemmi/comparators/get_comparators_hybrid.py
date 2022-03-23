@@ -7,11 +7,11 @@ class GetComparatorsHybrid(GetComparatorsInterface):
     def __init__(self,
                  comparison_min_comparators: int,
                  comparison_max_comparators: int,
-                 sample_rate,
-                 resolution_cutoff,
+                 sample_rate: float,
+                 resolution_cutoff: float,
                  load_xmap_flat_func,
-                 process_local,
-                 debug,
+                 process_local: ProcessorInterface,
+                 debug: bool,
                  ):
         self.comparison_min_comparators = comparison_min_comparators
         self.comparison_max_comparators = comparison_max_comparators
