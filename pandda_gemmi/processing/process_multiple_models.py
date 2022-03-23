@@ -311,10 +311,12 @@ def event_score_and_report(
             initial_score = result[0]
             structure = result[1]
 
-            if initial_score < 0.4:
-                score = 0
-            else:
-                score = initial_score / percentage_noise
+            # if initial_score < 0.4:
+            #     score = 0
+            # else:
+            #     score = initial_score / percentage_noise
+
+            score = initial_score
 
             if debug:
                 structure.write_minimal_pdb(

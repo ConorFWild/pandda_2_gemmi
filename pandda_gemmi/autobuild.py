@@ -15,15 +15,15 @@ import ray
 
 from pandda_gemmi import constants
 
-from pandda_gemmi.constants import *
+# from pandda_gemmi.constants import *
 # from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID, EventIDX
+# from pandda_gemmi.common import Dtag, EventID, EventIDX
 # from pandda_gemmi.fs import PanDDAFSModel
 from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Dataset, ResidueID, Datasets,
                                   Resolution, Reference)
-from pandda_gemmi.shells import Shell
-from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Partitioning, Xmap
-from pandda_gemmi.model import Zmap, Model
+# from pandda_gemmi.shells import Shell
+# from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Partitioning, Xmap
+# from pandda_gemmi.model import Zmap, Model
 from pandda_gemmi.event import Event
 
 
