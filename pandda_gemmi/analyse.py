@@ -582,7 +582,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             printer.pprint(shells)
 
         # Parameterise
-        if pandda_args.comparison_strategy == "cluster":
+        if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
             process_shell_paramaterised = partial(
                 process_shell_multiple_models,
                 process_local=process_local,
