@@ -92,7 +92,7 @@ def get_shells_multiple_models(
         high_res_dtag_comparators = comparators[shell_high_res_dtag]
         for comparator_num, comparator_dtags in high_res_dtag_comparators.items():
 
-            shells_train[res][comparator_num] = comparator_dtags
+            shells_train[res][comparator_num] = comparator_dtags[:min_characterisation_datasets]
 
     # Add each testing dtag to the appropriate shell
     for dtag in datasets:
