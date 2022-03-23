@@ -483,7 +483,11 @@ def get_multiple_comparator_sets(
         current_res = datasets[test_dtag].reflections.resolution().resolution
         truncation_res = max(current_res, highest_res_datasets_max)
 
+        comparators[test_dtag] = {}
+
         for comparator_cluster_num, comparator_cluster in clusters.items():
+
+            comparators[test_dtag][comparator_cluster_num] = []
 
             # Sort dtags by distance to cluster
             sorted_distance_to_cluster = sorted(
@@ -497,7 +501,7 @@ def get_multiple_comparator_sets(
             for dtag in sorted_distance_to_cluster:
 
                 if datasets[dtag].reflections.resolution().resolution < truncation_res:
-                    comparators[dtag][comparator_cluster_num].append(dtag)
+                    comparators[test_dtag][comparator_cluster_num].append(dtag)
 
                     # If enough datasets for training, exit loop and move onto next cluster
                     if len(comparators[dtag][comparator_cluster_num]) >= comparison_min_comparators:

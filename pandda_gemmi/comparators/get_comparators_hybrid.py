@@ -38,6 +38,8 @@ class GetComparatorsHybrid(GetComparatorsInterface):
             self.comparison_max_comparators,
         )[0]
 
+        print(comparators_first)
+
         comparators_multiple, clusters = get_multiple_comparator_sets(
             datasets,
             alignments,
@@ -51,6 +53,8 @@ class GetComparatorsHybrid(GetComparatorsInterface):
             process_local=self.process_local,
             debug=self.debug,
         )
+
+        print(comparators_multiple)
 
         comparators: ComparatorsInterface = {}
 
