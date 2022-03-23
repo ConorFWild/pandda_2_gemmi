@@ -547,7 +547,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # sake of computational efficiency
         with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
                            f'\tDone!'):
-            if pandda_args.comparison_strategy == "cluster":
+            if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
                 shells = get_shells_multiple_models(
                     datasets,
                     comparators,

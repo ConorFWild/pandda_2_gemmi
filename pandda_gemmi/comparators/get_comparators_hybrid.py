@@ -63,7 +63,7 @@ class GetComparatorsHybrid(GetComparatorsInterface):
             for model_number, model_comparators in dtag_models.items():
                 comparators[dtag][model_number] = model_comparators
 
-        for dtag, dtag_models in comparators_first.items():
+        for dtag, dtag_models in comparators_multiple.items():
             for model_number, model_comparators in dtag_models.items():
                 comparators[dtag][model_number+1] = model_comparators
 
