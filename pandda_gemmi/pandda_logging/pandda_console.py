@@ -117,7 +117,7 @@ class PanDDAConsole:
         event_class_table.add_column("Class")
 
         for event_id, event_class in event_classifications.items():
-            event_class_table.add_column(event_id.dtag.dtag, event_id.event_idx.event_idx, event_class)
+            event_class_table.add_row(event_id.dtag.dtag, event_id.event_idx.event_idx, event_class)
 
         self.console.print(event_class_table)
 
