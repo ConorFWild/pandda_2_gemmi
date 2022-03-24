@@ -151,13 +151,19 @@ class EventRankingInterface(Protocol):
 class EventIDInterface(Protocol):
     ...
 
+EventsInterface = Dict[EventIDInterface, EventInterface]
+
 
 class SiteIDInterface(Protocol):
     ...
 
+# SiteIDInterface = NewType(int)
 
 class SiteInterface(Protocol):
     ...
+
+
+SitesInterface = Dict[SiteIDInterface, SiteInterface]
 
 
 class EventTableInterface(Protocol):
@@ -389,7 +395,6 @@ class GetSitesInterface(Protocol):
     def __call__(self,
                  all_events_ranked: Dict[EventIDInterface, EventInterface],
                  grid: GridInterface,
-                 max_site_distance_cutoff: float,
                  ) -> Dict[SiteIDInterface, SiteInterface]:
         ...
 

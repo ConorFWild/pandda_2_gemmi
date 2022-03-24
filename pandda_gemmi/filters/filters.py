@@ -206,4 +206,9 @@ class FilterReferenceCompatibility(FilterReferenceCompatibilityInterface):
         self.filters = filters
 
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
-        ...
+        for filter_key, dataset_filter in self.filters.items():
+            new_datasets = dataset_filter(datasets, reference)
+
+            datasets = new_datasets
+
+        return datasets

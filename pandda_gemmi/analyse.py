@@ -100,6 +100,7 @@ from pandda_gemmi.processing import (
 )
 
 from pandda_gemmi import event_classification
+from pandda_gemmi.sites import GetSites
 from pandda_gemmi.analyse_interface import *
 
 printer = pprint.PrettyPrinter()
@@ -370,6 +371,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         load_xmap_flat_func,
         process_local
     )
+
+    get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
 
     # Set up autobuilding
     if pandda_args.autobuild:
@@ -909,6 +912,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
+        console.summarise_event_ranking(event_classifications)
+
+
         ###################################################################
         # # Assign Sites
         ###################################################################
@@ -916,7 +922,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Get the events and assign sites to them
         with STDOUTManager('Assigning sites to each event', f'\tDone!'):
-            all_events_events = Events.from_all_events(all_events_ranked, grid, pandda_args.max_site_distance_cutoff)
+            sites: SitesInterface = get_sites(
+                all_events_ranked,
+                        grid,
+            )
+            all_events_events = Events.from_sites(all_events_ranked, sites, )
+
+        console.summarise_sites(sites)
+
 
         ###################################################################
         # # Output pandda summary information

@@ -1,1 +1,1 @@
-from pandda_gemmi.sites.sites import Site, Sites
+from pandda_gemmi.sites.sites import Site, Sites, GetSites

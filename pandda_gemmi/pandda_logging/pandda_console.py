@@ -211,6 +211,22 @@ class PanDDAConsole:
 
         self.console.print(table)
 
+    def summarise_sites(self, sites):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Site")
+
+        for event_id, site_id in sites.event_to_site.items():
+
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                int(event_id.event_idx.event_idx),
+                event_class,
+            )
+
+        self.console.print(event_class_table)
     def print_exception(self, e, debug):
         if debug:
             self.console.print_exception()
