@@ -213,7 +213,7 @@ class AnalyseModelInterface(Protocol):
 
 
 class FilterDataQualityInterface(Protocol):
-    def __call__(self, datasets: DatasetsInterface, ) -> DatasetsInterface:
+    def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
         ...
 
 class FilterNoStructureFactorsInterface(Protocol):
@@ -227,6 +227,7 @@ class FilterNoStructureFactorsInterface(Protocol):
 class FilterRFreeInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 structure_factors: StructureFactorsInterface
                  ) -> Dict[DtagInterface, DatasetInterface]:
         ...
 
@@ -234,6 +235,7 @@ class FilterRFreeInterface(Protocol):
 class FilterResolutionDatasetsInterface(Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 structure_factors: StructureFactorsInterface
                  ) -> Dict[DtagInterface, DatasetInterface]:
         ...
 
@@ -266,6 +268,10 @@ class FilterIncompleteModelsInterface(Protocol):
                  ) -> Dict[DtagInterface, DatasetInterface]:
         ...
 
+
+class DropReflectionColumns:
+    def __call__(self, *args, **kwargs) -> DatasetsInterface:
+        ...
 
 class GetAlignmentsInterface(Protocol):
     def __call__(self,

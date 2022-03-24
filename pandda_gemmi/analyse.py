@@ -22,12 +22,29 @@ from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
-from pandda_gemmi.dataset import Datasets, Reference, StructureFactors, smooth, smooth_ray, DatasetStatistics
+from pandda_gemmi.dataset import (
+    Datasets,
+    Reference,
+    StructureFactors,
+    smooth,
+    smooth_ray,
+    DatasetStatistics,
+    drop_columns,
+)
 from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
                                       from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
                                       from_unaligned_dataset_c_flat_ray,
                                       )
-from pandda_gemmi.filters import remove_models_with_large_gaps
+from pandda_gemmi.filters import (
+    FilterDataQuality,
+    FilterReferenceCompatibility,
+    FilterNoStructureFactors,
+    FilterResolutionDatasets,
+    FilterRFree,
+    FilterDissimilarModels,
+    FilterIncompleteModels,
+    FilterDifferentSpacegroups,
+)
 from pandda_gemmi.comparators import GetComparatorsHybrid
 from pandda_gemmi.comparators import get_multiple_comparator_sets, ComparatorCluster
 from pandda_gemmi.shells import get_shells_multiple_models
@@ -156,6 +173,7 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
 
     return comparators_func
 
+
 def get_process_global(pandda_args, distributed_tmp):
     if pandda_args.global_processing == "serial":
         process_global = process_global_serial
@@ -249,6 +267,44 @@ def get_analyse_model_func(pandda_args):
     return analyse_model_func
 
 
+def get_filter_data_quality(
+        filter_keys: List[str],
+        pandda_args: PanDDAArgs,
+) -> FilterDataQualityInterface:
+
+    filters = {}
+
+    if "structure_factors" in filter_keys:
+        filters["structure_factors"] = FilterNoStructureFactors()
+
+    if "resolution" in filter_keys:
+        filters["resolution"] = FilterResolutionDatasets(pandda_args.low_resolution_completeness)
+
+    if "rfree" in filter_keys:
+        filters["rfree"] = FilterRFree(pandda_args.max_rfree)
+
+    return FilterDataQuality(filters)
+
+
+def get_filter_reference_compatability(
+        filter_keys: List[str],
+        pandda_args: PanDDAArgs,
+) -> FilterReferenceCompatibilityInterface:
+
+    filters = {}
+
+    if "dissimilar_models" in filter_keys:
+        filters["dissimilar_models"] = FilterDissimilarModels(pandda_args.max_rmsd_to_reference)
+
+    if "large_gaps" in filter_keys:
+        filters["large_gaps"] = FilterIncompleteModels()
+
+    if "dissimilar_spacegroups" in filter_keys:
+        filters["dissimilar_spacegroups"] = FilterDifferentSpacegroups()
+
+    return FilterReferenceCompatibility(filters)
+
+
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -292,6 +348,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     else:
         get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
 
+    filter_data_quality: FilterDataQualityInterface = get_filter_data_quality(
+        [
+            "structure_factors",
+            "resolution",
+            "rfree"
+        ]
+    )
+    filter_reference_compatability: FilterReferenceCompatibilityInterface = get_filter_reference_compatability(
+        [
+            "dissimilar_models",
+            "large_gaps"
+            "dissimilar_spacegroups"
+        ]
+    )
 
     comparators_func = get_comparator_func(
         pandda_args,
@@ -383,33 +453,41 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.start_data_quality_filters()
 
+        datasets_quality_filtered = filter_data_quality(datasets_initial, structure_factors)
+
         # Initial filters
-        with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
-            datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
-                structure_factors)
-            pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
-            validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+        # with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
+        #     datasets_invalid: Datasets = datasets_initial.remove_invalid_structure_factor_datasets(
+        #         structure_factors)
+        #     pandda_log[constants.LOG_INVALID] = [dtag.dtag for dtag in datasets_initial if dtag not in datasets_invalid]
+        #     validate_paramterized(datasets_invalid, exception=Exception("Too few datasets after filter: invalid"))
+        #
+        # with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!'):
+        #     datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
+        #
+        # with STDOUTManager('Removing datasets with poor low resolution completeness...', f'\tDone!'):
+        #     datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
+        #         pandda_args.low_resolution_completeness)
+        #     pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
+        #                                          dtag not in datasets_low_res]
+        #     validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
+        #
+        # with STDOUTManager('Removing datasets with poor rfree...', f'\tDone!'):
+        #     datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
+        #     pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
+        #                                        dtag not in datasets_rfree]
+        #     validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
+        #
+        # with STDOUTManager('Removing datasets with poor wilson rmsd...', f'\tDone!'):
+        #     datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
+        #         pandda_args.max_wilson_plot_z_score)  # TODO
+        #     validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
 
+        ###################################################################
+        # # Truncate columns
+        ###################################################################
         with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!'):
-            datasets_truncated_columns = datasets_invalid.drop_columns(structure_factors)
-
-        with STDOUTManager('Removing datasets with poor low resolution completeness...', f'\tDone!'):
-            datasets_low_res: Datasets = datasets_truncated_columns.remove_low_resolution_datasets(
-                pandda_args.low_resolution_completeness)
-            pandda_log[constants.LOG_LOW_RES] = [dtag.dtag for dtag in datasets_truncated_columns if
-                                                 dtag not in datasets_low_res]
-            validate_paramterized(datasets_low_res, exception=Exception("Too few datasets after filter: low res"))
-
-        with STDOUTManager('Removing datasets with poor rfree...', f'\tDone!'):
-            datasets_rfree: Datasets = datasets_low_res.remove_bad_rfree(pandda_args.max_rfree)
-            pandda_log[constants.LOG_RFREE] = [dtag.dtag for dtag in datasets_low_res if
-                                               dtag not in datasets_rfree]
-            validate_paramterized(datasets_rfree, exception=Exception("Too few datasets after filter: rfree"))
-
-        with STDOUTManager('Removing datasets with poor wilson rmsd...', f'\tDone!'):
-            datasets_wilson: Datasets = datasets_rfree.remove_bad_wilson(
-                pandda_args.max_wilson_plot_z_score)  # TODO
-            validate_paramterized(datasets_wilson, exception=Exception("Too few datasets after filter: wilson"))
+            datasets_wilson = drop_columns(datasets_quality_filtered, structure_factors)
 
         ###################################################################
         # # Reference Selection
@@ -447,34 +525,36 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.start_reference_comparability_filters()
 
+        datasets: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
+
         # Post-reference filters
-        with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
-            datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
-                reference,
-                pandda_args.max_rmsd_to_reference,
-            )
-            pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
-                                                              dtag not in datasets_diss_struc]
-            validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
-
-        with STDOUTManager('Removing datasets whose models have large gaps...', f'\tDone!'):
-            datasets_gaps: Datasets = remove_models_with_large_gaps(datasets_diss_struc, reference, )
-            for dtag in datasets_gaps:
-                if dtag not in datasets_diss_struc.datasets:
-                    print(f"WARNING: Removed dataset {dtag} due to a large gap")
-            pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
-                                              dtag not in datasets_gaps]
-            validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
-
-        with STDOUTManager('Removing datasets with dissimilar spacegroups to the reference...', f'\tDone!'):
-            datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
-            pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
-                                            dtag not in datasets_diss_space]
-            validate_paramterized(datasets_diss_space,
-                                  exception=Exception("Too few datasets after filter: space group"))
-
-            datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
-            pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
+        # with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
+        #     datasets_diss_struc: Datasets = datasets_smoother.remove_dissimilar_models(
+        #         reference,
+        #         pandda_args.max_rmsd_to_reference,
+        #     )
+        #     pandda_log[constants.LOG_DISSIMILAR_STRUCTURE] = [dtag.dtag for dtag in datasets_smoother if
+        #                                                       dtag not in datasets_diss_struc]
+        #     validate_paramterized(datasets_diss_struc, exception=Exception("Too few datasets after filter: structure"))
+        #
+        # with STDOUTManager('Removing datasets whose models have large gaps...', f'\tDone!'):
+        #     datasets_gaps: Datasets = remove_models_with_large_gaps(datasets_diss_struc, reference, )
+        #     for dtag in datasets_gaps:
+        #         if dtag not in datasets_diss_struc.datasets:
+        #             print(f"WARNING: Removed dataset {dtag} due to a large gap")
+        #     pandda_log[constants.LOG_GAPS] = [dtag.dtag for dtag in datasets_diss_struc if
+        #                                       dtag not in datasets_gaps]
+        #     validate_paramterized(datasets_gaps, exception=Exception("Too few datasets after filter: structure gaps"))
+        #
+        # with STDOUTManager('Removing datasets with dissimilar spacegroups to the reference...', f'\tDone!'):
+        #     datasets_diss_space: Datasets = datasets_gaps.remove_dissimilar_space_groups(reference)
+        #     pandda_log[constants.LOG_SG] = [dtag.dtag for dtag in datasets_gaps if
+        #                                     dtag not in datasets_diss_space]
+        #     validate_paramterized(datasets_diss_space,
+        #                           exception=Exception("Too few datasets after filter: space group"))
+        #
+        #     datasets = {dtag: datasets_diss_space[dtag] for dtag in datasets_diss_space}
+        #     pandda_log[constants.LOG_DATASETS] = summarise_datasets(datasets, pandda_fs_model)
 
         if pandda_args.debug:
             print(pandda_log[constants.LOG_DATASETS])

@@ -17,6 +17,7 @@ from sklearn import neighbors
 import pandas as pd
 import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
@@ -1676,3 +1677,8 @@ class Datasets:
     #                     }
     #
     #     return Datasets(new_datasets)
+
+def drop_columns(datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
+    new_datasets = {dtag: datasets[dtag].drop_columns(structure_factors) for dtag in datasets}
+
+    return Datasets(new_datasets)

@@ -115,7 +115,7 @@ class FilterResolutionDatasets(FilterResolutionDatasetsInterface):
     def __init__(self, resolution_cutoff: float):
         self.resolution_cutoff = resolution_cutoff
 
-    def __call__(self, datasets: DatasetsInterface, ):
+    def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface):
         high_resolution_dtags = filter(
             lambda dtag: datasets[dtag].reflections.resolution().to_float() < self.resolution_cutoff,
             datasets,
@@ -130,7 +130,7 @@ class FilterRFree(FilterRFreeInterface):
     def __init__(self, max_rfree: float):
         self.max_rfree = max_rfree
 
-    def __call__(self, datasets: DatasetsInterface, ):
+    def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface):
         good_rfree_dtags = filter(
             lambda dtag: datasets[dtag].structure.rfree().to_float() < self.max_rfree,
             datasets,
@@ -142,22 +142,25 @@ class FilterRFree(FilterRFreeInterface):
 
 
 class FilterDataQuality(FilterDataQualityInterface):
-    def __init__(self, filters: List[FilterDataQualityInterface]):
+    def __init__(self, filters: Dict[str, FilterDataQualityInterface]):
         self.filters = filters
 
+    def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
+        for filter_key, dataset_filter in self.filters.items():
+            new_datasets = dataset_filter(datasets, structure_factors)
 
-    def __call__(self, datasets: DatasetsInterface) -> DatasetsInterface:
-        for filter in self.filters:
-            new_datasets = filter(datasets,)
+            datasets = new_datasets
 
-
+        return datasets
 
 
 class FilterDissimilarModels(FilterDissimilarModelsInterface):
     def __init__(self, max_rmsd_to_reference: float):
         self.max_rmsd_to_reference = max_rmsd_to_reference
 
-    def __call__(self, datasets: DatasetsInterface, reference: Reference, ) -> Datasets:
+    def __call__(self,
+                 datasets: DatasetsInterface,
+                 reference: ReferenceInterface, ) -> Datasets:
         new_dtags = filter(lambda dtag: (RMSD.from_reference(
             reference,
             datasets[dtag],
@@ -171,7 +174,9 @@ class FilterDissimilarModels(FilterDissimilarModelsInterface):
 
 
 class FilterIncompleteModels(FilterIncompleteModelsInterface):
-    def __call__(self, datasets: DatasetsInterface, reference: Reference):
+    def __call__(self,
+                 datasets: DatasetsInterface,
+                 reference: ReferenceInterface):
         new_dtags = filter(lambda dtag: Alignment.has_large_gap(reference, datasets.datasets[dtag]),
                            datasets.datasets,
                            )
@@ -184,7 +189,8 @@ class FilterIncompleteModels(FilterIncompleteModelsInterface):
 class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
     def __call__(self,
                  datasets: DatasetsInterface,
-                 reference: Reference):
+                 reference: ReferenceInterface,
+                 ):
         same_spacegroup_datasets = filter(
             lambda dtag: datasets[dtag].reflections.spacegroup() == reference.dataset.reflections.spacegroup(),
             datasets,
@@ -196,8 +202,8 @@ class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
 
 
 class FilterReferenceCompatibility(FilterReferenceCompatibilityInterface):
-    def __init__(self):
-        ...
+    def __init__(self, filters: Dict[str, FilterReferenceCompatibilityInterface]):
+        self.filters = filters
 
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
         ...
