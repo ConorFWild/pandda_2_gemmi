@@ -531,7 +531,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.start_reference_comparability_filters()
 
-        datasets: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
+        datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
+
+        datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
+                                                    datasets_reference.datasets.items()}
 
         # Post-reference filters
         # with STDOUTManager('Removing datasets with dissimilar models...', f'\tDone!'):
