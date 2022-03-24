@@ -17,7 +17,6 @@ from pandda_gemmi.common import EventIDX, EventID, SiteID, Dtag, PositionsArray,
 from pandda_gemmi.dataset import Reference, Dataset, StructureFactors
 from pandda_gemmi.edalignment import Grid, Xmap, Alignment, Xmaps, Partitioning
 from pandda_gemmi.model import Zmap, Zmaps, Model
-from pandda_gemmi.sites import Sites
 
 
 @dataclasses.dataclass()
