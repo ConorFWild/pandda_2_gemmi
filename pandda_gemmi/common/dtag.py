@@ -5,6 +5,9 @@ import dataclasses
 class Dtag:
     dtag: str
 
+    def __str__(self):
+        return self.dtag
+
     def __hash__(self):
         return hash(self.dtag)
 

@@ -272,7 +272,6 @@ def get_filter_data_quality(
         filter_keys: List[str],
         pandda_args: PanDDAArgs,
 ) -> FilterDataQualityInterface:
-
     filters = {}
 
     if "structure_factors" in filter_keys:
@@ -291,7 +290,6 @@ def get_filter_reference_compatability(
         filter_keys: List[str],
         pandda_args: PanDDAArgs,
 ) -> FilterReferenceCompatibilityInterface:
-
     filters = {}
 
     if "dissimilar_models" in filter_keys:
@@ -503,7 +501,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
             reference: Reference = Reference.from_datasets(datasets_wilson, dataset_statistics)
-            pandda_log["Reference Dtag"] = reference.dtag.dtag
+            pandda_log["Reference Dtag"] = str(reference.dtag)
             if pandda_args.debug:
                 print(reference.dtag)
 
@@ -611,9 +609,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             )
 
         if pandda_args.comparison_strategy == "cluster":
-            pandda_log["Cluster Assignments"] = {dtag.dtag: int(cluster) for dtag, cluster in
+            pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
                                                  cluster_assignments.items()}
-            pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [dtag.dtag for dtag in
+            pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [str(dtag) for dtag in
                                                                                   neighbourhood.core_dtags]
                                                       for neighbourhood_number, neighbourhood
                                                       in comparators.items()
@@ -799,7 +797,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 # Save results
                 pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
                 for event_id, autobuild_result in autobuild_results.items():
-                    dtag = str(event_id.dtag.dtag)
+                    dtag = str(event_id.dtag)
                     if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
                         pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
 
@@ -838,14 +836,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         key=lambda _path: all_scores[_path],
                     )
 
-                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][dtag.dtag] = str(selected_fragement_path)
-                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][dtag.dtag] = float(
+                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][str(dtag)] = str(selected_fragement_path)
+                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][str(dtag)] = float(
                         all_scores[selected_fragement_path])
 
                     # Copy to pandda models
                     model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
                     pandda_model_path = pandda_fs_model.processed_datasets[
-                                            dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(dtag.dtag)
+                                            dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(str(dtag))
                     merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
                     save_pdb_file(merged_structure, pandda_model_path)
 
@@ -914,7 +912,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # console.summarise_event_ranking(event_classifications)
 
-
         ###################################################################
         # # Assign Sites
         ###################################################################
@@ -924,12 +921,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Assigning sites to each event', f'\tDone!'):
             sites: SitesInterface = get_sites(
                 all_events_ranked,
-                        grid,
+                grid,
             )
             all_events_events = Events.from_sites(all_events_ranked, sites, )
 
         console.summarise_sites(sites)
-
 
         ###################################################################
         # # Output pandda summary information
