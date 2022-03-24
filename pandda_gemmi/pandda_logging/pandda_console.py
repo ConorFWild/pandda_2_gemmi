@@ -223,7 +223,7 @@ class PanDDAConsole:
             event_class_table.add_row(
                 str(event_id.dtag.dtag),
                 int(event_id.event_idx.event_idx),
-                event_class,
+                int(site_id.site_id),
             )
 
         self.console.print(event_class_table)

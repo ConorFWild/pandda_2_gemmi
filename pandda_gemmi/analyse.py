@@ -912,7 +912,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
-        console.summarise_event_ranking(event_classifications)
+        # console.summarise_event_ranking(event_classifications)
 
 
         ###################################################################
