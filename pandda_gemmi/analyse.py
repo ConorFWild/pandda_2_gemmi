@@ -156,6 +156,32 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
 
     return comparators_func
 
+def get_process_global(pandda_args, distributed_tmp):
+    if pandda_args.global_processing == "serial":
+        process_global = process_global_serial
+    elif pandda_args.global_processing == "distributed":
+        client = get_dask_client(
+            scheduler=pandda_args.distributed_scheduler,
+            num_workers=pandda_args.distributed_num_workers,
+            queue=pandda_args.distributed_queue,
+            project=pandda_args.distributed_project,
+            cores_per_worker=pandda_args.local_cpus,
+            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+            resource_spec=pandda_args.distributed_resource_spec,
+            job_extra=pandda_args.distributed_job_extra,
+            walltime=pandda_args.distributed_walltime,
+            watcher=pandda_args.distributed_watcher,
+        )
+        process_global = partial(
+            process_global_dask,
+            client=client,
+            tmp_dir=distributed_tmp
+        )
+    else:
+        raise Exception()
+
+    return process_global
+
 
 def get_process_local(pandda_args):
     if pandda_args.local_processing == "serial":
@@ -249,28 +275,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Get global processor
     # with STDOUTManager('Getting global processor...', '\tGot global processor!'):
     console.start_initialise_shell_processor()
-    if pandda_args.global_processing == "serial":
-        process_global = process_global_serial
-    elif pandda_args.global_processing == "distributed":
-        client = get_dask_client(
-            scheduler=pandda_args.distributed_scheduler,
-            num_workers=pandda_args.distributed_num_workers,
-            queue=pandda_args.distributed_queue,
-            project=pandda_args.distributed_project,
-            cores_per_worker=pandda_args.local_cpus,
-            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
-            resource_spec=pandda_args.distributed_resource_spec,
-            job_extra=pandda_args.distributed_job_extra,
-            walltime=pandda_args.distributed_walltime,
-            watcher=pandda_args.distributed_watcher,
-        )
-        process_global = partial(
-            process_global_dask,
-            client=client,
-            tmp_dir=distributed_tmp
-        )
-    else:
-        raise Exception()
+    process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
 
     # Get local processor
     # with STDOUTManager('Getting local processor...', '\tGot local processor!'):
