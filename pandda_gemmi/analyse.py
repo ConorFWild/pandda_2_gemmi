@@ -353,14 +353,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             "structure_factors",
             "resolution",
             "rfree"
-        ]
+        ],
+        pandda_args
     )
     filter_reference_compatability: FilterReferenceCompatibilityInterface = get_filter_reference_compatability(
         [
             "dissimilar_models",
             "large_gaps"
             "dissimilar_spacegroups"
-        ]
+        ],
+        pandda_args
     )
 
     comparators_func = get_comparator_func(

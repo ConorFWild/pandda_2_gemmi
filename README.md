@@ -17,7 +17,7 @@ It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda envi
 ```bash
 conda create -n pandda2 python=3.9
 conda activate pandda2
-conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib
+conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib 
 conda install -c conda-forge -y seaborn
 conda install -c conda-forge -y rdkit
 pip install ray
