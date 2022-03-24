@@ -12,7 +12,7 @@ If you uncertain about the correctness of the results, then a github issue is ap
 
 ## Installation
 
-It is reccomended that you install PanDDA 2 in it's own python 3.9 anaconda enviroment. This can be achieved by installing anaconda and then:
+It is reccomended that you install PanDDA 2 in it's own python 3.8 anaconda enviroment. This can be achieved by installing anaconda and then:
 
 ```bash
 conda create -n pandda2 python=3.9
@@ -22,7 +22,7 @@ conda install -c conda-forge -y seaborn
 conda install -c conda-forge -y rdkit
 pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
-cd /path/to/cloned/repository
+cd pandda_2_gemmi
 pip install .
 cd _gemmi
 pip install .

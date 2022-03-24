@@ -456,7 +456,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.start_data_quality_filters()
 
-        datasets_quality_filtered = filter_data_quality(datasets_initial, structure_factors)
+        datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
+                                                    datasets_initial.datasets.items()}
+
+        datasets_quality_filtered = filter_data_quality(datasets_for_filtering, structure_factors)
 
         # Initial filters
         # with STDOUTManager('Filtering datasets with invalid structure factors...', f'\tDone!'):
