@@ -8,6 +8,9 @@ class GetEventClassAutobuildScore(GetEventClassAutobuildInterface):
 
     def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
         selected_event = autobuild_result.selected_fragment_path
+        if not selected_event:
+            return False
+
         selected_event_score = autobuild_result.scores[selected_event]
         if selected_event_score > self.cutoff:
             return True
