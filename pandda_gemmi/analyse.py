@@ -198,7 +198,7 @@ def get_process_global(pandda_args, distributed_tmp):
             tmp_dir=distributed_tmp
         )
     else:
-        raise Exception()
+        raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")
 
     return process_global
 
