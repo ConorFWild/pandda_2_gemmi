@@ -789,7 +789,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         console.start_classification()
 
-        #
+        # If autobuild results are available, use them
         if pandda_args.autobuild:
             event_classifications: Dict[EventID, bool] = {
                 event_id: get_event_class(
@@ -816,9 +816,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Rank Events
         ###################################################################
-
         console.start_ranking()
 
+        # Rank the events to determine the order the are displated in
         with STDOUTManager('Ranking events...', f'\tDone!'):
             if pandda_args.rank_method == "size":
                 all_events_ranked = rank_events_size(all_events, grid)
@@ -864,7 +864,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Output pandda summary information
         ###################################################################
-
         console.start_run_summary()
 
         # Output a csv of the events
@@ -894,9 +893,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Handle Exceptions
     ###################################################################
-
+    # If an exception has occured, print relevant information to the console and save the log
     except Exception as e:
-        # traceback.print_exc()
         console.print_exception(e, pandda_args.debug)
         console.save(pandda_fs_model.console_log_file)
 
@@ -904,10 +902,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_log[constants.LOG_EXCEPTION] = str(e)
 
         print(f"Saving PanDDA log to: {pandda_args.out_dir / constants.PANDDA_LOG_FILE}")
-
-        # printer.pprint(
-        #     pandda_log
-        # )
 
         save_json_log(
             pandda_log,
