@@ -548,20 +548,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-        if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-            pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
-                                                 cluster_assignments.items()}
-            pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [str(dtag) for dtag in
-                                                                                  neighbourhood.core_dtags]
-                                                      for neighbourhood_number, neighbourhood
-                                                      in comparators.items()
-                                                      }
+        # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
+        #     pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
+        #                                          cluster_assignments.items()}
+        #     pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [str(dtag) for dtag in
+        #                                                                           neighbourhood.core_dtags]
+        #                                               for neighbourhood_number, neighbourhood
+        #                                               in comparators.items()
+        #                                               }
 
-        if pandda_args.debug:
-            print("Comparators are:")
+        # if pandda_args.debug:
+        #     print("Comparators are:")
             # printer.pprint(pandda_log["Cluster Assignments"])
             # printer.pprint(pandda_log["Neighbourhood core dtags"])
-            printer.pprint(comparators)
+            # printer.pprint(comparators)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
