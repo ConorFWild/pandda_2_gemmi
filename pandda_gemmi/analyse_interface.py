@@ -279,7 +279,7 @@ class FilterResolutionDatasetsInterface(FilterDataQualityInterface, Protocol):
         ...
 
 
-class FilterReferenceCompatibilityInterface(Protocol, FilterBaseInterface):
+class FilterReferenceCompatibilityInterface(FilterBaseInterface, Protocol, ):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface
