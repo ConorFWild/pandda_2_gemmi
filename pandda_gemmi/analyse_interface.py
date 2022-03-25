@@ -18,6 +18,7 @@ class ProcessorInterface(Protocol):
 class DtagInterface(Protocol):
     ...
 
+
 class PanDDAFSModelInterface(Protocol):
     # path: Path
     # processed_dataset_dirs: Dict[DtagInterface, ProcessedDatasetInterface]
@@ -81,7 +82,9 @@ class DatasetInterface(Protocol):
     structure: StructureInterface
     reflections: ReflectionsInterface
 
+
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
+
 
 class StructureInterface(Protocol):
     ...
@@ -103,9 +106,6 @@ class ModelInterface(Protocol):
     ...
 
 
-
-
-
 class XmapInterface(Protocol):
     ...
 
@@ -119,8 +119,10 @@ class ModelResultInterface(Protocol):
 
 
 ComparatorsInterface = MutableMapping[DtagInterface, MutableMapping[int, List[DtagInterface]]]
-    # def get_comparators(self) -> List[DtagInterface]:
-    #     ...
+
+
+# def get_comparators(self) -> List[DtagInterface]:
+#     ...
 
 
 class ShellInterface(Protocol):
@@ -151,11 +153,13 @@ class EventRankingInterface(Protocol):
 class EventIDInterface(Protocol):
     ...
 
+
 EventsInterface = Dict[EventIDInterface, EventInterface]
 
 
 class SiteIDInterface(Protocol):
     ...
+
 
 # SiteIDInterface = NewType(int)
 
@@ -217,6 +221,7 @@ class AnalyseModelInterface(Protocol):
                  ) -> ModelResultInterface:
         ...
 
+
 class DatasetsValidatorInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface, exception: str):
         ...
@@ -234,7 +239,7 @@ class FilterBaseInterface(Protocol):
         ...
 
 
-class FilterDataQualityInterface(Protocol, FilterBaseInterface):
+class FilterDataQualityInterface(FilterBaseInterface, Protocol):
     def __call__(self,
                  datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  structure_factors: StructureFactorsInterface
@@ -317,6 +322,7 @@ class FilterIncompleteModelsInterface(FilterReferenceCompatibilityInterface, Pro
 class DropReflectionColumns:
     def __call__(self, *args, **kwargs) -> DatasetsInterface:
         ...
+
 
 class GetAlignmentsInterface(Protocol):
     def __call__(self,

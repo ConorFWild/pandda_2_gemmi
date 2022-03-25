@@ -331,27 +331,22 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
     # Get global processor
-    # with STDOUTManager('Getting global processor...', '\tGot global processor!'):
     console.start_initialise_shell_processor()
     process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
 
     # Get local processor
-    # with STDOUTManager('Getting local processor...', '\tGot local processor!'):
     console.start_initialise_multiprocessor()
     process_local = get_process_local(pandda_args)
 
+    # Get reflection smoothing function
     smooth_func = get_smooth_func(pandda_args)
+
+    # Get XMap loading functions
     load_xmap_func = get_load_xmap_func(pandda_args)
     load_xmap_flat_func = get_load_xmap_flat_func(pandda_args)
-    analyse_model_func = get_analyse_model_func(pandda_args)
 
-    if pandda_args.autobuild:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4)
-    else:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
-
+    # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
-
     filter_data_quality: FilterDataQualityInterface = get_filter_data_quality(
         [
             "structure_factors",
@@ -371,15 +366,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_args
     )
 
+    # Get the functino for selecting the comparators
     comparators_func = get_comparator_func(
         pandda_args,
         load_xmap_flat_func,
         process_local
     )
 
-    get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
+    # Get the staticial model anaylsis function
+    analyse_model_func = get_analyse_model_func(pandda_args)
 
-    # Set up autobuilding
+    # Set up autobuilding function
     if pandda_args.autobuild:
 
         # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
@@ -397,14 +394,23 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
+    # Get the event classification function
+    if pandda_args.autobuild:
+        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4)
+    else:
+        get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
+
+    # Get the site determination function
+    get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
+
+    ###################################################################
+    # # Run the PanDDA
+    ###################################################################
     try:
 
         ###################################################################
         # # Get datasets
         ###################################################################
-
-        # with STDOUTManager(f'Building model of file system in {pandda_args.data_dirs}...',
-        #                    '\tBuilt file system model!'):
         console.start_fs_model()
         time_fs_model_building_start = time.time()
         pandda_fs_model: PanDDAFSModel = PanDDAFSModel.from_dir(
@@ -426,11 +432,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
-        # # Pre-pandda
+        # # Load datasets
         ###################################################################
-
         # Get datasets
-        # with STDOUTManager('Loading datasets...', f'\tLoaded datasets!'):
         console.start_load_datasets()
         datasets_initial: Datasets = Datasets.from_dir(pandda_fs_model, )
         dataset_statistics = DatasetStatistics(datasets_initial.datasets)
@@ -450,7 +454,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Data Quality filters
         ###################################################################
-
         console.start_data_quality_filters()
 
         datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
@@ -461,13 +464,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Truncate columns
         ###################################################################
-        with STDOUTManager('Truncating mtz columns to only those needed for PanDDA...', f'\tDone!'):
-            datasets_wilson = drop_columns(datasets_quality_filtered, structure_factors)
+        datasets_wilson = drop_columns(datasets_quality_filtered, structure_factors)
 
         ###################################################################
         # # Reference Selection
         ###################################################################
-
         console.start_reference_selection()
 
         # Select refernce
@@ -480,7 +481,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # B Factor smoothing
         ###################################################################
-
         console.start_b_factor_smoothing()
 
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
@@ -497,18 +497,15 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Reference compatability filters
         ###################################################################
-
         console.start_reference_comparability_filters()
 
         datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
-
         datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
                                        datasets_reference.datasets.items()}
 
         ###################################################################
         # # Getting grid
         ###################################################################
-
         console.start_get_grid()
 
         # Grid
@@ -537,7 +534,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
-
         console.start_get_comparators()
 
         with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
@@ -551,7 +547,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_fs_model,
             )
 
-        if pandda_args.comparison_strategy == "cluster":
+        if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
             pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
                                                  cluster_assignments.items()}
             pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [str(dtag) for dtag in
@@ -571,7 +567,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Process shells
         ###################################################################
-
         console.start_process_shells()
 
         # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
@@ -588,7 +583,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.only_datasets,
                     debug=pandda_args.debug,
                 )
-                # TODO
                 if pandda_args.debug:
                     print('Got shells that support multiple models')
                     for shell_res, shell in shells.items():
@@ -612,7 +606,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.debug:
             printer.pprint(shells)
 
-        # Parameterise
+        # Parameterise the shell processing function
         if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
             process_shell_paramaterised = partial(
                 process_shell_multiple_models,
@@ -698,10 +692,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Autobuilding
         ###################################################################
-
         # Autobuild the results if set to
         if pandda_args.autobuild:
-
             console.start_autobuilding()
 
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
@@ -795,9 +787,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Classify Events
         ###################################################################
-
         console.start_classification()
 
+        #
         if pandda_args.autobuild:
             event_classifications: Dict[EventID, bool] = {
                 event_id: get_event_class(
@@ -807,7 +799,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 for event_id, event
                 in all_events.items()
             }
-
         else:
             event_classifications: Dict[EventID, bool] = {
                 event_id: get_event_class(event)
