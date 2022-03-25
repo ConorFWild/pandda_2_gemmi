@@ -7,3 +7,4 @@ from pandda_gemmi.filters.filters import (FilterDataQuality,
                                           FilterIncompleteModels,
                                           FilterDifferentSpacegroups,
                                           )
+from pandda_gemmi.filters.validate import DatasetsValidator

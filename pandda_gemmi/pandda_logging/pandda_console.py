@@ -6,8 +6,8 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
 
-
 from pandda_gemmi import constants
+
 
 class PanDDAConsole:
 
@@ -44,7 +44,7 @@ class PanDDAConsole:
     def indent_text(text, indent=4):
         return Padding(
             text,
-            (0,0, 0, indent)
+            (0, 0, 0, indent)
         )
 
     def summarise_fs_model(self, pandda_fs_model):
@@ -119,8 +119,8 @@ class PanDDAConsole:
         for event_id, event_class in event_classifications.items():
             event_class_table.add_row(
                 str(event_id.dtag.dtag),
-                int(event_id.event_idx.event_idx),
-                event_class,
+                str(event_id.event_idx.event_idx),
+                str(event_class),
             )
 
         self.console.print(event_class_table)
@@ -167,7 +167,7 @@ class PanDDAConsole:
         resolution_table.add_row(str(np.min(ress)), str(np.mean(ress)), str(np.max(ress)))
 
         self.console.print(
-          resolution_table
+            resolution_table
         )
 
         # Spacegroups
@@ -200,14 +200,13 @@ class PanDDAConsole:
         table.add_column("Spacegroup")
 
         # Rows
-        for dtag in sorted(datasets_initial, key = lambda x: x.dtag):
+        for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
             dataset = datasets_initial[dtag]
             table.add_row(
                 dtag.dtag,
                 str(dataset.reflections.reflections.resolution_high()),
                 dataset.reflections.reflections.spacegroup.hm,
             )
-
 
         self.console.print(table)
 
@@ -219,7 +218,6 @@ class PanDDAConsole:
         event_class_table.add_column("Site")
 
         for event_id, site_id in sites.event_to_site.items():
-
             event_class_table.add_row(
                 str(event_id.dtag.dtag),
                 str(event_id.event_idx.event_idx),
@@ -227,6 +225,7 @@ class PanDDAConsole:
             )
 
         self.console.print(event_class_table)
+
     def print_exception(self, e, debug):
         if debug:
             self.console.print_exception()

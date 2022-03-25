@@ -110,6 +110,15 @@ class FilterNoStructureFactors(FilterNoStructureFactorsInterface):
 
         return Datasets(new_datasets)
 
+    def log(self) -> Dict[str, List[str]]:
+        ...
+
+    def name(self) -> str:
+        return "Datasets filtered for being invalid"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: invalid"
+
 
 class FilterResolutionDatasets(FilterResolutionDatasetsInterface):
     def __init__(self, resolution_cutoff: float):
@@ -124,6 +133,15 @@ class FilterResolutionDatasets(FilterResolutionDatasetsInterface):
         new_datasets = {dtag: datasets[dtag] for dtag in high_resolution_dtags}
 
         return Datasets(new_datasets)
+
+    def log(self) -> Dict[str, List[str]]:
+        ...
+
+    def name(self) -> str:
+        return "Datasets filtered for being too low res"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: low res"
 
 
 class FilterRFree(FilterRFreeInterface):
@@ -140,10 +158,20 @@ class FilterRFree(FilterRFreeInterface):
 
         return Datasets(new_datasets)
 
+    def log(self) -> Dict[str, List[str]]:
+        ...
 
-class FilterDataQuality(FilterDataQualityInterface):
-    def __init__(self, filters: Dict[str, FilterDataQualityInterface]):
+    def name(self) -> str:
+        return "Datasets filtered for having high RFree"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: rfree"
+
+
+class FilterDataQuality(FiltersDataQualityInterface):
+    def __init__(self, filters: Dict[str, FilterDataQualityInterface], datasets_validator: DatasetsValidatorInterface):
         self.filters = filters
+        self.validator = datasets_validator
 
     def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
@@ -172,6 +200,15 @@ class FilterDissimilarModels(FilterDissimilarModelsInterface):
 
         return Datasets(new_datasets)
 
+    def log(self) -> Dict[str, List[str]]:
+        ...
+
+    def name(self) -> str:
+        return "Datasets filtered for having dissimilar structures"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: structure"
+
 
 class FilterIncompleteModels(FilterIncompleteModelsInterface):
     def __call__(self,
@@ -184,6 +221,15 @@ class FilterIncompleteModels(FilterIncompleteModelsInterface):
         new_datasets = {dtag: datasets.datasets[dtag] for dtag in new_dtags}
 
         return Datasets(new_datasets)
+
+    def log(self) -> Dict[str, List[str]]:
+        ...
+
+    def name(self) -> str:
+        return "Datasets filtered for having large gaps"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: structure gaps"
 
 
 class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
@@ -200,15 +246,34 @@ class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
 
         return Datasets(new_datasets)
 
+    def log(self) -> Dict[str, List[str]]:
+        ...
 
-class FilterReferenceCompatibility(FilterReferenceCompatibilityInterface):
-    def __init__(self, filters: Dict[str, FilterReferenceCompatibilityInterface]):
+    def name(self) -> str:
+        return "Datasets filtered for having a different spacegroup"
+
+    def exception(self) -> str:
+        return "Too few datasets after filter: space group"
+
+
+class FilterReferenceCompatibility(FiltersReferenceCompatibilityInterface):
+    def __init__(self,
+                 filters: Dict[str, FilterReferenceCompatibilityInterface],
+                 dataset_validator: DatasetsValidatorInterface,
+                 ):
         self.filters = filters
+        self.log = {}
+        self.validator = dataset_validator
 
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
             new_datasets = dataset_filter(datasets, reference)
+            self.log[dataset_filter.name()] = dataset_filter.log()
+            self.validator(new_datasets, dataset_filter.exception())
 
             datasets = new_datasets
 
         return datasets
+
+    def log(self) -> Dict[str, List[str]]:
+        return self.log
