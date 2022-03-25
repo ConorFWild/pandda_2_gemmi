@@ -475,6 +475,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
             reference: Reference = Reference.from_datasets(datasets_wilson, dataset_statistics)
             pandda_log["Reference Dtag"] = str(reference.dtag)
+            console.summarise_reference(reference)
             if pandda_args.debug:
                 print(reference.dtag)
 

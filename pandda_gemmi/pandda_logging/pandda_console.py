@@ -65,6 +65,9 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_REF_SELEC)
         self.console.print(printable)
 
+    def summarise_reference(self, reference):
+        self.console.print(str(reference.dtag))
+
     def start_b_factor_smoothing(self):
         printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
         self.console.print(printable)
