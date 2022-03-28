@@ -37,7 +37,7 @@ from pandda_gemmi.shells import Shell, ShellMultipleModels
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import (
-    Event, Clusterings, Clustering, Events, get_event_mask_indicies, score_events,
+    Event, Clusterings, Clustering, Events, get_event_mask_indicies,
     save_event_map,
 )
 
