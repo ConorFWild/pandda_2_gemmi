@@ -413,6 +413,37 @@ class ProcessDatasetInterface(Protocol):
         ...
 
 
+# @runtime_checkable
+class GetEventScoreInbuiltInterface(Protocol):
+    tag: Literal["inbuilt"]
+    def __call__(self,
+                 test_dtag,
+                 model_number,
+                 dataset_processed_dataset,
+                 dataset_xmap,
+                 events,
+                 model,
+                 grid,
+                 dataset_alignment,
+                 max_site_distance_cutoff,
+                 min_bdc, max_bdc,
+                 reference,
+                 structure_output_folder,
+                 debug
+                 ) -> Dict[EventIDInterface, float]:
+        ...
+
+
+# @runtime_checkable
+class GetEventScoreAutobuildInterface(Protocol):
+    tag: Literal["autobuild"]
+    def __call__(self, *args, **kwargs) -> Dict[EventIDInterface, float]:
+        ...
+
+
+GetEventScoreInterface = Union[GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface]
+
+
 class GetAutobuildResultInterface(Protocol):
     def __call__(self,
                  dataset: DatasetInterface,

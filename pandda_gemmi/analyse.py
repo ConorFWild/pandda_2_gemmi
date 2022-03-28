@@ -8,6 +8,7 @@ import pprint
 from functools import partial
 import multiprocessing as mp
 import json
+import pickle
 
 # Scientific python libraries
 from dask.distributed import Client
@@ -75,7 +76,7 @@ from pandda_gemmi.pandda_functions import (
     validate,
     get_common_structure_factors,
 )
-from pandda_gemmi.event import Event, Events
+from pandda_gemmi.event import Event, Events, GetEventScoreInbuilt
 from pandda_gemmi.ranking import (
     rank_events_size,
     rank_events_autobuild,
@@ -307,6 +308,10 @@ def get_filter_reference_compatability(
     return FilterReferenceCompatibility(filters, datasets_validator)
 
 
+def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
+    return GetEventScoreInbuilt()
+
+
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # # Configuration
@@ -375,6 +380,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Get the staticial model anaylsis function
     analyse_model_func = get_analyse_model_func(pandda_args)
+
+    # Get the event scoring func
+    score_events_func = get_score_events_func(pandda_args)
 
     # Set up autobuilding function
     if pandda_args.autobuild:
@@ -479,6 +487,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.debug:
                 print(reference.dtag)
 
+
+            if pandda_args.debug:
+                with open(pandda_fs_model.pandda_dir / "reference.pickle", "wb") as f:
+                    pickle.dump( reference, f)
+
         ###################################################################
         # # B Factor smoothing
         ###################################################################
@@ -518,6 +531,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                              sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
                                              )
 
+            if pandda_args.debug:
+                with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
+                    pickle.dump( grid, f)
+
+
         ###################################################################
         # # Getting alignments
         ###################################################################
@@ -529,6 +547,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 reference,
                 datasets,
             )
+
+            if pandda_args.debug:
+                with open(pandda_fs_model.pandda_dir / "alighments.pickle", "wb") as f:
+                    pickle.dump( alignments, f)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -559,9 +581,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # if pandda_args.debug:
         #     print("Comparators are:")
-            # printer.pprint(pandda_log["Cluster Assignments"])
-            # printer.pprint(pandda_log["Neighbourhood core dtags"])
-            # printer.pprint(comparators)
+        # printer.pprint(pandda_log["Cluster Assignments"])
+        # printer.pprint(pandda_log["Neighbourhood core dtags"])
+        # printer.pprint(comparators)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -627,6 +649,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 statmaps=pandda_args.statmaps,
                 load_xmap_func=load_xmap_func,
                 analyse_model_func=analyse_model_func,
+                score_events_func=score_events_func,
                 debug=pandda_args.debug,
             )
         else:
