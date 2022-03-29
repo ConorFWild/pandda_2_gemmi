@@ -523,6 +523,7 @@ def score_clusters(
 
 
 class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
+    tag: Literal["inbuilt"] = "inbuilt"
 
     def __call__(self,
                  test_dtag,
