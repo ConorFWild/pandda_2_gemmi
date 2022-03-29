@@ -549,7 +549,7 @@ def analyse_model(
 
 
     if score_events_func.tag == "inbuilt":
-        event_scores, noises = score_events_func(
+        event_scores = score_events_func(
             test_dtag,
             model_number,
             dataset_processed_dataset,
@@ -572,7 +572,7 @@ def analyse_model(
 
     for event_num, score in event_scores.items():
         model_log['score'][int(event_num)] = float(score)
-        model_log['noise'][int(event_num)] = noises[event_num]
+        # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
     #     test_dtag,

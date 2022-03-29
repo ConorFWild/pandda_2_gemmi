@@ -162,6 +162,9 @@ def process_local_dask(funcs: List[Partial], client=None):
     return results
 
 
+
+
+
 def process_local_ray(funcs):
     assert ray.is_initialized() == True
     tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]

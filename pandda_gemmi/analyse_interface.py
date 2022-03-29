@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import *
 from pathlib import Path
 
+import numpy as np
+
 T = TypeVar('T')
 
 
@@ -102,6 +104,9 @@ class AlignmentInterface(Protocol):
     ...
 
 
+AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
+
+
 class ModelInterface(Protocol):
     ...
 
@@ -136,14 +141,18 @@ class ShellInterface(Protocol):
         ...
 
 
-class EventInterface(Protocol):
+ShellsInterface = Dict[int, ShellInterface]
+
+
+class ShellResultInterface(Protocol):
     ...
 
 
-class AutobuildResultInterface(Protocol):
-    paths: List[str]
-    scores: Dict[str, float]
-    selected_fragment_path: Optional[str]
+ShellResultsInterface = Dict[int, ShellResultInterface]
+
+
+class EventInterface(Protocol):
+    ...
 
 
 class EventRankingInterface(Protocol):
@@ -157,11 +166,27 @@ class EventIDInterface(Protocol):
 EventsInterface = Dict[EventIDInterface, EventInterface]
 
 
+class AutobuildResultInterface(Protocol):
+    paths: List[str]
+    scores: Dict[str, float]
+    selected_fragment_path: Optional[str]
+
+
+AutobuildResultsInterface = Dict[EventIDInterface, AutobuildResultInterface]
+
+
 class SiteIDInterface(Protocol):
     ...
 
 
 # SiteIDInterface = NewType(int)
+
+class EventClassificationInterface(Protocol):
+    ...
+
+
+EventClassificationsInterface = Dict[EventIDInterface, EventClassificationInterface]
+
 
 class SiteInterface(Protocol):
     ...
@@ -176,6 +201,12 @@ class EventTableInterface(Protocol):
 
 class SiteTableInterface(Protocol):
     ...
+
+
+# Ray
+class RayCompatibleInterface:
+    def ray(self):
+        ...
 
 
 # Analyse Function Interfaces
@@ -196,6 +227,17 @@ class LoadXMapInterface(Protocol):
                  structure_factors: StructureFactorsInterface,
                  sample_rate: float = 3.0,
                  ) -> XmapInterface:
+        ...
+
+
+class LoadXMapFlatInterface(Protocol):
+    def __call__(self,
+                 dataset: DatasetInterface,
+                 alignment: AlignmentInterface,
+                 grid: GridInterface,
+                 structure_factors: StructureFactorsInterface,
+                 sample_rate: float = 3.0,
+                 ) -> np.ndarray:
         ...
 
 
@@ -416,6 +458,7 @@ class ProcessDatasetInterface(Protocol):
 # @runtime_checkable
 class GetEventScoreInbuiltInterface(Protocol):
     tag: Literal["inbuilt"]
+
     def __call__(self,
                  test_dtag,
                  model_number,
@@ -437,6 +480,7 @@ class GetEventScoreInbuiltInterface(Protocol):
 # @runtime_checkable
 class GetEventScoreAutobuildInterface(Protocol):
     tag: Literal["autobuild"]
+
     def __call__(self, *args, **kwargs) -> Dict[EventIDInterface, float]:
         ...
 

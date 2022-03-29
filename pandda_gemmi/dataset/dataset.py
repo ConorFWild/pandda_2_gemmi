@@ -676,7 +676,7 @@ class Reference:
         #     key=lambda dtag: resolutions[dtag].to_float(),
         # )
 
-        for dtag in sorted(resolutions, key = lambda x: resolutions[x].to_float()):
+        for dtag in sorted(resolutions, key=lambda x: resolutions[x].to_float()):
             dataset = datasets[dtag]
             dataset_spacegroup = dataset.reflections.reflections.spacegroup.hm
             if dataset_spacegroup == modal_spacegroup:
@@ -912,13 +912,14 @@ class Dataset:
     #     # return
     #     return correlation
 
+
 def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     reference_dataset = reference.dataset
 
     # Get common set of reflections
     common_reflections = dataset.common_reflections(reference_dataset.reflections,
-                                                 structure_factors,
-                                                 )
+                                                    structure_factors,
+                                                    )
 
     # Truncate
     truncated_reference = reference.dataset.truncate_reflections(common_reflections)
@@ -1037,9 +1038,17 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
 
     return smoothed_dataset
 
+
 @ray.remote
 def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactors):
     return smooth(dataset, reference, structure_factors)
+
+
+@ray.remote
+class SmoothSmoothBFactorsRay(SmoothBFactorsInterface, RayCompatibleInterface):
+    def __call__(self, *args, **kwargs):
+        ...
+
 
 @dataclasses.dataclass()
 class RMSD:
@@ -1326,12 +1335,12 @@ class Datasets:
                     # delayed(
                     # self[key].smooth)(
                     # partial(
-                        Partial(
-                            smooth_func,
-                            self[key],
+                    Partial(
+                        smooth_func,
+                        self[key],
                         reference,
                         structure_factors
-                        )
+                    )
                     for key
                     in keys
                 ]
@@ -1677,6 +1686,7 @@ class Datasets:
     #                     }
     #
     #     return Datasets(new_datasets)
+
 
 def drop_columns(datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
     new_datasets = {dtag: datasets[dtag].drop_columns(structure_factors) for dtag in datasets}
