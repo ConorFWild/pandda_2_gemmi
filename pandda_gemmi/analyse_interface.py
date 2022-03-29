@@ -5,6 +5,8 @@ from pathlib import Path
 import numpy as np
 
 T = TypeVar('T')
+V = TypeVar("V")
+P = ParamSpec("P")
 
 
 # Analyse class interfaces
@@ -13,7 +15,7 @@ class PanDDAConsoleInterface(Protocol):
 
 
 class ProcessorInterface(Protocol):
-    def __call__(self, funcs: List[Callable[..., T]]) -> List[T]:
+    def __call__(self, funcs: List[Callable[P, T]]) -> List[T]:
         ...
 
 
@@ -204,9 +206,15 @@ class SiteTableInterface(Protocol):
 
 
 # Ray
-class RayCompatibleInterface:
-    def ray(self):
+class RayCompatibleInterface(Protocol):
+    def remote(self):
         ...
+
+
+class PartialInterface(Protocol[P, V]):
+    func: Callable[P, V]
+    args: P.args
+    kwargs: P.kwargs
 
 
 # Analyse Function Interfaces

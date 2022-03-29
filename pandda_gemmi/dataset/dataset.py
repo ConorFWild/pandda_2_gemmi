@@ -1044,10 +1044,20 @@ def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactor
     return smooth(dataset, reference, structure_factors)
 
 
-@ray.remote
-class SmoothSmoothBFactorsRay(SmoothBFactorsInterface, RayCompatibleInterface):
-    def __call__(self, *args, **kwargs):
-        ...
+class SmoothBFactors(SmoothBFactorsInterface):
+    def __call__(self,
+                 dataset: DatasetInterface,
+                 reference: ReferenceInterface,
+                 structure_factors: StructureFactorsInterface) -> DatasetsInterface:
+        return smooth(dataset, reference, structure_factors)
+
+
+# @ray.remote
+# class SmoothBFactorRayInternal(SmoothBFactors):
+#     ...
+#
+# class SmoothBFactorsRay(SmoothBFactors, RayCompatibleInterface):
+#     ...
 
 
 @dataclasses.dataclass()
@@ -1691,4 +1701,4 @@ class Datasets:
 def drop_columns(datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
     new_datasets = {dtag: datasets[dtag].drop_columns(structure_factors) for dtag in datasets}
 
-    return Datasets(new_datasets)
+    return new_datasets

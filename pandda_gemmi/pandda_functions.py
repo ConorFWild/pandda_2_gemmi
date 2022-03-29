@@ -162,9 +162,6 @@ def process_local_dask(funcs: List[Partial], client=None):
     return results
 
 
-
-
-
 def process_local_ray(funcs):
     assert ray.is_initialized() == True
     tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
@@ -624,7 +621,8 @@ def get_comparators_high_res_first(
         truncated_datasets = [dtag for dtag in dtag_list if
                               datasets[dtag].reflections.resolution().resolution < truncation_res]
 
-        comparators[dtag] = [dtag for dtag in sorted(truncated_datasets, key= lambda x: x.dtag)][:comparison_min_comparators + 1]
+        comparators[dtag] = [dtag for dtag in sorted(truncated_datasets, key=lambda x: x.dtag)][
+                            :comparison_min_comparators + 1]
 
     return comparators, {}
 

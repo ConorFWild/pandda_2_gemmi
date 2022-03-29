@@ -24,8 +24,8 @@ from pandda_gemmi.dataset import (
     Datasets,
     Reference,
     StructureFactors,
-    smooth,
-    smooth_ray,
+    SmoothBFactors,
+    SmoothBFactorsRay,
     DatasetStatistics,
     drop_columns,
 )
@@ -88,7 +88,9 @@ from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
     analyse_model,
-    analyse_model_ray
+    analyse_model_ray,
+    RayWrapper,
+    ProcessLocalRay
 )
 
 from pandda_gemmi import event_classification
@@ -230,9 +232,9 @@ def get_process_local(pandda_args):
 
 def get_smooth_func(pandda_args) -> SmoothBFactorsInterface:
     if pandda_args.local_processing == "ray":
-        smooth_func = smooth_ray
+        smooth_func = RayWrapper(SmoothBFactors())
     else:
-        smooth_func = smooth
+        smooth_func = SmoothBFactors()
 
     return smooth_func
 
@@ -490,12 +492,26 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
             start = time.time()
-            datasets_smoother: DatasetsInterface = datasets_wilson.smooth_datasets(
-                reference,
-                structure_factors=structure_factors,
-                smooth_func=smooth_func,
-                mapper=process_local,
-            )
+            datasets_smoother: DatasetsInterface = {
+                smoothed_dtag: smoothed_dataset
+                for smoothed_dtag, smoothed_dataset
+                in zip(
+                    datasets_wilson,
+                    process_local(
+                        [
+                            Partial(
+                                smooth_func,
+                                dataset,
+                                reference,
+                                structure_factors,
+                            )
+                            for dtag, dataset
+                            in datasets_wilson.items()
+                        ]
+                    )
+                )
+            }
+
             finish = time.time()
             pandda_log["Time to perform b factor smoothing"] = finish - start
 
