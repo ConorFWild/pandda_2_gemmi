@@ -23,7 +23,7 @@ conda install -c conda-forge -y rdkit
 pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi
-pip install .
+pip install -e .
 cd _gemmi
 pip install .
 

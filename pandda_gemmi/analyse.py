@@ -25,7 +25,6 @@ from pandda_gemmi.dataset import (
     Reference,
     StructureFactors,
     SmoothBFactors,
-    SmoothBFactorsRay,
     DatasetStatistics,
     drop_columns,
 )
