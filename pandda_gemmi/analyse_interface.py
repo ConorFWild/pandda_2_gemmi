@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import *
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, Concatenate
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +22,7 @@ class ProcessorInterface(Protocol):
 
 class DtagInterface(Protocol):
     ...
+
 
 
 class PanDDAFSModelInterface(Protocol):
@@ -213,10 +214,32 @@ class RayCompatibleInterface(Protocol):
 
 
 class PartialInterface(Protocol[P, V]):
-    func: Callable[P, V]
-    args: P.args
-    kwargs: P.kwargs
 
+    args: Any
+    kwargs: Any
+
+    def __init__(self, func: Callable[P, V], *args: P.args, **kwargs: P.kwargs):
+        ...
+
+    def __call__(self) -> V:
+        ...
+
+#
+# class PartialInterface2(Generic[P, V]):
+#     func: Callable[P, V]
+#     args: P.args
+#     kwargs: P.kwargs
+#
+#     def __call__(self, *args: P.args) -> V:
+#         ...
+# #
+# def decorator(f: Callable[P, int]) -> Callable[P, int]:
+#     def wrapper(*args: P.args, **kw: P.kwargs) -> int:
+#         print(args[0])
+#         return 0
+#     return wrapper
+
+# PartialInterface = Callable[Concatenate[Callable[P, V], P], Callable[[], V]]
 
 # Analyse Function Interfaces
 class SmoothBFactorsInterface(Protocol):

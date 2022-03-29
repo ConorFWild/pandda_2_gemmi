@@ -229,11 +229,9 @@ def get_process_local(pandda_args):
     return process_local
 
 
-def get_smooth_func(pandda_args) -> SmoothBFactorsInterface:
-    if pandda_args.local_processing == "ray":
-        smooth_func = RayWrapper(SmoothBFactors())
-    else:
-        smooth_func = SmoothBFactors()
+def get_smooth_func(pandda_args: PanDDAArgs) -> SmoothBFactorsInterface:
+    
+    smooth_func: SmoothBFactorsInterface = SmoothBFactors()
 
     return smooth_func
 
