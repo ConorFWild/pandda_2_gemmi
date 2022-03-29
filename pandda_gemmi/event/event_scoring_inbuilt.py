@@ -538,7 +538,6 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  min_bdc, max_bdc,
                  reference,
                  structure_output_folder,
-                 cluster_scorer,
                  debug=True,
                  ):
         # Get the events and their BDCs
