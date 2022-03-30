@@ -509,7 +509,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
         datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                       datasets_reference.datasets.items()}
+                                       datasets_reference.items()}
 
         ###################################################################
         # # Getting grid
