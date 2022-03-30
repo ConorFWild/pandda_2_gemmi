@@ -14,6 +14,7 @@ set_loky_pickler('pickle')
 from typing import *
 from functools import partial
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventIDX
@@ -515,7 +516,7 @@ class ShellDirs:
 
 
 @dataclasses.dataclass()
-class PanDDAFSModel:
+class PanDDAFSModel(PanDDAFSModelInterface):
     pandda_dir: Path
     data_dirs: DataDirs
     analyses: Analyses
@@ -557,3 +558,51 @@ class PanDDAFSModel:
 
         self.processed_datasets.build(process_local=process_local)
         self.analyses.build()
+
+def get_pandda_fs_model(input_data_dirs: Path,
+                 output_out_dir: Path,
+                 pdb_regex: str, mtz_regex: str,
+                 ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
+                 process_local=None,
+                 ):
+    analyses = Analyses.from_pandda_dir(output_out_dir)
+    data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
+                                    ligand_pdb_regex, ligand_smiles_regex, process_local=process_local)
+    processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
+                                                            output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
+                                                            process_local=process_local,
+                                                            )
+    log_path = output_out_dir / PANDDA_LOG_FILE
+
+    console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
+
+    return PanDDAFSModel(pandda_dir=output_out_dir,
+                            data_dirs=data_dirs,
+                            analyses=analyses,
+                            processed_datasets=processed_datasets,
+                            log_file=log_path,
+                            shell_dirs=None,
+                            console_log_file=console_log_file
+                            )
+
+
+class GetPanDDAFSModel(GetPanDDAFSModelInterface):
+    def __call__(self, 
+    input_data_dirs: Path, 
+    output_out_dir: Path, 
+    pdb_regex: str, 
+    mtz_regex: str, 
+    ligand_dir_name, 
+    ligand_cif_regex: str, 
+    ligand_pdb_regex: str, 
+    ligand_smiles_regex: str) -> PanDDAFSModelInterface:
+        return get_pandda_fs_model(
+            input_data_dirs, 
+            output_out_dir, 
+            pdb_regex, 
+            mtz_regex, 
+            ligand_dir_name, 
+            ligand_cif_regex, 
+            ligand_pdb_regex, 
+            ligand_smiles_regex,
+            )

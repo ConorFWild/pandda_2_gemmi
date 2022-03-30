@@ -21,6 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
+from pandda_gemmi.analyse_interface import DatasetsInterface
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -1981,7 +1982,7 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
         raise exception
 
 
-def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
+def get_common_structure_factors(datasets: DatasetsInterface):
     for dtag in datasets:
         dataset = datasets[dtag]
         reflections = dataset.reflections

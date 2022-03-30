@@ -27,6 +27,7 @@ from pandda_gemmi.dataset import (
     SmoothBFactors,
     DatasetStatistics,
     drop_columns,
+    GetDatasets,
 )
 from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
                                       from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
@@ -82,7 +83,7 @@ from pandda_gemmi.tables import (
     EventTable,
     SiteTable,
 )
-from pandda_gemmi.fs import PanDDAFSModel, ShellDirs
+from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel
 from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
@@ -400,7 +401,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         console.start_fs_model()
         time_fs_model_building_start = time.time()
-        pandda_fs_model: PanDDAFSModelInterface = PanDDAFSModel.from_dir(
+        pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel()(
             pandda_args.data_dirs,
             pandda_args.out_dir,
             pandda_args.pdb_regex,
@@ -409,9 +410,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_args.ligand_cif_regex,
             pandda_args.ligand_pdb_regex,
             pandda_args.ligand_smiles_regex,
-            process_local=None
         )
-        pandda_fs_model.build(process_local=None)
+        pandda_fs_model.build()
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
@@ -423,18 +423,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # Get datasets
         console.start_load_datasets()
-        datasets_initial: DatasetsInterface = Datasets.from_dir(pandda_fs_model, )
-        dataset_statistics = DatasetStatistics(datasets_initial.datasets)
-        console.summarise_datasets(datasets_initial.datasets, dataset_statistics)
+        datasets_initial: DatasetsInterface = GetDatasets()(pandda_fs_model, )
+        dataset_statistics = DatasetStatistics(datasets_initial)
+        console.summarise_datasets(datasets_initial, dataset_statistics)
 
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
             if not pandda_args.structure_factors:
-                structure_factors: StructureFactorsInterface = get_common_structure_factors(datasets_initial)
+                potential_structure_factors: Optional[StructureFactorsInterface] = get_common_structure_factors(datasets_initial)
                 # If still no structure factors
-                if not structure_factors:
+                if not potential_structure_factors:
                     raise Exception(
                         "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
+                else:
+                    structure_factors: StructureFactorsInterface = potential_structure_factors
             else:
                 structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
                                                                                 pandda_args.structure_factors[1])

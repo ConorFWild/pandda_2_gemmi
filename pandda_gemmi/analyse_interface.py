@@ -25,50 +25,81 @@ class DtagInterface(Protocol):
     dtag: str
 
 
+class DataDirInterface(Protocol):
+    ...
+
+DataDirsInterface = Dict[DtagInterface, DataDirInterface]
+
+class AnalysesDirIntererface(Protocol):
+    ...
+
+class ProcessedDatasetIntererface(Protocol):
+    ...
+
+
+ProcessedDatasetsInterface = Dict[DtagInterface, ProcessedDatasetIntererface]
+
+
+class ShellDirInterface(Protocol):
+    ...
+
+ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
+
 
 class PanDDAFSModelInterface(Protocol):
     # path: Path
     # processed_dataset_dirs: Dict[DtagInterface, ProcessedDatasetInterface]
     # shell_dirs: Dict[DtagInterface, ShellDirInterface]
 
-    def get_pandda_dir(self) -> Path:
+    pandda_dir: Path
+    data_dirs: DataDirsInterface
+    analyses: AnalysesDirIntererface
+    processed_datasets: ProcessedDatasetsInterface
+    log_file: Path
+    shell_dirs: Optional[ShellDirsInterface]
+    console_log_file: Path
+
+    def build(self) -> None:
         ...
 
-    def get_dataset_dir(self, dtag: DtagInterface) -> Path:
-        ...
+    # def get_pandda_dir(self) -> Path:
+    #     ...
 
-    def get_dataset_structure_path(self, dtag: DtagInterface) -> Path:
-        ...
+    # def get_dataset_dir(self, dtag: DtagInterface) -> Path:
+    #     ...
 
-    def get_dataset_reflections_path(self, dtag: DtagInterface) -> Path:
-        ...
+    # def get_dataset_structure_path(self, dtag: DtagInterface) -> Path:
+    #     ...
 
-    def get_dataset_ligand_cif(self, dtag: DtagInterface) -> Optional[Path]:
-        ...
+    # def get_dataset_reflections_path(self, dtag: DtagInterface) -> Path:
+    #     ...
 
-    def get_dataset_ligand_pdb(self, dtag: DtagInterface) -> Optional[Path]:
-        ...
+    # def get_dataset_ligand_cif(self, dtag: DtagInterface) -> Optional[Path]:
+    #     ...
 
-    def get_dataset_ligand_smiles(self, dtag: DtagInterface) -> Optional[Path]:
-        ...
+    # def get_dataset_ligand_pdb(self, dtag: DtagInterface) -> Optional[Path]:
+    #     ...
 
-    def get_dataset_output_dir(self, dtag: DtagInterface) -> Path:
-        ...
+    # def get_dataset_ligand_smiles(self, dtag: DtagInterface) -> Optional[Path]:
+    #     ...
 
-    def get_event_map_path(self, dtag: DtagInterface) -> Path:
-        ...
+    # def get_dataset_output_dir(self, dtag: DtagInterface) -> Path:
+    #     ...
 
-    def get_shell_dir(self, shell_id: int) -> Path:
-        ...
+    # def get_event_map_path(self, dtag: DtagInterface) -> Path:
+    #     ...
 
-    def get_event_table_path(self, ) -> Path:
-        ...
+    # def get_shell_dir(self, shell_id: int) -> Path:
+    #     ...
 
-    def get_site_table_path(self, ) -> Path:
-        ...
+    # def get_event_table_path(self, ) -> Path:
+    #     ...
 
-    def get_log_path(self, ) -> Path:
-        ...
+    # def get_site_table_path(self, ) -> Path:
+    #     ...
+
+    # def get_log_path(self, ) -> Path:
+    #     ...
 
 
 class ShellDirInterface(Protocol):
@@ -253,6 +284,23 @@ class PartialInterface(Protocol[P, V]):
 # PartialInterface = Callable[Concatenate[Callable[P, V], P], Callable[[], V]]
 
 # Analyse Function Interfaces
+class GetPanDDAFSModelInterface(Protocol):
+    def __call__(self, 
+    input_data_dirs: Path,
+                 output_out_dir: Path,
+                 pdb_regex: str, mtz_regex: str,
+                 ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
+                 ) -> PanDDAFSModelInterface:
+        ...
+
+class GetDatasetsInterface(Protocol):
+    def __call__(self, 
+    pandda_fs_model: PanDDAFSModelInterface
+                 ) -> DatasetsInterface:
+        ...
+        
+
+
 class SmoothBFactorsInterface(Protocol):
     def __call__(self,
                  dataset: DatasetInterface,
@@ -302,6 +350,7 @@ class AnalyseModelInterface(Protocol):
                  min_blob_volume: float,
                  min_blob_z_peak: float,
                  output_dir: Path,
+                score_events_func: GetEventScoreInterface,
                  debug: bool
                  ) -> ModelResultInterface:
         ...

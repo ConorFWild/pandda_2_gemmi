@@ -212,8 +212,7 @@ grid, structure_factors, sample_rate,
 
         results = process_local(
             [
-                Partial(
-                    load_xmap_flat_func,
+                Partial(load_xmap_flat_func).paramaterise(
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,
@@ -268,7 +267,7 @@ grid, structure_factors, sample_rate,
         results = process_local(
             [
                 Partial(
-                    load_xmap_flat_func,
+                    load_xmap_flat_func).paramaterise(
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,

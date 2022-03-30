@@ -12,8 +12,10 @@ class Partial(PartialInterface[P, V]):
         self.kwargs = {}
         
 
-    def paramaterise(self, *args: P.args,
-                 **kwargs: P.kwargs,) :
+    def paramaterise(self, 
+    *args: P.args,
+                 **kwargs: P.kwargs,
+                 ) :
         self.args = args
         self.kwargs = kwargs
         # return self.func(*self.args, **self.kwargs)

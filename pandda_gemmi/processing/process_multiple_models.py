@@ -701,7 +701,7 @@ def process_dataset_multiple_models(
         min_bdc, max_bdc,
         sample_rate,
         statmaps,
-        analyse_model_func,
+        analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
         process_local=process_local_serial,
         debug=False,
@@ -750,7 +750,7 @@ def process_dataset_multiple_models(
     results = process_local(
         [
             Partial(
-                analyse_model_func,
+                analyse_model_func).paramaterise(
                 model,
                 model_number,
                 test_dtag=test_dtag,
@@ -1009,7 +1009,7 @@ def process_shell_multiple_models(
         max_bdc,
         memory_availability,
         statmaps,
-        load_xmap_func,
+        load_xmap_func: LoadXMapInterface,
         analyse_model_func,
         score_events_func: GetEventScoreInterface,
         debug=False,
@@ -1087,8 +1087,7 @@ def process_shell_multiple_models(
 
     results = process_local_in_shell(
         [
-            Partial(
-                load_xmap_func,
+            Partial(load_xmap_func).paramaterise(
                 shell_truncated_datasets[key],
                 alignments[key],
                 grid=grid,
@@ -1128,8 +1127,29 @@ def process_shell_multiple_models(
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
 
-    process_dataset_paramaterized = Partial(
-        process_dataset_multiple_models,
+    # process_dataset_paramaterized = 
+
+    # Process each dataset in the shell
+    all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
+    all_train_dtags = []
+    for _dtag in all_train_dtags_unmerged:
+        if _dtag not in all_train_dtags:
+            all_train_dtags.append(_dtag)
+
+    if debug:
+        print(f"\tAll train datasets are: {all_train_dtags}")
+    # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
+    dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
+    if debug:
+        print(f"\tDataset dtags are: {dataset_dtags}")
+    results = process_local_over_datasets(
+        [
+            Partial(
+        process_dataset_multiple_models).paramaterise(
+            test_dtag,
+                dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
+                                            dataset_dtags[test_dtag]},
+                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
         models=models,
         shell=shell,
         alignments=alignments,
@@ -1154,29 +1174,8 @@ def process_shell_multiple_models(
         process_local=process_local_in_dataset,
         debug=debug,
     )
-
-    # Process each dataset in the shell
-    all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
-    all_train_dtags = []
-    for _dtag in all_train_dtags_unmerged:
-        if _dtag not in all_train_dtags:
-            all_train_dtags.append(_dtag)
-
-    if debug:
-        print(f"\tAll train datasets are: {all_train_dtags}")
-    # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
-    dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
-    if debug:
-        print(f"\tDataset dtags are: {dataset_dtags}")
-    results = process_local_over_datasets(
-        [
-            partial(
-                process_dataset_paramaterized,
-                test_dtag,
-                dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
-                                            dataset_dtags[test_dtag]},
-                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
-            )
+                
+            
             for test_dtag
             in shell.test_dtags
         ],

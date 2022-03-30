@@ -1702,3 +1702,20 @@ def drop_columns(datasets: DatasetsInterface, structure_factors: StructureFactor
     new_datasets = {dtag: datasets[dtag].drop_columns(structure_factors) for dtag in datasets}
 
     return new_datasets
+
+
+def get_datasets_from_pandda_fs_model(pandda_fs_model: PanDDAFSModelInterface,
+                ) -> DatasetsInterface:
+    datasets = {}
+    for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
+        dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
+                                                dataset_dir.input_mtz_file,
+                                                )
+
+        datasets[dtag] = dataset
+
+    return datasets
+
+class GetDatasets(GetDatasetsInterface):
+    def __call__(self, pandda_fs_model: PanDDAFSModelInterface) -> DatasetsInterface:
+        return get_datasets_from_pandda_fs_model(pandda_fs_model)
