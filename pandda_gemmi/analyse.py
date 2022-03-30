@@ -70,10 +70,12 @@ from pandda_gemmi.pandda_functions import (
     get_comparators_high_res_first,
     get_common_structure_factors,
 )
-from pandda_gemmi.event import Events, GetEventScoreInbuilt
+from pandda_gemmi.event import Events, GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
     rank_events_size,
     rank_events_autobuild,
+    GetEventRankingAutobuild,
+    GetEventRankingSize,
 )
 from pandda_gemmi.autobuild import (
     autobuild_rhofit,
@@ -466,9 +468,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
             reference: ReferenceInterface = GetReferenceDataset()(
-                datasets_wilson, 
+                datasets_wilson,
                 datasets_statistics,
-                )
+            )
             pandda_log["Reference Dtag"] = str(reference.dtag)
             console.summarise_reference(reference)
             if pandda_args.debug:
@@ -524,11 +526,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Grid
         with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
             grid: GridInterface = GetGrid()(reference,
-                                                      pandda_args.outer_mask,
-                                                      pandda_args.inner_mask_symmetry,
-                                                      # sample_rate=pandda_args.sample_rate,
-                                                      sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
-                                                      )
+                                            pandda_args.outer_mask,
+                                            pandda_args.inner_mask_symmetry,
+                                            # sample_rate=pandda_args.sample_rate,
+                                            sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
+                                            )
 
             if pandda_args.debug:
                 with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
@@ -870,7 +872,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Rank the events to determine the order the are displated in
         with STDOUTManager('Ranking events...', f'\tDone!'):
             if pandda_args.rank_method == "size":
-                all_events_ranked = rank_events_size(all_events, grid)
+                all_events_ranked = GetEventRankingSize()(all_events, grid)
             elif pandda_args.rank_method == "size_delta":
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_size_delta()
@@ -882,7 +884,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if not pandda_args.autobuild:
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")
                 else:
-                    all_events_ranked: EventRankingInterface = rank_events_autobuild(
+                    all_events_ranked: EventRankingInterface = GetEventRankingAutobuild()(
                         all_events,
                         autobuild_results,
                         datasets,
@@ -903,10 +905,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Get the events and assign sites to them
         with STDOUTManager('Assigning sites to each event', f'\tDone!'):
             sites: SitesInterface = get_sites(
-                all_events_ranked,
+                all_events,
                 grid,
             )
-            all_events_events = Events.from_sites(all_events_ranked, sites, )
+            all_events_sites: EventsInterface = add_sites_to_events(all_events, sites, )
 
         console.summarise_sites(sites)
 
@@ -917,12 +919,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Output a csv of the events
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
-            event_table: EventTableInterface = EventTable.from_events(all_events_events)
+            event_table: EventTableInterface = EventTable.from_events(all_events_sites)
             event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
         with STDOUTManager('Building and outputting site table...', f'\tDone!'):
-            site_table: SiteTableInterface = SiteTable.from_events(all_events_events,
+            site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
                                                                    pandda_args.max_site_distance_cutoff)
             site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 

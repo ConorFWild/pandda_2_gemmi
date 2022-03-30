@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import *
+from pandda_gemmi.analyse_interface import *
 
 from pandda_gemmi.common import EventID, Dtag
 from pandda_gemmi.dataset import Dataset
@@ -23,6 +24,12 @@ def rank_events_size(events: Dict[EventID, Event], grid: Grid):
 
     return events_ranked
 
+
+class GetEventRankingSize(GetEventRankingSizeInterface):
+    tag: Literal["size"] = "size"
+
+    def __call__(self, events: EventsInterface, grid: GridInterface) -> EventRankingInterface:
+        return rank_events_size(events, grid)
 
 def rank_events_size_delta(events: Dict[EventID, Event], datasets: Dict[Dtag, Dataset]):
     ...
@@ -60,3 +67,10 @@ def rank_events_autobuild(
     events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
 
     return events_ranked
+
+
+class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):
+    tag: Literal["autobuild"] = "autobuild"
+
+    def __call__(self, events: EventsInterface, autobuild_results: AutobuildResultsInterface, datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
+        return rank_events_autobuild(events, autobuild_result, datasets, pandda_fs_model)

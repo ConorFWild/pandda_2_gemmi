@@ -657,16 +657,6 @@ class GetAutobuildResultInterface(Protocol):
         ...
 
 
-class GetEventRankingInterface(Protocol):
-    def __call__(self,
-                 all_events,
-                 autobuild_results,
-                 datasets,
-                 pandda_fs_model,
-                 ) -> EventRankingInterface:
-        ...
-
-
 class GetSitesInterface(Protocol):
     def __call__(self,
                  all_events_ranked: Dict[EventIDInterface, EventInterface],
@@ -701,3 +691,22 @@ class GetEventClassAutobuildInterface(Protocol):
         ...
 
 GetEventClassInterface = Union[GetEventClassAutobuildInterface, GetEventClassTrivialInterface]
+
+
+class GetEventRankingSizeInterface(Protocol):
+    tag: Literal["size"] = "size"
+    def __call__(self, events: EventsInterface, grid: GridInterface) -> EventRankingInterface:
+        ...
+
+
+class GetEventRankingAutobuildInterface(Protocol):
+    tag: Literal["autobuild"] = "autobuild"
+    def __call__(self, 
+    events: EventsInterface, 
+    autobuild_results: AutobuildResultsInterface,
+    datasets: DatasetsInterface,
+    pandda_fs_model: PanDDAFSModelInterface,
+    ) -> EventRankingInterface:
+        ...
+
+GetEventRankingInterface = Union[GetEventRankingAutobuildInterface, GetEventRankingSizeInterface]

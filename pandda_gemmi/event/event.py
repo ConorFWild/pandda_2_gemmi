@@ -8,6 +8,7 @@ import dataclasses
 from scipy.cluster.hierarchy import fclusterdata
 from sklearn.cluster import DBSCAN
 from joblib.externals.loky import set_loky_pickler
+from pandda_gemmi.analyse_interface import EventsInterface
 
 set_loky_pickler('pickle')
 
@@ -445,3 +446,39 @@ class Events:
                 for event_id
                 in event_id_list
             )
+
+
+def add_sites_to_events(event_dict: EventsInterface, sites):
+
+        # Get the sites
+        # all_clusterings_dict = {}
+        # for event_id in event_dict:
+        #     if event_id.dtag not in all_clusterings_dict:
+        #         all_clusterings_dict[event_id.dtag] = {}
+        #
+        #     all_clusterings_dict[event_id.dtag][event_id.event_idx.event_idx] = event_dict[event_id].cluster
+        #
+        # all_clusterings = {}
+        # for dtag in all_clusterings_dict:
+        #     all_clusterings[dtag] = Clustering(all_clusterings_dict[dtag])
+        #
+        # clusterings = Clusterings(all_clusterings)
+        #
+        # sites: Sites = Sites.from_clusters(clusterings, cutoff)
+
+        # Add sites to events
+        events: typing.Dict[EventID, Event] = {}
+        for event_id in event_dict:
+            event = event_dict[event_id]
+
+            for event_id_site, event_site in sites.event_to_site.items():
+                if (event_id_site.dtag.dtag == event_id.dtag.dtag) and (
+                        event_id_site.event_idx.event_idx == event_id.event_idx.event_idx):
+                    site = event_site
+
+            event.site = site
+
+            events[event_id] = event
+
+        # return Events(events, sites)
+        return events
