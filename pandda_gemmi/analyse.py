@@ -948,7 +948,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # If an exception has occured, print relevant information to the console and save the log
     except Exception as e:
         console.print_exception(e, pandda_args.debug)
-        console.save(pandda_fs_model.console_log_file)
+        console.save(pandda_args.out_dir / constants.PANDDA_TEXT_LOG_FILE)
 
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()
         pandda_log[constants.LOG_EXCEPTION] = str(e)

@@ -983,7 +983,7 @@ def process_dataset_multiple_models(
 
     return DatasetResult(
         dtag=test_dtag.dtag,
-        events=events,
+        events={event_id: event for event_id, event in events.events.items()},
         log=dataset_log,
     )
 
@@ -1142,7 +1142,7 @@ def process_shell_multiple_models(
     dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
     if debug:
         print(f"\tDataset dtags are: {dataset_dtags}")
-    results = process_local_over_datasets(
+    results: List[DatasetResultsInterface] = process_local_over_datasets(
         [
             Partial(
         process_dataset_multiple_models).paramaterise(
