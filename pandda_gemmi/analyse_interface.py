@@ -1,12 +1,13 @@
 from __future__ import annotations
 from typing import *
-from typing_extensions import ParamSpec, Concatenate
+from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
+from grpc import Call
 
 import numpy as np
 
-T = TypeVar('T')
-V = TypeVar("V")
+T = TypeVar('T',)
+V = TypeVar("V", covariant=True)
 P = ParamSpec("P")
 
 
@@ -15,8 +16,8 @@ class PanDDAConsoleInterface(Protocol):
     ...
 
 
-class ProcessorInterface(Protocol):
-    def __call__(self, funcs: List[Callable[P, T]]) -> List[T]:
+class ProcessorInterface(Protocol[P, V]):
+    def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         ...
 
 
@@ -214,11 +215,17 @@ class RayCompatibleInterface(Protocol):
 
 
 class PartialInterface(Protocol[P, V]):
-
+    func: Callable[P, V]
     args: Any
     kwargs: Any
 
-    def __init__(self, func: Callable[P, V], *args: P.args, **kwargs: P.kwargs):
+    def __init__(self, func: Callable[P, V], ):
+        ...
+
+    def paramaterise(self, 
+        *args: P.args,
+        **kwargs: P.kwargs,
+        ) -> Self:
         ...
 
     def __call__(self) -> V:

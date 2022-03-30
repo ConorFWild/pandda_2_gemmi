@@ -13,10 +13,10 @@ class RayWrapper(Generic[P, V]):
 
 class ProcessLocalRay(ProcessorInterface):
 
-    def __call__(self, funcs: List[PartialInterface[P, V]]) -> List[V]:
+    def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         assert ray.is_initialized() == True
         actors = [RayWrapper.remote() for f in funcs]
-        tasks = [a.run.remote(f, *f.args, **f.kwargs) for a, f in zip(actors, funcs)]  # type: ignore
+        tasks = [a.run.remote(f, *f.args, **f.kwargs) for a, f in zip(actors, funcs)]
         results = ray.get(tasks)
         return results
 

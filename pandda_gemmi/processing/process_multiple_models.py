@@ -535,17 +535,15 @@ def analyse_model(
         with open(output_dir / "dataset_processed_dataset.pickle", "wb") as f:
             pickle.dump(dataset_processed_dataset, f)
 
-        with open(output_dir / "events.pickle", "wb") as f:
-            pickle.dump(events, f)
-
-        with open(output_dir / "model.pickle", "wb") as f:
-            pickle.dump(model, f)
-
         with open(output_dir / "dataset_xmap.pickle", "wb") as f:
             pickle.dump(dataset_xmap, f)
 
-        with open(output_dir / "test_dtag.pickle", "wb") as f:
-            pickle.dump(test_dtag, f)
+        with open(output_dir / "events.pickle", "wb") as f:
+            pickle.dump(events, f)
+
+        with open(output_dir / f"model_{model_number}.pickle", "wb") as f:
+            pickle.dump(model, f)
+
 
 
     if score_events_func.tag == "inbuilt":

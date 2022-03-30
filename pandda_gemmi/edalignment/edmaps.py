@@ -7,9 +7,12 @@ from pathlib import Path
 from typing import Tuple
 
 from joblib.externals.loky import set_loky_pickler
+
+from pandda_gemmi.analyse_interface import LoadXMapInterface
 set_loky_pickler('pickle')
 import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
 from pandda_gemmi.dataset import StructureFactors, Reflections, Dataset, Datasets
@@ -595,6 +598,16 @@ def from_unaligned_dataset_c(dataset: Dataset,
 
     return xmap
 
+class LoadXmap(LoadXMapInterface):
+    def __call__(
+        self, 
+        dataset: DatasetInterface, 
+        alignment: AlignmentInterface, 
+        grid: GridInterface, 
+        structure_factors: StructureFactorsInterface, 
+        sample_rate: float = 3) -> XmapInterface:
+        return from_unaligned_dataset_c(dataset, alignment, grid, structure_factors, sample_rate)
+
 
 def from_unaligned_dataset_c_flat(dataset: Dataset,
                                   alignment: Alignment,
@@ -614,6 +627,17 @@ def from_unaligned_dataset_c_flat(dataset: Dataset,
     masked_array = xmap_array[grid.partitioning.total_mask == 1]
 
     return masked_array
+
+class LoadXmapFlat(LoadXMapFlatInterface):
+    def __call__(
+        self, 
+        dataset: DatasetInterface, 
+        alignment: AlignmentInterface, 
+        grid: GridInterface, 
+        structure_factors: StructureFactorsInterface, 
+        sample_rate: float = 3) -> XmapInterface:
+        return from_unaligned_dataset_c_flat(dataset, alignment, grid, structure_factors, sample_rate)
+
 
 @ray.remote
 def from_unaligned_dataset_c_ray(dataset: Dataset,
