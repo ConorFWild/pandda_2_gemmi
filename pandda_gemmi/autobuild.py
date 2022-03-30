@@ -13,7 +13,9 @@ import numpy as np
 import gemmi
 import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
+from pandda_gemmi.analyse_interface import GetAutobuildResultInterface
 
 # from pandda_gemmi.constants import *
 # from pandda_gemmi.python_types import *
@@ -1358,3 +1360,14 @@ def autobuild_rhofit_ray(dataset: Dataset,
                             rhofit_coord,
                             debug
                             )
+
+class GetAutobuildResultRhofit(GetAutobuildResultInterface):
+    def __call__(self, 
+    dataset: DatasetInterface, 
+    event: EventInterface, 
+    pandda_fs: PanDDAFSModelInterface, 
+    cif_strategy: str, 
+    cut: float, 
+    rhofit_coord: bool, 
+    debug: bool) -> AutobuildResultInterface:
+        return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)

@@ -5,6 +5,7 @@ class GetEventClassAutobuildScore(GetEventClassAutobuildInterface):
 
     def __init__(self, cutoff: float):
         self.cutoff = cutoff
+        self.tag: Literal["autobuild"] = "autobuild"
 
     def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
         selected_event = autobuild_result.selected_fragment_path

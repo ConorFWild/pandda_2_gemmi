@@ -44,7 +44,9 @@ from pandda_gemmi.filters import (
     FilterDifferentSpacegroups,
     DatasetsValidator
 )
-from pandda_gemmi.comparators import GetComparatorsHybrid
+from pandda_gemmi.comparators import (
+    GetComparatorsHybrid, GetComparatorsHighResFirst, GetComparatorsHighResRandom, GetComparatorsHighRes,
+    GetComparatorsCluster)
 from pandda_gemmi.comparators import get_multiple_comparator_sets
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
@@ -61,11 +63,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_serial,
     process_global_dask,
     get_shells,
-    get_comparators_high_res,
-    get_comparators_high_res_random,
-
     get_comparators_high_res_first,
-
     get_common_structure_factors,
 )
 from pandda_gemmi.event import Events, GetEventScoreInbuilt
@@ -78,6 +76,7 @@ from pandda_gemmi.autobuild import (
     autobuild_rhofit_ray,
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
+    GetAutobuildResultRhofit,
 )
 from pandda_gemmi.tables import (
     EventTable,
@@ -110,7 +109,9 @@ def update_log(shell_log, shell_log_path):
         json.dump(shell_log, f, indent=2)
 
 
-def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
+def get_comparator_func(pandda_args: PanDDAArgs, 
+load_xmap_flat_func: LoadXMapFlatInterface, 
+process_local: ProcessorInterface) -> GetComparatorsInterface:
     if pandda_args.comparison_strategy == "closest":
         # Closest datasets after clustering
         raise NotImplementedError()
@@ -118,32 +119,30 @@ def get_comparator_func(pandda_args, load_xmap_flat_func, process_local):
     elif pandda_args.comparison_strategy == "high_res":
         # Almost Old PanDDA strategy: highest res datasets
 
-        comparators_func = Partial(
-            get_comparators_high_res,
+        comparators_func = GetComparatorsHighRes(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
 
     elif pandda_args.comparison_strategy == "high_res_random":
-        # Old pandda strategy: random datasets that are higher resolution
-
-        comparators_func = Partial(
-            get_comparators_high_res_random,
+        
+        comparators_func = GetComparatorsHighResRandom(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
 
     elif pandda_args.comparison_strategy == "high_res_first":
-        comparators_func = Partial(
-            get_comparators_high_res_first,
+        # Old pandda strategy: random datasets that are higher resolution
+
+        comparators_func = GetComparatorsHighResFirst(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
         )
 
     elif pandda_args.comparison_strategy == "cluster":
-        comparators_func = Partial(
-            get_multiple_comparator_sets,
+        comparators_func = GetComparatorsCluster(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
+            comparison_max_comparators=pandda_args.comparison_max_comparators,
             sample_rate=pandda_args.sample_rate,
             # TODO: add option: pandda_args.resolution_cutoff,
             resolution_cutoff=3.0,
@@ -337,7 +336,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
-    filter_data_quality: FilterDataQualityInterface = get_filter_data_quality(
+    filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
         [
             "structure_factors",
             "resolution",
@@ -346,7 +345,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_validator,
         pandda_args
     )
-    filter_reference_compatability: FilterReferenceCompatibilityInterface = get_filter_reference_compatability(
+    filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
         [
             "dissimilar_models",
             "large_gaps"
@@ -374,11 +373,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
         if pandda_args.autobuild_strategy == "rhofit":
-
-            if pandda_args.local_processing == "ray":
-                autobuild_func: GetAutobuildResultInterface = autobuild_rhofit_ray
-            else:
-                autobuild_func: GetAutobuildResultInterface = autobuild_rhofit
+            autobuild_func: GetAutobuildResultInterface = GetAutobuildResultRhofit()
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
