@@ -99,7 +99,7 @@ class FilterNoStructureFactors(FilterNoStructureFactorsInterface):
     def __call__(self,
                  datasets: DatasetsInterface,
                  structure_factors: StructureFactorsInterface,
-                 ) -> Datasets:
+                 ) -> DatasetsInterface:
         new_dtags = filter(
             lambda dtag: (structure_factors.f in datasets[dtag].reflections.columns()) and (
                     structure_factors.phi in datasets[dtag].reflections.columns()),
@@ -108,7 +108,7 @@ class FilterNoStructureFactors(FilterNoStructureFactorsInterface):
 
         new_datasets = {dtag: datasets[dtag] for dtag in new_dtags}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -132,7 +132,7 @@ class FilterResolutionDatasets(FilterResolutionDatasetsInterface):
 
         new_datasets = {dtag: datasets[dtag] for dtag in high_resolution_dtags}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -156,7 +156,7 @@ class FilterRFree(FilterRFreeInterface):
 
         new_datasets = {dtag: datasets[dtag] for dtag in good_rfree_dtags}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -181,6 +181,9 @@ class FilterDataQuality(FiltersDataQualityInterface):
 
         return datasets
 
+    def log(self) -> Dict[str, List[str]]:
+        ...
+
 
 class FilterDissimilarModels(FilterDissimilarModelsInterface):
     def __init__(self, max_rmsd_to_reference: float):
@@ -188,7 +191,7 @@ class FilterDissimilarModels(FilterDissimilarModelsInterface):
 
     def __call__(self,
                  datasets: DatasetsInterface,
-                 reference: ReferenceInterface, ) -> Datasets:
+                 reference: ReferenceInterface, ) -> DatasetsInterface:
         new_dtags = filter(lambda dtag: (RMSD.from_reference(
             reference,
             datasets[dtag],
@@ -198,7 +201,7 @@ class FilterDissimilarModels(FilterDissimilarModelsInterface):
 
         new_datasets = {dtag: datasets[dtag] for dtag in new_dtags}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -213,14 +216,14 @@ class FilterDissimilarModels(FilterDissimilarModelsInterface):
 class FilterIncompleteModels(FilterIncompleteModelsInterface):
     def __call__(self,
                  datasets: DatasetsInterface,
-                 reference: ReferenceInterface):
-        new_dtags = filter(lambda dtag: Alignment.has_large_gap(reference, datasets.datasets[dtag]),
-                           datasets.datasets,
+                 reference: ReferenceInterface) -> DatasetsInterface:
+        new_dtags = filter(lambda dtag: Alignment.has_large_gap(reference, datasets[dtag]),
+                           datasets,
                            )
 
-        new_datasets = {dtag: datasets.datasets[dtag] for dtag in new_dtags}
+        new_datasets = {dtag: datasets[dtag] for dtag in new_dtags}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -236,7 +239,7 @@ class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
     def __call__(self,
                  datasets: DatasetsInterface,
                  reference: ReferenceInterface,
-                 ):
+                 ) -> DatasetsInterface:
         same_spacegroup_datasets = filter(
             lambda dtag: datasets[dtag].reflections.spacegroup() == reference.dataset.reflections.spacegroup(),
             datasets,
@@ -244,7 +247,7 @@ class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
 
         new_datasets = {dtag: datasets[dtag] for dtag in same_spacegroup_datasets}
 
-        return Datasets(new_datasets)
+        return new_datasets
 
     def log(self) -> Dict[str, List[str]]:
         ...
@@ -256,19 +259,19 @@ class FilterDifferentSpacegroups(FilterDifferentSpacegroupsInterface):
         return "Too few datasets after filter: space group"
 
 
-class FilterReferenceCompatibility(FiltersReferenceCompatibilityInterface):
+class FiltersReferenceCompatibility(FiltersReferenceCompatibilityInterface):
     def __init__(self,
                  filters: Dict[str, FilterReferenceCompatibilityInterface],
                  dataset_validator: DatasetsValidatorInterface,
                  ):
         self.filters = filters
-        self.log = {}
+        self._log = {}
         self.validator = dataset_validator
 
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
             new_datasets = dataset_filter(datasets, reference)
-            self.log[dataset_filter.name()] = dataset_filter.log()
+            # self.log[dataset_filter.name()] = dataset_filter.log()
             self.validator(new_datasets, dataset_filter.exception())
 
             datasets = new_datasets
@@ -276,4 +279,4 @@ class FilterReferenceCompatibility(FiltersReferenceCompatibilityInterface):
         return datasets
 
     def log(self) -> Dict[str, List[str]]:
-        return self.log
+        return self._log

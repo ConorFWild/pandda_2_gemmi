@@ -375,9 +375,9 @@ class FilterBaseInterface(Protocol):
 
 class FilterDataQualityInterface(FilterBaseInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  structure_factors: StructureFactorsInterface
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
@@ -391,33 +391,33 @@ class FiltersDataQualityInterface(Protocol):
 
 class FilterNoStructureFactorsInterface(FilterDataQualityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  structure_factors: StructureFactorsInterface
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
 class FilterRFreeInterface(FilterDataQualityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  structure_factors: StructureFactorsInterface
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
 class FilterResolutionDatasetsInterface(FilterDataQualityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  structure_factors: StructureFactorsInterface
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
 class FilterReferenceCompatibilityInterface(FilterBaseInterface, Protocol, ):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
@@ -431,25 +431,25 @@ class FiltersReferenceCompatibilityInterface(Protocol):
 
 class FilterDissimilarModelsInterface(FilterReferenceCompatibilityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface,
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 ) -> DatasetsInterface:
         ...
 
 
 class FilterDifferentSpacegroupsInterface(FilterReferenceCompatibilityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface,
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 )-> DatasetsInterface:
         ...
 
 
 class FilterIncompleteModelsInterface(FilterReferenceCompatibilityInterface, Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
+                 datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface,
-                 ) -> Dict[DtagInterface, DatasetInterface]:
+                 )-> DatasetsInterface:
         ...
 
 

@@ -447,7 +447,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_data_quality_filters()
 
         datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                                     datasets_initial.datasets.items()}
+                                                     datasets_initial.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
 
