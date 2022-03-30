@@ -11,7 +11,7 @@ class RayWrapper(Generic[P, V]):
         return func(*args, **kwargs)
 
 @ray.remote
-def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V
+def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
     return func(*args, **kwargs)
 
 
