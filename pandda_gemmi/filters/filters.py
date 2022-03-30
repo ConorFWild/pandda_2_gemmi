@@ -168,7 +168,7 @@ class FilterRFree(FilterRFreeInterface):
         return "Too few datasets after filter: rfree"
 
 
-class FilterDataQuality(FiltersDataQualityInterface):
+class FiltersDataQuality(FiltersDataQualityInterface):
     def __init__(self, filters: Dict[str, FilterDataQualityInterface], datasets_validator: DatasetsValidatorInterface):
         self.filters = filters
         self.validator = datasets_validator

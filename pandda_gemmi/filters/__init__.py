@@ -1,5 +1,5 @@
-from pandda_gemmi.filters.filters import (FilterDataQuality,
-                                          FilterReferenceCompatibility,
+from pandda_gemmi.filters.filters import (FiltersDataQuality,
+                                          FiltersReferenceCompatibility,
                                           FilterNoStructureFactors,
                                           FilterResolutionDatasets,
                                           FilterRFree,

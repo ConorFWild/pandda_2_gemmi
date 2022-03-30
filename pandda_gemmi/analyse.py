@@ -35,8 +35,8 @@ from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c
                                       LoadXmap, LoadXmapFlat
                                       )
 from pandda_gemmi.filters import (
-    FilterDataQuality,
-    FilterReferenceCompatibility,
+    FiltersDataQuality,
+    FiltersReferenceCompatibility,
     FilterNoStructureFactors,
     FilterResolutionDatasets,
     FilterRFree,
@@ -270,7 +270,7 @@ def get_filter_data_quality(
     if "rfree" in filter_keys:
         filters["rfree"] = FilterRFree(pandda_args.max_rfree)
 
-    return FilterDataQuality(filters, datasets_validator)
+    return FiltersDataQuality(filters, datasets_validator)
 
 
 def get_filter_reference_compatability(
@@ -289,7 +289,7 @@ def get_filter_reference_compatability(
     if "dissimilar_spacegroups" in filter_keys:
         filters["dissimilar_spacegroups"] = FilterDifferentSpacegroups()
 
-    return FilterReferenceCompatibility(filters, datasets_validator)
+    return FiltersReferenceCompatibility(filters, datasets_validator)
 
 
 def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
@@ -430,7 +430,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
             if not pandda_args.structure_factors:
-                potential_structure_factors: Optional[StructureFactorsInterface] = get_common_structure_factors(datasets_initial)
+                potential_structure_factors: Optional[StructureFactorsInterface] = get_common_structure_factors(
+                    datasets_initial)
                 # If still no structure factors
                 if not potential_structure_factors:
                     raise Exception(
@@ -676,8 +677,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         shells,
                         process_global(
                             [
-                                Partial(
-                                    process_shell).paramaterise(
+                                Partial(process_shell).paramaterise(
                                     shell,
                                     datasets,
                                     alignments,

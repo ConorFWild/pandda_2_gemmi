@@ -29,7 +29,7 @@ class ShellMultipleModels:
 
 
 def get_shells_multiple_models(
-        datasets: Dict[Dtag, Dataset],
+        datasets: DatasetsInterface,
         comparators: ComparatorsInterface,
         min_characterisation_datasets,
         max_shell_datasets,

@@ -1787,7 +1787,7 @@ def get_comparators_closest_cluster_neighbours(
 
 
 def get_shells(
-        datasets: Dict[Dtag, Dataset],
+        datasets: DatasetsInterface,
         comparators: Dict[Dtag, List[Dtag]],
         min_characterisation_datasets,
         max_shell_datasets,
