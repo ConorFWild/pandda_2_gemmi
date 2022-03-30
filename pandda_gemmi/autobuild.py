@@ -38,6 +38,9 @@ class AutobuildResult:
     selected_fragment_path: Optional[str]
     command: str
 
+    def log(self):
+        return self.command
+
 
 def execute(command: str):
     p = subprocess.Popen(command,

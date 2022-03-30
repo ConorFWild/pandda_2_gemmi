@@ -18,6 +18,8 @@ import ray
 from pandda_gemmi import constants
 from pandda_gemmi.common import Partial
 from pandda_gemmi.args import PanDDAArgs
+from pandda_gemmi.dataset.dataset import GetReferenceDataset
+from pandda_gemmi.edalignment.grid import GetGrid
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import (
@@ -25,11 +27,12 @@ from pandda_gemmi.dataset import (
     Reference,
     StructureFactors,
     SmoothBFactors,
-    DatasetStatistics,
+    DatasetsStatistics,
     drop_columns,
     GetDatasets,
+    GetReferenceDataset,
 )
-from pandda_gemmi.edalignment import (Grid, Alignments, from_unaligned_dataset_c,
+from pandda_gemmi.edalignment import (Grid, GetGrid, Alignments, GetAlignments, from_unaligned_dataset_c,
                                       from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
                                       from_unaligned_dataset_c_flat_ray,
                                       LoadXmap, LoadXmapFlat
@@ -83,7 +86,7 @@ from pandda_gemmi.tables import (
     EventTable,
     SiteTable,
 )
-from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel
+from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
@@ -247,10 +250,7 @@ def get_load_xmap_flat_func(pandda_args) -> LoadXMapFlatInterface:
 
 
 def get_analyse_model_func(pandda_args):
-    if pandda_args.local_processing == "ray":
-        analyse_model_func = analyse_model_ray
-    else:
-        analyse_model_func = analyse_model
+    analyse_model_func = analyse_model
     return analyse_model_func
 
 
@@ -369,11 +369,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
 
     # Set up autobuilding function
+    autobuild_func: Optional[GetAutobuildResultInterface] = None
     if pandda_args.autobuild:
 
         # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
         if pandda_args.autobuild_strategy == "rhofit":
-            autobuild_func: GetAutobuildResultInterface = GetAutobuildResultRhofit()
+            autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
@@ -424,8 +425,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Get datasets
         console.start_load_datasets()
         datasets_initial: DatasetsInterface = GetDatasets()(pandda_fs_model, )
-        dataset_statistics = DatasetStatistics(datasets_initial)
-        console.summarise_datasets(datasets_initial, dataset_statistics)
+        datasets_statistics: DatasetsStatisticsInterface = DatasetsStatistics(datasets_initial)
+        console.summarise_datasets(datasets_initial, datasets_statistics)
 
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
@@ -464,7 +465,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Select refernce
         with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
-            reference: ReferenceInterface = Reference.from_datasets(datasets_wilson, dataset_statistics)
+            reference: ReferenceInterface = GetReferenceDataset()(
+                datasets_wilson, 
+                datasets_statistics,
+                )
             pandda_log["Reference Dtag"] = str(reference.dtag)
             console.summarise_reference(reference)
             if pandda_args.debug:
@@ -519,7 +523,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Grid
         with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
-            grid: GridInterface = Grid.from_reference(reference,
+            grid: GridInterface = GetGrid()(reference,
                                                       pandda_args.outer_mask,
                                                       pandda_args.inner_mask_symmetry,
                                                       # sample_rate=pandda_args.sample_rate,
@@ -537,7 +541,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_alignments()
 
         with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
-            alignments: AlignmentsInterface = Alignments.from_datasets(
+            alignments: AlignmentsInterface = GetAlignments()(
                 reference,
                 datasets,
             )
@@ -556,7 +560,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
                            f'\tDone!'):
             # TODO: Fix typing for comparators func
-            comparators, cluster_assignments = comparators_func(
+            comparators: ComparatorsInterface = comparators_func(
                 datasets,
                 alignments,
                 grid,
@@ -617,7 +621,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_args.only_datasets,
 
                 )
-            pandda_fs_model.shell_dirs = ShellDirs.from_pandda_dir(pandda_fs_model.pandda_dir, shells)
+            pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()
 
         if pandda_args.debug:
@@ -711,7 +715,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_log[constants.LOG_SHELLS] = {
                 res: shell_result.log
                 for res, shell_result
-                in zip(shells, shell_results)
+                in shell_results.items()
                 if shell_result
             }
             pandda_log["Time to process all shells"] = time_shells_finish - time_shells_start
@@ -719,10 +723,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 print(f"Time to process all shells: {time_shells_finish - time_shells_start}")
 
         all_events: EventsInterface = {}
-        for shell_result in shell_results:
+        for res, shell_result in shell_results.items():
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
-                    all_events.update(dataset_result.events.events)
+                    all_events.update(dataset_result.events)
 
         # Add the event maps to the fs
         for event_id, event in all_events.items():
@@ -781,7 +785,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                     event_idx = int(event_id.event_idx.event_idx)
 
-                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.command
+                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
 
             with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
                 # Add the best fragment by scoring method to default model
@@ -848,6 +852,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 for event_id, event
                 in all_events.items()
             }
+        else:
+            raise Exception("No event classifier specified!")
 
         console.summarise_event_classifications(event_classifications)
 

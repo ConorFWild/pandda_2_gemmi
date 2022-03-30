@@ -21,7 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import DatasetsInterface
+from pandda_gemmi.analyse_interface import ComparatorsInterface, DatasetsInterface
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -1788,7 +1788,7 @@ def get_comparators_closest_cluster_neighbours(
 
 def get_shells(
         datasets: DatasetsInterface,
-        comparators: Dict[Dtag, List[Dtag]],
+        comparators: ComparatorsInterface,
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,

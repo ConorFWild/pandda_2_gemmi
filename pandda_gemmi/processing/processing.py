@@ -7,6 +7,7 @@ import pprint
 from functools import partial
 import os
 import json
+from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterface, GridInterface, LoadXMapInterface, PanDDAFSModelInterface, ProcessorInterface, ReferenceInterface, ShellInterface, StructureFactorsInterface
 
 printer = pprint.PrettyPrinter()
 
@@ -397,27 +398,27 @@ def process_dataset(
 
 # Define how to process a shell
 def process_shell(
-        shell: Shell,
-        datasets: Dict[Dtag, Dataset],
-        alignments,
-        grid,
-        pandda_fs_model: PanDDAFSModel,
-        reference,
-        process_local,
-        structure_factors: StructureFactors,
+        shell: ShellInterface,
+        datasets: DatasetsInterface,
+        alignments: AlignmentsInterface,
+        grid: GridInterface,
+        pandda_fs_model: PanDDAFSModelInterface,
+        reference: ReferenceInterface,
+        process_local: ProcessorInterface,
+        structure_factors: StructureFactorsInterface,
         sample_rate: float,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
-        outer_mask,
-        inner_mask_symmetry,
-        max_site_distance_cutoff,
-        min_bdc,
-        max_bdc,
-        memory_availability,
-        statmaps,
-        load_xmap_func,
+        contour_level: float,
+        cluster_cutoff_distance_multiplier: float,
+        min_blob_volume: float,
+        min_blob_z_peak: float,
+        outer_mask: float,
+        inner_mask_symmetry: float,
+        max_site_distance_cutoff: float,
+        min_bdc: float,
+        max_bdc: float,
+        memory_availability: str,
+        statmaps: bool,
+        load_xmap_func: LoadXMapInterface,
 ):
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path

@@ -328,7 +328,7 @@ class EventMapFiles:
 
 
 @dataclasses.dataclass()
-class ProcessedDataset:
+class ProcessedDataset(ProcessedDatasetInterface):
     path: Path
     dataset_models: DatasetModels
     input_mtz: Path
@@ -492,20 +492,9 @@ class ShellDir:
 
 
 @dataclasses.dataclass()
-class ShellDirs:
+class ShellDirs(ShellDirsInterface):
     path: Path
     shell_dirs: Dict[float, ShellDir]
-
-    @staticmethod
-    def from_pandda_dir(pandda_dir: Path, shells: Dict[float, Shell]):
-
-        shells_dir = pandda_dir / PANDDA_SHELL_DIR
-
-        shell_dirs = {}
-        for shell_res, shell in shells.items():
-            shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
-
-        return ShellDirs(shells_dir, shell_dirs)
 
     def build(self):
         if not self.path.exists():
@@ -513,6 +502,21 @@ class ShellDirs:
 
         for shell_res, shell_dir in self.shell_dirs.items():
             shell_dir.build()
+
+
+def get_shell_dirs_from_pandda_dir(pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
+
+    shells_dir = pandda_dir / PANDDA_SHELL_DIR
+
+    shell_dirs = {}
+    for shell_res, shell in shells.items():
+        shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
+
+    return ShellDirs(shells_dir, shell_dirs)
+
+class GetShellDirs(GetShellDirsInterface):
+    def __call__(self, pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
+        return get_shell_dirs_from_pandda_dir(pandda_dir, shells)
 
 
 @dataclasses.dataclass()

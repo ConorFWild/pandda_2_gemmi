@@ -50,7 +50,7 @@ class DatasetResult:
 
 
 @dataclasses.dataclass()
-class ShellResult:
+class ShellResult(ShellResultInterface):
     shell: Shell
     dataset_results: Dict[Dtag, DatasetResult]
     log: Dict
@@ -989,30 +989,30 @@ def process_dataset_multiple_models(
 
 
 def process_shell_multiple_models(
-        shell: ShellMultipleModels,
-        datasets: Dict[Dtag, Dataset],
-        alignments,
-        grid,
-        pandda_fs_model: PanDDAFSModel,
-        reference,
-        process_local,
-        structure_factors: StructureFactors,
+        shell: ShellInterface,
+        datasets: DatasetsInterface,
+        alignments: AlignmentsInterface,
+        grid: GridInterface,
+        pandda_fs_model: PanDDAFSModelInterface,
+        reference: ReferenceInterface,
+        process_local: ProcessorInterface,
+        structure_factors: StructureFactorsInterface,
         sample_rate: float,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
-        outer_mask,
-        inner_mask_symmetry,
-        max_site_distance_cutoff,
-        min_bdc,
-        max_bdc,
-        memory_availability,
-        statmaps,
+        contour_level: float,
+        cluster_cutoff_distance_multiplier: float,
+        min_blob_volume: float,
+        min_blob_z_peak: float,
+        outer_mask: float,
+        inner_mask_symmetry: float,
+        max_site_distance_cutoff: float,
+        min_bdc: float,
+        max_bdc: float,
+        memory_availability: str,
+        statmaps: bool,
         load_xmap_func: LoadXMapInterface,
-        analyse_model_func,
+        analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
-        debug=False,
+        debug: bool=False,
 ):
     if debug:
         print(f"Processing shell at resolution: {shell.res}")

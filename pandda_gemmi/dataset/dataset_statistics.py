@@ -5,12 +5,12 @@ from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset
 
 
-class DatasetStatistics:
+class DatasetsStatistics(DatasetsStatisticsInterface):
     def __init__(self, datasets: DatasetsInterface):
-        self.unit_cells = DatasetStatistics.get_unit_cell_stats(datasets)
-        self.spacegroups = DatasetStatistics.get_spacegroup_stats(datasets)
-        self.resolutions = DatasetStatistics.get_resolution_stats(datasets)
-        self.chains = DatasetStatistics.get_chain_stats(datasets)
+        self.unit_cells = DatasetsStatistics.get_unit_cell_stats(datasets)
+        self.spacegroups = DatasetsStatistics.get_spacegroup_stats(datasets)
+        self.resolutions = DatasetsStatistics.get_resolution_stats(datasets)
+        self.chains = DatasetsStatistics.get_chain_stats(datasets)
         # self.residues = ...
 
     @staticmethod

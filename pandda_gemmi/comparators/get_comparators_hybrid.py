@@ -68,5 +68,5 @@ class GetComparatorsHybrid(GetComparatorsInterface):
                 comparators[dtag][model_number+1] = model_comparators
 
 
-        return comparators, clusters
+        return comparators
 

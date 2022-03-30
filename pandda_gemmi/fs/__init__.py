@@ -1,1 +1,1 @@
-from pandda_gemmi.fs.fs import PanDDAFSModel, ShellDirs, MeanMapFile, StdMapFile, ProcessedDataset, GetPanDDAFSModel
+from pandda_gemmi.fs.fs import PanDDAFSModel, ShellDirs, MeanMapFile, StdMapFile, ProcessedDataset, GetPanDDAFSModel, GetShellDirs

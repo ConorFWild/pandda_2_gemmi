@@ -33,17 +33,63 @@ DataDirsInterface = Dict[DtagInterface, DataDirInterface]
 class AnalysesDirIntererface(Protocol):
     ...
 
-class ProcessedDatasetIntererface(Protocol):
+
+class ModelInterface(Protocol):
     ...
 
 
-ProcessedDatasetsInterface = Dict[DtagInterface, ProcessedDatasetIntererface]
+class XmapInterface(Protocol):
+    ...
+
+
+class DatasetModelsInterface(Protocol):
+    path: Path
+
+class ZMapFileInterface(Protocol):
+    ...
+
+class EventMapFilesInterface(Protocol):
+    def add_event(self, event: EventInterface):
+        ...
+
+class LigandDirInterface(Protocol):
+    ...
+
+
+class ProcessedDatasetInterface(Protocol):
+    path: Path
+    dataset_models: DatasetModelsInterface
+    input_mtz: Path
+    input_pdb: Path
+    source_mtz: Path
+    source_pdb: Path
+    z_map_file: ZMapFileInterface
+    event_map_files: EventMapFilesInterface
+    source_ligand_cif: Optional[Path]
+    source_ligand_pdb: Optional[Path]
+    source_ligand_smiles: Optional[Path]
+    input_ligand_cif: Path
+    input_ligand_pdb: Path
+    input_ligand_smiles: Path
+    source_ligand_dir: Optional[LigandDirInterface]
+    input_ligand_dir: Path
+    log_path: Path
+
+
+ProcessedDatasetsInterface = Dict[DtagInterface, ProcessedDatasetInterface]
 
 
 class ShellDirInterface(Protocol):
     ...
 
-ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
+# ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
+
+class ShellDirsInterface(Protocol):
+    path : Path
+    shell_dirs: Dict[float, ShellDirInterface]
+
+    def build(self) -> None:
+        ...
 
 
 class PanDDAFSModelInterface(Protocol):
@@ -61,6 +107,7 @@ class PanDDAFSModelInterface(Protocol):
 
     def build(self) -> None:
         ...
+
 
     # def get_pandda_dir(self) -> Path:
     #     ...
@@ -102,8 +149,6 @@ class PanDDAFSModelInterface(Protocol):
     #     ...
 
 
-class ShellDirInterface(Protocol):
-    ...
 
 
 class StructureFactorsInterface(Protocol):
@@ -124,6 +169,10 @@ class DatasetInterface(Protocol):
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 
 
+
+class DatasetsStatisticsInterface(Protocol):
+    ...
+
 class StructureInterface(Protocol):
     ...
 
@@ -143,16 +192,6 @@ class AlignmentInterface(Protocol):
 AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 
 
-class ModelInterface(Protocol):
-    ...
-
-
-class XmapInterface(Protocol):
-    ...
-
-
-class ProcessedDatasetInterface(Protocol):
-    ...
 
 
 class ModelResultInterface(Protocol):
@@ -167,24 +206,35 @@ ComparatorsInterface = MutableMapping[DtagInterface, MutableMapping[int, List[Dt
 
 
 class ShellInterface(Protocol):
-    def get_test_dtags(self) -> List[DtagInterface]:
-        ...
+    res: float
+    test_dtags: List[DtagInterface]
+    train_dtags: Dict[int, List[DtagInterface]]
+    all_dtags: List[DtagInterface]
 
-    def get_train_dtags(self, dtag: DtagInterface) -> List[DtagInterface]:
-        ...
+    # def get_test_dtags(self) -> List[DtagInterface]:
+    #     ...
 
-    def get_all_dtags(self) -> List[DtagInterface]:
-        ...
+    # def get_train_dtags(self, dtag: DtagInterface) -> List[DtagInterface]:
+    #     ...
+
+    # def get_all_dtags(self) -> List[DtagInterface]:
+    #     ...
 
 
 ShellsInterface = Dict[int, ShellInterface]
 
+class DatasetResultInterface(Protocol):
+    events: EventsInterface
+
+DatasetResultsInterface = Dict[DtagInterface, DatasetResultInterface]
 
 class ShellResultInterface(Protocol):
-    ...
+    shell: ShellInterface
+    dataset_results: DatasetResultsInterface
+    log: Dict
 
 
-ShellResultsInterface = Dict[int, ShellResultInterface]
+ShellResultsInterface = Dict[float, ShellResultInterface]
 
 
 class EventInterface(Protocol):
@@ -211,6 +261,8 @@ class AutobuildResultInterface(Protocol):
     scores: Dict[str, float]
     selected_fragment_path: Optional[str]
 
+    def log(self) -> Any:
+        ...
 
 AutobuildResultsInterface = Dict[EventIDInterface, AutobuildResultInterface]
 
@@ -298,6 +350,10 @@ class GetDatasetsInterface(Protocol):
     pandda_fs_model: PanDDAFSModelInterface
                  ) -> DatasetsInterface:
         ...
+
+class GetDatasetsStatisticsInterface(Protocol):
+    def __call__(self, datasets: DatasetsInterface) -> DatasetsStatisticsInterface:
+        ...
         
 
 
@@ -360,6 +416,10 @@ class DatasetsValidatorInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface, exception: str):
         ...
 
+
+class GetReferenceDatasetInterface(Protocol):
+    def __call__(self, datasets: DatasetsInterface) -> ReferenceInterface:
+        ...
 
 class FilterBaseInterface(Protocol):
 
@@ -468,7 +528,6 @@ class GetAlignmentsInterface(Protocol):
 
 class GetGridInterface(Protocol):
     def __call__(self,
-                 datasets_diss_struc: Dict[DtagInterface, DatasetInterface],
                  reference: ReferenceInterface,
                  outer_mask: float,
                  inner_mask_symmetry: float,
@@ -484,7 +543,12 @@ class GetComparatorsInterface(Protocol):
                  grid: GridInterface,
                  structure_factors: StructureFactorsInterface,
                  pandda_fs_model: PanDDAFSModelInterface,
-                 ):
+                 ) -> ComparatorsInterface:
+        ...
+
+
+class GetShellDirsInterface(Protocol):
+    def __call__(self, pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
         ...
 
 
