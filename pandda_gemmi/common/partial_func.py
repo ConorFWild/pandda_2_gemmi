@@ -19,5 +19,5 @@ class Partial(PartialInterface[P, V]):
         # return self.func(*self.args, **self.kwargs)
         return self
 
-    def __call__(self) -> V:
-        ...
+    def __call__(self,) -> V:
+        return self.func(*self.args, **self.kwargs)

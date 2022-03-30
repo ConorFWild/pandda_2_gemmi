@@ -573,14 +573,14 @@ class GetEventTableInterface(Protocol):
 
 
 class GetEventClassTrivialInterface(Protocol):
-    ysh
+    tag: Literal["trivial"] = "trivial"
     def __call__(self, event: EventInterface, ) -> bool:
         ...
 
 
 class GetEventClassAutobuildInterface(Protocol):
-    tag: Literal["autobuild", ]
+    tag: Literal["autobuild"] = "autobuild"
     def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
         ...
 
-GetEventClass = Union[GetEventClassAutobuildInterface, GetEventClassTrivialInterface]
+GetEventClassInterface = Union[GetEventClassAutobuildInterface, GetEventClassTrivialInterface]

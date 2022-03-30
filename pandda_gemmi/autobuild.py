@@ -1362,6 +1362,7 @@ def autobuild_rhofit_ray(dataset: Dataset,
                             )
 
 class GetAutobuildResultRhofit(GetAutobuildResultInterface):
+
     def __call__(self, 
     dataset: DatasetInterface, 
     event: EventInterface, 

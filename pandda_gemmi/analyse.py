@@ -735,7 +735,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Autobuilding
         ###################################################################
         # Autobuild the results if set to
-        if pandda_args.autobuild:
+        autobuild_results = {}
+        if autobuild_func:
             console.start_autobuilding()
 
             with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
@@ -753,12 +754,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         all_events,
                         process_autobuilds(
                             [
-                                Partial(
-                                    autobuild_func,
+                                Partial(autobuild_func).paramaterise(
                                     datasets[event_id.dtag],
                                     all_events[event_id],
                                     pandda_fs_model,
                                     cif_strategy=pandda_args.cif_strategy,
+                                    cut=2.0,
                                     rhofit_coord=pandda_args.rhofit_coord,
                                     debug=pandda_args.debug,
                                 )
@@ -833,7 +834,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_classification()
 
         # If autobuild results are available, use them
-        if pandda_args.autobuild:
+        if get_event_class.tag == "autobuild":
             event_classifications: EventClassificationsInterface = {
                 event_id: get_event_class(
                     event,
@@ -842,7 +843,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 for event_id, event
                 in all_events.items()
             }
-        else:
+        elif get_event_class.tag == "trivial":
             event_classifications: EventClassificationsInterface = {
                 event_id: get_event_class(event)
                 for event_id, event

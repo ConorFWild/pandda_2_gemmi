@@ -7,7 +7,7 @@ from pandda_gemmi.analyse_interface import *
 @ray.remote
 class RayWrapper(Generic[P, V]):
 
-    def run(self, func: PartialInterface[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
+    def run(self, func: PartialInterface[P, V], *args, **kwargs) -> V:
         return func()
 
 
@@ -20,7 +20,7 @@ class ProcessLocalRay(ProcessorInterface):
         print([f for f in funcs])
         print([f.args for f in funcs])
         print(f.kwargs for f in funcs)
-        tasks = [a.run.remote(f, *f.args, **f.kwargs) for a, f in zip(actors, funcs)]   # type: ignore
+        tasks = [a.run.remote(f.func, *f.args, **f.kwargs) for a, f in zip(actors, funcs)]   # type: ignore
         print(tasks)
         results = ray.get(tasks)
         return results
