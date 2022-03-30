@@ -1,3 +1,4 @@
+import numpy
 import ray
 
 from pandda_gemmi.analyse_interface import *
@@ -6,7 +7,7 @@ from pandda_gemmi.analyse_interface import *
 @ray.remote
 class RayWrapper(Generic[P, V]):
 
-    def run(self, func: PartialInterface[P, V], *args, **kwargs) -> V:
+    def run(self, func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
         return func(*args, **kwargs)
 
 
