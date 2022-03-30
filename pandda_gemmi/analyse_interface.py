@@ -22,7 +22,7 @@ class ProcessorInterface(Protocol[P, V]):
 
 
 class DtagInterface(Protocol):
-    ...
+    dtag: str
 
 
 
@@ -164,8 +164,12 @@ class EventRankingInterface(Protocol):
     ...
 
 
+class EventIDXInterface(Protocol):
+    event_idx: int
+
 class EventIDInterface(Protocol):
-    ...
+    dtag: DtagInterface
+    event_idx: EventIDXInterface
 
 
 EventsInterface = Dict[EventIDInterface, EventInterface]

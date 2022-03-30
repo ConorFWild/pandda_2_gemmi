@@ -109,9 +109,9 @@ def update_log(shell_log, shell_log_path):
         json.dump(shell_log, f, indent=2)
 
 
-def get_comparator_func(pandda_args: PanDDAArgs, 
-load_xmap_flat_func: LoadXMapFlatInterface, 
-process_local: ProcessorInterface) -> GetComparatorsInterface:
+def get_comparator_func(pandda_args: PanDDAArgs,
+                        load_xmap_flat_func: LoadXMapFlatInterface,
+                        process_local: ProcessorInterface) -> GetComparatorsInterface:
     if pandda_args.comparison_strategy == "closest":
         # Closest datasets after clustering
         raise NotImplementedError()
@@ -125,7 +125,7 @@ process_local: ProcessorInterface) -> GetComparatorsInterface:
         )
 
     elif pandda_args.comparison_strategy == "high_res_random":
-        
+
         comparators_func = GetComparatorsHighResRandom(
             comparison_min_comparators=pandda_args.comparison_min_comparators,
             comparison_max_comparators=pandda_args.comparison_max_comparators,
@@ -230,7 +230,6 @@ def get_process_local(pandda_args):
 
 
 def get_smooth_func(pandda_args: PanDDAArgs) -> SmoothBFactorsInterface:
-    
     smooth_func: SmoothBFactorsInterface = SmoothBFactors()
 
     return smooth_func
@@ -621,7 +620,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.debug:
             printer.pprint(shells)
 
-
         # Process the shells
         with STDOUTManager('Processing the shells...', f'\tDone!'):
             time_shells_start = time.time()
@@ -636,30 +634,30 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                             [
                                 Partial(
                                     process_shell_multiple_models).paramaterise(
-                                        shell,
+                                    shell,
                                     datasets,
                                     alignments,
                                     grid,
                                     pandda_fs_model,
                                     reference,
-                    process_local=process_local,
-                    structure_factors=structure_factors,
-                    sample_rate=pandda_args.sample_rate,
-                    contour_level=pandda_args.contour_level,
-                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                    min_blob_volume=pandda_args.min_blob_volume,
-                    min_blob_z_peak=pandda_args.min_blob_z_peak,
-                    outer_mask=pandda_args.outer_mask,
-                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                    min_bdc=pandda_args.min_bdc,
-                    max_bdc=pandda_args.max_bdc,
-                    memory_availability=pandda_args.memory_availability,
-                    statmaps=pandda_args.statmaps,
-                    load_xmap_func=load_xmap_func,
-                    analyse_model_func=analyse_model_func,
-                    score_events_func=score_events_func,
-                    debug=pandda_args.debug,
+                                    process_local=process_local,
+                                    structure_factors=structure_factors,
+                                    sample_rate=pandda_args.sample_rate,
+                                    contour_level=pandda_args.contour_level,
+                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                                    min_blob_volume=pandda_args.min_blob_volume,
+                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
+                                    outer_mask=pandda_args.outer_mask,
+                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                                    min_bdc=pandda_args.min_bdc,
+                                    max_bdc=pandda_args.max_bdc,
+                                    memory_availability=pandda_args.memory_availability,
+                                    statmaps=pandda_args.statmaps,
+                                    load_xmap_func=load_xmap_func,
+                                    analyse_model_func=analyse_model_func,
+                                    score_events_func=score_events_func,
+                                    debug=pandda_args.debug,
                                 )
                                 for res, shell
                                 in shells.items()
@@ -678,27 +676,27 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                             [
                                 Partial(
                                     process_shell).paramaterise(
-                                        shell,
+                                    shell,
                                     datasets,
                                     alignments,
                                     grid,
                                     pandda_fs_model,
                                     reference,
-                    process_local=process_local,
-                structure_factors=structure_factors,
-                sample_rate=pandda_args.sample_rate,
-                contour_level=pandda_args.contour_level,
-                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                min_blob_volume=pandda_args.min_blob_volume,
-                min_blob_z_peak=pandda_args.min_blob_z_peak,
-                outer_mask=pandda_args.outer_mask,
-                inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                min_bdc=pandda_args.min_bdc,
-                max_bdc=pandda_args.max_bdc,
-                memory_availability=pandda_args.memory_availability,
-                statmaps=pandda_args.statmaps,
-                load_xmap_func=load_xmap_func,
+                                    process_local=process_local,
+                                    structure_factors=structure_factors,
+                                    sample_rate=pandda_args.sample_rate,
+                                    contour_level=pandda_args.contour_level,
+                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                                    min_blob_volume=pandda_args.min_blob_volume,
+                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
+                                    outer_mask=pandda_args.outer_mask,
+                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                                    min_bdc=pandda_args.min_bdc,
+                                    max_bdc=pandda_args.max_bdc,
+                                    memory_availability=pandda_args.memory_availability,
+                                    statmaps=pandda_args.statmaps,
+                                    load_xmap_func=load_xmap_func,
                                 )
                                 for res, shell
                                 in shells.items()
@@ -706,7 +704,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         )
                     )
                 }
-
 
             time_shells_finish = time.time()
             pandda_log[constants.LOG_SHELLS] = {
