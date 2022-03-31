@@ -1202,4 +1202,4 @@ def process_shell_multiple_models(
     
     )
 
-    return ShellResult
+    return shell_result

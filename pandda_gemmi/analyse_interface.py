@@ -5,6 +5,8 @@ from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
 from grpc import Call
 
+from numpy.typing import NDArray
+
 import numpy as np
 
 
@@ -13,8 +15,10 @@ V = TypeVar("V")
 P = ParamSpec("P")
 
 
-class NDArrayInterface(Protocol):
-    ...
+NDArrayInterface = NDArray
+
+# class NDArrayInterface(Protocol):
+#     ...
 
 
 class PanDDAConsoleInterface(Protocol):
