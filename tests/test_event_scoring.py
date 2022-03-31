@@ -107,6 +107,8 @@ def score_dataset_models(
             debug=False
         )
 
+        print(f"event score: {event_score}")
+
 
 def main(autobuild_test_data_dir: str):
     autobuild_test_data_dir = Path(autobuild_test_data_dir)
