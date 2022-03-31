@@ -21,7 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import ComparatorsInterface, DatasetsInterface, ResolutionInterface, StructureFactorsInterface
+from pandda_gemmi.analyse_interface import AlignmentInterface, ComparatorsInterface, CrystallographicGridInterface, DatasetInterface, DatasetsInterface, GridInterface, PartitioningInterface, ResolutionInterface, StructureFactorsInterface
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -2002,15 +2002,15 @@ def get_common_structure_factors(datasets: DatasetsInterface):
 
 
 def save_native_frame_zmap(
-        path,
-        zmap: Zmap,
-        dataset: Dataset,
-        alignment: Alignment,
-        grid: Grid,
-        structure_factors: StructureFactors,
+        path: Path,
+        zmap: CrystallographicGridInterface,
+        dataset: DatasetInterface,
+        alignment: AlignmentInterface,
+        grid: GridInterface,
+        structure_factors: StructureFactorsInterface,
         mask_radius: float,
         mask_radius_symmetry: float,
-        partitioning: Partitioning,
+        partitioning: PartitioningInterface,
         sample_rate: float,
 ):
     reference_frame_zmap_grid = zmap.zmap
@@ -2044,7 +2044,7 @@ def save_native_frame_zmap(
 
 
 def save_reference_frame_zmap(path,
-                              zmap: Zmap, ):
+                              zmap: CrystallographicGridInterface, ):
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = zmap.zmap
     ccp4.update_ccp4_header(2, True)

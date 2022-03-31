@@ -247,7 +247,7 @@ class MeanMapFile:
     path: Path
 
     @staticmethod
-    def from_zmap_file(zmap: ZMapFile):
+    def from_zmap_file(zmap: ZMapFileInterface):
         return MeanMapFile(zmap.path.parent / "mean.ccp4")
 
     @staticmethod

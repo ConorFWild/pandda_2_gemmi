@@ -56,7 +56,7 @@ class DatasetModelsInterface(Protocol):
     path: Path
 
 class ZMapFileInterface(Protocol):
-    ...
+    path: Path
 
 class EventMapFilesInterface(Protocol):
     def add_event(self, event: EventInterface):

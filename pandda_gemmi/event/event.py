@@ -8,10 +8,11 @@ import dataclasses
 from scipy.cluster.hierarchy import fclusterdata
 from sklearn.cluster import DBSCAN
 from joblib.externals.loky import set_loky_pickler
-from pandda_gemmi.analyse_interface import EventsInterface
+from pandda_gemmi.analyse_interface import AlignmentInterface, AlignmentsInterface, CrystallographicGridInterface, DatasetsInterface, EDClusteringsInterface, EventsInterface, GridInterface, ModelInterface, PanDDAFSModelInterface, ProcessorInterface, StructureFactorsInterface, XmapsInterface
 
 set_loky_pickler('pickle')
 
+from pandda_gemmi.analyse_interface import *
 # from pandda_gemmi.pandda_functions import save_event_map
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import EventIDX, EventID, SiteID, Dtag, PositionsArray, delayed
@@ -23,17 +24,17 @@ from pandda_gemmi.density_clustering import Cluster, Clustering, Clusterings
 
 
 def save_event_map(
-        path,
-        xmap: Xmap,
-        model: Model,
-        event: Event,
-        dataset: Dataset,
-        alignment: Alignment,
-        grid: Grid,
-        structure_factors: StructureFactors,
+        path: Path,
+        xmap: XmapInterface,
+        model: ModelInterface,
+        event: EventInterface,
+        dataset: DatasetInterface,
+        alignment: AlignmentInterface,
+        grid: GridInterface,
+        structure_factors: StructureFactorsInterface,
         mask_radius: float,
         mask_radius_symmetry: float,
-        partitioning: Partitioning,
+        partitioning: PartitioningInterface,
         sample_rate: float,
         # native_grid,
 ):
@@ -205,12 +206,18 @@ class Events:
     sites: Sites
 
     @staticmethod
-    def from_clusters(clusterings: Clusterings, model: Model, xmaps: Xmaps, grid: Grid,
-                      alignment: Alignment, cutoff: float,
-                      min_bdc, max_bdc,
-                      mapper: Any = None):
+    def from_clusters(
+        clusterings: EDClusteringsInterface, 
+        model: ModelInterface, 
+        xmaps: XmapsInterface, 
+        grid: GridInterface,
+        alignment: AlignmentInterface, 
+        cutoff: float,
+        min_bdc: float, 
+        max_bdc: float,
+        mapper: Any = None):
+        
         events: typing.Dict[EventID, Event] = {}
-
         sites: Sites = Sites.from_clusters(clusterings, cutoff)
 
         if mapper:
@@ -366,18 +373,18 @@ class Events:
 
     def save_event_maps(
             self,
-            datasets,
-            alignments,
-            xmaps,
-            model,
-            pandda_fs_model,
-            grid,
-            structure_factors,
-            outer_mask,
-            inner_mask_symmetry,
-            sample_rate,
-            native_grid,
-            mapper=False,
+            datasets: DatasetsInterface,
+            alignments: AlignmentsInterface,
+            xmaps: XmapsInterface,
+            model: ModelInterface,
+            pandda_fs_model: PanDDAFSModelInterface,
+            grid: GridInterface,
+            structure_factors: StructureFactorsInterface,
+            outer_mask: float,
+            inner_mask_symmetry: float ,
+            sample_rate: float,
+            native_grid: CrystallographicGridInterface,
+            mapper: Optional[ProcessorInterface]=False,
     ):
 
         processed_datasets = {}

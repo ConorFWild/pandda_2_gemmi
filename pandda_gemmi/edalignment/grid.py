@@ -213,8 +213,8 @@ class Partitioning:
         return positions
 
     @staticmethod
-    def from_structure_multiprocess(structure: Structure,
-                                    grid,#: Grid,
+    def from_structure_multiprocess(structure: StructureInterface,
+                                    grid: CrystallographicGridInterface,#: Grid,
                                     mask_radius: float,
                                     mask_radius_symmetry: float, ):
 
