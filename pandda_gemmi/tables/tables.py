@@ -240,4 +240,4 @@ def get_site_table_from_events(events: EventsInterface, initial_sites: SitesInte
 
 class GetSiteTable(GetSiteTableInterface):
     def __call__(self, events: EventsInterface, sites: SitesInterface, cutoff: float) -> SiteTableInterface:
-        return get_site_table_from_events(events, sites, cutoff: float)
+        return get_site_table_from_events(events, sites, cutoff)
