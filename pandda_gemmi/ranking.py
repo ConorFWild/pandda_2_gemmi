@@ -73,4 +73,4 @@ class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):
     tag: Literal["autobuild"] = "autobuild"
 
     def __call__(self, events: EventsInterface, autobuild_results: AutobuildResultsInterface, datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
-        return rank_events_autobuild(events, autobuild_result, datasets, pandda_fs_model)
+        return rank_events_autobuild(events, autobuild_results, datasets, pandda_fs_model)
