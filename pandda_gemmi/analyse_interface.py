@@ -13,6 +13,10 @@ V = TypeVar("V")
 P = ParamSpec("P")
 
 
+class NDArrayInterface(Protocol):
+    ...
+
+
 class PanDDAConsoleInterface(Protocol):
     ...
 
@@ -232,6 +236,9 @@ class ClusterIDInterface(Protocol):
 
 class EDClusterInterface(Protocol):
     centroid: Tuple[float, float, float]
+    cluster_positions_array: NDArrayInterface
+    event_mask_indicies: Optional[NDArrayInterface]
+
     def size(self, grid: GridInterface) -> float:
         ...
 

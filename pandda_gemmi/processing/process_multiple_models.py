@@ -40,7 +40,11 @@ from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
     save_event_map, 
 )
-from pandda_gemmi.density_clustering import GetEDClustering
+from pandda_gemmi.density_clustering import (
+    GetEDClustering, FilterEDClusteringsSize,
+FilterEDClusteringsPeak,
+MergeEDClusterings,
+)
 
 
 @dataclasses.dataclass()
@@ -476,41 +480,45 @@ def analyse_model(
     # update_log(dataset_log, dataset_log_path)
 
     # Filter out small clusters
-    clusterings_large: EDClusteringsInterface = clusterings.filter_size(grid,
+    clusterings_large: EDClusteringsInterface = FilterEDClusteringsSize()(clusterings,
+    grid,
                                                              min_blob_volume,
                                                              )
     if debug:
         print("\t\tAfter filtering: large: {}".format(
             {dtag: len(cluster) for dtag, cluster in
-             zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+             zip(clusterings_large, clusterings_large.values())}))
     model_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_large.clusterings.values()])
+        [len(clustering) for clustering in clusterings_large.values()])
     # update_log(dataset_log, dataset_log_path)
 
     # Filter out weak clusters (low peak z score)
-    clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
+    clusterings_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clusterings_large,
+    grid,
                                                                     min_blob_z_peak)
     if debug:
         print("\t\tAfter filtering: peak: {}".format(
             {dtag: len(cluster) for dtag, cluster in
-             zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+             zip(clusterings_peaked, clusterings_peaked.values())}))
     model_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
+        [len(clustering) for clustering in clusterings_peaked.values()])
     # update_log(dataset_log, dataset_log_path)
 
     # Add the event mask
-    for clustering_id, clustering in clusterings_peaked.clusterings.items():
+    for clustering_id, clustering in clusterings_peaked.items():
         for cluster_id, cluster in clustering.clustering.items():
-            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+            cluster.event_mask_indicies = get_event_mask_indicies(
+                zmaps[test_dtag], 
+                cluster.cluster_positions_array)
 
     # Merge the clusters
-    clusterings_merged = clusterings_peaked.merge_clusters()
+    clusterings_merged: EDClusteringsInterface = MergeEDClusterings()(clusterings_peaked)
     if debug:
         print("\t\tAfter filtering: merged: {}".format(
             {dtag: len(_cluster) for dtag, _cluster in
-             zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
+             zip(clusterings_merged, clusterings_merged.values())}))
     model_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_merged.clusterings.values()])
+        [len(clustering) for clustering in clusterings_merged.values()])
     # update_log(dataset_log, dataset_log_path)
 
     # Log the clustering
