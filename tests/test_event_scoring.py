@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+import sys, os
 import re
 import pickle
 
@@ -8,6 +10,17 @@ from pandda_gemmi import constants
 from pandda_gemmi.autobuild import autobuild_rhofit, GetAutobuildResultRhofit
 from pandda_gemmi.event import GetEventScoreInbuilt
 
+
+
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 def unpickle(path: Path):
     with open(path, "rb") as f:
@@ -70,23 +83,23 @@ def score_dataset_models(
     dataset_alignment = alignment
 
     for model_number, model in dataset_dir.models.items():
-
-        event_score = GetEventScoreInbuilt()(
-            test_dtag,
-            model_number,
-            processed_dataset,
-            dataset_xmap,
-            events,
-            model,
-            grid,
-            dataset_alignment,
-            max_site_distance_cutoff=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
-            min_bdc=constants.ARGS_MIN_BDC_DEFAULT,
-            max_bdc=constants.ARGS_MAX_BDC_DEFAULT,
-            reference=reference,
-            structure_output_folder=None,
-            debug=False
-        )
+        with suppress_stdout():
+            event_score = GetEventScoreInbuilt()(
+                test_dtag,
+                model_number,
+                processed_dataset,
+                dataset_xmap,
+                events,
+                model,
+                grid,
+                dataset_alignment,
+                max_site_distance_cutoff=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
+                min_bdc=constants.ARGS_MIN_BDC_DEFAULT,
+                max_bdc=constants.ARGS_MAX_BDC_DEFAULT,
+                reference=reference,
+                structure_output_folder=None,
+                debug=False
+            )
 
         print(f"event score: {event_score}")
 
