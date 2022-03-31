@@ -539,6 +539,11 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  min_bdc, max_bdc,
                  reference,
                  structure_output_folder,
+                 event_map_cut=2.0,
+                 below_cut_score=0.0,
+                 event_density_score=1.0,
+                 protein_score=-1.0,
+                 protein_event_overlap_score=0.0,
                  debug=True,
                  ):
         # Get the events and their BDCs
@@ -620,13 +625,13 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             )
 
             high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            high_mask[event_map_reference_grid_array >= 2.0] = True
+            high_mask[event_map_reference_grid_array >= event_map_cut] = True
             low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            low_mask[event_map_reference_grid_array < 2.0] = True
+            low_mask[event_map_reference_grid_array < event_map_cut] = True
 
             # Rescale the map
-            event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
-            event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
+            event_map_reference_grid_array[event_map_reference_grid_array < event_map_cut] = below_cut_score
+            event_map_reference_grid_array[event_map_reference_grid_array >= event_map_cut] = event_density_score
 
             # Event mask
             event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
@@ -637,10 +642,10 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             outer_mask[np.nonzero(outer_mask_int_array)] = True
 
             # Mask the protein except at event sites with a penalty
-            event_map_reference_grid_array[inner_mask & (~event_mask)] = -1.0
+            event_map_reference_grid_array[inner_mask & (~event_mask)] = protein_score
 
             # Mask the protein-event overlaps with zeros
-            event_map_reference_grid_array[inner_mask & event_mask] = 0.0
+            event_map_reference_grid_array[inner_mask & event_mask] = protein_event_overlap_score
 
             # Noise
             noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
