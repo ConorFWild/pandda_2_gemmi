@@ -34,7 +34,7 @@ class DtagAutobuildTestDataDir:
                 "model_([0-9]+).pickle",
                 str(model_path)
             )
-            for match in match:
+            for match in matchs:
                 if match:
                     model_num = int(
                         match.groups()[0]
