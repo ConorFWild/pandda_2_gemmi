@@ -69,7 +69,7 @@ class DatasetModelsScoreResult:
 
 def score_dataset_models(
             pandda_fs_model: PanDDAFSModelInterface,
-            alignments: AlignmentsInterface,
+            alignment: AlignmentInterface,
             grid: GridInterface,
             reference: ReferenceInterface,
             dtag: DtagInterface,
@@ -104,6 +104,9 @@ def main(autobuild_test_data_dir: str):
 
     for dtag, dataset_dir in dataset_dirs.items():
         print(f"\tTesting dtag: {dtag}")
+
+        alignment = alignments[dtag]
+
         dataset_models_score_result: DatasetModelsScoreResult = score_dataset_models(
             pandda_fs_model,
             alignments,
