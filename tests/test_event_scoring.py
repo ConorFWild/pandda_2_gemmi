@@ -32,13 +32,13 @@ def unpickle(path: Path):
 class DtagAutobuildTestDataDir:
     def __init__(self, path: Path):
         dtag_pickle_path = path / "test_dtag.pickle"
-        events_pickle_path = path / "events.pickle"
+        # events_pickle_path = path / "events.pickle"
         dataset_pickle_path = path / "dataset_processed_dataset.pickle"
         dataset_xmap_pickle_path = path / "dataset_xmap.pickle"
 
         self.dtag = unpickle(dtag_pickle_path)
         self.dataset = unpickle(dataset_pickle_path)
-        self.events = unpickle(events_pickle_path)
+        # self.events = unpickle(events_pickle_path)
         self.dataset_xmap = unpickle(dataset_xmap_pickle_path)
 
         self.models: Dict[int, ModelInterface] = {}
@@ -54,6 +54,21 @@ class DtagAutobuildTestDataDir:
                     )
                     model: ModelInterface = unpickle(model_path)
                     self.models[model_num] = model
+
+
+        self.events: Dict[int, EventsInterface] = {}
+        for model_path in path.glob("events_*.pickle"):
+            matchs = re.findall(
+                "events_([0-9]+).pickle",
+                str(model_path)
+            )
+            for match in matchs:
+                if match:
+                    model_num = int(
+                        match
+                    )
+                    events: EventsInterface = unpickle(model_path)
+                    self.events[model_num] = events
 
 
 class ModelResult:
@@ -77,13 +92,13 @@ def score_dataset_models(
     # For each model, run event scoring, and collect results
     model_result_dict = {}
 
-    events = dataset_dir.events
     dataset_xmap = dataset_dir.dataset_xmap
     processed_dataset = dataset_dir.dataset
     dataset_alignment = alignment
 
     for model_number in sorted(dataset_dir.models):
         model = dataset_dir.models[model_number]
+        events = dataset_dir.events[model_number]
         print(f"\t\tAnalysing model: {model_number}")
         with suppress_stdout():
             event_score = GetEventScoreInbuilt()(
