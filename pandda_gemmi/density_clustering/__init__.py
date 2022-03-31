@@ -1,1 +1,1 @@
-from pandda_gemmi.density_clustering.density_clustering import Cluster, Clustering, Clusterings
+from pandda_gemmi.density_clustering.density_clustering import Cluster, Clustering, Clusterings, GetEDClustering

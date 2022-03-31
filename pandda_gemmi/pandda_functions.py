@@ -21,7 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import AlignmentInterface, ComparatorsInterface, CrystallographicGridInterface, DatasetInterface, DatasetsInterface, GridInterface, PartitioningInterface, ResolutionInterface, StructureFactorsInterface
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -35,7 +35,7 @@ def run(func: Partial):
     return func()
 
 
-def process_local_serial(funcs):
+def process_local_serial(funcs: List[Callable[P, V]]) -> List[V]:
     results = []
     for func in funcs:
         results.append(func())

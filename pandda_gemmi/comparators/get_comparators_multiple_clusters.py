@@ -554,17 +554,6 @@ class GetComparatorsCluster(GetComparatorsInterface):
 
         print(comparators_multiple)
 
-        comparators: ComparatorsInterface = {}
 
-        for dtag, dtag_models in comparators_first.items():
-            comparators[dtag] = {}
-            for model_number, model_comparators in dtag_models.items():
-                comparators[dtag][model_number] = model_comparators
-
-        for dtag, dtag_models in comparators_multiple.items():
-            for model_number, model_comparators in dtag_models.items():
-                comparators[dtag][model_number+1] = model_comparators
-
-
-        return comparators, clusters
+        return comparators_multiple
 

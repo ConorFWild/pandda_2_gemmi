@@ -38,8 +38,9 @@ from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_u
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
-    save_event_map,
+    save_event_map, 
 )
+from pandda_gemmi.density_clustering import GetEDClustering
 
 
 @dataclasses.dataclass()
@@ -237,6 +238,11 @@ def update_log(shell_log, shell_log_path):
 #     return selected_model_number, log
 
 
+class ModelSelection(ModelSelectionInterface):
+    def __init__(self, selected_model_id: ModelIDInterface, log: Dict) -> None:
+        self.selected_model_id = selected_model_id
+        self.log = log
+
 def EXPERIMENTAL_select_model(
         model_results: ModelResultsInterface,
         inner_mask: CrystallographicGridInterface,
@@ -245,7 +251,7 @@ def EXPERIMENTAL_select_model(
 ) -> ModelSelectionInterface:
     log = {}
 
-    model_event_scores = {model_id: model['event_scores'] for model_id, model in model_results.items()}
+    model_event_scores = {model_id: model.event_scores for model_id, model in model_results.items()}
 
     # Score the top clusters
     model_scores = {
@@ -260,7 +266,7 @@ def EXPERIMENTAL_select_model(
     log['model_scores'] = {model_id: float(score) for model_id, score in model_scores.items()}
 
     if len(model_scores) == 0:
-        return 0, log
+        return ModelSelection(0, log)
 
     else:
         selected_model_number = max(
@@ -268,7 +274,7 @@ def EXPERIMENTAL_select_model(
             key=lambda _score: model_scores[_score],
         )  # [0]
 
-    return selected_model_number, log
+    return ModelSelection(selected_model_number, log)
 
 
 def get_models(
@@ -390,7 +396,7 @@ def analyse_model(
     if debug:
         print("\t\tCalculating zmaps")
     time_z_maps_start = time.time()
-    zmaps: Dict[Dtag, Zmap] = Zmaps.from_xmaps(
+    zmaps: ZmapsInterface = Zmaps.from_xmaps(
         model=model,
         xmaps={test_dtag: dataset_xmap, },
         model_number=model_number,
@@ -411,21 +417,20 @@ def analyse_model(
 
     # Get the clustered electron desnity outliers
 
-    cluster_paramaterised = partial(
-        Clustering.from_zmap,
-        reference=reference,
-        grid=grid,
-        contour_level=contour_level,
-        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-    )
+
     time_cluster_z_start = time.time()
 
     if debug:
         print("\t\tClustering")
 
-    clusterings: List[Clustering] = process_local_serial(
+    clusterings_list: List[EDClusteringInterface] = process_local_serial(
         [
-            partial(cluster_paramaterised, zmaps[dtag], )
+            Partial(GetEDClustering()).paramaterise(
+                    zmaps[dtag], 
+                    reference=reference,
+                    grid=grid,
+                    contour_level=contour_level,
+                    cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier, )
             for dtag
             in zmaps
         ]
@@ -435,25 +440,25 @@ def analyse_model(
     if debug:
         print("\t\tClustering finished")
 
-    if debug:
-        model_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
-        model_log['time_event_mask'] = {}
-        for j, clustering in enumerate(clusterings):
-            model_log['time_cluster'] = clustering.time_cluster
-            model_log['time_np'] = clustering.time_np
-            model_log['time_event_masking'] = clustering.time_event_masking
-            model_log['time_get_orth'] = clustering.time_get_orth
-            model_log['time_fcluster'] = clustering.time_fcluster
-            for cluster_num, cluster in clustering.clustering.items():
-                model_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
+    # if debug:
+    #     model_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
+    #     model_log['time_event_mask'] = {}
+    #     for j, clustering in enumerate(clusterings_list):
+    #         model_log['time_cluster'] = clustering.time_cluster
+    #         model_log['time_np'] = clustering.time_np
+    #         model_log['time_event_masking'] = clustering.time_event_masking
+    #         model_log['time_get_orth'] = clustering.time_get_orth
+    #         model_log['time_fcluster'] = clustering.time_fcluster
+    #         for cluster_num, cluster in clustering.clustering.items():
+    #             model_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
 
-    clusterings: Clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+    clusterings: EDClusteringsInterface = {dtag: clustering for dtag, clustering in zip(zmaps, clusterings_list)}
 
     model_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings.clusterings.values()])
+        [len(clustering) for clustering in clusterings.values()])
     # update_log(dataset_log, dataset_log_path)
     cluster_sizes = {}
-    for dtag, clustering in clusterings.clusterings.items():
+    for dtag, clustering in clusterings.items():
         for cluster_num, cluster in clustering.clustering.items():
             cluster_sizes[int(cluster_num)] = {
                 "size": float(cluster.size(grid)),
@@ -471,7 +476,7 @@ def analyse_model(
     # update_log(dataset_log, dataset_log_path)
 
     # Filter out small clusters
-    clusterings_large: Clusterings = clusterings.filter_size(grid,
+    clusterings_large: EDClusteringsInterface = clusterings.filter_size(grid,
                                                              min_blob_volume,
                                                              )
     if debug:

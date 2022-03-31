@@ -6,6 +6,7 @@ from grpc import Call
 
 import numpy as np
 
+
 T = TypeVar('T',)
 V = TypeVar("V")
 P = ParamSpec("P")
@@ -222,11 +223,18 @@ AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 class ZmapInterface(Protocol):
     ...
 
-ZmapsInterface = MutableMapping
+ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
 
+class ClusterIDInterface(Protocol):
+    ...
+
+class EDClusterInterface(Protocol):
+    ...
 
 class EDClusteringInterface(Protocol):
-    ...
+    clustering: MutableMapping[ClusterIDInterface, EDClusterInterface]
+    def __len__(self) -> int:
+        ...
 
 EDClusteringsInterface = MutableMapping[DtagInterface, EDClusteringInterface]
 
@@ -652,6 +660,11 @@ class ProcessDatasetInterface(Protocol):
                  ):
         ...
 
+
+class GetEDClusteringInterface(Protocol):
+    def __call__(self, zmap: ZmapInterface, reference: ReferenceInterface, grid: GridInterface, contour_level: float,
+                cluster_cutoff_distance_multiplier: float) -> EDClusteringInterface:
+        ...
 
 # @runtime_checkable
 class GetEventScoreInbuiltInterface(Protocol):

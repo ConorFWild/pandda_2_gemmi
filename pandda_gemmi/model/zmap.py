@@ -7,6 +7,8 @@ from functools import partial
 
 from scipy import stats
 from joblib.externals.loky import set_loky_pickler
+
+from pandda_gemmi.analyse_interface import GridInterface, ModelIDInterface, ModelInterface, XmapsInterface
 set_loky_pickler('pickle')
 from matplotlib import pyplot as plt
 from scipy import optimize
@@ -70,7 +72,7 @@ class Model:
     def from_mean_is_sms(mean_flat,
                          sigma_is,
                          sigma_s_m_flat,
-                         grid: Grid, ):
+                         grid: GridInterface, ):
 
         # mask = grid.partitioning.protein_mask
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
@@ -578,14 +580,14 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: Model, xmaps: Xmaps, model_number=0, debug=False):
+    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface=0, debug: bool=False):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
             zmap = Zmap.from_xmap(model, xmap, dtag, model_number=model_number, debug=debug)
             zmaps[dtag] = zmap
 
-        return Zmaps(zmaps)
+        return zmaps
 
     def __len__(self):
         return len(self.zmaps)

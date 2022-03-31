@@ -540,8 +540,8 @@ class XmapArray:
         return self.xmap_array[index, :]
 
     @staticmethod
-    def from_xmaps(xmaps: Xmaps,
-                   grid: Grid,
+    def from_xmaps(xmaps: XmapsInterface,
+                   grid: GridInterface,
                    ):
 
         protein_mask = grid.partitioning.protein_mask
@@ -564,7 +564,7 @@ class XmapArray:
 
         return XmapArray(dtag_list, xmap_array)
 
-    def from_dtags(self, dtags: typing.List[Dtag]):
+    def from_dtags(self, dtags: typing.List[DtagInterface]):
         bool_mask = []
 
         for dtag in dtags:
