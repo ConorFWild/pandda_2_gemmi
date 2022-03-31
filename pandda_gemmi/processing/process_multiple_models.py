@@ -326,7 +326,7 @@ def get_models(
 
 class ModelResult(ModelResultInterface):
     def __init__(self,
-        zmaps,
+        zmap,
         clusterings,
         clusterings_large,
         clusterings_peaked,
@@ -334,7 +334,8 @@ class ModelResult(ModelResultInterface):
         events,
         event_scores,
         model_log) -> None:
-        self.zmaps = zmaps
+
+        self.zmap = zmap
         self.clusterings = clusterings
         self.clusterings_large = clusterings_large
         self.clusterings_peaked = clusterings_peaked
