@@ -622,7 +622,11 @@ def filter_size(clusterings: EDClusteringsInterface, grid: Grid, min_cluster_siz
 
 class FilterEDClusteringsSize:
     def __call__(self, clusterings: EDClusteringsInterface, grid: GridInterface, min_cluster_size: float) -> EDClusteringsInterface:
-        return filter_size(clusterings: EDClusteringsInterface, grid: GridInterface, min_cluster_size: float)
+        return filter_size(
+            clusterings, 
+            grid, 
+            min_cluster_size,
+            )
 
 
 def filter_peak(clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float):
@@ -648,14 +652,18 @@ def filter_peak(clusterings: EDClusteringsInterface, grid: GridInterface, z_peak
 
 class FilterEDClusteringsPeak:
     def __call__(self, clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float) -> EDClusteringsInterface:
-        return filter_peak(clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float)
+        return filter_peak(
+            clusterings, 
+            grid, 
+            z_peak,
+            )
 
 
 
 def merge_clusters(clusterings: EDClusteringsInterface):
     new_clustering_dict = {}
-    for dtag in self.clusterings:
-        clustering = self.clusterings[dtag]
+    for dtag in clusterings:
+        clustering = clusterings[dtag]
 
         cluster_list = []
         centroid_list = []
@@ -750,7 +758,7 @@ def merge_clusters(clusterings: EDClusteringsInterface):
 
         new_clustering_dict[dtag] = Clustering(new_clusters)
 
-    return Clusterings(new_clustering_dict)
+    return new_clustering_dict
 
 
 class MergeEDClusterings:
