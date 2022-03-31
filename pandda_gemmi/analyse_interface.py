@@ -35,7 +35,9 @@ class AnalysesDirIntererface(Protocol):
 
 
 class ModelIDInterface(Protocol):
-    ...
+    model_id: int
+    def __int__(self)-> int:
+        ...
 
 
 class ModelInterface(Protocol):
@@ -196,9 +198,19 @@ class ReflectionsInterface(Protocol):
     def get_resolution(self) -> float:
         ...
 
-class GridInterface(Protocol):
+    def transform_f_phi_to_map(self, f: str, phi: str, sample_rate: float) -> CrystallographicGridInterface:
+        ...
+
+
+class PartitioningInterface(Protocol):
+    inner_mask: CrystallographicGridInterface
+
+
+class CrystallographicGridInterface(Protocol):
     ...
 
+class GridInterface(Protocol):
+    partitioning: PartitioningInterface
 
 class AlignmentInterface(Protocol):
     ...
@@ -212,14 +224,25 @@ class ZmapInterface(Protocol):
 
 ZmapsInterface = MutableMapping
 
+
+class EDClusteringInterface(Protocol):
+    ...
+
+EDClusteringsInterface = MutableMapping[DtagInterface, EDClusteringInterface]
+
+
+class ModelSelectionInterface(Protocol):
+    selected_model_id: ModelIDInterface
+    log: Dict
+
 class ModelResultInterface(Protocol):
-    zmaps
-    clusterings
-    clusterings_large
-    clusterings_peaked
-    clusterings_merged
-    events
-    event_scores
+    zmap: CrystallographicGridInterface
+    clusterings: EDClusteringsInterface
+    clusterings_large: EDClusteringsInterface
+    clusterings_peaked: EDClusteringsInterface
+    clusterings_merged: EDClusteringsInterface
+    events: EventsInterface
+    event_scores: MutableMapping[EventIDInterface, float]
     model_log: Dict
 
 ModelResultsInterface = MutableMapping[ModelIDInterface, ModelResultInterface]

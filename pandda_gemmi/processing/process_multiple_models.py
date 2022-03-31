@@ -238,11 +238,11 @@ def update_log(shell_log, shell_log_path):
 
 
 def EXPERIMENTAL_select_model(
-        model_results: Dict[int, Dict],
-        inner_mask,
-        processed_dataset,
-        debug=False,
-):
+        model_results: ModelResultsInterface,
+        inner_mask: CrystallographicGridInterface,
+        processed_dataset: ProcessedDatasetInterface,
+        debug: bool=False,
+) -> ModelSelectionInterface:
     log = {}
 
     model_event_scores = {model_id: model['event_scores'] for model_id, model in model_results.items()}
@@ -805,31 +805,31 @@ def process_dataset_multiple_models(
     ###################################################################
     if debug:
         print(f"\tSelecting model...")
-    selected_model_number, model_selection_log = EXPERIMENTAL_select_model(
+    model_selection: ModelSelectionInterface = EXPERIMENTAL_select_model(
         model_results,
         grid.partitioning.inner_mask,
-        pandda_fs_model.processed_datasets[test_dtag],
+        pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
         debug=debug,
     )
-    selected_model = models[selected_model_number]
-    selected_model_clusterings = model_results[selected_model_number]['clusterings_merged']
-    zmap = model_results[selected_model_number]['zmap']
-    dataset_log['Selected model'] = int(selected_model_number)
-    dataset_log['Model selection log'] = model_selection_log
+    selected_model: ModelInterface = models[model_selection.selected_model_id]
+    selected_model_clusterings = model_results[model_selection.selected_model_id].clusterings_merged
+    zmap = model_results[model_selection.selected_model_id].zmap
+    dataset_log['Selected model'] = int(model_selection.selected_model_id)
+    dataset_log['Model selection log'] = model_selection.log
 
     if debug:
-        print(f'\tSelected model is: {selected_model_number}')
+        print(f'\tSelected model is: {model_selection.selected_model_id}')
 
     ###################################################################
     # # Output the z map
     ###################################################################
     time_output_zmap_start = time.time()
 
-    native_grid = dataset_truncated_datasets[test_dtag].reflections.reflections.transform_f_phi_to_map(
+    native_grid = dataset_truncated_datasets[test_dtag].reflections.transform_f_phi_to_map(
         structure_factors.f,
         structure_factors.phi,
         # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
-        sample_rate=dataset_truncated_datasets[test_dtag].reflections.resolution().resolution / 0.5
+        sample_rate=dataset_truncated_datasets[test_dtag].reflections.get_resolution() / 0.5
     )
 
     partitioning = Partitioning.from_structure_multiprocess(

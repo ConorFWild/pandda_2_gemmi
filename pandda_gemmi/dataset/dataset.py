@@ -335,7 +335,7 @@ class Symops:
 
 
 @dataclasses.dataclass()
-class Reflections:
+class Reflections(ReflectionsInterface):
     reflections: gemmi.Mtz
     path: typing.Union[Path, None] = None
 
@@ -347,6 +347,9 @@ class Reflections:
         except Exception as e:
             raise Exception(f'Error trying to open file: {file}: {e}')
         return Reflections(reflections, file)
+
+    def transform_f_phi_to_map(self, f: str, phi: str, sample_rate: float) -> CrystallographicGridInterface:
+        self.reflections.transform_f_phi_to_map(f, phi, sample_rate)
 
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
