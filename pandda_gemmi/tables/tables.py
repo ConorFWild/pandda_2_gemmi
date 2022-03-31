@@ -7,10 +7,13 @@ from typing import *
 import numpy as np
 from joblib.externals.loky import set_loky_pickler
 
+from pandda_gemmi.analyse_interface import EventsInterface, GetEventTableInterface, SitesInterface
+
 set_loky_pickler('pickle')
 
 import pandas as pd
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.common import SiteID
 from pandda_gemmi.sites import Sites
 from pandda_gemmi.event import Event, Events, Clustering, Clusterings
@@ -96,6 +99,51 @@ class EventTable:
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
+
+
+def get_event_record_from_event_site(event: EventInterface, site_id: SiteIDInterface) -> EventTableRecord:
+    return EventTableRecord(
+                dtag=event.event_id.dtag.dtag,
+                event_idx=event.event_id.event_idx.event_idx,
+                bdc=event.bdc.bdc,
+                cluster_size=event.cluster.values.size,
+                global_correlation_to_average_map=0,
+                global_correlation_to_mean_map=0,
+                local_correlation_to_average_map=0,
+                local_correlation_to_mean_map=0,
+                site_idx=site_id.site_id,
+                x=event.cluster.centroid[0],
+                y=event.cluster.centroid[1],
+                z=event.cluster.centroid[2],
+                z_mean=0.0,
+                z_peak=0.0,
+                applied_b_factor_scaling=0.0,
+                high_resolution=0.0,
+                low_resolution=0.0,
+                r_free=0.0,
+                r_work=0.0,
+                analysed_resolution=0.0,
+                map_uncertainty=0.0,
+                analysed=False,
+                interesting=False,
+                exclude_from_z_map_analysis=False,
+                exclude_from_characterisation=False,
+            )
+
+def get_event_table_from_events(events: EventsInterface, sites: SitesInterface) -> EventTableInterface:
+    records = []
+    for event_id in events:
+        event = events[event_id]
+        site_id = sites.event_to_site[event_id]
+        event_record = get_event_record_from_event_site(event, site_id)
+        records.append(event_record)
+
+    return EventTable(records)
+
+
+class GetEventTable(GetEventTableInterface):
+    def __call__(self, events: EventsInterface, sites: SitesInterface) -> EventTableInterface:
+        return get_event_table_from_events(events, sites)
 
 
 @dataclasses.dataclass()

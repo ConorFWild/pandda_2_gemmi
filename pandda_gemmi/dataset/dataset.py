@@ -351,6 +351,9 @@ class Reflections:
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
 
+    def get_resolution(self) -> float:
+        return self.reflections.resolution_high()
+
     def truncate_resolution(self, resolution: Resolution) -> Reflections:
         new_reflections = gemmi.Mtz(with_base=False)
 

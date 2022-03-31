@@ -1,1 +1,1 @@
-from pandda_gemmi.tables.tables import SiteTable, EventTable
+from pandda_gemmi.tables.tables import SiteTable, EventTable, GetEventTable

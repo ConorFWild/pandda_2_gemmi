@@ -86,6 +86,7 @@ from pandda_gemmi.autobuild import (
 )
 from pandda_gemmi.tables import (
     EventTable,
+    GetEventTable,
     SiteTable,
 )
 from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel, GetShellDirs
@@ -533,7 +534,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                             pandda_args.outer_mask,
                                             pandda_args.inner_mask_symmetry,
                                             # sample_rate=pandda_args.sample_rate,
-                                            sample_rate=reference.dataset.reflections.resolution().resolution / 0.5
+                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5
                                             )
 
             if pandda_args.debug:
@@ -923,7 +924,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Output a csv of the events
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
-            event_table: EventTableInterface = EventTable.from_events(all_events_sites)
+            # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
+            event_table: EventTableInterface = GetEventTable()(all_events, sites)
             event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table

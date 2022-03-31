@@ -78,7 +78,9 @@ def score_dataset_models(
     ...
 
 
-def main(autobuild_test_data_dir: Path):
+def main(autobuild_test_data_dir: str):
+    autobuild_test_data_dir = Path(autobuild_test_data_dir)
+    print("Loading data...")
     pandda_fs_model_pickle_path = autobuild_test_data_dir / "pandda_fs_model.pickle"
     alignments_pickle_path = autobuild_test_data_dir / "alignments.pickle"
     grid_pickle_path = autobuild_test_data_dir / "grid.pickle"
@@ -97,6 +99,8 @@ def main(autobuild_test_data_dir: Path):
         dtag_test_data_dir = DtagAutobuildTestDataDir(dataset_dir)
 
         dataset_dirs[dtag_test_data_dir.dtag] = dtag_test_data_dir
+
+    print("Running tests...")
 
     for dtag, dataset_dir in dataset_dirs.items():
         dataset_models_score_result: DatasetModelsScoreResult = score_dataset_models(

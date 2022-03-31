@@ -31,7 +31,8 @@ class DataDirInterface(Protocol):
 DataDirsInterface = Dict[DtagInterface, DataDirInterface]
 
 class AnalysesDirIntererface(Protocol):
-    ...
+    pandda_analyse_events_file: Path
+    pandda_analyse_sites_file: Path
 
 
 class ModelInterface(Protocol):
@@ -166,6 +167,8 @@ class DatasetInterface(Protocol):
     reflections: ReflectionsInterface
 
 
+
+
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 
 
@@ -178,8 +181,8 @@ class StructureInterface(Protocol):
 
 
 class ReflectionsInterface(Protocol):
-    ...
-
+    def get_resolution(self) -> float:
+        ...
 
 class GridInterface(Protocol):
     ...
@@ -284,11 +287,16 @@ class SiteInterface(Protocol):
     ...
 
 
-SitesInterface = Dict[SiteIDInterface, SiteInterface]
+class SitesInterface(Protocol):
+    site_to_event: Dict[SiteIDInterface, List[EventIDInterface]]
+    event_to_site: Dict[EventIDInterface, SiteIDInterface]
+    centroids: Dict[SiteIDInterface, np.ndarray]
+# SitesInterface = Dict[SiteIDInterface, SiteInterface]
 
 
 class EventTableInterface(Protocol):
-    ...
+    def save(self, path: Path) -> None:
+        ...
 
 
 class SiteTableInterface(Protocol):
