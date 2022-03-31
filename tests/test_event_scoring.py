@@ -30,17 +30,17 @@ class DtagAutobuildTestDataDir:
 
         self.models: Dict[int, ModelInterface] = {}
         for model_path in path.glob("model_*.pickle"):
-            print(f"model path: {model_path}")
-            match = re.match(
+            matchs = re.findall(
                 "model_([0-9]+).pickle",
                 str(model_path)
             )
-            if match:
-                model_num = int(
-                    match.groups()[0]
-                )
-                model: ModelInterface = unpickle(model_path)
-                self.models[model_num] = model
+            for match in match:
+                if match:
+                    model_num = int(
+                        match.groups()[0]
+                    )
+                    model: ModelInterface = unpickle(model_path)
+                    self.models[model_num] = model
 
 
 class ModelResult:
