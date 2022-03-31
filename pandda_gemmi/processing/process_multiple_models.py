@@ -1188,7 +1188,7 @@ def process_shell_multiple_models(
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
         if result:
-            shell_log[constants.LOG_SHELL_DATASET_LOGS][result.dtag] = result.log
+            shell_log[constants.LOG_SHELL_DATASET_LOGS][str(result.dtag)] = result.log
 
     time_shell_finish = time.time()
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
