@@ -10,6 +10,8 @@ import json
 from typing import Set
 import pickle
 
+from pandda_gemmi.processing.process_local import ProcessLocalSerial
+
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
@@ -630,23 +632,23 @@ def analyse_model(
 
     time_model_analysis_finish = time.time()
 
-    model_results = {
-        'zmap': zmaps[test_dtag],
-        'clusterings': clusterings,
-        'clusterings_large': clusterings_large,
-        'clusterings_peaked': clusterings_peaked,
-        'clusterings_merged': clusterings_merged,
-        'events': events,
-        'event_scores': event_scores,
-        'log': model_log
-    }
-    model_results = ModelResult(
+    # model_results = {
+    #     'zmap': zmaps[test_dtag],
+    #     'clusterings': clusterings,
+    #     'clusterings_large': clusterings_large,
+    #     'clusterings_peaked': clusterings_peaked,
+    #     'clusterings_merged': clusterings_merged,
+    #     'events': events,
+    #     'event_scores': event_scores,
+    #     'log': model_log
+    # }
+    model_results: ModelResult = ModelResult(
                 zmaps[test_dtag],
         clusterings,
         clusterings_large,
         clusterings_peaked,
         clusterings_merged,
-        events,
+        {event_id: event for event_id, event in events.events.items()},
         event_scores,
         model_log
     )
@@ -962,7 +964,7 @@ def process_dataset_multiple_models(
         inner_mask_symmetry,
         sample_rate,
         native_grid,
-        mapper=process_local_serial,
+        mapper=ProcessLocalSerial(),
     )
 
     if debug:
