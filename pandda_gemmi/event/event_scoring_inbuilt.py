@@ -501,7 +501,8 @@ def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
         fragment_dataset,
-        debug=False):
+        debug=False,
+):
     if debug:
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
@@ -642,7 +643,6 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             event_map_reference_grid_array[inner_mask & event_mask] = 0.0
 
             # Noise
-
             noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
             num_noise_points = noise_points.size
             potential_noise_points = event_map_reference_grid_array[outer_mask & (~inner_mask)]

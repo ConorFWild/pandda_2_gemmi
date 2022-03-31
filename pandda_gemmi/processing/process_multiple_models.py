@@ -538,7 +538,7 @@ def analyse_model(
         with open(output_dir / "dataset_xmap.pickle", "wb") as f:
             pickle.dump(dataset_xmap, f)
 
-        with open(output_dir / "events.pickle", "wb") as f:
+        with open(output_dir / f"events_{model_number}.pickle", "wb") as f:
             pickle.dump(events, f)
 
         with open(output_dir / f"model_{model_number}.pickle", "wb") as f:
