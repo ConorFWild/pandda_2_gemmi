@@ -1,4 +1,5 @@
 from __future__ import annotations
+from tkinter import Grid
 from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
@@ -226,10 +227,13 @@ class ZmapInterface(Protocol):
 ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
 
 class ClusterIDInterface(Protocol):
-    ...
+    def __int__(self) -> int:
+        ...
 
 class EDClusterInterface(Protocol):
-    ...
+    centroid: Tuple[float, float, float]
+    def size(self, grid: GridInterface) -> float:
+        ...
 
 class EDClusteringInterface(Protocol):
     clustering: MutableMapping[ClusterIDInterface, EDClusterInterface]

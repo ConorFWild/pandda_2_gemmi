@@ -573,145 +573,7 @@ class Clusterings:
 
         return Clusterings(clusterings)
 
-    def filter_size(self, grid: Grid, min_cluster_size: float):
-        new_clusterings = {}
-        for dtag in self.clusterings:
-            clustering = self.clusterings[dtag]
-            new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
-                                           clustering,
-                                           )
-                                    )
-
-            if len(new_cluster_nums) == 0:
-                continue
-
-            else:
-                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in
-                                     new_cluster_nums}
-                new_clustering = Clustering(new_clusters_dict)
-                new_clusterings[dtag] = new_clustering
-
-        return Clusterings(new_clusterings)
-
-    def filter_peak(self, grid: Grid, z_peak: float):
-        new_clusterings = {}
-        for dtag in self.clusterings:
-            clustering = self.clusterings[dtag]
-            new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
-                                           clustering,
-                                           )
-                                    )
-
-            if len(new_cluster_nums) == 0:
-                continue
-
-            else:
-                new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in
-                                     new_cluster_nums}
-                new_clustering = Clustering(new_clusters_dict)
-                new_clusterings[dtag] = new_clustering
-
-        return Clusterings(new_clusterings)
-
-    def merge_clusters(self):
-        new_clustering_dict = {}
-        for dtag in self.clusterings:
-            clustering = self.clusterings[dtag]
-
-            cluster_list = []
-            centroid_list = []
-            for cluster_id in clustering:
-                cluster = clustering[cluster_id]
-                centroid = cluster.centroid
-                cluster_list.append(cluster)
-                centroid_list.append(centroid)
-
-            cluster_array = np.array(cluster_list)
-            centroid_array = np.array(centroid_list)
-
-            dbscan = DBSCAN(
-                eps=6,
-                min_samples=1,
-            )
-
-            cluster_ids_array = dbscan.fit_predict(centroid_array)
-            new_clusters = {}
-            for unique_cluster in np.unique(cluster_ids_array):
-                current_clusters = cluster_array[cluster_ids_array == unique_cluster]
-
-                cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i]
-                                                             for current_cluster
-                                                             in current_clusters
-                                                             ], axis=None,
-                                                            )
-                                             for i
-                                             in [0, 1, 2]
-                                             )
-                cluster_positions_array = np.vstack([current_cluster.cluster_positions_array
-                                                     for current_cluster
-                                                     in current_clusters])
-
-                cluster_positions_list = [current_cluster.centroid
-                                          for current_cluster
-                                          in current_clusters
-                                          ]
-
-                values = np.concatenate([current_cluster.values
-                                         for current_cluster
-                                         in current_clusters
-                                         ], axis=None,
-                                        )
-
-                cluster_inner_protein_mask = np.concatenate([current_cluster.cluster_inner_protein_mask
-                                                             for current_cluster
-                                                             in current_clusters
-                                                             ], axis=None,
-                                                            )
-                cluster_contact_mask = np.concatenate([current_cluster.cluster_contact_mask
-                                                       for current_cluster
-                                                       in current_clusters
-                                                       ], axis=None,
-                                                      )
-
-                centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
-
-                centroid = (centroid_array[0],
-                            centroid_array[1],
-                            centroid_array[2],)
-
-                # event_mask_indicies_list =
-
-                # if len(event_mask_indicies_list) > 1:
-                event_mask_indicies = tuple(
-                    np.concatenate(
-                        [current_cluster.event_mask_indicies[i]
-                         for current_cluster
-                         in current_clusters
-                         if current_cluster.event_mask_indicies
-                         ],
-                        axis=None,
-                    )
-                    for i
-                    in [0, 1, 2]
-                )
-                # else:
-                # event_mask_indicies = None
-
-                new_cluster = Cluster(
-                    cluster_points_tuple,
-                    cluster_positions_array,
-                    values,
-                    centroid,
-                    event_mask_indicies,
-                    cluster_inner_protein_mask,
-                    cluster_contact_mask,
-                )
-
-                new_clusters[unique_cluster] = new_cluster
-
-            new_clustering_dict[dtag] = Clustering(new_clusters)
-
-        return Clusterings(new_clustering_dict)
+    
 
     def filter_distance_from_protein(self):
         pass
@@ -731,3 +593,166 @@ class Clusterings:
     def __iter__(self):
         for dtag in self.clusterings:
             yield dtag
+
+
+def filter_size(clusterings: EDClusteringsInterface, grid: Grid, min_cluster_size: float):
+        new_clusterings = {}
+        for dtag in clusterings:
+            clustering = clusterings[dtag]
+            new_cluster_nums = list(
+                filter(
+                    lambda cluster_num: clustering[cluster_num].size(grid) > min_cluster_size,
+                                           clustering,
+                                           )
+                                    )
+
+            if len(new_cluster_nums) == 0:
+                continue
+
+            else:
+                new_clusters_dict = {
+                    new_cluster_num: clustering[new_cluster_num] 
+                    for new_cluster_num 
+                    in new_cluster_nums
+                    }
+                new_clustering = Clustering(new_clusters_dict)
+                new_clusterings[dtag] = new_clustering
+
+        return new_clusterings
+
+class FilterEDClusteringsSize:
+    def __call__(self, clusterings: EDClusteringsInterface, grid: GridInterface, min_cluster_size: float) -> EDClusteringsInterface:
+        return filter_size(clusterings: EDClusteringsInterface, grid: GridInterface, min_cluster_size: float)
+
+
+def filter_peak(clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float):
+    new_clusterings = {}
+    for dtag in clusterings:
+        clustering = clusterings[dtag]
+        new_cluster_nums = list(filter(lambda cluster_num: clustering[cluster_num].peak() > z_peak,
+                                        clustering,
+                                        )
+                                )
+
+        if len(new_cluster_nums) == 0:
+            continue
+
+        else:
+            new_clusters_dict = {new_cluster_num: clustering[new_cluster_num] for new_cluster_num in
+                                    new_cluster_nums}
+            new_clustering = Clustering(new_clusters_dict)
+            new_clusterings[dtag] = new_clustering
+
+    return new_clusterings
+
+
+class FilterEDClusteringsPeak:
+    def __call__(self, clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float) -> EDClusteringsInterface:
+        return filter_peak(clusterings: EDClusteringsInterface, grid: GridInterface, z_peak: float)
+
+
+
+def merge_clusters(clusterings: EDClusteringsInterface):
+    new_clustering_dict = {}
+    for dtag in self.clusterings:
+        clustering = self.clusterings[dtag]
+
+        cluster_list = []
+        centroid_list = []
+        for cluster_id in clustering:
+            cluster = clustering[cluster_id]
+            centroid = cluster.centroid
+            cluster_list.append(cluster)
+            centroid_list.append(centroid)
+
+        cluster_array = np.array(cluster_list)
+        centroid_array = np.array(centroid_list)
+
+        dbscan = DBSCAN(
+            eps=6,
+            min_samples=1,
+        )
+
+        cluster_ids_array = dbscan.fit_predict(centroid_array)
+        new_clusters = {}
+        for unique_cluster in np.unique(cluster_ids_array):
+            current_clusters = cluster_array[cluster_ids_array == unique_cluster]
+
+            cluster_points_tuple = tuple(np.concatenate([current_cluster.indexes[i]
+                                                            for current_cluster
+                                                            in current_clusters
+                                                            ], axis=None,
+                                                        )
+                                            for i
+                                            in [0, 1, 2]
+                                            )
+            cluster_positions_array = np.vstack([current_cluster.cluster_positions_array
+                                                    for current_cluster
+                                                    in current_clusters])
+
+            cluster_positions_list = [current_cluster.centroid
+                                        for current_cluster
+                                        in current_clusters
+                                        ]
+
+            values = np.concatenate([current_cluster.values
+                                        for current_cluster
+                                        in current_clusters
+                                        ], axis=None,
+                                    )
+
+            cluster_inner_protein_mask = np.concatenate([current_cluster.cluster_inner_protein_mask
+                                                            for current_cluster
+                                                            in current_clusters
+                                                            ], axis=None,
+                                                        )
+            cluster_contact_mask = np.concatenate([current_cluster.cluster_contact_mask
+                                                    for current_cluster
+                                                    in current_clusters
+                                                    ], axis=None,
+                                                    )
+
+            centroid_array = np.mean(np.array(cluster_positions_list), axis=0)
+
+            centroid = (centroid_array[0],
+                        centroid_array[1],
+                        centroid_array[2],)
+
+            # event_mask_indicies_list =
+
+            # if len(event_mask_indicies_list) > 1:
+            event_mask_indicies = tuple(
+                np.concatenate(
+                    [current_cluster.event_mask_indicies[i]
+                        for current_cluster
+                        in current_clusters
+                        if current_cluster.event_mask_indicies
+                        ],
+                    axis=None,
+                )
+                for i
+                in [0, 1, 2]
+            )
+            # else:
+            # event_mask_indicies = None
+
+            new_cluster = Cluster(
+                cluster_points_tuple,
+                cluster_positions_array,
+                values,
+                centroid,
+                event_mask_indicies,
+                cluster_inner_protein_mask,
+                cluster_contact_mask,
+            )
+
+            new_clusters[unique_cluster] = new_cluster
+
+        new_clustering_dict[dtag] = Clustering(new_clusters)
+
+    return Clusterings(new_clustering_dict)
+
+
+class MergeEDClusterings:
+    def __call__(self, clusterings: EDClusteringsInterface, ) -> EDClusteringsInterface:
+        return merge_clusters(clusterings, )

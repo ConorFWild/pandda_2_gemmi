@@ -40,7 +40,7 @@ class GetComparatorsHybrid(GetComparatorsInterface):
 
         print(comparators_first)
 
-        comparators_multiple = get_multiple_comparator_sets(
+        comparators_multiple, clusters = get_multiple_comparator_sets(
             datasets,
             alignments,
             grid,
