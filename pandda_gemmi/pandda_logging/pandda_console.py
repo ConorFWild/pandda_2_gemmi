@@ -6,6 +6,7 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 
 
@@ -111,6 +112,25 @@ class PanDDAConsole:
     def start_classification(self):
         printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
         self.console.print(printable)
+
+    def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Autobuild Scores"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Autobuild Score")
+
+        for event_id, autobuild_result in autobuild_results.items():
+            selected_build = autobuild_result.selected_fragment_path
+            selected_build_score = autobuild_result.scores[selected_build]
+
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(round(selected_build_score, 2)),
+            )
+
+        self.console.print(event_class_table)
 
     def summarise_event_classifications(self, event_classifications):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
