@@ -252,6 +252,9 @@ ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
 ARGS_RANK_METHOD_DEFAULT: str = "autobuild"
+ARGS_MIN_BDC_DEFAULT: float = 0.0
+ARGS_MAX_BDC_DEFAULT: float = 0.95
+ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
 
 ###################################################################
 # # Console constants

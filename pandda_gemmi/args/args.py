@@ -51,9 +51,9 @@ class PanDDAArgs:
     min_blob_z_peak: float = 3.0
     clustering_cutoff: float = 1.5
     cluster_cutoff_distance_multiplier: float = 1.0
-    max_site_distance_cutoff: float = 1.732
-    min_bdc: float = 0.0
-    max_bdc: float = 0.95
+    max_site_distance_cutoff: float = constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT
+    min_bdc: float = constants.ARGS_MIN_BDC_DEFAULT
+    max_bdc: float = constants.ARGS_MAX_BDC_DEFAULT
     increment: float = 0.05
     output_multiplier: float = 2.0
     comparison_strategy: str = constants.ARGS_COMPARISON_STRATEGY_DEFAULT

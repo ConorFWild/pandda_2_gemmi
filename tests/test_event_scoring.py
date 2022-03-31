@@ -4,7 +4,9 @@ import pickle
 import fire
 
 from pandda_gemmi.analyse_interface import *
+from pandda_gemmi import constants
 from pandda_gemmi.autobuild import autobuild_rhofit, GetAutobuildResultRhofit
+from pandda_gemmi.event import GetEventScoreInbuilt
 
 
 def unpickle(path: Path):
@@ -63,19 +65,47 @@ def _main(
 class ModelResult:
     ...
 
+
 class DatasetModelsScoreResult:
     model_results: Dict[int, ModelResult]
     selected_model: int
 
+
 def score_dataset_models(
-            pandda_fs_model: PanDDAFSModelInterface,
-            alignment: AlignmentInterface,
-            grid: GridInterface,
-            reference: ReferenceInterface,
-            dtag: DtagInterface,
-            dataset_dir: DtagAutobuildTestDataDir,
-        ) -> DatasetModelsScoreResult:
-    ...
+        pandda_fs_model: PanDDAFSModelInterface,
+        alignment: AlignmentInterface,
+        grid: GridInterface,
+        reference: ReferenceInterface,
+        test_dtag: DtagInterface,
+        dataset_dir: DtagAutobuildTestDataDir,
+) -> DatasetModelsScoreResult:
+
+    # For each model, run event scoring, and collect results
+    model_result_dict = {}
+
+    events = dataset_dir.events
+    dataset_xmap = dataset_dir.dataset_xmap
+    processed_dataset = dataset_dir.dataset
+    dataset_alignment = alignment
+
+    for model_number, model in dataset_dir.models.items():
+
+        event_score = GetEventScoreInbuilt()(
+            test_dtag,
+            model_number,
+            processed_dataset,
+            dataset_xmap,
+            events,
+            model,
+            grid,
+            dataset_alignment,
+            max_site_distance_cutoff=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
+            min_bdc=constants.ARGS_MIN_BDC_DEFAULT,
+            max_bdc=constants.ARGS_MAX_BDC_DEFAULT,
+            reference=reference,
+            structure_output_folder=None,
+            debug=False
+        )
 
 
 def main(autobuild_test_data_dir: str):
