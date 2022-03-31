@@ -16,7 +16,7 @@ def unpickle(path: Path):
 
 class DtagAutobuildTestDataDir:
     def __init__(self, path: Path):
-        dtag_pickle_path = path / "dataset_dtag.pickle"
+        dtag_pickle_path = path / "dataset_processed_dataset.pickle"
         events_pickle_path = path / "events.pickle"
         dataset_pickle_path = path / "dataset.pickle"
         dataset_xmap_pickle_path = path / "dataset_xmap.pickle"
