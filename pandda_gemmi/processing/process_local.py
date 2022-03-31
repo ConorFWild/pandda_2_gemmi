@@ -4,6 +4,14 @@ import ray
 from pandda_gemmi.analyse_interface import *
 
 
+class ProcessLocalSerial(ProcessorInterface):
+    def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
+        results = []
+        for func in funcs:
+            results.append(func())
+
+        return results
+
 @ray.remote
 class RayWrapper(Generic[P, V]):
 

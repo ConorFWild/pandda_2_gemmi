@@ -349,7 +349,7 @@ class Reflections(ReflectionsInterface):
         return Reflections(reflections, file)
 
     def transform_f_phi_to_map(self, f: str, phi: str, sample_rate: float) -> CrystallographicGridInterface:
-        self.reflections.transform_f_phi_to_map(f, phi, sample_rate)
+        return self.reflections.transform_f_phi_to_map(f, phi, sample_rate=sample_rate)
 
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())

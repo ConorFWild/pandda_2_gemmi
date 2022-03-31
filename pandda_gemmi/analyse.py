@@ -97,7 +97,8 @@ from pandda_gemmi.processing import (
     analyse_model,
     analyse_model_ray,
     RayWrapper,
-    ProcessLocalRay
+    ProcessLocalRay,
+    ProcessLocalSerial,
 )
 
 from pandda_gemmi import event_classification
@@ -206,26 +207,26 @@ def get_process_global(pandda_args, distributed_tmp):
 
 def get_process_local(pandda_args):
     if pandda_args.local_processing == "serial":
-        process_local = process_local_serial
+        process_local = ProcessLocalSerial()
 
-    elif pandda_args.local_processing == "joblib":
-        process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+    # elif pandda_args.local_processing == "joblib":
+    #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
 
-    elif pandda_args.local_processing == "multiprocessing_forkserver":
-        mp.set_start_method("forkserver")
-        process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
-        # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+    # elif pandda_args.local_processing == "multiprocessing_forkserver":
+    #     mp.set_start_method("forkserver")
+    #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
+    #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
 
-    elif pandda_args.local_processing == "multiprocessing_spawn":
-        mp.set_start_method("spawn")
-        process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
-        # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-    elif pandda_args.local_processing == "dask":
-        client = Client(n_workers=pandda_args.local_cpus)
-        process_local = partial(
-            process_local_dask,
-            client=client
-        )
+    # elif pandda_args.local_processing == "multiprocessing_spawn":
+    #     mp.set_start_method("spawn")
+    #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
+    #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+    # elif pandda_args.local_processing == "dask":
+    #     client = Client(n_workers=pandda_args.local_cpus)
+    #     process_local = partial(
+    #         process_local_dask,
+    #         client=client
+    #     )
 
     elif pandda_args.local_processing == "ray":
         ray.init(num_cpus=pandda_args.local_cpus)
@@ -738,7 +739,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Add the event maps to the fs
         for event_id, event in all_events.items():
-            pandda_fs_model.processed_datasets[event_id.dtag].event_map_files.add_event(event)
+            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -831,8 +832,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         all_scores[selected_fragement_path])
 
                     # Copy to pandda models
-                    model_path = str(pandda_fs_model.processed_datasets[dtag].input_pdb)
-                    pandda_model_path = pandda_fs_model.processed_datasets[
+                    model_path = str(pandda_fs_model.processed_datasets.processed_datasets[dtag].input_pdb)
+                    pandda_model_path = pandda_fs_model.processed_datasets.processed_datasets[
                                             dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(str(dtag))
                     merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
                     save_pdb_file(merged_structure, pandda_model_path)
