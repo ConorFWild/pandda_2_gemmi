@@ -82,7 +82,9 @@ def score_dataset_models(
     processed_dataset = dataset_dir.dataset
     dataset_alignment = alignment
 
-    for model_number, model in dataset_dir.models.items():
+    for model_number in sorted(dataset_dir.models):
+        model = dataset_dir.models[model_number]
+        print(f"\t\tAnalysing model: {model_number}")
         with suppress_stdout():
             event_score = GetEventScoreInbuilt()(
                 test_dtag,
@@ -101,7 +103,7 @@ def score_dataset_models(
                 debug=False
             )
 
-        print(f"event score: {event_score}")
+        print(f"\t\t\tevent score: {event_score}")
 
 
 def main(autobuild_test_data_dir: str):
