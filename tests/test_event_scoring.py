@@ -37,7 +37,7 @@ class DtagAutobuildTestDataDir:
             for match in matchs:
                 if match:
                     model_num = int(
-                        match.groups()[0]
+                        match
                     )
                     model: ModelInterface = unpickle(model_path)
                     self.models[model_num] = model
