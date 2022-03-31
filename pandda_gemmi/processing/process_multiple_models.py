@@ -1192,6 +1192,7 @@ def process_shell_multiple_models(
 
     time_shell_finish = time.time()
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
+    print(shell_log)
     update_log(shell_log, shell_log_path)
 
     shell_result: ShellResultInterface = ShellResult(
