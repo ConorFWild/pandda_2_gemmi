@@ -138,6 +138,7 @@ def main(autobuild_test_data_dir: str):
         print(f"\tTesting dtag: {dtag}")
 
         alignment = alignments[dtag]
+        print(dataset_dir)
 
         dataset_models_score_result: DatasetModelsScoreResult = score_dataset_models(
             pandda_fs_model,
