@@ -418,6 +418,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
+        if pandda_args.debug:
+            with open(pandda_fs_model.pandda_dir / "pandda_fs_model.pickle", "wb") as f:
+                pickle.dump(pandda_fs_model, f)
+
         console.summarise_fs_model(pandda_fs_model)
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -549,7 +553,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             )
 
             if pandda_args.debug:
-                with open(pandda_fs_model.pandda_dir / "alighments.pickle", "wb") as f:
+                with open(pandda_fs_model.pandda_dir / "alignments.pickle", "wb") as f:
                     pickle.dump(alignments, f)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
