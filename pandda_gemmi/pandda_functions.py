@@ -21,7 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import ComparatorsInterface, DatasetsInterface
+from pandda_gemmi.analyse_interface import ComparatorsInterface, DatasetsInterface, ResolutionInterface, StructureFactorsInterface
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -1940,7 +1940,11 @@ def get_shells_clustered(
     return shells
 
 
-def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
+def truncate(
+    datasets: DatasetsInterface, 
+    resolution: ResolutionInterface, 
+    structure_factors: StructureFactorsInterface,
+    ):
     new_datasets_resolution = {}
 
     # Truncate by common resolution

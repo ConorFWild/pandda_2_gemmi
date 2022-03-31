@@ -88,6 +88,7 @@ from pandda_gemmi.tables import (
     EventTable,
     GetEventTable,
     SiteTable,
+    GetSiteTable,
 )
 from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
@@ -930,8 +931,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Output site table
         with STDOUTManager('Building and outputting site table...', f'\tDone!'):
-            site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
-                                                                   pandda_args.max_site_distance_cutoff)
+            # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
+            #                                                        pandda_args.max_site_distance_cutoff)
+            site_table: SiteTableInterface = GetSiteTable()(all_events,
+                                            sites,
+                                                        pandda_args.max_site_distance_cutoff)
             site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()

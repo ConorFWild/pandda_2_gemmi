@@ -7,16 +7,15 @@ from grpc import Call
 import numpy as np
 
 T = TypeVar('T',)
-V = TypeVar("V", covariant=True)
+V = TypeVar("V")
 P = ParamSpec("P")
 
 
-# Analyse class interfaces
 class PanDDAConsoleInterface(Protocol):
     ...
 
 
-class ProcessorInterface(Protocol[P, V]):
+class ProcessorInterface(Protocol):
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         ...
 
@@ -35,12 +34,20 @@ class AnalysesDirIntererface(Protocol):
     pandda_analyse_sites_file: Path
 
 
+class ModelIDInterface(Protocol):
+    ...
+
+
 class ModelInterface(Protocol):
     ...
+
+ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 
 
 class XmapInterface(Protocol):
     ...
+
+XmapsInterface = MutableMapping[DtagInterface, XmapInterface]
 
 
 class DatasetModelsInterface(Protocol):
@@ -77,11 +84,13 @@ class ProcessedDatasetInterface(Protocol):
     log_path: Path
 
 
-ProcessedDatasetsInterface = Dict[DtagInterface, ProcessedDatasetInterface]
+class ProcessedDatasetsInterface(Protocol):
+    path: Path
+    processed_datasets: Dict[DtagInterface, ProcessedDatasetInterface]
 
 
 class ShellDirInterface(Protocol):
-    ...
+    log_path: Path
 
 # ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
 
@@ -179,6 +188,9 @@ class DatasetsStatisticsInterface(Protocol):
 class StructureInterface(Protocol):
     ...
 
+class ResolutionInterface(Protocol):
+    ...
+
 
 class ReflectionsInterface(Protocol):
     def get_resolution(self) -> float:
@@ -195,10 +207,22 @@ class AlignmentInterface(Protocol):
 AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 
 
+class ZmapInterface(Protocol):
+    ...
 
+ZmapsInterface = MutableMapping
 
 class ModelResultInterface(Protocol):
-    ...
+    zmaps
+    clusterings
+    clusterings_large
+    clusterings_peaked
+    clusterings_merged
+    events
+    event_scores
+    model_log: Dict
+
+ModelResultsInterface = MutableMapping[ModelIDInterface, ModelResultInterface]
 
 
 ComparatorsInterface = MutableMapping[DtagInterface, MutableMapping[int, List[DtagInterface]]]
@@ -227,7 +251,9 @@ class ShellInterface(Protocol):
 ShellsInterface = Dict[int, ShellInterface]
 
 class DatasetResultInterface(Protocol):
+    dtag: DtagInterface
     events: EventsInterface
+    log: Any
 
 DatasetResultsInterface = Dict[DtagInterface, DatasetResultInterface]
 
@@ -300,7 +326,8 @@ class EventTableInterface(Protocol):
 
 
 class SiteTableInterface(Protocol):
-    ...
+    def save(self, path: Path) -> None:
+        ...
 
 
 # Ray
@@ -326,22 +353,6 @@ class PartialInterface(Protocol[P, V]):
     def __call__(self) -> V:
         ...
 
-#
-# class PartialInterface2(Generic[P, V]):
-#     func: Callable[P, V]
-#     args: P.args
-#     kwargs: P.kwargs
-#
-#     def __call__(self, *args: P.args) -> V:
-#         ...
-# #
-# def decorator(f: Callable[P, int]) -> Callable[P, int]:
-#     def wrapper(*args: P.args, **kw: P.kwargs) -> int:
-#         print(args[0])
-#         return 0
-#     return wrapper
-
-# PartialInterface = Callable[Concatenate[Callable[P, V], P], Callable[[], V]]
 
 # Analyse Function Interfaces
 class GetPanDDAFSModelInterface(Protocol):
@@ -399,7 +410,7 @@ class LoadXMapFlatInterface(Protocol):
 class AnalyseModelInterface(Protocol):
     def __call__(self,
                  model: ModelInterface,
-                 model_number: int,
+                 model_number: ModelIDInterface,
                  test_dtag: DtagInterface,
                  dataset_xmap: XmapInterface,
                  reference: ReferenceInterface,
@@ -673,9 +684,10 @@ class GetSitesInterface(Protocol):
         ...
 
 
-class GetSiteTable(Protocol):
+class GetSiteTableInterface(Protocol):
     def __call__(self,
-                 sites: Dict[SiteIDInterface, SiteInterface]
+    events: EventsInterface,
+                 sites: SitesInterface,
                  ) -> SiteTableInterface:
         ...
 

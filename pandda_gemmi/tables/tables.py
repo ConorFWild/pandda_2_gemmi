@@ -207,3 +207,37 @@ class SiteTable:
         table = pd.DataFrame(records)
 
         table.to_csv(str(path))
+
+def get_site_table_from_events(events: EventsInterface, initial_sites: SitesInterface, cutoff: float):
+
+        dtag_clusters = {}
+        for event_id in events:
+            dtag = event_id.dtag
+            event_idx = event_id.event_idx.event_idx
+            event = events[event_id]
+
+            if dtag not in dtag_clusters:
+                dtag_clusters[dtag] = {}
+
+            dtag_clusters[dtag][event_idx] = event.cluster
+
+        _clusterings = {}
+        for dtag in dtag_clusters:
+            _clusterings[dtag] = Clustering(dtag_clusters[dtag])
+
+        clusterings = Clusterings(_clusterings)
+
+        sites: SitesInterface = Sites.from_clusters(clusterings, cutoff)
+
+        records = []
+        for site_id in sites:
+            # site = sites[site_id]
+            centroid = sites.centroids[site_id]
+            site_record = SiteTableRecord.from_site_id(site_id, centroid)
+            records.append(site_record)
+
+        return SiteTable(records)
+
+class GetSiteTable(GetSiteTableInterface):
+    def __call__(self, events: EventsInterface, sites: SitesInterface, cutoff: float) -> SiteTableInterface:
+        return get_site_table_from_events(events, sites, cutoff: float)

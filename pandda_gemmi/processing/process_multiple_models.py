@@ -43,16 +43,16 @@ from pandda_gemmi.event import (
 
 
 @dataclasses.dataclass()
-class DatasetResult:
-    dtag: Dtag
+class DatasetResult(DatasetResultInterface):
+    dtag: DtagInterface
     events: Dict[EventID, Event]
     log: Dict
 
 
 @dataclasses.dataclass()
 class ShellResult(ShellResultInterface):
-    shell: Shell
-    dataset_results: Dict[Dtag, DatasetResult]
+    shell: ShellInterface
+    dataset_results: DatasetResultsInterface
     log: Dict
 
 
@@ -272,11 +272,11 @@ def EXPERIMENTAL_select_model(
 
 
 def get_models(
-        test_dtags,
-        comparison_sets: Dict[int, List[Dtag]],
-        shell_xmaps,
-        grid: Grid,
-        process_local,
+        test_dtags: List[DtagInterface],
+        comparison_sets: Dict[int, List[DtagInterface]],
+        shell_xmaps: XmapsInterface,
+        grid: GridInterface,
+        process_local: ProcessorInterface,
 ):
     masked_xmap_array = XmapArray.from_xmaps(
         shell_xmaps,
@@ -324,6 +324,27 @@ def get_models(
     return models
 
 
+class ModelResult(ModelResultInterface):
+    def __init__(self,
+        zmaps,
+        clusterings,
+        clusterings_large,
+        clusterings_peaked,
+        clusterings_merged,
+        events,
+        event_scores,
+        model_log) -> None:
+        self.zmaps = zmaps
+        self.clusterings = clusterings
+        self.clusterings_large = clusterings_large
+        self.clusterings_peaked = clusterings_peaked
+        self.clusterings_merged = clusterings_merged
+        self.events = events
+        self.event_scores = event_scores
+        self.model_log = model_log
+        
+
+
 def analyse_model(
         model,
         model_number,
@@ -342,7 +363,7 @@ def analyse_model(
         output_dir,
         score_events_func: GetEventScoreInterface,
         debug=False
-):
+) -> ModelResultInterface:
     if debug:
         print(f'\tAnalysing model: {model_number}')
 
@@ -544,8 +565,6 @@ def analyse_model(
         with open(output_dir / f"model_{model_number}.pickle", "wb") as f:
             pickle.dump(model, f)
 
-
-
     if score_events_func.tag == "inbuilt":
         event_scores = score_events_func(
             test_dtag,
@@ -605,12 +624,26 @@ def analyse_model(
         'clusterings_merged': clusterings_merged,
         'events': events,
         'event_scores': event_scores,
+        'log': model_log
     }
+    model_results = ModelResult(
+                zmaps[test_dtag],
+        clusterings,
+        clusterings_large,
+        clusterings_peaked,
+        clusterings_merged,
+        events,
+        event_scores,
+        model_log
+    )
+
     model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
     if debug:
         print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
 
-    return model_results, model_log
+    
+
+    return model_results
 
 
 @ray.remote
@@ -681,31 +714,32 @@ def dump_and_load(ob, name):
 
 
 def process_dataset_multiple_models(
-        test_dtag,
-        models,
-        shell: ShellMultipleModels,
-        dataset_truncated_datasets,
-        alignments,
-        dataset_xmaps,
-        pandda_fs_model: PanDDAFSModel,
-        reference,
-        grid,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
-        structure_factors,
-        outer_mask,
-        inner_mask_symmetry,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        sample_rate,
-        statmaps,
+        test_dtag: DtagInterface,
+        models: ModelsInterface,
+        shell: ShellInterface,
+        dataset_truncated_datasets: DatasetsInterface,
+        alignments: AlignmentsInterface,
+        dataset_xmaps: XmapsInterface,
+        pandda_fs_model: PanDDAFSModelInterface,
+        reference: ReferenceInterface,
+        grid: GridInterface,
+        contour_level: float,
+        cluster_cutoff_distance_multiplier: float,
+        min_blob_volume: float,
+        min_blob_z_peak: float,
+        structure_factors: StructureFactorsInterface,
+        outer_mask: float,
+        inner_mask_symmetry: float,
+        max_site_distance_cutoff: float,
+        min_bdc: float, 
+        max_bdc: float,
+        sample_rate: float,
+        statmaps: bool,
         analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
-        process_local=process_local_serial,
-        debug=False,
-):
+        process_local: ProcessorInterface,
+        debug: bool=False,
+) -> DatasetResultInterface:
     if debug:
         print(f'\tProcessing dtag: {test_dtag}')
     time_dataset_start = time.time()
@@ -717,64 +751,43 @@ def process_dataset_multiple_models(
     ###################################################################
     # # Process the models...
     ###################################################################
-
     time_model_analysis_start = time.time()
-    # analyse_model_paramaterised = partial(
-    #     analyse_model,
-    #     test_dtag=test_dtag,
-    #     dataset_xmap=dataset_xmaps[test_dtag],
-    #     reference=reference,
-    #     grid=grid,
-    #     dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
-    #     dataset_alignment=alignments[test_dtag],
-    #     max_site_distance_cutoff=max_site_distance_cutoff,
-    #     min_bdc=min_bdc, max_bdc=max_bdc,
-    #     contour_level=contour_level,
-    #     cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-    #     min_blob_volume=min_blob_volume,
-    #     min_blob_z_peak=min_blob_z_peak,
-    #     debug=False
-    # )
-    #
-    # results = process_local(
-    #     [
-    #         Partial(
-    #             analyse_model_paramaterised,
-    #             model,
-    #             model_number,
-    #         )
-    #         for model_number, model
-    #         in models.items()]
-    # )
 
-    results = process_local(
-        [
-            Partial(
-                analyse_model_func).paramaterise(
-                model,
-                model_number,
-                test_dtag=test_dtag,
-                dataset_xmap=dataset_xmaps[test_dtag],
-                reference=reference,
-                grid=grid,
-                dataset_processed_dataset=pandda_fs_model.processed_datasets[test_dtag],
-                dataset_alignment=alignments[test_dtag],
-                max_site_distance_cutoff=max_site_distance_cutoff,
-                min_bdc=min_bdc, max_bdc=max_bdc,
-                contour_level=contour_level,
-                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-                min_blob_volume=min_blob_volume,
-                min_blob_z_peak=min_blob_z_peak,
-                output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
-                score_events_func=score_events_func,
-                debug=debug
+    model_results: ModelResultsInterface = {
+        model_number: model_result
+        for model_number, model_result
+        in zip(
+            models,
+            process_local(
+                [
+                    Partial(
+                        analyse_model_func).paramaterise(
+                        model,
+                        model_number,
+                        test_dtag=test_dtag,
+                        dataset_xmap=dataset_xmaps[test_dtag],
+                        reference=reference,
+                        grid=grid,
+                        dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                        dataset_alignment=alignments[test_dtag],
+                        max_site_distance_cutoff=max_site_distance_cutoff,
+                        min_bdc=min_bdc, max_bdc=max_bdc,
+                        contour_level=contour_level,
+                        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                        min_blob_volume=min_blob_volume,
+                        min_blob_z_peak=min_blob_z_peak,
+                        output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                        score_events_func=score_events_func,
+                        debug=debug
+                    )
+                    for model_number, model
+                    in models.items()
+                    ]
             )
-            for model_number, model
-            in models.items()]
-    )
+        )
+    }
 
-    model_results = {model_number: result[0] for model_number, result in zip(models, results)}
-    dataset_log["Model logs"] = {model_number: result[1] for model_number, result in zip(models, results)}  #
+    dataset_log["Model logs"] = {model_number: model_result.model_log for model_number, model_result in model_results.items()}  #
 
     time_model_analysis_finish = time.time()
 
@@ -786,22 +799,6 @@ def process_dataset_multiple_models(
             model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
             print(f"\t\tModel {model_number} processed in {model_time}")
 
-    # dump_and_load(dataset_xmaps[test_dtag], "xmap")
-    # dump_and_load(reference, "reference")
-    # dump_and_load(grid, "grid")
-    # dump_and_load(pandda_fs_model.processed_datasets[test_dtag], "processed_dataset")
-    # dump_and_load(alignments, "alignments")
-    # # dump_and_load(alignments, "func")
-    # dump_and_load([model for model in models.values()][0], "model")
-    # dump_and_load(
-    #     partial(
-    #         analyse_model_paramaterised,
-    #         [model for model in models.values()][0],
-    #         [model_number for model_number in models.keys()][0],
-    #     ), "func")
-    # dump_and_load(
-    #     results,
-    #     "results")
 
     ###################################################################
     # # Decide which model to use...
@@ -982,7 +979,7 @@ def process_dataset_multiple_models(
     update_log(dataset_log, dataset_log_path)
 
     return DatasetResult(
-        dtag=test_dtag.dtag,
+        dtag=test_dtag,
         events={event_id: event for event_id, event in events.events.items()},
         log=dataset_log,
     )
@@ -1012,30 +1009,36 @@ def process_shell_multiple_models(
         load_xmap_func: LoadXMapInterface,
         analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
-        debug: bool=False,
+        debug: bool = False,
 ):
     if debug:
         print(f"Processing shell at resolution: {shell.res}")
 
     if memory_availability == "very_low":
-        process_local_in_shell = process_local_serial
-        process_local_in_dataset = process_local_serial
-        process_local_over_datasets = process_local_serial
+        process_local_in_shell: ProcessorInterface = process_local_serial
+        process_local_in_dataset: ProcessorInterface = process_local_serial
+        process_local_over_datasets: ProcessorInterface = process_local_serial
     elif memory_availability == "low":
-        process_local_in_shell = process_local
-        process_local_in_dataset = process_local
-        process_local_over_datasets = process_local_serial
+        process_local_in_shell: ProcessorInterface = process_local
+        process_local_in_dataset: ProcessorInterface = process_local
+        process_local_over_datasets: ProcessorInterface = process_local_serial
     elif memory_availability == "high":
-        process_local_in_shell = process_local
-        process_local_in_dataset = process_local_serial
-        process_local_over_datasets = process_local
+        process_local_in_shell: ProcessorInterface = process_local
+        process_local_in_dataset: ProcessorInterface = process_local_serial
+        process_local_over_datasets: ProcessorInterface = process_local
+
+    else:
+        raise Exception(f"memory_availability: {memory_availability}: does not have defined processors")
 
     time_shell_start = time.time()
-    shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
+    if pandda_fs_model.shell_dirs:
+        shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
+    else: 
+        raise Exception("Attempted to find the log path for the shell, but no shell dir added to pandda_fs_model somehow.")
     shell_log = {}
 
     # Seperate out test and train datasets
-    shell_datasets: Dict[Dtag, Dataset] = {
+    shell_datasets: DatasetsInterface = {
         dtag: dataset
         for dtag, dataset
         in datasets.items()
@@ -1049,9 +1052,9 @@ def process_shell_multiple_models(
     ###################################################################
     if debug:
         print(f"\tTruncating shell datasets")
-    shell_working_resolution = Resolution(
-        max([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
-    shell_truncated_datasets: Datasets = truncate(
+    shell_working_resolution: ResolutionInterface = Resolution(
+        max([datasets[dtag].reflections.get_resolution() for dtag in shell.all_dtags]))
+    shell_truncated_datasets: DatasetsInterface = truncate(
         shell_datasets,
         resolution=shell_working_resolution,
         structure_factors=structure_factors,
@@ -1066,26 +1069,12 @@ def process_shell_multiple_models(
 
     time_xmaps_start = time.time()
 
-    # load_xmap_paramaterised = partial(
-    #     Xmap.from_unaligned_dataset_c,
-    #     grid=grid,
-    #     structure_factors=structure_factors,
-    #     # sample_rate=sample_rate,
-    #     sample_rate=shell.res / 0.5
-    # )
-    #
-    # results = process_local_in_shell(
-    #     [partial(
-    #         load_xmap_paramaterised,
-    #         shell_truncated_datasets[key],
-    #         alignments[key],
-    #     )
-    #         for key
-    #         in shell_truncated_datasets
-    #     ]
-    # )
-
-    results = process_local_in_shell(
+    xmaps: XmapsInterface = {
+        dtag: xmap
+        for dtag, xmap 
+        in zip(
+            shell_truncated_datasets,
+            process_local_in_shell(
         [
             Partial(load_xmap_func).paramaterise(
                 shell_truncated_datasets[key],
@@ -1098,12 +1087,9 @@ def process_shell_multiple_models(
             in shell_truncated_datasets
         ]
     )
-
-    xmaps = {
-        dtag: xmap
-        for dtag, xmap
-        in zip(shell_truncated_datasets, results)
+        )
     }
+
 
     time_xmaps_finish = time.time()
     shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish - time_xmaps_start
@@ -1114,7 +1100,7 @@ def process_shell_multiple_models(
     ###################################################################
     if debug:
         print(f"\tGetting models")
-    models = get_models(
+    models: ModelsInterface = get_models(
         shell.test_dtags,
         shell.train_dtags,
         xmaps,
@@ -1142,44 +1128,45 @@ def process_shell_multiple_models(
     dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
     if debug:
         print(f"\tDataset dtags are: {dataset_dtags}")
-    results: List[DatasetResultsInterface] = process_local_over_datasets(
+    results: List[DatasetResultInterface] = process_local_over_datasets(
         [
             Partial(
-        process_dataset_multiple_models).paramaterise(
-            test_dtag,
+                process_dataset_multiple_models).paramaterise(
+                test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
                                             dataset_dtags[test_dtag]},
                 dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
-        models=models,
-        shell=shell,
-        alignments=alignments,
-        pandda_fs_model=pandda_fs_model,
-        reference=reference,
-        grid=grid,
-        contour_level=contour_level,
-        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-        min_blob_volume=min_blob_volume,
-        min_blob_z_peak=min_blob_z_peak,
-        structure_factors=structure_factors,
-        outer_mask=outer_mask,
-        inner_mask_symmetry=inner_mask_symmetry,
-        max_site_distance_cutoff=max_site_distance_cutoff,
-        min_bdc=min_bdc,
-        max_bdc=max_bdc,
-        # sample_rate=sample_rate,
-        sample_rate=shell.res / 0.5,
-        statmaps=statmaps,
-        analyse_model_func=analyse_model_func,
-        score_events_func=score_events_func,
-        process_local=process_local_in_dataset,
-        debug=debug,
-    )
-                
-            
+                models=models,
+                shell=shell,
+                alignments=alignments,
+                pandda_fs_model=pandda_fs_model,
+                reference=reference,
+                grid=grid,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                min_blob_volume=min_blob_volume,
+                min_blob_z_peak=min_blob_z_peak,
+                structure_factors=structure_factors,
+                outer_mask=outer_mask,
+                inner_mask_symmetry=inner_mask_symmetry,
+                max_site_distance_cutoff=max_site_distance_cutoff,
+                min_bdc=min_bdc,
+                max_bdc=max_bdc,
+                # sample_rate=sample_rate,
+                sample_rate=shell.res / 0.5,
+                statmaps=statmaps,
+                analyse_model_func=analyse_model_func,
+                score_events_func=score_events_func,
+                process_local=process_local_in_dataset,
+                debug=debug,
+            )
+
             for test_dtag
             in shell.test_dtags
         ],
     )
+
+    
 
     # Update shell log with dataset results
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
@@ -1191,8 +1178,11 @@ def process_shell_multiple_models(
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
     update_log(shell_log, shell_log_path)
 
-    return ShellResult(
+    shell_result: ShellResultInterface = ShellResult(
         shell=shell,
         dataset_results={dtag: result for dtag, result in zip(shell.test_dtags, results) if result},
         log=shell_log,
+    
     )
+
+    return ShellResult

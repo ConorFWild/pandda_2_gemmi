@@ -102,7 +102,7 @@ def get_shells_multiple_models(
                 continue
 
         # Find the first shell whose res is higher
-        dtag_res = datasets[dtag].reflections.resolution().resolution
+        dtag_res: float = datasets[dtag].reflections.get_resolution()
         for res in reses:
             if res > dtag_res:
                 shells_test[res] = shells_test[res].union({dtag, })

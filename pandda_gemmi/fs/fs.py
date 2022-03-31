@@ -417,7 +417,7 @@ class ProcessedDataset(ProcessedDatasetInterface):
 
 
 @dataclasses.dataclass()
-class ProcessedDatasets:
+class ProcessedDatasets(ProcessedDatasetsInterface):
     path: Path
     processed_datasets: typing.Dict[Dtag, ProcessedDataset]
 
