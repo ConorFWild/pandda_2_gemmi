@@ -30,6 +30,7 @@ class DtagAutobuildTestDataDir:
 
         self.models: Dict[int, ModelInterface] = {}
         for model_path in path.glob("model_*.pickle"):
+            print(f"model path: {model_path}")
             match = re.match(
                 "model_([0-9]+).pickle",
                 str(model_path)
@@ -40,26 +41,6 @@ class DtagAutobuildTestDataDir:
                 )
                 model: ModelInterface = unpickle(model_path)
                 self.models[model_num] = model
-
-
-def _main(
-        dataset_pickle_path,
-        event_pickle_path,
-        pandda_fs_pickle_path
-):
-    with open(dataset_pickle_path, "rb") as f:
-        dataset = pickle.load(f)
-    with open(event_pickle_path, "rb") as f:
-        event = pickle.load(f)
-    with open(pandda_fs_pickle_path, "rb") as f:
-        pandda_fs = pickle.load(f)
-
-    print("####################################################")
-    print("Dataset info:")
-    print(pandda_fs.processed_datasets[event.event_id.dtag])
-    print("####################################################")
-
-    autobuild_rhofit(dataset, event, pandda_fs, cif_strategy="elbow")
 
 
 class ModelResult:
