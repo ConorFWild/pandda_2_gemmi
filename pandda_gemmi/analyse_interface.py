@@ -319,7 +319,6 @@ class EventInterface(Protocol):
 # class EventRankingInterface(Protocol):
 #     ...
 
-EventRankingInterface = List[EventIDInterface]
 
 class EventIDXInterface(Protocol):
     event_idx: int
@@ -354,6 +353,10 @@ class EventClassificationInterface(Protocol):
 
 
 EventClassificationsInterface = Dict[EventIDInterface, EventClassificationInterface]
+
+
+EventRankingInterface = List[EventIDInterface]
+
 
 
 class SiteInterface(Protocol):
