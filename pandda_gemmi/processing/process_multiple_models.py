@@ -1031,16 +1031,16 @@ def process_shell_multiple_models(
         print(f"Processing shell at resolution: {shell.res}")
 
     if memory_availability == "very_low":
-        process_local_in_shell: ProcessorInterface = process_local_serial
-        process_local_in_dataset: ProcessorInterface = process_local_serial
-        process_local_over_datasets: ProcessorInterface = process_local_serial
+        process_local_in_shell: ProcessorInterface = ProcessLocalSerial()
+        process_local_in_dataset: ProcessorInterface = ProcessLocalSerial()
+        process_local_over_datasets: ProcessorInterface = ProcessLocalSerial()
     elif memory_availability == "low":
         process_local_in_shell: ProcessorInterface = process_local
         process_local_in_dataset: ProcessorInterface = process_local
-        process_local_over_datasets: ProcessorInterface = process_local_serial
+        process_local_over_datasets: ProcessorInterface = ProcessLocalSerial()
     elif memory_availability == "high":
         process_local_in_shell: ProcessorInterface = process_local
-        process_local_in_dataset: ProcessorInterface = process_local_serial
+        process_local_in_dataset: ProcessorInterface = ProcessLocalSerial()
         process_local_over_datasets: ProcessorInterface = process_local
 
     else:
@@ -1192,7 +1192,6 @@ def process_shell_multiple_models(
 
     time_shell_finish = time.time()
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
-    print(shell_log)
     update_log(shell_log, shell_log_path)
 
     shell_result: ShellResultInterface = ShellResult(
