@@ -57,7 +57,7 @@ ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 
 
 class XmapInterface(Protocol):
-    ...
+    xmap: CrystallographicGridInterface
 
 XmapsInterface = MutableMapping[DtagInterface, XmapInterface]
 
@@ -215,9 +215,15 @@ class ReflectionsInterface(Protocol):
 class PartitioningInterface(Protocol):
     inner_mask: CrystallographicGridInterface
 
+class UnitCellInterface(Protocol):
+    ...
+
 
 class CrystallographicGridInterface(Protocol):
-    ...
+    nu: int
+    nv: int
+    nw: int
+    unit_cell: UnitCellInterface
 
 class GridInterface(Protocol):
     partitioning: PartitioningInterface
@@ -230,7 +236,7 @@ AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 
 
 class ZmapInterface(Protocol):
-    ...
+    zmap: CrystallographicGridInterface
 
 ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
 
@@ -311,9 +317,15 @@ class ShellResultInterface(Protocol):
 
 ShellResultsInterface = Dict[float, ShellResultInterface]
 
+class BDCInterface(Protocol):
+    bdc: float
+
+    def __float__(self) -> float:
+        return self.bdc
+
 
 class EventInterface(Protocol):
-    ...
+    bdc: BDCInterface
 
 
 # class EventRankingInterface(Protocol):
@@ -322,6 +334,9 @@ class EventInterface(Protocol):
 
 class EventIDXInterface(Protocol):
     event_idx: int
+
+    def __int__(self) -> int:
+        ...
 
 class EventIDInterface(Protocol):
     dtag: DtagInterface

@@ -1,5 +1,3 @@
-from typing import *
-
 # 3rd party
 import numpy as np
 import gemmi
@@ -702,7 +700,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                          f"{event.cluster.values.size}"
                 print(string)
 
-                event_scores[event_id.event_idx.event_idx] = score
+                event_scores[event_id] = score
 
         time_event_scoring_finish = time.time()
 

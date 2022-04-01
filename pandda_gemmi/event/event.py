@@ -103,7 +103,7 @@ def save_event_map(
     ccp4.write_ccp4_map(str(path))
 
 
-def get_event_mask_indicies(zmap: ZmapInterface, cluster_positions_array: NDArrayInterface):
+def get_event_mask_indicies(zmap: ZmapInterface, cluster_positions_array: NDArrayInterface) -> NDArrayInterface:
     # cluster_positions_array = extrema_cart_coords_array[cluster_indicies]
     positions = PositionsArray(cluster_positions_array).to_positions()
     event_mask = gemmi.Int8Grid(*zmap.shape())
@@ -455,7 +455,7 @@ class Events:
             )
 
 
-def add_sites_to_events(event_dict: EventsInterface, sites):
+def add_sites_to_events(event_dict: EventsInterface, sites) -> EventsInterface:
 
         # Get the sites
         # all_clusterings_dict = {}

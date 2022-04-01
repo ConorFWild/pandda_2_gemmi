@@ -597,14 +597,18 @@ def analyse_model(
             structure_output_folder=output_dir,
             debug=debug
         )
-    elif score_events_func.tag == "autobuild":
-        raise NotImplementedError()
+    # elif score_events_func.tag == "autobuild":
+    #     raise NotImplementedError()
+
+    else:
+        raise Exception("No valid event selection score method!")
+
 
     model_log['score'] = {}
     model_log['noise'] = {}
 
-    for event_num, score in event_scores.items():
-        model_log['score'][int(event_num)] = float(score)
+    for event_id, score in event_scores.items():
+        model_log['score'][int(event_id.event_idx)] = float(score)
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
@@ -626,8 +630,8 @@ def analyse_model(
     model_log['score'] = {}
     model_log['noise'] = {}
 
-    for event_num, score in event_scores.items():
-        model_log['score'][int(event_num)] = float(score)
+    for event_id, score in event_scores.items():
+        model_log['score'][int(event_id.event_idx)] = float(score)
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     time_model_analysis_finish = time.time()
@@ -660,47 +664,6 @@ def analyse_model(
     
 
     return model_results
-
-
-@ray.remote
-def analyse_model_ray(
-        model,
-        model_number,
-        test_dtag,
-        dataset_xmap,
-        reference,
-        grid,
-        dataset_processed_dataset,
-        dataset_alignment,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
-        output_dir,
-        score_events_func,
-        debug=False
-):
-    return analyse_model(
-        model,
-        model_number,
-        test_dtag,
-        dataset_xmap,
-        reference,
-        grid,
-        dataset_processed_dataset,
-        dataset_alignment,
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        contour_level,
-        cluster_cutoff_distance_multiplier,
-        min_blob_volume,
-        min_blob_z_peak,
-        output_dir,
-        score_events_func,
-        debug
-    )
 
 
 def dump_and_load(ob, name):
