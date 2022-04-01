@@ -64,7 +64,8 @@ def rank_events_autobuild(
         if len(autobuild_results[event_id].scores) == 0:
             ranked_event_ids.append(event_id)
 
-    events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
+    # events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
+    events_ranked = [event_id for event_id in ranked_event_ids]
 
     return events_ranked
 

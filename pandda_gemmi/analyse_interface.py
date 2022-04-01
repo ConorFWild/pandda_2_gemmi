@@ -316,9 +316,10 @@ class EventInterface(Protocol):
     ...
 
 
-class EventRankingInterface(Protocol):
-    ...
+# class EventRankingInterface(Protocol):
+#     ...
 
+EventRankingInterface = List[EventIDInterface]
 
 class EventIDXInterface(Protocol):
     event_idx: int
@@ -745,7 +746,8 @@ class GetSiteTableInterface(Protocol):
 
 class GetEventTableInterface(Protocol):
     def __call__(self,
-                 events: Dict[EventIDInterface, EventInterface]
+                 events: Dict[EventIDInterface, EventInterface],
+                 event_ranking: EventRankingInterface,
                  ) -> EventTableInterface:
         ...
 

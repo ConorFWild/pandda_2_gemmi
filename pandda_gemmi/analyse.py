@@ -4,12 +4,10 @@ import traceback
 import time
 import pprint
 from functools import partial
-import multiprocessing as mp
 import json
 import pickle
 
 # Scientific python libraries
-from dask.distributed import Client
 import joblib
 
 import ray
@@ -23,8 +21,6 @@ from pandda_gemmi.edalignment.grid import GetGrid
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import (
-    Datasets,
-    Reference,
     StructureFactors,
     SmoothBFactors,
     DatasetsStatistics,
@@ -32,9 +28,7 @@ from pandda_gemmi.dataset import (
     GetDatasets,
     GetReferenceDataset,
 )
-from pandda_gemmi.edalignment import (Grid, GetGrid, Alignments, GetAlignments, from_unaligned_dataset_c,
-                                      from_unaligned_dataset_c_flat, from_unaligned_dataset_c_ray,
-                                      from_unaligned_dataset_c_flat_ray,
+from pandda_gemmi.edalignment import (GetGrid, GetAlignments, 
                                       LoadXmap, LoadXmapFlat
                                       )
 from pandda_gemmi.filters import (
@@ -51,52 +45,37 @@ from pandda_gemmi.filters import (
 from pandda_gemmi.comparators import (
     GetComparatorsHybrid, GetComparatorsHighResFirst, GetComparatorsHighResRandom, GetComparatorsHighRes,
     GetComparatorsCluster)
-from pandda_gemmi.comparators import get_multiple_comparator_sets
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
     save_json_log,
 )
 
 from pandda_gemmi.pandda_functions import (
-    process_local_serial,
-    process_local_joblib,
-    process_local_multiprocessing,
-    process_local_dask,
-    process_local_ray,
     get_dask_client,
     process_global_serial,
     process_global_dask,
     get_shells,
-    get_comparators_high_res_first,
     get_common_structure_factors,
 )
-from pandda_gemmi.event import Events, GetEventScoreInbuilt, add_sites_to_events
+from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
-    rank_events_size,
-    rank_events_autobuild,
     GetEventRankingAutobuild,
     GetEventRankingSize,
 )
 from pandda_gemmi.autobuild import (
-    autobuild_rhofit,
-    autobuild_rhofit_ray,
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
 )
 from pandda_gemmi.tables import (
-    EventTable,
     GetEventTable,
-    SiteTable,
     GetSiteTable,
 )
-from pandda_gemmi.fs import PanDDAFSModel, ShellDirs, GetPanDDAFSModel, GetShellDirs
+from pandda_gemmi.fs import GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
     analyse_model,
-    analyse_model_ray,
-    RayWrapper,
     ProcessLocalRay,
     ProcessLocalSerial,
 )
@@ -881,7 +860,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Rank the events to determine the order the are displated in
         with STDOUTManager('Ranking events...', f'\tDone!'):
             if pandda_args.rank_method == "size":
-                all_events_ranked = GetEventRankingSize()(all_events, grid)
+                event_ranking = GetEventRankingSize()(all_events, grid)
             elif pandda_args.rank_method == "size_delta":
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_size_delta()
@@ -893,7 +872,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if not pandda_args.autobuild:
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")
                 else:
-                    all_events_ranked: EventRankingInterface = GetEventRankingAutobuild()(
+                    event_ranking: EventRankingInterface = GetEventRankingAutobuild()(
                         all_events,
                         autobuild_results,
                         datasets,
@@ -929,7 +908,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Output a csv of the events
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
             # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
-            event_table: EventTableInterface = GetEventTable()(all_events, sites)
+            event_table: EventTableInterface = GetEventTable()(
+                all_events, 
+                sites,
+                event_ranking,
+                )
             event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table

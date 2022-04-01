@@ -130,9 +130,13 @@ def get_event_record_from_event_site(event: EventInterface, site_id: SiteIDInter
                 exclude_from_characterisation=False,
             )
 
-def get_event_table_from_events(events: EventsInterface, sites: SitesInterface) -> EventTableInterface:
+def get_event_table_from_events(
+    events: EventsInterface, 
+    sites: SitesInterface, 
+    event_ranking: EventRankingInterface,
+    ) -> EventTableInterface:
     records = []
-    for event_id in events:
+    for event_id in event_ranking:
         event = events[event_id]
         site_id = sites.event_to_site[event_id]
         event_record = get_event_record_from_event_site(event, site_id)
@@ -142,8 +146,8 @@ def get_event_table_from_events(events: EventsInterface, sites: SitesInterface) 
 
 
 class GetEventTable(GetEventTableInterface):
-    def __call__(self, events: EventsInterface, sites: SitesInterface) -> EventTableInterface:
-        return get_event_table_from_events(events, sites)
+    def __call__(self, events: EventsInterface, sites: SitesInterface, event_ranking: EventRankingInterface) -> EventTableInterface:
+        return get_event_table_from_events(events, sites, event_ranking)
 
 
 @dataclasses.dataclass()
