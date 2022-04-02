@@ -4,7 +4,6 @@ from pandda_gemmi.analyse_interface import ClusterIDInterface, DtagInterface, Ev
 from pandda_gemmi.common.dtag import Dtag
 
 
-
 @dataclasses.dataclass()
 class EventIDX(EventIDXInterface):
     event_idx: int
@@ -12,8 +11,8 @@ class EventIDX(EventIDXInterface):
     def __hash__(self):
         return hash(self.event_idx)
 
-    def __int__(self)-> int:
-        return self.event_idx
+    def __int__(self) -> int:
+        return int(self.event_idx)
 
 
 @dataclasses.dataclass()
@@ -25,7 +24,8 @@ class ClusterID(ClusterIDInterface):
         return hash((self.dtag, self.number))
 
     def __int__(self) -> int:
-        return self.number
+        return int(self.number)
+
 
 @dataclasses.dataclass()
 class EventID(EventIDInterface):
