@@ -496,7 +496,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
-    print(f"1-min(res.x)")
+    print(f"{1-min(res.x)}")
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
