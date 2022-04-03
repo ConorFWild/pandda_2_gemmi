@@ -249,9 +249,9 @@ def transform_structure(structure, translation, rotation_matrix):
 def score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
-    x = distance*x
-    y = distance*y
-    z = distance*z
+    # x = distance*x
+    # y = distance*y
+    # z = distance*z
 
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
@@ -400,7 +400,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         ),
         [
             # (-3, 3), (-3, 3), (-3, 3),
-            (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+            # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+                    (-6, 6), (-6, 6), (-6, 6),
             (0, 1), (0, 1), (0, 1)
         ],
     )
