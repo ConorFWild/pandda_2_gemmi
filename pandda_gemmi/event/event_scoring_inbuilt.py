@@ -454,7 +454,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         b = np.random.rand()
         c = np.random.rand()
 
-        x0 = np.ndarray((x, y, z, a ,b ,c))
+        x0 = np.array([x, y, z, a ,b ,c])
 
         scipy.optimize.minimize(
             lambda params: score_fit(
