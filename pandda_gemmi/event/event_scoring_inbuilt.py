@@ -246,7 +246,7 @@ def transform_structure(structure, translation, rotation_matrix):
     return structure_copy
 
 
-def score_fit_2(structure, grid, distance, params):
+def score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
     x_2 = distance*x
@@ -290,7 +290,7 @@ def score_fit_2(structure, grid, distance, params):
     return 1 - score
 
 
-def score_fit(structure, grid, distance, params):
+def DEP_score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
     x_2 = distance*x
@@ -442,6 +442,30 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
     # print(f"\t\t\tOptimisation result: {res.xl} {res.funl}")
     start_diff_ev = time.time()
+
+    for j in range(100):
+
+        distance = 12.0
+
+        x = (np.random.rand() - 0.5) * distance
+        y = (np.random.rand() - 0.5)* distance
+        z = (np.random.rand() - 0.5)* distance
+        a = np.random.rand()
+        b = np.random.rand()
+        c = np.random.rand()
+
+        x0 = (x, y, z, a ,b ,c)
+
+        scipy.optimize.minimize(
+            lambda params: score_fit(
+            probe_structure,
+            zmap_grid,
+            # 12.0,
+            1.0,
+            params,
+            ),
+                x0,
+        )
 
     for j in range(10):
         res = optimize.differential_evolution(
