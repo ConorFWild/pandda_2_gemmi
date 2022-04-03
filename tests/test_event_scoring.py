@@ -145,7 +145,7 @@ def main(autobuild_test_data_dir: str):
 
     print("Running tests...")
 
-    for dtag in sorted(dataset_dirs, key=lambda x: dataset_dirs[x].dtag):
+    for dtag in sorted(dataset_dirs, key=lambda x: dataset_dirs[x].dtag.dtag):
         print(f"\tTesting dtag: {dtag}")
         dataset_dir = dataset_dirs[dtag]
 
