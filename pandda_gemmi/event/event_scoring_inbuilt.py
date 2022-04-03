@@ -443,6 +443,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # print(f"\t\t\tOptimisation result: {res.xl} {res.funl}")
     start_diff_ev = time.time()
 
+    scores = []
     for j in range(100):
 
         distance = 12.0
@@ -466,12 +467,13 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             ),
                 x0,
         )
+        scores.append(res.x)
 
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
 
+    print(f"{1-min(res.x)}")
 
-    scores = []
     for j in range(10):
         res = optimize.differential_evolution(
             lambda params: score_fit(
@@ -492,7 +494,6 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         finish_diff_ev = time.time()
         # TODO: back to debug
         # if debug:
-        scores.append(res.x)
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
