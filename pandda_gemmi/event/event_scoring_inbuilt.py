@@ -432,21 +432,21 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
 
     # Get optimised fit
-    x, y, z, rx, ry, rz = res.x
-    rotation = spsp.transform.Rotation.from_euler(
-        "xyz",
-        [
-            rx * 360,
-            ry * 360,
-            rz * 360,
-        ],
-        degrees=True)
-    rotation_matrix: np.ndarray = rotation.as_matrix()
-    optimised_structure = transform_structure(
-        probe_structure,
-        [x, y, z],
-        rotation_matrix
-    )
+        x, y, z, rx, ry, rz = res.x
+        rotation = spsp.transform.Rotation.from_euler(
+            "xyz",
+            [
+                rx * 360,
+                ry * 360,
+                rz * 360,
+            ],
+            degrees=True)
+        rotation_matrix: np.ndarray = rotation.as_matrix()
+        optimised_structure = transform_structure(
+            probe_structure,
+            [x, y, z],
+            rotation_matrix
+        )
 
     # TODO: Remove althogether
     # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
