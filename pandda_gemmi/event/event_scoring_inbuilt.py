@@ -470,9 +470,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         scores.append(res.x)
 
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-        print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
-    print(f"{1-min(res.x)}")
+    print(f"{1-min(scores)}")
 
     for j in range(10):
         res = optimize.differential_evolution(
