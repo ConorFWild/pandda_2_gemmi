@@ -444,35 +444,35 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     start_diff_ev = time.time()
 
     scores = []
-    for j in range(1000):
-
-        distance = 12.0
-
-        x = (np.random.rand() - 0.5) * distance
-        y = (np.random.rand() - 0.5)* distance
-        z = (np.random.rand() - 0.5)* distance
-        a = np.random.rand()
-        b = np.random.rand()
-        c = np.random.rand()
-
-        x0 = np.array([x, y, z, a ,b ,c])
-
-        res = scipy.optimize.minimize(
-            lambda params: score_fit(
-            probe_structure,
-            zmap_grid,
-            1.0,
-            params,
-            ),
-                x0,
-            method="nelder-mead"
-        )
-        scores.append(res.fun)
-
-        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
-
-    print(f"{1-min(scores)}")
+    # for j in range(1000):
+    #
+    #     distance = 12.0
+    #
+    #     x = (np.random.rand() - 0.5) * distance
+    #     y = (np.random.rand() - 0.5)* distance
+    #     z = (np.random.rand() - 0.5)* distance
+    #     a = np.random.rand()
+    #     b = np.random.rand()
+    #     c = np.random.rand()
+    #
+    #     x0 = np.array([x, y, z, a ,b ,c])
+    #
+    #     res = scipy.optimize.minimize(
+    #         lambda params: score_fit(
+    #         probe_structure,
+    #         zmap_grid,
+    #         1.0,
+    #         params,
+    #         ),
+    #             x0,
+    #         method="nelder-mead"
+    #     )
+    #     scores.append(res.fun)
+    #
+    #     # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+    #     print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+    #
+    # print(f"{1-min(scores)}")
 
     for j in range(10):
         res = optimize.differential_evolution(
@@ -491,13 +491,14 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             ],
             # popsize=30,
         )
+        scores.append(res.fun)
         finish_diff_ev = time.time()
         # TODO: back to debug
         # if debug:
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
-    print(f"{1-min(res.x)}")
+    print(f"{1-min(scores)}")
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
