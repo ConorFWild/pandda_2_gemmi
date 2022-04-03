@@ -122,12 +122,18 @@ class PanDDAConsole:
 
         for event_id, autobuild_result in autobuild_results.items():
             selected_build = autobuild_result.selected_fragment_path
-            selected_build_score = autobuild_result.scores[selected_build]
+
+            if not selected_build:
+                build_score_string = "None"
+            else:
+
+                selected_build_score = autobuild_result.scores[selected_build]
+                build_score_string = str(round(selected_build_score, 2))
 
             event_class_table.add_row(
                 str(event_id.dtag.dtag),
                 str(event_id.event_idx.event_idx),
-                str(round(selected_build_score, 2)),
+                build_score_string,
             )
 
         self.console.print(event_class_table)
