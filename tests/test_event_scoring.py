@@ -11,7 +11,6 @@ from pandda_gemmi.autobuild import autobuild_rhofit, GetAutobuildResultRhofit
 from pandda_gemmi.event import GetEventScoreInbuilt
 
 
-
 @contextmanager
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
@@ -21,6 +20,7 @@ def suppress_stdout():
             yield
         finally:
             sys.stdout = old_stdout
+
 
 def unpickle(path: Path):
     with open(path, "rb") as f:
@@ -55,7 +55,6 @@ class DtagAutobuildTestDataDir:
                     model: ModelInterface = unpickle(model_path)
                     self.models[model_num] = model
 
-
         self.events: Dict[int, EventsInterface] = {}
         for model_path in path.glob("events_*.pickle"):
             matchs = re.findall(
@@ -88,7 +87,6 @@ def score_dataset_models(
         test_dtag: DtagInterface,
         dataset_dir: DtagAutobuildTestDataDir,
 ) -> DatasetModelsScoreResult:
-
     # For each model, run event scoring, and collect results
     model_result_dict = {}
 
