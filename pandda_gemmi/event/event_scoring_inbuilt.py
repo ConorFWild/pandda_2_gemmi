@@ -444,7 +444,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     start_diff_ev = time.time()
 
     scores = []
-    for j in range(100):
+    for j in range(1000):
 
         distance = 12.0
 
