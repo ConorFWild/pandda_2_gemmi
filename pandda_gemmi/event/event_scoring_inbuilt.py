@@ -456,7 +456,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
         x0 = np.array([x, y, z, a ,b ,c])
 
-        scipy.optimize.minimize(
+        res = scipy.optimize.minimize(
             lambda params: score_fit(
             probe_structure,
             zmap_grid,
@@ -466,6 +466,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             ),
                 x0,
         )
+
+        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
 
     for j in range(10):
         res = optimize.differential_evolution(
