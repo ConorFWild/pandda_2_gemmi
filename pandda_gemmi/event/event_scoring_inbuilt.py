@@ -336,7 +336,7 @@ def score_fit(structure, grid, distance, params):
     )
 
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
-    return 1 - score
+    return score
 
 
 def get_probe_structure(structure):
