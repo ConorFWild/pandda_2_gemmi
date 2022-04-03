@@ -145,8 +145,9 @@ def main(autobuild_test_data_dir: str):
 
     print("Running tests...")
 
-    for dtag, dataset_dir in dataset_dirs.items():
+    for dtag in sorted(dataset_dirs):
         print(f"\tTesting dtag: {dtag}")
+        dataset_dir = dataset_dirs[dtag]
 
         alignment = alignments[dtag]
         # print(f"\tdataset_dir: {dataset_dir.models}")
