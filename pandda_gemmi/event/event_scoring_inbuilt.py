@@ -408,6 +408,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
                     (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
             (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
         ],
+        popsize=30,
     )
     finish_diff_ev = time.time()
     # TODO: back to debug
