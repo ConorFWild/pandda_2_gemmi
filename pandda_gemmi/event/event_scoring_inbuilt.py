@@ -369,24 +369,24 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\t\tOptimizing structure fit...")
 
     # start_shgo = time.time()
-    res = optimize.shgo(
-        lambda params: score_fit(
-            probe_structure,
-            zmap_grid,
-            # 12,
-            1.0,
-            params
-        ),
-        [
-            # (-3, 3), (-3, 3), (-3, 3),
-            (-6.5, 6), (-6.5, 6), (-6.5, 6),
-            # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
-            (0, 1), (0, 1), (0, 1)
-        ],
-        sampling_method='sobol',
-        n=64,
-        iters=5,
-    )
+    # res = optimize.shgo(
+    #     lambda params: score_fit(
+    #         probe_structure,
+    #         zmap_grid,
+    #         # 12,
+    #         1.0,
+    #         params
+    #     ),
+    #     [
+    #         # (-3, 3), (-3, 3), (-3, 3),
+    #         (-6.5, 6), (-6.5, 6), (-6.5, 6),
+    #         # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+    #         (0, 1), (0, 1), (0, 1)
+    #     ],
+    #     sampling_method='sobol',
+    #     n=64,
+    #     iters=5,
+    # )
     # finish_shgo=time.time()
     # if debug:
     #     print(f"\t\t\tSHGO in: {finish_shgo-start_shgo}")
@@ -394,27 +394,28 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # print(f"\t\t\tOptimisation result: {res.xl} {res.funl}")
     start_diff_ev = time.time()
 
-    # res = optimize.differential_evolution(
-    #     lambda params: score_fit(
-    #         probe_structure,
-    #         zmap_grid,
-    #         # 12.0,
-    #         1.0,
-    #         params
-    #     ),
-    #     [
-    #         # (-3, 3), (-3, 3), (-3, 3),
-    #         # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
-    #                 (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
-    #         (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
-    #     ],
-    #     popsize=30,
-    # )
-    finish_diff_ev = time.time()
-    # TODO: back to debug
-    # if debug:
-    print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-    print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
+    for j in range(10):
+        res = optimize.differential_evolution(
+            lambda params: score_fit(
+                probe_structure,
+                zmap_grid,
+                # 12.0,
+                1.0,
+                params
+            ),
+            [
+                # (-3, 3), (-3, 3), (-3, 3),
+                # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+                        (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+            ],
+            # popsize=30,
+        )
+        finish_diff_ev = time.time()
+        # TODO: back to debug
+        # if debug:
+        print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
