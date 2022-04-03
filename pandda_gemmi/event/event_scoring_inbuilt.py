@@ -246,7 +246,7 @@ def transform_structure(structure, translation, rotation_matrix):
     return structure_copy
 
 
-def score_fit(structure, grid, distance, params):
+def score_fit_2(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
     x_2 = distance*x
@@ -285,6 +285,55 @@ def score_fit(structure, grid, distance, params):
     positive_score = sum([1 if val > 0.5 else 0 for val in vals])
     penalty = sum([-1 if val < -0.0 else 0 for val in vals])
     score = (positive_score + penalty) / n
+
+    # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
+    return 1 - score
+
+
+def score_fit(structure, grid, distance, params):
+    x, y, z, rx, ry, rz = params
+
+    x_2 = distance*x
+    y_2 = distance*y
+    z_2 = distance*z
+
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True)
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+    structure_copy = transform_structure(
+        structure,
+        [x_2, y_2, z_2],
+        rotation_matrix
+    )
+
+    vals = []
+    n = 0
+    for model in structure_copy:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        vals.append(
+                            grid.interpolate_value(
+                                atom.pos
+                            )
+                        )
+                        n = n + 1
+
+    # positive_score = sum([1 if val > 0.5 else 0 for val in vals])
+    # penalty = sum([-1 if val < -0.0 else 0 for val in vals])
+    # score = (positive_score + penalty) / n
+
+    score = EXPERIMENTAL_score_structure_signal_to_noise_density(
+        structure,
+        grid,
+    )
 
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
     return 1 - score
