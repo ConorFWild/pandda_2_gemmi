@@ -452,8 +452,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
 
     # Score, by including the noise as well as signal
-    if debug:
-        print(f"\t\t\t\tScoring optimized result by signal to noise")
+    # if debug:
+    #     print(f"\t\t\t\tScoring optimized result by signal to noise")
 
     # score, log = score_structure_signal_to_noise_density(
     #     optimised_structure,
@@ -461,11 +461,12 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # )
     # score = float(res.fun) / (int(cluster.values.size) + 1)
 
-    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-        optimised_structure,
-        zmap_grid,
-    )
-    # score = 1-float(res.fun)
+        score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+            optimised_structure,
+            zmap_grid,
+        )
+        # score = 1-float(res.fun)
+        print(f"\t\t\t\tScore: {score}")
 
     if debug:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
