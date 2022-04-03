@@ -467,7 +467,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             ),
                 x0,
         )
-        scores.append(res.x)
+        scores.append(res.fun)
 
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
