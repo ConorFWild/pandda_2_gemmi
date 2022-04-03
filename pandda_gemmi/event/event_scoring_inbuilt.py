@@ -331,7 +331,7 @@ def score_fit(structure, grid, distance, params):
     # score = (positive_score + penalty) / n
 
     score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-        structure,
+        structure_copy,
         grid,
     )
 
