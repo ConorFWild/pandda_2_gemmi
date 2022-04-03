@@ -470,6 +470,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
 
+
+    scores = []
     for j in range(10):
         res = optimize.differential_evolution(
             lambda params: score_fit(
@@ -490,8 +492,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         finish_diff_ev = time.time()
         # TODO: back to debug
         # if debug:
+        scores.append(res.x)
         print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-        print(f"\t\t\t\tOptimisation result: {res.x} {res.fun}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+
+    print(min(res.x))
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
@@ -508,21 +513,21 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
 
     # Get optimised fit
-        x, y, z, rx, ry, rz = res.x
-        rotation = spsp.transform.Rotation.from_euler(
-            "xyz",
-            [
-                rx * 360,
-                ry * 360,
-                rz * 360,
-            ],
-            degrees=True)
-        rotation_matrix: np.ndarray = rotation.as_matrix()
-        optimised_structure = transform_structure(
-            probe_structure,
-            [x, y, z],
-            rotation_matrix
-        )
+    x, y, z, rx, ry, rz = res.x
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True)
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+    optimised_structure = transform_structure(
+        probe_structure,
+        [x, y, z],
+        rotation_matrix
+    )
 
     # TODO: Remove althogether
     # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
@@ -537,12 +542,12 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     # )
     # score = float(res.fun) / (int(cluster.values.size) + 1)
 
-        score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-            optimised_structure,
-            zmap_grid,
-        )
-        # score = 1-float(res.fun)
-        print(f"\t\t\t\tScore: {score}")
+    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+        optimised_structure,
+        zmap_grid,
+    )
+    # score = 1-float(res.fun)
+    print(f"\t\t\t\tScore: {score}")
 
     if debug:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
