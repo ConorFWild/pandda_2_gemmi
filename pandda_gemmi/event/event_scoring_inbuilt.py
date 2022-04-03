@@ -461,11 +461,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             lambda params: score_fit(
             probe_structure,
             zmap_grid,
-            # 12.0,
             1.0,
             params,
             ),
                 x0,
+            method="nelder-mead"
         )
         scores.append(res.fun)
 
