@@ -98,23 +98,23 @@ def score_dataset_models(
         model = dataset_dir.models[model_number]
         events = dataset_dir.events[model_number]
         print(f"\t\tAnalysing model: {model_number}")
-        with suppress_stdout():
-            event_score = GetEventScoreInbuilt()(
-                test_dtag,
-                model_number,
-                processed_dataset,
-                dataset_xmap,
-                events,
-                model,
-                grid,
-                dataset_alignment,
-                max_site_distance_cutoff=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
-                min_bdc=constants.ARGS_MIN_BDC_DEFAULT,
-                max_bdc=constants.ARGS_MAX_BDC_DEFAULT,
-                reference=reference,
-                structure_output_folder=None,
-                debug=False
-            )
+        # with suppress_stdout():
+        event_score = GetEventScoreInbuilt()(
+            test_dtag,
+            model_number,
+            processed_dataset,
+            dataset_xmap,
+            events,
+            model,
+            grid,
+            dataset_alignment,
+            max_site_distance_cutoff=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
+            min_bdc=constants.ARGS_MIN_BDC_DEFAULT,
+            max_bdc=constants.ARGS_MAX_BDC_DEFAULT,
+            reference=reference,
+            structure_output_folder=None,
+            debug=False
+        )
 
         print(f"\t\t\tevent score: {event_score}")
 
