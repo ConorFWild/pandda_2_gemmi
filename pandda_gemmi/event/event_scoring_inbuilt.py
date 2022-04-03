@@ -373,7 +373,8 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         lambda params: score_fit(
             probe_structure,
             zmap_grid,
-            12,
+            # 12,
+            1.0,
             params
         ),
         [
