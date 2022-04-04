@@ -518,58 +518,60 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
         print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
+
+        # start_basin = time.time()
+        # res = optimize.basinhopping(
+        #     lambda params: score_fit(
+        #         probe_structure,
+        #         zmap_grid,
+        #         params
+        #     ),
+        #     x0=[0.0,0.0,0.0,0.0,0.0,0.0],
+        # )
+        # finish_basin = time.time()
+        # if debug:
+        #     print(f"\t\t\tbasin in: {finish_basin-start_basin}")
+        #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+
+        # Get optimised fit
+        x, y, z, rx, ry, rz = res.x
+        rotation = spsp.transform.Rotation.from_euler(
+            "xyz",
+            [
+                rx * 360,
+                ry * 360,
+                rz * 360,
+            ],
+            degrees=True)
+        rotation_matrix: np.ndarray = rotation.as_matrix().T
+        optimised_structure = transform_structure(
+            probe_structure,
+            [x, y, z],
+            rotation_matrix
+        )
+
+        # TODO: Remove althogether
+        # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
+
+        # Score, by including the noise as well as signal
+        # if debug:
+        #     print(f"\t\t\t\tScoring optimized result by signal to noise")
+
+        # score, log = score_structure_signal_to_noise_density(
+        #     optimised_structure,
+        #     zmap_grid,
+        # )
+        # score = float(res.fun) / (int(cluster.values.size) + 1)
+
+        score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+            optimised_structure,
+            zmap_grid,
+        )
+        # score = 1-float(res.fun)
+        print(f"\t\t\t\tScore: {score}")
+
     print(f"{1-min(scores)}")
 
-    # start_basin = time.time()
-    # res = optimize.basinhopping(
-    #     lambda params: score_fit(
-    #         probe_structure,
-    #         zmap_grid,
-    #         params
-    #     ),
-    #     x0=[0.0,0.0,0.0,0.0,0.0,0.0],
-    # )
-    # finish_basin = time.time()
-    # if debug:
-    #     print(f"\t\t\tbasin in: {finish_basin-start_basin}")
-    #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
-
-    # Get optimised fit
-    x, y, z, rx, ry, rz = res.x
-    rotation = spsp.transform.Rotation.from_euler(
-        "xyz",
-        [
-            rx * 360,
-            ry * 360,
-            rz * 360,
-        ],
-        degrees=True)
-    rotation_matrix: np.ndarray = rotation.as_matrix().T
-    optimised_structure = transform_structure(
-        probe_structure,
-        [x, y, z],
-        rotation_matrix
-    )
-
-    # TODO: Remove althogether
-    # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
-
-    # Score, by including the noise as well as signal
-    # if debug:
-    #     print(f"\t\t\t\tScoring optimized result by signal to noise")
-
-    # score, log = score_structure_signal_to_noise_density(
-    #     optimised_structure,
-    #     zmap_grid,
-    # )
-    # score = float(res.fun) / (int(cluster.values.size) + 1)
-
-    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
-        optimised_structure,
-        zmap_grid,
-    )
-    # score = 1-float(res.fun)
-    print(f"\t\t\t\tScore: {score}")
 
     if debug:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
