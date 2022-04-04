@@ -122,7 +122,7 @@ void add_grid(py::module& m, const std::string& name) {
               vals.push_back(val);
             }
           return vals;
-    }, py::arg().noconvert(), py::arg())
+    }, py::arg().noconvert())
     .def("tricubic_interpolation",
          (double (Gr::*)(const Fractional&) const) &Gr::tricubic_interpolation)
     .def("tricubic_interpolation",
