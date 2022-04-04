@@ -338,6 +338,7 @@ def score_fit_array(structure_array, grid, distance, params):
     #             pos
     #         )
     #     )
+    print(type(transformed_structure_array))
     vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
 
     n = structure_array.shape[0]
