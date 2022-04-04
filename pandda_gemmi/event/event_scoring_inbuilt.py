@@ -330,14 +330,15 @@ def score_fit_array(structure_array, grid, distance, params):
         rotation_matrix
     )
 
-    vals = []
-    for row in transformed_structure_array:
-        pos = gemmi.Position(row[0], row[1], row[2])
-        vals.append(
-            grid.interpolate_value(
-                pos
-            )
-        )
+    # vals = []
+    # for row in transformed_structure_array:
+    #     pos = gemmi.Position(row[0], row[1], row[2])
+    #     vals.append(
+    #         grid.interpolate_value(
+    #             pos
+    #         )
+    #     )
+    vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
 
     n = structure_array.shape[0]
 
