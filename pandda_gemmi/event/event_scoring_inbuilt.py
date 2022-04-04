@@ -492,6 +492,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
     structure_array = np.array(structure_positions, dtype=np.float32)
 
     scores = []
+    scores_signal_to_noise = []
     for j in range(10):
         start_diff_ev = time.time()
 
@@ -515,8 +516,8 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
         finish_diff_ev = time.time()
         # TODO: back to debug
         # if debug:
-        print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        # print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
 
         # start_basin = time.time()
@@ -567,10 +568,13 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
             optimised_structure,
             zmap_grid,
         )
-        # score = 1-float(res.fun)
-        print(f"\t\t\t\tScore: {score}")
 
-    print(f"{1-min(scores)}")
+        scores_signal_to_noise.append(score)
+        # score = 1-float(res.fun)
+        # print(f"\t\t\t\tScore: {score}")
+
+    print(f"Best fit score: {1-min(scores)}")
+    print(f"Best signal to noise score: {1-min(scores)}")
 
 
     if debug:
