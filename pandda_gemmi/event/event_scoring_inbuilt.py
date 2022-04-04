@@ -476,7 +476,6 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
     if debug:
         print(f"\t\t\t\tOptimizing structure fit...")
 
-    start_diff_ev = time.time()
 
     structure_positions = []
 
@@ -492,6 +491,8 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
 
     scores = []
     for j in range(10):
+        start_diff_ev = time.time()
+
         res = optimize.differential_evolution(
             lambda params: score_fit_array(
                 structure_array,
@@ -512,7 +513,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
         finish_diff_ev = time.time()
         # TODO: back to debug
         # if debug:
-        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
 
     print(f"{1-min(scores)}")
