@@ -262,6 +262,9 @@ def score_fit(structure, grid, distance, params):
         ],
         degrees=True)
     rotation_matrix: np.ndarray = rotation.as_matrix()
+
+
+
     structure_copy = transform_structure(
         structure,
         [x_2, y_2, z_2],
@@ -281,6 +284,75 @@ def score_fit(structure, grid, distance, params):
                             )
                         )
                         n = n + 1
+
+    positive_score = sum([1 if val > 0.5 else 0 for val in vals])
+    penalty = sum([-1 if val < -0.0 else 0 for val in vals])
+    score = (positive_score + penalty) / n
+
+    # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
+    return 1 - score
+
+def transform_structure_array(
+        structure_array,
+        transform_array,
+        rotation_matrix,
+                                      ):
+    structure_mean = np.mean(structure_array, axis=0)
+
+    demeaned_structure = structure_array-structure_mean
+
+    rotated_structure = np.matmul(demeaned_structure, rotation_matrix)
+
+    transformed_array = rotated_structure + structure_mean + transform_array
+
+    return transformed_array
+
+def score_fit_array(structure_array, grid, distance, params):
+    x, y, z, rx, ry, rz = params
+
+    x_2 = distance*x
+    y_2 = distance*y
+    z_2 = distance*z
+
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True)
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+
+    transformed_structure_array = transform_structure_array(
+        structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+
+    vals = []
+    for row in transformed_structure_array:
+        pos = gemmi.Position(row[0], row[1], row[2])
+        vals.append(
+            grid.interpolate_value(
+                pos
+            )
+        )
+
+    # n = 0
+    # for model in structure_copy:
+    #     for chain in model:
+    #         for residue in chain:
+    #             for atom in residue:
+    #                 if atom.element.name != "H":
+    #                     vals.append(
+    #                         grid.interpolate_value(
+    #                             atom.pos
+    #                         )
+    #                     )
+    #                     n = n + 1
+
+    n = structure_array.shape[0]
 
     positive_score = sum([1 if val > 0.5 else 0 for val in vals])
     penalty = sum([-1 if val < -0.0 else 0 for val in vals])
@@ -393,6 +465,130 @@ def get_probe_structure(structure):
     # print(f"Number of real atoms: {len(verticies)}")
     # print(f"Number of virtual atoms: {len(edges)}")
     return structure_clone
+
+
+
+def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
+    # Center the conformer at the cluster
+    centroid_cart = cluster.centroid
+
+    if debug:
+        print(f"\t\t\t\tCartesian centroid of event is: {centroid_cart}")
+
+    centered_structure = center_structure(
+        conformer,
+        centroid_cart,
+    )
+
+    # Get the probe structure
+    probe_structure = get_probe_structure(centered_structure)
+
+    if debug:
+        print(f"\t\t\t\tprobe structure: {probe_structure}")
+
+    # Optimise
+    if debug:
+        print(f"\t\t\t\tOptimizing structure fit...")
+
+    start_diff_ev = time.time()
+
+    structure_positions = []
+
+    for model in probe_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        pos = atom.pos
+                        structure_positions.append([pos.x, pos.y, pos.z])
+
+    structure_array = np.array([structure_positions])
+
+    scores = []
+    for j in range(10):
+        res = optimize.differential_evolution(
+            lambda params: score_fit_array(
+                structure_array,
+                zmap_grid,
+                # 12.0,
+                1.0,
+                params
+            ),
+            [
+                # (-3, 3), (-3, 3), (-3, 3),
+                # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+                        (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+            ],
+            # popsize=30,
+        )
+        scores.append(res.fun)
+        finish_diff_ev = time.time()
+        # TODO: back to debug
+        # if debug:
+        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+
+    print(f"{1-min(scores)}")
+
+    # start_basin = time.time()
+    # res = optimize.basinhopping(
+    #     lambda params: score_fit(
+    #         probe_structure,
+    #         zmap_grid,
+    #         params
+    #     ),
+    #     x0=[0.0,0.0,0.0,0.0,0.0,0.0],
+    # )
+    # finish_basin = time.time()
+    # if debug:
+    #     print(f"\t\t\tbasin in: {finish_basin-start_basin}")
+    #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+
+    # Get optimised fit
+    x, y, z, rx, ry, rz = res.x
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True)
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+    optimised_structure = transform_structure(
+        probe_structure,
+        [x, y, z],
+        rotation_matrix
+    )
+
+    # TODO: Remove althogether
+    # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
+
+    # Score, by including the noise as well as signal
+    # if debug:
+    #     print(f"\t\t\t\tScoring optimized result by signal to noise")
+
+    # score, log = score_structure_signal_to_noise_density(
+    #     optimised_structure,
+    #     zmap_grid,
+    # )
+    # score = float(res.fun) / (int(cluster.values.size) + 1)
+
+    score, log = EXPERIMENTAL_score_structure_signal_to_noise_density(
+        optimised_structure,
+        zmap_grid,
+    )
+    # score = 1-float(res.fun)
+    print(f"\t\t\t\tScore: {score}")
+
+    if debug:
+        print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
+        print(f"\t\t\t\tModeled atoms % is: {float(1 - res.fun)}")
+        print(f"\t\t\t\tScore is: {score}")
+        # print(f"\t\t\tScoring log results are: {log}")
+
+    return float(score), optimised_structure
 
 
 def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
@@ -568,7 +764,8 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
         print(f"\t\t\t\tScoring conformers")
     results = {}
     for conformer_id, conformer in fragment_conformers.items():
-        results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
+        # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
+        results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
 
     scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     structures = {conformer_id: result[1] for conformer_id, result in results.items()}

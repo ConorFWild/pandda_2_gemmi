@@ -78,6 +78,64 @@ Grid<float> interpolate_points(
 
 }
 
+// int num_atoms(Structure structure){
+//   int n = 0;
+
+//   for (gemmi::Model& model : structure.models)
+//       for (gemmi::Chain& chain : model.chains)
+//         for (gemmi::Residue& res : chain.residues)
+//           for (gemmi::Atom& atom : res.atoms)
+//             if (atom.name != "H") {
+//               n = n+1;            
+//               }
+        
+
+//   return n;
+// }
+
+// Structure transform_structure(
+//   Structure& structure, 
+//     std::vector<float>& translation,
+//   std::vector<std::vector<float>>& rotation,
+//   )
+// {
+//   Structure structure_copy = new Structure(structure);
+
+//   std::vector<float> structure_mean = get_structure_mean(structure_copy);
+
+
+
+//   return structure_copy;
+// }
+
+// std::vector<float> transform_and_interpolate(
+//   Structure& structure,
+//   Grid<float>& xmap,
+//   std::vector<float>& translation,
+//   std::vector<std::vector<float>>& rotation,
+// )
+// {
+//   Structure structure_copy = transform_structure(structure, translation, rotation);
+
+//   int n = num_atoms(structure_copy);
+
+//   std::vector<float> scores;
+
+//   for (gemmi::Model& model : structure_copy.models)
+//       for (gemmi::Chain& chain : model.chains)
+//         for (gemmi::Residue& res : chain.residues)
+//           for (gemmi::Atom& atom : res.atoms)
+//             if (atom.name != "H") {
+//               float score = xmap.interpolate_value(atom.pos); 
+//               scores.push_back(score);   
+//               }
+
+//   return scores;
+
+// }
+
+
+
 void add_custom(py::module& m) {
       m.def(
         "interpolate_points",
