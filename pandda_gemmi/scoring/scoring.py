@@ -240,7 +240,7 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     # TODO: remove if doesn't work
     signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
 
-    print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
+    print(f"\t\t\tSignal {_signal} / {len(signal_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
           f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
     # _score = ((_signal / len(signal_samples)) - np.sqrt(_noise / len(noise_samples))) - np.sqrt(
