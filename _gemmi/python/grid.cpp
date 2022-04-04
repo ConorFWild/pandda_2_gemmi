@@ -111,6 +111,18 @@ void add_grid(py::module& m, const std::string& name) {
               r(i, j, k) = self.interpolate_value(pos);
             }
     }, py::arg().noconvert(), py::arg())
+        .def("interpolate_values_from_pos_array",
+         [](const Gr& self, py::array_t<T> arr) {
+          std::vector<float> vals;
+          auto r = arr.template mutable_unchecked<2>();
+          for (int i = 0; i < r.shape(0); ++i)
+            for (int j = 0; j < r.shape(1); ++j){
+              Position pos(r(i, 0), r(i, 1), r(i, 2));
+              val = self.interpolate_value(pos);
+              vals.push_back(val);
+            }
+          return vals;
+    }, py::arg().noconvert(), py::arg())
     .def("tricubic_interpolation",
          (double (Gr::*)(const Fractional&) const) &Gr::tricubic_interpolation)
     .def("tricubic_interpolation",
