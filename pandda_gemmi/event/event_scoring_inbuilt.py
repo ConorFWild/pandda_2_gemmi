@@ -542,7 +542,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
             rz * 360,
         ],
         degrees=True)
-    rotation_matrix: np.ndarray = rotation.as_matrix()
+    rotation_matrix: np.ndarray = rotation.as_matrix().T
     optimised_structure = transform_structure(
         probe_structure,
         [x, y, z],
