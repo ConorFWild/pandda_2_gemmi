@@ -574,7 +574,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
         # print(f"\t\t\t\tScore: {score}")
 
     print(f"Best fit score: {1-min(scores)}")
-    print(f"Best signal to noise score: {1-min(scores_signal_to_noise)}")
+    print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
 
 
     if debug:
