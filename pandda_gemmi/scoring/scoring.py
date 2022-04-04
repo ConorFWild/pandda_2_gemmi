@@ -247,6 +247,6 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     #     signal_overlapping_protein_penalty / len(signal_samples))
 
     _score = (_signal / len(signal_samples)) - (_noise / len(noise_samples)) - (signal_overlapping_protein_penalty /
-                                                                                len(signal_samples)
+                                                                                len(signal_samples))
 
     return _score, rescore_log
