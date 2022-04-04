@@ -338,7 +338,7 @@ def score_fit_array(structure_array, grid, distance, params):
     #             pos
     #         )
     #     )
-    print(type(transformed_structure_array))
+    # print(type(transformed_structure_array))
     vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
 
     n = structure_array.shape[0]
@@ -489,7 +489,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
                         pos = atom.pos
                         structure_positions.append([pos.x, pos.y, pos.z])
 
-    structure_array = np.array(structure_positions)
+    structure_array = np.array(structure_positions, dtype=np.float32)
 
     scores = []
     for j in range(10):
