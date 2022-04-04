@@ -230,7 +230,8 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     rescore_log["noise_log"] = noise_log
 
     # Get fraction of bonds/atoms which are signal
-    _signal, signal_log = EXPERIMENTAL_signal_from_samples(structure_samples, xmap, 0.5)
+    # _signal, signal_log = EXPERIMENTAL_signal_from_samples(structure_samples, xmap, 0.5)
+    _signal, signal_log = EXPERIMENTAL_signal_from_samples(signal_samples, xmap, 0.5)
     rescore_log["signal"] = _signal
     rescore_log["signal_log"] = signal_log
 
