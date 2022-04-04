@@ -339,26 +339,12 @@ def score_fit_array(structure_array, grid, distance, params):
             )
         )
 
-    # n = 0
-    # for model in structure_copy:
-    #     for chain in model:
-    #         for residue in chain:
-    #             for atom in residue:
-    #                 if atom.element.name != "H":
-    #                     vals.append(
-    #                         grid.interpolate_value(
-    #                             atom.pos
-    #                         )
-    #                     )
-    #                     n = n + 1
-
     n = structure_array.shape[0]
 
     positive_score = sum([1 if val > 0.5 else 0 for val in vals])
     penalty = sum([-1 if val < -0.0 else 0 for val in vals])
     score = (positive_score + penalty) / n
 
-    # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
     return 1 - score
 
 
@@ -502,7 +488,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
                         pos = atom.pos
                         structure_positions.append([pos.x, pos.y, pos.z])
 
-    structure_array = np.array([structure_positions])
+    structure_array = np.array(structure_positions)
 
     scores = []
     for j in range(10):
