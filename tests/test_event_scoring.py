@@ -101,7 +101,7 @@ def score_dataset_models(
     processed_dataset = dataset_dir.dataset
     dataset_alignment = alignment
 
-    model_scores = {}
+    model_results = {}
     for model_number in sorted(dataset_dir.models):
         model = dataset_dir.models[model_number]
         events = dataset_dir.events[model_number]
@@ -125,10 +125,11 @@ def score_dataset_models(
         )
 
         if len(event_scores_dict) >0:
-            highest_score = max(
+            highest_score_key = max(
                 event_scores_dict,
                 key=lambda event_id: event_scores_dict[event_id],
             )
+            highest_score = event_scores_dict[highest_score_key]
         else:
             highest_score = 0.0
 
@@ -137,16 +138,16 @@ def score_dataset_models(
             highest_score,
         )
 
-        model_scores[model_number] = model_result
+        model_results[model_number] = model_result
 
         # print(f"\t\t\tevent score: {event_scores}")
 
     selected_model = max(
-        model_scores,
-        key=lambda module_number: model_scores[model_number].highest_score,
+        model_results,
+        key=lambda module_number: model_results[model_number].highest_score,
     )
 
-    return DatasetModelsScoreResult(model_scores, selected_model)
+    return DatasetModelsScoreResult(model_results, selected_model)
 
 
 def main(autobuild_test_data_dir: str):
