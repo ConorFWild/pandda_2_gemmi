@@ -71,12 +71,19 @@ class DtagAutobuildTestDataDir:
 
 
 class ModelResult:
-    ...
+    # score: float
+    def __init__(self, event_scores, highest_score):
+        self.event_scores = event_scores
+        self.highest_score = highest_score
 
 
 class DatasetModelsScoreResult:
-    model_results: Dict[int, ModelResult]
-    selected_model: int
+    # model_results: Dict[int, ModelResult]
+    # selected_model: int
+
+    def __init__(self, model_results, selected_model):
+        self.model_results = model_results
+        self.selected_model = selected_model
 
 
 def score_dataset_models(
@@ -94,12 +101,13 @@ def score_dataset_models(
     processed_dataset = dataset_dir.dataset
     dataset_alignment = alignment
 
+    model_scores = {}
     for model_number in sorted(dataset_dir.models):
         model = dataset_dir.models[model_number]
         events = dataset_dir.events[model_number]
         print(f"\t\tAnalysing model: {model_number}")
         # with suppress_stdout():
-        event_score = GetEventScoreInbuilt()(
+        event_scores_dict = GetEventScoreInbuilt()(
             test_dtag,
             model_number,
             processed_dataset,
@@ -116,7 +124,26 @@ def score_dataset_models(
             debug=False
         )
 
-        print(f"\t\t\tevent score: {event_score}")
+        highest_score = max(
+            event_scores_dict,
+            key=lambda event_id: event_scores_dict[event_id],
+        )
+
+        model_result = ModelResult(
+            event_scores_dict,
+            highest_score,
+        )
+
+        model_scores[model_number] = model_result
+
+        # print(f"\t\t\tevent score: {event_scores}")
+
+    selected_model = max(
+        model_scores,
+        key=lambda module_number: model_scores[model_number].highest_score,
+    )
+
+    return DatasetModelsScoreResult(model_scores, selected_model)
 
 
 def main(autobuild_test_data_dir: str):
