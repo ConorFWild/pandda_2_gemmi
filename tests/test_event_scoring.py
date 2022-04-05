@@ -190,6 +190,9 @@ def main(autobuild_test_data_dir: str):
             dataset_dir,
         )
 
+        print(f"Selected model: {dataset_models_score_result.selected_model}; score: "
+              f"{dataset_models_score_result.model_results[dataset_models_score_result.selected_model.highest_score]}")
+
 
 if __name__ == "__main__":
     fire.Fire(main)
