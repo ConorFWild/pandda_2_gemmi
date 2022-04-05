@@ -124,10 +124,13 @@ def score_dataset_models(
             debug=False
         )
 
-        highest_score = max(
-            event_scores_dict,
-            key=lambda event_id: event_scores_dict[event_id],
-        )
+        if len(event_scores_dict) >0:
+            highest_score = max(
+                event_scores_dict,
+                key=lambda event_id: event_scores_dict[event_id],
+            )
+        else:
+            highest_score = 0.0
 
         model_result = ModelResult(
             event_scores_dict,
