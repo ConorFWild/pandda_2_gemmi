@@ -250,6 +250,7 @@ class PanDDAConsole:
         event_table.add_column("Dtag")
         event_table.add_column("Event Number")
         event_table.add_column("Event Score")
+        event_table.add_column("Event Size")
 
         for res, shell_result in shell_results.items():
             res = shell_result.shell.res
