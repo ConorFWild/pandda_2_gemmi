@@ -255,6 +255,7 @@ class ClusterIDInterface(Protocol):
 
 
 class EDClusterInterface(Protocol):
+    indexes: Tuple[NDArrayInterface]
     centroid: Tuple[float, float, float]
     cluster_positions_array: NDArrayInterface
     event_mask_indicies: Optional[NDArrayInterface]
@@ -346,6 +347,8 @@ class BDCInterface(Protocol):
 
 class EventInterface(Protocol):
     bdc: BDCInterface
+    cluster: EDClusterInterface
+
 
 
 # class EventRankingInterface(Protocol):

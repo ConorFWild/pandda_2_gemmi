@@ -264,6 +264,7 @@ class PanDDAConsole:
                         str(event_id.dtag.dtag),
                         str(event_id.event_idx.event_idx),
                         str(event_score),
+                        str(event.cluster.indexes[0].size)
                     )
 
         self.console.print(event_table)

@@ -22,7 +22,7 @@ from pandda_gemmi.model import Zmap, Zmaps, Model
 
 
 @dataclasses.dataclass()
-class Cluster:
+class Cluster(EDClusterInterface):
     indexes: typing.Tuple[np.ndarray]
     cluster_positions_array: np.array
     values: np.ndarray
@@ -32,7 +32,7 @@ class Cluster:
     cluster_contact_mask: np.array
     time_event_mask: Optional[float] = 0.0
 
-    def size(self, grid: Grid):
+    def size(self, grid: GridInterface):
         grid_volume = grid.volume()
         grid_size = grid.size()
         grid_voxel_volume = grid_volume / grid_size

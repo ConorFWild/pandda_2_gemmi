@@ -176,11 +176,11 @@ class BDC:
 
 
 @dataclasses.dataclass()
-class Event:
+class Event(EventInterface):
     event_id: EventID
     site: SiteID
-    bdc: BDC
-    cluster: Cluster
+    bdc: BDCInterface
+    cluster: EDClusterInterface
     native_centroid: Tuple[float, float, float]
     native_positions: List[Tuple[float, float, float]]
 
