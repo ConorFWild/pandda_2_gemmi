@@ -261,10 +261,10 @@ class PanDDAConsole:
                 for event_id, event in dataset_events.items():
                     event_score = dataset_event_scores[event_id]
                     event_table.add_row(
-                        str(res),
+                        str(round(res, 2)),
                         str(event_id.dtag.dtag),
                         str(event_id.event_idx.event_idx),
-                        str(event_score),
+                        str(round(event_score, 2)),
                         str(event.cluster.indexes[0].size)
                     )
 
