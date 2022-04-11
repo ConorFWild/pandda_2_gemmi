@@ -961,7 +961,7 @@ def process_dataset_multiple_models(
 
     return DatasetResult(
         dtag=test_dtag,
-        events={event_id: event for event_id, event in events.events.items()},
+        events={event_id: event for event_id, event in events.items()},
         event_scores=model_results[model_selection.selected_model_id].event_scores,
         log=dataset_log,
     )
