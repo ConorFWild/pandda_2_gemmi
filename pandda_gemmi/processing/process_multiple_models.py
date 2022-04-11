@@ -53,7 +53,7 @@ MergeEDClusterings,
 class DatasetResult(DatasetResultInterface):
     dtag: DtagInterface
     events: Dict[EventID, Event]
-    event_scores: Dict[EventIDInterface, Dict[ModelIDInterface, float]]
+    event_scores: Dict[EventIDInterface,  float]
     log: Dict
 
 
@@ -894,16 +894,17 @@ def process_dataset_multiple_models(
     ###################################################################
     time_event_start = time.time()
     # Calculate the shell events
-    events: Events = Events.from_clusters(
-        selected_model_clusterings,
-        selected_model,
-        dataset_xmaps,
-        grid,
-        alignments[test_dtag],
-        max_site_distance_cutoff,
-        min_bdc, max_bdc,
-        None,
-    )
+    # events: Events = Events.from_clusters(
+    #     selected_model_clusterings,
+    #     selected_model,
+    #     dataset_xmaps,
+    #     grid,
+    #     alignments[test_dtag],
+    #     max_site_distance_cutoff,
+    #     min_bdc, max_bdc,
+    #     None,
+    # )
+    events = model_results[model_selection.selected_model_id].events
 
     time_event_finish = time.time()
     dataset_log[constants.LOG_DATASET_EVENT_TIME] = time_event_finish - time_event_start
@@ -961,15 +962,7 @@ def process_dataset_multiple_models(
     return DatasetResult(
         dtag=test_dtag,
         events={event_id: event for event_id, event in events.events.items()},
-        event_scores={
-            event_id: {
-                model_number: model_result.event_scores[event_id]
-                for model_number, model_result
-                in model_results.items()
-            }
-            for event_id, event
-            in events.events.items()
-        },
+        event_scores=model_results[model_selection.selected_model_id].event_scores,
         log=dataset_log,
     )
 

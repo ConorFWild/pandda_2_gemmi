@@ -258,12 +258,12 @@ class PanDDAConsole:
                 dataset_events = dataset_result.events
                 dataset_event_scores = dataset_result.event_scores
                 for event_id, event in dataset_events.items():
-                    max_event_score = max(dataset_event_scores[event_id].values(), )
+                    event_score = dataset_event_scores[event_id]
                     event_table.add_row(
                         str(res),
                         str(event_id.dtag.dtag),
                         str(event_id.event_idx.event_idx),
-                        str(max_event_score),
+                        str(event_score),
                     )
 
         self.console.print(event_table)

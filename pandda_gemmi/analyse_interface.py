@@ -321,7 +321,7 @@ ShellsInterface = Dict[int, ShellInterface]
 class DatasetResultInterface(Protocol):
     dtag: DtagInterface
     events: EventsInterface
-    event_scores: Dict[EventIDInterface, Dict[ModelIDInterface, float]]
+    event_scores: Dict[EventIDInterface,  float]
     log: Any
 
 
@@ -367,7 +367,7 @@ class EventIDInterface(Protocol):
 EventsInterface = Dict[EventIDInterface, EventInterface]
 
 
-EventScoresInterface = MutableMapping[EventIDInterface, MutableMapping[ModelIDInterface, float]]
+EventScoresInterface = MutableMapping[EventIDInterface, float]
 
 
 class AutobuildResultInterface(Protocol):
