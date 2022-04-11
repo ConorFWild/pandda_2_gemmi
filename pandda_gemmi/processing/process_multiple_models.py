@@ -967,7 +967,7 @@ def process_dataset_multiple_models(
                 for model_number, model_result
                 in model_results.items()
             }
-            for event_id
+            for event_id, event
             in events.events.items()
         },
         log=dataset_log,
