@@ -917,7 +917,7 @@ def process_dataset_multiple_models(
 
     # Save the event maps!
     # printer.pprint(events)
-    events.save_event_maps(
+    Events(events).save_event_maps(
         dataset_truncated_datasets,
         alignments,
         dataset_xmaps,

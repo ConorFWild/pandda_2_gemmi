@@ -203,7 +203,7 @@ class Event:
 @dataclasses.dataclass()
 class Events:
     events: typing.Dict[EventID, Event]
-    sites: Sites
+    # sites: Sites
 
     @staticmethod
     def from_clusters(
@@ -279,7 +279,7 @@ class Events:
 
                     events[event_id] = event
 
-        return Events(events, sites)
+        return Events(events,)# sites)
 
     @staticmethod
     def get_event(xmap, cluster, dtag, site, event_id, model, grid, min_bdc, max_bdc, ):
@@ -327,7 +327,7 @@ class Events:
 
             events[event_id] = event
 
-        return Events(events, sites)
+        return Events(events,)# sites)
 
     @staticmethod
     def from_sites(event_dict: typing.Dict[EventID, Event], sites):
@@ -362,7 +362,7 @@ class Events:
 
             events[event_id] = event
 
-        return Events(events, sites)
+        return Events(events,)#sites)
 
     def __iter__(self):
         for event_id in self.events:
