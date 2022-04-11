@@ -53,6 +53,7 @@ MergeEDClusterings,
 class DatasetResult(DatasetResultInterface):
     dtag: DtagInterface
     events: Dict[EventID, Event]
+    event_scores: Dict[EventIDInterface, Dict[ModelIDInterface, float]]
     log: Dict
 
 
@@ -960,6 +961,15 @@ def process_dataset_multiple_models(
     return DatasetResult(
         dtag=test_dtag,
         events={event_id: event for event_id, event in events.events.items()},
+        event_scores={
+            event_id: {
+                model_number: model_result.event_scores[event_id]
+                for model_number, model_result
+                in model_results.items()
+            }
+            for event_id
+            in events.events.items()
+        },
         log=dataset_log,
     )
 

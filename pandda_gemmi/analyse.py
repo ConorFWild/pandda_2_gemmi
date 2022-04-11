@@ -716,11 +716,19 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 for dtag, dataset_result in shell_result.dataset_results.items():
                     all_events.update(dataset_result.events)
 
+        event_scores: EventScoresInterface = {}
+        for res, shell_result in shell_results.items():
+            if shell_result:
+                for dtag, dataset_result in shell_result.dataset_results.items():
+                    event_scores.update(dataset_result.event_scores)
+
         # Add the event maps to the fs
         for event_id, event in all_events.items():
             pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        console.summarise_shells(shell_results, event_scores)
 
         ###################################################################
         # # Autobuilding

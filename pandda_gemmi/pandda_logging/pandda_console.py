@@ -239,6 +239,35 @@ class PanDDAConsole:
 
         self.console.print(table)
 
+    def summarise_shells(self,
+                         shell_results: ShellResultsInterface,
+                         events: EventsInterface,
+                         event_scores: EventScoresInterface,
+                         ):
+        event_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_table.title = "Event Classifications"
+        event_table.add_column("Res")
+        event_table.add_column("Dtag")
+        event_table.add_column("Event Number")
+        event_table.add_column("Event Score")
+
+        for res, shell_result in shell_results.items():
+            res = shell_result.shell.res
+            dataset_results = shell_result.dataset_results
+            for dtag, dataset_result in dataset_results.items():
+                dataset_events = dataset_result.events
+                dataset_event_scores = dataset_result.event_scores
+                for event_id, event in dataset_events.items():
+                    max_event_score = max(dataset_event_scores[event_id].values(), )
+                    event_table.add_row(
+                        str(res),
+                        str(event_id.dtag.dtag),
+                        str(event_id.event_idx.event_idx),
+                        str(max_event_score),
+                    )
+
+        self.console.print(event_table)
+
     def summarise_sites(self, sites):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Event Classifications"

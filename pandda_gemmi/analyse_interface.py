@@ -9,13 +9,12 @@ from numpy.typing import NDArray
 
 import numpy as np
 
-
-T = TypeVar('T',)
+T = TypeVar('T', )
 V = TypeVar("V")
 P = ParamSpec("P")
 
-
 NDArrayInterface = NDArray
+
 
 # class NDArrayInterface(Protocol):
 #     ...
@@ -37,7 +36,9 @@ class DtagInterface(Protocol):
 class DataDirInterface(Protocol):
     ...
 
+
 DataDirsInterface = Dict[DtagInterface, DataDirInterface]
+
 
 class AnalysesDirIntererface(Protocol):
     pandda_analyse_events_file: Path
@@ -46,12 +47,14 @@ class AnalysesDirIntererface(Protocol):
 
 class ModelIDInterface(Protocol):
     model_id: int
-    def __int__(self)-> int:
+
+    def __int__(self) -> int:
         ...
 
 
 class ModelInterface(Protocol):
     ...
+
 
 ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 
@@ -59,18 +62,22 @@ ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 class XmapInterface(Protocol):
     xmap: CrystallographicGridInterface
 
+
 XmapsInterface = MutableMapping[DtagInterface, XmapInterface]
 
 
 class DatasetModelsInterface(Protocol):
     path: Path
 
+
 class ZMapFileInterface(Protocol):
     path: Path
+
 
 class EventMapFilesInterface(Protocol):
     def add_event(self, event: EventInterface):
         ...
+
 
 class LigandDirInterface(Protocol):
     ...
@@ -104,10 +111,11 @@ class ProcessedDatasetsInterface(Protocol):
 class ShellDirInterface(Protocol):
     log_path: Path
 
+
 # ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
 
 class ShellDirsInterface(Protocol):
-    path : Path
+    path: Path
     shell_dirs: Dict[float, ShellDirInterface]
 
     def build(self) -> None:
@@ -129,7 +137,6 @@ class PanDDAFSModelInterface(Protocol):
 
     def build(self) -> None:
         ...
-
 
     # def get_pandda_dir(self) -> Path:
     #     ...
@@ -171,8 +178,6 @@ class PanDDAFSModelInterface(Protocol):
     #     ...
 
 
-
-
 class StructureFactorsInterface(Protocol):
     f: str
     phi: str
@@ -188,17 +193,16 @@ class DatasetInterface(Protocol):
     reflections: ReflectionsInterface
 
 
-
-
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
-
 
 
 class DatasetsStatisticsInterface(Protocol):
     ...
 
+
 class StructureInterface(Protocol):
     ...
+
 
 class ResolutionInterface(Protocol):
     ...
@@ -215,6 +219,7 @@ class ReflectionsInterface(Protocol):
 class PartitioningInterface(Protocol):
     inner_mask: CrystallographicGridInterface
 
+
 class UnitCellInterface(Protocol):
     ...
 
@@ -225,8 +230,10 @@ class CrystallographicGridInterface(Protocol):
     nw: int
     unit_cell: UnitCellInterface
 
+
 class GridInterface(Protocol):
     partitioning: PartitioningInterface
+
 
 class AlignmentInterface(Protocol):
     ...
@@ -238,11 +245,14 @@ AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 class ZmapInterface(Protocol):
     zmap: CrystallographicGridInterface
 
+
 ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
+
 
 class ClusterIDInterface(Protocol):
     def __int__(self) -> int:
         ...
+
 
 class EDClusterInterface(Protocol):
     centroid: Tuple[float, float, float]
@@ -252,10 +262,13 @@ class EDClusterInterface(Protocol):
     def size(self, grid: GridInterface) -> float:
         ...
 
+
 class EDClusteringInterface(Protocol):
     clustering: MutableMapping[ClusterIDInterface, EDClusterInterface]
+
     def __len__(self) -> int:
         ...
+
 
 EDClusteringsInterface = MutableMapping[DtagInterface, EDClusteringInterface]
 
@@ -263,6 +276,7 @@ EDClusteringsInterface = MutableMapping[DtagInterface, EDClusteringInterface]
 class ModelSelectionInterface(Protocol):
     selected_model_id: ModelIDInterface
     log: Dict
+
 
 class ModelResultInterface(Protocol):
     zmap: CrystallographicGridInterface
@@ -274,8 +288,8 @@ class ModelResultInterface(Protocol):
     event_scores: MutableMapping[EventIDInterface, float]
     model_log: Dict
 
-ModelResultsInterface = MutableMapping[ModelIDInterface, ModelResultInterface]
 
+ModelResultsInterface = MutableMapping[ModelIDInterface, ModelResultInterface]
 
 ComparatorsInterface = MutableMapping[DtagInterface, MutableMapping[int, List[DtagInterface]]]
 
@@ -302,12 +316,17 @@ class ShellInterface(Protocol):
 
 ShellsInterface = Dict[int, ShellInterface]
 
+
+
 class DatasetResultInterface(Protocol):
     dtag: DtagInterface
     events: EventsInterface
+    event_scores: Dict[EventIDInterface, Dict[ModelIDInterface, float]]
     log: Any
 
+
 DatasetResultsInterface = Dict[DtagInterface, DatasetResultInterface]
+
 
 class ShellResultInterface(Protocol):
     shell: ShellInterface
@@ -316,6 +335,7 @@ class ShellResultInterface(Protocol):
 
 
 ShellResultsInterface = Dict[float, ShellResultInterface]
+
 
 class BDCInterface(Protocol):
     bdc: float
@@ -338,12 +358,16 @@ class EventIDXInterface(Protocol):
     def __int__(self) -> int:
         ...
 
+
 class EventIDInterface(Protocol):
     dtag: DtagInterface
     event_idx: EventIDXInterface
 
 
 EventsInterface = Dict[EventIDInterface, EventInterface]
+
+
+EventScoresInterface = MutableMapping[EventIDInterface, MutableMapping[ModelIDInterface, float]]
 
 
 class AutobuildResultInterface(Protocol):
@@ -353,6 +377,7 @@ class AutobuildResultInterface(Protocol):
 
     def log(self) -> Any:
         ...
+
 
 AutobuildResultsInterface = Dict[EventIDInterface, AutobuildResultInterface]
 
@@ -369,9 +394,7 @@ class EventClassificationInterface(Protocol):
 
 EventClassificationsInterface = Dict[EventIDInterface, EventClassificationInterface]
 
-
 EventRankingInterface = List[EventIDInterface]
-
 
 
 class SiteInterface(Protocol):
@@ -382,6 +405,8 @@ class SitesInterface(Protocol):
     site_to_event: Dict[SiteIDInterface, List[EventIDInterface]]
     event_to_site: Dict[EventIDInterface, SiteIDInterface]
     centroids: Dict[SiteIDInterface, np.ndarray]
+
+
 # SitesInterface = Dict[SiteIDInterface, SiteInterface]
 
 
@@ -409,10 +434,10 @@ class PartialInterface(Protocol[P, V]):
     def __init__(self, func: Callable[P, V], ):
         ...
 
-    def paramaterise(self, 
-        *args: P.args,
-        **kwargs: P.kwargs,
-        ) -> Self:
+    def paramaterise(self,
+                     *args: P.args,
+                     **kwargs: P.kwargs,
+                     ) -> Self:
         ...
 
     def __call__(self) -> V:
@@ -421,24 +446,25 @@ class PartialInterface(Protocol[P, V]):
 
 # Analyse Function Interfaces
 class GetPanDDAFSModelInterface(Protocol):
-    def __call__(self, 
-    input_data_dirs: Path,
+    def __call__(self,
+                 input_data_dirs: Path,
                  output_out_dir: Path,
                  pdb_regex: str, mtz_regex: str,
                  ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
                  ) -> PanDDAFSModelInterface:
         ...
 
+
 class GetDatasetsInterface(Protocol):
-    def __call__(self, 
-    pandda_fs_model: PanDDAFSModelInterface
+    def __call__(self,
+                 pandda_fs_model: PanDDAFSModelInterface
                  ) -> DatasetsInterface:
         ...
+
 
 class GetDatasetsStatisticsInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface) -> DatasetsStatisticsInterface:
         ...
-        
 
 
 class SmoothBFactorsInterface(Protocol):
@@ -490,7 +516,7 @@ class AnalyseModelInterface(Protocol):
                  min_blob_volume: float,
                  min_blob_z_peak: float,
                  output_dir: Path,
-                score_events_func: GetEventScoreInterface,
+                 score_events_func: GetEventScoreInterface,
                  debug: bool
                  ) -> ModelResultInterface:
         ...
@@ -504,6 +530,7 @@ class DatasetsValidatorInterface(Protocol):
 class GetReferenceDatasetInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface) -> ReferenceInterface:
         ...
+
 
 class FilterBaseInterface(Protocol):
 
@@ -585,7 +612,7 @@ class FilterDifferentSpacegroupsInterface(FilterReferenceCompatibilityInterface,
     def __call__(self,
                  datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface,
-                 )-> DatasetsInterface:
+                 ) -> DatasetsInterface:
         ...
 
 
@@ -593,7 +620,7 @@ class FilterIncompleteModelsInterface(FilterReferenceCompatibilityInterface, Pro
     def __call__(self,
                  datasets_diss_struc: DatasetsInterface,
                  reference: ReferenceInterface,
-                 )-> DatasetsInterface:
+                 ) -> DatasetsInterface:
         ...
 
 
@@ -697,8 +724,9 @@ class ProcessDatasetInterface(Protocol):
 
 class GetEDClusteringInterface(Protocol):
     def __call__(self, zmap: ZmapInterface, reference: ReferenceInterface, grid: GridInterface, contour_level: float,
-                cluster_cutoff_distance_multiplier: float) -> EDClusteringInterface:
+                 cluster_cutoff_distance_multiplier: float) -> EDClusteringInterface:
         ...
+
 
 # @runtime_checkable
 class GetEventScoreInbuiltInterface(Protocol):
@@ -756,7 +784,7 @@ class GetSitesInterface(Protocol):
 
 class GetSiteTableInterface(Protocol):
     def __call__(self,
-    events: EventsInterface,
+                 events: EventsInterface,
                  sites: SitesInterface,
                  ) -> SiteTableInterface:
         ...
@@ -772,32 +800,38 @@ class GetEventTableInterface(Protocol):
 
 class GetEventClassTrivialInterface(Protocol):
     tag: Literal["trivial"] = "trivial"
+
     def __call__(self, event: EventInterface, ) -> bool:
         ...
 
 
 class GetEventClassAutobuildInterface(Protocol):
     tag: Literal["autobuild"] = "autobuild"
+
     def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
         ...
+
 
 GetEventClassInterface = Union[GetEventClassAutobuildInterface, GetEventClassTrivialInterface]
 
 
 class GetEventRankingSizeInterface(Protocol):
     tag: Literal["size"] = "size"
+
     def __call__(self, events: EventsInterface, grid: GridInterface) -> EventRankingInterface:
         ...
 
 
 class GetEventRankingAutobuildInterface(Protocol):
     tag: Literal["autobuild"] = "autobuild"
-    def __call__(self, 
-    events: EventsInterface, 
-    autobuild_results: AutobuildResultsInterface,
-    datasets: DatasetsInterface,
-    pandda_fs_model: PanDDAFSModelInterface,
-    ) -> EventRankingInterface:
+
+    def __call__(self,
+                 events: EventsInterface,
+                 autobuild_results: AutobuildResultsInterface,
+                 datasets: DatasetsInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ) -> EventRankingInterface:
         ...
+
 
 GetEventRankingInterface = Union[GetEventRankingAutobuildInterface, GetEventRankingSizeInterface]
