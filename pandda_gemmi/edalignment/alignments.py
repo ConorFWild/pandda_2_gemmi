@@ -8,6 +8,7 @@ from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterfac
 
 set_loky_pickler('pickle')
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.pandda_exceptions import *
 from pandda_gemmi.common import Dtag
@@ -15,7 +16,7 @@ from pandda_gemmi.dataset import Dataset, ResidueID, Reference, Datasets
 
 
 @dataclasses.dataclass()
-class Transform:
+class Transform(TransformInterface):
     transform: gemmi.Transform
     com_reference: np.array
     com_moving: np.array
@@ -210,7 +211,7 @@ class Transform:
 
 
 @dataclasses.dataclass()
-class Alignment:
+class Alignment(AlignmentInterface):
     transforms: typing.Dict[ResidueID, Transform]
 
     def __getitem__(self, item: ResidueID):

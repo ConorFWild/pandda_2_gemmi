@@ -52,8 +52,8 @@ MergeEDClusterings,
 @dataclasses.dataclass()
 class DatasetResult(DatasetResultInterface):
     dtag: DtagInterface
-    events: Dict[EventID, Event]
-    event_scores: Dict[EventIDInterface,  float]
+    events: MutableMapping[EventIDInterface, EventInterface]
+    event_scores: MutableMapping[EventIDInterface,  float]
     log: Dict
 
 

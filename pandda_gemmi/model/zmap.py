@@ -8,7 +8,7 @@ from functools import partial
 from scipy import stats
 from joblib.externals.loky import set_loky_pickler
 
-from pandda_gemmi.analyse_interface import GridInterface, ModelIDInterface, ModelInterface, XmapsInterface
+from pandda_gemmi.analyse_interface import DtagInterface, GridInterface, ModelIDInterface, ModelInterface, NDArrayInterface, XmapsInterface
 set_loky_pickler('pickle')
 from matplotlib import pyplot as plt
 from scipy import optimize
@@ -23,10 +23,10 @@ from pandda_gemmi.python_types import *
 
 
 @dataclasses.dataclass()
-class Model:
-    mean: np.array
-    sigma_is: typing.Dict[Dtag, float]
-    sigma_s_m: np.ndarray
+class Model(ModelInterface):
+    mean: NDArrayInterface
+    sigma_is: typing.Dict[DtagInterface, float]
+    sigma_s_m: NDArrayInterface
 
     @staticmethod
     def mean_from_xmap_array(masked_train_xmap_array: XmapArray):

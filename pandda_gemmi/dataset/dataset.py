@@ -43,7 +43,7 @@ class Resolution:
 
 
 @dataclasses.dataclass()
-class ResidueID:
+class ResidueID(ResidueIDInterface):
     model: str
     chain: str
     insertion: str

@@ -202,7 +202,7 @@ class Event(EventInterface):
 
 @dataclasses.dataclass()
 class Events:
-    events: typing.Dict[EventID, Event]
+    events: EventsInterface
     # sites: Sites
 
     @staticmethod

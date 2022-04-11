@@ -19,7 +19,7 @@ from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 
 @dataclasses.dataclass()
-class Partitioning:
+class Partitioning(PartitioningInterface):
     partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
     protein_mask: gemmi.Int8Grid
     inner_mask: gemmi.Int8Grid
@@ -29,6 +29,10 @@ class Partitioning:
 
     def __getitem__(self, item: ResidueID):
         return self.partitioning[item]
+
+    def __iter__(self) -> Iterator[ResidueIDInterface]:
+        for residue_id in self.partitioning:
+            yield residue_id
 
     @staticmethod
     def from_reference(reference: Reference,
@@ -544,7 +548,7 @@ class Partitioning:
 
 
 @dataclasses.dataclass()
-class Grid:
+class Grid(GridInterface):
     grid: gemmi.FloatGrid
     partitioning: Partitioning
 

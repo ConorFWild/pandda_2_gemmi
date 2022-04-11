@@ -1,5 +1,5 @@
 from __future__ import annotations
-from tkinter import Grid
+# from tkinter import Grid
 from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
@@ -8,12 +8,13 @@ from grpc import Call
 from numpy.typing import NDArray
 
 import numpy as np
+import gemmi
 
 T = TypeVar('T', )
 V = TypeVar("V")
 P = ParamSpec("P")
 
-NDArrayInterface = NDArray
+NDArrayInterface = NDArray[np.float_]
 
 
 # class NDArrayInterface(Protocol):
@@ -27,6 +28,12 @@ class PanDDAConsoleInterface(Protocol):
 class ProcessorInterface(Protocol):
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         ...
+
+
+class ResidueIDInterface(Protocol):
+    model: str
+    chain: str
+    insertion: str
 
 
 class DtagInterface(Protocol):
@@ -53,8 +60,9 @@ class ModelIDInterface(Protocol):
 
 
 class ModelInterface(Protocol):
-    ...
-
+    mean: NDArrayInterface
+    sigma_is: Dict[DtagInterface, float]
+    sigma_s_m: NDArrayInterface
 
 ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 
@@ -216,8 +224,31 @@ class ReflectionsInterface(Protocol):
         ...
 
 
+class PositionInterface(Protocol):
+    ...
+
+class FractionalInterface(Protocol):
+    ...
+
+GridCoordInterface = Tuple[int, int, int]
+
+class TransformInterface(Protocol):
+
+    transform: gemmi.Transform
+    com_moving : NDArrayInterface
+    com_reference: NDArrayInterface
+
+    def apply_reference_to_moving(self, alignment_positions: Dict[GridCoordInterface, PositionInterface]) -> MutableMapping[GridCoordInterface, PositionInterface]:
+        ...
+
 class PartitioningInterface(Protocol):
     inner_mask: CrystallographicGridInterface
+
+    def __iter__(self) -> Iterator[ResidueIDInterface]:
+        ...
+
+    def __getitem__(self, residue_id: ResidueIDInterface) -> Dict[GridCoordInterface, PositionInterface]:
+        ...
 
 
 class UnitCellInterface(Protocol):
@@ -235,8 +266,17 @@ class GridInterface(Protocol):
     partitioning: PartitioningInterface
 
 
+
+    def new_grid(self) -> GridInterface:
+        ...
+
+
 class AlignmentInterface(Protocol):
-    ...
+    def __iter__(self) -> Iterator[ResidueIDInterface]:
+        ...
+
+    def __getitem__(self, residue_id: ResidueIDInterface) -> TransformInterface:
+        ...
 
 
 AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
@@ -322,7 +362,7 @@ ShellsInterface = Dict[int, ShellInterface]
 class DatasetResultInterface(Protocol):
     dtag: DtagInterface
     events: EventsInterface
-    event_scores: Dict[EventIDInterface,  float]
+    event_scores: MutableMapping[EventIDInterface,  float]
     log: Any
 
 
