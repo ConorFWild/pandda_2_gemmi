@@ -138,7 +138,7 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-    def summarise_event_classifications(self, event_classifications):
+    def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Event Classifications"
         event_class_table.add_column("Dtag")
@@ -245,7 +245,7 @@ class PanDDAConsole:
                          event_scores: EventScoresInterface,
                          ):
         event_table = Table(show_header=True, header_style="bold magenta", expand=True)
-        event_table.title = "Event Classifications"
+        event_table.title = "Shell Events"
         event_table.add_column("Res")
         event_table.add_column("Dtag")
         event_table.add_column("Event Number")

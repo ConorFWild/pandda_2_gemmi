@@ -4,6 +4,7 @@ from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
 from grpc import Call
+from enum import Enum
 
 from numpy.typing import NDArray
 
@@ -431,11 +432,21 @@ class SiteIDInterface(Protocol):
 
 # SiteIDInterface = NewType(int)
 
+class EventClasses(Enum):
+    HIT = "hit"
+    NEEDS_INSPECTION = "needs_inspection"
+    JUNK = "junk"
+
+    def __str__(self):
+        return self.value
+
+
+
 class EventClassificationInterface(Protocol):
     ...
 
 
-EventClassificationsInterface = Dict[EventIDInterface, EventClassificationInterface]
+EventClassificationsInterface = Dict[EventIDInterface, EventClasses]
 
 EventRankingInterface = List[EventIDInterface]
 
@@ -844,14 +855,14 @@ class GetEventTableInterface(Protocol):
 class GetEventClassTrivialInterface(Protocol):
     tag: Literal["trivial"] = "trivial"
 
-    def __call__(self, event: EventInterface, ) -> bool:
+    def __call__(self, event: EventInterface, ) -> EventClasses:
         ...
 
 
 class GetEventClassAutobuildInterface(Protocol):
     tag: Literal["autobuild"] = "autobuild"
 
-    def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> bool:
+    def __call__(self, event: EventInterface, autobuild_result: AutobuildResultInterface) -> EventClasses:
         ...
 
 

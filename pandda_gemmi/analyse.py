@@ -369,7 +369,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Get the event classification function
     if pandda_args.autobuild:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4)
+        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
     else:
         get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
 
