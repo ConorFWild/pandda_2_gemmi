@@ -31,6 +31,7 @@ class GetEventRankingSize(GetEventRankingSizeInterface):
     def __call__(self, events: EventsInterface, grid: GridInterface) -> EventRankingInterface:
         return rank_events_size(events, grid)
 
+
 def rank_events_size_delta(events: Dict[EventID, Event], datasets: Dict[Dtag, Dataset]):
     ...
 
@@ -73,5 +74,60 @@ def rank_events_autobuild(
 class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):
     tag: Literal["autobuild"] = "autobuild"
 
-    def __call__(self, events: EventsInterface, autobuild_results: AutobuildResultsInterface, datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
+    def __call__(self, events: EventsInterface, autobuild_results: AutobuildResultsInterface,
+                 datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
         return rank_events_autobuild(events, autobuild_results, datasets, pandda_fs_model)
+
+
+class GetEventRankingSizeAutobuild(GetEventRankingSizeAutobuildInterface):
+    tag: Literal["size-autobuild"] = "size-autobuild"
+
+    def __init__(self, cutoff: float):
+        self.cutoff = cutoff
+
+    def __call__(self,
+                 events: EventsInterface,
+                 autobuild_results: AutobuildResultsInterface,
+                 datasets: DatasetsInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ) -> EventRankingInterface:
+        # Get max score for each event
+        autobuild_scores = {
+            event_id: max(autobuild_results[event_id].scores.values())
+            for event_id
+            in events
+            if len(autobuild_results[event_id].scores) > 0
+        }
+
+        # Get event sizes for each event
+        event_scores = {
+            event_id: event.cluster.indexes[0].size
+            for event_id, event
+            in events.items()
+        }
+
+        # Rank events with a score
+        ranked_event_ids = list(
+            sorted(
+                [
+                    event_id
+                    for event_id
+                    in events.keys()
+                    if autobuild_scores[event_id] > self.cutoff
+                ],
+                key=lambda event_id: autobuild_scores[event_id],
+                reverse=True,
+            )
+        )
+
+        # Add remaining events by size
+        for event_id in sorted(event_scores.keys(), key=lambda _event_id: event_scores[_event_id], reverse=True):
+            if event_id not in ranked_event_ids:
+                ranked_event_ids.append(event_id)
+
+        # events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
+        events_ranked = [event_id for event_id in ranked_event_ids]
+
+        return events_ranked
+
+        ...

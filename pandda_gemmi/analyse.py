@@ -61,6 +61,7 @@ from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
+GetEventRankingSizeAutobuild
 )
 from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
@@ -881,6 +882,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")
                 else:
                     event_ranking: EventRankingInterface = GetEventRankingAutobuild()(
+                        all_events,
+                        autobuild_results,
+                        datasets,
+                        pandda_fs_model,
+                    )
+            elif pandda_args.rank_method == "size-autobuild":
+                if not pandda_args.autobuild:
+                    raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+                else:
+                    event_ranking: EventRankingInterface = GetEventRankingSizeAutobuild(0.4)(
                         all_events,
                         autobuild_results,
                         datasets,

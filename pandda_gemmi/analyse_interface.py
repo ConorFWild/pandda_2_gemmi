@@ -65,6 +65,7 @@ class ModelInterface(Protocol):
     sigma_is: Dict[DtagInterface, float]
     sigma_s_m: NDArrayInterface
 
+
 ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 
 
@@ -228,19 +229,23 @@ class ReflectionsInterface(Protocol):
 class PositionInterface(Protocol):
     ...
 
+
 class FractionalInterface(Protocol):
     ...
 
+
 GridCoordInterface = Tuple[int, int, int]
 
-class TransformInterface(Protocol):
 
+class TransformInterface(Protocol):
     transform: gemmi.Transform
-    com_moving : NDArrayInterface
+    com_moving: NDArrayInterface
     com_reference: NDArrayInterface
 
-    def apply_reference_to_moving(self, alignment_positions: Dict[GridCoordInterface, PositionInterface]) -> MutableMapping[GridCoordInterface, PositionInterface]:
+    def apply_reference_to_moving(self, alignment_positions: Dict[GridCoordInterface, PositionInterface]) -> \
+            MutableMapping[GridCoordInterface, PositionInterface]:
         ...
+
 
 class PartitioningInterface(Protocol):
     inner_mask: CrystallographicGridInterface
@@ -265,8 +270,6 @@ class CrystallographicGridInterface(Protocol):
 
 class GridInterface(Protocol):
     partitioning: PartitioningInterface
-
-
 
     def new_grid(self) -> GridInterface:
         ...
@@ -359,11 +362,10 @@ class ShellInterface(Protocol):
 ShellsInterface = Dict[int, ShellInterface]
 
 
-
 class DatasetResultInterface(Protocol):
     dtag: DtagInterface
     events: EventsInterface
-    event_scores: MutableMapping[EventIDInterface,  float]
+    event_scores: MutableMapping[EventIDInterface, float]
     log: Any
 
 
@@ -391,7 +393,6 @@ class EventInterface(Protocol):
     cluster: EDClusterInterface
 
 
-
 # class EventRankingInterface(Protocol):
 #     ...
 
@@ -409,7 +410,6 @@ class EventIDInterface(Protocol):
 
 
 EventsInterface = Dict[EventIDInterface, EventInterface]
-
 
 EventScoresInterface = MutableMapping[EventIDInterface, float]
 
@@ -439,7 +439,6 @@ class EventClasses(Enum):
 
     def __str__(self):
         return self.value
-
 
 
 class EventClassificationInterface(Protocol):
@@ -888,4 +887,18 @@ class GetEventRankingAutobuildInterface(Protocol):
         ...
 
 
-GetEventRankingInterface = Union[GetEventRankingAutobuildInterface, GetEventRankingSizeInterface]
+class GetEventRankingSizeAutobuildInterface(Protocol):
+    tag: Literal["size-autobuild"] = "size-autobuild"
+
+    def __call__(self,
+                 events: EventsInterface,
+                 autobuild_results: AutobuildResultsInterface,
+                 datasets: DatasetsInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ) -> EventRankingInterface:
+        ...
+
+
+GetEventRankingInterface = Union[
+    GetEventRankingAutobuildInterface, GetEventRankingSizeInterface, GetEventRankingSizeAutobuildInterface
+]
