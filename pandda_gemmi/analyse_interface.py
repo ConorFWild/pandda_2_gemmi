@@ -72,6 +72,10 @@ ModelsInterface = MutableMapping[ModelIDInterface, ModelInterface]
 class XmapInterface(Protocol):
     xmap: CrystallographicGridInterface
 
+    def to_array(self, copy=True) -> NDArrayInterface:
+        ...
+
+
 
 XmapsInterface = MutableMapping[DtagInterface, XmapInterface]
 
@@ -289,6 +293,8 @@ AlignmentsInterface = Dict[DtagInterface, AlignmentInterface]
 class ZmapInterface(Protocol):
     zmap: CrystallographicGridInterface
 
+    def to_array(self, copy=True) -> NDArrayInterface:
+        ...
 
 ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
 

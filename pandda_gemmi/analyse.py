@@ -61,7 +61,7 @@ from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
-GetEventRankingSizeAutobuild
+    GetEventRankingSizeAutobuild
 )
 from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,

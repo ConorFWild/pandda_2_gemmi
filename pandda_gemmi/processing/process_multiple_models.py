@@ -36,7 +36,7 @@ from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
 from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
                                   Resolution, )
 from pandda_gemmi.shells import Shell, ShellMultipleModels
-from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c
+from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
@@ -415,6 +415,20 @@ def analyse_model(
 
     time_z_maps_finish = time.time()
     model_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
+    for dtag, zmap in zmaps.items():
+        z_map_statistics = GetMapStatistics(
+            zmap
+        )
+        model_log["ZMap statistics"] = {
+            "mean": str(z_map_statistics.mean),
+            "std": str(z_map_statistics.std),
+            ">1.0": str(z_map_statistics.greater_1),
+            ">2.0": str(z_map_statistics.greater_2),
+            ">3.0": str(z_map_statistics.greater_3),
+        }
+        if debug:
+            print(model_log["ZMap statistics"])
+
     # update_log(dataset_log, dataset_log_path)
 
     ###################################################################

@@ -15,6 +15,7 @@ from scipy import optimize
 import seaborn as sns
 sns.set_theme()
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.shells import Shell
@@ -465,7 +466,7 @@ class Model(ModelInterface):
 
 
 @dataclasses.dataclass()
-class Zmap:
+class Zmap(ZmapInterface):
     zmap: gemmi.FloatGrid
 
     @staticmethod
