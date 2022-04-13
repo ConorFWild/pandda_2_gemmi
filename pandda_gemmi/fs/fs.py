@@ -556,7 +556,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
                              processed_datasets=processed_datasets,
                              log_file=log_path,
                              shell_dirs=None,
-                             console_log_file=console_log_file
+                             console_log_file=console_log_file,
         events_json_file=events_json_file,
                              )
 
