@@ -129,5 +129,3 @@ class GetEventRankingSizeAutobuild(GetEventRankingSizeAutobuildInterface):
         events_ranked = [event_id for event_id in ranked_event_ids]
 
         return events_ranked
-
-        ...
