@@ -720,7 +720,7 @@ def get_reference_from_datasets(
         #     key=lambda dtag: resolutions[dtag].to_float(),
         # )
 
-        for dtag in sorted(resolutions, key=lambda x: resolutions[x].to_float()):
+        for dtag in sorted(resolutions, key=lambda x: resolutions[x]):
             dataset = datasets[dtag]
             dataset_spacegroup = dataset.reflections.reflections.spacegroup.hm
             if dataset_spacegroup == modal_spacegroup:
