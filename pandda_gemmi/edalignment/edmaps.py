@@ -272,12 +272,15 @@ class Xmap(XmapInterface):
         return Xmap(new_grid)
 
     @staticmethod
-    def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
-                         dataset: Dataset, alignment: Alignment, grid: Grid,
-                         structure_factors: StructureFactors, mask_radius: float,
+    def from_aligned_map(event_map_reference_grid: CrystallographicGridInterface,
+                         dataset: DatasetInterface, 
+                         alignment: AlignmentInterface, 
+                         grid: GridInterface,
+                         structure_factors: StructureFactors, 
+                         mask_radius: float,
                          mask_radius_symmetry: float):
 
-        partitioning = Partitioning.from_structure(dataset.structure,
+        partitioning: PartitioningInterface = Partitioning.from_structure(dataset.structure,
                                                    event_map_reference_grid,
                                                    mask_radius,
                                                    mask_radius_symmetry)
@@ -285,17 +288,16 @@ class Xmap(XmapInterface):
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
-            alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = partitioning[residue_id]
+            alignment_positions: typing.Dict[GridCoordInterface, PositionInterface] = partitioning[residue_id]
 
-            transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
+            transformed_positions: typing.Dict[GridCoordInterface, PositionInterface] = alignment[residue_id].apply_moving_to_reference(
                 alignment_positions)
 
-            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+            transformed_positions_fractional: typing.Dict[GridCoordInterface, FractionalInterface] = {
                 point: event_map_reference_grid.unit_cell.fractionalize(pos) for point, pos in
                 transformed_positions.items()}
 
-            interpolated_values: typing.Dict[typing.Tuple[int],
+            interpolated_values: typing.Dict[GridCoordInterface,
                                              float] = Xmap.interpolate_grid(event_map_reference_grid,
                                                                             transformed_positions_fractional,
                                                                             )
@@ -332,11 +334,11 @@ class Xmap(XmapInterface):
             sample_rate: float,
     ):
 
-        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(
+        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
             # sample_rate=sample_rate,
-            sample_rate=dataset.reflections.resolution().resolution / 0.5,
+            sample_rate=dataset.reflections.get_resolution() / 0.5,
         )
 
         new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu,
@@ -351,9 +353,9 @@ class Xmap(XmapInterface):
         transform_list = []
         com_moving_list = []
         com_reference_list = []
-        for residue_id in grid.partitioning.partitioning:
+        for residue_id in grid.partitioning:
 
-            if residue_id in partitioning.partitioning:
+            if residue_id in partitioning:
                 al = alignment[residue_id]
                 transform = al.transform
                 com_moving = al.com_reference
@@ -434,88 +436,88 @@ class Xmaps:
     def from_datasets(datasets: Datasets):
         pass
 
-    @staticmethod
-    def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
-                              structure_factors: StructureFactors, sample_rate=3.0,
-                              mapper=True,
-                              ):
+    # @staticmethod
+    # def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
+    #                           structure_factors: StructureFactors, sample_rate=3.0,
+    #                           mapper=True,
+    #                           ):
 
-        if mapper:
-            keys = list(datasets.datasets.keys())
+    #     if mapper:
+    #         keys = list(datasets.datasets.keys())
 
-            results = mapper(
-                delayed(Xmap.from_unaligned_dataset)(
-                    datasets[key],
-                    alignments[key],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
-                for key
-                in keys
-            )
+    #         results = mapper(
+    #             delayed(Xmap.from_unaligned_dataset)(
+    #                 datasets[key],
+    #                 alignments[key],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
+    #             for key
+    #             in keys
+    #         )
 
-            xmaps = {keys[i]: results[i]
-                     for i, key
-                     in enumerate(keys)
-                     }
+    #         xmaps = {keys[i]: results[i]
+    #                  for i, key
+    #                  in enumerate(keys)
+    #                  }
 
-        else:
+    #     else:
 
-            xmaps = {}
-            for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                                   alignments[dtag],
-                                                   grid,
-                                                   structure_factors,
-                                                   sample_rate)
+    #         xmaps = {}
+    #         for dtag in datasets:
+    #             xmap = Xmap.from_unaligned_dataset(datasets[dtag],
+    #                                                alignments[dtag],
+    #                                                grid,
+    #                                                structure_factors,
+    #                                                sample_rate)
 
-                xmaps[dtag] = xmap
+    #             xmaps[dtag] = xmap
 
-        return Xmaps(xmaps)
+    #     return Xmaps(xmaps)
 
-    @staticmethod
-    def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
-                                structure_factors: StructureFactors, sample_rate=3.0,
-                                mapper=False,
-                                ):
+    # @staticmethod
+    # def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
+    #                             structure_factors: StructureFactors, sample_rate=3.0,
+    #                             mapper=False,
+    #                             ):
 
-        if mapper:
+    #     if mapper:
 
-            keys = list(datasets.datasets.keys())
+    #         keys = list(datasets.datasets.keys())
 
-            results = mapper(
-                delayed(Xmap.from_unaligned_dataset_c)(
-                    datasets[key],
-                    alignments[key],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
-                for key
-                in keys
-            )
+    #         results = mapper(
+    #             delayed(Xmap.from_unaligned_dataset_c)(
+    #                 datasets[key],
+    #                 alignments[key],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
+    #             for key
+    #             in keys
+    #         )
 
-            xmaps = {keys[i]: results[i]
-                     for i, key
-                     in enumerate(keys)
-                     }
+    #         xmaps = {keys[i]: results[i]
+    #                  for i, key
+    #                  in enumerate(keys)
+    #                  }
 
-        else:
+    #     else:
 
-            xmaps = {}
-            for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset_c(
-                    datasets[dtag],
-                    alignments[dtag],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
+    #         xmaps = {}
+    #         for dtag in datasets:
+    #             xmap = Xmap.from_unaligned_dataset_c(
+    #                 datasets[dtag],
+    #                 alignments[dtag],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
 
-                xmaps[dtag] = xmap
+    #             xmaps[dtag] = xmap
 
-        return Xmaps(xmaps)
+    #     return Xmaps(xmaps)
 
     def from_dtags(self, dtags: typing.List[Dtag]):
         new_xmaps = {dtag: self.xmaps[dtag] for dtag in dtags}
@@ -590,17 +592,17 @@ class XmapArray:
         return XmapArray([_dtag for _dtag in self.dtag_list if _dtag in dtags], view)
 
 
-def from_unaligned_dataset_c(dataset: Dataset,
-                             alignment: Alignment,
-                             grid: Grid,
-                             structure_factors: StructureFactors,
+def from_unaligned_dataset_c(dataset: DatasetInterface,
+                             alignment: AlignmentInterface,
+                             grid: GridInterface,
+                             structure_factors: StructureFactorsInterface,
                              sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution / 0.5
+                                         dataset.reflections.get_resolution() / 0.5
                                          )
 
     return xmap
@@ -617,17 +619,17 @@ class LoadXmap(LoadXMapInterface):
         return from_unaligned_dataset_c(dataset, alignment, grid, structure_factors, sample_rate)
 
 
-def from_unaligned_dataset_c_flat(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
+def from_unaligned_dataset_c_flat(dataset: DatasetInterface,
+                                  alignment: AlignmentInterface,
+                                  grid: GridInterface,
+                                  structure_factors: StructureFactorsInterface,
                                   sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution / 0.5
+                                         dataset.reflections.get_resolution() / 0.5
                                          )
 
     xmap_array = xmap.to_array()

@@ -213,9 +213,12 @@ DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 class DatasetsStatisticsInterface(Protocol):
     ...
 
+class AtomInterface(Protocol):
+    ...
 
 class StructureInterface(Protocol):
-    ...
+    def protein_atoms(self) -> Iterator[AtomInterface]:
+        ...
 
 
 class ResolutionInterface(Protocol):
@@ -247,12 +250,22 @@ class TransformInterface(Protocol):
     com_reference: NDArrayInterface
 
     def apply_reference_to_moving(self, alignment_positions: Dict[GridCoordInterface, PositionInterface]) -> \
-            MutableMapping[GridCoordInterface, PositionInterface]:
+            Dict[GridCoordInterface, PositionInterface]:
+        ...
+
+    def apply_moving_to_reference(
+        self, 
+        alignment_positions: Dict[GridCoordInterface, PositionInterface],
+    ) -> Dict[GridCoordInterface, PositionInterface]:
         ...
 
 
 class PartitioningInterface(Protocol):
     inner_mask: CrystallographicGridInterface
+    protein_mask: CrystallographicGridInterface
+    total_mask: CrystallographicGridInterface
+    symmetry_mask: CrystallographicGridInterface
+
 
     def __iter__(self) -> Iterator[ResidueIDInterface]:
         ...
@@ -262,7 +275,8 @@ class PartitioningInterface(Protocol):
 
 
 class UnitCellInterface(Protocol):
-    ...
+    def fractionalize(self, pos: PositionInterface) -> FractionalInterface:
+        ...
 
 
 class CrystallographicGridInterface(Protocol):
@@ -270,6 +284,10 @@ class CrystallographicGridInterface(Protocol):
     nv: int
     nw: int
     unit_cell: UnitCellInterface
+
+    def interpolate_value(self, grid_coord: FractionalInterface) -> float:
+        ...
+
 
 
 class GridInterface(Protocol):

@@ -20,14 +20,14 @@ from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 @dataclasses.dataclass()
 class Partitioning(PartitioningInterface):
-    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
+    partitioning: typing.Dict[ResidueIDInterface, typing.Dict[GridCoordInterface, PositionInterface]]
     protein_mask: gemmi.Int8Grid
     inner_mask: gemmi.Int8Grid
     contact_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
     total_mask: np.ndarray
 
-    def __getitem__(self, item: ResidueID):
+    def __getitem__(self, item: ResidueIDInterface):
         return self.partitioning[item]
 
     def __iter__(self) -> Iterator[ResidueIDInterface]:
@@ -35,7 +35,7 @@ class Partitioning(PartitioningInterface):
             yield residue_id
 
     @staticmethod
-    def from_reference(reference: Reference,
+    def from_reference(reference: ReferenceInterface,
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
                        mask_radius_symmetry: float,
@@ -228,8 +228,8 @@ class Partitioning(PartitioningInterface):
                                            mask_radius_symmetry, )
 
     @staticmethod
-    def from_structure(structure: Structure,
-                       grid: gemmi.FloatGrid,
+    def from_structure(structure: StructureInterface,
+                       grid: CrystallographicGridInterface,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
