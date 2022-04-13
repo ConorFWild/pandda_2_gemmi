@@ -112,7 +112,7 @@ class GetEventRankingSizeAutobuild(GetEventRankingSizeAutobuildInterface):
                 [
                     event_id
                     for event_id
-                    in events.keys()
+                    in autobuild_scores.keys()
                     if autobuild_scores[event_id] > self.cutoff
                 ],
                 key=lambda event_id: autobuild_scores[event_id],
