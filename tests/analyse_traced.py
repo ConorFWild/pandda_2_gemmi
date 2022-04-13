@@ -10,7 +10,8 @@ import pickle
 # Scientific python libraries
 import joblib
 import ray
-from viztracer import VizTracer
+# from viztracer import VizTracer
+import yappi
 
 ## Custom Imports
 from pandda_gemmi import constants
@@ -283,7 +284,7 @@ def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
 
 
 def process_pandda(pandda_args: PanDDAArgs, ):
-    with VizTracer(output_file="initiation.json") as tracer:
+    with yappi.run():
 
         ###################################################################
         # # Configuration
@@ -576,7 +577,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
-    with VizTracer(output_file="shells.json") as tracer:
+    yappi.get_func_stats().print_all()
+
+    # with VizTracer(output_file="shells.json") as tracer:
+    with yappi.run():
 
         ###################################################################
         # # Process shells
@@ -735,8 +739,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.summarise_shells(shell_results, all_events, event_scores)
 
-    with VizTracer(output_file="autobuild.json") as tracer:
 
+    yappi.get_func_stats().print_all()
+    # with VizTracer(output_file="autobuild.json") as tracer:
+    with yappi.run():
         ###################################################################
         # # Autobuilding
         ###################################################################
@@ -970,7 +976,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         print(f"PanDDA ran in: {time_finish - time_start}")
 
-
+    yappi.get_func_stats().print_all()
 
 if __name__ == '__main__':
     with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
