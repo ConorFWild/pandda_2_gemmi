@@ -283,107 +283,106 @@ def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
 
 
 def process_pandda(pandda_args: PanDDAArgs, ):
-    tracer = VizTracer()
-    tracer.start()
-    ###################################################################
-    # # Configuration
-    ###################################################################
-    time_start = time.time()
+    with VizTracer(output_file="initiation.json") as tracer:
 
-    # Process args
-    distributed_tmp = Path(pandda_args.distributed_tmp)
+        ###################################################################
+        # # Configuration
+        ###################################################################
+        time_start = time.time()
 
-    # CHeck dependencies
-    # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
-    console.start_dependancy_check()
-    check_dependencies(pandda_args)
+        # Process args
+        distributed_tmp = Path(pandda_args.distributed_tmp)
 
-    # Initialise log
-    # with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
-    console.start_log()
-    pandda_log: Dict = {}
-    pandda_log[constants.LOG_START] = time.time()
-    initial_args = log_arguments(pandda_args, )
+        # CHeck dependencies
+        # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
+        console.start_dependancy_check()
+        check_dependencies(pandda_args)
 
-    pandda_log[constants.LOG_ARGUMENTS] = initial_args
+        # Initialise log
+        # with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
+        console.start_log()
+        pandda_log: Dict = {}
+        pandda_log[constants.LOG_START] = time.time()
+        initial_args = log_arguments(pandda_args, )
 
-    # Get global processor
-    console.start_initialise_shell_processor()
-    process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
+        pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
-    # Get local processor
-    console.start_initialise_multiprocessor()
-    process_local: ProcessorInterface = get_process_local(pandda_args)
+        # Get global processor
+        console.start_initialise_shell_processor()
+        process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
 
-    # Get reflection smoothing function
-    smooth_func: SmoothBFactorsInterface = get_smooth_func(pandda_args)
+        # Get local processor
+        console.start_initialise_multiprocessor()
+        process_local: ProcessorInterface = get_process_local(pandda_args)
 
-    # Get XMap loading functions
-    load_xmap_func: LoadXMapInterface = get_load_xmap_func(pandda_args)
-    load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
+        # Get reflection smoothing function
+        smooth_func: SmoothBFactorsInterface = get_smooth_func(pandda_args)
 
-    # Get the filtering functions
-    datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
-    filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
-        [
-            "structure_factors",
-            "resolution",
-            "rfree"
-        ],
-        datasets_validator,
-        pandda_args
-    )
-    filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
-        [
-            "dissimilar_models",
-            "large_gaps"
-            "dissimilar_spacegroups"
-        ],
-        datasets_validator,
-        pandda_args
-    )
+        # Get XMap loading functions
+        load_xmap_func: LoadXMapInterface = get_load_xmap_func(pandda_args)
+        load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
 
-    # Get the functino for selecting the comparators
-    comparators_func: GetComparatorsInterface = get_comparator_func(
-        pandda_args,
-        load_xmap_flat_func,
-        process_local
-    )
+        # Get the filtering functions
+        datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
+        filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
+            [
+                "structure_factors",
+                "resolution",
+                "rfree"
+            ],
+            datasets_validator,
+            pandda_args
+        )
+        filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
+            [
+                "dissimilar_models",
+                "large_gaps"
+                "dissimilar_spacegroups"
+            ],
+            datasets_validator,
+            pandda_args
+        )
 
-    # Get the staticial model anaylsis function
-    analyse_model_func: AnalyseModelInterface = get_analyse_model_func(pandda_args)
+        # Get the functino for selecting the comparators
+        comparators_func: GetComparatorsInterface = get_comparator_func(
+            pandda_args,
+            load_xmap_flat_func,
+            process_local
+        )
 
-    # Get the event scoring func
-    score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
+        # Get the staticial model anaylsis function
+        analyse_model_func: AnalyseModelInterface = get_analyse_model_func(pandda_args)
 
-    # Set up autobuilding function
-    autobuild_func: Optional[GetAutobuildResultInterface] = None
-    if pandda_args.autobuild:
+        # Get the event scoring func
+        score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
 
-        # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
-        if pandda_args.autobuild_strategy == "rhofit":
-            autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
+        # Set up autobuilding function
+        autobuild_func: Optional[GetAutobuildResultInterface] = None
+        if pandda_args.autobuild:
 
-        elif pandda_args.autobuild_strategy == "inbuilt":
-            raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
+            # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
+            if pandda_args.autobuild_strategy == "rhofit":
+                autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
+
+            elif pandda_args.autobuild_strategy == "inbuilt":
+                raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
 
 
+            else:
+                raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+
+        # Get the event classification function
+        if pandda_args.autobuild:
+            get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
         else:
-            raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+            get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
 
-    # Get the event classification function
-    if pandda_args.autobuild:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
-    else:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
+        # Get the site determination function
+        get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
 
-    # Get the site determination function
-    get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
-
-    ###################################################################
-    # # Run the PanDDA
-    ###################################################################
-    try:
+        ###################################################################
+        # # Run the PanDDA
+        ###################################################################
 
         ###################################################################
         # # Get datasets
@@ -577,8 +576,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
-        tracer.stop()
-        tracer.save()
+    with VizTracer(output_file="shells.json") as tracer:
 
         ###################################################################
         # # Process shells
@@ -736,6 +734,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         console.summarise_shells(shell_results, all_events, event_scores)
+
+    with VizTracer(output_file="autobuild.json") as tracer:
 
         ###################################################################
         # # Autobuilding
@@ -970,26 +970,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         print(f"PanDDA ran in: {time_finish - time_start}")
 
-    ###################################################################
-    # # Handle Exceptions
-    ###################################################################
-    # If an exception has occured, print relevant information to the console and save the log
-    except Exception as e:
-        if pandda_args.debug:
-            printer.pprint(pandda_log)
-
-        console.print_exception(e, pandda_args.debug)
-        console.save(pandda_args.out_dir / constants.PANDDA_TEXT_LOG_FILE)
-
-        pandda_log[constants.LOG_TRACE] = traceback.format_exc()
-        pandda_log[constants.LOG_EXCEPTION] = str(e)
-
-        print(f"Saving PanDDA log to: {pandda_args.out_dir / constants.PANDDA_LOG_FILE}")
-
-        save_json_log(
-            pandda_log,
-            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
-        )
 
 
 if __name__ == '__main__':
