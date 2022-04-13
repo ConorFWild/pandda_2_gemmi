@@ -13,6 +13,7 @@ PANDDA_LIGAND_FILES_DIR = "ligand_files"
 PANDDA_PDB_FILE = "{}-pandda-input.pdb"
 PANDDA_MTZ_FILE = "{}-pandda-input.mtz"
 PANDDA_TEXT_LOG_FILE = "pandda_log.txt"
+PANDDA_EVENT_JSON_FILE = "events.json"
 
 PANDDA_LIGAND_CIF_FILE = "ligand.cif"
 PANDDA_LIGAND_PDB_FILE = "ligand.pdb"

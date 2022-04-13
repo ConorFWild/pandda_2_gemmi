@@ -76,7 +76,6 @@ class XmapInterface(Protocol):
         ...
 
 
-
 XmapsInterface = MutableMapping[DtagInterface, XmapInterface]
 
 
@@ -148,6 +147,7 @@ class PanDDAFSModelInterface(Protocol):
     log_file: Path
     shell_dirs: Optional[ShellDirsInterface]
     console_log_file: Path
+    events_json_file: Path
 
     def build(self) -> None:
         ...
@@ -296,6 +296,7 @@ class ZmapInterface(Protocol):
     def to_array(self, copy=True) -> NDArrayInterface:
         ...
 
+
 ZmapsInterface = MutableMapping[DtagInterface, ZmapInterface]
 
 
@@ -433,7 +434,10 @@ AutobuildResultsInterface = Dict[EventIDInterface, AutobuildResultInterface]
 
 
 class SiteIDInterface(Protocol):
-    ...
+    site_id: int
+
+    def __int__(self):
+        return self.site_id
 
 
 # SiteIDInterface = NewType(int)

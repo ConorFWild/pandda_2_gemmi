@@ -28,7 +28,7 @@ from pandda_gemmi.dataset import (
     GetDatasets,
     GetReferenceDataset,
 )
-from pandda_gemmi.edalignment import (GetGrid, GetAlignments, 
+from pandda_gemmi.edalignment import (GetGrid, GetAlignments,
                                       LoadXmap, LoadXmapFlat
                                       )
 from pandda_gemmi.filters import (
@@ -71,7 +71,6 @@ from pandda_gemmi.autobuild import (
 from pandda_gemmi.tables import (
     GetEventTable,
     GetSiteTable,
-SaveEvents
 )
 from pandda_gemmi.fs import GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
@@ -543,194 +542,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
         ###################################################################
-        # # Assign comparison datasets
+        # # Load events from event table
         ###################################################################
-        console.start_get_comparators()
 
-        with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
-                           f'\tDone!'):
-            # TODO: Fix typing for comparators func
-            comparators: ComparatorsInterface = comparators_func(
-                datasets,
-                alignments,
-                grid,
-                structure_factors,
-                pandda_fs_model,
-            )
-
-        # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-        #     pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
-        #                                          cluster_assignments.items()}
-        #     pandda_log["Neighbourhood core dtags"] = {int(neighbourhood_number): [str(dtag) for dtag in
-        #                                                                           neighbourhood.core_dtags]
-        #                                               for neighbourhood_number, neighbourhood
-        #                                               in comparators.items()
-        #                                               }
-
-        # if pandda_args.debug:
-        #     print("Comparators are:")
-        # printer.pprint(pandda_log["Cluster Assignments"])
-        # printer.pprint(pandda_log["Neighbourhood core dtags"])
-        # printer.pprint(comparators)
-
-        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-
-        ###################################################################
-        # # Process shells
-        ###################################################################
-        console.start_process_shells()
-
-        # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
-        # sake of computational efficiency
-        with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
-                           f'\tDone!'):
-            if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-                shells: ShellsInterface = get_shells_multiple_models(
-                    datasets,
-                    comparators,
-                    pandda_args.min_characterisation_datasets,
-                    pandda_args.max_shell_datasets,
-                    pandda_args.high_res_increment,
-                    pandda_args.only_datasets,
-                    debug=pandda_args.debug,
-                )
-                if pandda_args.debug:
-                    print('Got shells that support multiple models')
-                    for shell_res, shell in shells.items():
-                        print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
-                        for cluster_num, dtags in shell.train_dtags.items():
-                            print(f'\t\t{cluster_num}: {dtags[:5]}')
-
-            else:
-                shells: ShellsInterface = get_shells(
-                    datasets,
-                    comparators,
-                    pandda_args.min_characterisation_datasets,
-                    pandda_args.max_shell_datasets,
-                    pandda_args.high_res_increment,
-                    pandda_args.only_datasets,
-
-                )
-            pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
-            pandda_fs_model.shell_dirs.build()
-
-        if pandda_args.debug:
-            printer.pprint(shells)
-
-        # Process the shells
-        with STDOUTManager('Processing the shells...', f'\tDone!'):
-            time_shells_start = time.time()
-            if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-
-                shell_results: ShellResultsInterface = {
-                    shell_id: shell_result
-                    for shell_id, shell_result
-                    in zip(
-                        shells,
-                        process_global(
-                            [
-                                Partial(
-                                    process_shell_multiple_models).paramaterise(
-                                    shell,
-                                    datasets,
-                                    alignments,
-                                    grid,
-                                    pandda_fs_model,
-                                    reference,
-                                    process_local=process_local,
-                                    structure_factors=structure_factors,
-                                    sample_rate=pandda_args.sample_rate,
-                                    contour_level=pandda_args.contour_level,
-                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                                    min_blob_volume=pandda_args.min_blob_volume,
-                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
-                                    outer_mask=pandda_args.outer_mask,
-                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                                    min_bdc=pandda_args.min_bdc,
-                                    max_bdc=pandda_args.max_bdc,
-                                    memory_availability=pandda_args.memory_availability,
-                                    statmaps=pandda_args.statmaps,
-                                    load_xmap_func=load_xmap_func,
-                                    analyse_model_func=analyse_model_func,
-                                    score_events_func=score_events_func,
-                                    debug=pandda_args.debug,
-                                )
-                                for res, shell
-                                in shells.items()
-                            ],
-                        )
-                    )
-                }
-
-            else:
-                shell_results: ShellResultsInterface = {
-                    shell_id: shell_result
-                    for shell_id, shell_result
-                    in zip(
-                        shells,
-                        process_global(
-                            [
-                                Partial(process_shell).paramaterise(
-                                    shell,
-                                    datasets,
-                                    alignments,
-                                    grid,
-                                    pandda_fs_model,
-                                    reference,
-                                    process_local=process_local,
-                                    structure_factors=structure_factors,
-                                    sample_rate=pandda_args.sample_rate,
-                                    contour_level=pandda_args.contour_level,
-                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                                    min_blob_volume=pandda_args.min_blob_volume,
-                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
-                                    outer_mask=pandda_args.outer_mask,
-                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                                    min_bdc=pandda_args.min_bdc,
-                                    max_bdc=pandda_args.max_bdc,
-                                    memory_availability=pandda_args.memory_availability,
-                                    statmaps=pandda_args.statmaps,
-                                    load_xmap_func=load_xmap_func,
-                                )
-                                for res, shell
-                                in shells.items()
-                            ],
-                        )
-                    )
-                }
-
-            time_shells_finish = time.time()
-            pandda_log[constants.LOG_SHELLS] = {
-                res: shell_result.log
-                for res, shell_result
-                in shell_results.items()
-                if shell_result
-            }
-            pandda_log["Time to process all shells"] = time_shells_finish - time_shells_start
-            if pandda_args.debug:
-                print(f"Time to process all shells: {time_shells_finish - time_shells_start}")
-
-        all_events: EventsInterface = {}
-        for res, shell_result in shell_results.items():
-            if shell_result:
-                for dtag, dataset_result in shell_result.dataset_results.items():
-                    all_events.update(dataset_result.events)
-
-        event_scores: EventScoresInterface = {}
-        for res, shell_result in shell_results.items():
-            if shell_result:
-                for dtag, dataset_result in shell_result.dataset_results.items():
-                    event_scores.update(dataset_result.event_scores)
-
-        # Add the event maps to the fs
-        for event_id, event in all_events.items():
-            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
-
-        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-
-        console.summarise_shells(shell_results, all_events, event_scores)
+        all_events: EventsInterface = GetEventsFromEventTable()(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         ###################################################################
         # # Autobuilding
@@ -925,18 +740,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         console.start_run_summary()
 
-        # Save the events to json
-        SaveEvents()(
-            all_events,
-            sites,
-            pandda_fs_model.events_json_file
-        )
-
         # Output a csv of the events
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
             # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
             event_table: EventTableInterface = GetEventTable()(
-                all_events, 
+                all_events,
                 sites,
                 event_ranking,
                 )

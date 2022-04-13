@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 from pathlib import Path
 from typing import *
 
@@ -14,7 +15,7 @@ set_loky_pickler('pickle')
 import pandas as pd
 
 from pandda_gemmi.analyse_interface import *
-from pandda_gemmi.common import SiteID
+from pandda_gemmi.common import SiteID, EventID, Dtag, EventIDX
 from pandda_gemmi.sites import Sites
 from pandda_gemmi.event import Event, Events, Clustering, Clusterings
 
@@ -95,7 +96,7 @@ class EventTable:
         records = []
         for record in self.records:
             event_dict = dataclasses.asdict(record)
-            event_dict["1-BDC"] = round(1-event_dict["bdc"], 2)
+            event_dict["1-BDC"] = round(1 - event_dict["bdc"], 2)
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
@@ -103,38 +104,39 @@ class EventTable:
 
 def get_event_record_from_event_site(event: EventInterface, site_id: SiteIDInterface) -> EventTableRecord:
     return EventTableRecord(
-                dtag=event.event_id.dtag.dtag,
-                event_idx=event.event_id.event_idx.event_idx,
-                bdc=event.bdc.bdc,
-                cluster_size=event.cluster.values.size,
-                global_correlation_to_average_map=0,
-                global_correlation_to_mean_map=0,
-                local_correlation_to_average_map=0,
-                local_correlation_to_mean_map=0,
-                site_idx=site_id.site_id,
-                x=event.cluster.centroid[0],
-                y=event.cluster.centroid[1],
-                z=event.cluster.centroid[2],
-                z_mean=0.0,
-                z_peak=0.0,
-                applied_b_factor_scaling=0.0,
-                high_resolution=0.0,
-                low_resolution=0.0,
-                r_free=0.0,
-                r_work=0.0,
-                analysed_resolution=0.0,
-                map_uncertainty=0.0,
-                analysed=False,
-                interesting=False,
-                exclude_from_z_map_analysis=False,
-                exclude_from_characterisation=False,
-            )
+        dtag=event.event_id.dtag.dtag,
+        event_idx=event.event_id.event_idx.event_idx,
+        bdc=event.bdc.bdc,
+        cluster_size=event.cluster.values.size,
+        global_correlation_to_average_map=0,
+        global_correlation_to_mean_map=0,
+        local_correlation_to_average_map=0,
+        local_correlation_to_mean_map=0,
+        site_idx=site_id.site_id,
+        x=event.cluster.centroid[0],
+        y=event.cluster.centroid[1],
+        z=event.cluster.centroid[2],
+        z_mean=0.0,
+        z_peak=0.0,
+        applied_b_factor_scaling=0.0,
+        high_resolution=0.0,
+        low_resolution=0.0,
+        r_free=0.0,
+        r_work=0.0,
+        analysed_resolution=0.0,
+        map_uncertainty=0.0,
+        analysed=False,
+        interesting=False,
+        exclude_from_z_map_analysis=False,
+        exclude_from_characterisation=False,
+    )
+
 
 def get_event_table_from_events(
-    events: EventsInterface, 
-    sites: SitesInterface, 
-    event_ranking: EventRankingInterface,
-    ) -> EventTableInterface:
+        events: EventsInterface,
+        sites: SitesInterface,
+        event_ranking: EventRankingInterface,
+) -> EventTableInterface:
     records = []
     for event_id in event_ranking:
         event = events[event_id]
@@ -146,7 +148,8 @@ def get_event_table_from_events(
 
 
 class GetEventTable(GetEventTableInterface):
-    def __call__(self, events: EventsInterface, sites: SitesInterface, event_ranking: EventRankingInterface) -> EventTableInterface:
+    def __call__(self, events: EventsInterface, sites: SitesInterface,
+                 event_ranking: EventRankingInterface) -> EventTableInterface:
         return get_event_table_from_events(events, sites, event_ranking)
 
 
@@ -212,36 +215,82 @@ class SiteTable:
 
         table.to_csv(str(path))
 
+
 def get_site_table_from_events(events: EventsInterface, initial_sites: SitesInterface, cutoff: float):
+    dtag_clusters = {}
+    for event_id in events:
+        dtag = event_id.dtag
+        event_idx = event_id.event_idx.event_idx
+        event = events[event_id]
 
-        dtag_clusters = {}
-        for event_id in events:
-            dtag = event_id.dtag
-            event_idx = event_id.event_idx.event_idx
-            event = events[event_id]
+        if dtag not in dtag_clusters:
+            dtag_clusters[dtag] = {}
 
-            if dtag not in dtag_clusters:
-                dtag_clusters[dtag] = {}
+        dtag_clusters[dtag][event_idx] = event.cluster
 
-            dtag_clusters[dtag][event_idx] = event.cluster
+    _clusterings = {}
+    for dtag in dtag_clusters:
+        _clusterings[dtag] = Clustering(dtag_clusters[dtag])
 
-        _clusterings = {}
-        for dtag in dtag_clusters:
-            _clusterings[dtag] = Clustering(dtag_clusters[dtag])
+    clusterings = Clusterings(_clusterings)
 
-        clusterings = Clusterings(_clusterings)
+    sites: SitesInterface = Sites.from_clusters(clusterings, cutoff)
 
-        sites: SitesInterface = Sites.from_clusters(clusterings, cutoff)
+    records = []
+    for site_id in sites:
+        # site = sites[site_id]
+        centroid = sites.centroids[site_id]
+        site_record = SiteTableRecord.from_site_id(site_id, centroid)
+        records.append(site_record)
 
-        records = []
-        for site_id in sites:
-            # site = sites[site_id]
-            centroid = sites.centroids[site_id]
-            site_record = SiteTableRecord.from_site_id(site_id, centroid)
-            records.append(site_record)
+    return SiteTable(records)
 
-        return SiteTable(records)
 
 class GetSiteTable(GetSiteTableInterface):
     def __call__(self, events: EventsInterface, sites: SitesInterface, cutoff: float) -> SiteTableInterface:
         return get_site_table_from_events(events, sites, cutoff)
+
+
+# class GetEventsFromEventTable:
+#     def __call__(self, event_table_path) -> EventsInterface:
+#         event_table_dataframe = pd.read_csv(str(event_table_path))
+#         for row_id, row in event_table_dataframe.iterrows():
+#             event: EventInterface = Event(
+#                 EventID(
+#                     Dtag(),
+#                     EventIDX()
+#                 ),
+#                 SiteID(),
+#                 BDCInterface(),
+#
+#             )
+
+class SaveEvents:
+    def __call__(self, events: EventsInterface, sites: SitesInterface, events_json_file: Path):
+
+        representations = {}
+        for event_id, event in events.items():
+            representation = {
+                "dtag": str(event_id.dtag),
+                "event_idx": int(event_id.event_idx),
+                "site_id": int(sites.event_to_site[event_id]),
+                "bdc": event.bdc.bdc,
+                "cluster": {
+                    "indexes": [
+                        arr.tolist()
+                        for arr
+                        in event.cluster.indexes
+                    ],
+                    "centroid": event.cluster.centroid,
+                    "cluster_positions_array": event.cluster.cluster_positions_array.tolist(),
+                    "event_mask_indicies": None if not event.cluster.event_mask_indicies else
+                    event.cluster.event_mask_indicies.tolist(),
+                },
+                "native_centroid": event.native_centroid,
+                "native_positions": event.native_positions,
+            }
+            representations[f"{event_id.dtag}_{event_id.event_idx}"] = representation
+
+        with open(events_json_file, "w") as f:
+            json.dump(representations, f)
+
