@@ -122,7 +122,7 @@ class GetEventRankingSizeAutobuild(GetEventRankingSizeAutobuildInterface):
 
         # Add remaining events by size
         for event_id in sorted(event_scores.keys(), key=lambda _event_id: event_scores[_event_id], reverse=True):
-            if event_id not in ranked_event_ids:
+            if not len(autobuild_results[event_id].scores) > 0:  # i.e. event_id was not in autobuild_scores
                 ranked_event_ids.append(event_id)
 
         # events_ranked = {event_id: events[event_id] for event_id in ranked_event_ids}
