@@ -584,14 +584,17 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
 
+    events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
+
     return PanDDAFSModel(pandda_dir=output_out_dir,
                             data_dirs=data_dirs,
                             analyses=analyses,
                             processed_datasets=processed_datasets,
                             log_file=log_path,
                             shell_dirs=None,
-                            console_log_file=console_log_file
-                            )
+                            console_log_file=console_log_file,
+                         events_json_file=events_json_file
+                         )
 
 
 class GetPanDDAFSModel(GetPanDDAFSModelInterface):
