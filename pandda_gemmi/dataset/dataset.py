@@ -1352,7 +1352,7 @@ class Datasets:
             if running_index is not None:
                 running_index = running_index.intersection(flattened_index)
         
-        if running_index:
+        if running_index is not None:
             return running_index.to_list()
 
         else:
