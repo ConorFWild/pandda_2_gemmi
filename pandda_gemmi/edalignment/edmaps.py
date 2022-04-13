@@ -693,5 +693,5 @@ class GetMapStatistics:
         self.mean = np.mean(array[array > 0])
         self.std = np.std(array[array > 0])
         self.greater_1 = array[array > 1.0].size
-        self.greater_2 = array[array > 1.0].size
-        self.greater_3 = array[array > 1.0].size
+        self.greater_2 = array[array > 2.0].size
+        self.greater_3 = array[array > 3.0].size
