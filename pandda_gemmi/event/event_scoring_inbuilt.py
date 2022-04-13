@@ -307,6 +307,18 @@ def transform_structure_array(
 
     return transformed_array
 
+def get_interpolated_values(grid, transformed_structure_array):
+    vals = []
+    for row in transformed_structure_array:
+        pos = gemmi.Position(row[0], row[1], row[2])
+        vals.append(
+            grid.interpolate_value(
+                pos
+            )
+        )
+
+    return np.array(vals)
+
 def score_fit_array(structure_array, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
@@ -330,24 +342,18 @@ def score_fit_array(structure_array, grid, distance, params):
         rotation_matrix
     )
 
-    vals = []
-    for row in transformed_structure_array:
-        pos = gemmi.Position(row[0], row[1], row[2])
-        vals.append(
-            grid.interpolate_value(
-                pos
-            )
-        )
+    vals = get_interpolated_values(grid, transformed_structure_array)
+
     # print(type(transformed_structure_array))
     # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
 
     n = structure_array.shape[0]
 
-    positive_score = sum([1 if val > 0.5 else 0 for val in vals])
-    penalty = sum([-1 if val < -0.0 else 0 for val in vals])
+    positive_score = np.sum(vals > 0.5)
+    penalty = -np.sum(vals < 0.0)
     score = (positive_score + penalty) / n
 
-    return 1 - score
+    return float(1 - score)
 
 
 def DEP_score_fit(structure, grid, distance, params):
