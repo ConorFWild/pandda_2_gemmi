@@ -309,7 +309,7 @@ class EDClusterInterface(Protocol):
     indexes: Tuple[NDArrayInterface]
     centroid: Tuple[float, float, float]
     cluster_positions_array: NDArrayInterface
-    event_mask_indicies: Optional[NDArrayInterface]
+    event_mask_indicies: Optional[Tuple[NDArrayInterface]]
 
     def size(self, grid: GridInterface) -> float:
         ...

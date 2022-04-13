@@ -267,7 +267,6 @@ class GetSiteTable(GetSiteTableInterface):
 
 class SaveEvents:
     def __call__(self, events: EventsInterface, sites: SitesInterface, events_json_file: Path):
-
         representations = {}
         for event_id, event in events.items():
             representation = {
@@ -284,7 +283,11 @@ class SaveEvents:
                     "centroid": event.cluster.centroid,
                     "cluster_positions_array": event.cluster.cluster_positions_array.tolist(),
                     "event_mask_indicies": None if not event.cluster.event_mask_indicies else
-                    event.cluster.event_mask_indicies.tolist(),
+                    [
+                        arr.tolist()
+                        for arr
+                        in event.cluster.event_mask_indicies
+                    ],
                 },
                 "native_centroid": event.native_centroid,
                 "native_positions": event.native_positions,
@@ -293,4 +296,3 @@ class SaveEvents:
 
         with open(events_json_file, "w") as f:
             json.dump(representations, f)
-
