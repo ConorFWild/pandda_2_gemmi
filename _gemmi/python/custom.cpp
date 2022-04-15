@@ -87,9 +87,9 @@ void interpolate_pos_array(
   auto r_val = vals_array.template mutable_unchecked<1>();
   for (int i=0; i<r_pos.shape(0); i++){
     r_val(i) = grid.interpolate_value(
-      r_arr(i, 0),
-      r_arr(i, 1),
-      r_arr(i, 2));
+      r_pos(i, 0),
+      r_pos(i, 1),
+      r_pos(i, 2));
   }
 }
 
