@@ -157,4 +157,10 @@ void add_custom(py::module& m) {
         &interpolate_points,
         "Interpolates a list of points."
     );
+      m.def(
+        "interpolate_pos_array",
+        &interpolate_pos_array,
+        "Interpolates an array of points."
+    );
+    
 }
