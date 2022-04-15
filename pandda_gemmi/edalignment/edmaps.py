@@ -22,6 +22,26 @@ from pandda_gemmi.edalignment.alignments import Alignment, Alignments, Transform
 from pandda_gemmi.edalignment.grid import Grid, Partitioning
 
 
+def interpolate_points(
+        unaligned_xmap,
+        new_grid,
+        point_list,
+        position_list,
+        transform_list,
+        com_moving_list,
+        com_reference_list, ):
+    interpolated_grid = gemmi.interpolate_points(
+        unaligned_xmap,
+        new_grid,
+        point_list,
+        position_list,
+        transform_list,
+        com_moving_list,
+        com_reference_list,
+    )
+    return interpolated_grid
+
+
 @dataclasses.dataclass()
 class Xmap(XmapInterface):
     xmap: gemmi.FloatGrid
@@ -195,14 +215,22 @@ class Xmap(XmapInterface):
         # ))
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                                     new_grid,
-                                                     point_list,
-                                                     position_list,
-                                                     transform_list,
-                                                     com_moving_list,
-                                                     com_reference_list,
-                                                     )
+        interpolated_grid = interpolate_points(unaligned_xmap,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
+        # interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+        #                                              new_grid,
+        #                                              point_list,
+        #                                              position_list,
+        #                                              transform_list,
+        #                                              com_moving_list,
+        #                                              com_reference_list,
+        #                                              )
 
         return Xmap(interpolated_grid)
 
@@ -260,37 +288,48 @@ class Xmap(XmapInterface):
             com_reference_list.append(com_reference)
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                                     new_grid,
-                                                     point_list,
-                                                     position_list,
-                                                     transform_list,
-                                                     com_moving_list,
-                                                     com_reference_list,
-                                                     )
 
-        return Xmap(new_grid)
+
+        # interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+        #                                              new_grid,
+        #                                              point_list,
+        #                                              position_list,
+        #                                              transform_list,
+        #                                              com_moving_list,
+        #                                              com_reference_list,
+        #                                              )
+        interpolated_grid = interpolate_points(unaligned_xmap,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
+
+        return Xmap(interpolated_grid)
 
     @staticmethod
     def from_aligned_map(event_map_reference_grid: CrystallographicGridInterface,
-                         dataset: DatasetInterface, 
-                         alignment: AlignmentInterface, 
+                         dataset: DatasetInterface,
+                         alignment: AlignmentInterface,
                          grid: GridInterface,
-                         structure_factors: StructureFactors, 
+                         structure_factors: StructureFactors,
                          mask_radius: float,
                          mask_radius_symmetry: float):
 
         partitioning: PartitioningInterface = Partitioning.from_structure(dataset.structure,
-                                                   event_map_reference_grid,
-                                                   mask_radius,
-                                                   mask_radius_symmetry)
+                                                                          event_map_reference_grid,
+                                                                          mask_radius,
+                                                                          mask_radius_symmetry)
 
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
             alignment_positions: typing.Dict[GridCoordInterface, PositionInterface] = partitioning[residue_id]
 
-            transformed_positions: typing.Dict[GridCoordInterface, PositionInterface] = alignment[residue_id].apply_moving_to_reference(
+            transformed_positions: typing.Dict[GridCoordInterface, PositionInterface] = alignment[
+                residue_id].apply_moving_to_reference(
                 alignment_positions)
 
             transformed_positions_fractional: typing.Dict[GridCoordInterface, FractionalInterface] = {
@@ -372,15 +411,23 @@ class Xmap(XmapInterface):
                 continue
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(
-            event_map_reference_grid,
-            new_grid,
-            point_list,
-            position_list,
-            transform_list,
-            com_moving_list,
-            com_reference_list,
-        )
+        # interpolated_grid = gemmi.interpolate_points(
+        #     event_map_reference_grid,
+        #     new_grid,
+        #     point_list,
+        #     position_list,
+        #     transform_list,
+        #     com_moving_list,
+        #     com_reference_list,
+        # )
+        interpolated_grid = interpolate_points(event_map_reference_grid,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
 
         return Xmap(interpolated_grid)
 

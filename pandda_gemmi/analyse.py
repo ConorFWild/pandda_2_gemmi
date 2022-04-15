@@ -28,7 +28,7 @@ from pandda_gemmi.dataset import (
     GetDatasets,
     GetReferenceDataset,
 )
-from pandda_gemmi.edalignment import (GetGrid, GetAlignments, 
+from pandda_gemmi.edalignment import (GetGrid, GetAlignments,
                                       LoadXmap, LoadXmapFlat
                                       )
 from pandda_gemmi.filters import (
@@ -71,7 +71,7 @@ from pandda_gemmi.autobuild import (
 from pandda_gemmi.tables import (
     GetEventTable,
     GetSiteTable,
-SaveEvents
+    SaveEvents
 )
 from pandda_gemmi.fs import GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
@@ -364,7 +364,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
-
 
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
@@ -936,10 +935,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         with STDOUTManager('Building and outputting event table...', f'\tDone!'):
             # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
             event_table: EventTableInterface = GetEventTable()(
-                all_events, 
+                all_events,
                 sites,
                 event_ranking,
-                )
+            )
             event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
@@ -947,8 +946,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
             #                                                        pandda_args.max_site_distance_cutoff)
             site_table: SiteTableInterface = GetSiteTable()(all_events,
-                                            sites,
-                                                        pandda_args.max_site_distance_cutoff)
+                                                            sites,
+                                                            pandda_args.max_site_distance_cutoff)
             site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
 
         time_finish = time.time()
