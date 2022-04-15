@@ -78,6 +78,21 @@ Grid<float> interpolate_points(
 
 }
 
+void interpolate_pos_array(
+  Grid<float>& grid,
+  py::array_t<float> pos_array,
+  py::array_t<float> vals_array
+){
+  auto r_pos = pos_array.template mutable_unchecked<2>();
+  auto r_val = vals_array.template mutable_unchecked<1>();
+  for (int i=0; i<r_pos.shape(0); i++){
+    r_val(i) = grid.interpolate_value(
+      r_arr(i, 0),
+      r_arr(i, 1),
+      r_arr(i, 2));
+  }
+}
+
 // int num_atoms(Structure structure){
 //   int n = 0;
 

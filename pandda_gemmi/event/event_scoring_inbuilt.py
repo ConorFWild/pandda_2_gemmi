@@ -319,6 +319,21 @@ def get_interpolated_values(grid, transformed_structure_array):
 
     return np.array(vals)
 
+def get_interpolated_values_c(
+    grid, 
+    transformed_structure_array, 
+    n,
+    ):
+    vals = np.zeros(n)
+
+    gemmi.interpolate_pos_array(
+        grid,
+        transformed_structure_array,
+        vals,
+    )
+
+    return vals
+
 def score_fit_array(structure_array, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
