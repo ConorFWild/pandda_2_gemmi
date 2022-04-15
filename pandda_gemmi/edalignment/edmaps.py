@@ -184,7 +184,7 @@ class Xmap(XmapInterface):
         # Unpack the points, poitions and transforms
         point_list: List[GridCoordInterface] = []
         position_list: List[PositionInterface] = []
-        transform_list: List[gemmi.Trasform] = []
+        transform_list: List[gemmi.Transform] = []
         com_moving_list: List[NDArrayInterface] = []
         com_reference_list: List[NDArrayInterface] = []
 
