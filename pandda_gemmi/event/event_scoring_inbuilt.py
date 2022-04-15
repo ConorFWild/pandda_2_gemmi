@@ -357,12 +357,14 @@ def score_fit_array(structure_array, grid, distance, params):
         rotation_matrix
     )
 
-    vals = get_interpolated_values(grid, transformed_structure_array)
+
+    n = structure_array.shape[0]
+
+    vals = get_interpolated_values_c(grid, transformed_structure_array, n)
 
     # print(type(transformed_structure_array))
     # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
 
-    n = structure_array.shape[0]
 
     positive_score = np.sum(vals > 0.5)
     penalty = -np.sum(vals < 0.0)
