@@ -78,10 +78,89 @@ Grid<float> interpolate_points(
 
 }
 
+void interpolate_pos_array(
+  Grid<float>& grid,
+  py::array_t<float> pos_array,
+  py::array_t<float> vals_array
+){
+  auto r_pos = pos_array.template mutable_unchecked<2>();
+  auto r_val = vals_array.template mutable_unchecked<1>();
+  for (int i=0; i<r_pos.shape(0); i++){
+    r_val(i) = grid.interpolate_value(
+      r_pos(i, 0),
+      r_pos(i, 1),
+      r_pos(i, 2));
+  }
+}
+
+// int num_atoms(Structure structure){
+//   int n = 0;
+
+//   for (gemmi::Model& model : structure.models)
+//       for (gemmi::Chain& chain : model.chains)
+//         for (gemmi::Residue& res : chain.residues)
+//           for (gemmi::Atom& atom : res.atoms)
+//             if (atom.name != "H") {
+//               n = n+1;            
+//               }
+        
+
+//   return n;
+// }
+
+// Structure transform_structure(
+//   Structure& structure, 
+//     std::vector<float>& translation,
+//   std::vector<std::vector<float>>& rotation,
+//   )
+// {
+//   Structure structure_copy = new Structure(structure);
+
+//   std::vector<float> structure_mean = get_structure_mean(structure_copy);
+
+
+
+//   return structure_copy;
+// }
+
+// std::vector<float> transform_and_interpolate(
+//   Structure& structure,
+//   Grid<float>& xmap,
+//   std::vector<float>& translation,
+//   std::vector<std::vector<float>>& rotation,
+// )
+// {
+//   Structure structure_copy = transform_structure(structure, translation, rotation);
+
+//   int n = num_atoms(structure_copy);
+
+//   std::vector<float> scores;
+
+//   for (gemmi::Model& model : structure_copy.models)
+//       for (gemmi::Chain& chain : model.chains)
+//         for (gemmi::Residue& res : chain.residues)
+//           for (gemmi::Atom& atom : res.atoms)
+//             if (atom.name != "H") {
+//               float score = xmap.interpolate_value(atom.pos); 
+//               scores.push_back(score);   
+//               }
+
+//   return scores;
+
+// }
+
+
+
 void add_custom(py::module& m) {
       m.def(
         "interpolate_points",
         &interpolate_points,
         "Interpolates a list of points."
     );
+      m.def(
+        "interpolate_pos_array",
+        &interpolate_pos_array,
+        "Interpolates an array of points."
+    );
+    
 }

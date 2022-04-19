@@ -7,12 +7,15 @@ from functools import partial
 
 from scipy import stats
 from joblib.externals.loky import set_loky_pickler
+
+from pandda_gemmi.analyse_interface import DtagInterface, GridInterface, ModelIDInterface, ModelInterface, NDArrayInterface, XmapsInterface
 set_loky_pickler('pickle')
 from matplotlib import pyplot as plt
 from scipy import optimize
 import seaborn as sns
 sns.set_theme()
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.shells import Shell
@@ -21,10 +24,10 @@ from pandda_gemmi.python_types import *
 
 
 @dataclasses.dataclass()
-class Model:
-    mean: np.array
-    sigma_is: typing.Dict[Dtag, float]
-    sigma_s_m: np.ndarray
+class Model(ModelInterface):
+    mean: NDArrayInterface
+    sigma_is: typing.Dict[DtagInterface, float]
+    sigma_s_m: NDArrayInterface
 
     @staticmethod
     def mean_from_xmap_array(masked_train_xmap_array: XmapArray):
@@ -70,7 +73,7 @@ class Model:
     def from_mean_is_sms(mean_flat,
                          sigma_is,
                          sigma_s_m_flat,
-                         grid: Grid, ):
+                         grid: GridInterface, ):
 
         # mask = grid.partitioning.protein_mask
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
@@ -463,7 +466,7 @@ class Model:
 
 
 @dataclasses.dataclass()
-class Zmap:
+class Zmap(ZmapInterface):
     zmap: gemmi.FloatGrid
 
     @staticmethod
@@ -578,14 +581,14 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: Model, xmaps: Xmaps, model_number=0, debug=False):
+    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface=0, debug: bool=False):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]
             zmap = Zmap.from_xmap(model, xmap, dtag, model_number=model_number, debug=debug)
             zmaps[dtag] = zmap
 
-        return Zmaps(zmaps)
+        return zmaps
 
     def __len__(self):
         return len(self.zmaps)

@@ -13,6 +13,7 @@ PANDDA_LIGAND_FILES_DIR = "ligand_files"
 PANDDA_PDB_FILE = "{}-pandda-input.pdb"
 PANDDA_MTZ_FILE = "{}-pandda-input.mtz"
 PANDDA_TEXT_LOG_FILE = "pandda_log.txt"
+PANDDA_EVENT_JSON_FILE = "events.json"
 
 PANDDA_LIGAND_CIF_FILE = "ligand.cif"
 PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
@@ -252,6 +253,9 @@ ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
 ARGS_RANK_METHOD_DEFAULT: str = "autobuild"
+ARGS_MIN_BDC_DEFAULT: float = 0.0
+ARGS_MAX_BDC_DEFAULT: float = 0.95
+ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
 
 ###################################################################
 # # Console constants
@@ -274,6 +278,7 @@ CONSOLE_START_AUTOBUILDING = "Autobuilding event maps..."
 CONSOLE_START_RANKING = "Ranking events..."
 CONSOLE_START_ASSIGN_SITES = "Assigning sites..."
 CONSOLE_START_SUMMARY = "Summarising PanDDA run..."
+CONSOLE_START_EVENT_CLASSIFICATION = "Starting classification of PanDDA Events..."
 
 ###################################################################
 # # Logging constants

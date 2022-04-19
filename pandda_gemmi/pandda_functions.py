@@ -21,6 +21,7 @@ import gemmi
 import ray
 
 from pandda_gemmi import constants
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import StructureFactors, Dataset, Datasets, Resolution
 from pandda_gemmi.fs import PanDDAFSModel
@@ -34,7 +35,7 @@ def run(func: Partial):
     return func()
 
 
-def process_local_serial(funcs):
+def process_local_serial(funcs: List[Callable[P, V]]) -> List[V]:
     results = []
     for func in funcs:
         results.append(func())
@@ -521,34 +522,8 @@ def load_and_reduce(
     return reduced_array
 
 
-def get_comparators_high_res(
-        datasets,
-        alignments,
-        grid,
-        structure_factors,
-        pandda_fs_model,
-        comparison_min_comparators,
-        comparison_max_comparators,
-):
-    dtag_list = [dtag for dtag in datasets]
 
-    dtags_by_res = list(
-        sorted(
-            dtag_list,
-            key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
-        )
-    )
-
-    highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
-
-    comparators = {}
-    for dtag in dtag_list:
-        comparators[dtag] = highest_res_datasets
-
-    return comparators
-
-
-def get_comparators_high_res_random(
+def get_comparators_high_res_first(
         datasets,
         alignments,
         grid,
@@ -579,15 +554,10 @@ def get_comparators_high_res_random(
         truncated_datasets = [dtag for dtag in dtag_list if
                               datasets[dtag].reflections.resolution().resolution < truncation_res]
 
-        comparators[dtag] = list(
-            np.random.choice(
-                truncated_datasets,
-                size=comparison_min_comparators,
-                replace=False,
-            )
-        )
+        comparators[dtag] = [dtag for dtag in sorted(truncated_datasets, key=lambda x: x.dtag)][
+                            :comparison_min_comparators + 1]
 
-    return comparators
+    return comparators, {}
 
 
 def get_distance_matrix(samples: MutableMapping[str, np.ndarray]) -> np.ndarray:
@@ -1817,11 +1787,12 @@ def get_comparators_closest_cluster_neighbours(
 
 
 def get_shells(
-        datasets: Dict[Dtag, Dataset],
-        comparators: Dict[Dtag, List[Dtag]],
+        datasets: DatasetsInterface,
+        comparators: ComparatorsInterface,
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,
+        only_datasets,
 ):
     # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
     # Common reoslution
@@ -1847,8 +1818,15 @@ def get_shells(
         # Find the first shell whose res is higher
         for res in reses:
             if res > low_res:
-                shells_test[res] = shells_test[res].union({dtag, })
-                shells_train[res][dtag] = set(comparison_dtags)
+
+                if only_datasets:
+                    if dtag.dtag in only_datasets:
+                        shells_test[res] = shells_test[res].union({dtag, })
+                        shells_train[res][dtag] = set(comparison_dtags)
+
+                else:
+                    shells_test[res] = shells_test[res].union({dtag, })
+                    shells_train[res][dtag] = set(comparison_dtags)
 
                 # Make sure they only appear in one shell
                 break
@@ -1962,7 +1940,11 @@ def get_shells_clustered(
     return shells
 
 
-def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
+def truncate(
+    datasets: DatasetsInterface, 
+    resolution: ResolutionInterface, 
+    structure_factors: StructureFactorsInterface,
+    ):
     new_datasets_resolution = {}
 
     # Truncate by common resolution
@@ -2004,7 +1986,7 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
         raise exception
 
 
-def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
+def get_common_structure_factors(datasets: DatasetsInterface):
     for dtag in datasets:
         dataset = datasets[dtag]
         reflections = dataset.reflections
@@ -2020,15 +2002,15 @@ def get_common_structure_factors(datasets: Dict[Dtag, Dataset]):
 
 
 def save_native_frame_zmap(
-        path,
-        zmap: Zmap,
-        dataset: Dataset,
-        alignment: Alignment,
-        grid: Grid,
-        structure_factors: StructureFactors,
+        path: Path,
+        zmap: CrystallographicGridInterface,
+        dataset: DatasetInterface,
+        alignment: AlignmentInterface,
+        grid: GridInterface,
+        structure_factors: StructureFactorsInterface,
         mask_radius: float,
         mask_radius_symmetry: float,
-        partitioning: Partitioning,
+        partitioning: PartitioningInterface,
         sample_rate: float,
 ):
     reference_frame_zmap_grid = zmap.zmap
@@ -2062,7 +2044,7 @@ def save_native_frame_zmap(
 
 
 def save_reference_frame_zmap(path,
-                              zmap: Zmap, ):
+                              zmap: CrystallographicGridInterface, ):
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = zmap.zmap
     ccp4.update_ccp4_header(2, True)

@@ -6,10 +6,15 @@ import itertools
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 from joblib.externals.loky import set_loky_pickler
+
+from pandda_gemmi.analyse_interface import LoadXMapInterface
+
 set_loky_pickler('pickle')
 import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
 from pandda_gemmi.dataset import StructureFactors, Reflections, Dataset, Datasets
@@ -17,8 +22,28 @@ from pandda_gemmi.edalignment.alignments import Alignment, Alignments, Transform
 from pandda_gemmi.edalignment.grid import Grid, Partitioning
 
 
+def interpolate_points(
+        unaligned_xmap,
+        new_grid,
+        point_list,
+        position_list,
+        transform_list,
+        com_moving_list,
+        com_reference_list, ):
+    interpolated_grid = gemmi.interpolate_points(
+        unaligned_xmap,
+        new_grid,
+        point_list,
+        position_list,
+        transform_list,
+        com_moving_list,
+        com_reference_list,
+    )
+    return interpolated_grid
+
+
 @dataclasses.dataclass()
-class Xmap:
+class Xmap(XmapInterface):
     xmap: gemmi.FloatGrid
 
     @staticmethod
@@ -32,13 +57,14 @@ class Xmap:
         return Xmap(ccp4.grid)
 
     @staticmethod
-    def from_unaligned_dataset(dataset: Dataset, alignment: Alignment, grid: Grid, structure_factors: StructureFactors,
+    def from_unaligned_dataset(dataset: DatasetInterface, alignment: AlignmentInterface, grid: GridInterface,
+                               structure_factors: StructureFactorsInterface,
                                sample_rate: float = 3.0):
 
-        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                                 structure_factors.phi,
-                                                                                                 sample_rate=sample_rate,
-                                                                                                 )
+        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                     structure_factors.phi,
+                                                                                     sample_rate=sample_rate,
+                                                                                     )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
         std = np.std(unaligned_xmap_array)
 
@@ -47,18 +73,19 @@ class Xmap:
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
-            alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = grid.partitioning[residue_id]
+            alignment_positions: typing.MutableMapping[GridCoordInterface, PositionInterface] = grid.partitioning[
+                residue_id]
 
-            transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply_reference_to_moving(
+            transformed_positions: typing.MutableMapping[GridCoordInterface, PositionInterface] = alignment[
+                residue_id].apply_reference_to_moving(
                 alignment_positions)
 
-            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+            transformed_positions_fractional: typing.MutableMapping[GridCoordInterface, FractionalInterface] = {
                 point: unaligned_xmap.unit_cell.fractionalize(pos) for point, pos in transformed_positions.items()}
 
-            interpolated_values: typing.Dict[typing.Tuple[int],
-                                             float] = Xmap.interpolate_grid(unaligned_xmap,
-                                                                            transformed_positions_fractional)
+            interpolated_values: typing.MutableMapping[GridCoordInterface, float] = Xmap.interpolate_grid(
+                unaligned_xmap,
+                transformed_positions_fractional)
 
             interpolated_values_tuple = (interpolated_values_tuple[0] + [index[0] for index in interpolated_values],
                                          interpolated_values_tuple[1] + [index[1] for index in interpolated_values],
@@ -75,18 +102,79 @@ class Xmap:
 
         return Xmap(new_grid)
 
+    # @staticmethod
+    # def from_unaligned_dataset_c(dataset: Dataset,
+    #                              alignment: Alignment,
+    #                              grid: Grid,
+    #                              structure_factors: StructureFactors,
+    #                              sample_rate: float = 3.0,
+    #                              ):
+
+    #     unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
+    #                                                                                              structure_factors.phi,
+    #                                                                                              sample_rate=sample_rate,
+    #                                                                                              )
+    #     unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
+
+    #     std = np.std(unaligned_xmap_array)
+    #     unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
+
+    #     new_grid = grid.new_grid()
+    #     # Unpack the points, poitions and transforms
+    #     point_list: List[Tuple[int, int, int]] = []
+    #     position_list: List[Tuple[float, float, float]] = []
+    #     transform_list: List[gemmi.transform] = []
+    #     com_moving_list: List[np.array] = []
+    #     com_reference_list: List[np.array] = []
+
+    #     for residue_id, point_position_dict in grid.partitioning.partitioning.items():
+
+    #         al = alignment[residue_id]
+    #         transform = al.transform.inverse()
+    #         com_moving = al.com_moving
+    #         com_reference = al.com_reference
+
+    #         for point, position in point_position_dict.items():
+    #             point_list.append(point)
+    #             position_list.append(position)
+    #             transform_list.append(transform)
+    #             com_moving_list.append(com_moving)
+    #             com_reference_list.append(com_reference)
+
+    #     # for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
+
+    #     # print((
+    #     #     f"point: {point}\n"
+    #     #     f"Position: {position}\n"
+    #     #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
+    #     #     f"com moving: {com_moving} \n"
+    #     #     f"Com moving: {com_reference}\n"
+    #     # ))
+
+    #     # Interpolate values
+    #     interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+    #                                                  new_grid,
+    #                                                  point_list,
+    #                                                  position_list,
+    #                                                  transform_list,
+    #                                                  com_moving_list,
+    #                                                  com_reference_list,
+    #                                                  )
+
+    #     return Xmap(interpolated_grid)
+
     @staticmethod
-    def from_unaligned_dataset_c(dataset: Dataset,
-                                 alignment: Alignment,
-                                 grid: Grid,
-                                 structure_factors: StructureFactors,
+    def from_unaligned_dataset_c(dataset: DatasetInterface,
+                                 alignment: AlignmentInterface,
+                                 grid: GridInterface,
+                                 structure_factors: StructureFactorsInterface,
                                  sample_rate: float = 3.0,
                                  ):
 
-        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                                 structure_factors.phi,
-                                                                                                 sample_rate=sample_rate,
-                                                                                                 )
+        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                     structure_factors.phi,
+                                                                                     sample_rate=sample_rate,
+                                                                                     )
         unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
 
         std = np.std(unaligned_xmap_array)
@@ -94,13 +182,15 @@ class Xmap:
 
         new_grid = grid.new_grid()
         # Unpack the points, poitions and transforms
-        point_list: List[Tuple[int, int, int]] = []
-        position_list: List[Tuple[float, float, float]] = []
-        transform_list: List[gemmi.transform] = []
-        com_moving_list: List[np.array] = []
-        com_reference_list: List[np.array] = []
+        point_list: List[GridCoordInterface] = []
+        position_list: List[PositionInterface] = []
+        transform_list: List[gemmi.Transform] = []
+        com_moving_list: List[NDArrayInterface] = []
+        com_reference_list: List[NDArrayInterface] = []
 
-        for residue_id, point_position_dict in grid.partitioning.partitioning.items():
+        for residue_id in grid.partitioning:
+
+            point_position_dict = grid.partitioning[residue_id]
 
             al = alignment[residue_id]
             transform = al.transform.inverse()
@@ -125,75 +215,22 @@ class Xmap:
         # ))
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                                     new_grid,
-                                                     point_list,
-                                                     position_list,
-                                                     transform_list,
-                                                     com_moving_list,
-                                                     com_reference_list,
-                                                     )
-
-        return Xmap(interpolated_grid)
-
-    @staticmethod
-    def from_unaligned_dataset_c(dataset: Dataset,
-                                 alignment: Alignment,
-                                 grid: Grid,
-                                 structure_factors: StructureFactors,
-                                 sample_rate: float = 3.0,
-                                 ):
-
-        unaligned_xmap: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(structure_factors.f,
-                                                                                                 structure_factors.phi,
-                                                                                                 sample_rate=sample_rate,
-                                                                                                 )
-        unaligned_xmap_array = np.array(unaligned_xmap, copy=False)
-
-        std = np.std(unaligned_xmap_array)
-        unaligned_xmap_array[:, :, :] = unaligned_xmap_array[:, :, :] / std
-
-        new_grid = grid.new_grid()
-        # Unpack the points, poitions and transforms
-        point_list: List[Tuple[int, int, int]] = []
-        position_list: List[Tuple[float, float, float]] = []
-        transform_list: List[gemmi.transform] = []
-        com_moving_list: List[np.array] = []
-        com_reference_list: List[np.array] = []
-
-        for residue_id, point_position_dict in grid.partitioning.partitioning.items():
-
-            al = alignment[residue_id]
-            transform = al.transform.inverse()
-            com_moving = al.com_moving
-            com_reference = al.com_reference
-
-            for point, position in point_position_dict.items():
-                point_list.append(point)
-                position_list.append(position)
-                transform_list.append(transform)
-                com_moving_list.append(com_moving)
-                com_reference_list.append(com_reference)
-
-        # for point, position, transform, com_moving, com_reference in zip(point_list, position_list, transform_list, com_moving_list, com_reference_list):
-
-        # print((
-        #     f"point: {point}\n"
-        #     f"Position: {position}\n"
-        #     f"transform: {transform.vec.tolist()} # {transform.mat.tolist()} \n"
-        #     f"com moving: {com_moving} \n"
-        #     f"Com moving: {com_reference}\n"
-        # ))
-
-        # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                                     new_grid,
-                                                     point_list,
-                                                     position_list,
-                                                     transform_list,
-                                                     com_moving_list,
-                                                     com_reference_list,
-                                                     )
+        interpolated_grid = interpolate_points(unaligned_xmap,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
+        # interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+        #                                              new_grid,
+        #                                              point_list,
+        #                                              position_list,
+        #                                              transform_list,
+        #                                              com_moving_list,
+        #                                              com_reference_list,
+        #                                              )
 
         return Xmap(interpolated_grid)
 
@@ -232,11 +269,11 @@ class Xmap:
         )
 
         # Unpack the points, poitions and transforms
-        point_list: List[Tuple[int, int, int]] = []
-        position_list: List[Tuple[float, float, float]] = []
+        point_list: List[GridCoordInterface] = []
+        position_list: List[PositionInterface] = []
         transform_list: List[gemmi.transform] = []
-        com_moving_list: List[np.array] = []
-        com_reference_list: List[np.array] = []
+        com_moving_list: List[List[float]] = []
+        com_reference_list: List[List[float]] = []
 
         transform = transform.transform.inverse()
         com_moving = [0.0, 0.0, 0.0]
@@ -251,42 +288,55 @@ class Xmap:
             com_reference_list.append(com_reference)
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
-                                                     new_grid,
-                                                     point_list,
-                                                     position_list,
-                                                     transform_list,
-                                                     com_moving_list,
-                                                     com_reference_list,
-                                                     )
 
-        return Xmap(new_grid)
+
+        # interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
+        #                                              new_grid,
+        #                                              point_list,
+        #                                              position_list,
+        #                                              transform_list,
+        #                                              com_moving_list,
+        #                                              com_reference_list,
+        #                                              )
+        interpolated_grid = interpolate_points(unaligned_xmap,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
+
+        return Xmap(interpolated_grid)
 
     @staticmethod
-    def from_aligned_map(event_map_reference_grid: gemmi.FloatGrid,
-                         dataset: Dataset, alignment: Alignment, grid: Grid,
-                         structure_factors: StructureFactors, mask_radius: float,
+    def from_aligned_map(event_map_reference_grid: CrystallographicGridInterface,
+                         dataset: DatasetInterface,
+                         alignment: AlignmentInterface,
+                         grid: GridInterface,
+                         structure_factors: StructureFactors,
+                         mask_radius: float,
                          mask_radius_symmetry: float):
 
-        partitioning = Partitioning.from_structure(dataset.structure,
-                                                   event_map_reference_grid,
-                                                   mask_radius,
-                                                   mask_radius_symmetry)
+        partitioning: PartitioningInterface = Partitioning.from_structure(dataset.structure,
+                                                                          event_map_reference_grid,
+                                                                          mask_radius,
+                                                                          mask_radius_symmetry)
 
         interpolated_values_tuple = ([], [], [], [])
 
         for residue_id in alignment:
-            alignment_positions: typing.Dict[typing.Tuple[int], gemmi.Position] = partitioning[residue_id]
+            alignment_positions: typing.Dict[GridCoordInterface, PositionInterface] = partitioning[residue_id]
 
-            transformed_positions: typing.Dict[typing.Tuple[int],
-                                               gemmi.Position] = alignment[residue_id].apply_moving_to_reference(
+            transformed_positions: typing.Dict[GridCoordInterface, PositionInterface] = alignment[
+                residue_id].apply_moving_to_reference(
                 alignment_positions)
 
-            transformed_positions_fractional: typing.Dict[typing.Tuple[int], gemmi.Fractional] = {
+            transformed_positions_fractional: typing.Dict[GridCoordInterface, FractionalInterface] = {
                 point: event_map_reference_grid.unit_cell.fractionalize(pos) for point, pos in
                 transformed_positions.items()}
 
-            interpolated_values: typing.Dict[typing.Tuple[int],
+            interpolated_values: typing.Dict[GridCoordInterface,
                                              float] = Xmap.interpolate_grid(event_map_reference_grid,
                                                                             transformed_positions_fractional,
                                                                             )
@@ -312,22 +362,22 @@ class Xmap:
 
     @staticmethod
     def from_aligned_map_c(
-            event_map_reference_grid: gemmi.FloatGrid,
-            dataset: Dataset,
-            alignment: Alignment,
-            grid: Grid,
-            structure_factors: StructureFactors,
+            event_map_reference_grid: CrystallographicGridInterface,
+            dataset: DatasetInterface,
+            alignment: AlignmentInterface,
+            grid: GridInterface,
+            structure_factors: StructureFactorsInterface,
             mask_radius: float,
-            partitioning: Partitioning,
+            partitioning: PartitioningInterface,
             mask_radius_symmetry: float,
             sample_rate: float,
     ):
 
-        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.reflections.transform_f_phi_to_map(
+        moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
             # sample_rate=sample_rate,
-            sample_rate=dataset.reflections.resolution().resolution/0.5,
+            sample_rate=dataset.reflections.get_resolution() / 0.5,
         )
 
         new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu,
@@ -342,9 +392,9 @@ class Xmap:
         transform_list = []
         com_moving_list = []
         com_reference_list = []
-        for residue_id in grid.partitioning.partitioning:
+        for residue_id in grid.partitioning:
 
-            if residue_id in partitioning.partitioning:
+            if residue_id in partitioning:
                 al = alignment[residue_id]
                 transform = al.transform
                 com_moving = al.com_reference
@@ -361,22 +411,30 @@ class Xmap:
                 continue
 
         # Interpolate values
-        interpolated_grid = gemmi.interpolate_points(
-            event_map_reference_grid,
-            new_grid,
-            point_list,
-            position_list,
-            transform_list,
-            com_moving_list,
-            com_reference_list,
-        )
+        # interpolated_grid = gemmi.interpolate_points(
+        #     event_map_reference_grid,
+        #     new_grid,
+        #     point_list,
+        #     position_list,
+        #     transform_list,
+        #     com_moving_list,
+        #     com_reference_list,
+        # )
+        interpolated_grid = interpolate_points(event_map_reference_grid,
+                                               new_grid,
+                                               point_list,
+                                               position_list,
+                                               transform_list,
+                                               com_moving_list,
+                                               com_reference_list,
+                                               )
 
         return Xmap(interpolated_grid)
 
     @staticmethod
-    def interpolate_grid(grid: gemmi.FloatGrid,
-                         positions: typing.Dict[typing.Tuple[int],
-                                                gemmi.Position]) -> typing.Dict[typing.Tuple[int], float]:
+    def interpolate_grid(grid: CrystallographicGridInterface,
+                         positions: typing.MutableMapping[
+                             GridCoordInterface, FractionalInterface]):  # -> typing.Dict[typing.Tuple[int], float]:
         return {coord: grid.interpolate_value(pos) for coord, pos in positions.items()}
 
     def to_array(self, copy=True):
@@ -425,88 +483,88 @@ class Xmaps:
     def from_datasets(datasets: Datasets):
         pass
 
-    @staticmethod
-    def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
-                              structure_factors: StructureFactors, sample_rate=3.0,
-                              mapper=True,
-                              ):
+    # @staticmethod
+    # def from_aligned_datasets(datasets: Datasets, alignments: Alignments, grid: Grid,
+    #                           structure_factors: StructureFactors, sample_rate=3.0,
+    #                           mapper=True,
+    #                           ):
 
-        if mapper:
-            keys = list(datasets.datasets.keys())
+    #     if mapper:
+    #         keys = list(datasets.datasets.keys())
 
-            results = mapper(
-                delayed(Xmap.from_unaligned_dataset)(
-                    datasets[key],
-                    alignments[key],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
-                for key
-                in keys
-            )
+    #         results = mapper(
+    #             delayed(Xmap.from_unaligned_dataset)(
+    #                 datasets[key],
+    #                 alignments[key],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
+    #             for key
+    #             in keys
+    #         )
 
-            xmaps = {keys[i]: results[i]
-                     for i, key
-                     in enumerate(keys)
-                     }
+    #         xmaps = {keys[i]: results[i]
+    #                  for i, key
+    #                  in enumerate(keys)
+    #                  }
 
-        else:
+    #     else:
 
-            xmaps = {}
-            for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset(datasets[dtag],
-                                                   alignments[dtag],
-                                                   grid,
-                                                   structure_factors,
-                                                   sample_rate)
+    #         xmaps = {}
+    #         for dtag in datasets:
+    #             xmap = Xmap.from_unaligned_dataset(datasets[dtag],
+    #                                                alignments[dtag],
+    #                                                grid,
+    #                                                structure_factors,
+    #                                                sample_rate)
 
-                xmaps[dtag] = xmap
+    #             xmaps[dtag] = xmap
 
-        return Xmaps(xmaps)
+    #     return Xmaps(xmaps)
 
-    @staticmethod
-    def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
-                                structure_factors: StructureFactors, sample_rate=3.0,
-                                mapper=False,
-                                ):
+    # @staticmethod
+    # def from_aligned_datasets_c(datasets: Datasets, alignments: Alignments, grid: Grid,
+    #                             structure_factors: StructureFactors, sample_rate=3.0,
+    #                             mapper=False,
+    #                             ):
 
-        if mapper:
+    #     if mapper:
 
-            keys = list(datasets.datasets.keys())
+    #         keys = list(datasets.datasets.keys())
 
-            results = mapper(
-                delayed(Xmap.from_unaligned_dataset_c)(
-                    datasets[key],
-                    alignments[key],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
-                for key
-                in keys
-            )
+    #         results = mapper(
+    #             delayed(Xmap.from_unaligned_dataset_c)(
+    #                 datasets[key],
+    #                 alignments[key],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
+    #             for key
+    #             in keys
+    #         )
 
-            xmaps = {keys[i]: results[i]
-                     for i, key
-                     in enumerate(keys)
-                     }
+    #         xmaps = {keys[i]: results[i]
+    #                  for i, key
+    #                  in enumerate(keys)
+    #                  }
 
-        else:
+    #     else:
 
-            xmaps = {}
-            for dtag in datasets:
-                xmap = Xmap.from_unaligned_dataset_c(
-                    datasets[dtag],
-                    alignments[dtag],
-                    grid,
-                    structure_factors,
-                    sample_rate,
-                )
+    #         xmaps = {}
+    #         for dtag in datasets:
+    #             xmap = Xmap.from_unaligned_dataset_c(
+    #                 datasets[dtag],
+    #                 alignments[dtag],
+    #                 grid,
+    #                 structure_factors,
+    #                 sample_rate,
+    #             )
 
-                xmaps[dtag] = xmap
+    #             xmaps[dtag] = xmap
 
-        return Xmaps(xmaps)
+    #     return Xmaps(xmaps)
 
     def from_dtags(self, dtags: typing.List[Dtag]):
         new_xmaps = {dtag: self.xmaps[dtag] for dtag in dtags}
@@ -537,8 +595,8 @@ class XmapArray:
         return self.xmap_array[index, :]
 
     @staticmethod
-    def from_xmaps(xmaps: Xmaps,
-                   grid: Grid,
+    def from_xmaps(xmaps: XmapsInterface,
+                   grid: GridInterface,
                    ):
 
         protein_mask = grid.partitioning.protein_mask
@@ -561,7 +619,7 @@ class XmapArray:
 
         return XmapArray(dtag_list, xmap_array)
 
-    def from_dtags(self, dtags: typing.List[Dtag]):
+    def from_dtags(self, dtags: typing.List[DtagInterface]):
         bool_mask = []
 
         for dtag in dtags:
@@ -580,33 +638,45 @@ class XmapArray:
 
         return XmapArray([_dtag for _dtag in self.dtag_list if _dtag in dtags], view)
 
-def from_unaligned_dataset_c(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
-                                  sample_rate: float = 3.0, ):
+
+def from_unaligned_dataset_c(dataset: DatasetInterface,
+                             alignment: AlignmentInterface,
+                             grid: GridInterface,
+                             structure_factors: StructureFactorsInterface,
+                             sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
+                                         dataset.reflections.get_resolution() / 0.5
                                          )
 
     return xmap
 
 
-def from_unaligned_dataset_c_flat(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
+class LoadXmap(LoadXMapInterface):
+    def __call__(
+            self,
+            dataset: DatasetInterface,
+            alignment: AlignmentInterface,
+            grid: GridInterface,
+            structure_factors: StructureFactorsInterface,
+            sample_rate: float = 3) -> XmapInterface:
+        return from_unaligned_dataset_c(dataset, alignment, grid, structure_factors, sample_rate)
+
+
+def from_unaligned_dataset_c_flat(dataset: DatasetInterface,
+                                  alignment: AlignmentInterface,
+                                  grid: GridInterface,
+                                  structure_factors: StructureFactorsInterface,
                                   sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
+                                         dataset.reflections.get_resolution() / 0.5
                                          )
 
     xmap_array = xmap.to_array()
@@ -615,18 +685,30 @@ def from_unaligned_dataset_c_flat(dataset: Dataset,
 
     return masked_array
 
+
+class LoadXmapFlat(LoadXMapFlatInterface):
+    def __call__(
+            self,
+            dataset: DatasetInterface,
+            alignment: AlignmentInterface,
+            grid: GridInterface,
+            structure_factors: StructureFactorsInterface,
+            sample_rate: float = 3) -> XmapInterface:
+        return from_unaligned_dataset_c_flat(dataset, alignment, grid, structure_factors, sample_rate)
+
+
 @ray.remote
 def from_unaligned_dataset_c_ray(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
-                                  sample_rate: float = 3.0, ):
+                                 alignment: Alignment,
+                                 grid: Grid,
+                                 structure_factors: StructureFactors,
+                                 sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
+                                         dataset.reflections.resolution().resolution / 0.5
                                          )
 
     return xmap
@@ -634,16 +716,16 @@ def from_unaligned_dataset_c_ray(dataset: Dataset,
 
 @ray.remote
 def from_unaligned_dataset_c_flat_ray(dataset: Dataset,
-                                  alignment: Alignment,
-                                  grid: Grid,
-                                  structure_factors: StructureFactors,
-                                  sample_rate: float = 3.0, ):
+                                      alignment: Alignment,
+                                      grid: Grid,
+                                      structure_factors: StructureFactors,
+                                      sample_rate: float = 3.0, ):
     xmap = Xmap.from_unaligned_dataset_c(dataset,
                                          alignment,
                                          grid,
                                          structure_factors,
                                          # sample_rate,
-                                         dataset.reflections.resolution().resolution/0.5
+                                         dataset.reflections.resolution().resolution / 0.5
                                          )
 
     xmap_array = xmap.to_array()
@@ -651,3 +733,14 @@ def from_unaligned_dataset_c_flat_ray(dataset: Dataset,
     masked_array = xmap_array[grid.partitioning.total_mask == 1]
 
     return masked_array
+
+
+class GetMapStatistics:
+    def __init__(self, xmap: Union[XmapInterface, ZmapInterface]):
+        array = xmap.to_array()
+
+        self.mean = np.mean(array[array > 0])
+        self.std = np.std(array[array > 0])
+        self.greater_1 = array[array > 1.0].size
+        self.greater_2 = array[array > 2.0].size
+        self.greater_3 = array[array > 3.0].size

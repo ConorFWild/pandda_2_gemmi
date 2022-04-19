@@ -14,6 +14,7 @@ set_loky_pickler('pickle')
 from typing import *
 from functools import partial
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventIDX
@@ -246,7 +247,7 @@ class MeanMapFile:
     path: Path
 
     @staticmethod
-    def from_zmap_file(zmap: ZMapFile):
+    def from_zmap_file(zmap: ZMapFileInterface):
         return MeanMapFile(zmap.path.parent / "mean.ccp4")
 
     @staticmethod
@@ -327,7 +328,7 @@ class EventMapFiles:
 
 
 @dataclasses.dataclass()
-class ProcessedDataset:
+class ProcessedDataset(ProcessedDatasetInterface):
     path: Path
     dataset_models: DatasetModels
     input_mtz: Path
@@ -416,7 +417,7 @@ class ProcessedDataset:
 
 
 @dataclasses.dataclass()
-class ProcessedDatasets:
+class ProcessedDatasets(ProcessedDatasetsInterface):
     path: Path
     processed_datasets: typing.Dict[Dtag, ProcessedDataset]
 
@@ -491,20 +492,9 @@ class ShellDir:
 
 
 @dataclasses.dataclass()
-class ShellDirs:
+class ShellDirs(ShellDirsInterface):
     path: Path
     shell_dirs: Dict[float, ShellDir]
-
-    @staticmethod
-    def from_pandda_dir(pandda_dir: Path, shells: Dict[float, Shell]):
-
-        shells_dir = pandda_dir / PANDDA_SHELL_DIR
-
-        shell_dirs = {}
-        for shell_res, shell in shells.items():
-            shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
-
-        return ShellDirs(shells_dir, shell_dirs)
 
     def build(self):
         if not self.path.exists():
@@ -514,8 +504,23 @@ class ShellDirs:
             shell_dir.build()
 
 
+def get_shell_dirs_from_pandda_dir(pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
+
+    shells_dir = pandda_dir / PANDDA_SHELL_DIR
+
+    shell_dirs = {}
+    for shell_res, shell in shells.items():
+        shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
+
+    return ShellDirs(shells_dir, shell_dirs)
+
+class GetShellDirs(GetShellDirsInterface):
+    def __call__(self, pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
+        return get_shell_dirs_from_pandda_dir(pandda_dir, shells)
+
+
 @dataclasses.dataclass()
-class PanDDAFSModel:
+class PanDDAFSModel(PanDDAFSModelInterface):
     pandda_dir: Path
     data_dirs: DataDirs
     analyses: Analyses
@@ -523,6 +528,7 @@ class PanDDAFSModel:
     log_file: Path
     shell_dirs: Optional[ShellDirs]
     console_log_file: Path
+    events_json_file: Path
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -542,13 +548,16 @@ class PanDDAFSModel:
 
         console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
 
+        events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
+
         return PanDDAFSModel(pandda_dir=output_out_dir,
                              data_dirs=data_dirs,
                              analyses=analyses,
                              processed_datasets=processed_datasets,
                              log_file=log_path,
                              shell_dirs=None,
-                             console_log_file=console_log_file
+                             console_log_file=console_log_file,
+        events_json_file=events_json_file,
                              )
 
     def build(self, overwrite=False, process_local=None):
@@ -557,3 +566,54 @@ class PanDDAFSModel:
 
         self.processed_datasets.build(process_local=process_local)
         self.analyses.build()
+
+def get_pandda_fs_model(input_data_dirs: Path,
+                 output_out_dir: Path,
+                 pdb_regex: str, mtz_regex: str,
+                 ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
+                 process_local=None,
+                 ):
+    analyses = Analyses.from_pandda_dir(output_out_dir)
+    data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
+                                    ligand_pdb_regex, ligand_smiles_regex, process_local=process_local)
+    processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
+                                                            output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
+                                                            process_local=process_local,
+                                                            )
+    log_path = output_out_dir / PANDDA_LOG_FILE
+
+    console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
+
+    events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
+
+    return PanDDAFSModel(pandda_dir=output_out_dir,
+                            data_dirs=data_dirs,
+                            analyses=analyses,
+                            processed_datasets=processed_datasets,
+                            log_file=log_path,
+                            shell_dirs=None,
+                            console_log_file=console_log_file,
+                         events_json_file=events_json_file
+                         )
+
+
+class GetPanDDAFSModel(GetPanDDAFSModelInterface):
+    def __call__(self, 
+    input_data_dirs: Path, 
+    output_out_dir: Path, 
+    pdb_regex: str, 
+    mtz_regex: str, 
+    ligand_dir_name, 
+    ligand_cif_regex: str, 
+    ligand_pdb_regex: str, 
+    ligand_smiles_regex: str) -> PanDDAFSModelInterface:
+        return get_pandda_fs_model(
+            input_data_dirs, 
+            output_out_dir, 
+            pdb_regex, 
+            mtz_regex, 
+            ligand_dir_name, 
+            ligand_cif_regex, 
+            ligand_pdb_regex, 
+            ligand_smiles_regex,
+            )

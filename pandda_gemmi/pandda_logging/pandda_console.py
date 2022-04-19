@@ -6,8 +6,9 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
 
-
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
+
 
 class PanDDAConsole:
 
@@ -44,7 +45,7 @@ class PanDDAConsole:
     def indent_text(text, indent=4):
         return Padding(
             text,
-            (0,0, 0, indent)
+            (0, 0, 0, indent)
         )
 
     def summarise_fs_model(self, pandda_fs_model):
@@ -64,6 +65,9 @@ class PanDDAConsole:
     def start_reference_selection(self):
         printable = self.wrap_title(constants.CONSOLE_START_REF_SELEC)
         self.console.print(printable)
+
+    def summarise_reference(self, reference):
+        self.console.print(str(reference.dtag))
 
     def start_b_factor_smoothing(self):
         printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
@@ -105,7 +109,50 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
         self.console.print(printable)
 
+    def start_classification(self):
+        printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
+        self.console.print(printable)
 
+    def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Autobuild Scores"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Autobuild Score")
+
+        for event_id, autobuild_result in autobuild_results.items():
+            selected_build = autobuild_result.selected_fragment_path
+
+            if not selected_build:
+                build_score_string = "None"
+            else:
+
+                selected_build_score = autobuild_result.scores[selected_build]
+                build_score_string = str(round(selected_build_score, 2))
+
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                build_score_string,
+            )
+
+        self.console.print(event_class_table)
+
+    def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Class")
+
+        for event_id, event_class in event_classifications.items():
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(event_class),
+            )
+
+        self.console.print(event_class_table)
 
     def summarise_datasets(self, datasets_initial, dataset_statistics):
 
@@ -149,7 +196,7 @@ class PanDDAConsole:
         resolution_table.add_row(str(np.min(ress)), str(np.mean(ress)), str(np.max(ress)))
 
         self.console.print(
-          resolution_table
+            resolution_table
         )
 
         # Spacegroups
@@ -182,7 +229,7 @@ class PanDDAConsole:
         table.add_column("Spacegroup")
 
         # Rows
-        for dtag in sorted(datasets_initial, key = lambda x: x.dtag):
+        for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
             dataset = datasets_initial[dtag]
             table.add_row(
                 dtag.dtag,
@@ -190,8 +237,54 @@ class PanDDAConsole:
                 dataset.reflections.reflections.spacegroup.hm,
             )
 
-
         self.console.print(table)
+
+    def summarise_shells(self,
+                         shell_results: ShellResultsInterface,
+                         events: EventsInterface,
+                         event_scores: EventScoresInterface,
+                         ):
+        event_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_table.title = "Shell Events"
+        event_table.add_column("Res")
+        event_table.add_column("Dtag")
+        event_table.add_column("Event Number")
+        event_table.add_column("Event Score")
+        event_table.add_column("Event Size")
+
+        for res, shell_result in shell_results.items():
+            res = shell_result.shell.res
+            dataset_results = shell_result.dataset_results
+            for dtag, dataset_result in dataset_results.items():
+                dataset_events = dataset_result.events
+                dataset_event_scores = dataset_result.event_scores
+                for event_id, event in dataset_events.items():
+                    event_score = dataset_event_scores[event_id]
+                    event_table.add_row(
+                        str(round(res, 2)),
+                        str(event_id.dtag.dtag),
+                        str(event_id.event_idx.event_idx),
+                        str(round(event_score, 2)),
+                        str(event.cluster.indexes[0].size)
+                    )
+
+        self.console.print(event_table)
+
+    def summarise_sites(self, sites):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Site")
+
+        for event_id, site_id in sites.event_to_site.items():
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(site_id.site_id),
+            )
+
+        self.console.print(event_class_table)
 
     def print_exception(self, e, debug):
         if debug:
@@ -207,3 +300,7 @@ class PanDDAConsole:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         ...
+
+
+def get_pandda_console():
+    return PanDDAConsole()

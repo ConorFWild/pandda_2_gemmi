@@ -8,28 +8,34 @@ from pathlib import Path
 
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
+from pandda_gemmi.analyse_interface import GetGridInterface
 
 set_loky_pickler('pickle')
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 
 @dataclasses.dataclass()
-class Partitioning:
-    partitioning: typing.Dict[ResidueID, typing.Dict[typing.Tuple[int], typing.Tuple[float]]]
+class Partitioning(PartitioningInterface):
+    partitioning: typing.Dict[ResidueIDInterface, typing.Dict[GridCoordInterface, PositionInterface]]
     protein_mask: gemmi.Int8Grid
     inner_mask: gemmi.Int8Grid
     contact_mask: gemmi.Int8Grid
     symmetry_mask: gemmi.Int8Grid
     total_mask: np.ndarray
 
-    def __getitem__(self, item: ResidueID):
+    def __getitem__(self, item: ResidueIDInterface):
         return self.partitioning[item]
 
+    def __iter__(self) -> Iterator[ResidueIDInterface]:
+        for residue_id in self.partitioning:
+            yield residue_id
+
     @staticmethod
-    def from_reference(reference: Reference,
+    def from_reference(reference: ReferenceInterface,
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
                        mask_radius_symmetry: float,
@@ -211,8 +217,8 @@ class Partitioning:
         return positions
 
     @staticmethod
-    def from_structure_multiprocess(structure: Structure,
-                                    grid,#: Grid,
+    def from_structure_multiprocess(structure: StructureInterface,
+                                    grid: CrystallographicGridInterface,#: Grid,
                                     mask_radius: float,
                                     mask_radius_symmetry: float, ):
 
@@ -222,8 +228,8 @@ class Partitioning:
                                            mask_radius_symmetry, )
 
     @staticmethod
-    def from_structure(structure: Structure,
-                       grid: gemmi.FloatGrid,
+    def from_structure(structure: StructureInterface,
+                       grid: CrystallographicGridInterface,
                        mask_radius: float,
                        mask_radius_symmetry: float,
                        ):
@@ -542,27 +548,11 @@ class Partitioning:
 
 
 @dataclasses.dataclass()
-class Grid:
+class Grid(GridInterface):
     grid: gemmi.FloatGrid
     partitioning: Partitioning
 
-    @staticmethod
-    def from_reference(reference: Reference, mask_radius: float, mask_radius_symmetry: float,
-                       sample_rate: float = 3.0, ):
-        unit_cell = Grid.unit_cell_from_reference(reference)
-        spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
-
-        grid = gemmi.FloatGrid(*spacing)
-        grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        grid.set_unit_cell(unit_cell)
-        grid.spacegroup = reference.dataset.reflections.spacegroup()
-
-        partitioning = Partitioning.from_reference(reference,
-                                                   grid,
-                                                   mask_radius,
-                                                   mask_radius_symmetry)
-
-        return Grid(grid, partitioning)
+    
 
     def new_grid(self):
         spacing = [self.grid.nu, self.grid.nv, self.grid.nw]
@@ -614,3 +604,38 @@ class Grid:
                                          data[1][5]
                                          )
         self.grid = data[0].to_gemmi()
+
+def get_grid_from_reference(
+    reference: ReferenceInterface, 
+    mask_radius: float, 
+    mask_radius_symmetry: float,
+                    sample_rate: float = 3.0, 
+                    ):
+    unit_cell = Grid.unit_cell_from_reference(reference)
+    spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
+
+    grid = gemmi.FloatGrid(*spacing)
+    grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    grid.set_unit_cell(unit_cell)
+    grid.spacegroup = reference.dataset.reflections.spacegroup()
+
+    partitioning = Partitioning.from_reference(reference,
+                                                grid,
+                                                mask_radius,
+                                                mask_radius_symmetry)
+
+    return Grid(grid, partitioning)
+
+class GetGrid(GetGridInterface):
+    def __call__(self, 
+    reference: ReferenceInterface, 
+    outer_mask: float, 
+    inner_mask_symmetry: float, 
+    sample_rate: float,
+    ) -> GridInterface:
+        return get_grid_from_reference(
+            reference, 
+            outer_mask, 
+            inner_mask_symmetry, 
+            sample_rate,
+            )

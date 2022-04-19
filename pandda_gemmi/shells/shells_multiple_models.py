@@ -10,6 +10,7 @@ from typing import *
 
 import numpy as np
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution
 from pandda_gemmi.comparators import ComparatorCluster
@@ -28,8 +29,8 @@ class ShellMultipleModels:
 
 
 def get_shells_multiple_models(
-        datasets: Dict[Dtag, Dataset],
-        comparators: Dict[int, ComparatorCluster],
+        datasets: DatasetsInterface,
+        comparators: ComparatorsInterface,
         min_characterisation_datasets,
         max_shell_datasets,
         high_res_increment,
@@ -62,25 +63,36 @@ def get_shells_multiple_models(
 
     # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
     # in the set of the first shell of sufficiently low res
+    # for res in reses:
+    #     for cluster_num, comparator_cluster in comparators.items():
+    #         shells_train[res][cluster_num] = []
+    #
+    #         # Sort dtags by distance to cluster
+    #         sorted_distance_to_cluster = sorted(
+    #             comparator_cluster.dtag_distance_to_cluster,
+    #             key=lambda _dtag: comparator_cluster.dtag_distance_to_cluster[_dtag]
+    #                                             )
+    #
+    #         # Iterate over dtags, from closest to cluster to furthest, adding those of the right resolution until
+    #         # comparison set is full
+    #         for dtag in sorted_distance_to_cluster:
+    #             if datasets[dtag].reflections.resolution().resolution < res:
+    #                 shells_train[res][cluster_num].append(dtag)
+    #
+    #                 # If enough datasets for training, exit loop and move onto next cluster
+    #                 if len(shells_train[res][cluster_num]) >= min_characterisation_datasets:
+    #                     break
+
     for res in reses:
-        for cluster_num, comparator_cluster in comparators.items():
-            shells_train[res][cluster_num] = []
+        resolution_shell_dtags = {_dtag: _resolution for _dtag, _resolution in resolutions.items() if _resolution > res}
+        shell_high_res_dtag = min(
+            resolution_shell_dtags,
+            key=lambda _dtag: resolution_shell_dtags[_dtag]
+        )
+        high_res_dtag_comparators = comparators[shell_high_res_dtag]
+        for comparator_num, comparator_dtags in high_res_dtag_comparators.items():
 
-            # Sort dtags by distance to cluster
-            sorted_distance_to_cluster = sorted(
-                comparator_cluster.dtag_distance_to_cluster,
-                key=lambda _dtag: comparator_cluster.dtag_distance_to_cluster[_dtag]
-                                                )
-
-            # Iterate over dtags, from closest to cluster to furthest, adding those of the right resolution until
-            # comparison set is full
-            for dtag in sorted_distance_to_cluster:
-                if datasets[dtag].reflections.resolution().resolution < res:
-                    shells_train[res][cluster_num].append(dtag)
-
-                    # If enough datasets for training, exit loop and move onto next cluster
-                    if len(shells_train[res][cluster_num]) >= min_characterisation_datasets:
-                        break
+            shells_train[res][comparator_num] = comparator_dtags[:min_characterisation_datasets]
 
     # Add each testing dtag to the appropriate shell
     for dtag in datasets:
@@ -90,7 +102,7 @@ def get_shells_multiple_models(
                 continue
 
         # Find the first shell whose res is higher
-        dtag_res = datasets[dtag].reflections.resolution().resolution
+        dtag_res: float = datasets[dtag].reflections.get_resolution()
         for res in reses:
             if res > dtag_res:
                 shells_test[res] = shells_test[res].union({dtag, })

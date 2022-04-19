@@ -16,7 +16,7 @@ from pandda_gemmi.common import Dtag, Partial
 from pandda_gemmi.dataset import Dataset, Datasets, Resolution, StructureFactors
 from pandda_gemmi.edalignment import Alignment, Grid, Xmap
 from pandda_gemmi.plots import save_plot_pca_umap_bokeh, embed_umap, bokeh_scatter_plot
-
+from pandda_gemmi.analyse_interface import *
 # from pandda_gemmi.pandda_functions import truncate, from_unaligned_dataset_c_flat
 
 
@@ -212,8 +212,7 @@ grid, structure_factors, sample_rate,
 
         results = process_local(
             [
-                Partial(
-                    load_xmap_flat_func,
+                Partial(load_xmap_flat_func).paramaterise(
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,
@@ -268,7 +267,7 @@ grid, structure_factors, sample_rate,
         results = process_local(
             [
                 Partial(
-                    load_xmap_flat_func,
+                    load_xmap_flat_func).paramaterise(
                     shell_truncated_datasets[key],
                     alignments[key],
                     grid,
@@ -460,4 +459,101 @@ def get_multiple_comparator_sets(
     if max_comparator_sets:
         clusters = refine_comparator_clusters(clusters, max_comparator_sets)
 
-    return clusters, cluster_cluster_annotations_dict
+
+
+
+    # dtag_list = [dtag for dtag in datasets]
+    #
+    # dtags_by_res = list(
+    #     sorted(
+    #         dtag_list,
+    #         key=lambda dtag: datasets[dtag].reflections.resolution().resolution,
+    #     )
+    # )
+    #
+    # highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
+    # highest_res_datasets_max = max(
+    #     [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
+
+    comparators: ComparatorsInterface = {}
+    # Iterate over comparators, getting the resolution range, the lowest res in it, and then including all
+    # in the set of the first shell of sufficiently low res
+    for test_dtag in dtag_list:
+        current_res = datasets[test_dtag].reflections.resolution().resolution
+        truncation_res = max(current_res, highest_res_datasets_max)
+
+        comparators[test_dtag] = {}
+
+        for comparator_cluster_num, comparator_cluster in clusters.items():
+
+            comparators[test_dtag][comparator_cluster_num] = []
+
+            # Sort dtags by distance to cluster
+            sorted_distance_to_cluster = sorted(
+                comparator_cluster.dtag_distance_to_cluster,
+                key=lambda _dtag: comparator_cluster.dtag_distance_to_cluster[_dtag]
+                                                )
+
+
+            # Iterate over dtags, from closest to cluster to furthest, adding those of the right resolution until
+            # comparison set is full
+            for dtag in sorted_distance_to_cluster:
+
+                if datasets[dtag].reflections.resolution().resolution < truncation_res:
+                    comparators[test_dtag][comparator_cluster_num].append(dtag)
+
+                    # If enough datasets for training, exit loop and move onto next cluster
+                    if len(comparators[test_dtag][comparator_cluster_num]) >= comparison_min_comparators:
+                        break
+
+    # comparators = clusters
+
+    return comparators, cluster_cluster_annotations_dict
+
+
+class GetComparatorsCluster(GetComparatorsInterface):
+    def __init__(self,
+                 comparison_min_comparators: int,
+                 comparison_max_comparators: int,
+                 sample_rate: float,
+                 resolution_cutoff: float,
+                 load_xmap_flat_func,
+                 process_local: ProcessorInterface,
+                 debug: bool,
+                 ):
+        self.comparison_min_comparators = comparison_min_comparators
+        self.comparison_max_comparators = comparison_max_comparators
+        self.sample_rate = sample_rate
+        self.load_xmap_flat_func = load_xmap_flat_func
+        self.resolution_cutoff = resolution_cutoff
+        self.process_local = process_local
+        self.debug = debug
+
+    def __call__(self,
+                 datasets: Dict[DtagInterface, DatasetInterface],
+                 alignments: Dict[DtagInterface, AlignmentInterface],
+                 grid: GridInterface,
+                 structure_factors: StructureFactorsInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ) -> ComparatorsInterface:
+
+
+        comparators_multiple, clusters = get_multiple_comparator_sets(
+            datasets,
+            alignments,
+            grid,
+            structure_factors,
+            pandda_fs_model,
+            comparison_min_comparators=self.comparison_min_comparators,
+            sample_rate=self.sample_rate,
+            resolution_cutoff=self.resolution_cutoff,
+            load_xmap_flat_func=self.load_xmap_flat_func,
+            process_local=self.process_local,
+            debug=self.debug,
+        )
+
+        print(comparators_multiple)
+
+
+        return comparators_multiple
+

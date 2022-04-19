@@ -17,6 +17,7 @@ from sklearn import neighbors
 import pandas as pd
 import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, delayed
@@ -42,7 +43,7 @@ class Resolution:
 
 
 @dataclasses.dataclass()
-class ResidueID:
+class ResidueID(ResidueIDInterface):
     model: str
     chain: str
     insertion: str
@@ -161,136 +162,136 @@ class Structure:
                         for atom in residue:
                             yield atom
 
-    def align_to(self, other: Structure):
-        # Warning: inplace!
-        # Aligns structures usings carbon alphas and transform self into the frame of the other
+    # def align_to(self, other: Structure):
+    #     # Warning: inplace!
+    #     # Aligns structures usings carbon alphas and transform self into the frame of the other
 
-        transform = self.get_alignment(other)
+    #     transform = self.get_alignment(other)
 
-        # Transform positions
-        for atom in self.all_atoms():
-            atom.pos = transform.apply_inverse(atom.pos)
+    #     # Transform positions
+    #     for atom in self.all_atoms():
+    #         atom.pos = transform.apply_inverse(atom.pos)
 
-        return self
+    #     return self
 
-    def get_alignment(self, other: Structure):
-        # alignment returned is FROM other TO self
+    # def get_alignment(self, other: Structure):
+    #     # alignment returned is FROM other TO self
 
-        ca_self = []
-        ca_other = []
+    #     ca_self = []
+    #     ca_other = []
 
-        # Get CAs
-        for model in self.structure:
-            for chain in model:
-                for res_self in chain.get_polymer():
-                    if res_self.name.upper() not in RESIDUE_NAMES:
-                        continue
+    #     # Get CAs
+    #     for model in self.structure:
+    #         for chain in model:
+    #             for res_self in chain.get_polymer():
+    #                 if res_self.name.upper() not in RESIDUE_NAMES:
+    #                     continue
 
-                    current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
+    #                 current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
-                    res_other = other.structure[current_res_id][0]
+    #                 res_other = other.structure[current_res_id][0]
 
-                    self_ca_pos = res_self["CA"][0].pos
-                    other_ca_pos = res_other["CA"][0].pos
+    #                 self_ca_pos = res_self["CA"][0].pos
+    #                 other_ca_pos = res_other["CA"][0].pos
 
-                    ca_list_self = Transform.pos_to_list(self_ca_pos)
-                    ca_list_other = Transform.pos_to_list(other_ca_pos)
+    #                 ca_list_self = Transform.pos_to_list(self_ca_pos)
+    #                 ca_list_other = Transform.pos_to_list(other_ca_pos)
 
-                    ca_self.append(ca_list_self)
-                    ca_other.append(ca_list_other)
+    #                 ca_self.append(ca_list_self)
+    #                 ca_other.append(ca_list_other)
 
-        # Make coord matricies
-        matrix_self = np.array(ca_self)
-        matrix_other = np.array(ca_other)
+    #     # Make coord matricies
+    #     matrix_self = np.array(ca_self)
+    #     matrix_other = np.array(ca_other)
 
-        # Find means
-        mean_self = np.mean(matrix_self, axis=0)
-        mean_other = np.mean(matrix_other, axis=0)
+    #     # Find means
+    #     mean_self = np.mean(matrix_self, axis=0)
+    #     mean_other = np.mean(matrix_other, axis=0)
 
-        # demaen
-        de_meaned_self = matrix_self - mean_self
-        de_meaned_other = matrix_other - mean_other
+    #     # demaen
+    #     de_meaned_self = matrix_self - mean_self
+    #     de_meaned_other = matrix_other - mean_other
 
-        # Align
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
-                                                                        de_meaned_other,
-                                                                        )
+    #     # Align
+    #     rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
+    #                                                                     de_meaned_other,
+    #                                                                     )
 
-        # Get transform
-        vec = np.array([0.0, 0.0, 0.0])
-        # Transform is from other frame to self frame
-        transform = Transform.from_translation_rotation(vec,
-                                                        rotation,
-                                                        mean_other,
-                                                        mean_self,
-                                                        )
+    #     # Get transform
+    #     vec = np.array([0.0, 0.0, 0.0])
+    #     # Transform is from other frame to self frame
+    #     transform = Transform.from_translation_rotation(vec,
+    #                                                     rotation,
+    #                                                     mean_other,
+    #                                                     mean_self,
+    #                                                     )
 
-        return transform
+    #     return transform
 
-    def get_alignment(self, other: Structure):
-        # alignment returned is FROM other TO self
+    # def get_alignment(self, other: Structure):
+    #     # alignment returned is FROM other TO self
 
-        ca_self = []
-        ca_other = []
+    #     ca_self = []
+    #     ca_other = []
 
-        # Get CAs
-        for model in self.structure:
-            for chain in model:
-                for res_self in chain.get_polymer():
-                    if res_self.name.upper() not in RESIDUE_NAMES:
-                        continue
-                    current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
+    #     # Get CAs
+    #     for model in self.structure:
+    #         for chain in model:
+    #             for res_self in chain.get_polymer():
+    #                 if res_self.name.upper() not in RESIDUE_NAMES:
+    #                     continue
+    #                 current_res_id = ResidueID.from_residue_chain(model, chain, res_self)
 
-                    res_other = other.structure[current_res_id][0]
+    #                 res_other = other.structure[current_res_id][0]
 
-                    self_ca_pos = res_self["CA"][0].pos
-                    other_ca_pos = res_other["CA"][0].pos
+    #                 self_ca_pos = res_self["CA"][0].pos
+    #                 other_ca_pos = res_other["CA"][0].pos
 
-                    ca_list_self = Transform.pos_to_list(self_ca_pos)
-                    ca_list_other = Transform.pos_to_list(other_ca_pos)
+    #                 ca_list_self = Transform.pos_to_list(self_ca_pos)
+    #                 ca_list_other = Transform.pos_to_list(other_ca_pos)
 
-                    ca_self.append(ca_list_self)
-                    ca_other.append(ca_list_other)
+    #                 ca_self.append(ca_list_self)
+    #                 ca_other.append(ca_list_other)
 
-        # Make coord matricies
-        matrix_self = np.array(ca_self)
-        matrix_other = np.array(ca_other)
+    #     # Make coord matricies
+    #     matrix_self = np.array(ca_self)
+    #     matrix_other = np.array(ca_other)
 
-        # Find means
-        mean_self = np.mean(matrix_self, axis=0)
-        mean_other = np.mean(matrix_other, axis=0)
+    #     # Find means
+    #     mean_self = np.mean(matrix_self, axis=0)
+    #     mean_other = np.mean(matrix_other, axis=0)
 
-        # demaen
-        de_meaned_self = matrix_self - mean_self
-        de_meaned_other = matrix_other - mean_other
+    #     # demaen
+    #     de_meaned_self = matrix_self - mean_self
+    #     de_meaned_other = matrix_other - mean_other
 
-        # Align
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
-                                                                        de_meaned_other,
-                                                                        )
+    #     # Align
+    #     rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned_self,
+    #                                                                     de_meaned_other,
+    #                                                                     )
 
-        # Get transform
-        vec = np.array([0.0, 0.0, 0.0])
-        # Transform is from other frame to self frame
-        transform = Transform.from_translation_rotation(vec,
-                                                        rotation,
-                                                        mean_other,
-                                                        mean_self,
-                                                        )
+    #     # Get transform
+    #     vec = np.array([0.0, 0.0, 0.0])
+    #     # Transform is from other frame to self frame
+    #     transform = Transform.from_translation_rotation(vec,
+    #                                                     rotation,
+    #                                                     mean_other,
+    #                                                     mean_self,
+    #                                                     )
 
-        return transform
+    #     return transform
 
-    def align_to(self, other: Structure):
-        # Warning: inplace!
-        # Aligns structures usings carbon alphas and transform self into the frame of the other
+    # def align_to(self, other: Structure):
+    #     # Warning: inplace!
+    #     # Aligns structures usings carbon alphas and transform self into the frame of the other
 
-        transform = self.get_alignment(other)
+    #     transform = self.get_alignment(other)
 
-        # Transform positions
-        for atom in self.all_atoms():
-            atom.pos = transform.apply_reference_to_moving(atom.pos)
+    #     # Transform positions
+    #     for atom in self.all_atoms():
+    #         atom.pos = transform.apply_reference_to_moving(atom.pos)
 
-        return self
+    #     return self
 
     def __getstate__(self):
         structure_python = StructurePython.from_gemmi(self.structure)
@@ -334,7 +335,7 @@ class Symops:
 
 
 @dataclasses.dataclass()
-class Reflections:
+class Reflections(ReflectionsInterface):
     reflections: gemmi.Mtz
     path: typing.Union[Path, None] = None
 
@@ -347,8 +348,14 @@ class Reflections:
             raise Exception(f'Error trying to open file: {file}: {e}')
         return Reflections(reflections, file)
 
+    def transform_f_phi_to_map(self, f: str, phi: str, sample_rate: float) -> CrystallographicGridInterface:
+        return self.reflections.transform_f_phi_to_map(f, phi, sample_rate=sample_rate)
+
     def resolution(self) -> Resolution:
         return Resolution.from_float(self.reflections.resolution_high())
+
+    def get_resolution(self) -> float:
+        return self.reflections.resolution_high()
 
     def truncate_resolution(self, resolution: Resolution) -> Reflections:
         new_reflections = gemmi.Mtz(with_base=False)
@@ -499,7 +506,7 @@ class Reflections:
     def columns(self):
         return self.reflections.column_labels()
 
-    def missing(self, structure_factors: StructureFactors, resolution: Resolution) -> pd.DataFrame:
+    def missing(self, structure_factors: StructureFactors, resolution: Resolution) -> pd.Series:
         all_data = np.array(self.reflections, copy=True)
         resolution_array = self.reflections.make_d_array()
 
@@ -513,45 +520,45 @@ class Reflections:
 
         return missing
 
-    def common_set(self, other_reflections: Reflections):
-        # Index own reflections
-        reflections_array = np.array(self.reflections, copy=False, )
-        hkl_dict = {}
-        f_index = self.reflections.column_labels().index("F")
-        for i, row in enumerate(reflections_array):
-            hkl = (row[0], row[1], row[2])
-            if not np.isnan(row[f_index]):
-                hkl_dict[hkl] = i
+    # def common_set(self, other_reflections: Reflections):
+    #     # Index own reflections
+    #     reflections_array = np.array(self.reflections, copy=False, )
+    #     hkl_dict = {}
+    #     f_index = self.reflections.column_labels().index("F")
+    #     for i, row in enumerate(reflections_array):
+    #         hkl = (row[0], row[1], row[2])
+    #         if not np.isnan(row[f_index]):
+    #             hkl_dict[hkl] = i
 
-        # Index the other array
-        other_reflections_array = np.array(other_reflections.reflections, copy=False, )
-        other_hkl_dict = {}
-        f_other_index = other_reflections.reflections.column_labels().index("F")
-        for i, row in enumerate(other_reflections_array):
-            hkl = (row[0], row[1], row[2])
-            if not np.isnan(row[f_other_index]):
-                other_hkl_dict[hkl] = i
+    #     # Index the other array
+    #     other_reflections_array = np.array(other_reflections.reflections, copy=False, )
+    #     other_hkl_dict = {}
+    #     f_other_index = other_reflections.reflections.column_labels().index("F")
+    #     for i, row in enumerate(other_reflections_array):
+    #         hkl = (row[0], row[1], row[2])
+    #         if not np.isnan(row[f_other_index]):
+    #             other_hkl_dict[hkl] = i
 
-        # Allocate the masks
-        self_mask = np.zeros(reflections_array.shape[0],
-                             dtype=np.bool,
-                             )
+    #     # Allocate the masks
+    #     self_mask = np.zeros(reflections_array.shape[0],
+    #                          dtype=np.bool,
+    #                          )
 
-        other_mask = np.zeros(other_reflections_array.shape[0],
-                              dtype=np.bool,
-                              )
+    #     other_mask = np.zeros(other_reflections_array.shape[0],
+    #                           dtype=np.bool,
+    #                           )
 
-        # Fill the masks
-        for hkl, index in hkl_dict.items():
-            try:
-                other_index = other_hkl_dict[hkl]
-                self_mask[index] = True
-                other_mask[other_index] = True
+    #     # Fill the masks
+    #     for hkl, index in hkl_dict.items():
+    #         try:
+    #             other_index = other_hkl_dict[hkl]
+    #             self_mask[index] = True
+    #             other_mask[other_index] = True
 
-            except:
-                continue
+    #         except:
+    #             continue
 
-        return self_mask, other_mask
+    #     return self_mask, other_mask
 
     # TODO: Make this work reasonably?
     def scale_reflections(self, other: Reflections, cut: float = 99.6):
@@ -675,7 +682,45 @@ class Reference:
         #     key=lambda dtag: resolutions[dtag].to_float(),
         # )
 
-        for dtag in sorted(resolutions, key = lambda x: resolutions[x].to_float()):
+        min_resolution_dtag: Optional[DtagInterface] = None
+        for dtag in sorted(resolutions, key=lambda x: resolutions[x].to_float()):
+            dataset = datasets[dtag]
+            dataset_spacegroup = dataset.reflections.reflections.spacegroup.hm
+            if dataset_spacegroup == modal_spacegroup:
+                min_resolution_dtag = dtag
+                break
+
+        # min_resolution_structure = datasets[min_resolution_dtag].structure
+        # min_resolution_reflections = datasets[min_resolution_dtag].reflections
+
+        if min_resolution_dtag:
+            return Reference(min_resolution_dtag,
+                            datasets[min_resolution_dtag]
+                            )
+        else:
+            raise Exception("Failed to find a minimum resolution datatag. THis should be impossible. Contact mantainer.")
+
+def get_reference_from_datasets(
+    datasets: DatasetsInterface, 
+    dataset_statistics: DatasetsStatisticsInterface) -> ReferenceInterface:
+        # Reference.assert_from_datasets(datasets)
+
+        unique_spacegroups, counts = np.unique(
+            dataset_statistics.spacegroups, 
+            return_counts=True,
+            )
+        modal_spacegroup = unique_spacegroups[np.argmax(counts)]
+
+        resolutions: typing.Dict[Dtag, Resolution] = {}
+        for dtag in datasets:
+            resolutions[dtag] = datasets[dtag].reflections.get_resolution()
+
+        # min_resolution_dtag = min(
+        #     resolutions,
+        #     key=lambda dtag: resolutions[dtag].to_float(),
+        # )
+
+        for dtag in sorted(resolutions, key=lambda x: resolutions[x]):
             dataset = datasets[dtag]
             dataset_spacegroup = dataset.reflections.reflections.spacegroup.hm
             if dataset_spacegroup == modal_spacegroup:
@@ -689,6 +734,14 @@ class Reference:
                          datasets[min_resolution_dtag]
                          )
 
+class GetReferenceDataset(GetReferenceDatasetInterface):
+
+    def __call__(self, 
+    datasets: DatasetsInterface, 
+    dataset_statistics: DatasetsStatisticsInterface,
+    ) -> ReferenceInterface:
+        return get_reference_from_datasets(datasets, dataset_statistics)
+    
 
 @dataclasses.dataclass()
 class Dataset:
@@ -911,13 +964,14 @@ class Dataset:
     #     # return
     #     return correlation
 
+
 def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     reference_dataset = reference.dataset
 
     # Get common set of reflections
     common_reflections = dataset.common_reflections(reference_dataset.reflections,
-                                                 structure_factors,
-                                                 )
+                                                    structure_factors,
+                                                    )
 
     # Truncate
     truncated_reference = reference.dataset.truncate_reflections(common_reflections)
@@ -1036,9 +1090,27 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
 
     return smoothed_dataset
 
+
 @ray.remote
 def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactors):
     return smooth(dataset, reference, structure_factors)
+
+
+class SmoothBFactors(SmoothBFactorsInterface):
+    def __call__(self,
+                 dataset: DatasetInterface,
+                 reference: ReferenceInterface,
+                 structure_factors: StructureFactorsInterface) -> DatasetsInterface:
+        return smooth(dataset, reference, structure_factors)
+
+
+# @ray.remote
+# class SmoothBFactorRayInternal(SmoothBFactors):
+#     ...
+#
+# class SmoothBFactorsRay(SmoothBFactors, RayCompatibleInterface):
+#     ...
+
 
 @dataclasses.dataclass()
 class RMSD:
@@ -1259,7 +1331,7 @@ class Datasets:
 
     def common_reflections(self, structure_factors: StructureFactors, tol=0.000001):
 
-        running_index = None
+        running_index: Optional[pd.Index] = None
 
         for dtag in self.datasets:
             dataset = self.datasets[dtag]
@@ -1277,8 +1349,14 @@ class Datasets:
             flattened_index = reflections_table[mask].index.to_flat_index()
             if running_index is None:
                 running_index = flattened_index
-            running_index = running_index.intersection(flattened_index)
-        return running_index.to_list()
+            if running_index is not None:
+                running_index = running_index.intersection(flattened_index)
+        
+        if running_index is not None:
+            return running_index.to_list()
+
+        else:
+            raise Exception("Somehow a running index has not been calculated. This should be impossible. Contact mantainer.")
 
     def truncate(self, resolution: Resolution, structure_factors: StructureFactors) -> Datasets:
         new_datasets_resolution = {}
@@ -1309,50 +1387,50 @@ class Datasets:
 
         return Datasets(new_datasets_reflections)
 
-    def smooth_datasets(self,
-                        reference: Reference,
-                        structure_factors: StructureFactors,
-                        cut=97.5,
-                        smooth_func=smooth,
-                        mapper=False,
-                        ):
+    # def smooth_datasets(self,
+    #                     reference: Reference,
+    #                     structure_factors: StructureFactors,
+    #                     cut=97.5,
+    #                     smooth_func=smooth,
+    #                     mapper=False,
+    #                     ):
 
-        if mapper:
-            keys = list(self.datasets.keys())
+    #     if mapper:
+    #         keys = list(self.datasets.keys())
 
-            results = mapper(
-                [
-                    # delayed(
-                    # self[key].smooth)(
-                    # partial(
-                        Partial(
-                            smooth_func,
-                            self[key],
-                        reference,
-                        structure_factors
-                        )
-                    for key
-                    in keys
-                ]
-            )
+    #         results = mapper(
+    #             [
+    #                 # delayed(
+    #                 # self[key].smooth)(
+    #                 # partial(
+    #                 Partial(
+    #                     smooth_func,
+    #                     self[key],
+    #                     reference,
+    #                     structure_factors
+    #                 )
+    #                 for key
+    #                 in keys
+    #             ]
+    #         )
 
-            smoothed_datasets = {keys[i]: results[i]
-                                 for i, key
-                                 in enumerate(keys)
-                                 }
+    #         smoothed_datasets = {keys[i]: results[i]
+    #                              for i, key
+    #                              in enumerate(keys)
+    #                              }
 
 
-        else:
-            smoothed_datasets = {}
-            for dtag in self.datasets:
-                dataset = self.datasets[dtag]
+    #     else:
+    #         smoothed_datasets = {}
+    #         for dtag in self.datasets:
+    #             dataset = self.datasets[dtag]
 
-                smoothed_dataset = dataset.smooth(reference,
-                                                  structure_factors,
-                                                  )
-                smoothed_datasets[dtag] = smoothed_dataset
+    #             smoothed_dataset = dataset.smooth(reference,
+    #                                               structure_factors,
+    #                                               )
+    #             smoothed_datasets[dtag] = smoothed_dataset
 
-        return Datasets(smoothed_datasets)
+    #     return Datasets(smoothed_datasets)
 
     def smooth(self,
                reference_reflections: gemmi.Mtz,
@@ -1676,3 +1754,26 @@ class Datasets:
     #                     }
     #
     #     return Datasets(new_datasets)
+
+
+def drop_columns(datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
+    new_datasets = {dtag: datasets[dtag].drop_columns(structure_factors) for dtag in datasets}
+
+    return new_datasets
+
+
+def get_datasets_from_pandda_fs_model(pandda_fs_model: PanDDAFSModelInterface,
+                ) -> DatasetsInterface:
+    datasets = {}
+    for dtag, dataset_dir in pandda_fs_model.data_dirs.to_dict().items():
+        dataset: Dataset = Dataset.from_files(dataset_dir.input_pdb_file,
+                                                dataset_dir.input_mtz_file,
+                                                )
+
+        datasets[dtag] = dataset
+
+    return datasets
+
+class GetDatasets(GetDatasetsInterface):
+    def __call__(self, pandda_fs_model: PanDDAFSModelInterface) -> DatasetsInterface:
+        return get_datasets_from_pandda_fs_model(pandda_fs_model)

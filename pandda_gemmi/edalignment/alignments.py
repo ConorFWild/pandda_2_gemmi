@@ -4,9 +4,11 @@ import dataclasses
 import scipy
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
+from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterface, GetAlignmentsInterface, ReferenceInterface
 
 set_loky_pickler('pickle')
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *
 from pandda_gemmi.pandda_exceptions import *
 from pandda_gemmi.common import Dtag
@@ -14,7 +16,7 @@ from pandda_gemmi.dataset import Dataset, ResidueID, Reference, Datasets
 
 
 @dataclasses.dataclass()
-class Transform:
+class Transform(TransformInterface):
     transform: gemmi.Transform
     com_reference: np.array
     com_moving: np.array
@@ -209,7 +211,7 @@ class Transform:
 
 
 @dataclasses.dataclass()
-class Alignment:
+class Alignment(AlignmentInterface):
     transforms: typing.Dict[ResidueID, Transform]
 
     def __getitem__(self, item: ResidueID):
@@ -413,14 +415,6 @@ class Alignment:
 class Alignments:
     alignments: typing.Dict[Dtag, Alignment]
 
-    @staticmethod
-    def from_datasets(reference: Reference, datasets: Datasets):
-        alignments = {}
-        for dtag in datasets:
-            alignments[dtag] = Alignment.from_dataset(reference, datasets[dtag])
-
-        return Alignments(alignments)
-
     def __getitem__(self, item):
         return self.alignments[item]
 
@@ -440,3 +434,21 @@ class Alignments:
     #     self.alignments = {dtag: alignment_python.to_gemmi() for dtag, alignment_python in alignments_python.items()}
     #
     #
+
+def get_alignments(reference: Reference, datasets: Datasets) -> AlignmentsInterface:
+    alignments = {}
+    for dtag in datasets:
+        alignments[dtag] = Alignment.from_dataset(reference, datasets[dtag])
+
+    return Alignments(alignments)
+
+
+
+class GetAlignments(GetAlignmentsInterface):
+    def __call__(self, 
+    reference: ReferenceInterface, 
+    datasets: DatasetsInterface) -> AlignmentsInterface:
+        return get_alignments(
+            reference,
+            datasets,
+        )
