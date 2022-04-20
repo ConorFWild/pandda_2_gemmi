@@ -46,11 +46,11 @@ from pandda_gemmi.density_clustering import (
 
 
 @dataclasses.dataclass()
-class DatasetResult:
-    dtag: Dtag
-    events: Dict[EventID, Event]
+class DatasetResult(DatasetResultInterface):
+    dtag: DtagInterface
+    events: MutableMapping[EventIDInterface, EventInterface]
+    event_scores: MutableMapping[EventIDInterface,  float]
     log: Dict
-
 
 @dataclasses.dataclass()
 class ShellResult(ShellResultInterface):
@@ -491,6 +491,7 @@ def process_dataset(
     return DatasetResult(
         dtag=test_dtag.dtag,
         events={event_id: event for event_id, event in events.events.items()},
+        event_scores={event_id: 0.0 for event_id in events.events},
         log=dataset_log,
     )
 
