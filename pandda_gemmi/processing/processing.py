@@ -7,7 +7,8 @@ import pprint
 from functools import partial
 import os
 import json
-from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterface, GridInterface, LoadXMapInterface, PanDDAFSModelInterface, ProcessorInterface, ReferenceInterface, ShellInterface, StructureFactorsInterface
+from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterface, GridInterface, LoadXMapInterface, \
+    PanDDAFSModelInterface, ProcessorInterface, ReferenceInterface, ShellInterface, StructureFactorsInterface
 
 printer = pprint.PrettyPrinter()
 
@@ -19,7 +20,10 @@ from pandda_gemmi.logs import (
     summarise_array,
 )
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
+from pandda_gemmi.processing.process_local import ProcessLocalSerial
+
 from pandda_gemmi.pandda_functions import (
     process_local_serial,
     truncate,
@@ -34,19 +38,24 @@ from pandda_gemmi.shells import Shell
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import Event, Clusterings, Clustering, Events, get_event_mask_indicies
+from pandda_gemmi.density_clustering import (
+    GetEDClustering, FilterEDClusteringsSize,
+    FilterEDClusteringsPeak,
+    MergeEDClusterings,
+)
 
 
 @dataclasses.dataclass()
-class DatasetResult:
-    dtag: Dtag
-    events: Dict[EventID, Event]
+class DatasetResult(DatasetResultInterface):
+    dtag: DtagInterface
+    events: MutableMapping[EventIDInterface, EventInterface]
+    event_scores: MutableMapping[EventIDInterface,  float]
     log: Dict
 
-
 @dataclasses.dataclass()
-class ShellResult:
-    shell: Shell
-    dataset_results: Dict[Dtag, DatasetResult]
+class ShellResult(ShellResultInterface):
+    shell: ShellInterface
+    dataset_results: DatasetResultsInterface
     log: Dict
 
 
@@ -239,45 +248,39 @@ def process_dataset(
     ###################################################################
     time_cluster_start = time.time()
 
-    # Get the clustered electron desnity outliers
-    cluster_paramaterised = partial(
-        Clustering.from_zmap,
-        reference=reference,
-        grid=grid,
-        contour_level=contour_level,
-        cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
-    )
-
-    # clusterings = process_local(
-    #     [
-    #         partial(cluster_paramaterised, zmaps[dtag], )
-    #         for dtag
-    #         in zmaps
-    #     ]
-    # )
-    clusterings = [
-            partial(cluster_paramaterised, zmaps[dtag], )()
+    clusterings_list: List[EDClusteringInterface] = process_local_serial(
+        [
+            Partial(GetEDClustering()).paramaterise(
+                zmaps[dtag],
+                reference=reference,
+                grid=grid,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier, )
             for dtag
             in zmaps
         ]
+    )
+    time_cluster_z_finish = time.time()
 
-    clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
-    # print("\t\tIntially found clusters: {}".format(
-    #     {
-    #         dtag: (
-    #             len(clustering),
-    #             max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
-    #             max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
-    #         )
-    #         for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
-    #     }
-    # )
-    # )
+    # if debug:
+    #     model_log['Time to perform primary clustering of z map'] = time_cluster_z_finish - time_cluster_z_start
+    #     model_log['time_event_mask'] = {}
+    #     for j, clustering in enumerate(clusterings_list):
+    #         model_log['time_cluster'] = clustering.time_cluster
+    #         model_log['time_np'] = clustering.time_np
+    #         model_log['time_event_masking'] = clustering.time_event_masking
+    #         model_log['time_get_orth'] = clustering.time_get_orth
+    #         model_log['time_fcluster'] = clustering.time_fcluster
+    #         for cluster_num, cluster in clustering.clustering.items():
+    #             model_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
+
+    clusterings: EDClusteringsInterface = {dtag: clustering for dtag, clustering in zip(zmaps, clusterings_list)}
+
     dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings.clusterings.values()])
-    update_log(dataset_log, dataset_log_path)
+        [len(clustering) for clustering in clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
     cluster_sizes = {}
-    for dtag, clustering in clusterings.clusterings.items():
+    for dtag, clustering in clusterings.items():
         for cluster_num, cluster in clustering.clustering.items():
             cluster_sizes[int(cluster_num)] = {
                 "size": float(cluster.size(grid)),
@@ -292,48 +295,144 @@ def process_dataset(
         ))
         if j < 10
     }
-    update_log(dataset_log, dataset_log_path)
+    # update_log(dataset_log, dataset_log_path)
 
     # Filter out small clusters
-    clusterings_large: Clusterings = clusterings.filter_size(grid,
-                                                             min_blob_volume,
-                                                             )
-    # print("\t\tAfter filtering: large: {}".format(
-    #     {dtag: len(cluster) for dtag, cluster in
-    #      zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+    clusterings_large: EDClusteringsInterface = FilterEDClusteringsSize()(clusterings,
+                                                                          grid,
+                                                                          min_blob_volume,
+                                                                          )
+    # if debug:
+    #     print("\t\tAfter filtering: large: {}".format(
+    #         {dtag: len(cluster) for dtag, cluster in
+    #          zip(clusterings_large, clusterings_large.values())}))
     dataset_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_large.clusterings.values()])
-    update_log(dataset_log, dataset_log_path)
+        [len(clustering) for clustering in clusterings_large.values()])
+    # update_log(dataset_log, dataset_log_path)
 
     # Filter out weak clusters (low peak z score)
-    clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
-                                                                    min_blob_z_peak)
-    # print("\t\tAfter filtering: peak: {}".format(
-    #     {dtag: len(cluster) for dtag, cluster in
-    #      zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+    clusterings_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clusterings_large,
+                                                                           grid,
+                                                                           min_blob_z_peak)
+    # if debug:
+    #     print("\t\tAfter filtering: peak: {}".format(
+    #         {dtag: len(cluster) for dtag, cluster in
+    #          zip(clusterings_peaked, clusterings_peaked.values())}))
     dataset_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
-    update_log(dataset_log, dataset_log_path)
-
-    # Add the event masks
-    for clustering_id, clustering in clusterings_peaked.clusterings.items():
-        for cluster_id, cluster in clustering.clustering.items():
-            cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
-
-
-    # Merge the clusters
-    clusterings_merged = clusterings_peaked.merge_clusters()
-    # print("\t\tAfter filtering: merged: {}".format(
-    #     {dtag: len(_cluster) for dtag, _cluster in
-    #      zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
-    dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
-        [len(clustering) for clustering in clusterings_merged.clusterings.values()])
-    update_log(dataset_log, dataset_log_path)
+        [len(clustering) for clustering in clusterings_peaked.values()])
+    # update_log(dataset_log, dataset_log_path)
 
     # Add the event mask
-    # for clustering_id, clustering in clusterings_merged.clusterings.items():
+    for clustering_id, clustering in clusterings_peaked.items():
+        for cluster_id, cluster in clustering.clustering.items():
+            cluster.event_mask_indicies = get_event_mask_indicies(
+                zmaps[test_dtag],
+                cluster.cluster_positions_array)
+
+    # Merge the clusters
+    clusterings_merged: EDClusteringsInterface = MergeEDClusterings()(clusterings_peaked)
+    # if debug:
+    #     print("\t\tAfter filtering: merged: {}".format(
+    #         {dtag: len(_cluster) for dtag, _cluster in
+    #          zip(clusterings_merged, clusterings_merged.values())}))
+    dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
+        [len(clustering) for clustering in clusterings_merged.values()])
+
+    # # Get the clustered electron desnity outliers
+    # cluster_paramaterised = partial(
+    #     Clustering.from_zmap,
+    #     reference=reference,
+    #     grid=grid,
+    #     contour_level=contour_level,
+    #     cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+    # )
+    #
+    # # clusterings = process_local(
+    # #     [
+    # #         partial(cluster_paramaterised, zmaps[dtag], )
+    # #         for dtag
+    # #         in zmaps
+    # #     ]
+    # # )
+    # clusterings = [
+    #         partial(cluster_paramaterised, zmaps[dtag], )()
+    #         for dtag
+    #         in zmaps
+    #     ]
+    #
+    # clusterings = Clusterings({dtag: clustering for dtag, clustering in zip(zmaps, clusterings)})
+    # # print("\t\tIntially found clusters: {}".format(
+    # #     {
+    # #         dtag: (
+    # #             len(clustering),
+    # #             max([len(cluster.indexes[0]) for cluster in clustering.clustering.values()] + [0, ]),
+    # #             max([cluster.size(grid) for cluster in clustering.clustering.values()] + [0, ]),
+    # #         )
+    # #         for dtag, clustering in zip(clusterings.clusterings, clusterings.clusterings.values())
+    # #     }
+    # # )
+    # # )
+    # dataset_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
+    #     [len(clustering) for clustering in clusterings.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+    # cluster_sizes = {}
+    # for dtag, clustering in clusterings.clusterings.items():
+    #     for cluster_num, cluster in clustering.clustering.items():
+    #         cluster_sizes[int(cluster_num)] = {
+    #             "size": float(cluster.size(grid)),
+    #             "centroid": (float(cluster.centroid[0]), float(cluster.centroid[1]), float(cluster.centroid[2])),
+    #         }
+    # dataset_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
+    #     cluster_num: cluster_sizes[cluster_num]
+    #     for j, cluster_num
+    #     in enumerate(sorted(
+    #         cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
+    #         reverse=True,
+    #     ))
+    #     if j < 10
+    # }
+    # update_log(dataset_log, dataset_log_path)
+    #
+    # # Filter out small clusters
+    # clusterings_large: Clusterings = clusterings.filter_size(grid,
+    #                                                          min_blob_volume,
+    #                                                          )
+    # # print("\t\tAfter filtering: large: {}".format(
+    # #     {dtag: len(cluster) for dtag, cluster in
+    # #      zip(clusterings_large.clusterings, clusterings_large.clusterings.values())}))
+    # dataset_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
+    #     [len(clustering) for clustering in clusterings_large.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+    #
+    # # Filter out weak clusters (low peak z score)
+    # clusterings_peaked: Clusterings = clusterings_large.filter_peak(grid,
+    #                                                                 min_blob_z_peak)
+    # # print("\t\tAfter filtering: peak: {}".format(
+    # #     {dtag: len(cluster) for dtag, cluster in
+    # #      zip(clusterings_peaked.clusterings, clusterings_peaked.clusterings.values())}))
+    # dataset_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
+    #     [len(clustering) for clustering in clusterings_peaked.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+    #
+    # # Add the event masks
+    # for clustering_id, clustering in clusterings_peaked.clusterings.items():
     #     for cluster_id, cluster in clustering.clustering.items():
     #         cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
+    #
+    #
+    # # Merge the clusters
+    # clusterings_merged = clusterings_peaked.merge_clusters()
+    # # print("\t\tAfter filtering: merged: {}".format(
+    # #     {dtag: len(_cluster) for dtag, _cluster in
+    # #      zip(clusterings_merged.clusterings, clusterings_merged.clusterings.values())}))
+    # dataset_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
+    #     [len(clustering) for clustering in clusterings_merged.clusterings.values()])
+    # update_log(dataset_log, dataset_log_path)
+    #
+    # # Add the event mask
+    # # for clustering_id, clustering in clusterings_merged.clusterings.items():
+    # #     for cluster_id, cluster in clustering.clustering.items():
+    # #         cluster.event_mask_indicies = get_event_mask_indicies(zmaps[test_dtag], cluster.cluster_positions_array)
 
     time_cluster_finish = time.time()
     dataset_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
@@ -378,7 +477,7 @@ def process_dataset(
         inner_mask_symmetry,
         sample_rate,
         native_grid,
-        mapper=process_local_serial,
+        mapper=ProcessLocalSerial(),
     )
 
     time_event_map_finish = time.time()
@@ -391,7 +490,8 @@ def process_dataset(
 
     return DatasetResult(
         dtag=test_dtag.dtag,
-        events=events,
+        events={event_id: event for event_id, event in events.events.items()},
+        event_scores={event_id: 0.0 for event_id in events.events},
         log=dataset_log,
     )
 
@@ -419,7 +519,7 @@ def process_shell(
         memory_availability: str,
         statmaps: bool,
         load_xmap_func: LoadXMapInterface,
-):
+) -> ShellResultInterface:
     time_shell_start = time.time()
     shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
     shell_log = {}
@@ -438,7 +538,7 @@ def process_shell(
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
     shell_working_resolution = Resolution(
-        min([datasets[dtag].reflections.resolution().resolution for dtag in shell.all_dtags]))
+        min([datasets[dtag].reflections.get_resolution() for dtag in shell.all_dtags]))
     shell_truncated_datasets: Datasets = truncate(
         shell_datasets,
         resolution=shell_working_resolution,
@@ -459,8 +559,7 @@ def process_shell(
     # )
 
     results = process_local(
-        Partial(
-            load_xmap_func,
+        Partial(load_xmap_func).paramaterise(
             shell_truncated_datasets[key],
             alignments[key],
             grid=grid,
@@ -518,14 +617,40 @@ def process_shell(
     )
 
     # Process each dataset in the shell
+    all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
+    all_train_dtags = []
+    for _dtag in all_train_dtags_unmerged:
+        if _dtag not in all_train_dtags:
+            all_train_dtags.append(_dtag)
+
+    dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
+
     results = process_local_over_datasets(
         [
-            partial(
-                process_dataset_paramaterized,
+            Partial(
+                process_dataset).paramaterise(
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
-                                            shell.train_dtags[test_dtag].union({test_dtag, })},
-                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })},
+                                            dataset_dtags[test_dtag]},
+                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
+                shell=shell,
+                alignments=alignments,
+                pandda_fs_model=pandda_fs_model,
+                reference=reference,
+                grid=grid,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+                min_blob_volume=min_blob_volume,
+                min_blob_z_peak=min_blob_z_peak,
+                structure_factors=structure_factors,
+                outer_mask=outer_mask,
+                inner_mask_symmetry=inner_mask_symmetry,
+                max_site_distance_cutoff=max_site_distance_cutoff,
+                min_bdc=min_bdc,
+                max_bdc=max_bdc,
+                sample_rate=sample_rate,
+                statmaps=statmaps,
+                process_local=process_local_in_dataset,
             )
             for test_dtag
             in shell.train_dtags
@@ -542,14 +667,13 @@ def process_shell(
     shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
     update_log(shell_log, shell_log_path)
 
-    return ShellResult(
+    shell_result: ShellResultInterface = ShellResult(
         shell=shell,
         dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
         log=shell_log,
     )
 
-
-
+    return shell_result
 
 ###################################################################
 # # LOW MEMORY VERSIONS

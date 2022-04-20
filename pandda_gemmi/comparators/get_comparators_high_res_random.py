@@ -9,7 +9,7 @@ def get_comparators_high_res_random(
         pandda_fs_model,
         comparison_min_comparators,
         comparison_max_comparators,
-):
+) -> ComparatorsInterface:
     dtag_list = [dtag for dtag in datasets]
 
     dtags_by_res = list(
@@ -40,7 +40,7 @@ def get_comparators_high_res_random(
             )
         )
 
-    return comparators, {}
+    return comparators
 
 class GetComparatorsHighResRandom(GetComparatorsInterface):
     def __init__(self,
@@ -56,7 +56,7 @@ class GetComparatorsHighResRandom(GetComparatorsInterface):
     alignments: Dict[DtagInterface, AlignmentInterface], 
     grid: GridInterface, 
     structure_factors: StructureFactorsInterface, 
-    pandda_fs_model: PanDDAFSModelInterface):
+    pandda_fs_model: PanDDAFSModelInterface) -> ComparatorsInterface:
         return get_comparators_high_res_random(
             datasets, 
             alignments, 
