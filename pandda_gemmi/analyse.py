@@ -80,6 +80,7 @@ from pandda_gemmi.processing import (
     analyse_model,
     ProcessLocalRay,
     ProcessLocalSerial,
+    ProcessLocalSpawn,
 )
 
 from pandda_gemmi import event_classification
