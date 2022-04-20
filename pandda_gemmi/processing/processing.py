@@ -459,8 +459,7 @@ def process_shell(
     # )
 
     results = process_local(
-        Partial(
-            load_xmap_func,
+        Partial(load_xmap_func).paramaterise(
             shell_truncated_datasets[key],
             alignments[key],
             grid=grid,
@@ -520,8 +519,8 @@ def process_shell(
     # Process each dataset in the shell
     results = process_local_over_datasets(
         [
-            partial(
-                process_dataset_paramaterized,
+            Partial(
+                process_dataset_paramaterized).paramaterise(
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
                                             shell.train_dtags[test_dtag].union({test_dtag, })},
