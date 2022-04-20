@@ -41,6 +41,7 @@ def interpolate_points(
     )
     return interpolated_grid
 
+
 def interpolate_points_single(
         unaligned_xmap,
         new_grid,
@@ -208,7 +209,6 @@ class Xmap(XmapInterface):
         com_reference_list: List[NDArrayInterface] = []
 
         for residue_id in grid.partitioning:
-
             point_position_dict = grid.partitioning[residue_id]
 
             al = alignment[residue_id]
@@ -220,13 +220,13 @@ class Xmap(XmapInterface):
             positions = [_position for _position in point_position_dict.values()]
 
             interpolate_points_single(unaligned_xmap,
-                                     new_grid,
-                                     points,
-                                     positions,
-                                     transform,
-                                     com_moving,
-                                     com_reference,
-                                     )
+                                      new_grid,
+                                      points,
+                                      positions,
+                                      transform,
+                                      com_moving,
+                                      com_reference,
+                                      )
             #
             # for point, position in point_position_dict.items():
             #     point_list.append(point)
@@ -321,7 +321,6 @@ class Xmap(XmapInterface):
             com_reference_list.append(com_reference)
 
         # Interpolate values
-
 
         # interpolated_grid = gemmi.interpolate_points(unaligned_xmap,
         #                                              new_grid,
