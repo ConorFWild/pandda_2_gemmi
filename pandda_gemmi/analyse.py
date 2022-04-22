@@ -587,33 +587,33 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # sake of computational efficiency
         with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
                            f'\tDone!'):
-            if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-                shells: ShellsInterface = get_shells_multiple_models(
-                    datasets,
-                    comparators,
-                    pandda_args.min_characterisation_datasets,
-                    pandda_args.max_shell_datasets,
-                    pandda_args.high_res_increment,
-                    pandda_args.only_datasets,
-                    debug=pandda_args.debug,
-                )
-                if pandda_args.debug:
-                    print('Got shells that support multiple models')
-                    for shell_res, shell in shells.items():
-                        print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
-                        for cluster_num, dtags in shell.train_dtags.items():
-                            print(f'\t\t{cluster_num}: {dtags[:5]}')
+            # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
+            shells: ShellsInterface = get_shells_multiple_models(
+                datasets,
+                comparators,
+                pandda_args.min_characterisation_datasets,
+                pandda_args.max_shell_datasets,
+                pandda_args.high_res_increment,
+                pandda_args.only_datasets,
+                debug=pandda_args.debug,
+            )
+            if pandda_args.debug:
+                print('Got shells that support multiple models')
+                for shell_res, shell in shells.items():
+                    print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
+                    for cluster_num, dtags in shell.train_dtags.items():
+                        print(f'\t\t{cluster_num}: {dtags[:5]}')
 
-            else:
-                shells: ShellsInterface = get_shells(
-                    datasets,
-                    comparators,
-                    pandda_args.min_characterisation_datasets,
-                    pandda_args.max_shell_datasets,
-                    pandda_args.high_res_increment,
-                    pandda_args.only_datasets,
-
-                )
+            # else:
+            #     shells: ShellsInterface = get_shells(
+            #         datasets,
+            #         comparators,
+            #         pandda_args.min_characterisation_datasets,
+            #         pandda_args.max_shell_datasets,
+            #         pandda_args.high_res_increment,
+            #         pandda_args.only_datasets,
+            #
+            #     )
             pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()
 
