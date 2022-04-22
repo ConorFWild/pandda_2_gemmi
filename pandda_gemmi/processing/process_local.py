@@ -1,5 +1,6 @@
 import numpy
 import ray
+import multiprocessing as mp
 
 from pandda_gemmi.analyse_interface import *
 
@@ -11,6 +12,7 @@ class ProcessLocalSerial(ProcessorInterface):
             results.append(func())
 
         return results
+
 
 @ray.remote
 class RayWrapper(Generic[P, V]):
@@ -43,4 +45,28 @@ class ProcessLocalRay(ProcessorInterface):
         assert ray.is_initialized() == True
         tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
         results = ray.get(tasks)
+        return results
+
+
+def run_multiprocessing(func: PartialInterface[P, V]) -> V:
+    return func()
+
+
+class ProcessLocalSpawn(ProcessorInterface):
+
+    def __init__(self, n_jobs: int):
+        self.n_jobs = n_jobs
+
+    def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
+        try:
+            mp.set_start_method("spawn")
+        except Exception as e:
+            print(e)
+
+        with mp.Pool(self.n_jobs) as pool:
+            results = pool.map(
+                run_multiprocessing,
+                funcs,
+            )
+
         return results

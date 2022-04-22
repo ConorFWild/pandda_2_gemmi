@@ -26,6 +26,7 @@ cd pandda_2_gemmi
 pip install -e .
 cd _gemmi
 pip install .
+pip install numpy=1.21.0
 
 ```
 

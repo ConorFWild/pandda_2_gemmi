@@ -80,6 +80,7 @@ from pandda_gemmi.processing import (
     analyse_model,
     ProcessLocalRay,
     ProcessLocalSerial,
+    ProcessLocalSpawn,
 )
 
 from pandda_gemmi import event_classification
@@ -189,6 +190,9 @@ def get_process_global(pandda_args, distributed_tmp):
 def get_process_local(pandda_args):
     if pandda_args.local_processing == "serial":
         process_local = ProcessLocalSerial()
+
+    elif pandda_args.local_processing == "multiprocessing_spawn":
+        process_local = ProcessLocalSpawn(pandda_args.local_cpus)
 
     # elif pandda_args.local_processing == "joblib":
     #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)

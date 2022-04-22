@@ -25,7 +25,7 @@ def get_comparators_high_res(
     for dtag in dtag_list:
         comparators[dtag] = highest_res_datasets
 
-    return comparators, {}
+    return comparators
 
 
 

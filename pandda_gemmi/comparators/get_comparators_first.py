@@ -36,7 +36,7 @@ def get_comparators_high_res_first(
             0: [dtag for dtag in sorted(truncated_datasets, key= lambda x: x.dtag)][:comparison_min_comparators + 1]
                              }
 
-    return comparators, {}
+    return comparators
 
 class GetComparatorsHighResFirst(GetComparatorsInterface):
     def __init__(self,
