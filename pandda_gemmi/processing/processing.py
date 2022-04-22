@@ -69,7 +69,7 @@ def update_log(shell_log, shell_log_path):
 
 def process_dataset(
         test_dtag,
-        shell,
+        shell: ShellInterface,
         dataset_truncated_datasets,
         alignments,
         dataset_xmaps,
@@ -93,7 +93,7 @@ def process_dataset(
 
     dataset_log_path = pandda_fs_model.processed_datasets.processed_datasets[test_dtag].log_path
     dataset_log = {}
-    dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[test_dtag]]
+    dataset_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[0]]
     update_log(dataset_log, dataset_log_path)
 
     masked_xmap_array = XmapArray.from_xmaps(
@@ -102,7 +102,7 @@ def process_dataset(
     )
 
     masked_train_xmap_array: XmapArray = masked_xmap_array.from_dtags(
-        [_dtag for _dtag in shell.train_dtags[test_dtag].union({test_dtag, })])
+        [_dtag for _dtag in shell.train_dtags[0] + [test_dtag,]])
 
     ###################################################################
     # # Generate the statistical model of the dataset
