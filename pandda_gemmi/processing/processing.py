@@ -653,7 +653,7 @@ def process_shell(
                 process_local=process_local_in_dataset,
             )
             for test_dtag
-            in shell.train_dtags
+            in shell.test_dtags
         ],
     )
 
