@@ -290,7 +290,7 @@ class PanDDAConsole:
         if debug:
             self.console.print_exception()
         else:
-            self.console.print(e)
+            self.console.print_exception(e)
 
     def save(self, console_log_file):
         self.console.save_html(str(console_log_file))
