@@ -669,7 +669,7 @@ def process_shell(
 
     shell_result: ShellResultInterface = ShellResult(
         shell=shell,
-        dataset_results={dtag: result for dtag, result in zip(shell.train_dtags, results) if result},
+        dataset_results={dtag: result for dtag, result in zip(shell.test_dtags, results) if result},
         log=shell_log,
     )
 

@@ -36,7 +36,7 @@ class GetComparatorsHybrid(GetComparatorsInterface):
             pandda_fs_model,
             self.comparison_min_comparators,
             self.comparison_max_comparators,
-        )[0]
+        )
 
         print(comparators_first)
 
