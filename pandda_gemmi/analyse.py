@@ -733,6 +733,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
+        if pandda_args.debug:
+            print(shell_results)
+            print(all_events)
+            print(event_scores)
+
         console.summarise_shells(shell_results, all_events, event_scores)
 
         ###################################################################
