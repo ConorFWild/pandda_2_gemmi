@@ -6,6 +6,7 @@ import dataclasses
 import os
 import shutil
 from pathlib import Path
+import re
 
 from joblib.externals.loky import set_loky_pickler
 
@@ -130,20 +131,48 @@ class DatasetDir:
             try:
                 print(ligand_search_path)
                 print(ligand_cif_regex)
-                ligands = ligand_search_path.rglob(ligand_cif_regex)
-                source_ligand_cif = next(ligands)
+                ligand_cif_paths = [
+                    ligand_cif_path
+                    for ligand_cif_path
+                    in ligand_search_path.rglob("*")
+                    if re.match(
+                        str(ligand_cif_path),
+                        ligand_cif_regex,
+                    )
+                ]
+                source_ligand_cif = next(*ligand_cif_paths)
             except:
                 source_ligand_cif = None
 
             try:
                 print(ligand_search_path)
                 print(ligand_cif_regex)
-                source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
+                # source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
+                ligand_smiles_paths = [
+                    ligand_smiles_path
+                    for ligand_smiles_path
+                    in ligand_search_path.rglob("*")
+                    if re.match(
+                        str(ligand_smiles_path),
+                        ligand_smiles_regex,
+                    )
+                ]
+                source_ligand_smiles = next(*ligand_smiles_paths)
             except:
                 source_ligand_smiles = None
 
             try:
-                ligands = ligand_search_path.rglob(ligand_pdb_regex)
+                # ligands = ligand_search_path.rglob(ligand_pdb_regex)
+                ligand_pdb_paths = [
+                    ligand_pdb_path
+                    for ligand_pdb_path
+                    in ligand_search_path.rglob("*")
+                    if re.match(
+                        str(ligand_pdb_path),
+                        ligand_pdb_regex,
+                    )
+                ]
+                source_ligand_smiles = next(*ligand_pdb_paths)
 
                 if source_ligand_cif:
                     stem = source_ligand_cif.stem
@@ -156,7 +185,8 @@ class DatasetDir:
 
                 source_ligand_pdb = None
                 if stem:
-                    for ligand_path in ligands:
+                    # for ligand_path in ligands:
+                    for ligand_path in ligand_pdb_paths:
                         if ligand_path.stem == stem:
                             source_ligand_pdb = ligand_path
 
