@@ -411,6 +411,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.summarise_fs_model(pandda_fs_model)
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+        if pandda_args.debug:
+            for dtag, data_dir in pandda_fs_model.data_dirs.dataset_dirs.items():
+                print(dtag)
+                print(data_dir.source_ligand_cif)
+                print(data_dir.source_ligand_smiles)
 
         ###################################################################
         # # Load datasets
