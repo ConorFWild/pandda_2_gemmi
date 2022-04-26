@@ -128,12 +128,16 @@ class DatasetDir:
                 ligand_search_path = path
 
             try:
+                print(ligand_search_path)
+                print(ligand_cif_regex)
                 ligands = ligand_search_path.rglob(ligand_cif_regex)
                 source_ligand_cif = next(ligands)
             except:
                 source_ligand_cif = None
 
             try:
+                print(ligand_search_path)
+                print(ligand_cif_regex)
                 source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
             except:
                 source_ligand_smiles = None
