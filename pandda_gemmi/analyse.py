@@ -421,6 +421,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_statistics: DatasetsStatisticsInterface = DatasetsStatistics(datasets_initial)
         console.summarise_datasets(datasets_initial, datasets_statistics)
 
+        if pandda_args.debug:
+            print(datasets_initial)
+
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
             if not pandda_args.structure_factors:
