@@ -291,6 +291,7 @@ class CrystallographicGridInterface(Protocol):
 
 
 class GridInterface(Protocol):
+    grid: CrystallographicGridInterface
     partitioning: PartitioningInterface
 
     def new_grid(self) -> GridInterface:

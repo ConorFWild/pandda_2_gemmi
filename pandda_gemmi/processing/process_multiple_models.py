@@ -869,6 +869,9 @@ def process_dataset_multiple_models(
                 sample_rate,
             )
 
+
+
+
     # if statmaps:
     #     mean_map_file = MeanMapFile.from_zmap_file(
     #         pandda_fs_model.processed_datasets.processed_datasets[test_dtag].z_map_file)
@@ -980,6 +983,26 @@ def process_dataset_multiple_models(
         log=dataset_log,
     )
 
+
+def save_array_to_map_file(
+        array: NDArrayInterface,
+        template: CrystallographicGridInterface,
+        path: Path
+):
+    spacing = [template.nu, template.nv, template.nw]
+    unit_cell = template.unit_cell
+    grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
+    grid.set_unit_cell(unit_cell)
+    grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+
+    grid_array = np.array(grid, copy=False)
+    grid_array[:, :, :] = array[:,:,:]
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = grid
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
 
 def process_shell_multiple_models(
         shell: ShellInterface,
@@ -1103,6 +1126,14 @@ def process_shell_multiple_models(
         grid,
         process_local_in_shell,
     )
+
+    if debug:
+        for model_key, model in models.items():
+            save_array_to_map_file(
+                model.mean,
+                grid.grid,
+                pandda_fs_model.pandda_dir / f"{shell.res}_{model_key}_mean.ccp4"
+            )
 
     ###################################################################
     # # Process each test dataset
