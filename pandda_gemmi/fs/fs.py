@@ -131,7 +131,7 @@ class DatasetDir:
             try:
                 print(ligand_search_path)
                 print(ligand_cif_regex)
-                print([x for x in ligand_search_path.rglob("*")])
+                print([x.name for x in ligand_search_path.rglob("*")])
                 ligand_cif_paths = [
                     ligand_cif_path
                     for ligand_cif_path
