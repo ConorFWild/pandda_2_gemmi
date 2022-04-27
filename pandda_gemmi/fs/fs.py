@@ -140,14 +140,14 @@ class DatasetDir:
                         ligand_cif_regex,
                     )
                 ]
-                source_ligand_cif = next(*ligand_cif_paths)
+                source_ligand_cif = ligand_cif_paths[0]
             except Exception as e:
                 print(e)
                 source_ligand_cif = None
 
             try:
                 print(ligand_search_path)
-                print(ligand_cif_regex)
+                print(ligand_smiles_regex)
                 # source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
                 ligand_smiles_paths = [
                     ligand_smiles_path
@@ -159,7 +159,7 @@ class DatasetDir:
                     )
                 ]
 
-                source_ligand_smiles = next(*ligand_smiles_paths)
+                source_ligand_smiles = ligand_smiles_paths[0]
             except Exception as e:
                 print(e)
                 source_ligand_smiles = None
@@ -175,7 +175,7 @@ class DatasetDir:
                         ligand_pdb_regex,
                     )
                 ]
-                source_ligand_smiles = next(*ligand_pdb_paths)
+                source_ligand_smiles = ligand_pdb_paths[0]
 
                 if source_ligand_cif:
                     stem = source_ligand_cif.stem
