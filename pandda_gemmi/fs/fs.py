@@ -132,13 +132,16 @@ class DatasetDir:
                 print(ligand_search_path)
                 print(ligand_cif_regex)
                 print([x.name for x in ligand_search_path.rglob("*")])
+                # print([re.match(str(x.name) for x in ligand_search_path.rglob("*")])
+
                 ligand_cif_paths = [
                     ligand_cif_path
                     for ligand_cif_path
                     in ligand_search_path.rglob("*")
                     if re.match(
-                        str(ligand_cif_path.name),
                         ligand_cif_regex,
+                        str(ligand_cif_path.name),
+
                     )
                 ]
                 source_ligand_cif = ligand_cif_paths[0]
@@ -155,8 +158,9 @@ class DatasetDir:
                     for ligand_smiles_path
                     in ligand_search_path.rglob("*")
                     if re.match(
-                        str(ligand_smiles_path.name),
                         ligand_smiles_regex,
+                        str(ligand_smiles_path.name),
+
                     )
                 ]
 
@@ -172,8 +176,9 @@ class DatasetDir:
                     for ligand_pdb_path
                     in ligand_search_path.rglob("*")
                     if re.match(
-                        str(ligand_pdb_path.name),
                         ligand_pdb_regex,
+                        str(ligand_pdb_path.name),
+
                     )
                 ]
                 source_ligand_smiles = ligand_pdb_paths[0]
