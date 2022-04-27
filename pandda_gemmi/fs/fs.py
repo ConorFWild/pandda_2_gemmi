@@ -129,10 +129,6 @@ class DatasetDir:
                 ligand_search_path = path
 
             try:
-                print(ligand_search_path)
-                print(ligand_cif_regex)
-                print([x.name for x in ligand_search_path.rglob("*")])
-                # print([re.match(str(x.name) for x in ligand_search_path.rglob("*")])
 
                 ligand_cif_paths = [
                     ligand_cif_path
@@ -150,9 +146,7 @@ class DatasetDir:
                 source_ligand_cif = None
 
             try:
-                print(ligand_search_path)
-                print(ligand_smiles_regex)
-                # source_ligand_smiles = next(ligand_search_path.rglob(ligand_smiles_regex))
+
                 ligand_smiles_paths = [
                     ligand_smiles_path
                     for ligand_smiles_path
