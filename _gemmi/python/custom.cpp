@@ -98,7 +98,14 @@ void interpolate_points_single(
             point[1] * (1.0 / interpolated_map.nv),
             point[2] * (1.0 / interpolated_map.nw)
             );
+          
+        
+
+
         Position pos = interpolated_map.unit_cell.orthogonalize(fractional);
+        // std::vector<float> pos_python = pos_vec[i];
+        // Position pos = Position(pos_python[0], pos_python[1], pos_python[2]);
+
         // Transform transform = transform_vec[i];
         // std::vector<double> com_moving = com_moving_vec[i];
         // std::vector<double> com_reference = com_reference_vec[i];

@@ -61,6 +61,28 @@ def interpolate_points_single(
         com_reference,
     )
 
+def transform_point(point, grid, transform, com_ref, com_mov):
+    frac = (
+        point[0] * (1/grid.nu),
+        point[1] * (1 / grid.nv),
+        point[2] * (1 / grid.nw),
+
+    )
+    pos = grid.unit_cell.orthogonalize(gemmi.Fractional(*frac))
+
+    zeroed_pos = (
+        pos.x-com_ref[0],
+        pos.y - com_ref[1],
+        pos.z - com_ref[2],
+                  )
+    transformed_pos = transform.apply(
+        gemmi.Position(*zeroed_pos)
+    )
+    transformed_pos.x = transformed_pos.x + com_mov[0]
+    transformed_pos.y = transformed_pos.y + com_mov[1]
+    transformed_pos.z = transformed_pos.z + com_mov[2]
+    return (transformed_pos.x, transformed_pos.y, transformed_pos.z)
+
 
 @dataclasses.dataclass()
 class Xmap(XmapInterface):
@@ -209,6 +231,8 @@ class Xmap(XmapInterface):
         com_reference_list: List[NDArrayInterface] = []
 
         for residue_id in grid.partitioning:
+
+
             point_position_dict = grid.partitioning[residue_id]
 
             al = alignment[residue_id]
@@ -218,6 +242,14 @@ class Xmap(XmapInterface):
 
             points = [_point for _point in point_position_dict.keys()]
             positions = [_position for _position in point_position_dict.values()]
+
+            print(f"Interpolating: {residue_id}")
+            print(f"\tPoint: {points[0]}")
+            print(f"\tPos: {positions[0]}")
+            # print(f"\tPos (from grid): {new_grid.}")
+            print(f"\tcom_moving: {com_moving}")
+            print(f"\tcom_reference: {com_moving}")
+            print(f"\tTransform: {transform_point(points[0]), new_grid, transform, com_reference, com_moving}")
 
             interpolate_points_single(unaligned_xmap,
                                       new_grid,
