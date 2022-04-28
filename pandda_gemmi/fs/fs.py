@@ -128,6 +128,7 @@ class DatasetDir:
                 ligand_dir = None
                 ligand_search_path = path
 
+            # Cif
             try:
 
                 ligand_cif_paths = [
@@ -145,6 +146,7 @@ class DatasetDir:
                 print(e)
                 source_ligand_cif = None
 
+            # Smiles
             try:
 
                 ligand_smiles_paths = [
@@ -163,6 +165,7 @@ class DatasetDir:
                 print(e)
                 source_ligand_smiles = None
 
+            # ligand Pdb
             try:
                 # ligands = ligand_search_path.rglob(ligand_pdb_regex)
                 ligand_pdb_paths = [
@@ -175,7 +178,7 @@ class DatasetDir:
 
                     )
                 ]
-                source_ligand_smiles = ligand_pdb_paths[0]
+                # source_ligand_pdb = ligand_pdb_paths[0]
 
                 if source_ligand_cif:
                     stem = source_ligand_cif.stem
