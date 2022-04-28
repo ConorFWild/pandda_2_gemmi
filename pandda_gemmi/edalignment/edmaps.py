@@ -249,7 +249,7 @@ class Xmap(XmapInterface):
             # print(f"\tPos (from grid): {new_grid.}")
             print(f"\tcom_moving: {com_moving}")
             print(f"\tcom_reference: {com_moving}")
-            print(f"\tTransform: {transform_point(points[0]), new_grid, transform, com_reference, com_moving}")
+            print(f"\tTransform: {transform_point(points[0], new_grid, transform, com_reference, com_moving)}")
 
             interpolate_points_single(unaligned_xmap,
                                       new_grid,
