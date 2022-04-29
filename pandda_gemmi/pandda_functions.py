@@ -1955,6 +1955,9 @@ def truncate(
 
     dataset_resolution_truncated = Datasets(new_datasets_resolution)
 
+    # TODO: REMOVE
+    return new_datasets_resolution
+
     # Get common set of reflections
     common_reflections = dataset_resolution_truncated.common_reflections(structure_factors)
 

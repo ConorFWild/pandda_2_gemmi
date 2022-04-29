@@ -1083,6 +1083,8 @@ def process_shell_multiple_models(
         resolution=shell_working_resolution,
         structure_factors=structure_factors,
     )
+    # TODO: REMOVE?
+    # shell_truncated_datasets = shell_datasets
     shell_log["Shell Working Resolution"] = shell_working_resolution.resolution
 
     ###################################################################
