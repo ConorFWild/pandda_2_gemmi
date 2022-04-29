@@ -231,7 +231,7 @@ class Partitioning(PartitioningInterface):
 
     @staticmethod
     def from_structure_multiprocess(structure: StructureInterface,
-                                    grid: CrystallographicGridInterface,#: Grid,
+                                    grid: CrystallographicGridInterface,  #: Grid,
                                     mask_radius: float,
                                     mask_radius_symmetry: float, ):
 
@@ -280,9 +280,9 @@ class Partitioning(PartitioningInterface):
         for atom in structure.protein_atoms():
             pos = atom.pos
             inner_mask.set_points_around(pos,
-                                   radius=mask_radius_symmetry,
-                                   value=1,
-                                   )
+                                         radius=mask_radius_symmetry,
+                                         value=1,
+                                         )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         # Get the contact mask
@@ -292,9 +292,9 @@ class Partitioning(PartitioningInterface):
         for atom in structure.protein_atoms():
             pos = atom.pos
             contact_mask.set_points_around(pos,
-                                         radius=4.0,
-                                         value=1,
-                                         )
+                                           radius=4.0,
+                                           value=1,
+                                           )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         # Mask the symmetry points
@@ -567,8 +567,6 @@ class Grid(GridInterface):
     grid: gemmi.FloatGrid
     partitioning: Partitioning
 
-    
-
     def new_grid(self):
         spacing = [self.grid.nu, self.grid.nv, self.grid.nw]
         unit_cell = self.grid.unit_cell
@@ -620,13 +618,14 @@ class Grid(GridInterface):
                                          )
         self.grid = data[0].to_gemmi()
 
+
 def get_grid_from_reference(
-    reference: ReferenceInterface, 
-    mask_radius: float, 
-    mask_radius_symmetry: float,
-                    sample_rate: float = 3.0,
+        reference: ReferenceInterface,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        sample_rate: float = 3.0,
         debug=False
-                    ):
+):
     unit_cell = Grid.unit_cell_from_reference(reference)
     spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -636,24 +635,25 @@ def get_grid_from_reference(
     grid.spacegroup = reference.dataset.reflections.spacegroup()
 
     partitioning = Partitioning.from_reference(reference,
-                                                grid,
-                                                mask_radius,
-                                                mask_radius_symmetry, debug)
+                                               grid,
+                                               mask_radius,
+                                               mask_radius_symmetry, debug)
 
     return Grid(grid, partitioning)
 
+
 class GetGrid(GetGridInterface):
-    def __call__(self, 
-    reference: ReferenceInterface, 
-    outer_mask: float, 
-    inner_mask_symmetry: float, 
-    sample_rate: float,
+    def __call__(self,
+                 reference: ReferenceInterface,
+                 outer_mask: float,
+                 inner_mask_symmetry: float,
+                 sample_rate: float,
                  debug=False,
-    ) -> GridInterface:
+                 ) -> GridInterface:
         return get_grid_from_reference(
-            reference, 
-            outer_mask, 
-            inner_mask_symmetry, 
+            reference,
+            outer_mask,
+            inner_mask_symmetry,
             sample_rate,
             debug
-            )
+        )
