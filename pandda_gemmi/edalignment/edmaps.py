@@ -232,7 +232,6 @@ class Xmap(XmapInterface):
 
         for residue_id in grid.partitioning:
 
-
             point_position_dict = grid.partitioning[residue_id]
 
             al = alignment[residue_id]

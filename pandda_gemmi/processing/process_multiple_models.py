@@ -1001,6 +1001,7 @@ def save_xmap(
         xmap: XmapInterface,
         path: Path
 ):
+    xmap.xmap.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = xmap.xmap
     ccp4.update_ccp4_header(2, True)
@@ -1122,10 +1123,17 @@ def process_shell_multiple_models(
 
     if debug:
         for dtag, xmap in xmaps.items():
-            save_xmap(
-                xmap,
+            xmap_array = np.array(xmap.xmap)
+            save_array_to_map_file(
+                xmap_array,
+                grid.grid,
                 pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}.ccp4"
             )
+
+            # save_xmap(
+            #     xmap,
+            #     pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}.ccp4"
+            # )
 
     ###################################################################
     # # Get the models to test

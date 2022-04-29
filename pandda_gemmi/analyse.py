@@ -528,7 +528,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                             pandda_args.outer_mask,
                                             pandda_args.inner_mask_symmetry,
                                             # sample_rate=pandda_args.sample_rate,
-                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5
+                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
+                                            debug=pandda_args.debug
                                             )
 
             if pandda_args.debug:
