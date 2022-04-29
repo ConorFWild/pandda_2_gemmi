@@ -18,6 +18,7 @@ from pandda_gemmi.python_types import *
 from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 
+
 @dataclasses.dataclass()
 class Partitioning(PartitioningInterface):
     partitioning: typing.Dict[ResidueIDInterface, typing.Dict[GridCoordInterface, PositionInterface]]
@@ -46,7 +47,7 @@ class Partitioning(PartitioningInterface):
                                            grid,
                                            mask_radius,
                                            mask_radius_symmetry,
-                                           debug
+                                           debug=debug
                                            )
 
     @staticmethod
@@ -306,7 +307,7 @@ class Partitioning(PartitioningInterface):
             ca_position_array,
             structure,
             mask_radius,
-            debug
+            debug=debug,
         )
 
         # Mask by protein
@@ -637,7 +638,7 @@ def get_grid_from_reference(
     partitioning = Partitioning.from_reference(reference,
                                                grid,
                                                mask_radius,
-                                               mask_radius_symmetry, debug)
+                                               mask_radius_symmetry, debug=debug)
 
     return Grid(grid, partitioning)
 
@@ -655,5 +656,5 @@ class GetGrid(GetGridInterface):
             outer_mask,
             inner_mask_symmetry,
             sample_rate,
-            debug
+            debug=debug
         )

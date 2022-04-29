@@ -536,6 +536,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
                     pickle.dump(grid, f)
 
+                grid.partitioning.save_maps(
+                    pandda_fs_model.pandda_dir
+                )
+
         ###################################################################
         # # Getting alignments
         ###################################################################
