@@ -22,7 +22,7 @@ from pandda_gemmi.analyse_interface import *
 
 
 
-def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
+def truncate(datasets: DatasetsInterface, resolution: ResolutionInterface, structure_factors: StructureFactorsInterface):
     new_datasets_resolution = {}
 
     # Truncate by common resolution
