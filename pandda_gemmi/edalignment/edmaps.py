@@ -235,7 +235,9 @@ class Xmap(XmapInterface):
             point_position_dict = grid.partitioning[residue_id]
 
             al = alignment[residue_id]
-            transform = al.transform.inverse()
+            # transform = al.transform.inverse()
+            # TODO: REMOVE?
+            transform = al.transform
             com_moving = al.com_moving
             com_reference = al.com_reference
 
