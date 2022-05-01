@@ -1011,6 +1011,8 @@ def save_xmap(
 def save_raw_xmap(
         dataset: DatasetInterface,
         path: Path,
+        structure_factors,
+        sample_rate,
 ):
     unaligned_xmap: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(structure_factors.f,
                                                                                  structure_factors.phi,
@@ -1148,7 +1150,9 @@ def process_shell_multiple_models(
 
             save_raw_xmap(
                 shell_truncated_datasets[dtag],
-                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_mov.ccp4"
+                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_mov.ccp4",
+                structure_factors,
+                sample_rate
             )
 
             # save_xmap(
