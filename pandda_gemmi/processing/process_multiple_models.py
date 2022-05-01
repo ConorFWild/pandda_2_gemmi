@@ -1008,6 +1008,22 @@ def save_xmap(
     ccp4.setup()
     ccp4.write_ccp4_map(str(path))
 
+def save_raw_xmap(
+        dataset: DatasetInterface,
+        path: Path,
+):
+    unaligned_xmap: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                 structure_factors.phi,
+                                                                                 sample_rate=sample_rate,
+                                                                                 )
+    unaligned_xmap.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = unaligned_xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
+
 
 def process_shell_multiple_models(
         shell: ShellInterface,
@@ -1127,7 +1143,12 @@ def process_shell_multiple_models(
             save_array_to_map_file(
                 xmap_array,
                 grid.grid,
-                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}.ccp4"
+                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_ref.ccp4"
+            )
+
+            save_raw_xmap(
+                shell_truncated_datasets[dtag],
+                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_mov.ccp4"
             )
 
             # save_xmap(
