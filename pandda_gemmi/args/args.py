@@ -5,6 +5,7 @@ from pathlib import Path
 from distutils.util import strtobool
 
 from pandda_gemmi import constants
+from pandda_gemmi.common import Debug
 
 
 @dataclasses.dataclass()
@@ -86,7 +87,7 @@ class PanDDAArgs:
     rhofit_coord: bool = False
     cif_strategy: str = "elbow"
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
-    debug: bool = True
+    debug: Debug = Debug.DEFAULT
 
     @staticmethod
     def parse_only_datasets(string):
@@ -589,9 +590,15 @@ class PanDDAArgs:
         )
 
         # Debug
+        def debug_mapping(integer):
+            for debug_level in Debug:
+                if integer == debug_level:
+                    return debug_level
+
+            raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
         parser.add_argument(
             constants.ARGS_DEBUG,
-            type=lambda x: bool(strtobool(x)),
+            type=lambda x: debug_mapping(int(x)),
             default=False,
             help=constants.ARGS_DEBUG_HELP,
         )

@@ -17,7 +17,7 @@ sns.set_theme()
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
-from pandda_gemmi.common import Dtag
+from pandda_gemmi.common import Dtag, Debug
 from pandda_gemmi.shells import Shell
 from pandda_gemmi.edalignment import XmapArray, Xmap, Grid, Xmaps
 from pandda_gemmi.python_types import *
@@ -470,7 +470,7 @@ class Zmap(ZmapInterface):
     zmap: gemmi.FloatGrid
 
     @staticmethod
-    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, model_number=0, debug=False):
+    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, model_number=0, debug: Debug=Debug.DEFAULT):
 
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
@@ -501,7 +501,7 @@ class Zmap(ZmapInterface):
 
         zmap_sparse_mean = np.mean(zmap_array[zmap_array != 0.0])
         zmap_sparse_std = np.std(zmap_array[zmap_array != 0.0])
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t\tZmap mean is: {zmap_sparse_mean}")
             print(f"\t\tZmap mean is: {zmap_sparse_std}")
             print(f"\t\tZmap max is: {np.max(zmap_array[zmap_array != 0.0])}")
@@ -581,7 +581,8 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface=0, debug: bool=False):
+    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface=0,
+                   debug: Debug=Debug.DEFAULT):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]

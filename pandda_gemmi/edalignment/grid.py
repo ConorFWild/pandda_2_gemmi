@@ -40,7 +40,7 @@ class Partitioning(PartitioningInterface):
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
                        mask_radius_symmetry: float,
-                       debug=False
+                       debug: Debug=Debug.DEFAULT
                        ):
 
         return Partitioning.from_structure(reference.dataset.structure,
@@ -52,7 +52,7 @@ class Partitioning(PartitioningInterface):
 
     @staticmethod
     def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float = 6.0, buffer: float = 3.0,
-                        debug=False):
+                        debug: Debug=Debug.DEFAULT):
         # Get the bounds
         min_x = ca_position_array[:, 0].min() - buffer
         max_x = ca_position_array[:, 0].max() + buffer
@@ -68,7 +68,7 @@ class Partitioning(PartitioningInterface):
         # Get them as fractions of the unit cell
         grid_min_frac = grid.unit_cell.fractionalize(grid_min_cart)
         grid_max_frac = grid.unit_cell.fractionalize(grid_max_cart)
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f"Min grid cart: {grid_min_cart}")
             print(f"Max grid cart: {grid_max_cart}")
 
@@ -78,7 +78,7 @@ class Partitioning(PartitioningInterface):
         grid_max_coord = [int(grid_max_frac[0] * grid.nu), int(grid_max_frac[1] * grid.nv),
                           int(grid_max_frac[2] * grid.nw), ]
 
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f"Min grid coord: {grid_min_coord}")
             print(f"Max grid coord: {grid_max_coord}")
 
@@ -108,7 +108,7 @@ class Partitioning(PartitioningInterface):
             fractional_grid_max[1] - fractional_grid_min[1],
             fractional_grid_max[2] - fractional_grid_min[2],
         ]
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f"Min grid frac: {fractional_grid_min}")
             print(f"Max grid frac: {fractional_grid_max}")
 
@@ -246,7 +246,7 @@ class Partitioning(PartitioningInterface):
                        grid: CrystallographicGridInterface,
                        mask_radius: float,
                        mask_radius_symmetry: float,
-                       debug=False,
+                       debug: Debug=Debug.DEFAULT,
                        ):
         poss = []
         res_indexes = {}
@@ -625,7 +625,7 @@ def get_grid_from_reference(
         mask_radius: float,
         mask_radius_symmetry: float,
         sample_rate: float = 3.0,
-        debug=False
+        debug: Debug=Debug.DEFAULT
 ):
     unit_cell = Grid.unit_cell_from_reference(reference)
     spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
@@ -649,7 +649,7 @@ class GetGrid(GetGridInterface):
                  outer_mask: float,
                  inner_mask_symmetry: float,
                  sample_rate: float,
-                 debug=False,
+                 debug: Debug=Debug.DEFAULT,
                  ) -> GridInterface:
         return get_grid_from_reference(
             reference,

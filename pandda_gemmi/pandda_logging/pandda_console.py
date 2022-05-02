@@ -286,11 +286,8 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-    def print_exception(self, e, debug):
-        if debug:
-            self.console.print_exception()
-        else:
-            self.console.print_exception()
+    def print_exception(self,):
+        self.console.print_exception()
 
     def save(self, console_log_file):
         self.console.save_html(str(console_log_file))

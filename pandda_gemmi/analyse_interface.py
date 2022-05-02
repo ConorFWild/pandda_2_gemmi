@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 
 import numpy as np
 import gemmi
+from pandda_gemmi.common import Debug
 
 T = TypeVar('T', )
 V = TypeVar("V")
@@ -599,7 +600,7 @@ class AnalyseModelInterface(Protocol):
                  min_blob_z_peak: float,
                  output_dir: Path,
                  score_events_func: GetEventScoreInterface,
-                 debug: bool
+                 debug: Debug
                  ) -> ModelResultInterface:
         ...
 
@@ -769,7 +770,7 @@ class ProcessShellInterface(Protocol):
                  statmaps: bool,
                  load_xmap_func: LoadXMapInterface,
                  analyse_model_func: AnalyseModelInterface,
-                 debug=False,
+                 debug: Debug=Debug.DEFAULT,
                  ):
         ...
 
@@ -799,7 +800,7 @@ class ProcessDatasetInterface(Protocol):
                  statmaps: bool,
                  analyse_model_func: AnalyseModelInterface,
                  process_local=ProcessorInterface,
-                 debug=bool,
+                 debug: Debug=Debug.DEFAULT,
                  ):
         ...
 
@@ -827,7 +828,7 @@ class GetEventScoreInbuiltInterface(Protocol):
                  min_bdc, max_bdc,
                  reference,
                  structure_output_folder,
-                 debug
+                 debug: Debug
                  ) -> Dict[EventIDInterface, float]:
         ...
 
@@ -851,7 +852,7 @@ class GetAutobuildResultInterface(Protocol):
                  cif_strategy: str,
                  cut: float,
                  rhofit_coord: bool,
-                 debug: bool
+                 debug: Debug
                  ) -> AutobuildResultInterface:
         ...
 

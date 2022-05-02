@@ -159,7 +159,7 @@ def get_reduced_array(
         dtag_list,
         load_xmap_flat_func,
 grid, structure_factors, sample_rate,
-        debug=False
+        debug: Debug= Debug.DEFAULT
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
@@ -234,7 +234,7 @@ grid, structure_factors, sample_rate,
                  }
 
         finish = time.time()
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
             print(f'\t\t\tProcessing batch in {finish - start}')
 
@@ -287,7 +287,7 @@ grid, structure_factors, sample_rate,
                  }
 
         finish = time.time()
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
             print(f'\t\t\tProcessing batch for transform in {finish - start}')
         # Get pca
@@ -366,7 +366,7 @@ def get_multiple_comparator_sets(
         load_xmap_flat_func=None,
         process_local=None,
         max_comparator_sets=None,
-        debug=False,
+        debug: Debug=Debug.DEFAULT,
 ) -> Dict[int, ComparatorCluster]:
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -393,7 +393,7 @@ def get_multiple_comparator_sets(
         dtag for dtag in dtags_by_res if datasets[dtag].reflections.resolution().resolution < resolution_cutoff
     ]
     suitable_datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in suitable_datasets_list}
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
     dtag_list = [dtag for dtag in suitable_datasets_list]
@@ -406,7 +406,7 @@ def get_multiple_comparator_sets(
         resolution=Resolution(highest_res_datasets_max),
         structure_factors=structure_factors,
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print('\tTruncated suitable datasets to common resolution')
 
     # Generate aligned xmaps
@@ -427,7 +427,7 @@ def get_multiple_comparator_sets(
         grid, structure_factors, sample_rate,
         debug=debug
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print('\tLoaded in datasets and found dimension reduced feature vectors')
 
     embedding = embed_umap(reduced_array)
@@ -454,7 +454,7 @@ def get_multiple_comparator_sets(
         dtag_array,
         dtag_to_index,
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tFound clusters! Found {len(clusters)} clusters!')
 
     if max_comparator_sets:
@@ -520,7 +520,7 @@ class GetComparatorsCluster(GetComparatorsInterface):
                  resolution_cutoff: float,
                  load_xmap_flat_func,
                  process_local: ProcessorInterface,
-                 debug: bool,
+                 debug: Debug,
                  ):
         self.comparison_min_comparators = comparison_min_comparators
         self.comparison_max_comparators = comparison_max_comparators

@@ -11,7 +11,7 @@ class GetComparatorsHybrid(GetComparatorsInterface):
                  resolution_cutoff: float,
                  load_xmap_flat_func,
                  process_local: ProcessorInterface,
-                 debug: bool,
+                 debug: Debug,
                  ):
         self.comparison_min_comparators = comparison_min_comparators
         self.comparison_max_comparators = comparison_max_comparators

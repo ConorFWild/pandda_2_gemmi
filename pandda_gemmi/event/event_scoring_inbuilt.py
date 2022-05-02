@@ -11,6 +11,7 @@ import time
 
 #
 from pandda_gemmi.analyse_interface import *
+from pandda_gemmi.common import Debug
 from pandda_gemmi.dataset import Dataset
 # from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
@@ -853,16 +854,16 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  event_density_score=1.0,
                  protein_score=-1.0,
                  protein_event_overlap_score=0.0,
-                 debug=True,
+                 debug: Debug=Debug.DEFAULT,
                  ):
         # Get the events and their BDCs
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print("\t\tGetting events...")
 
         time_event_finding_start = time.time()
 
         time_event_finding_finish = time.time()
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t\tTime to find events for model: {time_event_finding_finish - time_event_finding_start}")
 
         # Calculate the event maps
@@ -870,7 +871,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
         reference_xmap_grid_array = np.array(reference_xmap_grid, copy=True)
 
         # Mask protein
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print("\t\tMasking protein...")
         inner_mask_grid = gemmi.Int8Grid(*[grid.grid.nu, grid.grid.nv, grid.grid.nw])
         inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -892,7 +893,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                                               value=1,
                                               )
 
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print("\t\tIterating events...")
 
         event_scores = {}
@@ -902,7 +903,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
         for event_id, event in events.events.items():
 
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print("\t\t\tCaclulating event maps...")
             event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
                                                          reference_xmap_grid.nv,
@@ -970,10 +971,10 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             }
             noises[event_id.event_idx.event_idx] = noise
 
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t\tNoise is: {noise}")
 
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print("\t\t\tScoring...")
 
             # Score
@@ -985,7 +986,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 debug=debug,
             )
             time_scoring_finish = time.time()
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t\tTime to actually score all events: {time_scoring_finish - time_scoring_start}")
 
             # Ouptut
@@ -1000,7 +1001,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
                 score = initial_score
 
-                if debug:
+                if debug >= Debug.PRINT_SUMMARIES:
                     structure.write_minimal_pdb(
                         str(
                             structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'
@@ -1015,7 +1016,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
         time_event_scoring_finish = time.time()
 
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t\tTime to score all events: {time_event_scoring_finish - time_event_scoring_start}. Num events: "
                   f"{len(events.events)}")
 
