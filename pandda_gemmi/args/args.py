@@ -5,7 +5,7 @@ from pathlib import Path
 from distutils.util import strtobool
 
 from pandda_gemmi import constants
-
+from pandda_gemmi.analyse_interface import *
 
 @dataclasses.dataclass()
 class PanDDAArgs:
