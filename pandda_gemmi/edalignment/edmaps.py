@@ -461,7 +461,8 @@ class Xmap(XmapInterface):
 
             if residue_id in partitioning:
                 al = alignment[residue_id]
-                transform = al.transform
+                # transform = al.transform
+                transform = al.transform.inverse()
                 com_moving = al.com_reference
                 com_reference = al.com_moving
                 point_position_dict = partitioning[residue_id]
