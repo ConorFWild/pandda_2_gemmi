@@ -17,7 +17,7 @@ sns.set_theme()
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
-from pandda_gemmi.common import Dtag, Debug
+from pandda_gemmi.common import Dtag
 from pandda_gemmi.shells import Shell
 from pandda_gemmi.edalignment import XmapArray, Xmap, Grid, Xmaps
 from pandda_gemmi.python_types import *

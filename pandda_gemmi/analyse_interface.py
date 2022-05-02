@@ -10,7 +10,18 @@ from numpy.typing import NDArray
 
 import numpy as np
 import gemmi
-from pandda_gemmi.common import Debug
+
+from enum import IntEnum
+
+
+class Debug(IntEnum):
+    DEFAULT = 0
+    PRINT_SUMMARIES = 1
+    PRINT_NUMERICS = 2
+    AVERAGE_MAPS = 3
+    DATASET_MAPS = 4
+    INTERMEDIATE_FITS = 5
+
 
 T = TypeVar('T', )
 V = TypeVar("V")

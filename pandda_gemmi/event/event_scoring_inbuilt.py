@@ -11,7 +11,6 @@ import time
 
 #
 from pandda_gemmi.analyse_interface import *
-from pandda_gemmi.common import Debug
 from pandda_gemmi.dataset import Dataset
 # from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster

@@ -5,7 +5,6 @@ from pathlib import Path
 from distutils.util import strtobool
 
 from pandda_gemmi import constants
-from pandda_gemmi.common import Debug
 
 
 @dataclasses.dataclass()

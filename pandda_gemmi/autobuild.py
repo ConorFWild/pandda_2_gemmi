@@ -16,7 +16,6 @@ import ray
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 from pandda_gemmi.analyse_interface import GetAutobuildResultInterface
-from pandda_gemmi.common import Debug
 
 # from pandda_gemmi.constants import *
 # from pandda_gemmi.python_types import *

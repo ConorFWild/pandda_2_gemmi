@@ -31,7 +31,7 @@ from pandda_gemmi.pandda_functions import (
     save_reference_frame_zmap,
 )
 from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID, Partial, Debug
+from pandda_gemmi.common import Dtag, EventID, Partial
 from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
 from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
                                   Resolution, )
