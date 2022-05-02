@@ -138,13 +138,13 @@ def get_conformers(
         pruning_threshold=5,
         num_pose_samples=100,
         max_conformers=10,
-        debug=False,
+        debug: Debug=Debug.DEFAULT,
 ) -> MutableMapping[int, Chem.Mol]:
     # Decide how to load
     fragment_structures = {}
     if fragment_dataset.source_ligand_smiles:
 
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from ligand smiles')
         mol = get_fragment_mol_from_dataset_smiles_path(fragment_dataset.source_ligand_smiles)
 
@@ -160,20 +160,20 @@ def get_conformers(
             return fragment_structures
 
     if fragment_dataset.source_ligand_cif:
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
         if len(fragment_structures) > 0:
             return fragment_structures
 
     if fragment_dataset.source_ligand_pdb:
-        if debug:
+        if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from ligand pdb')
         fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
         if len(fragment_structures) > 0:
             return fragment_structures
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(fragment_structures)
 
     return fragment_structures
@@ -479,11 +479,11 @@ def get_probe_structure(structure):
 
 
 
-def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
+def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=Debug.DEFAULT):
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tCartesian centroid of event is: {centroid_cart}")
 
     centered_structure = center_structure(
@@ -494,11 +494,11 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
     # Get the probe structure
     probe_structure = get_probe_structure(centered_structure)
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tprobe structure: {probe_structure}")
 
     # Optimise
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tOptimizing structure fit...")
 
 
@@ -600,7 +600,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug=False):
     print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
 
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
         print(f"\t\t\t\tModeled atoms % is: {float(1 - res.fun)}")
         print(f"\t\t\t\tScore is: {score}")
@@ -774,11 +774,11 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     return float(score), optimised_structure
 
 
-def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=False):
-    if debug:
+def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug: Debug=Debug.DEFAULT):
+    if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tScoring conformers")
     results = {}
     for conformer_id, conformer in fragment_conformers.items():
@@ -788,7 +788,7 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
     scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     structures = {conformer_id: result[1] for conformer_id, result in results.items()}
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tConformer scores are: {scores}")
 
     highest_scoring_conformer = max(scores, key=lambda x: scores[x])
@@ -798,7 +798,7 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug=Fal
     return highest_score, highest_scoring_structure
 
 
-def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug=False):
+def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug: Debug=Debug.DEFAULT):
     if debug:
         print(f"\t\t\t\tScoring cluster")
     score, structure = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
@@ -810,9 +810,9 @@ def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
         fragment_dataset,
-        debug=False,
+        debug: Debug=Debug.DEFAULT,
 ):
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
@@ -1000,7 +1000,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
                 score = initial_score
 
-                if debug >= Debug.PRINT_SUMMARIES:
+                if debug >= Debug.INTERMEDIATE_FITS:
                     structure.write_minimal_pdb(
                         str(
                             structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'

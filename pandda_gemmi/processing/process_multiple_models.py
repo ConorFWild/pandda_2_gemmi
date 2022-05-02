@@ -1053,7 +1053,7 @@ def process_shell_multiple_models(
         score_events_func: GetEventScoreInterface,
         debug: Debug = Debug.DEFAULT,
 ):
-    if debug>= Debug.PRINT_SUMMARIES:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"Processing shell at resolution: {shell.res}")
 
     if memory_availability == "very_low":
@@ -1195,11 +1195,11 @@ def process_shell_multiple_models(
         if _dtag not in all_train_dtags:
             all_train_dtags.append(_dtag)
 
-    if debug >= Debug.PRINT_SUMMARIES:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\tAll train datasets are: {all_train_dtags}")
     # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
     dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
-    if debug >= Debug.PRINT_SUMMARIES:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\tDataset dtags are: {dataset_dtags}")
     results: List[DatasetResultInterface] = process_local_over_datasets(
         [

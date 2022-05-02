@@ -42,7 +42,7 @@ def truncate(datasets: DatasetsInterface, resolution: ResolutionInterface, struc
         reflections = dataset_resolution_truncated[dtag].reflections.reflections
         reflections_array = np.array(reflections)
 
-        print(f"Truncated reflections: {dtag}")
+        # print(f"Truncated reflections: {dtag}")
         truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                                                     )
         reflections = truncated_dataset.reflections.reflections

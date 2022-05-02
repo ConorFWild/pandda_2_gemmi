@@ -791,6 +791,7 @@ def score_structure_signal_to_noise_density(
         radius_inner_1=0.5,
         radius_outer_0=1.2,
         radius_outer_1=1.5,
+        debug: Debug = Debug.DEFAULT
 ):
     rescore_log = {
         "cutoff": float(cutoff),
@@ -852,7 +853,8 @@ def score_structure_signal_to_noise_density(
         xmap, -10)
     ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
 
-    print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
 
     _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
 
@@ -866,6 +868,7 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
         radius_inner_1=0.5,
         radius_outer_0=1.2,
         radius_outer_1=1.5,
+        debug: Debug = Debug.DEFAULT
 ):
     rescore_log = {
         "cutoff": float(cutoff),
@@ -931,8 +934,8 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
 
     # TODO: remove if doesn't work
     signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
-
-    print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
           f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
     _score = ((_signal / len(structure_samples)) - np.sqrt(_noise / len(noise_samples))) - np.sqrt(

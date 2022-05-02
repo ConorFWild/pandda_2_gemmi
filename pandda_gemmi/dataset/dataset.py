@@ -424,8 +424,8 @@ class Reflections(ReflectionsInterface):
                             columns=self.reflections.column_labels(),
                             )
         data.set_index(["H", "K", "L"], inplace=True)
-        print(data)
-        print(self.reflections.make_miller_array().shape)
+        # print(data)
+        # print(self.reflections.make_miller_array().shape)
 
         # Truncate by index
         data_indexed = data.loc[index]
@@ -438,14 +438,14 @@ class Reflections(ReflectionsInterface):
                               data_dropped_array,
                               ]
                              )
-        print(new_data)
+        # print(new_data)
 
         # Update
         new_reflections.set_data(new_data)
 
         # Update resolution
         new_reflections.update_reso()
-        print(new_reflections.make_miller_array().shape)
+        # print(new_reflections.make_miller_array().shape)
 
         return Reflections(new_reflections)
 
