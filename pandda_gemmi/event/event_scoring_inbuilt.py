@@ -811,7 +811,7 @@ def score_clusters(
         zmaps,
         fragment_dataset,
         debug: Debug=Debug.DEFAULT,
-) -> Dict[Tuple[float, Any]]:
+) -> Dict[Tuple[int, int], Tuple[float, Any]]:
     if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
