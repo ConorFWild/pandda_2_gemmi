@@ -816,7 +816,11 @@ def score_clusters(
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
-    results = {}
+    results = {
+        cluster_id: -999.9
+        for cluster_id, cluster
+        in clusters.items()
+    }
 
     if len(fragment_conformers) == 0:
         return results
