@@ -286,6 +286,11 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
+    def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
+        for filter_key, filtered in filtered_dtags.items():
+            self.console.print(f"Filtered with {filter_key}: {filtered}")
+
+
     def print_exception(self,):
         self.console.print_exception()
 

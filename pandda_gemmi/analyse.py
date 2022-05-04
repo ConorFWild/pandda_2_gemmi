@@ -453,6 +453,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                                      datasets_initial.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
+        console.summarise_filtered_datasets(filter_data_quality.filtered_dtags)
 
         ###################################################################
         # # Truncate columns
@@ -516,6 +517,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
         datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
                                        datasets_reference.items()}
+        console.summarise_filtered_datasets(filter_reference_compatability.filtered_dtags)
+
 
         ###################################################################
         # # Getting grid

@@ -172,11 +172,12 @@ class FiltersDataQuality(FiltersDataQualityInterface):
     def __init__(self, filters: Dict[str, FilterDataQualityInterface], datasets_validator: DatasetsValidatorInterface):
         self.filters = filters
         self.validator = datasets_validator
+        self.filtered_dtags = {}
 
     def __call__(self, datasets: DatasetsInterface, structure_factors: StructureFactorsInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
             new_datasets = dataset_filter(datasets, structure_factors)
-
+            self.filtered_dtags[filter_key] = [dtag for dtag in datasets if dtag not in new_datasets]
             datasets = new_datasets
 
         return datasets
@@ -267,11 +268,14 @@ class FiltersReferenceCompatibility(FiltersReferenceCompatibilityInterface):
         self.filters = filters
         self._log = {}
         self.validator = dataset_validator
+        self.filtered_dtags = {}
+
 
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
             new_datasets = dataset_filter(datasets, reference)
             # self.log[dataset_filter.name()] = dataset_filter.log()
+            self.filtered_dtags[filter_key] = [dtag for dtag in datasets if dtag not in new_datasets]
             self.validator(new_datasets, dataset_filter.exception())
 
             datasets = new_datasets
