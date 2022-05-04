@@ -342,7 +342,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         [
             "dissimilar_models",
             "large_gaps",
-            "dissimilar_spacegroups",
+            # "dissimilar_spacegroups",
         ],
         datasets_validator,
         pandda_args
