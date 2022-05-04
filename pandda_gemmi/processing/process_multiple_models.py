@@ -616,11 +616,11 @@ def analyse_model(
     else:
         raise Exception("No valid event selection score method!")
 
-    model_log['score'] = {}
-    model_log['noise'] = {}
-
-    for event_id, event_scoring_result in event_scores.items():
-        model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
+    # model_log['score'] = {}
+    # model_log['noise'] = {}
+    #
+    # for event_id, event_scoring_result in event_scores.items():
+    #     model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
@@ -644,6 +644,7 @@ def analyse_model(
 
     for event_id, event_scoring_result in event_scores.items():
         model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
+        model_log[int(event_id.event_idx)] = event_scoring_result.log()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     time_model_analysis_finish = time.time()
