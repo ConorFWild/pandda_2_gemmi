@@ -341,8 +341,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
         [
             "dissimilar_models",
-            "large_gaps"
-            "dissimilar_spacegroups"
+            "large_gaps",
+            "dissimilar_spacegroups",
         ],
         datasets_validator,
         pandda_args
