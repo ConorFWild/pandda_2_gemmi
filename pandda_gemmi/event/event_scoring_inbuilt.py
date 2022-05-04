@@ -122,7 +122,7 @@ def structure_from_small_structure(small_structure):
     return structure
 
 
-def structures_from_cif(source_ligand_cif, debug=False):
+def structures_from_cif(source_ligand_cif, debug: Debug = Debug.DEFAULT):
     # doc = gemmi.cif.read_file(str(source_ligand_cif))
     # block = doc[-1]
     # cc = gemmi.make_chemcomp_from_block(block)
@@ -131,7 +131,7 @@ def structures_from_cif(source_ligand_cif, debug=False):
     cif_doc = gemmi.cif.read(str(source_ligand_cif))
     # for block in cif_doc:
     small_structure = gemmi.make_small_structure_from_block(cif_doc[-1])
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\tsmall_structure: {small_structure}")
         print(f"\t\t\tSmall structure sites: {small_structure.sites}")
 
@@ -147,15 +147,34 @@ def structures_from_cif(source_ligand_cif, debug=False):
     return {0: structure}
 
 
+class Conformers(ConformersInterface):
+
+    def __init__(self,
+                 conformers: Dict[int, Any],
+                 method: str,
+                 path: Optional[Path],
+                 ):
+        self.conformers: Dict[int, Any] = conformers
+        self.method = method
+        self.path = Optional[path]
+
+    def log(self) -> Dict:
+        return {
+            "Num conformers": str(len(self.conformers)),
+            "Ligand generation method": self.method,
+            "Ligand source path": str(self.path)
+        }
+
+
 def get_conformers(
         fragment_dataset,
         pruning_threshold=3.0,
         num_pose_samples=100,
         max_conformers=10,
         debug: Debug = Debug.DEFAULT,
-) -> MutableMapping[int, Chem.Mol]:
+) -> ConformersInterface:
     # Decide how to load
-    fragment_structures = {}
+    # fragment_structures = {}
     if fragment_dataset.source_ligand_smiles:
 
         if debug >= Debug.PRINT_NUMERICS:
@@ -171,26 +190,42 @@ def get_conformers(
         # Translate to structures
         fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
         if len(fragment_structures) > 0:
-            return fragment_structures
+            return Conformers(
+                fragment_structures,
+                "smiles",
+                fragment_dataset.source_ligand_smiles,
+            )
 
     if fragment_dataset.source_ligand_cif:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from cif')
         fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
         if len(fragment_structures) > 0:
-            return fragment_structures
+            return Conformers(
+                fragment_structures,
+                "cif",
+                fragment_dataset.source_ligand_cif,
+            )
 
     if fragment_dataset.source_ligand_pdb:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from ligand pdb')
         fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
         if len(fragment_structures) > 0:
-            return fragment_structures
+            return Conformers(
+                fragment_structures,
+                "pdb",
+                fragment_dataset.source_ligand_pdb,
+            )
 
     if debug >= Debug.PRINT_NUMERICS:
         print(fragment_structures)
 
-    return fragment_structures
+    return Conformers(
+        {},
+        "None",
+        None,
+    )
 
 
 def get_structure_mean(structure):
@@ -788,7 +823,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     return float(score), optimised_structure
 
 
-def score_fragment_conformers(cluster, fragment_conformers, zmap_grid,
+def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid,
                               debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
@@ -796,7 +831,7 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid,
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tScoring conformers")
     results: ConformerFittingResultsInterface = {}
-    for conformer_id, conformer in fragment_conformers.items():
+    for conformer_id, conformer in fragment_conformers.conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
         results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
 
@@ -812,10 +847,11 @@ def score_fragment_conformers(cluster, fragment_conformers, zmap_grid,
 
     return LigandFittingResult(
         results,
+        fragment_conformers
     )
 
 
-def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers,
+def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface,
                   debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
@@ -827,16 +863,21 @@ def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers,
 class LigandFittingResult(LigandFittingResultInterface):
     def __init__(self,
                  conformer_fitting_results: ConformerFittingResultsInterface,
+                 conformers: ConformersInterface,
                  # selected_conformer: int
                  ):
-        conformer_fitting_results: ConformerFittingResultsInterface = conformer_fitting_results
+        self.conformer_fitting_results: ConformerFittingResultsInterface = conformer_fitting_results
         # selected_conformer: int = selected_conformer
+        self.conformers = conformers
 
     def log(self) -> Dict:
         return {
-            str(conformer_id): conformer_result.log()
-            for conformer_id, conformer_result
-            in self.conformer_fitting_results.items()
+            "Conformer results": {
+                str(conformer_id): conformer_result.log()
+                for conformer_id, conformer_result
+                in self.conformer_fitting_results.items()
+            },
+            "Conformer generation info": self.conformers.log()
         }
 
 
@@ -848,7 +889,7 @@ def score_clusters(
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\t\tGetting fragment conformers...")
-    fragment_conformers = get_conformers(fragment_dataset, debug=debug)
+    fragment_conformers: ConformersInterface = get_conformers(fragment_dataset, debug=debug)
 
     results = {
         cluster_id: EventScoringResult(
@@ -858,14 +899,15 @@ def score_clusters(
                         None,
                         None
                     )
-                }
+                },
+                fragment_conformers
             )
         )
         for cluster_id, cluster
         in clusters.items()
     }
 
-    if len(fragment_conformers) == 0:
+    if len(fragment_conformers.conformers) == 0:
         return results
 
     for cluster_id, cluster in clusters.items():
