@@ -225,8 +225,10 @@ DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 class DatasetsStatisticsInterface(Protocol):
     ...
 
+
 class AtomInterface(Protocol):
     ...
+
 
 class StructureInterface(Protocol):
     def protein_atoms(self) -> Iterator[AtomInterface]:
@@ -266,8 +268,8 @@ class TransformInterface(Protocol):
         ...
 
     def apply_moving_to_reference(
-        self, 
-        alignment_positions: Dict[GridCoordInterface, PositionInterface],
+            self,
+            alignment_positions: Dict[GridCoordInterface, PositionInterface],
     ) -> Dict[GridCoordInterface, PositionInterface]:
         ...
 
@@ -277,7 +279,6 @@ class PartitioningInterface(Protocol):
     protein_mask: CrystallographicGridInterface
     total_mask: CrystallographicGridInterface
     symmetry_mask: CrystallographicGridInterface
-
 
     def __iter__(self) -> Iterator[ResidueIDInterface]:
         ...
@@ -299,7 +300,6 @@ class CrystallographicGridInterface(Protocol):
 
     def interpolate_value(self, grid_coord: FractionalInterface) -> float:
         ...
-
 
 
 class GridInterface(Protocol):
@@ -450,6 +450,36 @@ class EventIDInterface(Protocol):
 EventsInterface = Dict[EventIDInterface, EventInterface]
 
 EventScoresInterface = MutableMapping[EventIDInterface, float]
+
+
+class ConformerFittingResultInterface(Protocol):
+    score: Optional[float]
+    optimised_fit: Optional[Any]
+
+    def log(self) -> Dict:
+        ...
+
+ConformerFittingResultsInterface = Dict[int, ConformerFittingResultInterface]
+
+class LigandFittingResultInterface(Protocol):
+    conformer_fitting_results: ConformerFittingResultsInterface
+    selected_conformer: int
+    def log(self) -> Dict:
+        ...
+
+class EventScoringResultInterface(Protocol):
+    ligand_fitting_result: LigandFittingResultInterface
+
+    def get_selected_structure(self) -> Any:
+        ...
+
+    def get_selected_structure_score(self) -> float:
+        ...
+
+    def log(self) -> Dict:
+        ...
+
+EventScoringResultsInterface = Dict[EventIDInterface, EventScoringResultInterface]
 
 
 class AutobuildResultInterface(Protocol):
@@ -781,7 +811,7 @@ class ProcessShellInterface(Protocol):
                  statmaps: bool,
                  load_xmap_func: LoadXMapInterface,
                  analyse_model_func: AnalyseModelInterface,
-                 debug: Debug=Debug.DEFAULT,
+                 debug: Debug = Debug.DEFAULT,
                  ):
         ...
 
@@ -811,7 +841,7 @@ class ProcessDatasetInterface(Protocol):
                  statmaps: bool,
                  analyse_model_func: AnalyseModelInterface,
                  process_local=ProcessorInterface,
-                 debug: Debug=Debug.DEFAULT,
+                 debug: Debug = Debug.DEFAULT,
                  ):
         ...
 
@@ -840,7 +870,7 @@ class GetEventScoreInbuiltInterface(Protocol):
                  reference,
                  structure_output_folder,
                  debug: Debug
-                 ) -> Dict[EventIDInterface, float]:
+                 ) -> EventScoringResultsInterface:
         ...
 
 
@@ -848,7 +878,7 @@ class GetEventScoreInbuiltInterface(Protocol):
 class GetEventScoreAutobuildInterface(Protocol):
     tag: Literal["autobuild"]
 
-    def __call__(self, *args, **kwargs) -> Dict[EventIDInterface, float]:
+    def __call__(self, *args, **kwargs) -> EventScoringResultsInterface:
         ...
 
 

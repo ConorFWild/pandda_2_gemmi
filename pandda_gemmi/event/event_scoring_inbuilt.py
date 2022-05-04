@@ -18,6 +18,20 @@ from pandda_gemmi.event import Cluster
 from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_density
 
 
+class ConformerFittingResult(ConformerFittingResultInterface):
+    def __init__(self,
+                 score: Optional[float],
+                 optimised_fit: Optional[Any],
+                 ):
+        self.score: Optional[float] = score
+        self.optimised_fit: Optional[Any] = optimised_fit
+
+    def log(self) -> Dict:
+        return {
+            "Score": str(self.score),
+        }
+
+
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
     fragmentstructures: MutableMapping[int, gemmi.Structure] = {}
     for i, conformer in enumerate(mol.GetConformers()):
@@ -135,10 +149,10 @@ def structures_from_cif(source_ligand_cif, debug=False):
 
 def get_conformers(
         fragment_dataset,
-        pruning_threshold=5,
+        pruning_threshold=3.0,
         num_pose_samples=100,
         max_conformers=10,
-        debug: Debug=Debug.DEFAULT,
+        debug: Debug = Debug.DEFAULT,
 ) -> MutableMapping[int, Chem.Mol]:
     # Decide how to load
     fragment_structures = {}
@@ -249,9 +263,9 @@ def transform_structure(structure, translation, rotation_matrix):
 def score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
-    x_2 = distance*x
-    y_2 = distance*y
-    z_2 = distance*z
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
 
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
@@ -262,8 +276,6 @@ def score_fit(structure, grid, distance, params):
         ],
         degrees=True)
     rotation_matrix: np.ndarray = rotation.as_matrix()
-
-
 
     structure_copy = transform_structure(
         structure,
@@ -292,20 +304,22 @@ def score_fit(structure, grid, distance, params):
     # return 1 - (sum([1 if val > 2.0 else 0 for val in vals ]) / n)
     return 1 - score
 
+
 def transform_structure_array(
         structure_array,
         transform_array,
         rotation_matrix,
-                                      ):
+):
     structure_mean = np.mean(structure_array, axis=0)
 
-    demeaned_structure = structure_array-structure_mean
+    demeaned_structure = structure_array - structure_mean
 
     rotated_structure = np.matmul(demeaned_structure, rotation_matrix)
 
     transformed_array = rotated_structure + structure_mean + transform_array
 
     return transformed_array
+
 
 def get_interpolated_values(grid, transformed_structure_array):
     vals = []
@@ -319,11 +333,12 @@ def get_interpolated_values(grid, transformed_structure_array):
 
     return np.array(vals)
 
+
 def get_interpolated_values_c(
-    grid, 
-    transformed_structure_array, 
-    n,
-    ):
+        grid,
+        transformed_structure_array,
+        n,
+):
     vals = np.zeros(n)
 
     gemmi.interpolate_pos_array(
@@ -334,12 +349,13 @@ def get_interpolated_values_c(
 
     return vals
 
+
 def score_fit_array(structure_array, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
-    x_2 = distance*x
-    y_2 = distance*y
-    z_2 = distance*z
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
 
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
@@ -357,14 +373,12 @@ def score_fit_array(structure_array, grid, distance, params):
         rotation_matrix
     )
 
-
     n = structure_array.shape[0]
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
 
     # print(type(transformed_structure_array))
     # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
-
 
     positive_score = np.sum(vals > 0.5)
     penalty = -np.sum(vals < 0.0)
@@ -376,9 +390,9 @@ def score_fit_array(structure_array, grid, distance, params):
 def DEP_score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
-    x_2 = distance*x
-    y_2 = distance*y
-    z_2 = distance*z
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
 
     rotation = spsp.transform.Rotation.from_euler(
         "xyz",
@@ -478,8 +492,8 @@ def get_probe_structure(structure):
     return structure_clone
 
 
-
-def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=Debug.DEFAULT):
+def score_conformer_array(cluster: Cluster, conformer, zmap_grid,
+                          debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
 
@@ -500,7 +514,6 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=D
     # Optimise
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tOptimizing structure fit...")
-
 
     structure_positions = []
 
@@ -530,7 +543,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=D
             [
                 # (-3, 3), (-3, 3), (-3, 3),
                 # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
-                        (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
                 (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
             # popsize=30,
@@ -541,7 +554,6 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=D
         # if debug:
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
         # print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
-
 
         # start_basin = time.time()
         # res = optimize.basinhopping(
@@ -596,9 +608,8 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=D
         # score = 1-float(res.fun)
         # print(f"\t\t\t\tScore: {score}")
 
-    print(f"Best fit score: {1-min(scores)}")
+    print(f"Best fit score: {1 - min(scores)}")
     print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
-
 
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
@@ -606,7 +617,10 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid, debug: Debug=D
         print(f"\t\t\t\tScore is: {score}")
         # print(f"\t\t\tScoring log results are: {log}")
 
-    return float(score), optimised_structure
+    return ConformerFittingResult(
+        float(score),
+        optimised_structure
+    )
 
 
 def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
@@ -700,7 +714,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
             [
                 # (-3, 3), (-3, 3), (-3, 3),
                 # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
-                        (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
                 (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
             # popsize=30,
@@ -710,9 +724,9 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
         # TODO: back to debug
         # if debug:
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
-        print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+        print(f"\t\t\t\tOptimisation result: {res.x} {1 - res.fun}")
 
-    print(f"{1-min(scores)}")
+    print(f"{1 - min(scores)}")
 
     # start_basin = time.time()
     # res = optimize.basinhopping(
@@ -774,50 +788,79 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     return float(score), optimised_structure
 
 
-def score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug: Debug=Debug.DEFAULT):
+def score_fragment_conformers(cluster, fragment_conformers, zmap_grid,
+                              debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
 
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tScoring conformers")
-    results = {}
+    results: ConformerFittingResultsInterface = {}
     for conformer_id, conformer in fragment_conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
         results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
 
-    scores = {conformer_id: result[0] for conformer_id, result in results.items()}
-    structures = {conformer_id: result[1] for conformer_id, result in results.items()}
+    # scores = {conformer_id: result[0] for conformer_id, result in results.items()}
+    # structures = {conformer_id: result[1] for conformer_id, result in results.items()}
 
-    if debug >= Debug.PRINT_NUMERICS:
-        print(f"\t\t\t\tConformer scores are: {scores}")
+    # if debug >= Debug.PRINT_NUMERICS:
+    #     print(f"\t\t\t\tConformer scores are: {scores}")
 
-    highest_scoring_conformer = max(scores, key=lambda x: scores[x])
-    highest_score = scores[highest_scoring_conformer]
-    highest_scoring_structure = structures[highest_scoring_conformer]
+    # highest_scoring_conformer = max(scores, key=lambda x: scores[x])
+    # highest_score = scores[highest_scoring_conformer]
+    # highest_scoring_structure = structures[highest_scoring_conformer]
 
-    return highest_score, highest_scoring_structure
+    return LigandFittingResult(
+        results,
+    )
 
 
-def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers, debug: Debug=Debug.DEFAULT):
+def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers,
+                  debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
-    score, structure = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
+    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
 
-    return score, structure
+    return EventScoringResult(ligand_fitting_result)
+
+
+class LigandFittingResult(LigandFittingResultInterface):
+    def __init__(self,
+                 conformer_fitting_results: ConformerFittingResultsInterface,
+                 # selected_conformer: int
+                 ):
+        conformer_fitting_results: ConformerFittingResultsInterface = conformer_fitting_results
+        # selected_conformer: int = selected_conformer
+
+    def log(self) -> Dict:
+        return {
+            str(conformer_id): conformer_result.log()
+            for conformer_id, conformer_result
+            in self.conformer_fitting_results.items()
+        }
 
 
 def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
         fragment_dataset,
-        debug: Debug=Debug.DEFAULT,
-) -> Dict[Tuple[int, int], Tuple[float, Any]]:
+        debug: Debug = Debug.DEFAULT,
+) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\t\tGetting fragment conformers...")
     fragment_conformers = get_conformers(fragment_dataset, debug=debug)
 
     results = {
-        cluster_id: (-999.9, None)
+        cluster_id: EventScoringResult(
+            LigandFittingResult(
+                {
+                    0: ConformerFittingResult(
+                        None,
+                        None
+                    )
+                }
+            )
+        )
         for cluster_id, cluster
         in clusters.items()
     }
@@ -834,6 +877,39 @@ def score_clusters(
         results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, debug)
 
     return results
+
+
+class EventScoringResult(EventScoringResultInterface):
+    def __init__(self, ligand_fitting_result):
+        # self.score: float = score
+        self.ligand_fitting_result: LigandFittingResultInterface = ligand_fitting_result
+
+    def get_selected_conformer_key(self) -> int:
+        return max(
+            [
+                conformer_id
+                for conformer_id
+                in self.ligand_fitting_result.conformer_fitting_results
+                if self.ligand_fitting_result.conformer_fitting_results[conformer_id].score is not None
+            ],
+            key=lambda key: self.ligand_fitting_result.conformer_fitting_results[key].score
+        )
+
+    def get_selected_conformer_results(self) -> ConformerFittingResultInterface:
+        return self.ligand_fitting_result.conformer_fitting_results[self.get_selected_conformer_key()]
+
+    def get_selected_structure(self) -> Any:
+        return self.get_selected_conformer_results().optimised_fit
+
+    def get_selected_structure_score(self) -> float:
+        return self.get_selected_conformer_results().score
+
+    def log(self) -> Dict:
+        return {
+            "Selected conformer id": str(self.get_selected_conformer_key()),
+            "Selected conformer score": str(self.get_selected_structure_score()),
+            "Ligand fitting log": self.ligand_fitting_result.log()
+        }
 
 
 class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
@@ -857,8 +933,8 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  event_density_score=1.0,
                  protein_score=-1.0,
                  protein_event_overlap_score=0.0,
-                 debug: Debug=Debug.DEFAULT,
-                 ):
+                 debug: Debug = Debug.DEFAULT,
+                 ) -> EventScoringResultsInterface:
         # Get the events and their BDCs
         if debug >= Debug.PRINT_SUMMARIES:
             print("\t\tGetting events...")
@@ -899,7 +975,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
         if debug >= Debug.PRINT_SUMMARIES:
             print("\t\tIterating events...")
 
-        event_scores = {}
+        event_scores: EventScoringResultsInterface = {}
         noises = {}
 
         time_event_scoring_start = time.time()
@@ -982,7 +1058,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
             # Score
             time_scoring_start = time.time()
-            results = score_clusters(
+            results: Dict[Tuple[int, int], EventScoringResultInterface] = score_clusters(
                 {(0, 0): event.cluster},
                 {(0, 0): event_map_reference_grid},
                 processed_dataset,
@@ -992,10 +1068,12 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t\tTime to actually score all events: {time_scoring_finish - time_scoring_start}")
 
-            # Ouptut
+            # Ouptut: actually will output only one result, so only one iteration guaranteed
             for result_id, result in results.items():
-                initial_score = result[0]
-                structure = result[1]
+                # initial_score = result[0]
+                # structure = result[1]
+                initial_score = result.get_selected_structure_score()
+                structure = result.get_selected_structure()
 
                 # if initial_score < 0.4:
                 #     score = 0
@@ -1015,7 +1093,12 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                          f"{event.cluster.values.size}"
                 print(string)
 
-                event_scores[event_id] = score
+                event_scores[event_id] = result
+
+                # EventScoringResult(
+                #     score,
+                #     result,
+                # )
 
         time_event_scoring_finish = time.time()
 

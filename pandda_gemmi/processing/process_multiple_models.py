@@ -595,7 +595,7 @@ def analyse_model(
             pickle.dump(model, f)
 
     if score_events_func.tag == "inbuilt":
-        event_scores = score_events_func(
+        event_scores: EventScoringResultsInterface = score_events_func(
             test_dtag,
             model_number,
             dataset_processed_dataset,
@@ -619,8 +619,8 @@ def analyse_model(
     model_log['score'] = {}
     model_log['noise'] = {}
 
-    for event_id, score in event_scores.items():
-        model_log['score'][int(event_id.event_idx)] = float(score)
+    for event_id, event_scoring_result in event_scores.items():
+        model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
@@ -642,8 +642,8 @@ def analyse_model(
     model_log['score'] = {}
     model_log['noise'] = {}
 
-    for event_id, score in event_scores.items():
-        model_log['score'][int(event_id.event_idx)] = float(score)
+    for event_id, event_scoring_result in event_scores.items():
+        model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     time_model_analysis_finish = time.time()
