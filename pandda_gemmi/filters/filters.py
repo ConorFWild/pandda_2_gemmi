@@ -270,14 +270,13 @@ class FiltersReferenceCompatibility(FiltersReferenceCompatibilityInterface):
         self.validator = dataset_validator
         self.filtered_dtags = {}
 
-
     def __call__(self, datasets: DatasetsInterface, reference: ReferenceInterface) -> DatasetsInterface:
         for filter_key, dataset_filter in self.filters.items():
+            print(filter_key)
             new_datasets = dataset_filter(datasets, reference)
             # self.log[dataset_filter.name()] = dataset_filter.log()
             self.filtered_dtags[filter_key] = [dtag for dtag in datasets if dtag not in new_datasets]
             self.validator(new_datasets, dataset_filter.exception())
-
             datasets = new_datasets
 
         return datasets
