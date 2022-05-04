@@ -382,14 +382,19 @@ def get_multiple_comparator_sets(
         )
     )
 
+    # Get the highest resolution with the minimal number of charactrerisation datasets within it
     highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
-    highest_res_datasets_max = max(
+    highest_characterisable_res = max(
         [
             datasets[dtag].reflections.resolution().resolution
             for dtag
             in highest_res_datasets
         ]
     )
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\tHighest resolution with sufficient datasets to characterise manifold: {highest_characterisable_res}")
+
 
     # Get the datasets below the upper cutoff for manifold characterisation
     suitable_datasets_list = [
@@ -399,14 +404,26 @@ def get_multiple_comparator_sets(
     if debug >= Debug.PRINT_NUMERICS:
         print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
-    dtag_list = [dtag for dtag in suitable_datasets_list]
-    dtag_array = np.array(dtag_list)
-    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
+    characterisation_dtag_list = [dtag for dtag in suitable_datasets_list]
+    characterisation_dtag_array = np.array(characterisation_dtag_list)
+    characterisation_dtag_to_index = {dtag: j for j, dtag in enumerate(characterisation_dtag_list)}
+
+    lowest_common_res_of_suitable_datasets = max(
+        [
+            datasets[dtag].reflections.resolution().resolution
+            for dtag
+            in characterisation_dtag_list
+        ]
+    )
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\tTruncating manifold characterisation datasets to resolution: {lowest_common_res_of_suitable_datasets}")
 
     # Load the xmaps
+    # Truncate to the lowest common res of suitable datasets
     shell_truncated_datasets: Datasets = truncate(
         suitable_datasets,
-        resolution=Resolution(highest_res_datasets_max),
+        resolution=Resolution(lowest_common_res_of_suitable_datasets),
         structure_factors=structure_factors,
     )
     if debug >= Debug.PRINT_SUMMARIES:
@@ -424,8 +441,8 @@ def get_multiple_comparator_sets(
         shell_truncated_datasets,
         alignments,
         process_local,
-        dtag_array,
-        dtag_list,
+        characterisation_dtag_array,
+        characterisation_dtag_list,
         load_xmap_flat_func,
         grid, structure_factors, sample_rate,
         debug=debug
@@ -453,9 +470,9 @@ def get_multiple_comparator_sets(
 
     distance_matrix, clusters = get_clusters_nn(
         reduced_array,
-        dtag_list,
-        dtag_array,
-        dtag_to_index,
+        characterisation_dtag_list,
+        characterisation_dtag_array,
+        characterisation_dtag_to_index,
     )
     if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tFound clusters! Found {len(clusters)} clusters!')
@@ -484,7 +501,7 @@ def get_multiple_comparator_sets(
     # in the set of the first shell of sufficiently low res
     for test_dtag in dtag_list:
         current_res = datasets[test_dtag].reflections.resolution().resolution
-        truncation_res = max(current_res, highest_res_datasets_max)
+        truncation_res = max(current_res, highest_characterisable_res)
 
         comparators[test_dtag] = {}
 
