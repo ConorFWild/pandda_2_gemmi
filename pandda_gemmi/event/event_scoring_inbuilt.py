@@ -155,8 +155,8 @@ class Conformers(ConformersInterface):
                  path: Optional[Path],
                  ):
         self.conformers: Dict[int, Any] = conformers
-        self.method = method
-        self.path = Optional[path]
+        self.method: str = method
+        self.path: Optional[Path] = path
 
     def log(self) -> Dict:
         return {
