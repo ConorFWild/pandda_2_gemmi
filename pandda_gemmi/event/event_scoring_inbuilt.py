@@ -409,13 +409,14 @@ def get_interpolated_values_c(
 ):
     vals = np.zeros(n, dtype=np.float32)
 
-    vals_list = gemmi.interpolate_pos_array(
+    # vals_list = \
+    gemmi.interpolate_pos_array(
         grid,
         transformed_structure_array.astype(np.float32),
         vals
     )
-    print(f"Vals list: {vals_list}")
-    print(f"Vals: {vals}")
+    # print(f"Vals list: {vals_list}")
+    # print(f"Vals: {vals}")
 
     return vals
 
@@ -446,9 +447,9 @@ def score_fit_array(structure_array, grid, distance, params):
     n = structure_array.shape[0]
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
-    print(f"Interpolated vals: {vals}: {np.sum(vals)}")
-    print(f"Num points > 2.0: {np.sum(np.array(grid) == 1.0)}")
-    print(f"Transformed structure array: {transformed_structure_array}")
+    # print(f"Interpolated vals: {vals}: {np.sum(vals)}")
+    # print(f"Num points > 2.0: {np.sum(np.array(grid) == 1.0)}")
+    # print(f"Transformed structure array: {transformed_structure_array}")
 
     # print(type(transformed_structure_array))
     # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)

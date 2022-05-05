@@ -144,28 +144,28 @@ void interpolate_points_single(
 }
 
 
-std::vector<float> interpolate_pos_array(
-  Grid<float>& grid,
-  py::array_t<float> pos_array,
-  py::array_t<float> vals_array
-){
-  auto r_pos = pos_array.template mutable_unchecked<2>();
-  auto r_val = vals_array.template mutable_unchecked<1>();
-  std::vector<float> vals_vec;
-  for (int i=0; i<r_pos.shape(0); i++){
-    Position pos = Position(
-      r_pos(i, 0),
-      r_pos(i, 1),
-      r_pos(i, 2)
-      );
-    auto val = grid.interpolate_value(pos);
-    std::cout << val << "\n";
-    r_val(i) = val;
-    vals_vec.push_back(val);
-  }
-  return vals_vec;
+// std::vector<float> interpolate_pos_array(
+//   Grid<float>& grid,
+//   py::array_t<float> pos_array,
+//   py::array_t<float> vals_array
+// ){
+//   auto r_pos = pos_array.template mutable_unchecked<2>();
+//   auto r_val = vals_array.template mutable_unchecked<1>();
+//   // std::vector<float> vals_vec;
+//   for (int i=0; i<r_pos.shape(0); i++){
+//     Position pos = Position(
+//       r_pos(i, 0),
+//       r_pos(i, 1),
+//       r_pos(i, 2)
+//       );
+//     auto val = grid.interpolate_value(pos);
+//     // std::cout << val << "\n";
+//     r_val(i) = val;
+//     // vals_vec.push_back(val);
+//   }
+//   return vals_vec;
 
-}
+// }
 
 // int num_atoms(Structure structure){
 //   int n = 0;
@@ -246,7 +246,7 @@ void add_custom(py::module& m) {
         ){
           auto r_pos = pos_array.template mutable_unchecked<2>();
           auto r_val = vals_array.template mutable_unchecked<1>();
-          std::vector<float> vals_vec;
+          // std::vector<float> vals_vec;
           for (int i=0; i<r_pos.shape(0); i++){
             Position pos = Position(
               r_pos(i, 0),
@@ -256,9 +256,9 @@ void add_custom(py::module& m) {
             auto val = grid.interpolate_value(pos);
             std::cout << val << "\n";
             r_val(i) = val;
-            vals_vec.push_back(val);
+            // vals_vec.push_back(val);
           }
-        return vals_vec;
+        // return vals_vec;
         },
         py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
         "Interpolates an array of points."
