@@ -444,7 +444,7 @@ def score_fit_array(structure_array, grid, distance, params):
     n = structure_array.shape[0]
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
-    print(f"Interpolated vals: {vals}")
+    print(f"Interpolated vals: {vals}: {np.sum(vals)}")
     print(f"Num points > 2.0: {np.sum(np.array(grid) == 1.0)}")
     print(f"Transformed structure array: {transformed_structure_array}")
 
