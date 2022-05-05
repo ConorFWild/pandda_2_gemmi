@@ -144,7 +144,7 @@ void interpolate_points_single(
 }
 
 
-std::vec<float> interpolate_pos_array(
+std::vector<float> interpolate_pos_array(
   Grid<float>& grid,
   py::array_t<float> pos_array,
   py::array_t<float> vals_array
