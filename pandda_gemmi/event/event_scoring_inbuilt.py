@@ -597,6 +597,9 @@ def score_conformer_array(cluster: Cluster,
 
     structure_array = np.array(structure_positions, dtype=np.float32)
 
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"Structure array: {structure_array}")
+
     scores = []
     scores_signal_to_noise = []
     logs = []
