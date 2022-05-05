@@ -18,6 +18,7 @@ from pandda_gemmi.event import Cluster
 from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_density
 from pandda_gemmi.python_types import *
 
+
 class ConformerFittingResult(ConformerFittingResultInterface):
     def __init__(self,
                  score: Optional[float],
@@ -33,11 +34,18 @@ class ConformerFittingResult(ConformerFittingResultInterface):
 
     def __setstate__(self, state):
         self.score = state[0]
-        self.optimised_fit = state[1].to_gemmi()
-        self.optimised_fit.setup_entities()
+
+        if state[1] is not None:
+            self.optimised_fit = state[1].to_gemmi()
+            self.optimised_fit.setup_entities()
+        else:
+            self.optimised_fit = state[1]
 
     def __getstate__(self):
-        return (self.score, StructurePython.from_gemmi(self.optimised_fit))
+        if self.optimised_fit is not None:
+            return (self.score, StructurePython.from_gemmi(self.optimised_fit))
+        else:
+            return (self.score, self.optimised_fit)
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
