@@ -234,6 +234,7 @@ void add_custom(py::module& m) {
       m.def(
         "interpolate_pos_array",
         &interpolate_pos_array,
+        py::arg().noconvert(),py::arg().noconvert(),py::arg().noconvert(),
         "Interpolates an array of points."
     );
           m.def(
