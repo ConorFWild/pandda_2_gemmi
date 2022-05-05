@@ -1117,6 +1117,11 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
             low_mask[event_map_reference_grid_array < event_map_cut] = True
 
+            if debug >= Debug.PRINT_NUMERICS:
+                print(f"\t\t\tHigh mask points: {np.sum(high_mask)}")
+                print(f"\t\t\tLow mask points: {np.sum(low_mask)}")
+
+
             # Rescale the map
             event_map_reference_grid_array[event_map_reference_grid_array < event_map_cut] = below_cut_score
             event_map_reference_grid_array[event_map_reference_grid_array >= event_map_cut] = event_density_score
@@ -1154,6 +1159,10 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
             if debug >= Debug.PRINT_SUMMARIES:
                 print("\t\t\tScoring...")
+
+            if debug >= Debug.PRINT_NUMERICS:
+                print(f"\t\t\tEvent map for scoring: {np.mean(event_map_reference_grid_array)}; "
+                      f"{np.max(event_map_reference_grid_array)}; {np.min(event_map_reference_grid_array)}")
 
             # Score
             time_scoring_start = time.time()
