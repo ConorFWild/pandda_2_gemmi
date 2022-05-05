@@ -1163,6 +1163,8 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             if debug >= Debug.PRINT_NUMERICS:
                 print(f"\t\t\tEvent map for scoring: {np.mean(event_map_reference_grid_array)}; "
                       f"{np.max(event_map_reference_grid_array)}; {np.min(event_map_reference_grid_array)}")
+                print(f"\t\t\tEvent map for scoring: {np.sum(event_map_reference_grid_array==1)}; "
+                      f"{np.sum(event_map_reference_grid_array==0)}; {np.sum(event_map_reference_grid_array==-1)}")
 
             # Score
             time_scoring_start = time.time()
