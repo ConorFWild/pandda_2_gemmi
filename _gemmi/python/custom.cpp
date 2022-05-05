@@ -161,7 +161,7 @@ std::vector<float> interpolate_pos_array(
     auto val = grid.interpolate_value(pos);
     std::cout << val << "\n";
     r_val(i) = val;
-    vals_vec[i] = val;
+    vals_vec.push_back(val);
   }
   return vals_vec;
 
