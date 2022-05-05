@@ -444,6 +444,7 @@ def score_fit_array(structure_array, grid, distance, params):
     n = structure_array.shape[0]
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
+    print(vals)
 
     # print(type(transformed_structure_array))
     # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
@@ -622,6 +623,8 @@ def score_conformer_array(cluster: Cluster,
             ],
             # popsize=30,
         )
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"Fit Score: {res.fun}")
         scores.append(res.fun)
         finish_diff_ev = time.time()
         # TODO: back to debug
