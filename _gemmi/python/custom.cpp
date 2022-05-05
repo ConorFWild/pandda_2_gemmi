@@ -152,10 +152,12 @@ void interpolate_pos_array(
   auto r_pos = pos_array.template mutable_unchecked<2>();
   auto r_val = vals_array.template mutable_unchecked<1>();
   for (int i=0; i<r_pos.shape(0); i++){
-    r_val(i) = grid.interpolate_value(
+    Position pos = Position(
       r_pos(i, 0),
       r_pos(i, 1),
-      r_pos(i, 2));
+      r_pos(i, 2)
+      );
+    r_val(i) = grid.interpolate_value(pos);
   }
 }
 
