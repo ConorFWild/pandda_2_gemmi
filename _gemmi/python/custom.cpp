@@ -157,7 +157,9 @@ void interpolate_pos_array(
       r_pos(i, 1),
       r_pos(i, 2)
       );
-    r_val(i) = grid.interpolate_value(pos);
+    auto val = grid.interpolate_value(pos);
+    std::cout << val << "\n";
+    r_val(i) = val;
   }
 }
 
