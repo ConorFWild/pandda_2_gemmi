@@ -181,6 +181,18 @@ class Conformers(ConformersInterface):
             "Ligand source path": str(self.path)
         }
 
+    def __getstate__(self):
+        return (
+            {key: StructurePython.from_gemmi(value) for key, value in self.conformers.items()},
+            self.method,
+            self.path
+        )
+
+    def __setstate__(self, state):
+        self.conformers = {key: value.to_gemmi() for key, value in state[0].items()}
+        self.method = state[1]
+        self.path = state[2]
+
 
 def get_conformers(
         fragment_dataset,
