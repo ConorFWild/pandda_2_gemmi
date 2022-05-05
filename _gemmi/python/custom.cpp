@@ -144,13 +144,14 @@ void interpolate_points_single(
 }
 
 
-void interpolate_pos_array(
+std::vec<float> interpolate_pos_array(
   Grid<float>& grid,
   py::array_t<float> pos_array,
   py::array_t<float> vals_array
 ){
   auto r_pos = pos_array.template mutable_unchecked<2>();
   auto r_val = vals_array.template mutable_unchecked<1>();
+  std::vector<float> vals_vec;
   for (int i=0; i<r_pos.shape(0); i++){
     Position pos = Position(
       r_pos(i, 0),
@@ -160,7 +161,10 @@ void interpolate_pos_array(
     auto val = grid.interpolate_value(pos);
     std::cout << val << "\n";
     r_val(i) = val;
+    vals_vec[i] = val;
   }
+  return vals_vec;
+
 }
 
 // int num_atoms(Structure structure){
