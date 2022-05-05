@@ -452,6 +452,7 @@ EventsInterface = Dict[EventIDInterface, EventInterface]
 
 EventScoresInterface = MutableMapping[EventIDInterface, float]
 
+
 class ConformersInterface(Protocol):
     conformers: Dict[int, Any]
     method: str
@@ -459,6 +460,7 @@ class ConformersInterface(Protocol):
 
     def log(self) -> Dict:
         ...
+
 
 class ConformerFittingResultInterface(Protocol):
     score: Optional[float]
@@ -468,13 +470,17 @@ class ConformerFittingResultInterface(Protocol):
     def log(self) -> Dict:
         ...
 
+
 ConformerFittingResultsInterface = Dict[int, ConformerFittingResultInterface]
+
 
 class LigandFittingResultInterface(Protocol):
     conformer_fitting_results: ConformerFittingResultsInterface
     selected_conformer: int
+
     def log(self) -> Dict:
         ...
+
 
 class EventScoringResultInterface(Protocol):
     ligand_fitting_result: LigandFittingResultInterface
@@ -487,6 +493,7 @@ class EventScoringResultInterface(Protocol):
 
     def log(self) -> Dict:
         ...
+
 
 EventScoringResultsInterface = Dict[EventIDInterface, EventScoringResultInterface]
 

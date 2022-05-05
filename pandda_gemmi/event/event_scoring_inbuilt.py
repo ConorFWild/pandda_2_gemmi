@@ -560,7 +560,9 @@ def get_probe_structure(structure):
     return structure_clone
 
 
-def score_conformer_array(cluster: Cluster, conformer, zmap_grid,
+def score_conformer_array(cluster: Cluster,
+                          conformer,
+                          zmap_grid,
                           debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
