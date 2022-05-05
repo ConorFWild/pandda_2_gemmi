@@ -748,7 +748,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         for res, shell_result in shell_results.items():
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
-                    event_scores.update(dataset_result.event_scores)
+                    event_scores.update(
+                        {
+                            event_id: event_scoring_result.get_selected_structure_score()
+                                         for event_id, event_scoring_result
+                                         in dataset_result.event_scores.items()
+                                         }
+                    )
 
         # Add the event maps to the fs
         for event_id, event in all_events.items():

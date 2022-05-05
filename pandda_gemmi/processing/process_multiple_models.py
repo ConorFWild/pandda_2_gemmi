@@ -53,7 +53,7 @@ from pandda_gemmi.density_clustering import (
 class DatasetResult(DatasetResultInterface):
     dtag: DtagInterface
     events: MutableMapping[EventIDInterface, EventInterface]
-    event_scores: MutableMapping[EventIDInterface, float]
+    event_scores: EventScoringResultsInterface
     log: Dict
 
 
@@ -263,7 +263,7 @@ def EXPERIMENTAL_select_model(
 
     # Score the top clusters
     model_scores = {
-        model_id: max([event_scores[score_id] for score_id in event_scores] + [0.0, ])
+        model_id: max([event_scores[score_id].get_selected_structure_score() for score_id in event_scores] + [0.0, ])
         for model_id, event_scores
         in model_event_scores.items()
     }
@@ -354,7 +354,7 @@ class ModelResult(ModelResultInterface):
         self.clusterings_peaked = clusterings_peaked
         self.clusterings_merged = clusterings_merged
         self.events = events
-        self.event_scores = event_scores
+        self.event_scores: EventScoringResultsInterface = event_scores
         self.model_log = model_log
 
 

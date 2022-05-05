@@ -368,7 +368,8 @@ class ModelResultInterface(Protocol):
     clusterings_peaked: EDClusteringsInterface
     clusterings_merged: EDClusteringsInterface
     events: EventsInterface
-    event_scores: MutableMapping[EventIDInterface, float]
+    # event_scores: MutableMapping[EventIDInterface, float]
+    event_scores: EventScoringResultsInterface
     model_log: Dict
 
 
@@ -403,7 +404,7 @@ ShellsInterface = Dict[int, ShellInterface]
 class DatasetResultInterface(Protocol):
     dtag: DtagInterface
     events: EventsInterface
-    event_scores: MutableMapping[EventIDInterface, float]
+    event_scores: EventScoringResultsInterface
     log: Any
 
 
