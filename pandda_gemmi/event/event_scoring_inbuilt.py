@@ -54,7 +54,7 @@ class ConformerFittingResult(ConformerFittingResultInterface):
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
-    fragmentstructures: MutableMapping[int, gemmi.Structure] = {}
+    fragment_structures: MutableMapping[int, gemmi.Structure] = {}
     for i, conformer in enumerate(mol.GetConformers()):
         if i > max_conformers:
             continue
@@ -91,9 +91,9 @@ def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int
             model.add_chain(chain)
             structure.add_model(model)
 
-            fragmentstructures[i] = structure
+            fragment_structures[i] = structure
 
-    return fragmentstructures
+    return fragment_structures
 
 
 def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
@@ -201,8 +201,8 @@ class Conformers(ConformersInterface):
 
 def get_conformers(
         fragment_dataset,
-        pruning_threshold=5.0,
-        num_pose_samples=100,
+        pruning_threshold=6.0,
+        num_pose_samples=1000,
         max_conformers=10,
         debug: Debug = Debug.DEFAULT,
 ) -> ConformersInterface:
@@ -215,13 +215,13 @@ def get_conformers(
         mol = get_fragment_mol_from_dataset_smiles_path(fragment_dataset.source_ligand_smiles)
 
         # Generate conformers
-        m2: Chem.Mol = Chem.AddHs(mol)
+        mol: Chem.Mol = Chem.AddHs(mol)
 
         # Generate conformers
-        cids = AllChem.EmbedMultipleConfs(m2, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
+        cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
 
         # Translate to structures
-        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(m2, max_conformers)
+        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(mol, max_conformers)
         if len(fragment_structures) > 0:
             return Conformers(
                 fragment_structures,
