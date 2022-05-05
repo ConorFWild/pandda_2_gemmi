@@ -526,7 +526,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             filter_reference_compatability.filtered_dtags
         )
 
-
         ###################################################################
         # # Getting grid
         ###################################################################
@@ -751,9 +750,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     event_scores.update(
                         {
                             event_id: event_scoring_result.get_selected_structure_score()
-                                         for event_id, event_scoring_result
-                                         in dataset_result.event_scores.items()
-                                         }
+                            for event_id, event_scoring_result
+                            in dataset_result.event_scores.items()
+                        }
                     )
 
         # Add the event maps to the fs

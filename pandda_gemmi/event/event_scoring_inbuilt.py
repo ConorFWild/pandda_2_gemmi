@@ -23,13 +23,16 @@ class ConformerFittingResult(ConformerFittingResultInterface):
     def __init__(self,
                  score: Optional[float],
                  optimised_fit: Optional[Any],
+                 score_log: Optional[Dict]
                  ):
         self.score: Optional[float] = score
         self.optimised_fit: Optional[Any] = optimised_fit
+        self.score_log = score_log
 
     def log(self) -> Dict:
         return {
             "Score": str(self.score),
+            "Score Log": self.score_log
         }
 
     def __setstate__(self, state):
@@ -41,11 +44,13 @@ class ConformerFittingResult(ConformerFittingResultInterface):
         else:
             self.optimised_fit = state[1]
 
+        self.score_log = state[2]
+
     def __getstate__(self):
         if self.optimised_fit is not None:
-            return (self.score, StructurePython.from_gemmi(self.optimised_fit))
+            return (self.score, StructurePython.from_gemmi(self.optimised_fit), self.score_log)
         else:
-            return (self.score, self.optimised_fit)
+            return (self.score, self.optimised_fit, self.score_log)
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
@@ -196,7 +201,7 @@ class Conformers(ConformersInterface):
 
 def get_conformers(
         fragment_dataset,
-        pruning_threshold=3.0,
+        pruning_threshold=5.0,
         num_pose_samples=100,
         max_conformers=10,
         debug: Debug = Debug.DEFAULT,
@@ -592,6 +597,7 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid,
 
     scores = []
     scores_signal_to_noise = []
+    logs = []
     for j in range(10):
         start_diff_ev = time.time()
 
@@ -668,11 +674,17 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid,
         )
 
         scores_signal_to_noise.append(score)
+        logs.append(log)
         # score = 1-float(res.fun)
         # print(f"\t\t\t\tScore: {score}")
 
     print(f"Best fit score: {1 - min(scores)}")
     print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
+
+    best_score_index = np.argmax(scores_signal_to_noise)
+    best_score = scores_signal_to_noise[best_score_index]
+    best_score_log = logs[best_score_index]
+    best_score_fit_score = scores[best_score_index]
 
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
@@ -681,8 +693,16 @@ def score_conformer_array(cluster: Cluster, conformer, zmap_grid,
         # print(f"\t\t\tScoring log results are: {log}")
 
     return ConformerFittingResult(
-        float(score),
-        optimised_structure
+        float(best_score),
+        optimised_structure,
+        {
+            "fit_score": float(best_score_fit_score),
+            "Signal": int(best_score_log["signal"]),
+            "Noise": int(best_score_log["noise"]),
+            "Num Signal Samples": int(best_score_log["signal_samples_shape"]),
+            "Num Noise Samples": int(best_score_log["noise_samples_shape"]),
+            "Penalty": int(best_score_log["penalty"]),
+        }
     )
 
 
@@ -924,6 +944,7 @@ def score_clusters(
             LigandFittingResult(
                 {
                     0: ConformerFittingResult(
+                        None,
                         None,
                         None
                     )

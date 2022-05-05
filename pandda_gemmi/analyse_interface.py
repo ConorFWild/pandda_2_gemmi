@@ -463,6 +463,7 @@ class ConformersInterface(Protocol):
 class ConformerFittingResultInterface(Protocol):
     score: Optional[float]
     optimised_fit: Optional[Any]
+    score_log: Dict
 
     def log(self) -> Dict:
         ...
