@@ -56,42 +56,43 @@ class ConformerFittingResult(ConformerFittingResultInterface):
 def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
     fragment_structures: MutableMapping[int, gemmi.Structure] = {}
     for i, conformer in enumerate(mol.GetConformers()):
-        if i > max_conformers:
-            continue
-        else:
-            positions: np.ndarray = conformer.GetPositions()
 
-            structure: gemmi.Structure = gemmi.Structure()
-            model: gemmi.Model = gemmi.Model(f"{i}")
-            chain: gemmi.Chain = gemmi.Chain(f"{i}")
-            residue: gemmi.Residue = gemmi.Residue()
-            residue.name = "LIG"
-            residue.seqid = gemmi.SeqId(1, ' ')
+        positions: np.ndarray = conformer.GetPositions()
 
-            # Loop over atoms, adding them to a gemmi residue
-            for j, atom in enumerate(mol.GetAtoms()):
-                # Get the atomic symbol
-                atom_symbol: str = atom.GetSymbol()
-                gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
+        structure: gemmi.Structure = gemmi.Structure()
+        model: gemmi.Model = gemmi.Model(f"{i}")
+        chain: gemmi.Chain = gemmi.Chain(f"{i}")
+        residue: gemmi.Residue = gemmi.Residue()
+        residue.name = "LIG"
+        residue.seqid = gemmi.SeqId(1, ' ')
 
-                # Get the position as a gemmi type
-                pos: np.ndarray = positions[j, :]
-                gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
+        # Loop over atoms, adding them to a gemmi residue
+        for j, atom in enumerate(mol.GetAtoms()):
+            # Get the atomic symbol
+            atom_symbol: str = atom.GetSymbol()
+            gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
 
-                # Get the
-                gemmi_atom: gemmi.Atom = gemmi.Atom()
-                gemmi_atom.name = atom_symbol
-                gemmi_atom.pos = gemmi_pos
-                gemmi_atom.element = gemmi_element
+            # Get the position as a gemmi type
+            pos: np.ndarray = positions[j, :]
+            gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
 
-                # Add atom to residue
-                residue.add_atom(gemmi_atom)
+            # Get the
+            gemmi_atom: gemmi.Atom = gemmi.Atom()
+            gemmi_atom.name = atom_symbol
+            gemmi_atom.pos = gemmi_pos
+            gemmi_atom.element = gemmi_element
 
-            chain.add_residue(residue)
-            model.add_chain(chain)
-            structure.add_model(model)
+            # Add atom to residue
+            residue.add_atom(gemmi_atom)
 
-            fragment_structures[i] = structure
+        chain.add_residue(residue)
+        model.add_chain(chain)
+        structure.add_model(model)
+
+        fragment_structures[i] = structure
+
+        if len(fragment_structures) > max_conformers:
+            return fragment_structures
 
     return fragment_structures
 
