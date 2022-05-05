@@ -254,7 +254,7 @@ void add_custom(py::module& m) {
               r_pos(i, 2)
               );
             auto val = grid.interpolate_value(pos);
-            std::cout << val << "\n";
+            // std::cout << val << "\n";
             r_val(i) = val;
             // vals_vec.push_back(val);
           }
