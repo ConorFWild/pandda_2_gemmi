@@ -407,12 +407,12 @@ def get_interpolated_values_c(
         transformed_structure_array,
         n,
 ):
-    vals = np.zeros(n)
+    vals = np.zeros(n, dtype=np.float32)
 
     vals_list = gemmi.interpolate_pos_array(
         grid,
-        transformed_structure_array,
-        vals,
+        transformed_structure_array.astype(np.float32),
+        vals.astype(np.float32),
     )
     print(f"Vals list: {vals_list}")
     print(f"Vals: {vals}")
