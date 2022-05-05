@@ -202,7 +202,7 @@ class Conformers(ConformersInterface):
 
 def get_conformers(
         fragment_dataset,
-        pruning_threshold=6.0,
+        pruning_threshold=2.0,
         num_pose_samples=1000,
         max_conformers=10,
         debug: Debug = Debug.DEFAULT,
