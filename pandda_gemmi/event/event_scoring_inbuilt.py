@@ -706,16 +706,24 @@ def score_conformer_array(cluster: Cluster,
         print(f"\t\t\t\tScore is: {score}")
         # print(f"\t\t\tScoring log results are: {log}")
 
-    def step_func(skeleton_score):
-        if 1 - skeleton_score > 0.40:
+    # def step_func(skeleton_score):
+    #     if 1 - skeleton_score > 0.40:
+    #         return 1.0
+    #     else:
+    #         return 0.0
+
+    def step_func(signal_score):
+        if signal_score > 0.40:
             return 1.0
         else:
             return 0.0
 
+    percent_signal = best_score_log["signal"] / best_score_log["signal_samples_shape"]
+
     return ConformerFittingResult(
         # float(best_score),
         float(
-            int(best_score_log["signal"]*step_func(best_score_fit_score)) / int(1+best_score_log["noise"])
+            int(best_score_log["signal"]*step_func(percent_signal)) / int(1+best_score_log["noise"])
         ),
         optimised_structure,
         {
