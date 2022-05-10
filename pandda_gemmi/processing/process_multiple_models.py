@@ -607,6 +607,7 @@ def analyse_model(
             max_site_distance_cutoff,
             min_bdc, max_bdc,
             reference,
+            event_map_cut=1.5,
             structure_output_folder=output_dir,
             debug=debug
         )
