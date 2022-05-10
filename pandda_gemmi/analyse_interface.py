@@ -877,6 +877,7 @@ class GetEventScoreInbuiltInterface(Protocol):
                  model_number,
                  dataset_processed_dataset,
                  dataset_xmap,
+                 zmap,
                  events,
                  model,
                  grid,

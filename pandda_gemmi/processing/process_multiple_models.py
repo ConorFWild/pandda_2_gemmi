@@ -600,6 +600,7 @@ def analyse_model(
             model_number,
             dataset_processed_dataset,
             dataset_xmap,
+            zmaps[test_dtag],
             events,
             model,
             grid,
@@ -607,7 +608,7 @@ def analyse_model(
             max_site_distance_cutoff,
             min_bdc, max_bdc,
             reference,
-            event_map_cut=1.5,
+            event_map_cut=2.0,
             structure_output_folder=output_dir,
             debug=debug
         )

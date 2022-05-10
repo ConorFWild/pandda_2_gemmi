@@ -727,7 +727,7 @@ def score_conformer_array(cluster: Cluster,
             int(
                 best_score_log["signal"]
                 * step_func(percent_signal, 0.4)
-                * step_func(1-percent_noise, 0.7)
+                * step_func(1 - percent_noise, 0.7)
             )
             - int(best_score_log["noise"])
         ),
@@ -1040,6 +1040,123 @@ class EventScoringResult(EventScoringResultInterface):
         }
 
 
+# def calculate_optimal_contour(
+#         dataset: DatasetInterface,
+#         crystallographic_grid: CrystallographicGridInterface,
+# ) -> float:
+#     # Get Ligand conformer as structure
+#
+#     # Get volume approximation
+#
+#     #
+#
+#
+#
+#     ...
+
+def get_event_map_reference_grid(
+        reference_xmap_grid: CrystallographicGridInterface,
+        zmap_grid: CrystallographicGridInterface,
+        model: ModelInterface,
+        event: EventInterface,
+        reference_xmap_grid_array: NDArrayInterface,
+        inner_mask_grid: CrystallographicGridInterface,
+        outer_mask_grid: CrystallographicGridInterface,
+        event_map_cut: float,
+        below_cut_score: float,
+        event_density_score: float,
+        protein_score: float,
+        protein_event_overlap_score: float,
+        debug: Debug = Debug.DEFAULT
+) -> Tuple[CrystallographicGridInterface, Dict]:
+    event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+                                                 reference_xmap_grid.nv,
+                                                 reference_xmap_grid.nw,
+                                                 ]
+                                               )
+    event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    mean_array = model.mean
+    event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+            1 - event.bdc.bdc)
+
+    # Mask the protein except around the event
+    # inner_mask_int_array = grid.partitioning.inner_mask
+    inner_mask_int_array = np.array(
+        inner_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    outer_mask_int_array = np.array(
+        outer_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+
+    high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    high_mask[event_map_reference_grid_array >= event_map_cut] = True
+    low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    low_mask[event_map_reference_grid_array < event_map_cut] = True
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tHigh mask points: {np.sum(high_mask)}")
+        print(f"\t\t\tLow mask points: {np.sum(low_mask)}")
+
+    # Rescale the map
+    event_map_reference_grid_array[event_map_reference_grid_array < event_map_cut] = below_cut_score
+    event_map_reference_grid_array[event_map_reference_grid_array >= event_map_cut] = event_density_score
+
+    # Add high z mask
+    zmap_array = np.array(zmap_grid)
+    event_map_reference_grid_array[zmap_array > 2.0] = event_density_score
+
+    # Event mask
+    event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    event_mask[event.cluster.event_mask_indicies] = True
+    inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    inner_mask[np.nonzero(inner_mask_int_array)] = True
+    outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    outer_mask[np.nonzero(outer_mask_int_array)] = True
+
+    # Mask the protein except at event sites with a penalty
+    event_map_reference_grid_array[inner_mask & (~event_mask)] = protein_score
+
+    # Mask the protein-event overlaps with zeros
+    event_map_reference_grid_array[inner_mask & event_mask] = protein_event_overlap_score
+
+    # Noise
+    noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
+    num_noise_points = noise_points.size
+    potential_noise_points = event_map_reference_grid_array[outer_mask & (~inner_mask)]
+    num_potential_noise_points = potential_noise_points.size
+    percentage_noise = num_noise_points / num_potential_noise_points
+
+    noise = {
+        'num_noise_points': int(num_noise_points),
+        'num_potential_noise_points': int(num_potential_noise_points),
+        'percentage_noise': float(percentage_noise)
+    }
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\t\t\tNoise is: {noise}")
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print("\t\t\tScoring...")
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tEvent map for scoring: {np.mean(event_map_reference_grid_array)}; "
+              f"{np.max(event_map_reference_grid_array)}; {np.min(event_map_reference_grid_array)}")
+        print(f"\t\t\tEvent map for scoring: {np.sum(event_map_reference_grid_array == 1)}; "
+              f"{np.sum(event_map_reference_grid_array == 0)}; {np.sum(event_map_reference_grid_array == -1)}")
+
+    return event_map_reference_grid, noise
+
+
 class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
     tag: Literal["inbuilt"] = "inbuilt"
 
@@ -1048,6 +1165,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  model_number,
                  processed_dataset,
                  dataset_xmap,
+                 zmap,
                  events,
                  model,
                  grid,
@@ -1112,88 +1230,23 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
             if debug >= Debug.PRINT_SUMMARIES:
                 print("\t\t\tCaclulating event maps...")
-            event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
-                                                         reference_xmap_grid.nv,
-                                                         reference_xmap_grid.nw,
-                                                         ]
-                                                       )
-            event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
-            event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
 
-            event_map_reference_grid_array = np.array(event_map_reference_grid,
-                                                      copy=False,
-                                                      )
-
-            mean_array = model.mean
-            event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
-                    1 - event.bdc.bdc)
-
-            # Mask the protein except around the event
-            # inner_mask_int_array = grid.partitioning.inner_mask
-            inner_mask_int_array = np.array(
+            event_map_reference_grid, noise = get_event_map_reference_grid(
+                reference_xmap_grid,
+                zmap.zmap,
+                model,
+                event,
+                reference_xmap_grid_array,
                 inner_mask_grid,
-                copy=False,
-                dtype=np.int8,
-            )
-            outer_mask_int_array = np.array(
                 outer_mask_grid,
-                copy=False,
-                dtype=np.int8,
+                event_map_cut,
+                below_cut_score,
+                event_density_score,
+                protein_score,
+                protein_event_overlap_score,
+                debug=debug
             )
-
-            high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            high_mask[event_map_reference_grid_array >= event_map_cut] = True
-            low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            low_mask[event_map_reference_grid_array < event_map_cut] = True
-
-            if debug >= Debug.PRINT_NUMERICS:
-                print(f"\t\t\tHigh mask points: {np.sum(high_mask)}")
-                print(f"\t\t\tLow mask points: {np.sum(low_mask)}")
-
-
-            # Rescale the map
-            event_map_reference_grid_array[event_map_reference_grid_array < event_map_cut] = below_cut_score
-            event_map_reference_grid_array[event_map_reference_grid_array >= event_map_cut] = event_density_score
-
-            # Event mask
-            event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            event_mask[event.cluster.event_mask_indicies] = True
-            inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            inner_mask[np.nonzero(inner_mask_int_array)] = True
-            outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
-            outer_mask[np.nonzero(outer_mask_int_array)] = True
-
-            # Mask the protein except at event sites with a penalty
-            event_map_reference_grid_array[inner_mask & (~event_mask)] = protein_score
-
-            # Mask the protein-event overlaps with zeros
-            event_map_reference_grid_array[inner_mask & event_mask] = protein_event_overlap_score
-
-            # Noise
-            noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
-            num_noise_points = noise_points.size
-            potential_noise_points = event_map_reference_grid_array[outer_mask & (~inner_mask)]
-            num_potential_noise_points = potential_noise_points.size
-            percentage_noise = num_noise_points / num_potential_noise_points
-
-            noise = {
-                'num_noise_points': int(num_noise_points),
-                'num_potential_noise_points': int(num_potential_noise_points),
-                'percentage_noise': float(percentage_noise)
-            }
             noises[event_id.event_idx.event_idx] = noise
-
-            if debug >= Debug.PRINT_SUMMARIES:
-                print(f"\t\t\tNoise is: {noise}")
-
-            if debug >= Debug.PRINT_SUMMARIES:
-                print("\t\t\tScoring...")
-
-            if debug >= Debug.PRINT_NUMERICS:
-                print(f"\t\t\tEvent map for scoring: {np.mean(event_map_reference_grid_array)}; "
-                      f"{np.max(event_map_reference_grid_array)}; {np.min(event_map_reference_grid_array)}")
-                print(f"\t\t\tEvent map for scoring: {np.sum(event_map_reference_grid_array==1)}; "
-                      f"{np.sum(event_map_reference_grid_array==0)}; {np.sum(event_map_reference_grid_array==-1)}")
 
             # Score
             time_scoring_start = time.time()
