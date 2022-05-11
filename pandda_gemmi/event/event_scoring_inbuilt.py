@@ -681,7 +681,8 @@ def EXPERIMENTAL_score_structure_rscc(
     return corr, {
         "Num masked indicies": len(mask_indicies[0]),
         "Mean approximate density": float(np.mean(approximate_structure_map_values)),
-        "Mean event density": float(np.mean(event_map_values))
+        "Mean event density": float(np.mean(event_map_values)),
+        "grid": approximate_structure_map
     }
 
 
@@ -819,7 +820,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
 
     best_score_index = np.argmax(scores_signal_to_noise)
     best_score = scores_signal_to_noise[best_score_index]
-    # best_score_log = logs[best_score_index]
+    best_score_log = logs[best_score_index]
     best_score_fit_score = scores[best_score_index]
 
     if debug >= Debug.PRINT_NUMERICS:
@@ -836,6 +837,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
         optimised_structure,
         {
             "fit_score": float(best_score_fit_score),
+            "grid": best_score_log["grid"],
         }
     )
 
@@ -1704,6 +1706,16 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 #     score = initial_score / percentage_noise
 
                 score = initial_score
+
+                #TODO remove
+                ed_grid = result.get_selected_conformer_results().score_log["grid"]
+                ccp4 = gemmi.Ccp4Map()
+                ccp4.grid = ed_grid
+                ccp4.update_ccp4_header(2, True)
+                ccp4.setup()
+                ccp4.write_ccp4_map(str(structure_output_folder / f'{model_number}_'
+                                                                  f'{event_id.event_idx.event_idx}_app.ccp4'))
+                del result.get_selected_conformer_results().score_log["grid"]
 
                 if debug >= Debug.INTERMEDIATE_FITS:
                     structure.write_minimal_pdb(
