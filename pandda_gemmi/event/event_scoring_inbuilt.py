@@ -650,6 +650,30 @@ def EXPERIMENTAL_score_structure_rscc(
                                                       value=1,
                                                       )
 
+    outer_mask_grid = gemmi.Int8Grid(*[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+    outer_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    outer_mask_grid.set_unit_cell(zmap_grid.unit_cell)
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    outer_mask_grid.set_points_around(pos,
+                                                      radius=2.0,
+                                                      value=1,
+                                                      )
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    outer_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=0,
+                                                      )
+    outer_mask_array = np.array(outer_mask_grid, copy=False,         dtype=np.int8,)
+    outer_mask_indexes = np.nonzero(outer_mask_array)
+
     # Scale ligand density to map
     inner_mask_int_array = np.array(
         inner_mask_grid,
@@ -682,7 +706,15 @@ def EXPERIMENTAL_score_structure_rscc(
         "Num masked indicies": len(mask_indicies[0]),
         "Mean approximate density": float(np.mean(approximate_structure_map_values)),
         "Mean event density": float(np.mean(event_map_values)),
-        "grid": approximate_structure_map
+        "grid": approximate_structure_map,
+        "outer_sum": float(np.sum(event_map_array[outer_mask_indexes])),
+        "inner_sum": float(np.sum(event_map_array[mask_indicies])),
+        "outer_mean": float(np.mean(event_map_array[outer_mask_indexes])),
+        "inner_mean": float(np.mean(event_map_array[mask_indicies])),
+        "inner>1": int(np.sum(event_map_array[outer_mask_indexes] > 1.0)),
+        "outer>1": int(np.sum(event_map_array[mask_indicies] > 1.0)),
+        "inner>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
+        "outer>2": int(np.sum(event_map_array[mask_indicies] > 2.0))
     }
 
 
@@ -838,6 +870,14 @@ def score_conformer_nonquant_array(cluster: Cluster,
         {
             "fit_score": float(best_score_fit_score),
             "grid": best_score_log["grid"],
+            "outer_sum": best_score_log["outer_sum"],
+            "inner_sum": best_score_log["inner_sum"],
+            "outer_mean": best_score_log["outer_mean"],
+            "inner_mean": best_score_log["inner_mean"],
+            "inner>1": best_score_log["inner>1"],
+            "outer>1": best_score_log["outer>1"],
+            "inner>2": best_score_log["inner>2"],
+            "outer>2":best_score_log["outer"]
         }
     )
 
