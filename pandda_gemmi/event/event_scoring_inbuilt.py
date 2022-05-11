@@ -658,7 +658,7 @@ def EXPERIMENTAL_score_structure_rscc(
     )
     event_map_array = np.array(zmap_grid, copy=False)
     approximate_structure_map_array = np.array(approximate_structure_map, copy=False)
-    mask_indicies = np.nonzero(inner_mask_int_array, copy=False)
+    mask_indicies = np.nonzero(inner_mask_int_array)
 
     event_map_values = event_map_array[mask_indicies]
     approximate_structure_map_values = approximate_structure_map_array[mask_indicies]
@@ -674,7 +674,11 @@ def EXPERIMENTAL_score_structure_rscc(
                     approximate_structure_map_values - np.mean(approximate_structure_map_values))
     ) / (np.std(event_map_values) * np.std(approximate_structure_map_values))
 
-    return corr, {}
+    return corr, {
+        "Num masked indicies": len(mask_indicies[0]),
+        "Mean approximate density": float(np.mean(approximate_structure_map_values)),
+        "Mean event density": float(np.mean(event_map_values))
+    }
 
 
 def score_conformer_nonquant_array(cluster: Cluster,
