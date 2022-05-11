@@ -885,6 +885,7 @@ class GetEventScoreInbuiltInterface(Protocol):
                  max_site_distance_cutoff,
                  min_bdc, max_bdc,
                  reference,
+                 res, rate,
                  structure_output_folder,
                  debug: Debug
                  ) -> EventScoringResultsInterface:

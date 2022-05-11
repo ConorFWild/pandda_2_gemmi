@@ -461,6 +461,49 @@ def score_fit_array(structure_array, grid, distance, params):
 
     return float(1 - score)
 
+def score_fit_nonquant_array(structure_array, grid, distance, params):
+    x, y, z, rx, ry, rz = params
+
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
+
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True)
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+
+    transformed_structure_array = transform_structure_array(
+        structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+
+    n = structure_array.shape[0]
+
+    vals = get_interpolated_values_c(grid, transformed_structure_array, n)
+    # print(f"Interpolated vals: {vals}: {np.sum(vals)}")
+    # print(f"Num points > 2.0: {np.sum(np.array(grid) == 1.0)}")
+    # print(f"Transformed structure array: {transformed_structure_array}")
+
+    # print(type(transformed_structure_array))
+    # vals = grid.interpolate_values_from_pos_array(transformed_structure_array)
+
+    # positive_score = np.sum(vals > 0.5)
+    # penalty = -np.sum(vals < 0.0)
+    # score = (positive_score + penalty) / n
+    vals[vals > 3.0] = 3.0
+
+    score = np.sum(vals)
+
+    return float(-score)
+
+
 
 def DEP_score_fit(structure, grid, distance, params):
     x, y, z, rx, ry, rz = params
@@ -565,6 +608,264 @@ def get_probe_structure(structure):
     # print(f"Number of real atoms: {len(verticies)}")
     # print(f"Number of virtual atoms: {len(edges)}")
     return structure_clone
+
+
+def EXPERIMENTAL_score_structure_rscc(
+        optimised_structure,
+        zmap_grid,
+        res,
+        rate,
+) -> Tuple[float, Dict]:
+    # Get grid
+    new_grid = gemmi.FloatGrid(zmap_grid.nu, zmap_grid.nv, zmap_grid.nw)
+    new_grid.unit_cell = zmap_grid.unit_cell
+
+    # Get density on grid
+    optimised_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    optimised_structure.cell = zmap_grid.unit_cell
+    dencalc = gemmi.DensityCalculatorX()
+    dencalc.d_min = 0.5
+    dencalc.rate = 1
+    dencalc.set_grid_cell_and_spacegroup(optimised_structure)
+    dencalc.put_model_density_on_grid(optimised_structure[0])
+
+    # Get the SFs at the right res
+    sf = gemmi.transform_map_to_f_phi(dencalc.grid, half_l=True)
+    data = sf.prepare_asu_data(dmin=res)
+
+    # Get the grid oversampled to the right size
+    approximate_structure_map = data.transform_f_phi_to_map(exact_size=[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+
+    # Get mask of ligand
+    inner_mask_grid = gemmi.Int8Grid(*[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(zmap_grid.unit_cell)
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=1,
+                                                      )
+
+    # Scale ligand density to map
+    inner_mask_int_array = np.array(
+        inner_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    event_map_array = np.array(zmap_grid, copy=False)
+    approximate_structure_map_array = np.array(approximate_structure_map, copy=False)
+    mask_indicies = np.nonzero(inner_mask_int_array, copy=False)
+
+    event_map_values = event_map_array[mask_indicies]
+    approximate_structure_map_values = approximate_structure_map_array[mask_indicies]
+
+    # scaled_event_map_values = ((approximate_structure_map_values - np.mean(approximate_structure_map_values))
+    #                           * (np.std(event_map_values) / np.std(approximate_structure_map_values))) \
+    #                           + (np.mean(event_map_values))
+    #
+
+    # Get correlation
+    corr = np.sum(
+        (event_map_values - np.mean(event_map_values)) * (
+                    approximate_structure_map_values - np.mean(approximate_structure_map_values))
+    ) / (np.std(event_map_values) * np.std(approximate_structure_map_values))
+
+    return corr, {}
+
+
+def score_conformer_nonquant_array(cluster: Cluster,
+                                   conformer,
+                                   zmap_grid,
+                                   res,
+                                   rate,
+                                   debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
+    # Center the conformer at the cluster
+    centroid_cart = cluster.centroid
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\t\tCartesian centroid of event is: {centroid_cart}")
+
+    centered_structure = center_structure(
+        conformer,
+        centroid_cart,
+    )
+
+    # Get the probe structure
+    probe_structure = get_probe_structure(centered_structure)
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\t\tprobe structure: {probe_structure}")
+
+    # Optimise
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\t\tOptimizing structure fit...")
+
+    structure_positions = []
+
+    for model in probe_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        pos = atom.pos
+                        structure_positions.append([pos.x, pos.y, pos.z])
+
+    structure_array = np.array(structure_positions, dtype=np.float32)
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"Structure array: {structure_array}")
+
+    scores = []
+    scores_signal_to_noise = []
+    logs = []
+    for j in range(10):
+        start_diff_ev = time.time()
+
+        res = optimize.differential_evolution(
+            lambda params: score_fit_nonquant_array(
+                structure_array,
+                zmap_grid,
+                # 12.0,
+                1.0,
+                params
+            ),
+            [
+                # (-3, 3), (-3, 3), (-3, 3),
+                # (-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5),
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+            ],
+            # popsize=30,
+        )
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"Fit Score: {res.fun}")
+        scores.append(res.fun)
+        finish_diff_ev = time.time()
+        # TODO: back to debug
+        # if debug:
+        # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
+        # print(f"\t\t\t\tOptimisation result: {res.x} {1-res.fun}")
+
+        # start_basin = time.time()
+        # res = optimize.basinhopping(
+        #     lambda params: score_fit(
+        #         probe_structure,
+        #         zmap_grid,
+        #         params
+        #     ),
+        #     x0=[0.0,0.0,0.0,0.0,0.0,0.0],
+        # )
+        # finish_basin = time.time()
+        # if debug:
+        #     print(f"\t\t\tbasin in: {finish_basin-start_basin}")
+        #     print(f"\t\t\tOptimisation result: {res.x} {res.fun}")
+
+        # Get optimised fit
+        x, y, z, rx, ry, rz = res.x
+        rotation = spsp.transform.Rotation.from_euler(
+            "xyz",
+            [
+                rx * 360,
+                ry * 360,
+                rz * 360,
+            ],
+            degrees=True)
+        rotation_matrix: np.ndarray = rotation.as_matrix().T
+        optimised_structure = transform_structure(
+            probe_structure,
+            [x, y, z],
+            rotation_matrix
+        )
+
+        # TODO: Remove althogether
+        # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
+
+        # Score, by including the noise as well as signal
+        # if debug:
+        #     print(f"\t\t\t\tScoring optimized result by signal to noise")
+
+        # score, log = score_structure_signal_to_noise_density(
+        #     optimised_structure,
+        #     zmap_grid,
+        # )
+        # score = float(res.fun) / (int(cluster.values.size) + 1)
+
+        score, log = EXPERIMENTAL_score_structure_rscc(
+            optimised_structure,
+            zmap_grid,
+            res,
+            rate
+        )
+
+        scores_signal_to_noise.append(score)
+        logs.append(log)
+        # score = 1-float(res.fun)
+        # print(f"\t\t\t\tScore: {score}")
+
+    print(f"Best fit score: {1 - min(scores)}")
+    print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
+
+    best_score_index = np.argmax(scores_signal_to_noise)
+    best_score = scores_signal_to_noise[best_score_index]
+    # best_score_log = logs[best_score_index]
+    best_score_fit_score = scores[best_score_index]
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
+        print(f"\t\t\t\tModeled atoms % is: {float(1 - res.fun)}")
+        print(f"\t\t\t\tScore is: {score}")
+        # print(f"\t\t\tScoring log results are: {log}")
+
+    return ConformerFittingResult(
+        # float(best_score),
+        float(
+            best_score
+        ),
+        optimised_structure,
+        {
+            "fit_score": float(best_score_fit_score),
+        }
+    )
+
+    # def step_func(skeleton_score):
+    #     if 1 - skeleton_score > 0.40:
+    #         return 1.0
+    #     else:
+    #         return 0.0
+    #
+    # def step_func(val, cut):
+    #     if val > cut:
+    #         return 1.0
+    #     else:
+    #         return 0.0
+    #
+    # percent_signal = best_score_log["signal"] / best_score_log["signal_samples_shape"]
+    # percent_noise = best_score_log["noise"] / best_score_log["noise_samples_shape"]
+    #
+    # return ConformerFittingResult(
+    #     # float(best_score),
+    #     float(
+    #         int(
+    #             best_score_log["signal"]
+    #             * step_func(percent_signal, 0.4)
+    #             * step_func(1 - percent_noise, 0.80)
+    #         )
+    #         - int(best_score_log["noise"])
+    #     ),
+    #     optimised_structure,
+    #     {
+    #         "fit_score": float(best_score_fit_score),
+    #         "Signal": int(best_score_log["signal"]),
+    #         "Noise": int(best_score_log["noise"]),
+    #         "Num Signal Samples": int(best_score_log["signal_samples_shape"]),
+    #         "Num Noise Samples": int(best_score_log["noise_samples_shape"]),
+    #         "Penalty": int(best_score_log["penalty"]),
+    #     }
+    # )
 
 
 def score_conformer_array(cluster: Cluster,
@@ -908,7 +1209,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
     return float(score), optimised_structure
 
 
-def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid,
+def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid, res, rate,
                               debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
@@ -918,7 +1219,8 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
     results: ConformerFittingResultsInterface = {}
     for conformer_id, conformer in fragment_conformers.conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
-        results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
+        # results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
+        results[conformer_id]  = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate, debug)
 
     # scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     # structures = {conformer_id: result[1] for conformer_id, result in results.items()}
@@ -936,11 +1238,11 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
     )
 
 
-def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface,
+def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface, res, rate,
                   debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
-    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, debug)
+    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, res, rate, debug)
 
     return EventScoringResult(ligand_fitting_result)
 
@@ -970,6 +1272,7 @@ def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
         fragment_dataset,
+res, rate,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -1002,7 +1305,7 @@ def score_clusters(
 
         zmap_grid = zmaps[cluster_id]
 
-        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, debug)
+        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, res, rate, debug)
 
     return results
 
@@ -1054,7 +1357,7 @@ class EventScoringResult(EventScoringResultInterface):
 #
 #     ...
 
-def get_event_map_reference_grid(
+def get_event_map_reference_grid_quantised(
         reference_xmap_grid: CrystallographicGridInterface,
         zmap_grid: CrystallographicGridInterface,
         model: ModelInterface,
@@ -1157,6 +1460,109 @@ def get_event_map_reference_grid(
     return event_map_reference_grid, noise
 
 
+def get_event_map_reference_grid(
+        reference_xmap_grid: CrystallographicGridInterface,
+        zmap_grid: CrystallographicGridInterface,
+        model: ModelInterface,
+        event: EventInterface,
+        reference_xmap_grid_array: NDArrayInterface,
+        inner_mask_grid: CrystallographicGridInterface,
+        outer_mask_grid: CrystallographicGridInterface,
+        event_map_cut: float,
+        below_cut_score: float,
+        event_density_score: float,
+        protein_score: float,
+        protein_event_overlap_score: float,
+        debug: Debug = Debug.DEFAULT
+) -> Tuple[CrystallographicGridInterface, Dict]:
+    event_map_reference_grid = gemmi.FloatGrid(*[reference_xmap_grid.nu,
+                                                 reference_xmap_grid.nv,
+                                                 reference_xmap_grid.nw,
+                                                 ]
+                                               )
+    event_map_reference_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")  # xmap.xmap.spacegroup
+    event_map_reference_grid.set_unit_cell(reference_xmap_grid.unit_cell)
+
+    event_map_reference_grid_array = np.array(event_map_reference_grid,
+                                              copy=False,
+                                              )
+
+    mean_array = model.mean
+    event_map_reference_grid_array[:, :, :] = (reference_xmap_grid_array - (event.bdc.bdc * mean_array)) / (
+            1 - event.bdc.bdc)
+
+    # Mask the protein except around the event
+    # inner_mask_int_array = grid.partitioning.inner_mask
+    inner_mask_int_array = np.array(
+        inner_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    outer_mask_int_array = np.array(
+        outer_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+
+    # high_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    # high_mask[event_map_reference_grid_array >= event_map_cut] = True
+    # low_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    # low_mask[event_map_reference_grid_array < event_map_cut] = True
+
+    # if debug >= Debug.PRINT_NUMERICS:
+    #     print(f"\t\t\tHigh mask points: {np.sum(high_mask)}")
+    #     print(f"\t\t\tLow mask points: {np.sum(low_mask)}")
+
+    # # Rescale the map
+    # event_map_reference_grid_array[event_map_reference_grid_array < event_map_cut] = below_cut_score
+    # event_map_reference_grid_array[event_map_reference_grid_array >= event_map_cut] = event_density_score
+
+    # # Add high z mask
+    # zmap_array = np.array(zmap_grid)
+    # event_map_reference_grid_array[zmap_array > 2.0] = event_density_score
+
+    # Event mask
+    event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    event_mask[event.cluster.event_mask_indicies] = True
+    inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    inner_mask[np.nonzero(inner_mask_int_array)] = True
+    outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    outer_mask[np.nonzero(outer_mask_int_array)] = True
+
+    # Mask the protein except at event sites with a penalty
+    event_map_reference_grid_array[inner_mask & (~event_mask)] = protein_score
+
+    # Mask the protein-event overlaps with zeros
+    event_map_reference_grid_array[inner_mask & event_mask] = protein_event_overlap_score
+
+    # Noise
+    # noise_points = event_map_reference_grid_array[outer_mask & high_mask & (~inner_mask)]
+    # num_noise_points = noise_points.size
+    # potential_noise_points = event_map_reference_grid_array[outer_mask & (~inner_mask)]
+    # num_potential_noise_points = potential_noise_points.size
+    # percentage_noise = num_noise_points / num_potential_noise_points
+
+    noise = {
+        'num_noise_points': 0,
+        'num_potential_noise_points': 0,
+        'percentage_noise': 0,
+    }
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\t\t\tNoise is: {noise}")
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print("\t\t\tScoring...")
+
+    # if debug >= Debug.PRINT_NUMERICS:
+    #     print(f"\t\t\tEvent map for scoring: {np.mean(event_map_reference_grid_array)}; "
+    #           f"{np.max(event_map_reference_grid_array)}; {np.min(event_map_reference_grid_array)}")
+    #     print(f"\t\t\tEvent map for scoring: {np.sum(event_map_reference_grid_array == 1)}; "
+    #           f"{np.sum(event_map_reference_grid_array == 0)}; {np.sum(event_map_reference_grid_array == -1)}")
+
+    return event_map_reference_grid, noise
+
+
 class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
     tag: Literal["inbuilt"] = "inbuilt"
 
@@ -1173,6 +1579,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  max_site_distance_cutoff,
                  min_bdc, max_bdc,
                  reference,
+                 res, rate,
                  structure_output_folder,
                  event_map_cut=2.0,
                  below_cut_score=0.0,
@@ -1231,6 +1638,21 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
             if debug >= Debug.PRINT_SUMMARIES:
                 print("\t\t\tCaclulating event maps...")
 
+            # event_map_reference_grid, noise = get_event_map_reference_grid_quantised(
+            #     reference_xmap_grid,
+            #     zmap.zmap,
+            #     model,
+            #     event,
+            #     reference_xmap_grid_array,
+            #     inner_mask_grid,
+            #     outer_mask_grid,
+            #     event_map_cut,
+            #     below_cut_score,
+            #     event_density_score,
+            #     protein_score,
+            #     protein_event_overlap_score,
+            #     debug=debug
+            # )
             event_map_reference_grid, noise = get_event_map_reference_grid(
                 reference_xmap_grid,
                 zmap.zmap,
@@ -1254,6 +1676,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 {(0, 0): event.cluster},
                 {(0, 0): event_map_reference_grid},
                 processed_dataset,
+                res, rate,
                 debug=debug,
             )
             time_scoring_finish = time.time()

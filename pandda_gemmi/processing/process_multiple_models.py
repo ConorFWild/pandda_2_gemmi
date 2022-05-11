@@ -375,6 +375,7 @@ def analyse_model(
         min_blob_z_peak,
         output_dir,
         score_events_func: GetEventScoreInterface,
+        res, rate,
         debug: Debug=Debug.DEFAULT
 ) -> ModelResultInterface:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -608,6 +609,7 @@ def analyse_model(
             max_site_distance_cutoff,
             min_bdc, max_bdc,
             reference,
+            res, rate,
             event_map_cut=2.0,
             structure_output_folder=output_dir,
             debug=debug
@@ -770,6 +772,8 @@ def process_dataset_multiple_models(
                         min_blob_z_peak=min_blob_z_peak,
                         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
                         score_events_func=score_events_func,
+                        res=shell.res,
+                        rate=0.5,
                         debug=debug
                     )
                     for model_number, model
