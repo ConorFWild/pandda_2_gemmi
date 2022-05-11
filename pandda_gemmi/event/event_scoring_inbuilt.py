@@ -711,10 +711,12 @@ def EXPERIMENTAL_score_structure_rscc(
         "inner_sum": float(np.sum(event_map_array[mask_indicies])),
         "outer_mean": float(np.mean(event_map_array[outer_mask_indexes])),
         "inner_mean": float(np.mean(event_map_array[mask_indicies])),
-        "inner>1": int(np.sum(event_map_array[outer_mask_indexes] > 1.0)),
-        "outer>1": int(np.sum(event_map_array[mask_indicies] > 1.0)),
-        "inner>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
-        "outer>2": int(np.sum(event_map_array[mask_indicies] > 2.0))
+        "inner>1": int(np.sum(event_map_array[mask_indicies] > 1.0)),
+        "outer>1": int(np.sum(event_map_array[outer_mask_indexes] > 1.0)),
+        "inner>2": int(np.sum(event_map_array[mask_indicies] > 2.0)),
+        "outer>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
+        "num_inner": int(np.sum(inner_mask_int_array)),
+        "num_outer": int(np.sum(outer_mask_array))
     }
 
 
@@ -877,7 +879,9 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "inner>1": best_score_log["inner>1"],
             "outer>1": best_score_log["outer>1"],
             "inner>2": best_score_log["inner>2"],
-            "outer>2":best_score_log["outer>2"]
+            "outer>2":best_score_log["outer>2"],
+            "num_inner": best_score_log["num_inner"],
+            "num_outer": best_score_log["num_outer"]
         }
     )
 
