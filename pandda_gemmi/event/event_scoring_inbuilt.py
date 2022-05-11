@@ -727,7 +727,7 @@ def score_conformer_array(cluster: Cluster,
             int(
                 best_score_log["signal"]
                 * step_func(percent_signal, 0.4)
-                * step_func(1 - percent_noise, 0.85)
+                * step_func(1 - percent_noise, 0.80)
             )
             - int(best_score_log["noise"])
         ),
