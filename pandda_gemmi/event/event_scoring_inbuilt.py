@@ -680,7 +680,7 @@ def EXPERIMENTAL_score_structure_rscc(
 def score_conformer_nonquant_array(cluster: Cluster,
                                    conformer,
                                    zmap_grid,
-                                   res,
+                                   resolution,
                                    rate,
                                    debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
@@ -797,7 +797,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
         score, log = EXPERIMENTAL_score_structure_rscc(
             optimised_structure,
             zmap_grid,
-            res,
+            resolution,
             rate
         )
 
