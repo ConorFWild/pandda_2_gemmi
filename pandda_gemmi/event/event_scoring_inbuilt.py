@@ -461,6 +461,7 @@ def score_fit_array(structure_array, grid, distance, params):
 
     return float(1 - score)
 
+
 def score_fit_nonquant_array(structure_array, grid, distance, params):
     x, y, z, rx, ry, rz = params
 
@@ -502,7 +503,6 @@ def score_fit_nonquant_array(structure_array, grid, distance, params):
     score = np.sum(vals)
 
     return float(-score)
-
 
 
 def DEP_score_fit(structure, grid, distance, params):
@@ -669,10 +669,14 @@ def EXPERIMENTAL_score_structure_rscc(
     #
 
     # Get correlation
-    corr = np.sum(
-        (event_map_values - np.mean(event_map_values)) * (
-                    approximate_structure_map_values - np.mean(approximate_structure_map_values))
-    ) / (np.std(event_map_values) * np.std(approximate_structure_map_values))
+    demeaned_event_map_values = event_map_values - np.mean(event_map_values)
+    demeaned_approximate_structure_map_values = approximate_structure_map_values - np.mean(
+        approximate_structure_map_values)
+    corr = np.sum(demeaned_event_map_values * demeaned_approximate_structure_map_values
+                  ) / (
+                   np.sqrt(np.sum(np.square(demeaned_event_map_values)))
+                   * np.sqrt(np.sum(np.square(demeaned_approximate_structure_map_values)))
+           )
 
     return corr, {
         "Num masked indicies": len(mask_indicies[0]),
@@ -1224,7 +1228,7 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
     for conformer_id, conformer in fragment_conformers.conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
         # results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
-        results[conformer_id]  = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate, debug)
+        results[conformer_id] = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate, debug)
 
     # scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     # structures = {conformer_id: result[1] for conformer_id, result in results.items()}
@@ -1276,7 +1280,7 @@ def score_clusters(
         clusters: Dict[Tuple[int, int], Cluster],
         zmaps,
         fragment_dataset,
-res, rate,
+        res, rate,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
