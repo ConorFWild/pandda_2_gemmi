@@ -877,7 +877,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "inner>1": best_score_log["inner>1"],
             "outer>1": best_score_log["outer>1"],
             "inner>2": best_score_log["inner>2"],
-            "outer>2":best_score_log["outer"]
+            "outer>2":best_score_log["outer>2"]
         }
     )
 
