@@ -903,7 +903,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "num_inner": best_score_log["num_inner"],
             "num_outer": best_score_log["num_outer"],
             "all_scores": best_score_log["scores"],
-            "scores_from_calc": best_score_fit_score["scores_from_calc"]
+            "scores_from_calc": best_score_log["scores_from_calc"]
         }
     )
 
