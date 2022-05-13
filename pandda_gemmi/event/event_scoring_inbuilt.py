@@ -671,7 +671,7 @@ def EXPERIMENTAL_score_structure_rscc(
                                                       radius=1.0,
                                                       value=0,
                                                       )
-    outer_mask_array = np.array(outer_mask_grid, copy=False,         dtype=np.int8,)
+    outer_mask_array = np.array(outer_mask_grid, copy=False, dtype=np.int8, )
     outer_mask_indexes = np.nonzero(outer_mask_array)
 
     # Scale ligand density to map
@@ -702,7 +702,16 @@ def EXPERIMENTAL_score_structure_rscc(
                    * np.sqrt(np.sum(np.square(demeaned_approximate_structure_map_values)))
            )
 
-    return corr, {
+    scores = {}
+    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
+        noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
+        signal = np.sum(event_map_array[mask_indicies] > cutoff)
+        score = signal - (np.sum(inner_mask_int_array) * noise_percent)
+        scores[cutoff] = score
+
+    score = max(scores.values())
+
+    return score, {
         "Num masked indicies": len(mask_indicies[0]),
         "Mean approximate density": float(np.mean(approximate_structure_map_values)),
         "Mean event density": float(np.mean(event_map_values)),
@@ -716,7 +725,8 @@ def EXPERIMENTAL_score_structure_rscc(
         "inner>2": int(np.sum(event_map_array[mask_indicies] > 2.0)),
         "outer>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
         "num_inner": int(np.sum(inner_mask_int_array)),
-        "num_outer": int(np.sum(outer_mask_array))
+        "num_outer": int(np.sum(outer_mask_array)),
+        "scores": scores
     }
 
 
@@ -879,7 +889,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "inner>1": best_score_log["inner>1"],
             "outer>1": best_score_log["outer>1"],
             "inner>2": best_score_log["inner>2"],
-            "outer>2":best_score_log["outer>2"],
+            "outer>2": best_score_log["outer>2"],
             "num_inner": best_score_log["num_inner"],
             "num_outer": best_score_log["num_outer"]
         }
@@ -1751,7 +1761,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
                 score = initial_score
 
-                #TODO remove
+                # TODO remove
                 ed_grid = result.get_selected_conformer_results().score_log["grid"]
                 ccp4 = gemmi.Ccp4Map()
                 ccp4.grid = ed_grid
