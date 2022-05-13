@@ -707,7 +707,7 @@ def EXPERIMENTAL_score_structure_rscc(
         noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
         signal = np.sum(event_map_array[mask_indicies] > cutoff)
         score = signal - (np.sum(inner_mask_int_array) * noise_percent)
-        scores[cutoff] = score
+        scores[float(cutoff)] = int(score)
 
     score = max(scores.values())
 
@@ -891,7 +891,8 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "inner>2": best_score_log["inner>2"],
             "outer>2": best_score_log["outer>2"],
             "num_inner": best_score_log["num_inner"],
-            "num_outer": best_score_log["num_outer"]
+            "num_outer": best_score_log["num_outer"],
+            "all_scores": best_score_log["scores"]
         }
     )
 
