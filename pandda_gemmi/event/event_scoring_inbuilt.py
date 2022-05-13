@@ -718,7 +718,7 @@ def EXPERIMENTAL_score_structure_rscc(
         score = signal - (np.sum(approximate_structure_map_array > 1.5) * noise_percent)
         scores_from_calc[float(cutoff)] = int(score)
 
-    score = max(scores.values())
+    score = max(scores_from_calc.values())
 
     return score, {
         "Num masked indicies": len(mask_indicies[0]),
