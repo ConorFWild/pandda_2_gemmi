@@ -709,6 +709,15 @@ def EXPERIMENTAL_score_structure_rscc(
         score = signal - (np.sum(inner_mask_int_array) * noise_percent)
         scores[float(cutoff)] = int(score)
 
+    scores_from_calc = {}
+    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
+        approximate_structure_map_high_indicies = approximate_structure_map_array > 1.5
+        event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
+        signal = np.sum(event_map_high_indicies)
+        noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
+        score = signal - (np.sum(approximate_structure_map_array > 1.5) * noise_percent)
+        scores[float(cutoff)] = int(score)
+
     score = max(scores.values())
 
     return score, {
@@ -726,7 +735,8 @@ def EXPERIMENTAL_score_structure_rscc(
         "outer>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
         "num_inner": int(np.sum(inner_mask_int_array)),
         "num_outer": int(np.sum(outer_mask_array)),
-        "scores": scores
+        "scores": scores,
+        "scores_from_calc": scores_from_calc
     }
 
 
@@ -892,7 +902,8 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "outer>2": best_score_log["outer>2"],
             "num_inner": best_score_log["num_inner"],
             "num_outer": best_score_log["num_outer"],
-            "all_scores": best_score_log["scores"]
+            "all_scores": best_score_log["scores"],
+            "scores_from_calc": best_score_fit_score["scores_from_calc"]
         }
     )
 
