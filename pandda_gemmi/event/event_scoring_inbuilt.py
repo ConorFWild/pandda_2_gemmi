@@ -716,7 +716,7 @@ def EXPERIMENTAL_score_structure_rscc(
         signal = np.sum(event_map_high_indicies)
         noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
         score = signal - (np.sum(approximate_structure_map_array > 1.5) * noise_percent)
-        scores[float(cutoff)] = int(score)
+        scores_from_calc[float(cutoff)] = int(score)
 
     score = max(scores.values())
 
