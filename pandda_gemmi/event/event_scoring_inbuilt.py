@@ -1781,7 +1781,11 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 ccp4.setup()
                 ccp4.write_ccp4_map(str(structure_output_folder / f'{model_number}_'
                                                                   f'{event_id.event_idx.event_idx}_app.ccp4'))
-                del result.get_selected_conformer_results().score_log["grid"]
+                # del result.get_selected_conformer_results().score_log["grid"]
+
+                for conformer_id, conformer_fitting_result in \
+                        result.ligand_fitting_result.conformer_fitting_results.items():
+                    del conformer_fitting_result.score_log["grid"]
 
                 if debug >= Debug.INTERMEDIATE_FITS:
                     structure.write_minimal_pdb(
