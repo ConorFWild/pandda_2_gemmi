@@ -252,8 +252,10 @@ def get_conformers(
                 fragment_dataset.source_ligand_pdb,
             )
 
-    if debug >= Debug.PRINT_NUMERICS:
-        print(fragment_structures)
+    if fragment_dataset.source_ligand_smiles or fragment_dataset.source_ligand_cif or \
+            fragment_dataset.source_ligand_pdb:
+        if debug >= Debug.PRINT_NUMERICS:
+            print(fragment_structures)
 
     return Conformers(
         {},
