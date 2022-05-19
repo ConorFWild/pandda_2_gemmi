@@ -1391,25 +1391,47 @@ class EventScoringResult(EventScoringResultInterface):
         # self.score: float = score
         self.ligand_fitting_result: LigandFittingResultInterface = ligand_fitting_result
 
-    def get_selected_conformer_key(self) -> int:
-        return max(
-            [
+    def get_selected_conformer_key(self) -> Optional[int]:
+
+        keys_with_scores = [
                 conformer_id
                 for conformer_id
                 in self.ligand_fitting_result.conformer_fitting_results
                 if self.ligand_fitting_result.conformer_fitting_results[conformer_id].score is not None
-            ],
+            ]
+
+        if len(keys_with_scores) == 0:
+            return None
+
+        return max(
+            keys_with_scores,
             key=lambda key: self.ligand_fitting_result.conformer_fitting_results[key].score
         )
 
-    def get_selected_conformer_results(self) -> ConformerFittingResultInterface:
-        return self.ligand_fitting_result.conformer_fitting_results[self.get_selected_conformer_key()]
+    def get_selected_conformer_results(self) -> Optional[ConformerFittingResultInterface]:
+        key = self.get_selected_conformer_key()
+
+        if key:
+            return self.ligand_fitting_result.conformer_fitting_results[key]
+        else:
+            return None
 
     def get_selected_structure(self) -> Any:
-        return self.get_selected_conformer_results().optimised_fit
 
-    def get_selected_structure_score(self) -> float:
-        return self.get_selected_conformer_results().score
+        selected_conformer = self.get_selected_conformer_results()
+
+        if selected_conformer:
+            return selected_conformer.optimised_fit
+        else:
+            return None
+
+    def get_selected_structure_score(self) -> Optional[float]:
+        selected_conformer = self.get_selected_conformer_results()
+
+        if selected_conformer:
+            return selected_conformer.score
+        else:
+            return None
 
     def log(self) -> Dict:
         return {
@@ -1766,6 +1788,8 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 initial_score = result.get_selected_structure_score()
                 structure = result.get_selected_structure()
 
+
+
                 # if initial_score < 0.4:
                 #     score = 0
                 # else:
@@ -1788,11 +1812,12 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                     del conformer_fitting_result.score_log["grid"]
 
                 if debug >= Debug.INTERMEDIATE_FITS:
-                    structure.write_minimal_pdb(
-                        str(
-                            structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'
+                    if structure:
+                        structure.write_minimal_pdb(
+                            str(
+                                structure_output_folder / f'{model_number}_{event_id.event_idx.event_idx}.pdb'
+                            )
                         )
-                    )
 
                 string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
                          f"{event.cluster.values.size}"

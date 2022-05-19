@@ -488,7 +488,7 @@ class EventScoringResultInterface(Protocol):
     def get_selected_structure(self) -> Any:
         ...
 
-    def get_selected_structure_score(self) -> float:
+    def get_selected_structure_score(self) -> Optional[float]:
         ...
 
     def log(self) -> Dict:

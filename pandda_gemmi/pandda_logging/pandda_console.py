@@ -260,11 +260,16 @@ class PanDDAConsole:
                 dataset_event_scores = dataset_result.event_scores
                 for event_id, event in dataset_events.items():
                     event_score = dataset_event_scores[event_id]
+                    selected_structure_score = event_score.get_selected_structure_score()
+                    if selected_structure_score:
+                        score = round(selected_structure_score, 2)
+                    else:
+                        score = None
                     event_table.add_row(
                         str(round(res, 2)),
                         str(event_id.dtag.dtag),
                         str(event_id.event_idx.event_idx),
-                        str(round(event_score.get_selected_structure_score(), 2)),
+                        str(score),
                         str(event.cluster.indexes[0].size)
                     )
 
