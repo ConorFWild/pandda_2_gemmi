@@ -1813,9 +1813,9 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
                     for conformer_id, conformer_fitting_result in \
                             result.ligand_fitting_result.conformer_fitting_results.items():
-                        if conformer_fitting_result:
+                        # if conformer_fitting_result:
 
-                            del conformer_fitting_result.score_log["grid"]
+                        del conformer_fitting_result.score_log["grid"]
 
                 if debug >= Debug.INTERMEDIATE_FITS:
                     if structure:
