@@ -261,6 +261,15 @@ def EXPERIMENTAL_select_model(
 
     model_event_scores = {model_id: model.event_scores for model_id, model in model_results.items()}
 
+    for model_id, event_scores in model_event_scores.items():
+        print(
+            [
+                event_scores[score_id].get_selected_structure_score()
+                for score_id
+                in event_scores
+            ]
+        )
+
     # Score the top clusters
     model_scores = {
         model_id: max(
@@ -277,7 +286,11 @@ def EXPERIMENTAL_select_model(
     if debug >= Debug.PRINT_SUMMARIES:
         print(model_scores)
 
-    log['model_scores'] = {model_id: float(score) for model_id, score in model_scores.items()}
+    log['model_scores'] = {
+        model_id: float(score)
+        for model_id, score
+        in model_scores.items()
+    }
 
     if len(model_scores) == 0:
         return ModelSelection(0, log)
