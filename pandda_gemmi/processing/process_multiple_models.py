@@ -259,7 +259,11 @@ def EXPERIMENTAL_select_model(
 ) -> ModelSelectionInterface:
     log = {}
 
-    model_event_scores = {model_id: model.event_scores for model_id, model in model_results.items()}
+    model_event_scores: Dict[ModelIDInterface, Dict[EventIDInterface, EventScoringResultInterface]] = {
+        model_id: model.event_scores for
+        model_id,
+        model in model_results.items()
+    }
 
     if debug >= Debug.PRINT_NUMERICS:
         for model_id, event_scores in model_event_scores.items():
@@ -271,18 +275,42 @@ def EXPERIMENTAL_select_model(
                 ]
             )
 
-    # Score the top clusters
-    model_scores = {
-        model_id: max(
-            [
-                event_scores[score_id].get_selected_structure_score()
-                for score_id
-                in event_scores
-                if event_scores[score_id].get_selected_structure_score() is not None
-            ] + [0.0, ])
-        for model_id, event_scores
-        in model_event_scores.items()
-    }
+    # Score the top clusters#
+    model_scores = {}
+    for model_id, event_scores in model_event_scores.items():
+        selected_event_scores = [
+            event_scores[event_id].get_selected_structure_score()
+            for event_id
+            in event_scores
+        ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"{model_id}: {selected_event_scores}")
+
+        filtered_model_scores = [
+                                    selected_event_score
+                                    for selected_event_score
+                                    in selected_event_scores
+                                    if selected_event_score
+                                ] + [0.0, ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"{model_id}: filtered: {filtered_model_scores}")
+
+        maximum_event_score = max(
+            filtered_model_scores
+        )
+        model_scores[model_id] = maximum_event_score
+
+    # model_scores = {
+    #     model_id: max(
+    #         [
+    #             event_scores[score_id].get_selected_structure_score()
+    #             for score_id
+    #             in event_scores
+    #             if event_scores[score_id].get_selected_structure_score() is not None
+    #         ] + [0.0, ])
+    #     for model_id, event_scores
+    #     in model_event_scores.items()
+    # }
 
     if debug >= Debug.PRINT_SUMMARIES:
         print(model_scores)
@@ -396,7 +424,7 @@ def analyse_model(
         output_dir,
         score_events_func: GetEventScoreInterface,
         res, rate,
-        debug: Debug=Debug.DEFAULT
+        debug: Debug = Debug.DEFAULT
 ) -> ModelResultInterface:
     if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tAnalysing model: {model_number}')
@@ -420,7 +448,7 @@ def analyse_model(
     time_model_analysis_start = time.time()
 
     # Calculate z maps
-    if debug>= Debug.PRINT_SUMMARIES:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tCalculating zmaps")
     time_z_maps_start = time.time()
     zmaps: ZmapsInterface = Zmaps.from_xmaps(
@@ -430,7 +458,7 @@ def analyse_model(
         debug=debug,
     )
 
-    if debug>= Debug.PRINT_SUMMARIES:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tCalculated zmaps")
 
     time_z_maps_finish = time.time()
@@ -645,7 +673,7 @@ def analyse_model(
     #
     # for event_id, event_scoring_result in event_scores.items():
     #     model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
-        # model_log['noise'][int(event_num)] = noises[event_num]
+    # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
     #     test_dtag,
@@ -1035,6 +1063,7 @@ def save_xmap(
     ccp4.setup()
     ccp4.write_ccp4_map(str(path))
 
+
 def save_raw_xmap(
         dataset: DatasetInterface,
         path: Path,
@@ -1051,7 +1080,6 @@ def save_raw_xmap(
     ccp4.update_ccp4_header(2, True)
     ccp4.setup()
     ccp4.write_ccp4_map(str(path))
-
 
 
 def process_shell_multiple_models(
