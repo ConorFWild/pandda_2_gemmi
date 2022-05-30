@@ -269,6 +269,8 @@ def EXPERIMENTAL_select_model(
         print("Event scores for each model are:")
         print(model_event_scores)
 
+
+
         for model_id, event_scores in model_event_scores.items():
             print(f"Best score for model: {model_id}")
             print(
@@ -278,6 +280,10 @@ def EXPERIMENTAL_select_model(
                     in event_scores
                 ]
             )
+            for event_id, event_score_result in event_scores.items():
+                print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+                print(event_score_result.log())
+
 
     # Score the top clusters#
     model_scores = {}
@@ -730,6 +736,11 @@ def analyse_model(
     model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
     if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        for event_id, event_score_result in model_results.event_scores.items():
+            print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+            print(event_score_result.log())
 
     return model_results
 
