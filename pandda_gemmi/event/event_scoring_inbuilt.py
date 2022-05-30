@@ -19,6 +19,17 @@ from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_de
 from pandda_gemmi.python_types import *
 
 
+class ConfomerID(ConfromerIDInterface):
+    def __init__(self, conformer_id):
+        self.conformer_id = conformer_id
+
+    def __int__(self):
+        return self.conformer_id
+
+    def __hash__(self):
+        return self.conformer_id
+
+
 class ConformerFittingResult(ConformerFittingResultInterface):
     def __init__(self,
                  score: Optional[float],
@@ -53,8 +64,8 @@ class ConformerFittingResult(ConformerFittingResultInterface):
             return (self.score, self.optimised_fit, self.score_log)
 
 
-def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int, gemmi.Structure]:
-    fragment_structures: MutableMapping[int, gemmi.Structure] = {}
+def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[ConfromerIDInterface, gemmi.Structure]:
+    fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {}
     for i, conformer in enumerate(mol.GetConformers()):
 
         positions: np.ndarray = conformer.GetPositions()
@@ -89,7 +100,7 @@ def get_structures_from_mol(mol: Chem.Mol, max_conformers) -> MutableMapping[int
         model.add_chain(chain)
         structure.add_model(model)
 
-        fragment_structures[i] = structure
+        fragment_structures[ConfomerID(i)] = structure
 
         if len(fragment_structures) > max_conformers:
             return fragment_structures
@@ -166,17 +177,17 @@ def structures_from_cif(source_ligand_cif, debug: Debug = Debug.DEFAULT):
     #     G.add_node(atom.id, Z=atom.el.atomic_number)
     # for bond in cc.rt.bonds:
     #     G.add_edge(bond.id1.atom, bond.id2.atom)
-    return {0: structure}
+    return {ConfomerID(0): structure}
 
 
 class Conformers(ConformersInterface):
 
     def __init__(self,
-                 conformers: Dict[int, Any],
+                 conformers: Dict[ConfromerIDInterface, Any],
                  method: str,
                  path: Optional[Path],
                  ):
-        self.conformers: Dict[int, Any] = conformers
+        self.conformers: Dict[ConfromerIDInterface, Any] = conformers
         self.method: str = method
         self.path: Optional[Path] = path
 
@@ -222,7 +233,7 @@ def get_conformers(
         cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
 
         # Translate to structures
-        fragment_structures: MutableMapping[int, gemmi.Structure] = get_structures_from_mol(mol, max_conformers)
+        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = get_structures_from_mol(mol, max_conformers)
         if len(fragment_structures) > 0:
             return Conformers(
                 fragment_structures,
@@ -233,7 +244,7 @@ def get_conformers(
     if fragment_dataset.source_ligand_cif:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from cif')
-        fragment_structures = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
+        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
         if len(fragment_structures) > 0:
             return Conformers(
                 fragment_structures,
@@ -244,7 +255,7 @@ def get_conformers(
     if fragment_dataset.source_ligand_pdb:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from ligand pdb')
-        fragment_structures = {0: gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {ConfomerID(0): gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
         if len(fragment_structures) > 0:
             return Conformers(
                 fragment_structures,
@@ -1361,7 +1372,7 @@ def score_clusters(
         cluster_id: EventScoringResult(
             LigandFittingResult(
                 {
-                    0: ConformerFittingResult(
+                    ConfomerID(0): ConformerFittingResult(
                         None,
                         None,
                         None
@@ -1393,7 +1404,7 @@ class EventScoringResult(EventScoringResultInterface):
         # self.score: float = score
         self.ligand_fitting_result: LigandFittingResultInterface = ligand_fitting_result
 
-    def get_selected_conformer_key(self) -> Optional[int]:
+    def get_selected_conformer_key(self) -> Optional[ConfromerIDInterface]:
 
         keys_with_scores = [
                 conformer_id
@@ -1437,7 +1448,7 @@ class EventScoringResult(EventScoringResultInterface):
 
     def log(self) -> Dict:
         return {
-            "Selected conformer id": str(self.get_selected_conformer_key()),
+            "Selected conformer id": str(self.get_selected_conformer_key().conformer_id),
             "Selected conformer score": str(self.get_selected_structure_score()),
             "Ligand fitting log": self.ligand_fitting_result.log()
         }
