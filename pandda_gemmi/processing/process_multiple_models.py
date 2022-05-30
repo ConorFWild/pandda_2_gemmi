@@ -295,7 +295,7 @@ def EXPERIMENTAL_select_model(
                                     for selected_event_score
                                     in selected_event_scores
                                     if selected_event_score
-                                ] + [0.0, ]
+                                ] + [-0.001, ]
         if debug >= Debug.PRINT_NUMERICS:
             print(f"\tModel {model_id}: filtered scores: {filtered_model_scores}")
 
