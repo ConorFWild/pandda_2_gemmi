@@ -266,7 +266,11 @@ def EXPERIMENTAL_select_model(
     }
 
     if debug >= Debug.PRINT_NUMERICS:
+        print("Event scores for each model are:")
+        print(model_event_scores)
+
         for model_id, event_scores in model_event_scores.items():
+            print(f"Best score for model: {model_id}")
             print(
                 [
                     event_scores[score_id].get_selected_structure_score()
@@ -284,7 +288,7 @@ def EXPERIMENTAL_select_model(
             in event_scores
         ]
         if debug >= Debug.PRINT_NUMERICS:
-            print(f"{model_id}: {selected_event_scores}")
+            print(f"\tModel {model_id} all scores: {selected_event_scores}")
 
         filtered_model_scores = [
                                     selected_event_score
@@ -293,7 +297,7 @@ def EXPERIMENTAL_select_model(
                                     if selected_event_score
                                 ] + [0.0, ]
         if debug >= Debug.PRINT_NUMERICS:
-            print(f"{model_id}: filtered: {filtered_model_scores}")
+            print(f"\tModel {model_id}: filtered scores: {filtered_model_scores}")
 
         maximum_event_score = max(
             filtered_model_scores
@@ -313,6 +317,7 @@ def EXPERIMENTAL_select_model(
     # }
 
     if debug >= Debug.PRINT_SUMMARIES:
+        print("Maximum score of any event for each model are are:")
         print(model_scores)
 
     log['model_scores'] = {
