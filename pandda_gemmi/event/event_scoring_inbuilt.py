@@ -1731,7 +1731,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
         for atom in reference.dataset.structure.protein_atoms():
             pos = atom.pos
             inner_mask_grid.set_points_around(pos,
-                                              radius=2.0,
+                                              radius=1.25,
                                               value=1,
                                               )
 
