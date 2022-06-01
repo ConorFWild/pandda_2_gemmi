@@ -1358,7 +1358,7 @@ class LigandFittingResult(LigandFittingResultInterface):
     def log(self) -> Dict:
         return {
             "Conformer results": {
-                str(conformer_id): conformer_result.log()
+                str(conformer_id.conformer_id): conformer_result.log()
                 for conformer_id, conformer_result
                 in self.conformer_fitting_results.items()
             },
