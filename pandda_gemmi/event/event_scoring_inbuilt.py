@@ -723,11 +723,15 @@ def EXPERIMENTAL_score_structure_rscc(
         scores[float(cutoff)] = int(score)
 
     scores_from_calc = {}
+    noises_from_calc = {}
+    signals_from_calc = {}
     for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
         approximate_structure_map_high_indicies = approximate_structure_map_array > 1.5
         event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
         signal = np.sum(event_map_high_indicies)
+        signals_from_calc[float(cutoff)] = float(signal)
         noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
+        noises_from_calc[float(cutoff)] = float(noise_percent)
         score = signal - (np.sum(approximate_structure_map_array > 1.5) * noise_percent)
         scores_from_calc[float(cutoff)] = int(score)
 
@@ -749,7 +753,9 @@ def EXPERIMENTAL_score_structure_rscc(
         "num_inner": int(np.sum(inner_mask_int_array)),
         "num_outer": int(np.sum(outer_mask_array)),
         "scores": scores,
-        "scores_from_calc": scores_from_calc
+        "scores_from_calc": scores_from_calc,
+        "signals": signals_from_calc,
+        "noises": noises_from_calc
     }
 
 
@@ -798,6 +804,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     scores = []
     scores_signal_to_noise = []
     logs = []
+    optimised_structures = []
     for j in range(10):
         start_diff_ev = time.time()
 
@@ -856,6 +863,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             [x, y, z],
             rotation_matrix
         )
+        optimised_structures.append(optimised_structure)
 
         # TODO: Remove althogether
         # optimised_structure.write_minimal_pdb(f"frag_{1-res.fun}_{str(res.x)}.pdb")
@@ -889,6 +897,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     best_score = scores_signal_to_noise[best_score_index]
     best_score_log = logs[best_score_index]
     best_score_fit_score = scores[best_score_index]
+    best_optimised_structure = optimised_structures[best_score_index]
 
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tCluster size is: {int(cluster.values.size)}")
@@ -901,7 +910,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
         float(
             best_score
         ),
-        optimised_structure,
+        best_optimised_structure,
         {
             "fit_score": float(best_score_fit_score),
             "grid": best_score_log["grid"],
