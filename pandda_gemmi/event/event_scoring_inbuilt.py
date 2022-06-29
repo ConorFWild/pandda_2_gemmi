@@ -1456,8 +1456,13 @@ class EventScoringResult(EventScoringResultInterface):
             return None
 
     def log(self) -> Dict:
+
+        if self.get_selected_conformer_key():
+            selected_conformer_key = self.get_selected_conformer_key().conformer_id
+        else:
+            selected_conformer_key = None
         return {
-            "Selected conformer id": str(self.get_selected_conformer_key().conformer_id),
+            "Selected conformer id": str(selected_conformer_key),
             "Selected conformer score": str(self.get_selected_structure_score()),
             "Ligand fitting log": self.ligand_fitting_result.log()
         }
