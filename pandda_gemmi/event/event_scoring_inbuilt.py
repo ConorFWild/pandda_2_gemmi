@@ -163,7 +163,11 @@ def structures_from_cif(source_ligand_cif, debug: Debug = Debug.DEFAULT):
     # small_structure = gemmi.read_small_structure(str(source_ligand_cif))
     cif_doc = gemmi.cif.read(str(source_ligand_cif))
     # for block in cif_doc:
-    small_structure = gemmi.make_small_structure_from_block(cif_doc[-1])
+    try:
+        small_structure = gemmi.make_small_structure_from_block(cif_doc[-1])
+    except:
+        raise Exception(f"Failed to read a cif from: {source_ligand_cif}")
+
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\tsmall_structure: {small_structure}")
         print(f"\t\t\tSmall structure sites: {small_structure.sites}")
