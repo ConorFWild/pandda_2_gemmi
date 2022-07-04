@@ -100,7 +100,7 @@ class LigandDir:
         ligand_smiles_paths = [
             ligand_smiles_path
             for ligand_smiles_path
-            in path.rglob("*")
+            in path.glob("*")
             if re.match(
                 ligand_smiles_regex,
                 str(ligand_smiles_path.name),
@@ -111,7 +111,7 @@ class LigandDir:
         ligand_cif_paths = [
             ligand_cif_path
             for ligand_cif_path
-            in path.rglob("*")
+            in path.glob("*")
             if re.match(
                 ligand_cif_regex,
                 str(ligand_cif_path.name),
@@ -122,7 +122,7 @@ class LigandDir:
         ligand_pdb_paths = [
             ligand_pdb_path
             for ligand_pdb_path
-            in path.rglob("*")
+            in path.glob("*")
             if re.match(
                 ligand_pdb_regex,
                 str(ligand_pdb_path.name),
@@ -218,8 +218,10 @@ class DatasetDir:
     @staticmethod
     def from_path(path: Path, pdb_regex: str, mtz_regex: str,
                   ligand_dir_name: str,
-                  ligand_cif_regex: str, ligand_pdb_regex: str,
-                  ligand_smiles_regex: str):
+                  ligand_cif_regex: str,
+                  ligand_pdb_regex: str,
+                  ligand_smiles_regex: str,
+                  ):
 
         # Get pdb
         input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
