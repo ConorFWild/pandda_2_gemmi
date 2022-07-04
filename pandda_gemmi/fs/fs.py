@@ -221,115 +221,126 @@ class DatasetDir:
                   ligand_cif_regex: str, ligand_pdb_regex: str,
                   ligand_smiles_regex: str):
 
-        try:
-            input_pdb_file: Path = next(path.glob(pdb_regex))
-            input_mtz_file: Path = next(path.glob(mtz_regex))
-
-            source_ligand_dir = path / ligand_dir_name
-
-            if source_ligand_dir.exists():
-                ligand_dir = LigandDir.from_path(
-                    source_ligand_dir,
-                    ligand_cif_regex,
-                    ligand_pdb_regex,
-                    ligand_smiles_regex
-                )
-                # ligand_search_path = source_ligand_dir
-
-                source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
-                source_ligand_cif = ligand_dir.get_first_ligand_cif()
-                source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
-
-            else:
-                ligand_dir = None
-                # ligand_search_path = path
-                source_ligand_smiles = None
-                source_ligand_cif = None
-                source_ligand_pdb = None
-
-            #
-            # # Cif
-            # try:
-            #
-            #     ligand_cif_paths = [
-            #         ligand_cif_path
-            #         for ligand_cif_path
-            #         in ligand_search_path.rglob("*")
-            #         if re.match(
-            #             ligand_cif_regex,
-            #             str(ligand_cif_path.name),
-            #
-            #         )
-            #     ]
-            #     source_ligand_cif = ligand_cif_paths[0]
-            # except Exception as e:
-            #     print(e)
-            #     source_ligand_cif = None
-            #
-            # # Smiles
-            # try:
-            #
-            #     ligand_smiles_paths = [
-            #         ligand_smiles_path
-            #         for ligand_smiles_path
-            #         in ligand_search_path.rglob("*")
-            #         if re.match(
-            #             ligand_smiles_regex,
-            #             str(ligand_smiles_path.name),
-            #
-            #         )
-            #     ]
-            #
-            #     source_ligand_smiles = ligand_smiles_paths[0]
-            # except Exception as e:
-            #     print(e)
-            #     source_ligand_smiles = None
-            #
-            # # ligand Pdb
-            # try:
-            #     # ligands = ligand_search_path.rglob(ligand_pdb_regex)
-            #     ligand_pdb_paths = [
-            #         ligand_pdb_path
-            #         for ligand_pdb_path
-            #         in ligand_search_path.rglob("*")
-            #         if re.match(
-            #             ligand_pdb_regex,
-            #             str(ligand_pdb_path.name),
-            #
-            #         )
-            #     ]
-            #     # source_ligand_pdb = ligand_pdb_paths[0]
-            #
-            #     if source_ligand_cif:
-            #         stem = source_ligand_cif.stem
-            #
-            #     elif source_ligand_smiles:
-            #         stem = source_ligand_smiles.stem
-            #
-            #     else:
-            #         stem = None
-            #
-            #     source_ligand_pdb = None
-            #     if stem:
-            #         # for ligand_path in ligands:
-            #         for ligand_path in ligand_pdb_paths:
-            #             if ligand_path.stem == stem:
-            #                 source_ligand_pdb = ligand_path
-            #
-            # except:
-            #     source_ligand_pdb = None
-
-            return DatasetDir(
-                path=path,
-                input_pdb_file=input_pdb_file,
-                input_mtz_file=input_mtz_file,
-                ligand_dir=ligand_dir,
-                source_ligand_cif=source_ligand_cif,
-                source_ligand_pdb=source_ligand_pdb,
-                source_ligand_smiles=source_ligand_smiles
-            )
-        except:
+        # Get pdb
+        input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
+        if len(input_pdb_files) == 0:
             return None
+        else:
+            input_pdb_file: Path = input_pdb_files[0]
+
+        # Get mtz
+        input_mtz_files = [mtz_path for mtz_path in path.glob(mtz_regex)]
+        if len(input_mtz_files) == 0:
+            return None
+        else:
+            input_mtz_file: Path = input_mtz_files[0]
+
+        source_ligand_dir = path / ligand_dir_name
+
+        if source_ligand_dir.exists():
+            ligand_dir = LigandDir.from_path(
+                source_ligand_dir,
+                ligand_cif_regex,
+                ligand_pdb_regex,
+                ligand_smiles_regex
+            )
+            # ligand_search_path = source_ligand_dir
+
+            source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
+            source_ligand_cif = ligand_dir.get_first_ligand_cif()
+            source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
+
+        else:
+            ligand_dir = None
+            # ligand_search_path = path
+            source_ligand_smiles = None
+            source_ligand_cif = None
+            source_ligand_pdb = None
+
+        #
+        # # Cif
+        # try:
+        #
+        #     ligand_cif_paths = [
+        #         ligand_cif_path
+        #         for ligand_cif_path
+        #         in ligand_search_path.rglob("*")
+        #         if re.match(
+        #             ligand_cif_regex,
+        #             str(ligand_cif_path.name),
+        #
+        #         )
+        #     ]
+        #     source_ligand_cif = ligand_cif_paths[0]
+        # except Exception as e:
+        #     print(e)
+        #     source_ligand_cif = None
+        #
+        # # Smiles
+        # try:
+        #
+        #     ligand_smiles_paths = [
+        #         ligand_smiles_path
+        #         for ligand_smiles_path
+        #         in ligand_search_path.rglob("*")
+        #         if re.match(
+        #             ligand_smiles_regex,
+        #             str(ligand_smiles_path.name),
+        #
+        #         )
+        #     ]
+        #
+        #     source_ligand_smiles = ligand_smiles_paths[0]
+        # except Exception as e:
+        #     print(e)
+        #     source_ligand_smiles = None
+        #
+        # # ligand Pdb
+        # try:
+        #     # ligands = ligand_search_path.rglob(ligand_pdb_regex)
+        #     ligand_pdb_paths = [
+        #         ligand_pdb_path
+        #         for ligand_pdb_path
+        #         in ligand_search_path.rglob("*")
+        #         if re.match(
+        #             ligand_pdb_regex,
+        #             str(ligand_pdb_path.name),
+        #
+        #         )
+        #     ]
+        #     # source_ligand_pdb = ligand_pdb_paths[0]
+        #
+        #     if source_ligand_cif:
+        #         stem = source_ligand_cif.stem
+        #
+        #     elif source_ligand_smiles:
+        #         stem = source_ligand_smiles.stem
+        #
+        #     else:
+        #         stem = None
+        #
+        #     source_ligand_pdb = None
+        #     if stem:
+        #         # for ligand_path in ligands:
+        #         for ligand_path in ligand_pdb_paths:
+        #             if ligand_path.stem == stem:
+        #                 source_ligand_pdb = ligand_path
+        #
+        # except:
+        #     source_ligand_pdb = None
+
+        return DatasetDir(
+            path=path,
+            input_pdb_file=input_pdb_file,
+            input_mtz_file=input_mtz_file,
+            ligand_dir=ligand_dir,
+            source_ligand_cif=source_ligand_cif,
+            source_ligand_pdb=source_ligand_pdb,
+            source_ligand_smiles=source_ligand_smiles
+        )
+        # except Exception as e:
+        #     print(e)
+        #     return None
 
 
 @dataclasses.dataclass()
