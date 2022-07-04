@@ -82,21 +82,127 @@ class DatasetModels:
 @dataclasses.dataclass()
 class LigandDir:
     path: Path
-    pdbs: typing.List[Path]
-    cifs: typing.List[Path]
-    smiles: typing.List[Path]
+    pdbs: typing.Dict[str, Optional[Path]]
+    cifs: typing.Dict[str, Optional[Path]]
+    smiles: typing.Dict[str, Optional[Path]]
+    ligand_keys: List[str]
 
     @staticmethod
-    def from_path(path: Path):
-        pdbs = list(path.glob("*.pdb"))
-        cifs = list(path.glob("*.cifs"))
-        smiles = list(path.glob("*.smiles"))
+    def from_path(path: Path,
+                  ligand_cif_regex: str,
+                  ligand_pdb_regex: str,
+                  ligand_smiles_regex: str
+                  ):
+        # pdbs = list(path.glob("*.pdb"))
+        # cifs = list(path.glob("*.cifs"))
+        # smiles = list(path.glob("*.smiles"))
+
+        ligand_smiles_paths = [
+            ligand_smiles_path
+            for ligand_smiles_path
+            in path.rglob("*")
+            if re.match(
+                ligand_smiles_regex,
+                str(ligand_smiles_path.name),
+
+            )
+        ]
+
+        ligand_cif_paths = [
+            ligand_cif_path
+            for ligand_cif_path
+            in path.rglob("*")
+            if re.match(
+                ligand_cif_regex,
+                str(ligand_cif_path.name),
+
+            )
+        ]
+
+        ligand_pdb_paths = [
+            ligand_pdb_path
+            for ligand_pdb_path
+            in path.rglob("*")
+            if re.match(
+                ligand_pdb_regex,
+                str(ligand_pdb_path.name),
+
+            )
+        ]
+
+        if len(ligand_smiles_paths) != 0:
+            ligand_keys = [
+                _ligand_smile_path.stem
+                for _ligand_smile_path
+                in ligand_smiles_paths
+            ]
+        elif len(ligand_cif_paths) != 0:
+            ligand_keys = [
+                _ligand_cif_path.stem
+                for _ligand_cif_path
+                in ligand_cif_paths
+            ]
+        elif len(ligand_pdb_paths) != 0:
+            ligand_keys = [
+                _ligand_pdb_path.stem
+                for _ligand_pdb_path
+                in ligand_pdb_paths
+            ]
+        else:
+            ligand_keys = []
+
+        # Generate dics
+        ligand_smiles_path_dict = {}
+        ligand_cif_path_dict = {}
+        ligand_pdb_path_dict = {}
+
+        for ligand_key in ligand_keys:
+            # Smiles
+            for _ligand_smiles_path in ligand_smiles_paths:
+                if _ligand_smiles_path.stem == ligand_key:
+                    ligand_smiles_path_dict[ligand_key] = _ligand_smiles_path
+                else:
+                    ligand_smiles_path_dict[ligand_key] = None
+
+            # Cifs
+            for _ligand_cif_path in ligand_cif_paths:
+                if _ligand_cif_path.stem == ligand_key:
+                    ligand_cif_path_dict[ligand_key] = _ligand_cif_path
+                else:
+                    ligand_cif_path_dict[ligand_key] = None
+
+            # Pdbs
+            for _ligand_pdb_path in ligand_pdb_paths:
+                if _ligand_pdb_path.stem == ligand_key:
+                    ligand_pdb_path_dict[ligand_key] = _ligand_pdb_path
+                else:
+                    ligand_pdb_path_dict[ligand_key] = None
 
         return LigandDir(path,
-                         pdbs,
-                         cifs,
-                         smiles,
+                         ligand_smiles_path_dict,
+                         ligand_cif_path_dict,
+                         ligand_pdb_path_dict,
+                         ligand_keys,
                          )
+
+    def get_first_ligand_smiles(self):
+        if len(self.ligand_keys) == 0:
+            return None
+        else:
+            return self.smiles[self.ligand_keys[0]]
+
+    def get_first_ligand_cif(self):
+        if len(self.ligand_keys) == 0:
+            return None
+        else:
+            return self.smiles[self.ligand_keys[0]]
+
+    def get_first_ligand_pdb(self):
+        if len(self.ligand_keys) == 0:
+            return None
+        else:
+            return self.smiles[self.ligand_keys[0]]
+
 
 
 @dataclasses.dataclass()
@@ -122,82 +228,96 @@ class DatasetDir:
             source_ligand_dir = path / ligand_dir_name
 
             if source_ligand_dir.exists():
-                ligand_dir = LigandDir.from_path(source_ligand_dir)
-                ligand_search_path = source_ligand_dir
+                ligand_dir = LigandDir.from_path(
+                    source_ligand_dir,
+                    ligand_cif_regex,
+                    ligand_pdb_regex,
+                    ligand_smiles_regex
+                )
+                # ligand_search_path = source_ligand_dir
+
+                source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
+                source_ligand_cif = ligand_dir.get_first_ligand_cif()
+                source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
+
             else:
                 ligand_dir = None
-                ligand_search_path = path
-
-            # Cif
-            try:
-
-                ligand_cif_paths = [
-                    ligand_cif_path
-                    for ligand_cif_path
-                    in ligand_search_path.rglob("*")
-                    if re.match(
-                        ligand_cif_regex,
-                        str(ligand_cif_path.name),
-
-                    )
-                ]
-                source_ligand_cif = ligand_cif_paths[0]
-            except Exception as e:
-                print(e)
-                source_ligand_cif = None
-
-            # Smiles
-            try:
-
-                ligand_smiles_paths = [
-                    ligand_smiles_path
-                    for ligand_smiles_path
-                    in ligand_search_path.rglob("*")
-                    if re.match(
-                        ligand_smiles_regex,
-                        str(ligand_smiles_path.name),
-
-                    )
-                ]
-
-                source_ligand_smiles = ligand_smiles_paths[0]
-            except Exception as e:
-                print(e)
+                # ligand_search_path = path
                 source_ligand_smiles = None
-
-            # ligand Pdb
-            try:
-                # ligands = ligand_search_path.rglob(ligand_pdb_regex)
-                ligand_pdb_paths = [
-                    ligand_pdb_path
-                    for ligand_pdb_path
-                    in ligand_search_path.rglob("*")
-                    if re.match(
-                        ligand_pdb_regex,
-                        str(ligand_pdb_path.name),
-
-                    )
-                ]
-                # source_ligand_pdb = ligand_pdb_paths[0]
-
-                if source_ligand_cif:
-                    stem = source_ligand_cif.stem
-
-                elif source_ligand_smiles:
-                    stem = source_ligand_smiles.stem
-
-                else:
-                    stem = None
-
+                source_ligand_cif = None
                 source_ligand_pdb = None
-                if stem:
-                    # for ligand_path in ligands:
-                    for ligand_path in ligand_pdb_paths:
-                        if ligand_path.stem == stem:
-                            source_ligand_pdb = ligand_path
 
-            except:
-                source_ligand_pdb = None
+            #
+            # # Cif
+            # try:
+            #
+            #     ligand_cif_paths = [
+            #         ligand_cif_path
+            #         for ligand_cif_path
+            #         in ligand_search_path.rglob("*")
+            #         if re.match(
+            #             ligand_cif_regex,
+            #             str(ligand_cif_path.name),
+            #
+            #         )
+            #     ]
+            #     source_ligand_cif = ligand_cif_paths[0]
+            # except Exception as e:
+            #     print(e)
+            #     source_ligand_cif = None
+            #
+            # # Smiles
+            # try:
+            #
+            #     ligand_smiles_paths = [
+            #         ligand_smiles_path
+            #         for ligand_smiles_path
+            #         in ligand_search_path.rglob("*")
+            #         if re.match(
+            #             ligand_smiles_regex,
+            #             str(ligand_smiles_path.name),
+            #
+            #         )
+            #     ]
+            #
+            #     source_ligand_smiles = ligand_smiles_paths[0]
+            # except Exception as e:
+            #     print(e)
+            #     source_ligand_smiles = None
+            #
+            # # ligand Pdb
+            # try:
+            #     # ligands = ligand_search_path.rglob(ligand_pdb_regex)
+            #     ligand_pdb_paths = [
+            #         ligand_pdb_path
+            #         for ligand_pdb_path
+            #         in ligand_search_path.rglob("*")
+            #         if re.match(
+            #             ligand_pdb_regex,
+            #             str(ligand_pdb_path.name),
+            #
+            #         )
+            #     ]
+            #     # source_ligand_pdb = ligand_pdb_paths[0]
+            #
+            #     if source_ligand_cif:
+            #         stem = source_ligand_cif.stem
+            #
+            #     elif source_ligand_smiles:
+            #         stem = source_ligand_smiles.stem
+            #
+            #     else:
+            #         stem = None
+            #
+            #     source_ligand_pdb = None
+            #     if stem:
+            #         # for ligand_path in ligands:
+            #         for ligand_path in ligand_pdb_paths:
+            #             if ligand_path.stem == stem:
+            #                 source_ligand_pdb = ligand_path
+            #
+            # except:
+            #     source_ligand_pdb = None
 
             return DatasetDir(
                 path=path,
@@ -545,7 +665,6 @@ class ShellDirs(ShellDirsInterface):
 
 
 def get_shell_dirs_from_pandda_dir(pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
-
     shells_dir = pandda_dir / PANDDA_SHELL_DIR
 
     shell_dirs = {}
@@ -553,6 +672,7 @@ def get_shell_dirs_from_pandda_dir(pandda_dir: Path, shells: ShellsInterface) ->
         shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
 
     return ShellDirs(shells_dir, shell_dirs)
+
 
 class GetShellDirs(GetShellDirsInterface):
     def __call__(self, pandda_dir: Path, shells: ShellsInterface) -> ShellDirsInterface:
@@ -597,7 +717,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
                              log_file=log_path,
                              shell_dirs=None,
                              console_log_file=console_log_file,
-        events_json_file=events_json_file,
+                             events_json_file=events_json_file,
                              )
 
     def build(self, overwrite=False, process_local=None):
@@ -607,19 +727,20 @@ class PanDDAFSModel(PanDDAFSModelInterface):
         self.processed_datasets.build(process_local=process_local)
         self.analyses.build()
 
+
 def get_pandda_fs_model(input_data_dirs: Path,
-                 output_out_dir: Path,
-                 pdb_regex: str, mtz_regex: str,
-                 ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
-                 process_local=None,
-                 ):
+                        output_out_dir: Path,
+                        pdb_regex: str, mtz_regex: str,
+                        ligand_dir_name, ligand_cif_regex: str, ligand_pdb_regex: str, ligand_smiles_regex: str,
+                        process_local=None,
+                        ):
     analyses = Analyses.from_pandda_dir(output_out_dir)
     data_dirs = DataDirs.from_dir(input_data_dirs, pdb_regex, mtz_regex, ligand_dir_name, ligand_cif_regex,
-                                    ligand_pdb_regex, ligand_smiles_regex, process_local=process_local)
+                                  ligand_pdb_regex, ligand_smiles_regex, process_local=process_local)
     processed_datasets = ProcessedDatasets.from_data_dirs(data_dirs,
-                                                            output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
-                                                            process_local=process_local,
-                                                            )
+                                                          output_out_dir / PANDDA_PROCESSED_DATASETS_DIR,
+                                                          process_local=process_local,
+                                                          )
     log_path = output_out_dir / PANDDA_LOG_FILE
 
     console_log_file = output_out_dir / PANDDA_TEXT_LOG_FILE
@@ -627,33 +748,33 @@ def get_pandda_fs_model(input_data_dirs: Path,
     events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
 
     return PanDDAFSModel(pandda_dir=output_out_dir,
-                            data_dirs=data_dirs,
-                            analyses=analyses,
-                            processed_datasets=processed_datasets,
-                            log_file=log_path,
-                            shell_dirs=None,
-                            console_log_file=console_log_file,
+                         data_dirs=data_dirs,
+                         analyses=analyses,
+                         processed_datasets=processed_datasets,
+                         log_file=log_path,
+                         shell_dirs=None,
+                         console_log_file=console_log_file,
                          events_json_file=events_json_file
                          )
 
 
 class GetPanDDAFSModel(GetPanDDAFSModelInterface):
-    def __call__(self, 
-    input_data_dirs: Path, 
-    output_out_dir: Path, 
-    pdb_regex: str, 
-    mtz_regex: str, 
-    ligand_dir_name, 
-    ligand_cif_regex: str, 
-    ligand_pdb_regex: str, 
-    ligand_smiles_regex: str) -> PanDDAFSModelInterface:
+    def __call__(self,
+                 input_data_dirs: Path,
+                 output_out_dir: Path,
+                 pdb_regex: str,
+                 mtz_regex: str,
+                 ligand_dir_name,
+                 ligand_cif_regex: str,
+                 ligand_pdb_regex: str,
+                 ligand_smiles_regex: str) -> PanDDAFSModelInterface:
         return get_pandda_fs_model(
-            input_data_dirs, 
-            output_out_dir, 
-            pdb_regex, 
-            mtz_regex, 
-            ligand_dir_name, 
-            ligand_cif_regex, 
-            ligand_pdb_regex, 
+            input_data_dirs,
+            output_out_dir,
+            pdb_regex,
+            mtz_regex,
+            ligand_dir_name,
+            ligand_cif_regex,
+            ligand_pdb_regex,
             ligand_smiles_regex,
-            )
+        )
