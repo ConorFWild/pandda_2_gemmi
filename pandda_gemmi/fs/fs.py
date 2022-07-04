@@ -82,9 +82,9 @@ class DatasetModels:
 @dataclasses.dataclass()
 class LigandDir:
     path: Path
-    pdbs: typing.Dict[str, Optional[Path]]
-    cifs: typing.Dict[str, Optional[Path]]
     smiles: typing.Dict[str, Optional[Path]]
+    cifs: typing.Dict[str, Optional[Path]]
+    pdbs: typing.Dict[str, Optional[Path]]
     ligand_keys: List[str]
 
     @staticmethod
