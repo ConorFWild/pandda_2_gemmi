@@ -18,6 +18,7 @@ from pandda_gemmi.python_types import *
 from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 
+
 @dataclasses.dataclass()
 class Partitioning(PartitioningInterface):
     partitioning: typing.Dict[ResidueIDInterface, typing.Dict[GridCoordInterface, PositionInterface]]
@@ -39,16 +40,19 @@ class Partitioning(PartitioningInterface):
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
                        mask_radius_symmetry: float,
+                       debug: Debug=Debug.DEFAULT
                        ):
 
         return Partitioning.from_structure(reference.dataset.structure,
                                            grid,
                                            mask_radius,
                                            mask_radius_symmetry,
+                                           debug=debug
                                            )
 
     @staticmethod
-    def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float = 6.0, buffer: float = 3.0):
+    def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float = 6.0, buffer: float = 3.0,
+                        debug: Debug=Debug.DEFAULT):
         # Get the bounds
         min_x = ca_position_array[:, 0].min() - buffer
         max_x = ca_position_array[:, 0].max() + buffer
@@ -64,12 +68,19 @@ class Partitioning(PartitioningInterface):
         # Get them as fractions of the unit cell
         grid_min_frac = grid.unit_cell.fractionalize(grid_min_cart)
         grid_max_frac = grid.unit_cell.fractionalize(grid_max_cart)
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"Min grid cart: {grid_min_cart}")
+            print(f"Max grid cart: {grid_max_cart}")
 
         # Get them as coords
         grid_min_coord = [int(grid_min_frac[0] * grid.nu), int(grid_min_frac[1] * grid.nv),
                           int(grid_min_frac[2] * grid.nw), ]
         grid_max_coord = [int(grid_max_frac[0] * grid.nu), int(grid_max_frac[1] * grid.nv),
                           int(grid_max_frac[2] * grid.nw), ]
+
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"Min grid coord: {grid_min_coord}")
+            print(f"Max grid coord: {grid_max_coord}")
 
         # Get these as fractions
         # fractional_grid_min = [
@@ -97,6 +108,9 @@ class Partitioning(PartitioningInterface):
             fractional_grid_max[1] - fractional_grid_min[1],
             fractional_grid_max[2] - fractional_grid_min[2],
         ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"Min grid frac: {fractional_grid_min}")
+            print(f"Max grid frac: {fractional_grid_max}")
 
         # Get the grid of points around the protein
 
@@ -218,7 +232,7 @@ class Partitioning(PartitioningInterface):
 
     @staticmethod
     def from_structure_multiprocess(structure: StructureInterface,
-                                    grid: CrystallographicGridInterface,#: Grid,
+                                    grid: CrystallographicGridInterface,  #: Grid,
                                     mask_radius: float,
                                     mask_radius_symmetry: float, ):
 
@@ -232,6 +246,7 @@ class Partitioning(PartitioningInterface):
                        grid: CrystallographicGridInterface,
                        mask_radius: float,
                        mask_radius_symmetry: float,
+                       debug: Debug=Debug.DEFAULT,
                        ):
         poss = []
         res_indexes = {}
@@ -266,9 +281,9 @@ class Partitioning(PartitioningInterface):
         for atom in structure.protein_atoms():
             pos = atom.pos
             inner_mask.set_points_around(pos,
-                                   radius=mask_radius_symmetry,
-                                   value=1,
-                                   )
+                                         radius=mask_radius_symmetry,
+                                         value=1,
+                                         )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         # Get the contact mask
@@ -278,9 +293,9 @@ class Partitioning(PartitioningInterface):
         for atom in structure.protein_atoms():
             pos = atom.pos
             contact_mask.set_points_around(pos,
-                                         radius=4.0,
-                                         value=1,
-                                         )
+                                           radius=4.0,
+                                           value=1,
+                                           )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         # Mask the symmetry points
@@ -291,7 +306,8 @@ class Partitioning(PartitioningInterface):
             mask,
             ca_position_array,
             structure,
-            mask_radius
+            mask_radius,
+            debug=debug,
         )
 
         # Mask by protein
@@ -552,8 +568,6 @@ class Grid(GridInterface):
     grid: gemmi.FloatGrid
     partitioning: Partitioning
 
-    
-
     def new_grid(self):
         spacing = [self.grid.nu, self.grid.nv, self.grid.nw]
         unit_cell = self.grid.unit_cell
@@ -605,12 +619,14 @@ class Grid(GridInterface):
                                          )
         self.grid = data[0].to_gemmi()
 
+
 def get_grid_from_reference(
-    reference: ReferenceInterface, 
-    mask_radius: float, 
-    mask_radius_symmetry: float,
-                    sample_rate: float = 3.0, 
-                    ):
+        reference: ReferenceInterface,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        sample_rate: float = 3.0,
+        debug: Debug=Debug.DEFAULT
+):
     unit_cell = Grid.unit_cell_from_reference(reference)
     spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
 
@@ -620,22 +636,25 @@ def get_grid_from_reference(
     grid.spacegroup = reference.dataset.reflections.spacegroup()
 
     partitioning = Partitioning.from_reference(reference,
-                                                grid,
-                                                mask_radius,
-                                                mask_radius_symmetry)
+                                               grid,
+                                               mask_radius,
+                                               mask_radius_symmetry, debug=debug)
 
     return Grid(grid, partitioning)
 
+
 class GetGrid(GetGridInterface):
-    def __call__(self, 
-    reference: ReferenceInterface, 
-    outer_mask: float, 
-    inner_mask_symmetry: float, 
-    sample_rate: float,
-    ) -> GridInterface:
+    def __call__(self,
+                 reference: ReferenceInterface,
+                 outer_mask: float,
+                 inner_mask_symmetry: float,
+                 sample_rate: float,
+                 debug: Debug=Debug.DEFAULT,
+                 ) -> GridInterface:
         return get_grid_from_reference(
-            reference, 
-            outer_mask, 
-            inner_mask_symmetry, 
+            reference,
+            outer_mask,
+            inner_mask_symmetry,
             sample_rate,
-            )
+            debug=debug
+        )

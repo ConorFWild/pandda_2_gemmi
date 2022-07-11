@@ -271,12 +271,15 @@ def get_filter_reference_compatability(
     filters = {}
 
     if "dissimilar_models" in filter_keys:
+        print("filter models")
         filters["dissimilar_models"] = FilterDissimilarModels(pandda_args.max_rmsd_to_reference)
 
     if "large_gaps" in filter_keys:
+        print("filter gaps")
         filters["large_gaps"] = FilterIncompleteModels()
 
     if "dissimilar_spacegroups" in filter_keys:
+        print("filter sg")
         filters["dissimilar_spacegroups"] = FilterDifferentSpacegroups()
 
     return FiltersReferenceCompatibility(filters, datasets_validator)
@@ -338,8 +341,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
         [
             "dissimilar_models",
-            "large_gaps"
-            "dissimilar_spacegroups"
+            "large_gaps",
+            # "dissimilar_spacegroups",
         ],
         datasets_validator,
         pandda_args
@@ -405,12 +408,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 
-        if pandda_args.debug:
+        if pandda_args.debug >= Debug.AVERAGE_MAPS:
             with open(pandda_fs_model.pandda_dir / "pandda_fs_model.pickle", "wb") as f:
                 pickle.dump(pandda_fs_model, f)
 
         console.summarise_fs_model(pandda_fs_model)
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+        if pandda_args.debug >= Debug.PRINT_NUMERICS:
+            for dtag, data_dir in pandda_fs_model.data_dirs.dataset_dirs.items():
+                print(dtag)
+                print(data_dir.source_ligand_cif)
+                print(data_dir.source_ligand_smiles)
 
         ###################################################################
         # # Load datasets
@@ -420,6 +428,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_initial: DatasetsInterface = GetDatasets()(pandda_fs_model, )
         datasets_statistics: DatasetsStatisticsInterface = DatasetsStatistics(datasets_initial)
         console.summarise_datasets(datasets_initial, datasets_statistics)
+
+        if pandda_args.debug >= Debug.PRINT_NUMERICS:
+            print(datasets_initial)
 
         # If structure factors not given, check if any common ones are available
         with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
@@ -445,6 +456,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                                      datasets_initial.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
+        console.summarise_filtered_datasets(
+            filter_data_quality.filtered_dtags
+        )
 
         ###################################################################
         # # Truncate columns
@@ -464,10 +478,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             )
             pandda_log["Reference Dtag"] = str(reference.dtag)
             console.summarise_reference(reference)
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
                 print(reference.dtag)
 
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.AVERAGE_MAPS:
                 with open(pandda_fs_model.pandda_dir / "reference.pickle", "wb") as f:
                     pickle.dump(reference, f)
 
@@ -508,6 +522,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
         datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
                                        datasets_reference.items()}
+        console.summarise_filtered_datasets(
+            filter_reference_compatability.filtered_dtags
+        )
 
         ###################################################################
         # # Getting grid
@@ -520,12 +537,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                             pandda_args.outer_mask,
                                             pandda_args.inner_mask_symmetry,
                                             # sample_rate=pandda_args.sample_rate,
-                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5
+                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
+                                            debug=pandda_args.debug
                                             )
 
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.AVERAGE_MAPS:
                 with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
                     pickle.dump(grid, f)
+
+                grid.partitioning.save_maps(
+                    pandda_fs_model.pandda_dir
+                )
 
         ###################################################################
         # # Getting alignments
@@ -539,7 +561,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 datasets,
             )
 
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.AVERAGE_MAPS:
                 with open(pandda_fs_model.pandda_dir / "alignments.pickle", "wb") as f:
                     pickle.dump(alignments, f)
 
@@ -597,7 +619,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 pandda_args.only_datasets,
                 debug=pandda_args.debug,
             )
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
                 print('Got shells that support multiple models')
                 for shell_res, shell in shells.items():
                     print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
@@ -617,7 +639,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
             pandda_fs_model.shell_dirs.build()
 
-        if pandda_args.debug:
+        if pandda_args.debug >= Debug.PRINT_NUMERICS:
             printer.pprint(shells)
 
         # Process the shells
@@ -712,7 +734,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 if shell_result
             }
             pandda_log["Time to process all shells"] = time_shells_finish - time_shells_start
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
                 print(f"Time to process all shells: {time_shells_finish - time_shells_start}")
 
         all_events: EventsInterface = {}
@@ -725,13 +747,24 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         for res, shell_result in shell_results.items():
             if shell_result:
                 for dtag, dataset_result in shell_result.dataset_results.items():
-                    event_scores.update(dataset_result.event_scores)
+                    event_scores.update(
+                        {
+                            event_id: event_scoring_result.get_selected_structure_score()
+                            for event_id, event_scoring_result
+                            in dataset_result.event_scores.items()
+                        }
+                    )
 
         # Add the event maps to the fs
         for event_id, event in all_events.items():
             pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        if pandda_args.debug >= Debug.PRINT_NUMERICS:
+            print(shell_results)
+            print(all_events)
+            print(event_scores)
 
         console.summarise_shells(shell_results, all_events, event_scores)
 
@@ -959,7 +992,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         # Output json log
         with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
-            if pandda_args.debug:
+            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
                 printer.pprint(pandda_log)
             save_json_log(
                 pandda_log,
@@ -973,10 +1006,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
     # If an exception has occured, print relevant information to the console and save the log
     except Exception as e:
-        if pandda_args.debug:
-            printer.pprint(pandda_log)
+        # if pandda_args.debug:
+        #     printer.pprint(pandda_log)
 
-        console.print_exception(e, pandda_args.debug)
+        console.print_exception()
         console.save(pandda_args.out_dir / constants.PANDDA_TEXT_LOG_FILE)
 
         pandda_log[constants.LOG_TRACE] = traceback.format_exc()

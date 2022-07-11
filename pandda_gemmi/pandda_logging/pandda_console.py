@@ -260,11 +260,16 @@ class PanDDAConsole:
                 dataset_event_scores = dataset_result.event_scores
                 for event_id, event in dataset_events.items():
                     event_score = dataset_event_scores[event_id]
+                    selected_structure_score = event_score.get_selected_structure_score()
+                    if selected_structure_score:
+                        score = round(selected_structure_score, 2)
+                    else:
+                        score = None
                     event_table.add_row(
                         str(round(res, 2)),
                         str(event_id.dtag.dtag),
                         str(event_id.event_idx.event_idx),
-                        str(round(event_score, 2)),
+                        str(score),
                         str(event.cluster.indexes[0].size)
                     )
 
@@ -286,11 +291,13 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-    def print_exception(self, e, debug):
-        if debug:
-            self.console.print_exception()
-        else:
-            self.console.print_exception(e)
+    def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
+        for filter_key, filtered in filtered_dtags.items():
+            self.console.print(f"Filtered with {filter_key}: {filtered}")
+
+
+    def print_exception(self,):
+        self.console.print_exception()
 
     def save(self, console_log_file):
         self.console.save_html(str(console_log_file))

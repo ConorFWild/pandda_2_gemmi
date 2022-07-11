@@ -22,7 +22,7 @@ from pandda_gemmi.analyse_interface import *
 
 
 
-def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_factors: StructureFactors):
+def truncate(datasets: DatasetsInterface, resolution: ResolutionInterface, structure_factors: StructureFactorsInterface):
     new_datasets_resolution = {}
 
     # Truncate by common resolution
@@ -33,6 +33,9 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
 
     dataset_resolution_truncated = Datasets(new_datasets_resolution)
 
+    # TODO: REMOVE
+    return new_datasets_resolution
+
     # Get common set of reflections
     common_reflections = dataset_resolution_truncated.common_reflections(structure_factors)
 
@@ -42,6 +45,7 @@ def truncate(datasets: Dict[Dtag, Dataset], resolution: Resolution, structure_fa
         reflections = dataset_resolution_truncated[dtag].reflections.reflections
         reflections_array = np.array(reflections)
 
+        # print(f"Truncated reflections: {dtag}")
         truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
                                                                                     )
         reflections = truncated_dataset.reflections.reflections
@@ -158,7 +162,7 @@ def get_reduced_array(
         dtag_list,
         load_xmap_flat_func,
 grid, structure_factors, sample_rate,
-        debug=False
+        debug: Debug= Debug.DEFAULT
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
@@ -233,7 +237,7 @@ grid, structure_factors, sample_rate,
                  }
 
         finish = time.time()
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
             print(f'\t\t\tProcessing batch in {finish - start}')
 
@@ -286,7 +290,7 @@ grid, structure_factors, sample_rate,
                  }
 
         finish = time.time()
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             # print(f'\t\t\tProcessing batch: {batch} in {finish - start}')
             print(f'\t\t\tProcessing batch for transform in {finish - start}')
         # Get pca
@@ -365,7 +369,7 @@ def get_multiple_comparator_sets(
         load_xmap_flat_func=None,
         process_local=None,
         max_comparator_sets=None,
-        debug=False,
+        debug: Debug=Debug.DEFAULT,
 ) -> Dict[int, ComparatorCluster]:
     dtag_list = [dtag for dtag in datasets]
     dtag_array = np.array(dtag_list)
@@ -378,8 +382,9 @@ def get_multiple_comparator_sets(
         )
     )
 
+    # Get the highest resolution with the minimal number of charactrerisation datasets within it
     highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
-    highest_res_datasets_max = max(
+    highest_characterisable_res = max(
         [
             datasets[dtag].reflections.resolution().resolution
             for dtag
@@ -387,25 +392,41 @@ def get_multiple_comparator_sets(
         ]
     )
 
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\tHighest resolution with sufficient datasets to characterise manifold: {highest_characterisable_res}")
+
+
     # Get the datasets below the upper cutoff for manifold characterisation
     suitable_datasets_list = [
         dtag for dtag in dtags_by_res if datasets[dtag].reflections.resolution().resolution < resolution_cutoff
     ]
     suitable_datasets = {dtag: dataset for dtag, dataset in datasets.items() if dtag in suitable_datasets_list}
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f'\tFound datasets suitable for characterising clusters: {suitable_datasets}')
 
-    dtag_list = [dtag for dtag in suitable_datasets_list]
-    dtag_array = np.array(dtag_list)
-    dtag_to_index = {dtag: j for j, dtag in enumerate(dtag_list)}
+    characterisation_dtag_list = [dtag for dtag in suitable_datasets_list]
+    characterisation_dtag_array = np.array(characterisation_dtag_list)
+    characterisation_dtag_to_index = {dtag: j for j, dtag in enumerate(characterisation_dtag_list)}
+
+    lowest_common_res_of_suitable_datasets = max(
+        [
+            datasets[dtag].reflections.resolution().resolution
+            for dtag
+            in characterisation_dtag_list
+        ]
+    )
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print(f"\tTruncating manifold characterisation datasets to resolution: {lowest_common_res_of_suitable_datasets}")
 
     # Load the xmaps
+    # Truncate to the lowest common res of suitable datasets
     shell_truncated_datasets: Datasets = truncate(
         suitable_datasets,
-        resolution=Resolution(highest_res_datasets_max),
+        resolution=Resolution(lowest_common_res_of_suitable_datasets),
         structure_factors=structure_factors,
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print('\tTruncated suitable datasets to common resolution')
 
     # Generate aligned xmaps
@@ -420,13 +441,13 @@ def get_multiple_comparator_sets(
         shell_truncated_datasets,
         alignments,
         process_local,
-        dtag_array,
-        dtag_list,
+        characterisation_dtag_array,
+        characterisation_dtag_list,
         load_xmap_flat_func,
         grid, structure_factors, sample_rate,
         debug=debug
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print('\tLoaded in datasets and found dimension reduced feature vectors')
 
     embedding = embed_umap(reduced_array)
@@ -449,11 +470,11 @@ def get_multiple_comparator_sets(
 
     distance_matrix, clusters = get_clusters_nn(
         reduced_array,
-        dtag_list,
-        dtag_array,
-        dtag_to_index,
+        characterisation_dtag_list,
+        characterisation_dtag_array,
+        characterisation_dtag_to_index,
     )
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tFound clusters! Found {len(clusters)} clusters!')
 
     if max_comparator_sets:
@@ -480,7 +501,7 @@ def get_multiple_comparator_sets(
     # in the set of the first shell of sufficiently low res
     for test_dtag in dtag_list:
         current_res = datasets[test_dtag].reflections.resolution().resolution
-        truncation_res = max(current_res, highest_res_datasets_max)
+        truncation_res = max(current_res, highest_characterisable_res)
 
         comparators[test_dtag] = {}
 
@@ -519,7 +540,7 @@ class GetComparatorsCluster(GetComparatorsInterface):
                  resolution_cutoff: float,
                  load_xmap_flat_func,
                  process_local: ProcessorInterface,
-                 debug: bool,
+                 debug: Debug,
                  ):
         self.comparison_min_comparators = comparison_min_comparators
         self.comparison_max_comparators = comparison_max_comparators

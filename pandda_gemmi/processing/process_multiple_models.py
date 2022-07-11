@@ -40,12 +40,12 @@ from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_u
 from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
-    save_event_map, 
+    save_event_map,
 )
 from pandda_gemmi.density_clustering import (
     GetEDClustering, FilterEDClusteringsSize,
-FilterEDClusteringsPeak,
-MergeEDClusterings,
+    FilterEDClusteringsPeak,
+    MergeEDClusterings,
 )
 
 
@@ -53,7 +53,7 @@ MergeEDClusterings,
 class DatasetResult(DatasetResultInterface):
     dtag: DtagInterface
     events: MutableMapping[EventIDInterface, EventInterface]
-    event_scores: MutableMapping[EventIDInterface,  float]
+    event_scores: EventScoringResultsInterface
     log: Dict
 
 
@@ -250,27 +250,87 @@ class ModelSelection(ModelSelectionInterface):
         self.selected_model_id = selected_model_id
         self.log = log
 
+
 def EXPERIMENTAL_select_model(
         model_results: ModelResultsInterface,
         inner_mask: CrystallographicGridInterface,
         processed_dataset: ProcessedDatasetInterface,
-        debug: bool=False,
+        debug: Debug = Debug.DEFAULT,
 ) -> ModelSelectionInterface:
     log = {}
 
-    model_event_scores = {model_id: model.event_scores for model_id, model in model_results.items()}
-
-    # Score the top clusters
-    model_scores = {
-        model_id: max([event_scores[score_id] for score_id in event_scores] + [0.0, ])
-        for model_id, event_scores
-        in model_event_scores.items()
+    model_event_scores: Dict[ModelIDInterface, Dict[EventIDInterface, EventScoringResultInterface]] = {
+        model_id: model.event_scores for
+        model_id,
+        model in model_results.items()
     }
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
+        print("Event scores for each model are:")
+        print(model_event_scores)
+
+
+
+        for model_id, event_scores in model_event_scores.items():
+            print(f"Best score for model: {model_id}")
+            print(
+                [
+                    event_scores[score_id].get_selected_structure_score()
+                    for score_id
+                    in event_scores
+                ]
+            )
+            for event_id, event_score_result in event_scores.items():
+                print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+                print(event_score_result.log())
+
+
+    # Score the top clusters#
+    model_scores = {}
+    for model_id, event_scores in model_event_scores.items():
+        selected_event_scores = [
+            event_scores[event_id].get_selected_structure_score()
+            for event_id
+            in event_scores
+        ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"\tModel {model_id} all scores: {selected_event_scores}")
+
+        filtered_model_scores = [
+                                    selected_event_score
+                                    for selected_event_score
+                                    in selected_event_scores
+                                    if selected_event_score
+                                ] + [-0.001, ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"\tModel {model_id}: filtered scores: {filtered_model_scores}")
+
+        maximum_event_score = max(
+            filtered_model_scores
+        )
+        model_scores[model_id] = maximum_event_score
+
+    # model_scores = {
+    #     model_id: max(
+    #         [
+    #             event_scores[score_id].get_selected_structure_score()
+    #             for score_id
+    #             in event_scores
+    #             if event_scores[score_id].get_selected_structure_score() is not None
+    #         ] + [0.0, ])
+    #     for model_id, event_scores
+    #     in model_event_scores.items()
+    # }
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print("Maximum score of any event for each model are are:")
         print(model_scores)
 
-    log['model_scores'] = {model_id: float(score) for model_id, score in model_scores.items()}
+    log['model_scores'] = {
+        model_id: float(score)
+        for model_id, score
+        in model_scores.items()
+    }
 
     if len(model_scores) == 0:
         return ModelSelection(0, log)
@@ -339,24 +399,22 @@ def get_models(
 
 class ModelResult(ModelResultInterface):
     def __init__(self,
-        zmap,
-        clusterings,
-        clusterings_large,
-        clusterings_peaked,
-        clusterings_merged,
-        events,
-        event_scores,
-        model_log) -> None:
-
+                 zmap,
+                 clusterings,
+                 clusterings_large,
+                 clusterings_peaked,
+                 clusterings_merged,
+                 events,
+                 event_scores,
+                 model_log) -> None:
         self.zmap = zmap
         self.clusterings = clusterings
         self.clusterings_large = clusterings_large
         self.clusterings_peaked = clusterings_peaked
         self.clusterings_merged = clusterings_merged
         self.events = events
-        self.event_scores = event_scores
+        self.event_scores: EventScoringResultsInterface = event_scores
         self.model_log = model_log
-        
 
 
 def analyse_model(
@@ -376,9 +434,10 @@ def analyse_model(
         min_blob_z_peak,
         output_dir,
         score_events_func: GetEventScoreInterface,
-        debug=False
+        res, rate,
+        debug: Debug = Debug.DEFAULT
 ) -> ModelResultInterface:
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tAnalysing model: {model_number}')
 
     model_log = {}
@@ -400,7 +459,7 @@ def analyse_model(
     time_model_analysis_start = time.time()
 
     # Calculate z maps
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tCalculating zmaps")
     time_z_maps_start = time.time()
     zmaps: ZmapsInterface = Zmaps.from_xmaps(
@@ -410,7 +469,7 @@ def analyse_model(
         debug=debug,
     )
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tCalculated zmaps")
 
     time_z_maps_finish = time.time()
@@ -426,7 +485,7 @@ def analyse_model(
             ">2.0": str(z_map_statistics.greater_2),
             ">3.0": str(z_map_statistics.greater_3),
         }
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(model_log["ZMap statistics"])
 
     # update_log(dataset_log, dataset_log_path)
@@ -438,27 +497,26 @@ def analyse_model(
 
     # Get the clustered electron desnity outliers
 
-
     time_cluster_z_start = time.time()
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tClustering")
 
     clusterings_list: List[EDClusteringInterface] = process_local_serial(
         [
             Partial(GetEDClustering()).paramaterise(
-                    zmaps[dtag], 
-                    reference=reference,
-                    grid=grid,
-                    contour_level=contour_level,
-                    cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier, )
+                zmaps[dtag],
+                reference=reference,
+                grid=grid,
+                contour_level=contour_level,
+                cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier, )
             for dtag
             in zmaps
         ]
     )
     time_cluster_z_finish = time.time()
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tClustering finished")
 
     # if debug:
@@ -498,10 +556,10 @@ def analyse_model(
 
     # Filter out small clusters
     clusterings_large: EDClusteringsInterface = FilterEDClusteringsSize()(clusterings,
-    grid,
-                                                             min_blob_volume,
-                                                             )
-    if debug:
+                                                                          grid,
+                                                                          min_blob_volume,
+                                                                          )
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tAfter filtering: large: {}".format(
             {dtag: len(cluster) for dtag, cluster in
              zip(clusterings_large, clusterings_large.values())}))
@@ -511,9 +569,9 @@ def analyse_model(
 
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clusterings_large,
-    grid,
-                                                                    min_blob_z_peak)
-    if debug:
+                                                                           grid,
+                                                                           min_blob_z_peak)
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tAfter filtering: peak: {}".format(
             {dtag: len(cluster) for dtag, cluster in
              zip(clusterings_peaked, clusterings_peaked.values())}))
@@ -525,12 +583,12 @@ def analyse_model(
     for clustering_id, clustering in clusterings_peaked.items():
         for cluster_id, cluster in clustering.clustering.items():
             cluster.event_mask_indicies = get_event_mask_indicies(
-                zmaps[test_dtag], 
+                zmaps[test_dtag],
                 cluster.cluster_positions_array)
 
     # Merge the clusters
     clusterings_merged: EDClusteringsInterface = MergeEDClusterings()(clusterings_peaked)
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tAfter filtering: merged: {}".format(
             {dtag: len(_cluster) for dtag, _cluster in
              zip(clusterings_merged, clusterings_merged.values())}))
@@ -574,10 +632,10 @@ def analyse_model(
         None,
     )
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print("\t\tScoring events...")
 
-    if debug:
+    if debug >= Debug.AVERAGE_MAPS:
         with open(output_dir / "test_dtag.pickle", "wb") as f:
             pickle.dump(test_dtag, f)
 
@@ -597,11 +655,12 @@ def analyse_model(
             pickle.dump(model, f)
 
     if score_events_func.tag == "inbuilt":
-        event_scores = score_events_func(
+        event_scores: EventScoringResultsInterface = score_events_func(
             test_dtag,
             model_number,
             dataset_processed_dataset,
             dataset_xmap,
+            zmaps[test_dtag],
             events,
             model,
             grid,
@@ -609,6 +668,8 @@ def analyse_model(
             max_site_distance_cutoff,
             min_bdc, max_bdc,
             reference,
+            res, rate,
+            event_map_cut=2.0,
             structure_output_folder=output_dir,
             debug=debug
         )
@@ -618,13 +679,12 @@ def analyse_model(
     else:
         raise Exception("No valid event selection score method!")
 
-
-    model_log['score'] = {}
-    model_log['noise'] = {}
-
-    for event_id, score in event_scores.items():
-        model_log['score'][int(event_id.event_idx)] = float(score)
-        # model_log['noise'][int(event_num)] = noises[event_num]
+    # model_log['score'] = {}
+    # model_log['noise'] = {}
+    #
+    # for event_id, event_scoring_result in event_scores.items():
+    #     model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
+    # model_log['noise'][int(event_num)] = noises[event_num]
 
     # event_scores, noises = event_score_autobuild(
     #     test_dtag,
@@ -645,8 +705,9 @@ def analyse_model(
     model_log['score'] = {}
     model_log['noise'] = {}
 
-    for event_id, score in event_scores.items():
-        model_log['score'][int(event_id.event_idx)] = float(score)
+    for event_id, event_scoring_result in event_scores.items():
+        model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
+        model_log[int(event_id.event_idx)] = event_scoring_result.log()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
     time_model_analysis_finish = time.time()
@@ -662,7 +723,7 @@ def analyse_model(
     #     'log': model_log
     # }
     model_results: ModelResult = ModelResult(
-                zmaps[test_dtag],
+        zmaps[test_dtag],
         clusterings,
         clusterings_large,
         clusterings_peaked,
@@ -673,10 +734,13 @@ def analyse_model(
     )
 
     model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
 
-    
+    if debug >= Debug.PRINT_SUMMARIES:
+        for event_id, event_score_result in model_results.event_scores.items():
+            print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+            print(event_score_result.log())
 
     return model_results
 
@@ -725,16 +789,16 @@ def process_dataset_multiple_models(
         outer_mask: float,
         inner_mask_symmetry: float,
         max_site_distance_cutoff: float,
-        min_bdc: float, 
+        min_bdc: float,
         max_bdc: float,
         sample_rate: float,
         statmaps: bool,
         analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
         process_local: ProcessorInterface,
-        debug: bool=False,
+        debug: Debug = Debug.DEFAULT,
 ) -> DatasetResultInterface:
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tProcessing dtag: {test_dtag}')
     time_dataset_start = time.time()
 
@@ -772,32 +836,34 @@ def process_dataset_multiple_models(
                         min_blob_z_peak=min_blob_z_peak,
                         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
                         score_events_func=score_events_func,
+                        res=shell.res,
+                        rate=0.5,
                         debug=debug
                     )
                     for model_number, model
                     in models.items()
-                    ]
+                ]
             )
         )
     }
 
-    dataset_log["Model logs"] = {model_number: model_result.model_log for model_number, model_result in model_results.items()}  #
+    dataset_log["Model logs"] = {model_number: model_result.model_log for model_number, model_result in
+                                 model_results.items()}  #
 
     time_model_analysis_finish = time.time()
 
     dataset_log["Time to analyse all models"] = time_model_analysis_finish - time_model_analysis_start
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\tTime to analyse all models: {time_model_analysis_finish - time_model_analysis_start}")
         for model_number, model_result in model_results.items():
             model_time = dataset_log["Model logs"][model_number]["Model analysis time"]
             print(f"\t\tModel {model_number} processed in {model_time}")
 
-
     ###################################################################
     # # Decide which model to use...
     ###################################################################
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\tSelecting model...")
     model_selection: ModelSelectionInterface = EXPERIMENTAL_select_model(
         model_results,
@@ -811,7 +877,7 @@ def process_dataset_multiple_models(
     dataset_log['Selected model'] = int(model_selection.selected_model_id)
     dataset_log['Model selection log'] = model_selection.log
 
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tSelected model is: {model_selection.selected_model_id}')
 
     ###################################################################
@@ -848,7 +914,7 @@ def process_dataset_multiple_models(
     )
 
     # TODO: Remove altogether
-    if debug:
+    if debug >= Debug.DATASET_MAPS:
         for model_number, model_result in model_results.items():
             save_reference_frame_zmap(
                 pandda_fs_model.processed_datasets.processed_datasets[
@@ -946,12 +1012,12 @@ def process_dataset_multiple_models(
         mapper=ProcessLocalSerial(),
     )
 
-    if debug:
+    if debug >= Debug.DATASET_MAPS:
         for model_number, model_result in model_results.items():
             for event_id, event in model_result.events.items():
                 save_event_map(
                     pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f'{model_number}'
-                                                                             f'_{event_id.event_idx.event_idx}.ccp4',
+                                                                                                f'_{event_id.event_idx.event_idx}.ccp4',
                     dataset_xmaps[event_id.dtag],
                     models[model_number],
                     event,
@@ -981,6 +1047,57 @@ def process_dataset_multiple_models(
     )
 
 
+def save_array_to_map_file(
+        array: NDArrayInterface,
+        template: CrystallographicGridInterface,
+        path: Path
+):
+    spacing = [template.nu, template.nv, template.nw]
+    unit_cell = template.unit_cell
+    grid = gemmi.FloatGrid(spacing[0], spacing[1], spacing[2])
+    grid.set_unit_cell(unit_cell)
+    grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+
+    grid_array = np.array(grid, copy=False)
+    grid_array[:, :, :] = array[:, :, :]
+
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = grid
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
+
+def save_xmap(
+        xmap: XmapInterface,
+        path: Path
+):
+    xmap.xmap.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = xmap.xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
+
+def save_raw_xmap(
+        dataset: DatasetInterface,
+        path: Path,
+        structure_factors,
+        sample_rate,
+):
+    unaligned_xmap: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(structure_factors.f,
+                                                                                 structure_factors.phi,
+                                                                                 sample_rate=sample_rate,
+                                                                                 )
+    unaligned_xmap.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = unaligned_xmap
+    ccp4.update_ccp4_header(2, True)
+    ccp4.setup()
+    ccp4.write_ccp4_map(str(path))
+
+
 def process_shell_multiple_models(
         shell: ShellInterface,
         datasets: DatasetsInterface,
@@ -1005,9 +1122,9 @@ def process_shell_multiple_models(
         load_xmap_func: LoadXMapInterface,
         analyse_model_func: AnalyseModelInterface,
         score_events_func: GetEventScoreInterface,
-        debug: bool = False,
+        debug: Debug = Debug.DEFAULT,
 ):
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"Processing shell at resolution: {shell.res}")
 
     if memory_availability == "very_low":
@@ -1029,8 +1146,9 @@ def process_shell_multiple_models(
     time_shell_start = time.time()
     if pandda_fs_model.shell_dirs:
         shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
-    else: 
-        raise Exception("Attempted to find the log path for the shell, but no shell dir added to pandda_fs_model somehow.")
+    else:
+        raise Exception(
+            "Attempted to find the log path for the shell, but no shell dir added to pandda_fs_model somehow.")
     shell_log = {}
 
     # Seperate out test and train datasets
@@ -1046,7 +1164,7 @@ def process_shell_multiple_models(
     ###################################################################
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\tTruncating shell datasets")
     shell_working_resolution: ResolutionInterface = Resolution(
         max([datasets[dtag].reflections.get_resolution() for dtag in shell.all_dtags]))
@@ -1055,46 +1173,68 @@ def process_shell_multiple_models(
         resolution=shell_working_resolution,
         structure_factors=structure_factors,
     )
+    # TODO: REMOVE?
+    # shell_truncated_datasets = shell_datasets
     shell_log["Shell Working Resolution"] = shell_working_resolution.resolution
 
     ###################################################################
     # # Generate aligned Xmaps
     ###################################################################
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\tLoading xmaps")
 
     time_xmaps_start = time.time()
 
     xmaps: XmapsInterface = {
         dtag: xmap
-        for dtag, xmap 
+        for dtag, xmap
         in zip(
             shell_truncated_datasets,
             process_local_in_shell(
-        [
-            Partial(load_xmap_func).paramaterise(
-                shell_truncated_datasets[key],
-                alignments[key],
-                grid=grid,
-                structure_factors=structure_factors,
-                sample_rate=shell.res / 0.5,
+                [
+                    Partial(load_xmap_func).paramaterise(
+                        shell_truncated_datasets[key],
+                        alignments[key],
+                        grid=grid,
+                        structure_factors=structure_factors,
+                        sample_rate=shell.res / 0.5,
+                    )
+                    for key
+                    in shell_truncated_datasets
+                ]
             )
-            for key
-            in shell_truncated_datasets
-        ]
-    )
         )
     }
-
 
     time_xmaps_finish = time.time()
     shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish - time_xmaps_start
     update_log(shell_log, shell_log_path)
 
+    if debug >= Debug.DATASET_MAPS:
+        for dtag, xmap in xmaps.items():
+            xmap_array = np.array(xmap.xmap)
+            save_array_to_map_file(
+                xmap_array,
+                grid.grid,
+                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_ref.ccp4"
+            )
+
+            save_raw_xmap(
+                shell_truncated_datasets[dtag],
+                pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}_mov.ccp4",
+                structure_factors,
+                sample_rate
+            )
+
+            # save_xmap(
+            #     xmap,
+            #     pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}.ccp4"
+            # )
+
     ###################################################################
     # # Get the models to test
     ###################################################################
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f"\tGetting models")
     models: ModelsInterface = get_models(
         shell.test_dtags,
@@ -1103,6 +1243,14 @@ def process_shell_multiple_models(
         grid,
         process_local_in_shell,
     )
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        for model_key, model in models.items():
+            save_array_to_map_file(
+                model.mean,
+                grid.grid,
+                pandda_fs_model.pandda_dir / f"{shell.res}_{model_key}_mean.ccp4"
+            )
 
     ###################################################################
     # # Process each test dataset
@@ -1118,11 +1266,11 @@ def process_shell_multiple_models(
         if _dtag not in all_train_dtags:
             all_train_dtags.append(_dtag)
 
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\tAll train datasets are: {all_train_dtags}")
     # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
     dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
-    if debug:
+    if debug >= Debug.PRINT_NUMERICS:
         print(f"\tDataset dtags are: {dataset_dtags}")
     results: List[DatasetResultInterface] = process_local_over_datasets(
         [
@@ -1162,8 +1310,6 @@ def process_shell_multiple_models(
         ],
     )
 
-    
-
     # Update shell log with dataset results
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
@@ -1178,7 +1324,7 @@ def process_shell_multiple_models(
         shell=shell,
         dataset_results={dtag: result for dtag, result in zip(shell.test_dtags, results) if result},
         log=shell_log,
-    
+
     )
 
     return shell_result

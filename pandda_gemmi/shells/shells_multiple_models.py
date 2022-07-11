@@ -35,7 +35,7 @@ def get_shells_multiple_models(
         max_shell_datasets,
         high_res_increment,
         only_datasets: Optional[List[str]],
-        debug=False
+        debug: Debug=Debug.DEFAULT
 ):
     # For each dataset + set of comparators, include all of these to be loaded in the set of the shell of their highest
     # Common reoslution
@@ -49,7 +49,7 @@ def get_shells_multiple_models(
     lowest_valid_res = datasets[dtags_by_resolution[min_characterisation_datasets+1]].reflections.resolution(
 
     ).resolution
-    if debug:
+    if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tLowest valid resolution is: {lowest_valid_res}')
 
     # Get the shells: start with the highest res dataset and count up in increments of high_res_increment to the

@@ -361,7 +361,7 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 # #####################
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
-           out_dir: Path, cut: float = 2.0, debug=False
+           out_dir: Path, cut: float = 2.0, debug: Debug=Debug.DEFAULT
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -791,6 +791,7 @@ def score_structure_signal_to_noise_density(
         radius_inner_1=0.5,
         radius_outer_0=1.2,
         radius_outer_1=1.5,
+        debug: Debug = Debug.DEFAULT
 ):
     rescore_log = {
         "cutoff": float(cutoff),
@@ -852,7 +853,8 @@ def score_structure_signal_to_noise_density(
         xmap, -10)
     ligand_overlapping_protein_penalty = signal_overlapping_protein_penalty + noise_overlapping_protein_penalty
 
-    print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tSignal {_signal} Noise {_noise} Penalty {ligand_overlapping_protein_penalty}")
 
     _score = ((_signal - _noise) - ligand_overlapping_protein_penalty)
 
@@ -866,6 +868,7 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
         radius_inner_1=0.5,
         radius_outer_0=1.2,
         radius_outer_1=1.5,
+        debug: Debug = Debug.DEFAULT
 ):
     rescore_log = {
         "cutoff": float(cutoff),
@@ -931,8 +934,8 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
 
     # TODO: remove if doesn't work
     signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
-
-    print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
           f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
     _score = ((_signal / len(structure_samples)) - np.sqrt(_noise / len(noise_samples))) - np.sqrt(
@@ -1135,7 +1138,7 @@ def autobuild_rhofit(dataset: Dataset,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
-                     debug=False
+                     debug: Debug=Debug.DEFAULT
                      ):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
@@ -1190,7 +1193,7 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Generate the cif
     if cif_strategy == "default":
-        if debug:
+        if debug>= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Making cif with default strategy using cif {cif_path}")
         if not cif_path:
             return AutobuildResult(
@@ -1206,11 +1209,11 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Makinf with elbow
     elif cif_strategy == "elbow":
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Making cif with elbow")
 
         if cif_path:
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t{event.event_id}   Making cif with elbow using cif: {cif_path}")
 
             cif_path = generate_cif(
@@ -1218,7 +1221,7 @@ def autobuild_rhofit(dataset: Dataset,
                 out_dir,
             )
         elif smiles_path:
-            if debug:
+            if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t{event.event_id}   Making cif with elbow using smiles: {smiles_path}")
 
             cif_path = generate_cif(
@@ -1286,13 +1289,13 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Call rhofit
     if rhofit_coord:
-        if debug:
+        if debug >=Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Using rhofit coord")
 
         rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord,
                                          cut, debug)
     else:
-        if debug:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Using rhofit without coord")
 
         rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, debug)
@@ -1373,5 +1376,5 @@ class GetAutobuildResultRhofit(GetAutobuildResultInterface):
     cif_strategy: str, 
     cut: float, 
     rhofit_coord: bool, 
-    debug: bool) -> AutobuildResultInterface:
+    debug: Debug) -> AutobuildResultInterface:
         return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)

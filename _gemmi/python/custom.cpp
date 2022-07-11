@@ -98,7 +98,14 @@ void interpolate_points_single(
             point[1] * (1.0 / interpolated_map.nv),
             point[2] * (1.0 / interpolated_map.nw)
             );
+          
+        
+
+
         Position pos = interpolated_map.unit_cell.orthogonalize(fractional);
+        // std::vector<float> pos_python = pos_vec[i];
+        // Position pos = Position(pos_python[0], pos_python[1], pos_python[2]);
+
         // Transform transform = transform_vec[i];
         // std::vector<double> com_moving = com_moving_vec[i];
         // std::vector<double> com_reference = com_reference_vec[i];
@@ -137,20 +144,28 @@ void interpolate_points_single(
 }
 
 
-void interpolate_pos_array(
-  Grid<float>& grid,
-  py::array_t<float> pos_array,
-  py::array_t<float> vals_array
-){
-  auto r_pos = pos_array.template mutable_unchecked<2>();
-  auto r_val = vals_array.template mutable_unchecked<1>();
-  for (int i=0; i<r_pos.shape(0); i++){
-    r_val(i) = grid.interpolate_value(
-      r_pos(i, 0),
-      r_pos(i, 1),
-      r_pos(i, 2));
-  }
-}
+// std::vector<float> interpolate_pos_array(
+//   Grid<float>& grid,
+//   py::array_t<float> pos_array,
+//   py::array_t<float> vals_array
+// ){
+//   auto r_pos = pos_array.template mutable_unchecked<2>();
+//   auto r_val = vals_array.template mutable_unchecked<1>();
+//   // std::vector<float> vals_vec;
+//   for (int i=0; i<r_pos.shape(0); i++){
+//     Position pos = Position(
+//       r_pos(i, 0),
+//       r_pos(i, 1),
+//       r_pos(i, 2)
+//       );
+//     auto val = grid.interpolate_value(pos);
+//     // std::cout << val << "\n";
+//     r_val(i) = val;
+//     // vals_vec.push_back(val);
+//   }
+//   return vals_vec;
+
+// }
 
 // int num_atoms(Structure structure){
 //   int n = 0;
@@ -216,9 +231,36 @@ void add_custom(py::module& m) {
         &interpolate_points,
         "Interpolates a list of points and transforms."
     );
-      m.def(
+    //   m.def(
+    //     "interpolate_pos_array",
+    //     &interpolate_pos_array,
+    //     py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
+    //     "Interpolates an array of points."
+    // );
+          m.def(
         "interpolate_pos_array",
-        &interpolate_pos_array,
+        [](
+          const Grid<float>& grid,
+          py::array_t<float> pos_array,
+          py::array_t<float> vals_array
+        ){
+          auto r_pos = pos_array.template mutable_unchecked<2>();
+          auto r_val = vals_array.template mutable_unchecked<1>();
+          // std::vector<float> vals_vec;
+          for (int i=0; i<r_pos.shape(0); i++){
+            Position pos = Position(
+              r_pos(i, 0),
+              r_pos(i, 1),
+              r_pos(i, 2)
+              );
+            auto val = grid.interpolate_value(pos);
+            // std::cout << val << "\n";
+            r_val(i) = val;
+            // vals_vec.push_back(val);
+          }
+        // return vals_vec;
+        },
+        py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
         "Interpolates an array of points."
     );
           m.def(
