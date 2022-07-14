@@ -353,7 +353,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     )
 
     # Get the functino for selecting the comparators
-    comparators_func: GetComparatorsInterface = get_comparator_func(
+    get_comparators_func: GetComparatorsInterface = get_comparator_func(
         pandda_args,
         load_xmap_flat_func,
         process_local
@@ -459,7 +459,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         get_dataset_statistics_func,
         get_common_structure_factors_func,
         get_structure_factors_func,
-        pandda_console,
+        console,
     )
     filter_datasets = PanDDAFilterDatasets(
         filter_data_quality,
@@ -469,16 +469,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         GetReferenceDataset(),
         console,
     )
-    filter_reference = PanDDAFilterReference()
+    filter_reference = PanDDAFilterReference(
+        filter_reference_compatability,
+        console,
+    )
     postprocess_datasets = PanDDAPostprocessDatasets()
     get_grid = PanDDAGetGrid(
         get_grid_func, console,
     )
     get_alignments = PanDDAGetAlignments(
         get_alignments_func,
+        console,
     )
     get_shell_results = PanDDAGetShellResults(
-        get_comparators,
+        get_comparators_func,
         get_shells,
         process_shell,
         console,

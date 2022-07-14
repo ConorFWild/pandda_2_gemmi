@@ -268,6 +268,8 @@ class DatasetDir:
             source_ligand_cif = ligand_dir.get_first_ligand_cif()
             source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
 
+            print(f"Source files are: {source_ligand_smiles} {source_ligand_cif} {source_ligand_pdb}")
+
         else:
             ligand_dir = None
             # ligand_search_path = path
