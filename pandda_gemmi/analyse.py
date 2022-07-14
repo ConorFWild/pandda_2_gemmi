@@ -419,6 +419,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 print(dtag)
                 print(data_dir.source_ligand_cif)
                 print(data_dir.source_ligand_smiles)
+                print(data_dir.source_ligand_pdb)
 
         ###################################################################
         # # Load datasets

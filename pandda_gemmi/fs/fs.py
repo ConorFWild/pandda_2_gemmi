@@ -170,9 +170,9 @@ class LigandDir:
 
             # Cifs
             ligand_cif_dict = {_ligand_cif_path.stem: _ligand_cif_path
-                                  for _ligand_cif_path
-                                  in ligand_cif_paths
-                                  }
+                               for _ligand_cif_path
+                               in ligand_cif_paths
+                               }
             if ligand_key in ligand_cif_dict:
                 ligand_cif_path_dict[ligand_key] = ligand_cif_dict[ligand_key]
             else:
@@ -180,9 +180,9 @@ class LigandDir:
 
             # Pdbs
             ligand_pdb_dict = {_ligand_pdb_path.stem: _ligand_pdb_path
-                                  for _ligand_pdb_path
-                                  in ligand_pdb_paths
-                                  }
+                               for _ligand_pdb_path
+                               in ligand_pdb_paths
+                               }
             if ligand_key in ligand_pdb_dict:
                 ligand_pdb_path_dict[ligand_key] = ligand_pdb_dict[ligand_key]
             else:
@@ -212,6 +212,7 @@ class LigandDir:
             return None
         else:
             return self.smiles[self.ligand_keys[0]]
+
 
 @dataclasses.dataclass()
 class DatasetDir:

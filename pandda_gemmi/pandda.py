@@ -94,10 +94,10 @@ class PanDDALoadDatasets:
 
 class PanDDAFilterDatasets:
     def __init__(self,
-                 filter_data_quality,
+                 filter_data_quality_func,
                  console,
                  ):
-        self.filter_data_quality = filter_data_quality
+        self.filter_data_quality = filter_data_quality_func
         self.console = console
 
     def __call__(self, datasets: DatasetsInterface):
