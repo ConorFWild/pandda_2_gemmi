@@ -156,27 +156,37 @@ class LigandDir:
         ligand_cif_path_dict = {}
         ligand_pdb_path_dict = {}
 
+        # For each ligand key, add the path to the relecant file to the relevant dict, or None
         for ligand_key in ligand_keys:
             # Smiles
-            for _ligand_smiles_path in ligand_smiles_paths:
-                if _ligand_smiles_path.stem == ligand_key:
-                    ligand_smiles_path_dict[ligand_key] = _ligand_smiles_path
-                else:
-                    ligand_smiles_path_dict[ligand_key] = None
+            ligand_smiles_dict = {_ligand_smiles_path.stem: _ligand_smiles_path
+                                  for _ligand_smiles_path
+                                  in ligand_smiles_paths
+                                  }
+            if ligand_key in ligand_smiles_dict:
+                ligand_smiles_path_dict[ligand_key] = ligand_smiles_dict[ligand_key]
+            else:
+                ligand_smiles_path_dict[ligand_key] = None
 
             # Cifs
-            for _ligand_cif_path in ligand_cif_paths:
-                if _ligand_cif_path.stem == ligand_key:
-                    ligand_cif_path_dict[ligand_key] = _ligand_cif_path
-                else:
-                    ligand_cif_path_dict[ligand_key] = None
+            ligand_cif_dict = {_ligand_cif_path.stem: _ligand_cif_path
+                                  for _ligand_cif_path
+                                  in ligand_cif_paths
+                                  }
+            if ligand_key in ligand_cif_dict:
+                ligand_cif_path_dict[ligand_key] = ligand_cif_dict[ligand_key]
+            else:
+                ligand_cif_path_dict[ligand_key] = None
 
             # Pdbs
-            for _ligand_pdb_path in ligand_pdb_paths:
-                if _ligand_pdb_path.stem == ligand_key:
-                    ligand_pdb_path_dict[ligand_key] = _ligand_pdb_path
-                else:
-                    ligand_pdb_path_dict[ligand_key] = None
+            ligand_pdb_dict = {_ligand_pdb_path.stem: _ligand_pdb_path
+                                  for _ligand_pdb_path
+                                  in ligand_pdb_paths
+                                  }
+            if ligand_key in ligand_pdb_dict:
+                ligand_pdb_path_dict[ligand_key] = ligand_pdb_dict[ligand_key]
+            else:
+                ligand_pdb_path_dict[ligand_key] = None
 
         return LigandDir(path,
                          ligand_smiles_path_dict,
@@ -202,8 +212,6 @@ class LigandDir:
             return None
         else:
             return self.smiles[self.ligand_keys[0]]
-
-
 
 @dataclasses.dataclass()
 class DatasetDir:
