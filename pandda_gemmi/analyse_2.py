@@ -503,7 +503,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         process_dataset,
     )
     get_shell_result = PanDDAGetShellResult()
-    process_shell = PanDDAProcessShell(
+    process_shell_func = PanDDAProcessShell(
         get_shell_datasets,
         homogenise_datasets,
         get_shell_xmaps,
@@ -557,7 +557,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     get_shell_results = PanDDAGetShellResults(
         get_comparators_func,
         get_shells,
-        process_shell,
+        process_shell_func,
         console,
     )
     get_autobuilds = PanDDAGetAutobuilds(

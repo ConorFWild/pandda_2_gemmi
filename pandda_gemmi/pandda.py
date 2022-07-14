@@ -1,5 +1,7 @@
 import time
 
+from pandda_gemmi.common import Partial
+
 from pandda_gemmi.analyse_interface import *
 
 
@@ -64,7 +66,6 @@ class PanDDALoadDatasets:
         self.console = pandda_console
 
     def __call__(self, pandda_fs_model: PanDDAFSModelInterface):
-
         self.console.start_load_datasets()
         datasets_initial: DatasetsInterface = self.get_datasets(pandda_fs_model, )
         datasets_statistics: DatasetsStatisticsInterface = self.get_dataset_statistics(datasets_initial)
@@ -108,10 +109,10 @@ class PanDDAFilterDatasets:
 
         datasets_quality_filtered: DatasetsInterface = self.filter_data_quality(
             datasets_for_filtering,
-            structure_factors,
+            # structure_factors,
         )
         self.console.summarise_filtered_datasets(
-            filter_data_quality.filtered_dtags
+            self.filter_data_quality.filtered_dtags
         )
 
         return datasets_quality_filtered
@@ -133,7 +134,7 @@ class PanDDAGetReference:
         # with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
         reference: ReferenceInterface = self.get_reference()(
             datasets_wilson,
-            datasets_statistics,
+            # datasets_statistics,
         )
         self.console.pandda_log["Reference Dtag"] = str(reference.dtag)
         self.console.summarise_reference(reference)
@@ -156,72 +157,91 @@ class PanDDAFilterReference:
         self.filter_reference_compatability = filter_reference_compatability
         self.console = console
 
-    def __call__(self, datasets_smoother, reference):
+    def __call__(self, datasets_smoother, reference) -> DatasetsInterface:
         self.console.start_reference_comparability_filters()
 
         datasets_reference: DatasetsInterface = self.filter_reference_compatability(datasets_smoother, reference)
-        datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                       datasets_reference.items()}
+        # datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
+        #                                datasets_reference.items()}
         self.console.summarise_filtered_datasets(
-            filter_reference_compatability.filtered_dtags
+            self.filter_reference_compatability.filtered_dtags
         )
 
         return datasets_reference
 
 
 class PanDDAPostprocessDatasets:
-    def __call__(self, *args, **kwargs):
-        datasets_wilson: DatasetsInterface = drop_columns(datasets_quality_filtered, structure_factors)
-        console.start_b_factor_smoothing()
 
-        with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
-            start = time.time()
-            datasets_smoother: DatasetsInterface = {
-                smoothed_dtag: smoothed_dataset
-                for smoothed_dtag, smoothed_dataset
-                in zip(
-                    datasets_wilson,
-                    process_local(
-                        [
-                            Partial(smooth_func).paramaterise(
-                                dataset,
-                                reference,
-                                structure_factors,
-                            )
-                            for dtag, dataset
-                            in datasets_wilson.items()
-                        ]
-                    )
+    def __init__(self,
+                 smooth_func,
+                 processor,
+                 console,
+                 ):
+        self.smooth_func = smooth_func
+        self.processor = processor
+        self.console = console
+
+    def __call__(self, datasets_quality_filtered, reference):
+        datasets_wilson: DatasetsInterface = drop_columns(
+            datasets_quality_filtered,
+            # structure_factors,
+        )
+
+        self.console.start_b_factor_smoothing()
+        # with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
+        start = time.time()
+        datasets_smoother: DatasetsInterface = {
+            smoothed_dtag: smoothed_dataset
+            for smoothed_dtag, smoothed_dataset
+            in zip(
+                datasets_wilson,
+                self.processor(
+                    [
+                        Partial(self.smooth_func).paramaterise(
+                            dataset,
+                            reference,
+                            # structure_factors,
+                        )
+                        for dtag, dataset
+                        in datasets_wilson.items()
+                    ]
                 )
-            }
+            )
+        }
 
-            finish = time.time()
-            pandda_log["Time to perform b factor smoothing"] = finish - start
+        finish = time.time()
+        # pandda_log["Time to perform b factor smoothing"] = finish - start
+
+        return datasets_smoother
 
 
 class PanDDAGetGrid:
 
-    def __init__(self, get_grid_func, console,):
-    def __call__(self, *args, **kwargs):
-        console.start_get_grid()
+    def __init__(self, get_grid_func, console, ):
+        self.get_grid_func = get_grid_func
+        self.console = console
+
+    def __call__(self, reference):
+        self.console.start_get_grid()
 
         # Grid
-        with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
-            grid: GridInterface = GetGrid()(reference,
-                                            pandda_args.outer_mask,
-                                            pandda_args.inner_mask_symmetry,
-                                            # sample_rate=pandda_args.sample_rate,
-                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
-                                            debug=pandda_args.debug
-                                            )
+        # with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
+        grid: GridInterface = self.get_grid_func(reference,
+                                        # pandda_args.outer_mask,
+                                        # pandda_args.inner_mask_symmetry,
+                                        # # sample_rate=pandda_args.sample_rate,
+                                        # sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
+                                        # debug=pandda_args.debug
+                                        )
 
-            if pandda_args.debug >= Debug.AVERAGE_MAPS:
-                with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
-                    pickle.dump(grid, f)
-
-                grid.partitioning.save_maps(
-                    pandda_fs_model.pandda_dir
-                )
+        # if pandda_args.debug >= Debug.AVERAGE_MAPS:
+        #     with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
+        #         pickle.dump(grid, f)
+        #
+        #     grid.partitioning.save_maps(
+        #         pandda_fs_model.pandda_dir
+        #     )
+        return grid
 
 
 class PanDDAGetAlignments:
@@ -244,7 +264,7 @@ class PanDDAGetAlignments:
 
 
 class PanDDAGetZmap:
-    def __call__(self, *args, **kwargs):
+    def __call__(self, xmap, model):
         ###################################################################
         # # Generate the statistical model of the dataset
         ###################################################################
@@ -282,14 +302,17 @@ class PanDDAGetZmap:
 
         # update_log(dataset_log, dataset_log_path)
 
+
 class PanDDAGetEvents:
 
     def __init__(self,
                  get_ed_clustering_func,
+                 processor,
                  ):
         self.get_ed_clustering_func = get_ed_clustering_func
+        self.processor = processor
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, datasets, reference, grid, alignments, model, zmap):
         ###################################################################
         # # Cluster the outlying density
         ###################################################################
@@ -302,19 +325,21 @@ class PanDDAGetEvents:
         # if debug >= Debug.PRINT_SUMMARIES:
         #     print("\t\tClustering")
 
-        clusterings_list: List[EDClusteringInterface] = process_local_serial(
-            [
-                Partial(self.get_ed_clustering_func).paramaterise(
-                    zmaps[dtag],
-                    reference=reference,
-                    grid=grid,
-                    contour_level=contour_level,
-                    cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier, )
-                for dtag
-                in zmaps
-            ]
-        )
+        # clusterings_list: List[EDClusteringInterface] = self.processor(
+        #     [
+        #         Partial(self.get_ed_clustering_func).paramaterise(
+        #             zmap,
+        #             reference=reference,
+        #             grid=grid,
+        #             # contour_level=contour_level,
+        #             # cluster_cutoff_distance_multiplier=cluster_cutoff_distance_multiplier,
+        #         )
+        #         for dtag
+        #         in zmaps
+        #     ]
+        # )
         time_cluster_z_finish = time.time()
+        clustering = self.get_ed_clustering_func(zmap, reference, grid)
 
         # if debug >= Debug.PRINT_SUMMARIES:
         #     print("\t\tClustering finished")
@@ -331,27 +356,27 @@ class PanDDAGetEvents:
         #         for cluster_num, cluster in clustering.clustering.items():
         #             model_log['time_event_mask'][int(cluster_num)] = cluster.time_event_mask
 
-        clusterings: EDClusteringsInterface = {dtag: clustering for dtag, clustering in zip(zmaps, clusterings_list)}
+        # clusterings: EDClusteringsInterface = {dtag: clustering for dtag, clustering in zip(zmaps, clusterings_list)}
 
-        model_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings.values()])
+        # model_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
+        #     [len(clustering) for clustering in clusterings.values()])
         # update_log(dataset_log, dataset_log_path)
         cluster_sizes = {}
-        for dtag, clustering in clusterings.items():
-            for cluster_num, cluster in clustering.clustering.items():
-                cluster_sizes[int(cluster_num)] = {
-                    "size": float(cluster.size(grid)),
-                    "centroid": (float(cluster.centroid[0]), float(cluster.centroid[1]), float(cluster.centroid[2])),
-                }
-        model_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
-            cluster_num: cluster_sizes[cluster_num]
-            for j, cluster_num
-            in enumerate(sorted(
-                cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
-                reverse=True,
-            ))
-            if j < 10
-        }
+        # for dtag, clustering in clusterings.items():
+        for cluster_num, cluster in clustering.clustering.items():
+            cluster_sizes[int(cluster_num)] = {
+                "size": float(cluster.size(grid)),
+                "centroid": (float(cluster.centroid[0]), float(cluster.centroid[1]), float(cluster.centroid[2])),
+            }
+        # model_log[constants.LOG_DATASET_CLUSTER_SIZES] = {
+        #     cluster_num: cluster_sizes[cluster_num]
+        #     for j, cluster_num
+        #     in enumerate(sorted(
+        #         cluster_sizes, key=lambda _cluster_num: cluster_sizes[_cluster_num]["size"],
+        #         reverse=True,
+        #     ))
+        #     if j < 10
+        # }
         # update_log(dataset_log, dataset_log_path)
 
         # Filter out small clusters
@@ -434,13 +459,22 @@ class PanDDAGetEvents:
 
         return events
 
+
 class PanDDAScoreEvents:
     def __init__(self,
                  score_events_func,
                  ):
         self.score_events_func = score_events_func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self,
+                 dataset_processed_dataset,
+                 dataset_xmap,
+                 zmap,
+                 events,
+                 model,
+                 grid,
+                 dataset_alignment,
+                 ):
         if score_events_func.tag == "inbuilt":
             event_scores: EventScoringResultsInterface = self.score_events_func(
                 test_dtag,
@@ -497,8 +531,9 @@ class PanDDAScoreEvents:
             model_log[int(event_id.event_idx)] = event_scoring_result.log()
             # model_log['noise'][int(event_num)] = noises[event_num]
 
+
 class PanDDAGetModelResult:
-    def __call__(self, *args, **kwargs):
+    def __call__(self, zmap, events, event_scores):
         time_model_analysis_finish = time.time()
 
         # model_results = {
@@ -512,11 +547,11 @@ class PanDDAGetModelResult:
         #     'log': model_log
         # }
         model_results: ModelResult = ModelResult(
-            zmaps[test_dtag],
-            clusterings,
-            clusterings_large,
-            clusterings_peaked,
-            clusterings_merged,
+            zmap,
+            # clusterings,
+            # clusterings_large,
+            # clusterings_peaked,
+            # clusterings_merged,
             {event_id: event for event_id, event in events.events.items()},
             event_scores,
             model_log
@@ -547,16 +582,25 @@ class PanDDAProcessModel:
         self.score_events = score_events
         self.get_model_result = get_model_result
 
-    def __call__(self, *args, **kwargs):
-        zmap = self.get_zmap()
+    def __call__(self, dataset, reference, grid, alignment, xmap, model):
+        zmap = self.get_zmap(xmap, model)
 
-        events = self.get_events()
+        events = self.get_events(dataset, reference, grid, alignment, model, zmap)
 
-        event_scores = self.score_events()
+        event_scores = self.score_events(
+            dataset,
+            xmap,
+            zmap,
+            events,
+            model,
+            grid,
+            alignment,
+        )
 
-        model_result = self.get_model_result()
+        model_result = self.get_model_result(zmap, events, event_scores)
 
         return model_result
+
 
 class PanDDAGetModelResults:
 
@@ -567,7 +611,7 @@ class PanDDAGetModelResults:
         self.analyse_model_func = analyse_model_func
         self.process_local = process_local
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, dataset, grid, alignment, xmap, models):
         ###################################################################
         # # Process the models...
         ###################################################################
@@ -654,8 +698,9 @@ class PanDDASelectModel:
 
         return selected_model
 
+
 class PanDDAOutputMaps:
-    def __call__(self, *args, **kwargs):
+    def __call__(self, dataset, grid, alignment, selected_model):
         ###################################################################
         # # Output the z map
         ###################################################################
@@ -839,20 +884,22 @@ class PanDDAProcessDataset:
         self.get_dataset_result = get_dataset_result
 
     def __call__(self,
-                 shell_datasets,
+                 dataset,
                  shell,
                  grid,
-                 alignments,
+                 alignment,
+                 xmap,
                  models, ):
-        model_results = self.process_models()
+        model_results = self.process_models(dataset, grid, alignment, xmap, models)
 
         selected_model = self.select_model(model_results)
 
-        self.output_maps()
+        self.output_maps( dataset, grid, alignment, selected_model)
 
-        dataset_result = self.get_dataset_result()
+        dataset_result = self.get_dataset_result(dataset, selected_model)
 
         return dataset_result
+
 
 class PanDDAGetShellDatasets:
     def __call__(self, *args, **kwargs):
@@ -868,11 +915,13 @@ class PanDDAGetShellDatasets:
 
         return shell_datasets
 
+
 class PanDDAGetHomogenisedDatasets:
     def __init__(self,
                  truncate_dataset_reflections_func,
                  ):
         self.truncate_dataset_reflections_func = truncate_dataset_reflections_func
+
     def __call__(self, datasets, shell):
         ###################################################################
         # # Homogonise shell datasets by truncation of resolution
@@ -891,6 +940,7 @@ class PanDDAGetHomogenisedDatasets:
         # shell_log["Shell Working Resolution"] = shell_working_resolution.resolution
 
         return shell_truncated_datasets
+
 
 class PanDDAGetShellXMaps:
     def __init__(self,
@@ -936,6 +986,7 @@ class PanDDAGetShellXMaps:
 
         return xmaps
 
+
 class PanDDAGetModels:
     def __init__(self,
                  get_models_func,
@@ -944,7 +995,7 @@ class PanDDAGetModels:
         self.get_models_func = get_models_func
         self.process_local_in_shell = process_local_in_shell
 
-    def __call__(self, shell, xmaps, grid,):
+    def __call__(self, shell, xmaps, grid, ):
         ###################################################################
         # # Get the models to test
         ###################################################################
@@ -968,6 +1019,7 @@ class PanDDAGetModels:
 
         return models
 
+
 class PanDDAGetDatasetResults:
     def __init__(self,
                  process_dataset_func,
@@ -975,7 +1027,7 @@ class PanDDAGetDatasetResults:
                  ):
         self.process_dataset_func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, datasets, reference, grid, alignments, shell, xmaps, models,):
         ###################################################################
         # # Process each test dataset
         ###################################################################
@@ -1019,6 +1071,7 @@ class PanDDAGetDatasetResults:
 
         return results
 
+
 class PanDDAGetShellResult:
     def __call__(self, *args, **kwargs):
         time_shell_finish = time.time()
@@ -1050,6 +1103,9 @@ class PanDDAProcessShell:
                  get_models,
                  get_dataset_results,
                  get_shell_result,
+                 # processor_in_shell,
+                 # processor_in_dataset,
+                 # processor_in_model,
                  console,
                  ):
         self.get_shell_datasets = get_shell_datasets
@@ -1058,26 +1114,10 @@ class PanDDAProcessShell:
         self.get_models = get_models
         self.get_dataset_results = get_dataset_results
         self.get_shell_result = get_shell_result
-        self.process_shell = process_shell
+        # self.process_shell = process_shell
+        # self.
         self.console = console
-        self.process_local = process_local,
-        # structure_factors = structure_factors,
-        # self.sample_rate = pandda_args.sample_rate,
-        # self.contour_level = pandda_args.contour_level,
-        # self.cluster_cutoff_distance_multiplier = pandda_args.cluster_cutoff_distance_multiplier,
-        # self.min_blob_volume = pandda_args.min_blob_volume,
-        # self.min_blob_z_peak = pandda_args.min_blob_z_peak,
-        # self.outer_mask = pandda_args.outer_mask,
-        # self.inner_mask_symmetry = pandda_args.inner_mask_symmetry,
-        # self.max_site_distance_cutoff = pandda_args.max_site_distance_cutoff,
-        # self.min_bdc = pandda_args.min_bdc,
-        # self.max_bdc = pandda_args.max_bdc,
-        # self.memory_availability = pandda_args.memory_availability,
-        # self.statmaps = pandda_args.statmaps,
-        # self.load_xmap_func = load_xmap_func,
-        # self.analyse_model_func = analyse_model_func,
-        # self.score_events_func = score_events_func,
-        # self.debug = pandda_args.debug
+        # self.process_local = process_local,
 
     def __call__(self,
                  shell,
@@ -1094,8 +1134,8 @@ class PanDDAProcessShell:
         shell_xmaps = self.get_shell_xmaps(shell_datasets, grid, alignments)
 
         models = self.get_models(
-            shell_datasets,
             shell,
+            shell_xmaps,
             grid,
         )
 
@@ -1510,8 +1550,6 @@ class PanDDASummariseRun:
         )
 
         print(f"PanDDA ran in: {time_finish - time_start}")
-
-
 
 
 class PanDDA:
