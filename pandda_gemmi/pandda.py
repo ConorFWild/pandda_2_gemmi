@@ -4,15 +4,15 @@ from pandda_gemmi.analyse_interface import *
 
 
 class PanDDAGetFSModel:
-    def __init__(self, pandda_args, get_pandda_fs_model_func, pandda_console):
-        self.data_dirs = pandda_args.data_dirs
-        self.out_dir = pandda_args.out_dir
-        self.pdb_regex = pandda_args.pdb_regex
-        self.mtz_regex = pandda_args.mtz_regex
-        self.ligand_dir_regex = pandda_args.ligand_dir_regex
-        self.ligand_cif_regex = pandda_args.ligand_cif_regex
-        self.ligand_pdb_regex = pandda_args.ligand_pdb_regex
-        self.ligand_smiles_regex = pandda_args.ligand_smiles_regex
+    def __init__(self, get_pandda_fs_model_func, pandda_console):
+        # self.data_dirs = pandda_args.data_dirs
+        # self.out_dir = pandda_args.out_dir
+        # self.pdb_regex = pandda_args.pdb_regex
+        # self.mtz_regex = pandda_args.mtz_regex
+        # self.ligand_dir_regex = pandda_args.ligand_dir_regex
+        # self.ligand_cif_regex = pandda_args.ligand_cif_regex
+        # self.ligand_pdb_regex = pandda_args.ligand_pdb_regex
+        # self.ligand_smiles_regex = pandda_args.ligand_smiles_regex
 
         self.get_pandda_fs_model_func = get_pandda_fs_model_func
 
@@ -23,14 +23,14 @@ class PanDDAGetFSModel:
 
         time_fs_model_building_start = time.time()
         pandda_fs_model: PanDDAFSModelInterface = self.get_pandda_fs_model_func(
-            self.data_dirs,
-            self.out_dir,
-            self.pdb_regex,
-            self.mtz_regex,
-            self.ligand_dir_regex,
-            self.ligand_cif_regex,
-            self.ligand_pdb_regex,
-            self.ligand_smiles_regex,
+            # self.data_dirs,
+            # self.out_dir,
+            # self.pdb_regex,
+            # self.mtz_regex,
+            # self.ligand_dir_regex,
+            # self.ligand_cif_regex,
+            # self.ligand_pdb_regex,
+            # self.ligand_smiles_regex,
         )
         pandda_fs_model.build()
         time_fs_model_building_finish = time.time()

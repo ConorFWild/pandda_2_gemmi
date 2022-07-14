@@ -441,10 +441,34 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     )
 
     # Construct the PanDDA
-    get_fs_model = PanDDAGetFSModel()
-    load_datasets= PanDDALoadDatasets
-    filter_datasets = PanDDAFilterDatasets()
-    get_reference= PanDDAGetReference
+    get_fs_model = PanDDAGetFSModel(
+        GetPanDDAFSModel(
+            pandda_args.data_dirs,
+            pandda_args.out_dir,
+            pandda_args.pdb_regex,
+            pandda_args.mtz_regex,
+            pandda_args.ligand_dir_regex,
+            pandda_args.ligand_cif_regex,
+            pandda_args.ligand_pdb_regex,
+            pandda_args.ligand_smiles_regex,
+        ),
+        console,
+    )
+    load_datasets = PanDDALoadDatasets(
+        get_datasets_func,
+        get_dataset_statistics_func,
+        get_common_structure_factors_func,
+        get_structure_factors_func,
+        pandda_console,
+    )
+    filter_datasets = PanDDAFilterDatasets(
+        filter_data_quality,
+        console,
+    )
+    get_reference = PanDDAGetReference(
+        GetReferenceDataset(),
+        console,
+    )
     filter_reference = PanDDAFilterReference()
     postprocess_datasets = PanDDAPostprocessDatasets()
     get_grid = PanDDAGetGrid(

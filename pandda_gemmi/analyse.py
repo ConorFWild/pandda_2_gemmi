@@ -394,7 +394,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         console.start_fs_model()
         time_fs_model_building_start = time.time()
-        pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel()(
+        pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel(
             pandda_args.data_dirs,
             pandda_args.out_dir,
             pandda_args.pdb_regex,
@@ -403,7 +403,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_args.ligand_cif_regex,
             pandda_args.ligand_pdb_regex,
             pandda_args.ligand_smiles_regex,
-        )
+        )()
         pandda_fs_model.build()
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
