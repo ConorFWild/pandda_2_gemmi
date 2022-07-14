@@ -211,13 +211,13 @@ class LigandDir:
         if len(self.ligand_keys) == 0:
             return None
         else:
-            return self.smiles[self.ligand_keys[0]]
+            return self.cifs[self.ligand_keys[0]]
 
     def get_first_ligand_pdb(self):
         if len(self.ligand_keys) == 0:
             return None
         else:
-            return self.smiles[self.ligand_keys[0]]
+            return self.pdbs[self.ligand_keys[0]]
 
 
 @dataclasses.dataclass()
