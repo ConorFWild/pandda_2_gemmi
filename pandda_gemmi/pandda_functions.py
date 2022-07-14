@@ -2005,6 +2005,10 @@ def get_common_structure_factors(datasets: DatasetsInterface):
     return None
 
 
+class GetStructureFactors:
+    def __call__(self, datasets,):
+        return get_common_structure_factors(datasets)
+
 def save_native_frame_zmap(
         path: Path,
         zmap: CrystallographicGridInterface,

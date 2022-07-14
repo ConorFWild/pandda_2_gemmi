@@ -11,7 +11,7 @@ from typing import *
 import fire
 import numpy as np
 import gemmi
-import ray
+# import ray
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
@@ -51,6 +51,8 @@ def execute(command: str):
                          )
 
     stdout, stderr = p.communicate()
+
+    print(stdout, stderr)
 
 
 @dataclasses.dataclass()
@@ -1350,22 +1352,22 @@ def autobuild_rhofit(dataset: Dataset,
     )
 
 
-@ray.remote
-def autobuild_rhofit_ray(dataset: Dataset,
-                         event: Event,
-                         pandda_fs,
-                         cif_strategy,
-                         cut: float = 2.0,
-                         rhofit_coord: bool = False,
-                         debug=False):
-    return autobuild_rhofit(dataset,
-                            event,
-                            pandda_fs,
-                            cif_strategy,
-                            cut,
-                            rhofit_coord,
-                            debug
-                            )
+# @ray.remote
+# def autobuild_rhofit_ray(dataset: Dataset,
+#                          event: Event,
+#                          pandda_fs,
+#                          cif_strategy,
+#                          cut: float = 2.0,
+#                          rhofit_coord: bool = False,
+#                          debug=False):
+#     return autobuild_rhofit(dataset,
+#                             event,
+#                             pandda_fs,
+#                             cif_strategy,
+#                             cut,
+#                             rhofit_coord,
+#                             debug
+#                             )
 
 class GetAutobuildResultRhofit(GetAutobuildResultInterface):
 

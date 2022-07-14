@@ -56,6 +56,7 @@ from pandda_gemmi.pandda_functions import (
     process_global_dask,
     get_shells,
     get_common_structure_factors,
+    GetStructureFactors,
 )
 from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
@@ -82,6 +83,8 @@ from pandda_gemmi.processing import (
     ProcessLocalSerial,
     ProcessLocalSpawn,
 )
+from pandda_gemmi.density_clustering import (
+    GetEDClustering)
 
 from pandda_gemmi import event_classification
 from pandda_gemmi.sites import GetSites
@@ -93,15 +96,15 @@ printer = pprint.PrettyPrinter()
 console = PanDDAConsole()
 
 
-def update_log(shell_log, shell_log_path):
-    if shell_log_path.exists():
-        os.remove(shell_log_path)
+# def update_log(shell_log, shell_log_path):
+#     if shell_log_path.exists():
+#         os.remove(shell_log_path)
+#
+#     with open(shell_log_path, "w") as f:
+#         json.dump(shell_log, f, indent=2)
 
-    with open(shell_log_path, "w") as f:
-        json.dump(shell_log, f, indent=2)
 
-
-def get_comparator_func(pandda_args: PanDDAArgs,
+def configure_comparator_func(pandda_args: PanDDAArgs,
                         load_xmap_flat_func: LoadXMapFlatInterface,
                         process_local: ProcessorInterface) -> GetComparatorsInterface:
     if pandda_args.comparison_strategy == "closest":
@@ -160,92 +163,95 @@ def get_comparator_func(pandda_args: PanDDAArgs,
 
     return comparators_func
 
+#
+# def get_process_global(pandda_args, distributed_tmp):
+#     if pandda_args.global_processing == "serial":
+#         process_global = process_global_serial
+#     elif pandda_args.global_processing == "distributed":
+#         client = get_dask_client(
+#             scheduler=pandda_args.distributed_scheduler,
+#             num_workers=pandda_args.distributed_num_workers,
+#             queue=pandda_args.distributed_queue,
+#             project=pandda_args.distributed_project,
+#             cores_per_worker=pandda_args.local_cpus,
+#             distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+#             resource_spec=pandda_args.distributed_resource_spec,
+#             job_extra=pandda_args.distributed_job_extra,
+#             walltime=pandda_args.distributed_walltime,
+#             watcher=pandda_args.distributed_watcher,
+#         )
+#         process_global = partial(
+#             process_global_dask,
+#             client=client,
+#             tmp_dir=distributed_tmp
+#         )
+#     else:
+#         raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")
+#
+#     return process_global
+#
+#
+# def get_process_local(pandda_args):
+#     if pandda_args.local_processing == "serial":
+#         process_local = ProcessLocalSerial()
+#
+#     elif pandda_args.local_processing == "multiprocessing_spawn":
+#         process_local = ProcessLocalSpawn(pandda_args.local_cpus)
+#
+#     # elif pandda_args.local_processing == "joblib":
+#     #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+#
+#     # elif pandda_args.local_processing == "multiprocessing_forkserver":
+#     #     mp.set_start_method("forkserver")
+#     #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
+#     #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+#
+#     # elif pandda_args.local_processing == "multiprocessing_spawn":
+#     #     mp.set_start_method("spawn")
+#     #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
+#     #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
+#     # elif pandda_args.local_processing == "dask":
+#     #     client = Client(n_workers=pandda_args.local_cpus)
+#     #     process_local = partial(
+#     #         process_local_dask,
+#     #         client=client
+#     #     )
+#
+#     elif pandda_args.local_processing == "ray":
+#         ray.init(num_cpus=pandda_args.local_cpus)
+#         process_local = ProcessLocalRay()
+#
+#     else:
+#         raise Exception()
+#
+#     return process_local
 
-def get_process_global(pandda_args, distributed_tmp):
-    if pandda_args.global_processing == "serial":
-        process_global = process_global_serial
-    elif pandda_args.global_processing == "distributed":
-        client = get_dask_client(
-            scheduler=pandda_args.distributed_scheduler,
-            num_workers=pandda_args.distributed_num_workers,
-            queue=pandda_args.distributed_queue,
-            project=pandda_args.distributed_project,
-            cores_per_worker=pandda_args.local_cpus,
-            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
-            resource_spec=pandda_args.distributed_resource_spec,
-            job_extra=pandda_args.distributed_job_extra,
-            walltime=pandda_args.distributed_walltime,
-            watcher=pandda_args.distributed_watcher,
-        )
-        process_global = partial(
-            process_global_dask,
-            client=client,
-            tmp_dir=distributed_tmp
-        )
-    else:
-        raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")
-
-    return process_global
+def configure_processing_funcs(pandda_args):
+    ...
 
 
-def get_process_local(pandda_args):
-    if pandda_args.local_processing == "serial":
-        process_local = ProcessLocalSerial()
-
-    elif pandda_args.local_processing == "multiprocessing_spawn":
-        process_local = ProcessLocalSpawn(pandda_args.local_cpus)
-
-    # elif pandda_args.local_processing == "joblib":
-    #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
-
-    # elif pandda_args.local_processing == "multiprocessing_forkserver":
-    #     mp.set_start_method("forkserver")
-    #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="forkserver")
-    #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-
-    # elif pandda_args.local_processing == "multiprocessing_spawn":
-    #     mp.set_start_method("spawn")
-    #     process_local = partial(process_local_multiprocessing, n_jobs=pandda_args.local_cpus, method="spawn")
-    #     # process_local_load = partial(process_local_joblib, int(joblib.cpu_count() * 3), "threads")
-    # elif pandda_args.local_processing == "dask":
-    #     client = Client(n_workers=pandda_args.local_cpus)
-    #     process_local = partial(
-    #         process_local_dask,
-    #         client=client
-    #     )
-
-    elif pandda_args.local_processing == "ray":
-        ray.init(num_cpus=pandda_args.local_cpus)
-        process_local = ProcessLocalRay()
-
-    else:
-        raise Exception()
-
-    return process_local
-
-
-def get_smooth_func(pandda_args: PanDDAArgs) -> SmoothBFactorsInterface:
+def configure_smooth_func(pandda_args: PanDDAArgs) -> SmoothBFactorsInterface:
     smooth_func: SmoothBFactorsInterface = SmoothBFactors()
 
     return smooth_func
 
 
-def get_load_xmap_func(pandda_args) -> LoadXMapInterface:
+def configure_load_xmap_func(pandda_args) -> LoadXMapInterface:
     load_xmap_func = LoadXmap()
     return load_xmap_func
 
 
-def get_load_xmap_flat_func(pandda_args) -> LoadXMapFlatInterface:
+def configure_load_xmap_flat_func(pandda_args) -> LoadXMapFlatInterface:
     load_xmap_flat_func = LoadXmapFlat()
     return load_xmap_flat_func
 
 
-def get_analyse_model_func(pandda_args):
+def configure_analyse_model_func(pandda_args):
     analyse_model_func = analyse_model
     return analyse_model_func
 
 
-def get_filter_data_quality(
+def configure_filter_data_quality_func(
         filter_keys: List[str],
         datasets_validator: DatasetsValidatorInterface,
         pandda_args: PanDDAArgs,
@@ -264,7 +270,7 @@ def get_filter_data_quality(
     return FiltersDataQuality(filters, datasets_validator)
 
 
-def get_filter_reference_compatability(
+def configure_filter_reference_compatability_func(
         filter_keys: List[str],
         datasets_validator: DatasetsValidatorInterface,
         pandda_args: PanDDAArgs,
@@ -286,9 +292,35 @@ def get_filter_reference_compatability(
     return FiltersReferenceCompatibility(filters, datasets_validator)
 
 
-def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
+def configure_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
     return GetEventScoreInbuilt()
 
+def configure_event_ranking_func(pandda_args):
+    # Rank the events to determine the order the are displated in
+    # with STDOUTManager('Ranking events...', f'\tDone!'):
+    if pandda_args.rank_method == "size":
+        event_ranking_func = GetEventRankingSize()
+    elif pandda_args.rank_method == "size_delta":
+        raise NotImplementedError()
+        # all_events_ranked = rank_events_size_delta()
+    elif pandda_args.rank_method == "cnn":
+        raise NotImplementedError()
+        # all_events_ranked = rank_events_cnn()
+
+    elif pandda_args.rank_method == "autobuild":
+        if not pandda_args.autobuild:
+            raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+        else:
+            event_ranking_func: EventRankingInterface = GetEventRankingAutobuild()
+    elif pandda_args.rank_method == "size-autobuild":
+        if not pandda_args.autobuild:
+            raise Exception("Cannot rank on autobuilds if autobuild is not set!")
+        else:
+            event_ranking_func: EventRankingInterface = GetEventRankingSizeAutobuild(0.4)
+    else:
+        raise Exception(f"Ranking method: {pandda_args.rank_method} is unknown!")
+
+    return event_ranking_func
 
 def process_pandda(pandda_args: PanDDAArgs, ):
     ###################################################################
@@ -313,27 +345,30 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     pandda_log[constants.LOG_ARGUMENTS] = initial_args
 
-    # Get global processor
-    console.start_initialise_shell_processor()
-    process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
+    # # Get global processor
+    # console.start_initialise_shell_processor()
+    # process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
+    #
+    # # Get local processor
+    # console.start_initialise_multiprocessor()
+    # process_local: ProcessorInterface = get_process_local(pandda_args)
+    #
+    # # Get serial processor
+    # process_serial = ProcessLocalSerial()
 
-    # Get local processor
-    console.start_initialise_multiprocessor()
-    process_local: ProcessorInterface = get_process_local(pandda_args)
-
-    # Get serial processor
-    process_serial = ProcessLocalSerial()
+    processor_global, processor_shells, processor_in_shell, processor_in_dataset, processor_in_model = \
+        configure_processing_funcs(pandda_args)
 
     # Get reflection smoothing function
-    smooth_func: SmoothBFactorsInterface = get_smooth_func(pandda_args)
+    smooth_func: SmoothBFactorsInterface = configure_smooth_func(pandda_args)
 
     # Get XMap loading functions
-    load_xmap_func: LoadXMapInterface = get_load_xmap_func(pandda_args)
-    load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
+    load_xmap_func: LoadXMapInterface = configure_load_xmap_func(pandda_args)
+    load_xmap_flat_func: LoadXMapFlatInterface = configure_load_xmap_flat_func(pandda_args)
 
     # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
-    filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
+    filter_data_quality: FiltersDataQualityInterface = configure_filter_data_quality_func(
         [
             "structure_factors",
             "resolution",
@@ -342,7 +377,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets_validator,
         pandda_args
     )
-    filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
+    filter_reference_compatability: FiltersReferenceCompatibilityInterface = \
+        configure_filter_reference_compatability_func(
         [
             "dissimilar_models",
             "large_gaps",
@@ -353,17 +389,17 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     )
 
     # Get the functino for selecting the comparators
-    get_comparators_func: GetComparatorsInterface = get_comparator_func(
+    get_comparators_func: GetComparatorsInterface = configure_comparator_func(
         pandda_args,
         load_xmap_flat_func,
-        process_local
+        processor_global,
     )
 
     # Get the staticial model anaylsis function
-    analyse_model_func: AnalyseModelInterface = get_analyse_model_func(pandda_args)
+    analyse_model_func: AnalyseModelInterface = configure_analyse_model_func(pandda_args)
 
     # Get the event scoring func
-    score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
+    score_events_func: GetEventScoreInterface = configure_score_events_func(pandda_args)
 
     # Set up autobuilding function
     autobuild_func: Optional[GetAutobuildResultInterface] = None
@@ -379,20 +415,38 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
-    # Get the event classification function
-    if pandda_args.autobuild:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
-    else:
-        get_event_class: GetEventClassInterface = event_classification.GetEventClassTrivial()
 
-    # Get the site determination function
-    get_sites: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
+
+    # Get functions for getting datasets
+    get_datasets_func = GetDatasets()
+    get_dataset_statistics_func = DatasetsStatistics()
+    get_structure_factors_func = GetStructureFactors()
+
+
 
     # Function to get the alignments
     get_alignments_func = GetAlignments()
 
     # Function to get the grid
     get_grid_func = GetGrid()
+
+    # Get the event ranking function
+    get_event_ranking_func = configure_event_ranking_func(pandda_args)
+
+    # Get the event classification function
+    if pandda_args.autobuild:
+        get_event_class_func: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
+    else:
+        get_event_class_func: GetEventClassInterface = event_classification.GetEventClassTrivial()
+
+    # Get the site determination function
+    get_sites_func: GetSitesInterface = GetSites(pandda_args.max_site_distance_cutoff)
+
+    save_events_func = SaveEvents()
+    get_event_table_func = GetEventTable()
+
+    #
+    get_site_table_func = GetSiteTable()
 
 
     ###################################################################
@@ -401,8 +455,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Construct the model processor
     get_zmap = PanDDAGetZmap()
-    get_events = PanDDAGetEvents()
-    score_events = PanDDAScoreEvents()
+    get_events = PanDDAGetEvents(
+        GetEDClustering()
+    )
+    score_events = PanDDAScoreEvents(
+        score_events_func,
+    )
     get_model_result = PanDDAGetModelResult()
     process_model = PanDDAProcessModel(
         get_zmap,
@@ -412,8 +470,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     )
 
     # Construct the Dataset processor
-    get_model_results = PanDDAGetModelResults()
-    select_model = PanDDASelectModel()
+    get_model_results = PanDDAGetModelResults(
+        process_model,
+        processor_in_dataset,
+    )
+    select_model = PanDDASelectModel(
+        SelectModel()
+    )
     output_maps = PanDDAOutputMaps()
     get_dataset_result = PanDDAGetDatasetResult()
     process_dataset = PanDDAProcessDataset(
@@ -425,10 +488,20 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Construct the Shell processor
     get_shell_datasets = PanDDAGetShellDatasets()
-    homogenise_datasets = PanDDAGetHomogenisedDatasets()
-    get_shell_xmaps = PanDDAGetShellXMaps()
-    get_models = PanDDAGetModels()
-    get_dataset_results = PanDDAGetDatasetResults()
+    homogenise_datasets = PanDDAGetHomogenisedDatasets(
+        TruncateDatasetReflections(),
+    )
+    get_shell_xmaps = PanDDAGetShellXMaps(
+        load_xmap_func,
+        processor_in_shell
+    )
+    get_models = PanDDAGetModels(
+        get_models_func,
+        processor_in_shell,
+    )
+    get_dataset_results = PanDDAGetDatasetResults(
+        process_dataset,
+    )
     get_shell_result = PanDDAGetShellResult()
     process_shell = PanDDAProcessShell(
         get_shell_datasets,
@@ -457,7 +530,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     load_datasets = PanDDALoadDatasets(
         get_datasets_func,
         get_dataset_statistics_func,
-        get_common_structure_factors_func,
         get_structure_factors_func,
         console,
     )
@@ -475,7 +547,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     )
     postprocess_datasets = PanDDAPostprocessDatasets()
     get_grid = PanDDAGetGrid(
-        get_grid_func, console,
+        get_grid_func,
+        console,
     )
     get_alignments = PanDDAGetAlignments(
         get_alignments_func,
@@ -492,12 +565,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console,
     )
     summarise_run = PanDDASummariseRun(
-        get_event_class,
-        get_event_ranking,
-        get_sites,
-        save_events,
-        get_event_table,
-        get_site_table,
+        get_event_class_func,
+        get_event_ranking_func,
+        get_sites_func,
+        save_events_func,
+        get_event_table_func,
+        get_site_table_func,
         console,
     )
     pandda = PanDDA(

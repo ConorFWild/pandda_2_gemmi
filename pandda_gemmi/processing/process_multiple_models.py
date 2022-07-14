@@ -343,6 +343,13 @@ def EXPERIMENTAL_select_model(
 
     return ModelSelection(selected_model_number, log)
 
+class SelectModel:
+
+    def __call__(self, model_results: ModelResultsInterface,):
+        return EXPERIMENTAL_select_model(
+            model_results,
+        )
+
 
 def get_models(
         test_dtags: List[DtagInterface],
