@@ -151,8 +151,8 @@ class LigandDir:
         else:
             ligand_keys = []
 
-        print(f"\tLigand keys are: {ligand_keys}")
-        print(f"\tPaths are: {ligand_smiles_paths}; {ligand_cif_paths}; {ligand_pdb_paths}")
+        # print(f"\tLigand keys are: {ligand_keys}")
+        # print(f"\tPaths are: {ligand_smiles_paths}; {ligand_cif_paths}; {ligand_pdb_paths}")
 
         # Generate dics
         ligand_smiles_path_dict = {}
@@ -191,7 +191,7 @@ class LigandDir:
             else:
                 ligand_pdb_path_dict[ligand_key] = None
 
-        print(f"\tPaths dicts are: {ligand_smiles_path_dict}; {ligand_cif_path_dict}; {ligand_pdb_path_dict}")
+        # print(f"\tPaths dicts are: {ligand_smiles_path_dict}; {ligand_cif_path_dict}; {ligand_pdb_path_dict}")
 
 
         return LigandDir(path,
@@ -262,13 +262,13 @@ class DatasetDir:
                 ligand_smiles_regex
             )
             # ligand_search_path = source_ligand_dir
-            print(f"Got ligand dir for dataset: {path.name}")
+            # print(f"Got ligand dir for dataset: {path.name}")
 
             source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
             source_ligand_cif = ligand_dir.get_first_ligand_cif()
             source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
 
-            print(f"Source files are: {source_ligand_smiles} {source_ligand_cif} {source_ligand_pdb}")
+            # print(f"Source files are: {source_ligand_smiles} {source_ligand_cif} {source_ligand_pdb}")
 
         else:
             ligand_dir = None
