@@ -269,7 +269,7 @@ def event_map_to_contour_score_map(
     #     print("\t\tMasking protein...")
     inner_mask_grid = gemmi.Int8Grid(*[event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    inner_mask_grid.set_unit_cell(event_map_grid.grid.unit_cell)
+    inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
     for atom in dataset.structure.protein_atoms():
         pos = atom.pos
         inner_mask_grid.set_points_around(pos,
