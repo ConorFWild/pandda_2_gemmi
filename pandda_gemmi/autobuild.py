@@ -1392,6 +1392,7 @@ def autobuild_rhofit(dataset: Dataset,
         event,
     )
 
+    del rescoring_log["grid"]
 
     autobuilding_log["rescoring_log"] = rescoring_log
 
