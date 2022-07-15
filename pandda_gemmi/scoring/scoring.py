@@ -303,6 +303,11 @@ def event_map_to_contour_score_map(
 
 
     #
+    event_mask_int_array = np.array(
+        event_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
     inner_mask_int_array = np.array(
         inner_mask_grid,
         copy=False,
@@ -313,11 +318,7 @@ def event_map_to_contour_score_map(
         copy=False,
         dtype=np.int8,
     )
-    event_mask_int_array = np.array(
-        event_mask_grid,
-        copy=False,
-        dtype=np.int8,
-    )
+
     # Event mask
     event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
     event_mask[np.nonzero(event_mask_int_array)] = True
@@ -326,11 +327,16 @@ def event_map_to_contour_score_map(
     outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
     outer_mask[np.nonzero(outer_mask_int_array)] = True
 
+    #
+    event_map_grid_array = np.array(event_map_grid,
+                                              copy=False,
+                                              )
+
     # Mask the protein except at event sites with a penalty
-    event_map_grid[inner_mask & (~event_mask)] = protein_score
+    event_map_grid_array[inner_mask & (~event_mask)] = protein_score
 
     # Mask the protein-event overlaps with zeros
-    event_map_grid[inner_mask & event_mask] = protein_event_overlap_score
+    event_map_grid_array[inner_mask & event_mask] = protein_event_overlap_score
 
     return event_map_grid
 
