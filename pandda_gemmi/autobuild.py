@@ -1102,6 +1102,7 @@ def score_builds_contour(
             res=dataset.reflections.get_resolution(),
             rate=0.0,
         )
+        del rescore_log["grid"]
         scores[str(model_path)] = score
         rescoring_log[str(model_path)] = rescore_log
 
@@ -1391,8 +1392,6 @@ def autobuild_rhofit(dataset: Dataset,
         dataset,
         event,
     )
-
-    del rescoring_log["grid"]
 
     autobuilding_log["rescoring_log"] = rescoring_log
 
