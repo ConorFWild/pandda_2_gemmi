@@ -27,6 +27,7 @@ from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Data
 # from pandda_gemmi.edalignment import Alignment, Alignments, Transform, Grid, Partitioning, Xmap
 # from pandda_gemmi.model import Zmap, Model
 from pandda_gemmi.event import Event
+from pandda_gemmi.scoring.scoring import event_map_to_contour_score_map, score_structure_contour
 
 
 @dataclasses.dataclass()
@@ -363,7 +364,7 @@ def generate_cif_grade2(smiles_path: Path, out_dir: Path):
 # #####################
 
 def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path, cif_path: Path,
-           out_dir: Path, cut: float = 2.0, debug: Debug=Debug.DEFAULT
+           out_dir: Path, cut: float = 2.0, debug: Debug = Debug.DEFAULT
            ):
     # Make rhofit commands
     pandda_rhofit = str(Path(__file__).parent / constants.PANDDA_RHOFIT_SCRIPT_FILE)
@@ -938,7 +939,7 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
     signal_overlapping_protein_penalty = EXPERIMENTAL_penalty_from_samples(signal_samples, xmap, -0.5)
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\tSignal {_signal} / {len(structure_samples)} Noise {_noise} / {len(noise_samples)} Penalty"
-          f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
+              f" {signal_overlapping_protein_penalty} / {len(signal_samples)}")
 
     _score = ((_signal / len(structure_samples)) - np.sqrt(_noise / len(noise_samples))) - np.sqrt(
         signal_overlapping_protein_penalty / len(signal_samples))
@@ -1037,6 +1038,76 @@ def score_builds(rhofit_dir: Path, score_model_path, xmap_path, zmap_path):
     return scores, rescoring_log
 
 
+def score_builds_contour(
+        rhofit_dir: Path,
+        score_model_path,
+        event_map_path,
+        zmap_path,
+        dataset: DatasetInterface,
+        event: EventInterface,
+):
+    scores = {}
+    rescoring_log = {}
+
+    regex = "Hit_*.pdb"
+    rescoring_log["regex"] = regex
+
+    # event_map_reference_grid = get_ccp4_map(xmap_path).grid
+
+    # event_map_reference_grid_array = np.array(event_map_reference_grid,
+    #                                           copy=False,
+    #                                           )
+
+    # score_model = Structure.from_file(score_model_path)
+    # inner_mask = gemmi.Int8Grid(
+    #     *[event_map_reference_grid.nu, event_map_reference_grid.nv, event_map_reference_grid.nw])
+    # inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    # inner_mask.set_unit_cell(event_map_reference_grid.unit_cell)
+    # for atom in score_model.protein_atoms():
+    #     pos = atom.pos
+    #     inner_mask.set_points_around(pos,
+    #                                  radius=2.0,
+    #                                  value=1,
+    #                                  )
+    #
+    # event_map_reference_grid_array[event_map_reference_grid_array < 2.0] = 0.0
+    # event_map_reference_grid_array[event_map_reference_grid_array >= 2.0] = 1.0
+    #
+    # # Mask the protein except around the event
+    # # inner_mask = grid.partitioning.inner_mask
+    # inner_mask_array = np.array(
+    #     inner_mask,
+    #     copy=False,
+    #     dtype=np.int8,
+    # )
+
+    event_map_reference_grid = get_ccp4_map(event_map_path).grid
+
+    score_grid = event_map_to_contour_score_map(
+        dataset,
+        event,
+        event_map_reference_grid,
+
+    )
+
+    # inner_mask_array[z_map_reference_grid_array > 2.0] = 0.0
+    # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = 0.0
+    # event_map_reference_grid_array[np.nonzero(inner_mask_array)] = -1.0
+
+    for model_path in rhofit_dir.glob(regex):
+        structure = gemmi.read_structure(str(model_path))
+        score, rescore_log = score_structure_contour(
+            structure,
+            score_grid,
+            res=dataset.reflections.get_resolution(),
+            rate=0.0,
+        )
+        scores[str(model_path)] = score
+        rescoring_log[str(model_path)] = rescore_log
+
+    return scores, rescoring_log
+
+
 def save_score_dictionary(score_dictionary, path):
     with open(str(path), "w") as f:
         json.dump(score_dictionary, f)
@@ -1062,7 +1133,6 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
             for model in ligand:
                 for chain in model:
                     for residue in chain:
-
                         residue.seqid.num = min_ligand_seqid
 
                         receptor_chain.add_residue(residue, pos=-1)
@@ -1140,7 +1210,7 @@ def autobuild_rhofit(dataset: Dataset,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
-                     debug: Debug=Debug.DEFAULT
+                     debug: Debug = Debug.DEFAULT
                      ):
     # Type all the input variables
     processed_dataset_dir = pandda_fs.processed_datasets[event.event_id.dtag]
@@ -1195,7 +1265,7 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Generate the cif
     if cif_strategy == "default":
-        if debug>= Debug.PRINT_SUMMARIES:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Making cif with default strategy using cif {cif_path}")
         if not cif_path:
             return AutobuildResult(
@@ -1291,7 +1361,7 @@ def autobuild_rhofit(dataset: Dataset,
 
     # Call rhofit
     if rhofit_coord:
-        if debug >=Debug.PRINT_SUMMARIES:
+        if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Using rhofit coord")
 
         rhofit_command = rhofit_to_coord(truncated_model_path, build_map_path, mtz_path, cif_path, out_dir, coord,
@@ -1304,13 +1374,24 @@ def autobuild_rhofit(dataset: Dataset,
 
     autobuilding_log["rhofit_command"] = str(rhofit_command)
 
+    # TODO: See if this change works
     # Score rhofit builds
-    score_dictionary, rescoring_log = score_builds(
+    # score_dictionary, rescoring_log = score_builds(
+    #     out_dir / "rhofit",
+    #     score_model_path,
+    #     score_map_path,
+    #     zmap_path,
+    #     dataset,
+    # )
+    score_dictionary, rescoring_log = score_builds_contour(
         out_dir / "rhofit",
         score_model_path,
         score_map_path,
-        zmap_path
+        zmap_path,
+        dataset,
+        event,
     )
+
 
     autobuilding_log["rescoring_log"] = rescoring_log
 
@@ -1371,12 +1452,12 @@ def autobuild_rhofit(dataset: Dataset,
 
 class GetAutobuildResultRhofit(GetAutobuildResultInterface):
 
-    def __call__(self, 
-    dataset: DatasetInterface, 
-    event: EventInterface, 
-    pandda_fs: PanDDAFSModelInterface, 
-    cif_strategy: str, 
-    cut: float, 
-    rhofit_coord: bool, 
-    debug: Debug) -> AutobuildResultInterface:
+    def __call__(self,
+                 dataset: DatasetInterface,
+                 event: EventInterface,
+                 pandda_fs: PanDDAFSModelInterface,
+                 cif_strategy: str,
+                 cut: float,
+                 rhofit_coord: bool,
+                 debug: Debug) -> AutobuildResultInterface:
         return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)
