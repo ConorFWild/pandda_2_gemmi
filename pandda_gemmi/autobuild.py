@@ -1103,7 +1103,7 @@ def score_builds_contour(
             rate=0.0,
         )
 
-        save_xmap(rescore_log.grid, rhofit_dir / "structure_map.ccp4")
+        save_xmap(rescore_log["grid"], rhofit_dir / "structure_map.ccp4")
 
         del rescore_log["grid"]
         scores[str(model_path)] = score
