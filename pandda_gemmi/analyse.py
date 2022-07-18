@@ -824,7 +824,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                     pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
 
-                    if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
+                    if dtag not in pandda_log["autobuild_scores"]:
                         pandda_log["autobuild_scores"][dtag] = {}
                     pandda_log["autobuild_scores"][dtag][event_idx][event_idx] = autobuild_result.scores
 

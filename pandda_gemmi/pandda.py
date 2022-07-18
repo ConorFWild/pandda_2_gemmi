@@ -1,3 +1,4 @@
+import dataclasses
 import time
 
 from pandda_gemmi.common import Partial
@@ -505,8 +506,8 @@ class PanDDAScoreEvents:
                  ):
         # if score_events_func.tag == "inbuilt":
         event_scores: EventScoringResultsInterface = self.score_events_func(
-            test_dtag,
-            model_number,
+            # test_dtag,
+            # model_number,
             dataset_processed_dataset,
             dataset_xmap,
             zmap,
@@ -514,13 +515,13 @@ class PanDDAScoreEvents:
             model,
             grid,
             dataset_alignment,
-            max_site_distance_cutoff,
-            min_bdc, max_bdc,
-            reference,
-            res, rate,
-            event_map_cut=2.0,
-            structure_output_folder=output_dir,
-            debug=debug
+            # max_site_distance_cutoff,
+            # min_bdc, max_bdc,
+            # reference,
+            # res, rate,
+            # event_map_cut=2.0,
+            # structure_output_folder=output_dir,
+            # debug=debug
         )
         # elif score_events_func.tag == "autobuild":
         #     raise NotImplementedError()
@@ -561,10 +562,19 @@ class PanDDAScoreEvents:
 
         return event_scores
 
+@dataclasses.dataclass()
+class PanDDAModelResult:
+    model_result: ModelResultInterface
+    model_processing_time: float
+
 
 class PanDDAGetModelResult:
+    def __init__(self):
+
+        self.log = {}
+
     def __call__(self, zmap, events, event_scores):
-        time_model_analysis_finish = time.time()
+        time_model_analysis_start = time.time()
 
         # model_results = {
         #     'zmap': zmaps[test_dtag],
@@ -587,16 +597,22 @@ class PanDDAGetModelResult:
             model_log
         )
 
-        model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
-        if debug >= Debug.PRINT_SUMMARIES:
-            print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
+        time_model_analysis_finish = time.time()
 
-        if debug >= Debug.PRINT_SUMMARIES:
-            for event_id, event_score_result in model_results.event_scores.items():
-                print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
-                print(event_score_result.log())
 
-        return model_results
+        # model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
+
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     for event_id, event_score_result in model_results.event_scores.items():
+        #         print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+        #         print(event_score_result.log())
+
+        return PanDDAModelResult(
+            model_results,
+            time_model_analysis_finish-time_model_analysis_start,
+        )
 
 
 class PanDDAProcessModel:
@@ -656,14 +672,15 @@ class PanDDAGetModelResults:
                     [
                         Partial(
                             self.analyse_model_func).paramaterise(
+                            dataset,
+                            reference,
+                            grid,
+                            alignment,
+                            # model_number,
+                            # test_dtag=test_dtag,
+                            xmap,
+                            # dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
                             model,
-                            model_number,
-                            test_dtag=test_dtag,
-                            dataset_xmap=xmap,
-                            reference=reference,
-                            grid=grid,
-                            dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                            dataset_alignment=alignment,
                             # max_site_distance_cutoff=max_site_distance_cutoff,
                             # min_bdc=min_bdc, max_bdc=max_bdc,
                             # contour_level=contour_level,
@@ -916,6 +933,8 @@ class PanDDAProcessDataset:
         self.output_maps = output_maps
         self.get_dataset_result = get_dataset_result
 
+        self.log = log
+
     def __call__(self,
                  dataset,
                  shell,
@@ -1154,6 +1173,8 @@ class PanDDAProcessShell:
         self.console = console
         # self.process_local = process_local,
 
+        self.log = {}
+
     def __call__(self,
                  shell,
                  datasets,
@@ -1198,6 +1219,8 @@ class PanDDAGetShellResults:
         self.get_comparators = get_comparators
         self.get_shells = get_shells
         self.process_shell = process_shell
+
+        self.log = {}
 
     def __call__(self, datassets, reference, grid, alignments, ):
         ###################################################################
