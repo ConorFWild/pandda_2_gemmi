@@ -478,3 +478,4 @@ def score_structure_contour(
         "Num structure map high": (approximate_structure_map_array > 1.5).shape
     }
 
+
