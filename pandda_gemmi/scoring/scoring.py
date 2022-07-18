@@ -477,3 +477,4 @@ def score_structure_contour(
         "Event map array size": event_map_array.size,
         "Num structure map high": (approximate_structure_map_array > 1.5).shape
     }
+
