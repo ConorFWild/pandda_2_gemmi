@@ -822,6 +822,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                     pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
 
+                    pandda_log["autobuild_scores"][dtag][event_idx][event_idx] = autobuild_result.scores
+
+
             with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
                 # Add the best fragment by scoring method to default model
                 pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}

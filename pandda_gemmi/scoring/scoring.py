@@ -472,5 +472,8 @@ def score_structure_contour(
         "scores": scores,
         "scores_from_calc": scores_from_calc,
         "signals": signals_from_calc,
-        "noises": noises_from_calc
+        "noises": noises_from_calc,
+        "Approximate structure map array size": approximate_structure_map_array.size,
+        "Event map array size": event_map_array.size,
+        "Num structure map high": (approximate_structure_map_array > 1.5).shape
     }

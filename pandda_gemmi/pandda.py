@@ -2,6 +2,25 @@ import time
 
 from pandda_gemmi.common import Partial
 
+from pandda_gemmi.dataset import (
+    StructureFactors,
+    SmoothBFactors,
+    DatasetsStatistics,
+    drop_columns,
+    GetDatasets,
+    GetReferenceDataset,
+)
+from pandda_gemmi.event import (
+    Event, Clusterings, Clustering, Events, get_event_mask_indicies,
+    save_event_map,
+)
+from pandda_gemmi.density_clustering import (
+    GetEDClustering, FilterEDClusteringsSize,
+    FilterEDClusteringsPeak,
+    MergeEDClusterings,
+)
+from pandda_gemmi.processing import DatasetResult, ModelResult, ShellResult
+
 from pandda_gemmi.analyse_interface import *
 
 
@@ -227,12 +246,12 @@ class PanDDAGetGrid:
         # Grid
         # with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
         grid: GridInterface = self.get_grid_func(reference,
-                                        # pandda_args.outer_mask,
-                                        # pandda_args.inner_mask_symmetry,
-                                        # # sample_rate=pandda_args.sample_rate,
-                                        # sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
-                                        # debug=pandda_args.debug
-                                        )
+                                                 # pandda_args.outer_mask,
+                                                 # pandda_args.inner_mask_symmetry,
+                                                 # # sample_rate=pandda_args.sample_rate,
+                                                 # sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
+                                                 # debug=pandda_args.debug
+                                                 )
 
         # if pandda_args.debug >= Debug.AVERAGE_MAPS:
         #     with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
@@ -264,6 +283,10 @@ class PanDDAGetAlignments:
 
 
 class PanDDAGetZmap:
+
+    def __init__(self, get_zmap_func):
+        self.get_zmap_func = get_zmap_func
+
     def __call__(self, xmap, model):
         ###################################################################
         # # Generate the statistical model of the dataset
@@ -271,36 +294,39 @@ class PanDDAGetZmap:
         time_model_analysis_start = time.time()
 
         # Calculate z maps
-        if debug >= Debug.PRINT_SUMMARIES:
-            print("\t\tCalculating zmaps")
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print("\t\tCalculating zmaps")
         time_z_maps_start = time.time()
-        zmaps: ZmapsInterface = Zmaps.from_xmaps(
-            model=model,
-            xmaps={test_dtag: dataset_xmap, },
-            model_number=model_number,
-            debug=debug,
-        )
+        # zmaps: ZmapsInterface = Zmaps.from_xmaps(
+        #     model=model,
+        #     xmaps={test_dtag: dataset_xmap, },
+        #     model_number=model_number,
+        #     debug=debug,
+        # )
+        zmap = self.get_zmap_func(model, xmap)
 
-        if debug >= Debug.PRINT_SUMMARIES:
-            print("\t\tCalculated zmaps")
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print("\t\tCalculated zmaps")
 
         time_z_maps_finish = time.time()
-        model_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
-        for dtag, zmap in zmaps.items():
-            z_map_statistics = GetMapStatistics(
-                zmap
-            )
-            model_log["ZMap statistics"] = {
-                "mean": str(z_map_statistics.mean),
-                "std": str(z_map_statistics.std),
-                ">1.0": str(z_map_statistics.greater_1),
-                ">2.0": str(z_map_statistics.greater_2),
-                ">3.0": str(z_map_statistics.greater_3),
-            }
-            if debug >= Debug.PRINT_SUMMARIES:
-                print(model_log["ZMap statistics"])
+        # model_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
+        # for dtag, zmap in zmaps.items():
+        #     z_map_statistics = GetMapStatistics(
+        #         zmap
+        #     )
+        #     model_log["ZMap statistics"] = {
+        #         "mean": str(z_map_statistics.mean),
+        #         "std": str(z_map_statistics.std),
+        #         ">1.0": str(z_map_statistics.greater_1),
+        #         ">2.0": str(z_map_statistics.greater_2),
+        #         ">3.0": str(z_map_statistics.greater_3),
+        #     }
+        #     if debug >= Debug.PRINT_SUMMARIES:
+        #         print(model_log["ZMap statistics"])
 
         # update_log(dataset_log, dataset_log_path)
+
+        return zmap
 
 
 class PanDDAGetEvents:
@@ -312,7 +338,7 @@ class PanDDAGetEvents:
         self.get_ed_clustering_func = get_ed_clustering_func
         self.processor = processor
 
-    def __call__(self, datasets, reference, grid, alignments, model, zmap):
+    def __call__(self, datasets, reference, grid, alignment, xmap, model, zmap):
         ###################################################################
         # # Cluster the outlying density
         ###################################################################
@@ -380,50 +406,51 @@ class PanDDAGetEvents:
         # update_log(dataset_log, dataset_log_path)
 
         # Filter out small clusters
-        clusterings_large: EDClusteringsInterface = FilterEDClusteringsSize()(clusterings,
-                                                                              grid,
-                                                                              min_blob_volume,
-                                                                              )
-        if debug >= Debug.PRINT_SUMMARIES:
-            print("\t\tAfter filtering: large: {}".format(
-                {dtag: len(cluster) for dtag, cluster in
-                 zip(clusterings_large, clusterings_large.values())}))
-        model_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_large.values()])
-        # update_log(dataset_log, dataset_log_path)
+        clustering_large: EDClusteringsInterface = FilterEDClusteringsSize()(clustering,
+                                                                             grid,
+                                                                             self.min_blob_volume,
+                                                                             )
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print("\t\tAfter filtering: large: {}".format(
+        #         {dtag: len(cluster) for dtag, cluster in
+        #          zip(clusterings_large, clusterings_large.values())}))
+        # model_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
+        #     [len(clustering) for clustering in clusterings_large.values()])
+        # update_log(dataset_log, dataset_log_path)     
 
         # Filter out weak clusters (low peak z score)
-        clusterings_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clusterings_large,
-                                                                               grid,
-                                                                               min_blob_z_peak)
-        if debug >= Debug.PRINT_SUMMARIES:
-            print("\t\tAfter filtering: peak: {}".format(
-                {dtag: len(cluster) for dtag, cluster in
-                 zip(clusterings_peaked, clusterings_peaked.values())}))
-        model_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_peaked.values()])
+        clustering_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clustering_large,
+                                                                              grid,
+                                                                              self.min_blob_z_peak,
+                                                                              )
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print("\t\tAfter filtering: peak: {}".format(
+        #         {dtag: len(cluster) for dtag, cluster in
+        #          zip(clusterings_peaked, clusterings_peaked.values())}))
+        # model_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
+        #     [len(clustering) for clustering in clusterings_peaked.values()])
         # update_log(dataset_log, dataset_log_path)
 
         # Add the event mask
-        for clustering_id, clustering in clusterings_peaked.items():
-            for cluster_id, cluster in clustering.clustering.items():
-                cluster.event_mask_indicies = get_event_mask_indicies(
-                    zmaps[test_dtag],
-                    cluster.cluster_positions_array)
+        # for clustering_id, clustering in clusterings_peaked.items():
+        for cluster_id, cluster in clustering_peaked.clustering.items():
+            cluster.event_mask_indicies = get_event_mask_indicies(
+                zmap,
+                cluster.cluster_positions_array)
 
         # Merge the clusters
-        clusterings_merged: EDClusteringsInterface = MergeEDClusterings()(clusterings_peaked)
-        if debug >= Debug.PRINT_SUMMARIES:
-            print("\t\tAfter filtering: merged: {}".format(
-                {dtag: len(_cluster) for dtag, _cluster in
-                 zip(clusterings_merged, clusterings_merged.values())}))
-        model_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
-            [len(clustering) for clustering in clusterings_merged.values()])
+        clustering_merged: EDClusteringsInterface = MergeEDClusterings()(clustering_peaked)
+        # if debug >= Debug.PRINT_SUMMARIES:
+        #     print("\t\tAfter filtering: merged: {}".format(
+        #         {dtag: len(_cluster) for dtag, _cluster in
+        #          zip(clusterings_merged, clusterings_merged.values())}))
+        # model_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
+        #     [len(clustering) for clustering in clusterings_merged.values()])
         # update_log(dataset_log, dataset_log_path)
 
         # Log the clustering
         time_cluster_finish = time.time()
-        model_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
+        # model_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
         # update_log(dataset_log, dataset_log_path)
 
         # TODO: REMOVE: event blob analysis
@@ -446,14 +473,15 @@ class PanDDAGetEvents:
         #     pandda_fs_model
         # )
 
-        events: Events = Events.from_clusters(
-            clusterings_large,
+        events = Events.from_clusters(
+            clustering_large,
             model,
-            {test_dtag: dataset_xmap, },
+            xmap,
             grid,
-            dataset_alignment,
-            max_site_distance_cutoff,
-            min_bdc, max_bdc,
+            alignment,
+            self.max_site_distance_cutoff,
+            self.min_bdc,
+            self.max_bdc,
             None,
         )
 
@@ -475,30 +503,30 @@ class PanDDAScoreEvents:
                  grid,
                  dataset_alignment,
                  ):
-        if score_events_func.tag == "inbuilt":
-            event_scores: EventScoringResultsInterface = self.score_events_func(
-                test_dtag,
-                model_number,
-                dataset_processed_dataset,
-                dataset_xmap,
-                zmaps[test_dtag],
-                events,
-                model,
-                grid,
-                dataset_alignment,
-                max_site_distance_cutoff,
-                min_bdc, max_bdc,
-                reference,
-                res, rate,
-                event_map_cut=2.0,
-                structure_output_folder=output_dir,
-                debug=debug
-            )
+        # if score_events_func.tag == "inbuilt":
+        event_scores: EventScoringResultsInterface = self.score_events_func(
+            test_dtag,
+            model_number,
+            dataset_processed_dataset,
+            dataset_xmap,
+            zmap,
+            events,
+            model,
+            grid,
+            dataset_alignment,
+            max_site_distance_cutoff,
+            min_bdc, max_bdc,
+            reference,
+            res, rate,
+            event_map_cut=2.0,
+            structure_output_folder=output_dir,
+            debug=debug
+        )
         # elif score_events_func.tag == "autobuild":
         #     raise NotImplementedError()
 
-        else:
-            raise Exception("No valid event selection score method!")
+        # else:
+        #     raise Exception("No valid event selection score method!")
 
         # model_log['score'] = {}
         # model_log['noise'] = {}
@@ -523,13 +551,15 @@ class PanDDAScoreEvents:
         #     debug=debug
         # )
 
-        model_log['score'] = {}
-        model_log['noise'] = {}
+        # model_log['score'] = {}
+        # model_log['noise'] = {}
+        #
+        # for event_id, event_scoring_result in event_scores.items():
+        #     model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
+        #     model_log[int(event_id.event_idx)] = event_scoring_result.log()
+        # model_log['noise'][int(event_num)] = noises[event_num]
 
-        for event_id, event_scoring_result in event_scores.items():
-            model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
-            model_log[int(event_id.event_idx)] = event_scoring_result.log()
-            # model_log['noise'][int(event_num)] = noises[event_num]
+        return event_scores
 
 
 class PanDDAGetModelResult:
@@ -546,7 +576,7 @@ class PanDDAGetModelResult:
         #     'event_scores': event_scores,
         #     'log': model_log
         # }
-        model_results: ModelResult = ModelResult(
+        model_results: ModelResultInterface = ModelResult(
             zmap,
             # clusterings,
             # clusterings_large,
@@ -611,7 +641,7 @@ class PanDDAGetModelResults:
         self.analyse_model_func = analyse_model_func
         self.process_local = process_local
 
-    def __call__(self, dataset, grid, alignment, xmap, models):
+    def __call__(self, pandda_fs_model, dataset, reference, grid, alignment, xmap, models):
         ###################################################################
         # # Process the models...
         ###################################################################
@@ -629,11 +659,11 @@ class PanDDAGetModelResults:
                             model,
                             model_number,
                             test_dtag=test_dtag,
-                            dataset_xmap=dataset_xmaps[test_dtag],
+                            dataset_xmap=xmap,
                             reference=reference,
                             grid=grid,
                             dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                            dataset_alignment=alignments[test_dtag],
+                            dataset_alignment=alignment,
                             # max_site_distance_cutoff=max_site_distance_cutoff,
                             # min_bdc=min_bdc, max_bdc=max_bdc,
                             # contour_level=contour_level,
@@ -675,7 +705,10 @@ class PanDDASelectModel:
                  ):
         self.select_model_func = select_model_func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, model_results: ModelResultsInterface,
+                 grid: GridInterface,
+                 pandda_fs_model: PanDDAFSModelInterface,
+                 ):
         ###################################################################
         # # Decide which model to use...
         ###################################################################
@@ -894,7 +927,7 @@ class PanDDAProcessDataset:
 
         selected_model = self.select_model(model_results)
 
-        self.output_maps( dataset, grid, alignment, selected_model)
+        self.output_maps(dataset, grid, alignment, selected_model)
 
         dataset_result = self.get_dataset_result(dataset, selected_model)
 
@@ -1023,11 +1056,13 @@ class PanDDAGetModels:
 class PanDDAGetDatasetResults:
     def __init__(self,
                  process_dataset_func,
+                 processor,
                  # console,
                  ):
-        self.process_dataset_func
+        self.process_dataset_func = process_dataset_func
+        self.processor = processor
 
-    def __call__(self, datasets, reference, grid, alignments, shell, xmaps, models,):
+    def __call__(self, pandda_fs_model, datasets, reference, grid, alignments, shell, xmaps, models, ):
         ###################################################################
         # # Process each test dataset
         ###################################################################
@@ -1042,13 +1077,13 @@ class PanDDAGetDatasetResults:
             if _dtag not in all_train_dtags:
                 all_train_dtags.append(_dtag)
 
-        if debug >= Debug.PRINT_NUMERICS:
-            print(f"\tAll train datasets are: {all_train_dtags}")
+        # if debug >= Debug.PRINT_NUMERICS:
+        #     print(f"\tAll train datasets are: {all_train_dtags}")
         # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
         dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
-        if debug >= Debug.PRINT_NUMERICS:
-            print(f"\tDataset dtags are: {dataset_dtags}")
-        results: List[DatasetResultInterface] = process_local_over_datasets(
+        # if debug >= Debug.PRINT_NUMERICS:
+        #     print(f"\tDataset dtags are: {dataset_dtags}")
+        results: List[DatasetResultInterface] = self.processor(
             [
                 Partial(
                     self.process_dataset_func).paramaterise(
@@ -1073,7 +1108,7 @@ class PanDDAGetDatasetResults:
 
 
 class PanDDAGetShellResult:
-    def __call__(self, *args, **kwargs):
+    def __call__(self, shell: ShellInterface, dataset_results: DatasetResultsInterface):
         time_shell_finish = time.time()
         shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
         update_log(shell_log, shell_log_path)
