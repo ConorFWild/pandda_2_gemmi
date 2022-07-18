@@ -22,6 +22,8 @@ from pandda_gemmi.density_clustering import (
 )
 from pandda_gemmi.processing import DatasetResult, ModelResult, ShellResult
 
+from pandda_gemmi.edalignment import Partitioning
+
 from pandda_gemmi.analyse_interface import *
 
 
@@ -756,11 +758,11 @@ class PanDDAOutputMaps:
         ###################################################################
         time_output_zmap_start = time.time()
 
-        native_grid = dataset_truncated_datasets[test_dtag].reflections.transform_f_phi_to_map(
-            structure_factors.f,
-            structure_factors.phi,
+        native_grid = dataset.reflections.transform_f_phi_to_map(
+            # structure_factors.f,
+            # structure_factors.phi,
             # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
-            sample_rate=dataset_truncated_datasets[test_dtag].reflections.get_resolution() / 0.5
+            sample_rate=dataset.reflections.get_resolution() / 0.5
         )
 
         partitioning = Partitioning.from_structure_multiprocess(
