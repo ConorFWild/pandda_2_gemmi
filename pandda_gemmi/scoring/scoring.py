@@ -345,6 +345,7 @@ def score_structure_contour(
         zmap_grid,
         res,
         rate,
+        structure_map_high_cut=0.5
 ) -> Tuple[float, Dict]:
     # Get grid
     new_grid = gemmi.FloatGrid(zmap_grid.nu, zmap_grid.nv, zmap_grid.nw)
@@ -443,7 +444,7 @@ def score_structure_contour(
     noises_from_calc = {}
     signals_from_calc = {}
     for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
-        approximate_structure_map_high_indicies = approximate_structure_map_array > 1.5
+        approximate_structure_map_high_indicies = approximate_structure_map_array > structure_map_high_cut
         event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
         signal = np.sum(event_map_high_indicies)
         signals_from_calc[float(cutoff)] = float(signal)
