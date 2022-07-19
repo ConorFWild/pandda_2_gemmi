@@ -826,7 +826,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                     if dtag not in pandda_log["autobuild_scores"]:
                         pandda_log["autobuild_scores"][dtag] = {}
-                    pandda_log["autobuild_scores"][dtag][event_idx][event_idx] = autobuild_result.scores
+                    pandda_log["autobuild_scores"][dtag][event_idx] = autobuild_result.scores
 
             with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
                 # Add the best fragment by scoring method to default model
