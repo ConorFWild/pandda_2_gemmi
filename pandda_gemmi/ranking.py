@@ -88,7 +88,26 @@ class GetEventRankingEventScore:
             )
         )
 
-        return ranked_event_ids
+        # Get the highest scoring event for each dataset
+        dtags = []
+        unique_dtag_ranked_event_ids = []
+        for event_id in ranked_event_ids:
+            _dtag = event_id.dtag
+            if _dtag in dtags:
+                continue
+            else:
+                unique_dtag_ranked_event_ids.append(_dtag)
+                dtags.append(_dtag)
+
+        # Add the rest in order of score
+        for event_id in ranked_event_ids:
+            if event_id in unique_dtag_ranked_event_ids:
+                continue
+            else:
+                unique_dtag_ranked_event_ids.append(event_id)
+
+        return unique_dtag_ranked_event_ids
+
 
 class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):
     tag: Literal["autobuild"] = "autobuild"
