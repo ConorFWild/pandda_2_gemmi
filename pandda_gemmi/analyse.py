@@ -61,7 +61,8 @@ from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
-    GetEventRankingSizeAutobuild
+    GetEventRankingSizeAutobuild,
+GetEventRankingEventScore
 )
 from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
@@ -920,6 +921,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             elif pandda_args.rank_method == "cnn":
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_cnn()
+
+            elif pandda_args.rank_method == "event_score":
+                event_ranking: EventRankingInterface = GetEventRankingEventScore()(
+                    all_events,
+                    event_scores,
+                    datasets,
+                    pandda_fs_model,
+                )
 
             elif pandda_args.rank_method == "autobuild":
                 if not pandda_args.autobuild:

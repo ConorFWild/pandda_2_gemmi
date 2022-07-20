@@ -71,6 +71,25 @@ def rank_events_autobuild(
     return events_ranked
 
 
+class GetEventRankingEventScore:
+    def __call__(self, events:EventsInterface,
+                 event_scores: EventScoresInterface,
+                 datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
+        # Rank events with a score
+        ranked_event_ids = list(
+            sorted(
+                [
+                    event_id
+                    for event_id
+                    in events.keys()
+                ],
+                key=lambda event_id: event_scores[event_id],
+                reverse=True,
+            )
+        )
+
+        return ranked_event_ids
+
 class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):
     tag: Literal["autobuild"] = "autobuild"
 
