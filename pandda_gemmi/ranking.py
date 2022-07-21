@@ -96,7 +96,7 @@ class GetEventRankingEventScore:
             if _dtag in dtags:
                 continue
             else:
-                unique_dtag_ranked_event_ids.append(_dtag)
+                unique_dtag_ranked_event_ids.append(event_id)
                 dtags.append(_dtag)
 
         # Add the rest in order of score
