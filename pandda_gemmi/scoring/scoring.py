@@ -434,7 +434,8 @@ def score_structure_contour(
            )
 
     scores = {}
-    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
+    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
+                   2.9, 3.0]:
         noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
         signal = np.sum(event_map_array[mask_indicies] > cutoff)
         score = signal - (np.sum(inner_mask_int_array) * noise_percent)
