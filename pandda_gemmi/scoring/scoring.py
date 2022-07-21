@@ -457,7 +457,9 @@ def score_structure_contour(
         noises_from_calc[float(cutoff)] = float(noise_percent)
         # score = signal - (np.sum(approximate_structure_map_array > structure_map_high_cut) * noise_percent)
         score = signal_percent - noise_percent
-        scores_from_calc[float(cutoff)] = int(score)
+        # scores_from_calc[float(cutoff)] = int(score)
+        scores_from_calc[float(cutoff)] = float(score)
+
 
     score = max(scores_from_calc.values())
 
