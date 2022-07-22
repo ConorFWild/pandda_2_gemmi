@@ -12,7 +12,7 @@ from joblib.externals.loky import set_loky_pickler
 from pandda_gemmi.analyse_interface import LoadXMapInterface
 
 set_loky_pickler('pickle')
-import ray
+# import ray
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *
@@ -763,42 +763,42 @@ class LoadXmapFlat(LoadXMapFlatInterface):
         return from_unaligned_dataset_c_flat(dataset, alignment, grid, structure_factors, sample_rate)
 
 
-@ray.remote
-def from_unaligned_dataset_c_ray(dataset: Dataset,
-                                 alignment: Alignment,
-                                 grid: Grid,
-                                 structure_factors: StructureFactors,
-                                 sample_rate: float = 3.0, ):
-    xmap = Xmap.from_unaligned_dataset_c(dataset,
-                                         alignment,
-                                         grid,
-                                         structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.resolution().resolution / 0.5
-                                         )
-
-    return xmap
-
-
-@ray.remote
-def from_unaligned_dataset_c_flat_ray(dataset: Dataset,
-                                      alignment: Alignment,
-                                      grid: Grid,
-                                      structure_factors: StructureFactors,
-                                      sample_rate: float = 3.0, ):
-    xmap = Xmap.from_unaligned_dataset_c(dataset,
-                                         alignment,
-                                         grid,
-                                         structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.resolution().resolution / 0.5
-                                         )
-
-    xmap_array = xmap.to_array()
-
-    masked_array = xmap_array[grid.partitioning.total_mask == 1]
-
-    return masked_array
+# @ray.remote
+# def from_unaligned_dataset_c_ray(dataset: Dataset,
+#                                  alignment: Alignment,
+#                                  grid: Grid,
+#                                  structure_factors: StructureFactors,
+#                                  sample_rate: float = 3.0, ):
+#     xmap = Xmap.from_unaligned_dataset_c(dataset,
+#                                          alignment,
+#                                          grid,
+#                                          structure_factors,
+#                                          # sample_rate,
+#                                          dataset.reflections.resolution().resolution / 0.5
+#                                          )
+#
+#     return xmap
+#
+#
+# @ray.remote
+# def from_unaligned_dataset_c_flat_ray(dataset: Dataset,
+#                                       alignment: Alignment,
+#                                       grid: Grid,
+#                                       structure_factors: StructureFactors,
+#                                       sample_rate: float = 3.0, ):
+#     xmap = Xmap.from_unaligned_dataset_c(dataset,
+#                                          alignment,
+#                                          grid,
+#                                          structure_factors,
+#                                          # sample_rate,
+#                                          dataset.reflections.resolution().resolution / 0.5
+#                                          )
+#
+#     xmap_array = xmap.to_array()
+#
+#     masked_array = xmap_array[grid.partitioning.total_mask == 1]
+#
+#     return masked_array
 
 
 class GetMapStatistics:

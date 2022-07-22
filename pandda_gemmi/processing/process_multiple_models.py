@@ -15,7 +15,7 @@ from pandda_gemmi.processing.process_local import ProcessLocalSerial
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
-import ray
+# import ray
 
 ## Custom Imports
 from pandda_gemmi.logs import (

@@ -15,7 +15,7 @@ set_loky_pickler('pickle')
 from sklearn import neighbors
 
 import pandas as pd
-import ray
+# import ray
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
@@ -1095,9 +1095,9 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     return smoothed_dataset
 
 
-@ray.remote
-def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactors):
-    return smooth(dataset, reference, structure_factors)
+# @ray.remote
+# def smooth_ray(dataset, reference: Reference, structure_factors: StructureFactors):
+#     return smooth(dataset, reference, structure_factors)
 
 
 class SmoothBFactors(SmoothBFactorsInterface):

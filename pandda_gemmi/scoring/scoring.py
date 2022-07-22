@@ -11,7 +11,7 @@ from typing import *
 import fire
 import numpy as np
 import gemmi
-import ray
+# import ray
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants

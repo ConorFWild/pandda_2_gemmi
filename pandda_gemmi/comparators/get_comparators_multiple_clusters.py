@@ -9,7 +9,7 @@ import dataclasses
 import numpy as np
 from sklearn import metrics
 from matplotlib import pyplot as plt
-import ray
+# import ray
 import hdbscan
 
 from pandda_gemmi.common import Dtag, Partial

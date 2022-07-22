@@ -15,7 +15,7 @@ printer = pprint.PrettyPrinter()
 # Scientific python libraries
 import numpy as np
 import gemmi
-import ray
+# import ray
 
 from pandda_gemmi.analyse_interface import *
 

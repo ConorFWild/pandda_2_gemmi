@@ -10,7 +10,7 @@ import pickle
 # Scientific python libraries
 import joblib
 
-import ray
+# import ray
 
 ## Custom Imports
 from pandda_gemmi import constants
@@ -215,8 +215,7 @@ def get_process_local(pandda_args):
     #     )
 
     elif pandda_args.local_processing == "ray":
-        ray.init(num_cpus=pandda_args.local_cpus)
-        process_local = ProcessLocalRay()
+        process_local = ProcessLocalRay(pandda_args.local_cpus)
 
     else:
         raise Exception()

@@ -28,6 +28,10 @@ def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
 
 class ProcessLocalRay(ProcessorInterface):
 
+    def __init__(self, local_cpus):
+        ray.init(num_cpus=local_cpus)
+
+
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         assert ray.is_initialized() == True
         # actors = [RayWrapper.remote() for f in funcs]
