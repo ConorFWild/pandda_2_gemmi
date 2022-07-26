@@ -929,6 +929,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     pandda_fs_model,
                 )
 
+            elif pandda_args.rank_method == "event_score_cutoff":
+                event_ranking: EventRankingInterface = GetEventRankingEventScoreCutoff()(
+                    all_events,
+                    event_scores,
+                    datasets,
+                    pandda_fs_model,
+                )
+
             elif pandda_args.rank_method == "autobuild":
                 if not pandda_args.autobuild:
                     raise Exception("Cannot rank on autobuilds if autobuild is not set!")

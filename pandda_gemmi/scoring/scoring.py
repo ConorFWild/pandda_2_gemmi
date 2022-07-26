@@ -405,6 +405,8 @@ def score_structure_contour(
     outer_mask_array = np.array(outer_mask_grid, copy=False, dtype=np.int8, )
     outer_mask_indexes = np.nonzero(outer_mask_array)
 
+
+
     # Scale ligand density to map
     inner_mask_int_array = np.array(
         inner_mask_grid,
@@ -422,6 +424,18 @@ def score_structure_contour(
     #                           * (np.std(event_map_values) / np.std(approximate_structure_map_values))) \
     #                           + (np.mean(event_map_values))
     #
+    approximate_structure_map_high_indicies = approximate_structure_map_array > structure_map_high_cut
+    num_structure_map_high_indicies = np.sum(approximate_structure_map_high_indicies)
+    num_outer_mask_indicies = np.sum(outer_mask_array)
+
+    # Generate the outer mask with about as many indicies as the approximate structure map
+    outer_mask_cut = structure_map_high_cut
+    outer_mask_indicies = (approximate_structure_map_array>outer_mask_cut) & (~approximate_structure_map_high_indicies)
+    while np.sum(outer_mask_indicies) < num_structure_map_high_indicies:
+        outer_mask_cut += 0.05
+        outer_mask_indicies = event_map_array[
+            (approximate_structure_map_array > outer_mask_cut) & (~approximate_structure_map_high_indicies)]
+
 
     # Get correlation
     demeaned_event_map_values = event_map_values - np.mean(event_map_values)
@@ -444,9 +458,7 @@ def score_structure_contour(
     scores_from_calc = {}
     noises_from_calc = {}
     signals_from_calc = {}
-    approximate_structure_map_high_indicies = approximate_structure_map_array > structure_map_high_cut
-    num_structure_map_high_indicies = np.sum(approximate_structure_map_high_indicies)
-    num_outer_mask_indicies = np.sum(outer_mask_array)
+
     for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
                    2.9, 3.0]:
         event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
