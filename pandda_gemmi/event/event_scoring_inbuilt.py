@@ -783,6 +783,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     # Get the probe structure
     probe_structure = get_probe_structure(centered_structure)
 
+
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tprobe structure: {probe_structure}")
 
@@ -862,8 +863,13 @@ def score_conformer_nonquant_array(cluster: Cluster,
             ],
             degrees=True)
         rotation_matrix: np.ndarray = rotation.as_matrix().T
+        # optimised_structure = transform_structure(
+        #     probe_structure,
+        #     [x, y, z],
+        #     rotation_matrix
+        # )
         optimised_structure = transform_structure(
-            probe_structure,
+            centered_structure,
             [x, y, z],
             rotation_matrix
         )
@@ -893,8 +899,10 @@ def score_conformer_nonquant_array(cluster: Cluster,
             zmap_grid,
             resolution,
             rate,
-            structure_map_high_cut=1.5
+            # structure_map_high_cut=1.5
+            structure_map_high_cut=0.5
         )
+
 
         scores_signal_to_noise.append(score)
         logs.append(log)

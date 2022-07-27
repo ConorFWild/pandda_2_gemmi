@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import os
 import dataclasses
 import subprocess
@@ -474,7 +476,18 @@ def score_structure_contour(
         scores_from_calc[float(cutoff)] = float(score)
 
 
-    score = max(scores_from_calc.values())
+
+    # Apply size correction
+    num_structure_heavy_atoms = 0.0
+    for model in optimised_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        num_structure_heavy_atoms += 1.0
+
+    score = max(scores_from_calc.values()) * math.sqrt(num_structure_heavy_atoms)
+
 
     return score, {
         "Num masked indicies": len(mask_indicies[0]),
