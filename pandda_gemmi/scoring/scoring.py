@@ -434,8 +434,7 @@ def score_structure_contour(
     print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
     while np.sum(outer_mask_indicies) < num_structure_map_high_indicies:
         outer_mask_cut -= 0.05
-        outer_mask_indicies = event_map_array[
-            (approximate_structure_map_array > outer_mask_cut) & (~approximate_structure_map_high_indicies)]
+        outer_mask_indicies = (approximate_structure_map_array > outer_mask_cut) & (~approximate_structure_map_high_indicies)
         print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
 
     # Get correlation
