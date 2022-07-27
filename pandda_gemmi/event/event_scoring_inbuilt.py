@@ -900,7 +900,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             resolution,
             rate,
             # structure_map_high_cut=1.5
-            structure_map_high_cut=0.5
+            structure_map_high_cut=0.6
         )
 
 

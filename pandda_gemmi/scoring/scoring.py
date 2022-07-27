@@ -347,7 +347,7 @@ def score_structure_contour(
         zmap_grid,
         res,
         rate,
-        structure_map_high_cut=0.5
+        structure_map_high_cut=0.6
 ) -> Tuple[float, Dict]:
     # Get grid
     new_grid = gemmi.FloatGrid(zmap_grid.nu, zmap_grid.nv, zmap_grid.nw)
@@ -431,7 +431,7 @@ def score_structure_contour(
     num_outer_mask_indicies = np.sum(outer_mask_array)
 
     # Generate the outer mask with about as many indicies as the approximate structure map
-    outer_mask_cut = structure_map_high_cut / 2.0
+    outer_mask_cut = structure_map_high_cut
     outer_mask_indicies = (approximate_structure_map_array>outer_mask_cut) & (~approximate_structure_map_high_indicies)
     # print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
     while np.sum(outer_mask_indicies) < num_structure_map_high_indicies:
@@ -461,6 +461,15 @@ def score_structure_contour(
     noises_from_calc = {}
     signals_from_calc = {}
 
+    # Apply size correction
+    num_structure_heavy_atoms = 0.0
+    for model in optimised_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        num_structure_heavy_atoms += 1.0
+
     for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
                    2.9, 3.0]:
         event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
@@ -471,22 +480,19 @@ def score_structure_contour(
         noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / num_outer_mask_indicies
         noises_from_calc[float(cutoff)] = float(noise_percent)
         # score = signal - (np.sum(approximate_structure_map_array > structure_map_high_cut) * noise_percent)
-        score = signal_percent - noise_percent
+        # score = signal_percent - noise_percent
+        if signal_percent > 0.5:
+            score = (signal_percent-noise_percent)*math.sqrt(num_structure_heavy_atoms)
+        else:
+            score = -0.01
+
         # scores_from_calc[float(cutoff)] = int(score)
         scores_from_calc[float(cutoff)] = float(score)
 
 
 
-    # Apply size correction
-    num_structure_heavy_atoms = 0.0
-    for model in optimised_structure:
-        for chain in model:
-            for residue in chain:
-                for atom in residue:
-                    if atom.element.name != "H":
-                        num_structure_heavy_atoms += 1.0
 
-    score = max(scores_from_calc.values()) * math.sqrt(num_structure_heavy_atoms)
+
 
 
     return score, {
