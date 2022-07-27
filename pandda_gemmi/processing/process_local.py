@@ -68,6 +68,10 @@ class ProcessLocalSpawn(ProcessorInterface):
             print(e)
 
         with mp.Pool(self.n_jobs) as pool:
+            # results = pool.map(
+            #     run_multiprocessing,
+            #     funcs,
+            # )
             results = pool.map(
                 run_multiprocessing,
                 funcs,
