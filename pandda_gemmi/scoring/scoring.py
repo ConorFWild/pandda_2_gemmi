@@ -428,7 +428,6 @@ def score_structure_contour(
     #
     approximate_structure_map_high_indicies = approximate_structure_map_array > structure_map_high_cut
     num_structure_map_high_indicies = np.sum(approximate_structure_map_high_indicies)
-    num_outer_mask_indicies = np.sum(outer_mask_array)
 
     # Generate the outer mask with about as many indicies as the approximate structure map
     outer_mask_cut = structure_map_high_cut
@@ -438,6 +437,7 @@ def score_structure_contour(
         outer_mask_cut -= 0.025
         outer_mask_indicies = (approximate_structure_map_array > outer_mask_cut) & (~approximate_structure_map_high_indicies)
         # print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
+    num_outer_mask_indicies = np.sum(outer_mask_indicies)
 
     # Get correlation
     demeaned_event_map_values = event_map_values - np.mean(event_map_values)
