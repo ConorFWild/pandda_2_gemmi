@@ -490,11 +490,7 @@ def score_structure_contour(
         # scores_from_calc[float(cutoff)] = int(score)
         scores_from_calc[float(cutoff)] = float(score)
 
-
-
-
-
-
+    score = max(scores_from_calc.values())
 
     return score, {
         "Num masked indicies": len(mask_indicies[0]),
