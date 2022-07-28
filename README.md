@@ -10,6 +10,17 @@ If the program errors while it runs, it is most helpful if you include the comma
 
 If you uncertain about the correctness of the results, then a github issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
 
+## How PanDDA 2 works
+
+### Model building
+
+### Model selection
+
+### Autobuilding
+
+### Autobuild selection
+
+
 ## Installation
 
 It is reccomended that you install PanDDA 2 in it's own python 3.8 anaconda enviroment. This can be achieved by installing anaconda and then:
@@ -89,4 +100,12 @@ qsub -V -o submit.o -e submit.e -q medium.q -pe smp 20 -l m_mem_free=15G submit.
 python ./pandda_gemmi/analyse.py /data/share-2/conor/pandda/data/pandda_inputs/BRD1 /data/share-2/conor/pandda/output/pandda_2_BRD1 --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("FWT","PHWT")' --autobuild=True --global_processing="distributed" --distributed_scheduler="HTCONDOR" --local_cpus=20
 
 ```
+
+## Running faster
+
+
+### Typical timelines (quick, difficult, ect...)
+
+### What can be made faster or not / what takes time
+
 

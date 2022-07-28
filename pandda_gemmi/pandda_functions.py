@@ -18,7 +18,7 @@ import umap
 from bokeh.plotting import ColumnDataSource, figure, output_file, show, save
 from matplotlib import pyplot as plt
 import gemmi
-import ray
+# import ray
 
 from pandda_gemmi import constants
 from pandda_gemmi.analyse_interface import *
@@ -163,11 +163,11 @@ def process_local_dask(funcs: List[Partial], client=None):
     return results
 
 
-def process_local_ray(funcs):
-    assert ray.is_initialized() == True
-    tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
-    results = ray.get(tasks)
-    return results
+# def process_local_ray(funcs):
+#     assert ray.is_initialized() == True
+#     tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
+#     results = ray.get(tasks)
+#     return results
 
 
 def process_shell_dask(funcs: List[Partial]):
@@ -2004,6 +2004,10 @@ def get_common_structure_factors(datasets: DatasetsInterface):
     # If couldn't find common names in any dataset return None
     return None
 
+
+class GetStructureFactors:
+    def __call__(self, datasets,):
+        return get_common_structure_factors(datasets)
 
 def save_native_frame_zmap(
         path: Path,

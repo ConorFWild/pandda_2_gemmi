@@ -10,7 +10,7 @@ import pickle
 # Scientific python libraries
 import joblib
 
-import ray
+# import ray
 
 ## Custom Imports
 from pandda_gemmi import constants
@@ -61,7 +61,8 @@ from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
-    GetEventRankingSizeAutobuild
+    GetEventRankingSizeAutobuild,
+GetEventRankingEventScore
 )
 from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
@@ -214,8 +215,7 @@ def get_process_local(pandda_args):
     #     )
 
     elif pandda_args.local_processing == "ray":
-        ray.init(num_cpus=pandda_args.local_cpus)
-        process_local = ProcessLocalRay()
+        process_local = ProcessLocalRay(pandda_args.local_cpus)
 
     else:
         raise Exception()
@@ -394,7 +394,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         console.start_fs_model()
         time_fs_model_building_start = time.time()
-        pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel()(
+        pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel(
             pandda_args.data_dirs,
             pandda_args.out_dir,
             pandda_args.pdb_regex,
@@ -403,7 +403,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_args.ligand_cif_regex,
             pandda_args.ligand_pdb_regex,
             pandda_args.ligand_smiles_regex,
-        )
+        )()
         pandda_fs_model.build()
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
@@ -419,6 +419,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 print(dtag)
                 print(data_dir.source_ligand_cif)
                 print(data_dir.source_ligand_smiles)
+                print(data_dir.source_ligand_pdb)
 
         ###################################################################
         # # Load datasets
@@ -812,6 +813,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
                 # Save results
                 pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
+                pandda_log["autobuild_scores"] = {}
+
                 for event_id, autobuild_result in autobuild_results.items():
                     dtag = str(event_id.dtag)
                     if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
@@ -820,6 +823,10 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     event_idx = int(event_id.event_idx.event_idx)
 
                     pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
+
+                    if dtag not in pandda_log["autobuild_scores"]:
+                        pandda_log["autobuild_scores"][dtag] = {}
+                    pandda_log["autobuild_scores"][dtag][event_idx] = autobuild_result.scores
 
             with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
                 # Add the best fragment by scoring method to default model
@@ -913,6 +920,22 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             elif pandda_args.rank_method == "cnn":
                 raise NotImplementedError()
                 # all_events_ranked = rank_events_cnn()
+
+            elif pandda_args.rank_method == "event_score":
+                event_ranking: EventRankingInterface = GetEventRankingEventScore()(
+                    all_events,
+                    event_scores,
+                    datasets,
+                    pandda_fs_model,
+                )
+
+            elif pandda_args.rank_method == "event_score_cutoff":
+                event_ranking: EventRankingInterface = GetEventRankingEventScoreCutoff()(
+                    all_events,
+                    event_scores,
+                    datasets,
+                    pandda_fs_model,
+                )
 
             elif pandda_args.rank_method == "autobuild":
                 if not pandda_args.autobuild:
@@ -1031,3 +1054,5 @@ if __name__ == '__main__':
         console.summarise_arguments(args)
 
     process_pandda(args)
+
+

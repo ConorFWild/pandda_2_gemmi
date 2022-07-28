@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import os
 import dataclasses
 import subprocess
@@ -11,8 +13,9 @@ from typing import *
 import fire
 import numpy as np
 import gemmi
-import ray
+# import ray
 
+from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 
 
@@ -253,3 +256,264 @@ def EXPERIMENTAL_score_structure_signal_to_noise_density(
                                                                                 len(signal_samples))
 
     return _score, rescore_log
+
+
+
+def event_map_to_contour_score_map(
+        dataset,
+        event: EventInterface,
+        event_map_grid,
+        protein_score=-1.0,
+        protein_event_overlap_score=0.0,
+):
+    # Mask protein
+    # if debug >= Debug.PRINT_SUMMARIES:
+    #     print("\t\tMasking protein...")
+    inner_mask_grid = gemmi.Int8Grid(*[event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
+    for atom in dataset.structure.protein_atoms():
+        pos = atom.pos
+        inner_mask_grid.set_points_around(pos,
+                                          radius=1.25,
+                                          value=1,
+                                          )
+
+    outer_mask_grid = gemmi.Int8Grid(*[event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
+    outer_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    outer_mask_grid.set_unit_cell(event_map_grid.unit_cell)
+    for atom in dataset.structure.protein_atoms():
+        pos = atom.pos
+        outer_mask_grid.set_points_around(pos,
+                                          radius=6.0,
+                                          value=1,
+                                          )
+
+
+
+    # Get event mask
+    event_mask_grid = gemmi.Int8Grid(*[event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
+    event_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    event_mask_grid.set_unit_cell(event_map_grid.unit_cell)
+
+    for x,y,z in event.native_positions:
+        pos = gemmi.Position(x,y,z)
+        event_mask_grid.set_points_around(pos,
+                                          radius=1.0,
+                                          value=1,
+                                          )
+
+
+    #
+    event_mask_int_array = np.array(
+        event_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    inner_mask_int_array = np.array(
+        inner_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    outer_mask_int_array = np.array(
+        outer_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+
+    # Event mask
+    event_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    event_mask[np.nonzero(event_mask_int_array)] = True
+    inner_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    inner_mask[np.nonzero(inner_mask_int_array)] = True
+    outer_mask = np.zeros(inner_mask_int_array.shape, dtype=bool)
+    outer_mask[np.nonzero(outer_mask_int_array)] = True
+
+    #
+    event_map_grid_array = np.array(event_map_grid,
+                                              copy=False,
+                                              )
+
+    # Mask the protein except at event sites with a penalty
+    event_map_grid_array[inner_mask & (~event_mask)] = protein_score
+
+    # Mask the protein-event overlaps with zeros
+    event_map_grid_array[inner_mask & event_mask] = protein_event_overlap_score
+
+    return event_map_grid
+
+def score_structure_contour(
+        optimised_structure,
+        zmap_grid,
+        res,
+        rate,
+        structure_map_high_cut=0.6
+) -> Tuple[float, Dict]:
+    # Get grid
+    new_grid = gemmi.FloatGrid(zmap_grid.nu, zmap_grid.nv, zmap_grid.nw)
+    new_grid.unit_cell = zmap_grid.unit_cell
+
+    # Get density on grid
+    optimised_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    optimised_structure.cell = zmap_grid.unit_cell
+    dencalc = gemmi.DensityCalculatorX()
+    dencalc.d_min = 0.5
+    dencalc.rate = 1
+    dencalc.set_grid_cell_and_spacegroup(optimised_structure)
+    dencalc.put_model_density_on_grid(optimised_structure[0])
+
+    # Get the SFs at the right res
+    sf = gemmi.transform_map_to_f_phi(dencalc.grid, half_l=True)
+    data = sf.prepare_asu_data(dmin=res)
+
+    # Get the grid oversampled to the right size
+    approximate_structure_map = data.transform_f_phi_to_map(exact_size=[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+
+    # Get mask of ligand
+    inner_mask_grid = gemmi.Int8Grid(*[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(zmap_grid.unit_cell)
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=1,
+                                                      )
+
+    outer_mask_grid = gemmi.Int8Grid(*[zmap_grid.nu, zmap_grid.nv, zmap_grid.nw])
+    outer_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    outer_mask_grid.set_unit_cell(zmap_grid.unit_cell)
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    outer_mask_grid.set_points_around(pos,
+                                                      radius=2.0,
+                                                      value=1,
+                                                      )
+    for struc in optimised_structure:
+        for chain in struc:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    outer_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=0,
+                                                      )
+    outer_mask_array = np.array(outer_mask_grid, copy=False, dtype=np.int8, )
+    outer_mask_indexes = np.nonzero(outer_mask_array)
+
+
+
+    # Scale ligand density to map
+    inner_mask_int_array = np.array(
+        inner_mask_grid,
+        copy=False,
+        dtype=np.int8,
+    )
+    event_map_array = np.array(zmap_grid, copy=False)
+    approximate_structure_map_array = np.array(approximate_structure_map, copy=False)
+    mask_indicies = np.nonzero(inner_mask_int_array)
+
+    event_map_values = event_map_array[mask_indicies]
+    approximate_structure_map_values = approximate_structure_map_array[mask_indicies]
+
+    # scaled_event_map_values = ((approximate_structure_map_values - np.mean(approximate_structure_map_values))
+    #                           * (np.std(event_map_values) / np.std(approximate_structure_map_values))) \
+    #                           + (np.mean(event_map_values))
+    #
+    approximate_structure_map_high_indicies = approximate_structure_map_array > structure_map_high_cut
+    num_structure_map_high_indicies = np.sum(approximate_structure_map_high_indicies)
+
+    # Generate the outer mask with about as many indicies as the approximate structure map
+    outer_mask_cut = structure_map_high_cut
+    outer_mask_indicies = (approximate_structure_map_array>outer_mask_cut) & (~approximate_structure_map_high_indicies)
+    # print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
+    while np.sum(outer_mask_indicies) < num_structure_map_high_indicies:
+        outer_mask_cut -= 0.025
+        outer_mask_indicies = (approximate_structure_map_array > outer_mask_cut) & (~approximate_structure_map_high_indicies)
+        # print(f"{outer_mask_cut} : {np.sum(outer_mask_indicies)}")
+    num_outer_mask_indicies = np.sum(outer_mask_indicies)
+
+    # Get correlation
+    demeaned_event_map_values = event_map_values - np.mean(event_map_values)
+    demeaned_approximate_structure_map_values = approximate_structure_map_values - np.mean(
+        approximate_structure_map_values)
+    corr = np.sum(demeaned_event_map_values * demeaned_approximate_structure_map_values
+                  ) / (
+                   np.sqrt(np.sum(np.square(demeaned_event_map_values)))
+                   * np.sqrt(np.sum(np.square(demeaned_approximate_structure_map_values)))
+           )
+
+    scores = {}
+    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
+                   2.9, 3.0]:
+        noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / np.sum(outer_mask_array)
+        signal = np.sum(event_map_array[mask_indicies] > cutoff)
+        score = signal - (np.sum(inner_mask_int_array) * noise_percent)
+        scores[float(cutoff)] = int(score)
+
+    scores_from_calc = {}
+    noises_from_calc = {}
+    signals_from_calc = {}
+
+    # Apply size correction
+    num_structure_heavy_atoms = 0.0
+    for model in optimised_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        num_structure_heavy_atoms += 1.0
+
+    for cutoff in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.8, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
+                   2.9, 3.0]:
+        event_map_high_indicies = event_map_array[approximate_structure_map_high_indicies] > cutoff
+        # signal = np.sum(event_map_high_indicies)
+        signal = np.sum(event_map_high_indicies)
+        signal_percent = signal / num_structure_map_high_indicies
+        signals_from_calc[float(cutoff)] = float(signal_percent)
+        # noise_percent = np.sum(event_map_array[outer_mask_indexes] > cutoff) / num_outer_mask_indicies
+        noise_percent = np.sum(event_map_array[outer_mask_indicies] > cutoff) / num_outer_mask_indicies
+        noises_from_calc[float(cutoff)] = float(noise_percent)
+        # score = signal - (np.sum(approximate_structure_map_array > structure_map_high_cut) * noise_percent)
+        # score = signal_percent - noise_percent
+        if signal_percent > 0.5:
+            score = (signal_percent-noise_percent)*math.sqrt(num_structure_heavy_atoms)
+        else:
+            score = -0.01
+
+        # scores_from_calc[float(cutoff)] = int(score)
+        scores_from_calc[float(cutoff)] = float(score)
+
+    score = max(scores_from_calc.values())
+
+    return score, {
+        "Num masked indicies": len(mask_indicies[0]),
+        "Mean approximate density": float(np.mean(approximate_structure_map_values)),
+        "Mean event density": float(np.mean(event_map_values)),
+        "grid": approximate_structure_map,
+        "outer_sum": float(np.sum(event_map_array[outer_mask_indexes])),
+        "inner_sum": float(np.sum(event_map_array[mask_indicies])),
+        "outer_mean": float(np.mean(event_map_array[outer_mask_indexes])),
+        "inner_mean": float(np.mean(event_map_array[mask_indicies])),
+        "inner>1": int(np.sum(event_map_array[mask_indicies] > 1.0)),
+        "outer>1": int(np.sum(event_map_array[outer_mask_indexes] > 1.0)),
+        "inner>2": int(np.sum(event_map_array[mask_indicies] > 2.0)),
+        "outer>2": int(np.sum(event_map_array[outer_mask_indexes] > 2.0)),
+        "num_inner": int(np.sum(inner_mask_int_array)),
+        "num_outer": int(np.sum(outer_mask_array)),
+        "scores": scores,
+        "scores_from_calc": scores_from_calc,
+        "signals": signals_from_calc,
+        "noises": noises_from_calc,
+        "Approximate structure map array size": approximate_structure_map_array.size,
+        "Event map array size": event_map_array.size,
+        "Num structure map high": (approximate_structure_map_array > 1.5).shape
+    }
+
+

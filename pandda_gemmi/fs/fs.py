@@ -151,32 +151,48 @@ class LigandDir:
         else:
             ligand_keys = []
 
+        # print(f"\tLigand keys are: {ligand_keys}")
+        # print(f"\tPaths are: {ligand_smiles_paths}; {ligand_cif_paths}; {ligand_pdb_paths}")
+
         # Generate dics
         ligand_smiles_path_dict = {}
         ligand_cif_path_dict = {}
         ligand_pdb_path_dict = {}
 
+        # For each ligand key, add the path to the relecant file to the relevant dict, or None
         for ligand_key in ligand_keys:
             # Smiles
-            for _ligand_smiles_path in ligand_smiles_paths:
-                if _ligand_smiles_path.stem == ligand_key:
-                    ligand_smiles_path_dict[ligand_key] = _ligand_smiles_path
-                else:
-                    ligand_smiles_path_dict[ligand_key] = None
+            ligand_smiles_dict = {_ligand_smiles_path.stem: _ligand_smiles_path
+                                  for _ligand_smiles_path
+                                  in ligand_smiles_paths
+                                  }
+            if ligand_key in ligand_smiles_dict:
+                ligand_smiles_path_dict[ligand_key] = ligand_smiles_dict[ligand_key]
+            else:
+                ligand_smiles_path_dict[ligand_key] = None
 
             # Cifs
-            for _ligand_cif_path in ligand_cif_paths:
-                if _ligand_cif_path.stem == ligand_key:
-                    ligand_cif_path_dict[ligand_key] = _ligand_cif_path
-                else:
-                    ligand_cif_path_dict[ligand_key] = None
+            ligand_cif_dict = {_ligand_cif_path.stem: _ligand_cif_path
+                               for _ligand_cif_path
+                               in ligand_cif_paths
+                               }
+            if ligand_key in ligand_cif_dict:
+                ligand_cif_path_dict[ligand_key] = ligand_cif_dict[ligand_key]
+            else:
+                ligand_cif_path_dict[ligand_key] = None
 
             # Pdbs
-            for _ligand_pdb_path in ligand_pdb_paths:
-                if _ligand_pdb_path.stem == ligand_key:
-                    ligand_pdb_path_dict[ligand_key] = _ligand_pdb_path
-                else:
-                    ligand_pdb_path_dict[ligand_key] = None
+            ligand_pdb_dict = {_ligand_pdb_path.stem: _ligand_pdb_path
+                               for _ligand_pdb_path
+                               in ligand_pdb_paths
+                               }
+            if ligand_key in ligand_pdb_dict:
+                ligand_pdb_path_dict[ligand_key] = ligand_pdb_dict[ligand_key]
+            else:
+                ligand_pdb_path_dict[ligand_key] = None
+
+        # print(f"\tPaths dicts are: {ligand_smiles_path_dict}; {ligand_cif_path_dict}; {ligand_pdb_path_dict}")
+
 
         return LigandDir(path,
                          ligand_smiles_path_dict,
@@ -195,14 +211,13 @@ class LigandDir:
         if len(self.ligand_keys) == 0:
             return None
         else:
-            return self.smiles[self.ligand_keys[0]]
+            return self.cifs[self.ligand_keys[0]]
 
     def get_first_ligand_pdb(self):
         if len(self.ligand_keys) == 0:
             return None
         else:
-            return self.smiles[self.ligand_keys[0]]
-
+            return self.pdbs[self.ligand_keys[0]]
 
 
 @dataclasses.dataclass()
@@ -247,10 +262,13 @@ class DatasetDir:
                 ligand_smiles_regex
             )
             # ligand_search_path = source_ligand_dir
+            # print(f"Got ligand dir for dataset: {path.name}")
 
             source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
             source_ligand_cif = ligand_dir.get_first_ligand_cif()
             source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
+
+            # print(f"Source files are: {source_ligand_smiles} {source_ligand_cif} {source_ligand_pdb}")
 
         else:
             ligand_dir = None
@@ -772,22 +790,35 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
 
 class GetPanDDAFSModel(GetPanDDAFSModelInterface):
-    def __call__(self,
-                 input_data_dirs: Path,
-                 output_out_dir: Path,
+    def __init__(self,
+                 data_dirs: Path,
+                 out_dir: Path,
                  pdb_regex: str,
                  mtz_regex: str,
-                 ligand_dir_name,
+                 ligand_dir_regex: str,
                  ligand_cif_regex: str,
                  ligand_pdb_regex: str,
-                 ligand_smiles_regex: str) -> PanDDAFSModelInterface:
+                 ligand_smiles_regex: str
+                 ):
+
+        self.data_dirs = data_dirs
+        self.out_dir = out_dir
+        self.pdb_regex = pdb_regex
+        self.mtz_regex = mtz_regex
+        self.ligand_dir_regex = ligand_dir_regex
+        self.ligand_cif_regex = ligand_cif_regex
+        self.ligand_pdb_regex = ligand_pdb_regex
+        self.ligand_smiles_regex = ligand_smiles_regex
+
+    def __call__(self,
+                 ) -> PanDDAFSModelInterface:
         return get_pandda_fs_model(
-            input_data_dirs,
-            output_out_dir,
-            pdb_regex,
-            mtz_regex,
-            ligand_dir_name,
-            ligand_cif_regex,
-            ligand_pdb_regex,
-            ligand_smiles_regex,
+            self.data_dirs,
+            self.out_dir,
+            self.pdb_regex,
+            self.mtz_regex,
+            self.ligand_dir_regex,
+            self.ligand_cif_regex,
+            self.ligand_pdb_regex,
+            self.ligand_smiles_regex,
         )

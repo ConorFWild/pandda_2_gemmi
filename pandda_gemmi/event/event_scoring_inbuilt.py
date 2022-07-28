@@ -15,7 +15,7 @@ from pandda_gemmi.dataset import Dataset
 # from pandda_gemmi.fs import PanDDAFSModel, ProcessedDataset
 from pandda_gemmi.event import Cluster
 # from pandda_gemmi.autobuild import score_structure_signal_to_noise_density, EXPERIMENTAL_score_structure_signal_to_noise_density
-from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_density
+from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_density, score_structure_contour
 from pandda_gemmi.python_types import *
 
 
@@ -783,6 +783,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     # Get the probe structure
     probe_structure = get_probe_structure(centered_structure)
 
+
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tprobe structure: {probe_structure}")
 
@@ -862,8 +863,13 @@ def score_conformer_nonquant_array(cluster: Cluster,
             ],
             degrees=True)
         rotation_matrix: np.ndarray = rotation.as_matrix().T
+        # optimised_structure = transform_structure(
+        #     probe_structure,
+        #     [x, y, z],
+        #     rotation_matrix
+        # )
         optimised_structure = transform_structure(
-            probe_structure,
+            centered_structure,
             [x, y, z],
             rotation_matrix
         )
@@ -882,12 +888,21 @@ def score_conformer_nonquant_array(cluster: Cluster,
         # )
         # score = float(res.fun) / (int(cluster.values.size) + 1)
 
-        score, log = EXPERIMENTAL_score_structure_rscc(
+        # score, log = EXPERIMENTAL_score_structure_rscc(
+        #     optimised_structure,
+        #     zmap_grid,
+        #     resolution,
+        #     rate
+        # )
+        score, log = score_structure_contour(
             optimised_structure,
             zmap_grid,
             resolution,
-            rate
+            rate,
+            # structure_map_high_cut=1.5
+            structure_map_high_cut=0.6
         )
+
 
         scores_signal_to_noise.append(score)
         logs.append(log)

@@ -15,7 +15,7 @@ from pandda_gemmi.processing.process_local import ProcessLocalSerial
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
-import ray
+# import ray
 
 ## Custom Imports
 from pandda_gemmi.logs import (
@@ -342,6 +342,13 @@ def EXPERIMENTAL_select_model(
         )  # [0]
 
     return ModelSelection(selected_model_number, log)
+
+class SelectModel:
+
+    def __call__(self, model_results: ModelResultsInterface,):
+        return EXPERIMENTAL_select_model(
+            model_results,
+        )
 
 
 def get_models(
