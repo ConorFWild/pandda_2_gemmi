@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
-from grpc import Call
 from enum import Enum
 
 from numpy.typing import NDArray
