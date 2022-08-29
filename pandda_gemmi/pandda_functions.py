@@ -1998,8 +1998,10 @@ def get_common_structure_factors(datasets: DatasetsInterface):
         for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
 
             f_label = common_f_phi_label_pair[0]
+            phi_label = common_f_phi_label_pair[0]
             if f_label in column_labels:
-                return StructureFactors(common_f_phi_label_pair[0], common_f_phi_label_pair[1])
+                if phi_label in column_labels:
+                    return StructureFactors(common_f_phi_label_pair[0], common_f_phi_label_pair[1])
 
     # If couldn't find common names in any dataset return None
     return None

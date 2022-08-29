@@ -38,6 +38,7 @@ COMMON_F_PHI_LABEL_PAIRS = (
     ("2FOFCWT", "PH2FOFCWT"),
     ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
     ("2FOFCWT_fill", "PH2FOFCWT_fill",),
+    ("2FOFCWT", "PHI2FOFCWT")
 )
 
 ###################################################################
