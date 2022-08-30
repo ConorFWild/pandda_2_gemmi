@@ -1991,6 +1991,8 @@ def validate(datasets: Dict[Dtag, Dataset], strategy=None, exception=None):
 
 
 def get_common_structure_factors(datasets: DatasetsInterface):
+    label_counts = {}
+
     for dtag in datasets:
         dataset = datasets[dtag]
         reflections = dataset.reflections
@@ -2001,10 +2003,23 @@ def get_common_structure_factors(datasets: DatasetsInterface):
             phi_label = common_f_phi_label_pair[0]
             if f_label in column_labels:
                 if phi_label in column_labels:
-                    return StructureFactors(common_f_phi_label_pair[0], common_f_phi_label_pair[1])
+                    if not common_f_phi_label_pair in label_counts:
+                        label_counts[common_f_phi_label_pair] = 1
+                    else:
+                        label_counts[common_f_phi_label_pair] += 1
+
+
+    if len(label_counts) != 0:
+        most_common_structure_factors = max(
+            label_counts,
+            key = lambda _key: label_counts[_key],
+        )
+
+        return StructureFactors(most_common_structure_factors[0], most_common_structure_factors[1])
 
     # If couldn't find common names in any dataset return None
-    return None
+    else:
+        return None
 
 
 class GetStructureFactors:
