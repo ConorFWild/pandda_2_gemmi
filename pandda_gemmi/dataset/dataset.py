@@ -715,6 +715,8 @@ def get_reference_from_datasets(
             )
         modal_spacegroup = unique_spacegroups[np.argmax(counts)]
 
+        print(f"Modal spacegroup is: {modal_spacegroup}")
+
         resolutions: typing.Dict[Dtag, Resolution] = {}
         for dtag in datasets:
             resolutions[dtag] = datasets[dtag].reflections.get_resolution()
@@ -724,12 +726,16 @@ def get_reference_from_datasets(
         #     key=lambda dtag: resolutions[dtag].to_float(),
         # )
 
+        min_resolution_dtag = None
         for dtag in sorted(resolutions, key=lambda x: resolutions[x]):
             dataset = datasets[dtag]
             dataset_spacegroup = dataset.reflections.reflections.spacegroup.hm
             if dataset_spacegroup == modal_spacegroup:
                 min_resolution_dtag = dtag
                 break
+
+        if not min_resolution_dtag:
+            raise Exception(f"No dtag in modal spacegroup! Something has gone very wrong!")
 
         # min_resolution_structure = datasets[min_resolution_dtag].structure
         # min_resolution_reflections = datasets[min_resolution_dtag].reflections
