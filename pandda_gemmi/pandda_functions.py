@@ -2000,7 +2000,7 @@ def get_common_structure_factors(datasets: DatasetsInterface):
         for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
 
             f_label = common_f_phi_label_pair[0]
-            phi_label = common_f_phi_label_pair[0]
+            phi_label = common_f_phi_label_pair[1]
             if f_label in column_labels:
                 if phi_label in column_labels:
                     if not common_f_phi_label_pair in label_counts:
