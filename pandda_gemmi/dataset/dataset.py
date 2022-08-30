@@ -468,6 +468,9 @@ class Reflections(ReflectionsInterface):
             if column.label == "FreeR_flag":
                 free_flag = "FreeR_flag"
                 break
+            if column.label == "R-free-flags":
+                free_flag = "R-free-flags"
+                break
 
         if not free_flag:
             raise Exception("No RFree Flag found!")
