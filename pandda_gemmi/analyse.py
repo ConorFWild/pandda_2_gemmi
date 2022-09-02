@@ -57,7 +57,7 @@ from pandda_gemmi.pandda_functions import (
     get_shells,
     get_common_structure_factors,
 )
-from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
+from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events, GetEventScoreSize
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
@@ -286,7 +286,10 @@ def get_filter_reference_compatability(
 
 
 def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
-    return GetEventScoreInbuilt()
+    if pandda_args.event_score == "inbuilt":
+        return GetEventScoreInbuilt()
+    elif pandda_args.event_score == "size":
+        return GetEventScoreSize()
 
 
 def process_pandda(pandda_args: PanDDAArgs, ):

@@ -7,6 +7,7 @@ from distutils.util import strtobool
 from pandda_gemmi import constants
 from pandda_gemmi.analyse_interface import *
 
+
 @dataclasses.dataclass()
 class PanDDAArgs:
     data_dirs: Path
@@ -52,6 +53,7 @@ class PanDDAArgs:
     min_blob_z_peak: float = 3.0
     clustering_cutoff: float = 1.5
     cluster_cutoff_distance_multiplier: float = 1.0
+    event_score: str = "inbuilt"
     max_site_distance_cutoff: float = constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT
     min_bdc: float = constants.ARGS_MIN_BDC_DEFAULT
     max_bdc: float = constants.ARGS_MAX_BDC_DEFAULT
@@ -519,6 +521,12 @@ class PanDDAArgs:
             default=1.5,
             help=constants.ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER_HELP,
         )
+        parser.add_argument(
+            constants.ARGS_EVENT_SCORE,
+            type=str,
+            default="inbuilt",
+            help=constants.ARGS_EVENT_SCORE_HELP,
+        )
 
         # Site finding options
         parser.add_argument(
@@ -595,6 +603,7 @@ class PanDDAArgs:
                     return debug_level
 
             raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
+
         parser.add_argument(
             constants.ARGS_DEBUG,
             type=lambda x: debug_mapping(int(x)),
@@ -650,6 +659,7 @@ class PanDDAArgs:
             min_blob_z_peak=args.min_blob_z_peak,
             clustering_cutoff=args.clustering_cutoff,
             cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
+            event_score=args.event_score,
             max_site_distance_cutoff=args.max_site_distance_cutoff,
             min_bdc=args.min_bdc,
             max_bdc=args.max_bdc,

@@ -338,6 +338,7 @@ class ClusterIDInterface(Protocol):
 class EDClusterInterface(Protocol):
     indexes: Tuple[NDArrayInterface]
     centroid: Tuple[float, float, float]
+    values: NDArrayInterface
     cluster_positions_array: NDArrayInterface
     event_mask_indicies: Optional[Tuple[NDArrayInterface]]
 
@@ -910,7 +911,32 @@ class GetEventScoreAutobuildInterface(Protocol):
         ...
 
 
-GetEventScoreInterface = Union[GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface]
+# @runtime_checkable
+class GetEventScoreSizeInterface(Protocol):
+    tag: Literal["size"]
+
+    def __call__(self,
+                 test_dtag,
+                 model_number,
+                 dataset_processed_dataset,
+                 dataset_xmap,
+                 zmap,
+                 events,
+                 model,
+                 grid,
+                 dataset_alignment,
+                 max_site_distance_cutoff,
+                 min_bdc, max_bdc,
+                 reference,
+                 res, rate,
+                 structure_output_folder,
+                 debug: Debug
+                 ) -> EventScoringResultsInterface:
+        ...
+
+
+GetEventScoreInterface = Union[
+    GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface, GetEventScoreSizeInterface]
 
 
 class GetAutobuildResultInterface(Protocol):

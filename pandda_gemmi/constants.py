@@ -215,6 +215,8 @@ ARGS_CLUSTERING_CUTOFF = "--clustering_cutoff"
 ARGS_CLUSTERING_CUTOFF_HELP = "DEPRECATED."
 ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER = "--cluster_cutoff_distance_multiplier"
 ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER_HELP = "A float which gives what multiple of a diagonal lattice step a high z value can be from a blob while still being considered for inclusion."
+ARGS_EVENT_SCORE = "--event_score"
+ARGS_EVENT_SCORE_HELP = "Method to score events: either inbuilt or size"
 ARGS_MAX_SITE_DISTANCE_CUTOFF = "--max_site_distance_cutoff"
 ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP = "The maximum distance between events for them to be considered for inclusion in " \
                                      "the same site"
