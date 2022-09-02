@@ -104,28 +104,7 @@ class EventScoringSizeResult(EventScoringResultInterface):
 class GetEventScoreSize(GetEventScoreSizeInterface):
     tag: Literal["size"] = "size"
 
-    def __call__(self,
-                 test_dtag,
-                 model_number,
-                 processed_dataset,
-                 dataset_xmap,
-                 zmap,
-                 events,
-                 model,
-                 grid,
-                 dataset_alignment,
-                 max_site_distance_cutoff,
-                 min_bdc, max_bdc,
-                 reference,
-                 res, rate,
-                 structure_output_folder,
-                 event_map_cut=2.0,
-                 below_cut_score=0.0,
-                 event_density_score=1.0,
-                 protein_score=-1.0,
-                 protein_event_overlap_score=0.0,
-                 debug: Debug = Debug.DEFAULT,
-                 ) -> EventScoringResultsInterface:
+    def __call__(self, events: EventsInterface) -> EventScoringResultsInterface:
         event_scores = {
             event_id: EventScoringSizeResult(
                 LigandFittingResult(
