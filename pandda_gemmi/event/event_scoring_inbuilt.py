@@ -9,6 +9,8 @@ from scipy import spatial as spsp, optimize
 from pathlib import Path
 import time
 
+from openbabel import pybel
+
 #
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.dataset import Dataset
@@ -17,6 +19,7 @@ from pandda_gemmi.event import Cluster
 # from pandda_gemmi.autobuild import score_structure_signal_to_noise_density, EXPERIMENTAL_score_structure_signal_to_noise_density
 from pandda_gemmi.scoring import EXPERIMENTAL_score_structure_signal_to_noise_density, score_structure_contour
 from pandda_gemmi.python_types import *
+from pandda_gemmi.autobuild.cif import generate_cif
 
 
 class ConfomerID(ConfromerIDInterface):
@@ -155,7 +158,16 @@ def structure_from_small_structure(small_structure):
     return structure
 
 
-def structures_from_cif(source_ligand_cif, debug: Debug = Debug.DEFAULT):
+def structures_from_cif(
+        fragment_dataset: ProcessedDatasetInterface,
+        debug: Debug = Debug.DEFAULT):
+    source_ligand_cif = fragment_dataset.source_ligand_cif
+
+    cif_path, pdb_path = generate_cif(
+        source_ligand_cif,
+        fragment_dataset.path
+    )
+
     # doc = gemmi.cif.read_file(str(source_ligand_cif))
     # block = doc[-1]
     # cc = gemmi.make_chemcomp_from_block(block)
@@ -182,6 +194,56 @@ def structures_from_cif(source_ligand_cif, debug: Debug = Debug.DEFAULT):
     # for bond in cc.rt.bonds:
     #     G.add_edge(bond.id1.atom, bond.id2.atom)
     return {ConfomerID(0): structure}
+
+
+def smiles_path_from_cif(
+        fragment_dataset: ProcessedDatasetInterface,
+        debug: Debug = Debug.DEFAULT):
+    source_ligand_cif = fragment_dataset.source_ligand_cif
+
+    # Run phenix to normalize cif
+    cif_path, pdb_path = generate_cif(
+        source_ligand_cif,
+        fragment_dataset.path
+    )
+
+    # Open new pdb with open babel
+    mol = next(pybel.readfile("pdb", str(pdb_path)))
+
+    # Convert to cif and back again to deal with psky Hs that confuse RDKIT
+    smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
+
+    # Write the smiles
+    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
+    with open(smiles_path) as f:
+        f.write(smiles)
+
+    return smiles_path
+
+
+def smiles_path_from_pdb(
+        fragment_dataset: ProcessedDatasetInterface,
+        debug: Debug = Debug.DEFAULT):
+    source_ligand_pdb = fragment_dataset.source_ligand_pdb
+
+    # Run phenix to normalize cif
+    cif_path, pdb_path = generate_cif(
+        source_ligand_pdb,
+        fragment_dataset.path
+    )
+
+    # Open new pdb with open babel
+    mol = next(pybel.readfile("pdb", str(pdb_path)))
+
+    # Convert to cif and back again to deal with psky Hs that confuse RDKIT
+    smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
+
+    # Write the smiles
+    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
+    with open(smiles_path) as f:
+        f.write(smiles)
+
+    return smiles_path
 
 
 class Conformers(ConformersInterface):
@@ -216,7 +278,7 @@ class Conformers(ConformersInterface):
 
 
 def get_conformers(
-        fragment_dataset,
+        fragment_dataset: ProcessedDatasetInterface,
         pruning_threshold=1.5,
         num_pose_samples=1000,
         max_conformers=10,
@@ -225,47 +287,52 @@ def get_conformers(
     # Decide how to load
     # fragment_structures = {}
     if fragment_dataset.source_ligand_smiles:
-
-        if debug >= Debug.PRINT_NUMERICS:
-            print(f'\t\tGetting mol from ligand smiles')
-        mol = get_fragment_mol_from_dataset_smiles_path(fragment_dataset.source_ligand_smiles)
-
-        # Generate conformers
-        mol: Chem.Mol = Chem.AddHs(mol)
-
-        # Generate conformers
-        cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
-
-        # Translate to structures
-        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = get_structures_from_mol(mol, max_conformers)
-        if len(fragment_structures) > 0:
-            return Conformers(
-                fragment_structures,
-                "smiles",
-                fragment_dataset.source_ligand_smiles,
-            )
+        smiles_path = fragment_dataset.source_ligand_smiles
 
     if fragment_dataset.source_ligand_cif:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from cif')
-        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = structures_from_cif(fragment_dataset.source_ligand_cif, debug)
-        if len(fragment_structures) > 0:
-            return Conformers(
-                fragment_structures,
-                "cif",
-                fragment_dataset.source_ligand_cif,
-            )
+        # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = smiles_from_cif(
+        #     fragment_dataset, debug)
+        # if len(fragment_structures) > 0:
+        #     return Conformers(
+        #         fragment_structures,
+        #         "cif",
+        #         fragment_dataset.source_ligand_cif,
+        #     )
+        smiles_path = smiles_path_from_cif(fragment_dataset, debug)
 
     if fragment_dataset.source_ligand_pdb:
-        if debug >= Debug.PRINT_NUMERICS:
-            print(f'\t\tGetting mol from ligand pdb')
-        fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {ConfomerID(0): gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
-        if len(fragment_structures) > 0:
-            return Conformers(
-                fragment_structures,
-                "pdb",
-                fragment_dataset.source_ligand_pdb,
-            )
+        # if debug >= Debug.PRINT_NUMERICS:
+        #     print(f'\t\tGetting mol from ligand pdb')
+        # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {ConfomerID(0): gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
+        # if len(fragment_structures) > 0:
+        #     return Conformers(
+        #         fragment_structures,
+        #         "pdb",
+        #         fragment_dataset.source_ligand_pdb,
+        #     )
+        smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f'\t\tGetting mol from ligand smiles')
+    mol = get_fragment_mol_from_dataset_smiles_path(smiles_path)
+
+    # Generate conformers
+    mol: Chem.Mol = Chem.AddHs(mol)
+
+    # Generate conformers
+    cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
+
+    # Translate to structures
+    fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = get_structures_from_mol(mol,
+                                                                                                         max_conformers)
+    if len(fragment_structures) > 0:
+        return Conformers(
+            fragment_structures,
+            "smiles",
+            fragment_dataset.source_ligand_smiles,
+        )
 
     if fragment_dataset.source_ligand_smiles or fragment_dataset.source_ligand_cif or \
             fragment_dataset.source_ligand_pdb:
@@ -783,7 +850,6 @@ def score_conformer_nonquant_array(cluster: Cluster,
     # Get the probe structure
     probe_structure = get_probe_structure(centered_structure)
 
-
     if debug >= Debug.PRINT_NUMERICS:
         print(f"\t\t\t\tprobe structure: {probe_structure}")
 
@@ -902,7 +968,6 @@ def score_conformer_nonquant_array(cluster: Cluster,
             # structure_map_high_cut=1.5
             structure_map_high_cut=0.6
         )
-
 
         scores_signal_to_noise.append(score)
         logs.append(log)
@@ -1435,11 +1500,11 @@ class EventScoringResult(EventScoringResultInterface):
     def get_selected_conformer_key(self) -> Optional[ConfromerIDInterface]:
 
         keys_with_scores = [
-                conformer_id
-                for conformer_id
-                in self.ligand_fitting_result.conformer_fitting_results
-                if self.ligand_fitting_result.conformer_fitting_results[conformer_id].score is not None
-            ]
+            conformer_id
+            for conformer_id
+            in self.ligand_fitting_result.conformer_fitting_results
+            if self.ligand_fitting_result.conformer_fitting_results[conformer_id].score is not None
+        ]
 
         if len(keys_with_scores) == 0:
             return None
@@ -1834,8 +1899,6 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 initial_score = result.get_selected_structure_score()
                 structure = result.get_selected_structure()
 
-
-
                 # if initial_score < 0.4:
                 #     score = 0
                 # else:
@@ -1854,8 +1917,6 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                     ccp4.write_ccp4_map(str(structure_output_folder / f'{model_number}_'
                                                                       f'{event_id.event_idx.event_idx}_app.ccp4'))
                     # del result.get_selected_conformer_results().score_log["grid"]
-
-
 
                 if debug >= Debug.INTERMEDIATE_FITS:
                     if structure:

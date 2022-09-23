@@ -379,6 +379,7 @@ CUT_EVENT_MAP_FILE = "cut.ccp4"
 ELBOW_COMMAND = "cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
 LIGAND_PREFIX = "ligand"
 LIGAND_CIF_FILE = "ligand.cif"
+LIGAND_PDB_FILE = "ligand.pdb"
 GRADE_COMMAND = "cd {out_dir}; grade -in {smiles_file} -ocif {prefix}.cif -opdb {prefix}.pdb -f; cd -"
 GRADE2_COMMAND = "cd {out_dir}; grade2 --in {smiles_file} -j -o {prefix} -f; mv {prefix}.restraints.cif {prefix}.cif; cd -"
 
