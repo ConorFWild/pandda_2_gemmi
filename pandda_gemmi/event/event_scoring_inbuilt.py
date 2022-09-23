@@ -215,7 +215,7 @@ def smiles_path_from_cif(
 
     # Write the smiles
     smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
-    with open(smiles_path) as f:
+    with open(smiles_path, "w") as f:
         f.write(smiles)
 
     return smiles_path
