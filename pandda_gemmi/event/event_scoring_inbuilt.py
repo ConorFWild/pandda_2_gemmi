@@ -314,6 +314,8 @@ def get_conformers(
         #     )
         smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
 
+    print(f"Generated smiles: {smiles_path}")
+
     if debug >= Debug.PRINT_NUMERICS:
         print(f'\t\tGetting mol from ligand smiles')
     mol = get_fragment_mol_from_dataset_smiles_path(smiles_path)
