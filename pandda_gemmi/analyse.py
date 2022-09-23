@@ -64,7 +64,7 @@ from pandda_gemmi.ranking import (
     GetEventRankingSizeAutobuild,
 GetEventRankingEventScore
 )
-from pandda_gemmi.autobuild import (
+from pandda_gemmi.autobuild.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
