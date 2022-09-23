@@ -291,7 +291,7 @@ def get_conformers(
     if fragment_dataset.source_ligand_smiles:
         smiles_path = fragment_dataset.source_ligand_smiles
 
-    if fragment_dataset.source_ligand_cif:
+    elif fragment_dataset.source_ligand_cif:
         if debug >= Debug.PRINT_NUMERICS:
             print(f'\t\tGetting mol from cif')
         # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = smiles_from_cif(
@@ -304,7 +304,7 @@ def get_conformers(
         #     )
         smiles_path = smiles_path_from_cif(fragment_dataset, debug)
 
-    if fragment_dataset.source_ligand_pdb:
+    elif fragment_dataset.source_ligand_pdb:
         # if debug >= Debug.PRINT_NUMERICS:
         #     print(f'\t\tGetting mol from ligand pdb')
         # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {ConfomerID(0): gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
