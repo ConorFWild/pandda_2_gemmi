@@ -286,6 +286,8 @@ def get_conformers(
 ) -> ConformersInterface:
     # Decide how to load
     # fragment_structures = {}
+    smiles_path = None
+
     if fragment_dataset.source_ligand_smiles:
         smiles_path = fragment_dataset.source_ligand_smiles
 
@@ -315,6 +317,20 @@ def get_conformers(
         smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
 
     print(f"Generated smiles: {smiles_path}")
+
+    if smiles_path is None:
+        return Conformers(
+            {},
+            "None: No Ligand",
+            None,
+        )
+
+    if not smiles_path.exists():
+        return Conformers(
+            {},
+            "None: No Smile Path",
+            None,
+        )
 
     if debug >= Debug.PRINT_NUMERICS:
         print(f'\t\tGetting mol from ligand smiles')
