@@ -214,7 +214,7 @@ def smiles_path_from_cif(
     # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
 
     # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(pdb_path)
+    mol = Chem.MolFromPDBFile(str(pdb_path))
 
     # Write smiles
     smiles = Chem.MolToSmiles(mol)
@@ -245,7 +245,7 @@ def smiles_path_from_pdb(
     # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
 
     # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(pdb_path)
+    mol = Chem.MolFromPDBFile(str(pdb_path))
 
     # Write smiles
     smiles = Chem.MolToSmiles(mol)
