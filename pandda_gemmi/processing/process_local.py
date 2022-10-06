@@ -1,5 +1,5 @@
 import numpy
-# import ray
+import ray
 import multiprocessing as mp
 
 from pandda_gemmi.analyse_interface import *
