@@ -14,16 +14,16 @@ class ProcessLocalSerial(ProcessorInterface):
         return results
 
 
-# @ray.remote
-# class RayWrapper(Generic[P, V]):
-#
-#     def run(self, func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
-#         return func(*args, **kwargs)
-#
-#
-# @ray.remote
-# def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
-#     return func(*args, **kwargs)
+@ray.remote
+class RayWrapper(Generic[P, V]):
+
+    def run(self, func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
+        return func(*args, **kwargs)
+
+
+@ray.remote
+def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
+    return func(*args, **kwargs)
 
 
 class ProcessLocalRay(ProcessorInterface):
