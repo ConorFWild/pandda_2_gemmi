@@ -1,6 +1,7 @@
 import numpy
 import ray
 import multiprocessing as mp
+from joblib import Parallel, delayed
 
 from pandda_gemmi.analyse_interface import *
 
@@ -76,5 +77,22 @@ class ProcessLocalSpawn(ProcessorInterface):
                 run_multiprocessing,
                 funcs,
             )
+
+        return results
+
+
+class ProcessLocalThreading(ProcessorInterface):
+    def __init__(self, n_jobs: int):
+        self.n_jobs = n_jobs
+
+    def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
+        results = Parallel(
+            n_jobs=self.n_jobs,
+            prefer="threads",
+        )(
+            delayed(run_multiprocessing)(func)
+            for func
+            in funcs
+        )
 
         return results

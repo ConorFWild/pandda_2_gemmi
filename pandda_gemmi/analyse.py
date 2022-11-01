@@ -195,8 +195,12 @@ def get_process_local(pandda_args):
     elif pandda_args.local_processing == "multiprocessing_spawn":
         process_local = ProcessLocalSpawn(pandda_args.local_cpus)
 
+    elif pandda_args.local_processing == "threading":
+        process_local = ProcessLocalThreading(pandda_args.local_cpus)
+
     # elif pandda_args.local_processing == "joblib":
-    #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+    #     # process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+    #     process_local = ProcessLocalJoblib(pandda_args.local_cpus)
 
     # elif pandda_args.local_processing == "multiprocessing_forkserver":
     #     mp.set_start_method("forkserver")
