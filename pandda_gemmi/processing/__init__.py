@@ -4,3 +4,4 @@ from pandda_gemmi.processing.process_local import (
     #RayWrapper,
     ProcessLocalRay, ProcessLocalSerial, ProcessLocalSpawn, ProcessLocalThreading
 )
+from pandda_gemmi.processing.process_global import DaskDistributedProcessor
