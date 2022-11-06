@@ -80,7 +80,7 @@ class PanDDAArgs:
     distributed_resource_spec: str = "m_mem_free=10G"
     distributed_tmp: str = "/tmp"
     distributed_job_extra: str = ("--exclusive",)
-    distributed_walltime: str = "60:00:00"
+    distributed_walltime: str = "150:00:00"
     distributed_watcher: bool = False
     distributed_slurm_partition: Optional[str] = None
     autobuild: bool = constants.ARGS_AUTOBUILD_DEFAULT
@@ -246,7 +246,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_WALLTIME,
             type=str,
-            default="60:00:00",
+            default="150:00:00",
             help=constants.ARGS_DISTRIBUTED_WALLTIME_HELP,
         )
         parser.add_argument(

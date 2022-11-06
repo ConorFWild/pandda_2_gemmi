@@ -20,7 +20,7 @@ class DaskDistributedProcessor(ProcessorInterface):
                  distributed_mem_per_core=10,
                  resource_spec="",
                  job_extra=("",),
-                 walltime="60:00:00",
+                 walltime="150:00:00",
                  watcher=True,
                  ):
 
