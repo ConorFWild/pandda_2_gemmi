@@ -12,12 +12,12 @@ from pandda_gemmi.analyse_interface import *
 class PanDDAArgs:
     data_dirs: Path
     out_dir: Path
-    pdb_regex: str = "*.pdb"
-    mtz_regex: str = "*.mtz"
+    pdb_regex: str = constants.ARGS_PDB_REGEX_DEFAULT
+    mtz_regex: str = constants.ARGS_MTZ_REGEX_DEFAULT
     ligand_dir_regex: str = "compound"
-    ligand_cif_regex: str = "*.cif"
-    ligand_pdb_regex: str = "*.pdb"
-    ligand_smiles_regex: str = "*.smiles"
+    ligand_cif_regex: str = constants.ARGS_LIGAND_CIF_REGEX_DEFAULT
+    ligand_pdb_regex: str = constants.ARGS_LIGAND_PDB_REGEX_DEFAULT
+    ligand_smiles_regex: str = constants.ARGS_LIGAND_SMILES_REGEX_DEFAULT
     statmaps: bool = False
     low_memory: bool = False
     ground_state_datasets: Optional[List[str]] = None
@@ -53,7 +53,7 @@ class PanDDAArgs:
     min_blob_z_peak: float = 3.0
     clustering_cutoff: float = 1.5
     cluster_cutoff_distance_multiplier: float = 1.0
-    event_score: str = "inbuilt"
+    event_score: str = constants.ARGS_EVENT_SCORE_DEFAULT
     max_site_distance_cutoff: float = constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT
     min_bdc: float = constants.ARGS_MIN_BDC_DEFAULT
     max_bdc: float = constants.ARGS_MAX_BDC_DEFAULT
@@ -68,7 +68,7 @@ class PanDDAArgs:
     cluster_selection: str = "close"
     local_processing: str = constants.ARGS_LOCAL_PROCESSING_DEFAULT
     local_cpus: int = constants.ARGS_LOCAL_CPUS_DEFAULT
-    global_processing: str = "serial"
+    global_processing: str = constants.ARGS_GLOBAL_PROCESSING_DEFAULT
     memory_availability: str = constants.ARGS_MEMORY_AVAILABILITY_DEFAULT
     job_params_file: Optional[str] = None
     distributed_scheduler: str = "SGE"
@@ -84,9 +84,9 @@ class PanDDAArgs:
     distributed_watcher: bool = False
     distributed_slurm_partition: Optional[str] = None
     autobuild: bool = constants.ARGS_AUTOBUILD_DEFAULT
-    autobuild_strategy: str = "rhofit"
+    autobuild_strategy: str = constants.ARGS_AUTOBUILD_STRATEGY_DEFAULT
     rhofit_coord: bool = False
-    cif_strategy: str = "elbow"
+    cif_strategy: str = constants.ARGS_CIF_STRATEGY_DEFAULT
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
     debug: Debug = Debug.DEFAULT
 
@@ -118,35 +118,37 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_PDB_REGEX,
             type=str,
+            default=constants.ARGS_PDB_REGEX_DEFAULT,
             help=constants.ARGS_PDB_REGEX_HELP,
         )
         parser.add_argument(
             constants.ARGS_MTZ_REGEX,
             type=str,
+            default=constants.ARGS_MTZ_REGEX_DEFAULT,
             help=constants.ARGS_MTZ_REGEX_HELP,
         )
         parser.add_argument(
             constants.ARGS_LIGAND_CIF_REGEX,
             type=str,
-            default='*.cif',
+            default=constants.ARGS_LIGAND_CIF_REGEX_DEFAULT,
             help=constants.ARGS_LIGAND_CIF_REGEX_HELP,
         )
         parser.add_argument(
             constants.ARGS_LIGAND_SMILES_REGEX,
             type=str,
-            default='*.smiles',
+            default=constants.ARGS_LIGAND_SMILES_REGEX_DEFAULT,
             help=constants.ARGS_LIGAND_SMILES_REGEX_HELP,
         )
         parser.add_argument(
             constants.ARGS_LIGAND_PDB_REGEX,
             type=str,
-            default='*.pdb',
+            default=constants.ARGS_LIGAND_PDB_REGEX_DEFAULT,
             help=constants.ARGS_LIGAND_PDB_REGEX_HELP,
         )
         parser.add_argument(
             constants.ARGS_LIGAND_DIR_REGEX,
             type=str,
-            default='compound',
+            default=constants.ARGS_LIGAND_DIR_REGEX_DEFAULT,
             help=constants.ARGS_LIGAND_DIR_REGEX_HELP,
         )
 
@@ -166,7 +168,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_GLOBAL_PROCESSING,
             type=str,
-            default='serial',
+            default=constants.ARGS_GLOBAL_PROCESSING_DEFAULT,
             help=constants.ARGS_GLOBAL_PROCESSING_HELP,
         )
         parser.add_argument(
@@ -524,7 +526,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_EVENT_SCORE,
             type=str,
-            default="inbuilt",
+            default=constants.ARGS_EVENT_SCORE_DEFAULT,
             help=constants.ARGS_EVENT_SCORE_HELP,
         )
 
@@ -572,7 +574,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_AUTOBUILD_STRATEGY,
             type=str,
-            default="rhofit",
+            default=constants.ARGS_AUTOBUILD_STRATEGY_DEFAULT,
             help=constants.ARGS_AUTOBUILD_STRATEGY_HELP,
         )
         parser.add_argument(
@@ -584,7 +586,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_CIF_STRATEGY,
             type=str,
-            default='elbow',
+            default=constants.ARGS_CIF_STRATEGY_DEFAULT,
             help=constants.ARGS_CIF_STRATEGY_HELP,
         )
 
