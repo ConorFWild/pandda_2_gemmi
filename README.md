@@ -28,7 +28,7 @@ It is reccomended that you install PanDDA 2 in it's own python 3.8 anaconda envi
 ```bash
 conda create -n pandda2 python=3.9
 conda activate pandda2
-conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib rich seaborn rdkit
+conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib rich seaborn rdkit openbabel
 pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi
@@ -83,7 +83,7 @@ An example of how to run with distributed computing at Diamond Light Source is a
 ```bash
 # Ensuring availability of Global Phasing code for autobuilding and phenix for building cifs
 module load ccp4
-module load phenix # be default, not necessary with --cif_method="grade"
+module load phenix # by default, not necessary with --cif_method="grade"
 module load buster
 
 # Put the following in the file submit.sh
