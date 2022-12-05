@@ -66,7 +66,7 @@ python /path/to/analyse.py <data directories> <output directory> --pdb_regex=<pd
 ### Running With Autobuilding
 PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is setup in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2 with the autobuild flag on.
 
-Important to note is that by defauly this will require *phenix.elbow* to be in the path. 
+Important to note is that by default this will require *phenix.elbow* to be in the path to handle cifs for autobuilding. Support for using grade instead is in the process of being added. 
 
 An example:
 ```bash
