@@ -18,6 +18,7 @@ from pandda_gemmi.common import Partial
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.dataset.dataset import GetReferenceDataset
 from pandda_gemmi.edalignment.grid import GetGrid
+from pandda_gemmi.smiles import GetDatasetSmiles
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import (
@@ -350,7 +351,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
 
     # Get the Smile generating function
-    get_dataset_smiles: GetDatasetsSmilesInterface = GetDatasetsSmiles()
+    get_dataset_smiles: GetDatasetSmilesInterface = GetDatasetSmiles()
 
     # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
@@ -429,7 +430,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_args.ligand_pdb_regex,
             pandda_args.ligand_smiles_regex,
         )()
-        pandda_fs_model.build()
+        pandda_fs_model.build(get_dataset_smiles, process_local=process_local)
         time_fs_model_building_finish = time.time()
         pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start
 

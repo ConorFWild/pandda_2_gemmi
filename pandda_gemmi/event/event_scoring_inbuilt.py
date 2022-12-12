@@ -9,7 +9,6 @@ from scipy import spatial as spsp, optimize
 from pathlib import Path
 import time
 
-from openbabel import pybel
 
 #
 from pandda_gemmi.analyse_interface import *
@@ -196,66 +195,6 @@ def structures_from_cif(
     return {ConfomerID(0): structure}
 
 
-def smiles_path_from_cif(
-        fragment_dataset: ProcessedDatasetInterface,
-        debug: Debug = Debug.DEFAULT):
-    source_ligand_cif = fragment_dataset.source_ligand_cif
-
-    # Run phenix to normalize cif
-    cif_path, pdb_path = generate_cif(
-        source_ligand_cif,
-        fragment_dataset.path
-    )
-
-    # # Open new pdb with open babel
-    # mol = next(pybel.readfile("pdb", str(pdb_path)))
-    #
-    # # Convert to cif and back again to deal with psky Hs that confuse RDKIT
-    # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
-
-    # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(str(pdb_path))
-
-    # Write smiles
-    smiles = Chem.MolToSmiles(mol)
-
-    # Write the smiles
-    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
-    with open(smiles_path, "w") as f:
-        f.write(smiles)
-
-    return smiles_path
-
-
-def smiles_path_from_pdb(
-        fragment_dataset: ProcessedDatasetInterface,
-        debug: Debug = Debug.DEFAULT):
-    source_ligand_pdb = fragment_dataset.source_ligand_pdb
-
-    # Run phenix to normalize cif
-    cif_path, pdb_path = generate_cif(
-        source_ligand_pdb,
-        fragment_dataset.path
-    )
-
-    # # Open new pdb with open babel
-    # mol = next(pybel.readfile("pdb", str(pdb_path)))
-    #
-    # # Convert to cif and back again to deal with psky Hs that confuse RDKIT
-    # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
-
-    # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(str(pdb_path))
-
-    # Write smiles
-    smiles = Chem.MolToSmiles(mol)
-
-    # Write the smiles
-    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
-    with open(smiles_path, "w") as f:
-        f.write(smiles)
-
-    return smiles_path
 
 
 class Conformers(ConformersInterface):
