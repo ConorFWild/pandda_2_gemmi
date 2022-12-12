@@ -28,6 +28,7 @@ from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Data
 # from pandda_gemmi.model import Zmap, Model
 from pandda_gemmi.event import Event
 from pandda_gemmi.scoring.scoring import event_map_to_contour_score_map, score_structure_contour
+from pandda_gemmi.autobuild.cif import generate_cif, generate_cif_grade, generate_cif_grade2
 
 
 @dataclasses.dataclass()
@@ -301,62 +302,6 @@ def cut_out_xmap(xmap_path: Path, coord: Coord, out_dir: Path):
     return cut_out_event_map_file
 
 
-# #####################
-# # Generate cif
-# #####################
-
-def get_elbow_command(smiles_file: Path, out_dir: Path) -> str:
-    command = constants.ELBOW_COMMAND.format(
-        out_dir=str(out_dir),
-        smiles_file=str(smiles_file),
-        prefix=constants.LIGAND_PREFIX, )
-    return command
-
-
-def generate_cif(smiles_path: Path, out_dir: Path):
-    # Get the command to run elbow
-    elbow_command = get_elbow_command(smiles_path, out_dir)
-
-    # Run the command
-    execute(elbow_command)
-
-    return out_dir / constants.LIGAND_CIF_FILE
-
-
-def get_grade_command(smiles_file: Path, out_dir: Path) -> str:
-    command = constants.GRADE_COMMAND.format(
-        out_dir=str(out_dir.resolve()),
-        smiles_file=str(smiles_file.resolve()),
-        prefix=constants.LIGAND_PREFIX, )
-    return command
-
-
-def generate_cif_grade(smiles_path: Path, out_dir: Path):
-    # Get the command to run elbow
-    grade_command = get_grade_command(smiles_path, out_dir)
-
-    # Run the command
-    execute(grade_command)
-
-    return out_dir / constants.LIGAND_CIF_FILE
-
-
-def get_grade2_command(smiles_file: Path, out_dir: Path) -> str:
-    command = constants.GRADE2_COMMAND.format(
-        out_dir=str(out_dir),
-        smiles_file=str(smiles_file),
-        prefix=constants.LIGAND_PREFIX, )
-    return command
-
-
-def generate_cif_grade2(smiles_path: Path, out_dir: Path):
-    # Get the command to run elbow
-    grade_2_command = get_grade2_command(smiles_path, out_dir)
-
-    # Run the command
-    execute(grade_2_command)
-
-    return out_dir / constants.LIGAND_CIF_FILE
 
 
 # #####################
@@ -1292,7 +1237,7 @@ def autobuild_rhofit(dataset: Dataset,
             if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t{event.event_id}   Making cif with elbow using cif: {cif_path}")
 
-            cif_path = generate_cif(
+            cif_path, pdb_path = generate_cif(
                 cif_path,
                 out_dir,
             )
@@ -1300,7 +1245,7 @@ def autobuild_rhofit(dataset: Dataset,
             if debug >= Debug.PRINT_SUMMARIES:
                 print(f"\t\t{event.event_id}   Making cif with elbow using smiles: {smiles_path}")
 
-            cif_path = generate_cif(
+            cif_path, pdb_path = generate_cif(
                 smiles_path,
                 out_dir,
             )

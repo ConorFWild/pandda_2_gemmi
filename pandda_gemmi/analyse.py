@@ -57,14 +57,14 @@ from pandda_gemmi.pandda_functions import (
     get_shells,
     get_common_structure_factors,
 )
-from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events
+from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events, GetEventScoreSize
 from pandda_gemmi.ranking import (
     GetEventRankingAutobuild,
     GetEventRankingSize,
     GetEventRankingSizeAutobuild,
-GetEventRankingEventScore
+    GetEventRankingEventScore
 )
-from pandda_gemmi.autobuild import (
+from pandda_gemmi.autobuild.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
@@ -82,6 +82,8 @@ from pandda_gemmi.processing import (
     ProcessLocalRay,
     ProcessLocalSerial,
     ProcessLocalSpawn,
+    ProcessLocalThreading,
+    DaskDistributedProcessor
 )
 
 from pandda_gemmi import event_classification
@@ -165,7 +167,24 @@ def get_process_global(pandda_args, distributed_tmp):
     if pandda_args.global_processing == "serial":
         process_global = process_global_serial
     elif pandda_args.global_processing == "distributed":
-        client = get_dask_client(
+        # client = get_dask_client(
+        #     scheduler=pandda_args.distributed_scheduler,
+        #     num_workers=pandda_args.distributed_num_workers,
+        #     queue=pandda_args.distributed_queue,
+        #     project=pandda_args.distributed_project,
+        #     cores_per_worker=pandda_args.local_cpus,
+        #     distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+        #     resource_spec=pandda_args.distributed_resource_spec,
+        #     job_extra=pandda_args.distributed_job_extra,
+        #     walltime=pandda_args.distributed_walltime,
+        #     watcher=pandda_args.distributed_watcher,
+        # )
+        # process_global = partial(
+        #     process_global_dask,
+        #     client=client,
+        #     tmp_dir=distributed_tmp
+        # )
+        process_global = DaskDistributedProcessor(
             scheduler=pandda_args.distributed_scheduler,
             num_workers=pandda_args.distributed_num_workers,
             queue=pandda_args.distributed_queue,
@@ -177,11 +196,7 @@ def get_process_global(pandda_args, distributed_tmp):
             walltime=pandda_args.distributed_walltime,
             watcher=pandda_args.distributed_watcher,
         )
-        process_global = partial(
-            process_global_dask,
-            client=client,
-            tmp_dir=distributed_tmp
-        )
+
     else:
         raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")
 
@@ -195,8 +210,12 @@ def get_process_local(pandda_args):
     elif pandda_args.local_processing == "multiprocessing_spawn":
         process_local = ProcessLocalSpawn(pandda_args.local_cpus)
 
+    elif pandda_args.local_processing == "threading":
+        process_local = ProcessLocalThreading(pandda_args.local_cpus)
+
     # elif pandda_args.local_processing == "joblib":
-    #     process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+    #     # process_local = partial(process_local_joblib, n_jobs=pandda_args.local_cpus, verbose=50, max_nbytes=None)
+    #     process_local = ProcessLocalJoblib(pandda_args.local_cpus)
 
     # elif pandda_args.local_processing == "multiprocessing_forkserver":
     #     mp.set_start_method("forkserver")
@@ -286,7 +305,10 @@ def get_filter_reference_compatability(
 
 
 def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
-    return GetEventScoreInbuilt()
+    if pandda_args.event_score == "inbuilt":
+        return GetEventScoreInbuilt()
+    elif pandda_args.event_score == "size":
+        return GetEventScoreSize()
 
 
 def process_pandda(pandda_args: PanDDAArgs, ):
@@ -326,6 +348,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # Get XMap loading functions
     load_xmap_func: LoadXMapInterface = get_load_xmap_func(pandda_args)
     load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
+
+    # Get the Smile generating function
+    get_dataset_smiles: GetDatasetsSmilesInterface = GetDatasetsSmiles()
 
     # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
@@ -446,7 +471,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     structure_factors: StructureFactorsInterface = potential_structure_factors
             else:
                 structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
-                                                                                pandda_args.structure_factors[1])
+                                                                                pandda_args.structure_factors[1],
+                                                                                )
+
+        print(f"Struccture factors are: {structure_factors}")
+
+        ###################################################################
+        # # Get the Smiles for each Dataset
+        ###################################################################
+        datasets_with_smiles = get_dataset_smiles(datasets_initial)
+
 
         ###################################################################
         # # Data Quality filters
@@ -454,7 +488,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_data_quality_filters()
 
         datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                                     datasets_initial.items()}
+                                                     datasets_with_smiles.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
         console.summarise_filtered_datasets(
@@ -646,86 +680,86 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Process the shells
         with STDOUTManager('Processing the shells...', f'\tDone!'):
             time_shells_start = time.time()
-            if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
+            # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
 
-                shell_results: ShellResultsInterface = {
-                    shell_id: shell_result
-                    for shell_id, shell_result
-                    in zip(
-                        shells,
-                        process_global(
-                            [
-                                Partial(
-                                    process_shell_multiple_models).paramaterise(
-                                    shell,
-                                    datasets,
-                                    alignments,
-                                    grid,
-                                    pandda_fs_model,
-                                    reference,
-                                    process_local=process_local,
-                                    structure_factors=structure_factors,
-                                    sample_rate=pandda_args.sample_rate,
-                                    contour_level=pandda_args.contour_level,
-                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                                    min_blob_volume=pandda_args.min_blob_volume,
-                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
-                                    outer_mask=pandda_args.outer_mask,
-                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                                    min_bdc=pandda_args.min_bdc,
-                                    max_bdc=pandda_args.max_bdc,
-                                    memory_availability=pandda_args.memory_availability,
-                                    statmaps=pandda_args.statmaps,
-                                    load_xmap_func=load_xmap_func,
-                                    analyse_model_func=analyse_model_func,
-                                    score_events_func=score_events_func,
-                                    debug=pandda_args.debug,
-                                )
-                                for res, shell
-                                in shells.items()
-                            ],
-                        )
+            shell_results: ShellResultsInterface = {
+                shell_id: shell_result
+                for shell_id, shell_result
+                in zip(
+                    shells,
+                    process_global(
+                        [
+                            Partial(
+                                process_shell_multiple_models).paramaterise(
+                                shell,
+                                datasets,
+                                alignments,
+                                grid,
+                                pandda_fs_model,
+                                reference,
+                                process_local=process_local,
+                                structure_factors=structure_factors,
+                                sample_rate=pandda_args.sample_rate,
+                                contour_level=pandda_args.contour_level,
+                                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                                min_blob_volume=pandda_args.min_blob_volume,
+                                min_blob_z_peak=pandda_args.min_blob_z_peak,
+                                outer_mask=pandda_args.outer_mask,
+                                inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+                                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                                min_bdc=pandda_args.min_bdc,
+                                max_bdc=pandda_args.max_bdc,
+                                memory_availability=pandda_args.memory_availability,
+                                statmaps=pandda_args.statmaps,
+                                load_xmap_func=load_xmap_func,
+                                analyse_model_func=analyse_model_func,
+                                score_events_func=score_events_func,
+                                debug=pandda_args.debug,
+                            )
+                            for res, shell
+                            in shells.items()
+                        ],
                     )
-                }
+                )
+            }
 
-            else:
-                shell_results: ShellResultsInterface = {
-                    shell_id: shell_result
-                    for shell_id, shell_result
-                    in zip(
-                        shells,
-                        process_global(
-                            [
-                                Partial(process_shell).paramaterise(
-                                    shell,
-                                    datasets,
-                                    alignments,
-                                    grid,
-                                    pandda_fs_model,
-                                    reference,
-                                    process_local=process_local,
-                                    structure_factors=structure_factors,
-                                    sample_rate=pandda_args.sample_rate,
-                                    contour_level=pandda_args.contour_level,
-                                    cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                                    min_blob_volume=pandda_args.min_blob_volume,
-                                    min_blob_z_peak=pandda_args.min_blob_z_peak,
-                                    outer_mask=pandda_args.outer_mask,
-                                    inner_mask_symmetry=pandda_args.inner_mask_symmetry,
-                                    max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                                    min_bdc=pandda_args.min_bdc,
-                                    max_bdc=pandda_args.max_bdc,
-                                    memory_availability=pandda_args.memory_availability,
-                                    statmaps=pandda_args.statmaps,
-                                    load_xmap_func=load_xmap_func,
-                                )
-                                for res, shell
-                                in shells.items()
-                            ],
-                        )
-                    )
-                }
+            # else:
+            #     shell_results: ShellResultsInterface = {
+            #         shell_id: shell_result
+            #         for shell_id, shell_result
+            #         in zip(
+            #             shells,
+            #             process_global(
+            #                 [
+            #                     Partial(process_shell).paramaterise(
+            #                         shell,
+            #                         datasets,
+            #                         alignments,
+            #                         grid,
+            #                         pandda_fs_model,
+            #                         reference,
+            #                         process_local=process_local,
+            #                         structure_factors=structure_factors,
+            #                         sample_rate=pandda_args.sample_rate,
+            #                         contour_level=pandda_args.contour_level,
+            #                         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+            #                         min_blob_volume=pandda_args.min_blob_volume,
+            #                         min_blob_z_peak=pandda_args.min_blob_z_peak,
+            #                         outer_mask=pandda_args.outer_mask,
+            #                         inner_mask_symmetry=pandda_args.inner_mask_symmetry,
+            #                         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+            #                         min_bdc=pandda_args.min_bdc,
+            #                         max_bdc=pandda_args.max_bdc,
+            #                         memory_availability=pandda_args.memory_availability,
+            #                         statmaps=pandda_args.statmaps,
+            #                         load_xmap_func=load_xmap_func,
+            #                     )
+            #                     for res, shell
+            #                     in shells.items()
+            #                 ],
+            #             )
+            #         )
+            #     }
 
             time_shells_finish = time.time()
             pandda_log[constants.LOG_SHELLS] = {
@@ -1054,5 +1088,3 @@ if __name__ == '__main__':
         console.summarise_arguments(args)
 
     process_pandda(args)
-
-

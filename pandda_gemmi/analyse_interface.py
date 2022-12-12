@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
 from pathlib import Path
-from grpc import Call
 from enum import Enum
 
 from numpy.typing import NDArray
@@ -339,6 +338,7 @@ class ClusterIDInterface(Protocol):
 class EDClusterInterface(Protocol):
     indexes: Tuple[NDArrayInterface]
     centroid: Tuple[float, float, float]
+    values: NDArrayInterface
     cluster_positions_array: NDArrayInterface
     event_mask_indicies: Optional[Tuple[NDArrayInterface]]
 
@@ -911,7 +911,18 @@ class GetEventScoreAutobuildInterface(Protocol):
         ...
 
 
-GetEventScoreInterface = Union[GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface]
+# @runtime_checkable
+class GetEventScoreSizeInterface(Protocol):
+    tag: Literal["size"]
+
+    def __call__(self,
+                 events: EventsInterface
+                 ) -> EventScoringResultsInterface:
+        ...
+
+
+GetEventScoreInterface = Union[
+    GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface, GetEventScoreSizeInterface]
 
 
 class GetAutobuildResultInterface(Protocol):

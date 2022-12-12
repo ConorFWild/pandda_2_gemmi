@@ -38,6 +38,7 @@ COMMON_F_PHI_LABEL_PAIRS = (
     ("2FOFCWT", "PH2FOFCWT"),
     ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
     ("2FOFCWT_fill", "PH2FOFCWT_fill",),
+    ("2FOFCWT", "PHI2FOFCWT")
 )
 
 ###################################################################
@@ -56,22 +57,34 @@ ARGS_DATA_DIRS = "--data_dirs"
 ARGS_DATA_DIRS_HELP = "The path to the directory containing the dataset directories. This directory must only contain other directories, one for each crystal to be analysed in PanDDA, each with a unique name and containing a file for the reflections from that crystal and a model of those reflections. The name of that model must match the pattern given in --pdb_regex and the name of the reflections file must match the pattern given in --mtz_regex"
 ARGS_OUT_DIR = "--out_dir"
 ARGS_OUT_DIR_HELP = "The path to the directory in which to store the results of the PanDDA."
+
 ARGS_PDB_REGEX = "--pdb_regex"
 ARGS_PDB_REGEX_HELP = "A grep pattern matching the name of the model of the crystal data in each crystal directory in the directory given by --data_dirs."
+ARGS_PDB_REGEX_DEFAULT = "dimple.pdb"
+
 ARGS_MTZ_REGEX = "--mtz_regex"
 ARGS_MTZ_REGEX_HELP = "A grep pattern matching the name of the reflections of each crystal in each crystal directory " \
                       "in the directory given by --data_dirs. "
+ARGS_MTZ_REGEX_DEFAULT = "dimple.mtz"
+
 ARGS_LIGAND_CIF_REGEX = "--ligand_cif_regex"
 ARGS_LIGAND_CIF_REGEX_HELP = "A grep pattern matching the restraints associated with each ligand that might be bound " \
                              "in the crystal."
+ARGS_LIGAND_CIF_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]cif"
+
 ARGS_LIGAND_SMILES_REGEX = "--ligand_smiles_regex"
 ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated with each ligand that may be bound in " \
                                 "the crystal."
+ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]smiles"
+
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
                              "bound in the crystal."
+ARGS_LIGAND_PDB_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]pdb"
+
 ARGS_LIGAND_DIR_REGEX = "--ligand_dir_regex"
 ARGS_LIGAND_DIR_REGEX_HELP = "A grep pattern matching a directory in each crystal directory in the directory given by --data_dirs. If this is given, then other cif regexs will only be searched for inside this directory, if it can be found."
+ARGS_LIGAND_DIR_REGEX_DEFAULT = "compound"
 ARGS_LOCAL_PROCESSING = "--local_processing"
 ARGS_LOCAL_PROCESSING_HELP = "A string from 'serial', 'joblib', 'multiprocessing_forkserver' or " \
                              "'multiprocessing_spawn' that gives how node-local parallelism should be used in the " \
@@ -85,6 +98,7 @@ ARGS_GLOBAL_PROCESSING = "--global_processing"
 ARGS_GLOBAL_PROCESSING_HELP = "A string from 'serial' and 'distributed'. that gives how to handle processing each " \
                               "resolution shell. If serial then shells will be processed on one computer. If " \
                               "distributed then a dask scheduler will attempt to exploit cluster resources to process shells simulatainiously."
+ARGS_GLOBAL_PROCESSING_DEFAULT = "serial"
 ARGS_MEMORY_AVAILABILITY = "--memory_availability"
 ARGS_MEMORY_AVAILABILITY_HELP = "A string from 'very low', 'low' or 'high' that gives the tradoff between performance and RAM usage in processing resolution shells. If 'very_low' then no multiprocessing will be exploited. If 'low' then datasets will be processed in serial but parallelism will be used within processing a dataset. If high then datasets will be processed in parallel."
 ARGS_JOB_PARAMS_FILE = "--job_params_file"
@@ -159,7 +173,7 @@ ARGS_COMPARISON_MAX_COMPARATORS_HELP = "An integer that gives the maximum number
 ARGS_KNOWN_APOS = "--known_apos"
 ARGS_KNOWN_APOS_HELP = "A list of dtags which give those datasets known not to have a fragment bound."
 ARGS_EXCLUDE_LOCAL = "--exclude_local"
-ARGS_EXCLUDE_LOCAL_HELP = "An integer that gives the number of closest datasets to exlude when --comparison_strategy " \
+ARGS_EXCLUDE_LOCAL_HELP = "An integer that gives the number of closest datasets to exclude when --comparison_strategy " \
                           "is one of 'closest' or 'closest_cutoff'"
 ARGS_CLUSTER_SELECTION = "--cluster_selection"
 ARGS_CLUSTER_SELECTION_HELP = "A string from 'close', 'center', 'far', 'next' or 'narrow' which gives the strategy " \
@@ -214,6 +228,9 @@ ARGS_CLUSTERING_CUTOFF = "--clustering_cutoff"
 ARGS_CLUSTERING_CUTOFF_HELP = "DEPRECATED."
 ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER = "--cluster_cutoff_distance_multiplier"
 ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER_HELP = "A float which gives what multiple of a diagonal lattice step a high z value can be from a blob while still being considered for inclusion."
+ARGS_EVENT_SCORE = "--event_score"
+ARGS_EVENT_SCORE_HELP = "Method to score events: either inbuilt or size"
+ARGS_EVENT_SCORE_DEFAULT = "inbuilt"
 ARGS_MAX_SITE_DISTANCE_CUTOFF = "--max_site_distance_cutoff"
 ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP = "The maximum distance between events for them to be considered for inclusion in " \
                                      "the same site"
@@ -230,6 +247,7 @@ ARGS_AUTOBUILD_HELP = "A boolean giving whether or not to attempt to autobuild e
 ARGS_AUTOBUILD_STRATEGY = "--autobuild_strategy"
 ARGS_AUTOBUILD_STRATEGY_HELP = "A string giving what autobuild strategy to attempt. Currently only 'rhofit' is " \
                                "implemented."
+ARGS_AUTOBUILD_STRATEGY_DEFAULT = "rhofit"
 ARGS_RHOFIT_COORD = "--rhofit_coord"
 ARGS_RHOFIT_COORD_HELP = "A boolean value giving whether to run rhofit with a seed coord (True) or with a map with " \
                          "the density around the event masked." \
@@ -239,6 +257,7 @@ ARGS_CIF_STRATEGY_HELP = "A string giving the strategy with which to generate th
                          "'default', 'elbow', 'grade' and 'grade2'. If default then the cifs found in the dataset " \
                          "directories will be used, otherwise they will be generated from the smiles found." \
                          "otherwise the smiles "
+ARGS_CIF_STRATEGY_DEFAULT = "elbow"
 ARGS_RANK_METHOD = "--rank_method"
 ARGS_RANK_METHOD_HELP = "A string giving the ranking method to be used from 'size' and 'autobuild'. If 'size' then " \
                         "the size of event will be used. If 'autobuild' then the scores from autobuilding will be used."
@@ -256,6 +275,7 @@ ARGS_RANK_METHOD_DEFAULT: str = "event_score"
 ARGS_MIN_BDC_DEFAULT: float = 0.0
 ARGS_MAX_BDC_DEFAULT: float = 0.95
 ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
+
 
 ###################################################################
 # # Console constants
@@ -376,6 +396,7 @@ CUT_EVENT_MAP_FILE = "cut.ccp4"
 ELBOW_COMMAND = "cd {out_dir}; phenix.elbow {smiles_file} --output=\"{prefix}\"; cd -"
 LIGAND_PREFIX = "ligand"
 LIGAND_CIF_FILE = "ligand.cif"
+LIGAND_PDB_FILE = "ligand.pdb"
 GRADE_COMMAND = "cd {out_dir}; grade -in {smiles_file} -ocif {prefix}.cif -opdb {prefix}.pdb -f; cd -"
 GRADE2_COMMAND = "cd {out_dir}; grade2 --in {smiles_file} -j -o {prefix} -f; mv {prefix}.restraints.cif {prefix}.cif; cd -"
 

@@ -8,7 +8,7 @@ from pandda_gemmi.dataset import Dataset
 from pandda_gemmi.fs import PanDDAFSModel
 from pandda_gemmi.edalignment import Grid
 from pandda_gemmi.event import Event
-from pandda_gemmi.autobuild import AutobuildResult
+from pandda_gemmi.autobuild.autobuild import AutobuildResult
 
 
 def rank_events_size(events: Dict[EventID, Event], grid: Grid):

@@ -1,4 +1,3 @@
-from grpc import Call
 from pandda_gemmi.analyse_interface import *
 
 

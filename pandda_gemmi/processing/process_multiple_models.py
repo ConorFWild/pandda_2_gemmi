@@ -683,6 +683,11 @@ def analyse_model(
     # elif score_events_func.tag == "autobuild":
     #     raise NotImplementedError()
 
+    elif score_events_func.tag == "size":
+        event_scores: EventScoringResultsInterface = score_events_func(
+            events
+        )
+
     else:
         raise Exception("No valid event selection score method!")
 
