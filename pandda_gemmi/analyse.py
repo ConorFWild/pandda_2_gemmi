@@ -475,7 +475,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                                                                 pandda_args.structure_factors[1],
                                                                                 )
 
-        print(f"Struccture factors are: {structure_factors}")
+        print(f"Structure factors are: {structure_factors}")
 
 
         ###################################################################
@@ -484,7 +484,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_data_quality_filters()
 
         datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                                     datasets_with_smiles.items()}
+                                                     datasets_initial.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
         console.summarise_filtered_datasets(
