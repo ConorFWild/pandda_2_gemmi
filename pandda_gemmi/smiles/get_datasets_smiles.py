@@ -6,3 +6,5 @@ class GetDatasetsSmiles(GetDatasetsSmilesInterface):
 
     def __call__(self, datasets: DatasetsInterface):
         ...
+
+
