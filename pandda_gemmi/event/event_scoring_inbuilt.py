@@ -253,7 +253,7 @@ def get_conformers(
     #     smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
     #
     # print(f"Generated smiles: {smiles_path}")
-    smiles_path = fragment_dataset.smiles_path
+    smiles_path = fragment_dataset.input_ligand_smiles
 
     if smiles_path is None:
         return Conformers(
