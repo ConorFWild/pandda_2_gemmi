@@ -173,7 +173,7 @@ ARGS_COMPARISON_MAX_COMPARATORS_HELP = "An integer that gives the maximum number
 ARGS_KNOWN_APOS = "--known_apos"
 ARGS_KNOWN_APOS_HELP = "A list of dtags which give those datasets known not to have a fragment bound."
 ARGS_EXCLUDE_LOCAL = "--exclude_local"
-ARGS_EXCLUDE_LOCAL_HELP = "An integer that gives the number of closest datasets to exlude when --comparison_strategy " \
+ARGS_EXCLUDE_LOCAL_HELP = "An integer that gives the number of closest datasets to exclude when --comparison_strategy " \
                           "is one of 'closest' or 'closest_cutoff'"
 ARGS_CLUSTER_SELECTION = "--cluster_selection"
 ARGS_CLUSTER_SELECTION_HELP = "A string from 'close', 'center', 'far', 'next' or 'narrow' which gives the strategy " \

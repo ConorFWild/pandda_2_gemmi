@@ -298,37 +298,23 @@ def get_conformers(
 ) -> ConformersInterface:
     # Decide how to load
     # fragment_structures = {}
-    smiles_path = None
-
-    if fragment_dataset.source_ligand_smiles:
-        smiles_path = fragment_dataset.source_ligand_smiles
-
-    elif fragment_dataset.source_ligand_cif:
-        if debug >= Debug.PRINT_NUMERICS:
-            print(f'\t\tGetting mol from cif')
-        # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = smiles_from_cif(
-        #     fragment_dataset, debug)
-        # if len(fragment_structures) > 0:
-        #     return Conformers(
-        #         fragment_structures,
-        #         "cif",
-        #         fragment_dataset.source_ligand_cif,
-        #     )
-        smiles_path = smiles_path_from_cif(fragment_dataset, debug)
-
-    elif fragment_dataset.source_ligand_pdb:
-        # if debug >= Debug.PRINT_NUMERICS:
-        #     print(f'\t\tGetting mol from ligand pdb')
-        # fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = {ConfomerID(0): gemmi.read_structure(str(fragment_dataset.source_ligand_pdb))}
-        # if len(fragment_structures) > 0:
-        #     return Conformers(
-        #         fragment_structures,
-        #         "pdb",
-        #         fragment_dataset.source_ligand_pdb,
-        #     )
-        smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
-
-    print(f"Generated smiles: {smiles_path}")
+    # smiles_path = None
+    #
+    # if fragment_dataset.source_ligand_smiles:
+    #     smiles_path = fragment_dataset.source_ligand_smiles
+    #
+    # elif fragment_dataset.source_ligand_cif:
+    #     if debug >= Debug.PRINT_NUMERICS:
+    #         print(f'\t\tGetting mol from cif')
+    #     smiles_path = smiles_path_from_cif(fragment_dataset, debug)
+    #
+    # elif fragment_dataset.source_ligand_pdb:
+    #     if debug >= Debug.PRINT_NUMERICS:
+    #         print(f'\t\tGetting mol from ligand pdb')
+    #     smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
+    #
+    # print(f"Generated smiles: {smiles_path}")
+    smiles_path = fragment_dataset.smiles_path
 
     if smiles_path is None:
         return Conformers(
@@ -352,11 +338,17 @@ def get_conformers(
     mol: Chem.Mol = Chem.AddHs(mol)
 
     # Generate conformers
-    cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_pose_samples, pruneRmsThresh=pruning_threshold)
+    cids = AllChem.EmbedMultipleConfs(
+        mol,
+        numConfs=num_pose_samples,
+        pruneRmsThresh=pruning_threshold)
 
     # Translate to structures
-    fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = get_structures_from_mol(mol,
-                                                                                                         max_conformers)
+    fragment_structures: MutableMapping[ConfromerIDInterface, gemmi.Structure] = get_structures_from_mol(
+        mol,
+        max_conformers,
+    )
+
     if len(fragment_structures) > 0:
         return Conformers(
             fragment_structures,

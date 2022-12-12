@@ -349,6 +349,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     load_xmap_func: LoadXMapInterface = get_load_xmap_func(pandda_args)
     load_xmap_flat_func: LoadXMapFlatInterface = get_load_xmap_flat_func(pandda_args)
 
+    # Get the Smile generating function
+    get_dataset_smiles: GetDatasetsSmilesInterface = GetDatasetsSmiles()
+
     # Get the filtering functions
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
     filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
@@ -468,9 +471,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     structure_factors: StructureFactorsInterface = potential_structure_factors
             else:
                 structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
-                                                                                pandda_args.structure_factors[1])
+                                                                                pandda_args.structure_factors[1],
+                                                                                )
 
         print(f"Struccture factors are: {structure_factors}")
+
+        ###################################################################
+        # # Get the Smiles for each Dataset
+        ###################################################################
+        datasets_with_smiles = get_dataset_smiles(datasets_initial)
+
 
         ###################################################################
         # # Data Quality filters
@@ -478,7 +488,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_data_quality_filters()
 
         datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                                     datasets_initial.items()}
+                                                     datasets_with_smiles.items()}
 
         datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
         console.summarise_filtered_datasets(
