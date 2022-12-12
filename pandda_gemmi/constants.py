@@ -257,7 +257,7 @@ ARGS_CIF_STRATEGY_HELP = "A string giving the strategy with which to generate th
                          "'default', 'elbow', 'grade' and 'grade2'. If default then the cifs found in the dataset " \
                          "directories will be used, otherwise they will be generated from the smiles found." \
                          "otherwise the smiles "
-ARGS_CIF_STRATEGY_DEFAULT = "elbow"
+ARGS_CIF_STRATEGY_DEFAULT = "grade"
 ARGS_RANK_METHOD = "--rank_method"
 ARGS_RANK_METHOD_HELP = "A string giving the ranking method to be used from 'size' and 'autobuild'. If 'size' then " \
                         "the size of event will be used. If 'autobuild' then the scores from autobuilding will be used."
