@@ -477,11 +477,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         print(f"Struccture factors are: {structure_factors}")
 
-        ###################################################################
-        # # Get the Smiles for each Dataset
-        ###################################################################
-        datasets_with_smiles = get_dataset_smiles(datasets_initial)
-
 
         ###################################################################
         # # Data Quality filters
