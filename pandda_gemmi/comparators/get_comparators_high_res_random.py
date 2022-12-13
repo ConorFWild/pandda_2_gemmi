@@ -32,13 +32,13 @@ def get_comparators_high_res_random(
         truncated_datasets = [dtag for dtag in dtag_list if
                               datasets[dtag].reflections.resolution().resolution < truncation_res]
 
-        comparators[0][dtag] = list(
+        comparators[dtag] = {0: list(
             np.random.choice(
                 truncated_datasets,
                 size=comparison_min_comparators,
                 replace=False,
             )
-        )
+        )}
 
     return comparators
 
