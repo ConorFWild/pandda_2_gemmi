@@ -4,7 +4,7 @@
 
  - Improved README.md
  - Phenix dependency removed
- - 
+
 
 ## Reporting Errors
 
