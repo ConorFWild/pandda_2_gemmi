@@ -21,9 +21,9 @@ def get_comparators_high_res(
 
     highest_res_datasets = dtags_by_res[:comparison_min_comparators + 1]
 
-    comparators = {}
+    comparators = {0:{}}
     for dtag in dtag_list:
-        comparators[dtag] = highest_res_datasets
+        comparators[0][dtag] = highest_res_datasets
 
     return comparators
 

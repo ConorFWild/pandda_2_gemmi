@@ -48,7 +48,7 @@ Installing PanDDA 2 this way will add various scripts to your path, but only whi
 Once you have installed PanDDA 2 in a conda enviroment, running it is as simple as:
 
 ```bash
-python /path/to/analyse.py <data directories> <output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
+python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
 
 ```
 
@@ -58,7 +58,7 @@ python /path/to/analyse.py <data directories> <output directory> --pdb_regex=<pd
 If you want to run the lightest possible PanDDA (no clustering of datasets, no autobuilding, ect: basically PanDDA 1), then a command like the following is appropriate:
 
 ```bash
-python /path/to/analyse.py <data directories> <output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --autobuild=False --rank_method="size" --comparison_strategy="high_res_random" <options>
+python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --autobuild=False --rank_method="size" --comparison_strategy="high_res_first" <options>
 
 ```
 
@@ -70,7 +70,7 @@ Important to note is that by default this will require *phenix.elbow* to be in t
 
 An example:
 ```bash
-python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
+python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
 
 ```
 
@@ -87,7 +87,7 @@ module load phenix # by default, not necessary with --cif_method="grade"
 module load buster
 
 # Put the following in the file submit.sh
-python /path/to/analyse.py <data dirs> <output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --global_processing="distributed" <options>
+python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --global_processing="distributed" <options>
 
 # Submitting
 chmod 777 submit.sh
