@@ -1228,85 +1228,85 @@ def autobuild_rhofit(dataset: Dataset,
 
         cif_path = cif_path
 
-    # Makinf with elbow
-    elif cif_strategy == "elbow":
-        if debug >= Debug.PRINT_SUMMARIES:
-            print(f"\t{event.event_id}   Making cif with elbow")
-
-        if cif_path:
-            if debug >= Debug.PRINT_SUMMARIES:
-                print(f"\t\t{event.event_id}   Making cif with elbow using cif: {cif_path}")
-
-            cif_path, pdb_path = generate_cif(
-                cif_path,
-                out_dir,
-            )
-        elif smiles_path:
-            if debug >= Debug.PRINT_SUMMARIES:
-                print(f"\t\t{event.event_id}   Making cif with elbow using smiles: {smiles_path}")
-
-            cif_path, pdb_path = generate_cif(
-                smiles_path,
-                out_dir,
-            )
-
-        else:
-            return AutobuildResult(
-                False,
-                [],
-                {},
-                "",
-                "",
-                "",
-            )
-    # Makinf with grade
-    elif cif_strategy == "grade":
-        if cif_path:
-            cif_path = generate_cif_grade(
-                cif_path,
-                out_dir,
-            )
-        elif smiles_path:
-            cif_path = generate_cif_grade(
-                smiles_path,
-                out_dir,
-            )
-
-        else:
-            return AutobuildResult(
-                False,
-                [],
-                {},
-                "",
-                "",
-                "",
-            )
-
-    # Makinf with grade2
-    elif cif_strategy == "grade2":
-        # if cif_path:
-        #     cif_path = generate_cif_grade2(
-        #         cif_path,
-        #         out_dir,
-        #     )
-        if smiles_path:
-            cif_path = generate_cif_grade2(
-                smiles_path,
-                out_dir,
-            )
-
-        else:
-            return AutobuildResult(
-                False,
-                [],
-                {},
-                "",
-                "",
-                "",
-            )
-
-    else:
-        raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
+    # # Makinf with elbow
+    # elif cif_strategy == "elbow":
+    #     if debug >= Debug.PRINT_SUMMARIES:
+    #         print(f"\t{event.event_id}   Making cif with elbow")
+    #
+    #     if cif_path:
+    #         if debug >= Debug.PRINT_SUMMARIES:
+    #             print(f"\t\t{event.event_id}   Making cif with elbow using cif: {cif_path}")
+    #
+    #         cif_path, pdb_path = generate_cif(
+    #             cif_path,
+    #             out_dir,
+    #         )
+    #     elif smiles_path:
+    #         if debug >= Debug.PRINT_SUMMARIES:
+    #             print(f"\t\t{event.event_id}   Making cif with elbow using smiles: {smiles_path}")
+    #
+    #         cif_path, pdb_path = generate_cif(
+    #             smiles_path,
+    #             out_dir,
+    #         )
+    #
+    #     else:
+    #         return AutobuildResult(
+    #             False,
+    #             [],
+    #             {},
+    #             "",
+    #             "",
+    #             "",
+    #         )
+    # # Makinf with grade
+    # elif cif_strategy == "grade":
+    #     if cif_path:
+    #         cif_path = generate_cif_grade(
+    #             cif_path,
+    #             out_dir,
+    #         )
+    #     elif smiles_path:
+    #         cif_path = generate_cif_grade(
+    #             smiles_path,
+    #             out_dir,
+    #         )
+    #
+    #     else:
+    #         return AutobuildResult(
+    #             False,
+    #             [],
+    #             {},
+    #             "",
+    #             "",
+    #             "",
+    #         )
+    #
+    # # Makinf with grade2
+    # elif cif_strategy == "grade2":
+    #     # if cif_path:
+    #     #     cif_path = generate_cif_grade2(
+    #     #         cif_path,
+    #     #         out_dir,
+    #     #     )
+    #     if smiles_path:
+    #         cif_path = generate_cif_grade2(
+    #             smiles_path,
+    #             out_dir,
+    #         )
+    #
+    #     else:
+    #         return AutobuildResult(
+    #             False,
+    #             [],
+    #             {},
+    #             "",
+    #             "",
+    #             "",
+    #         )
+    #
+    # else:
+    #     raise Exception(f"cif_strategy was somehow set to the invalid value: {cif_strategy}")
 
     # Call rhofit
     if rhofit_coord:
