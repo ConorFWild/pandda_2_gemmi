@@ -1291,7 +1291,8 @@ def process_shell_multiple_models(
                 test_dtag,
                 dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
                                             dataset_dtags[test_dtag]},
-                dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
+                # dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
+                dataset_xmaps={test_dtag: xmaps[test_dtag],},
                 models=models,
                 shell=shell,
                 alignments=alignments,
