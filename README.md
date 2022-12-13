@@ -1,5 +1,11 @@
 # PanDDA 2
 
+## New in version 0.1.0
+
+ - Improved README.md
+ - Phenix dependency removed
+ - 
+
 ## Reporting Errors
 
 PanDDA 2 is still in development and feedback is always appreciated! 
@@ -9,16 +15,6 @@ If you have a problem with installation, then it is most likely specific to your
 If the program errors while it runs, it is most helpful if you include the command line output and the json log in a github issue. 
 
 If you uncertain about the correctness of the results, then a github issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
-
-## How PanDDA 2 works
-
-### Model building
-
-### Model selection
-
-### Autobuilding
-
-### Autobuild selection
 
 
 ## Installation
@@ -101,6 +97,41 @@ qsub -V -o submit.o -e submit.e -q medium.q -pe smp 20 -l m_mem_free=15G submit.
 python ./pandda_gemmi/analyse.py /data/share-2/conor/pandda/data/pandda_inputs/BRD1 /data/share-2/conor/pandda/output/pandda_2_BRD1 --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("FWT","PHWT")' --autobuild=True --global_processing="distributed" --distributed_scheduler="HTCONDOR" --local_cpus=20
 
 ```
+
+
+## How PanDDA 2 works
+
+PanDDA 2 differs from PanDDA 1 in two major methodological ways. 
+
+Firstly, it attempts to identify which sets of datasets should be used to produce a statistical model which has the optimal contrast (to each test dataset individually). This allows it to handle subtle heterogeneity between datasets. 
+
+Secondly it attempts to autobuild the events returned, and then rank the events based on the quality of the model of the fragment that could be constructed. This allows improved rankings of events.
+
+### Statistical Model Dataset Selection
+
+PanDDA 2 selects the datasets to construct each statistical model it tries by identifying the sets of datasets which are closest to each other. This is achieved by:
+ - Finding all pairwise distances between electron density maps
+ - Finding the nearest neighbours of each dataset's electron density map
+ - Finding the non-overlapping neighbourhoods with the minimum standard deviation between the maps they contain.
+
+### Statistical Model Selection
+
+Currently PanDDA 2 only chooses one statistical model to progress to event map generation and autobuilding. This is done by fitting several conformations of the expected fragment into each event from each statistical by differential evolution. 
+
+The statistical which has the best fragment fit is then selected for progression to event map generation and autobuilding.
+
+### Autobuilding
+
+PanDDA 2 autobuilds the events of each dataset. This is done with a custom Rhofit invocation to account for the differing distribution of values between event maps and normal crystallographic 2Fo-Fc maps.
+
+### Autobuild Selection
+
+Current limitations with the interaction between pandda.inspect and PanDDA 2 mean that it is only possible to show one autobuild in the GUI. 
+
+Therefore, the highest scoring autobuild by RSCC from any event in each dataset is selected and included in the initial model pandda.inspect shows the user. 
+
+This has the effect that users may open apparently good hit density with no autobuild present, if another hit which is better fit by the autobuilding is present in the same dataset.
+
 
 ## Running faster
 
