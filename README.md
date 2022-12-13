@@ -4,7 +4,9 @@
 
  - Improved README.md
  - Phenix dependency removed
-
+ - Cleaner logs
+ - Improved ranking for unbuildable events
+ - Memory performance optimizations
 
 ## Reporting Errors
 
@@ -12,14 +14,14 @@ PanDDA 2 is still in development and feedback is always appreciated!
 
 If you have a problem with installation, then it is most likely specific to your system and best to just email me.
 
-If the program errors while it runs, it is most helpful if you include the command line output and the json log in a github issue. 
+If the program errors while it runs, it is most helpful if you include the command line output and the json log in a GitHub issue. 
 
-If you uncertain about the correctness of the results, then a github issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
+If you uncertain about the correctness of the results, then a GitHub issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
 
 
 ## Installation
 
-It is reccomended that you install PanDDA 2 in it's own python 3.8 anaconda enviroment. This can be achieved by installing anaconda and then:
+It is recommended that you install PanDDA 2 in its own python 3.8 anaconda environment. This can be achieved by installing anaconda and then:
 
 ```bash
 conda create -n pandda2 python=3.9
@@ -35,13 +37,13 @@ pip install numpy==1.21.0
 
 ```
 
-Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda enviroment.
+Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
 
 
 
 ## Running PanDDA 2
 
-Once you have installed PanDDA 2 in a conda enviroment, running it is as simple as:
+Once you have installed PanDDA 2 in a conda environment, running it is as simple as:
 
 ```bash
 python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
@@ -60,7 +62,7 @@ python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output dire
 
 
 ### Running With Autobuilding
-PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is setup in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2 with the autobuild flag on.
+PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2 with the autobuild flag on.
 
 Important to note is that by default this will require *phenix.elbow* to be in the path to handle cifs for autobuilding. Support for using *grade* instead is in the process of being added. 
 
@@ -73,13 +75,12 @@ python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb
 
 ### Running With Distributed Computing At Diamond
 
-It is strongly reccomended that if you are qsub'ing a script that will run PanDDA 2 you set up your enviroment on the head node (by activating the anaconda enviroment in which PanDDA 2 is installed) and use the "-V" option on qsub to copy your current enviroment to the job.
+It is strongly recommended that if you are qsub'ing a script that will run PanDDA 2 you set up your environment on the head node (by activating the anaconda environment in which PanDDA 2 is installed) and use the "-V" option on qsub to copy your current environment to the job.
 
 An example of how to run with distributed computing at Diamond Light Source is as follows:
 ```bash
 # Ensuring availability of Global Phasing code for autobuilding and phenix for building cifs
 module load ccp4
-module load phenix # by default, not necessary with --cif_method="grade"
 module load buster
 
 # Put the following in the file submit.sh
@@ -88,13 +89,6 @@ python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb
 # Submitting
 chmod 777 submit.sh
 qsub -V -o submit.o -e submit.e -q medium.q -pe smp 20 -l m_mem_free=15G submit.sh
-
-```
-
-
-### Running with distributed computing from condor
-```bash
-python ./pandda_gemmi/analyse.py /data/share-2/conor/pandda/data/pandda_inputs/BRD1 /data/share-2/conor/pandda/output/pandda_2_BRD1 --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz" --structure_factors='("FWT","PHWT")' --autobuild=True --global_processing="distributed" --distributed_scheduler="HTCONDOR" --local_cpus=20
 
 ```
 
