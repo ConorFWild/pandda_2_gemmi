@@ -23,7 +23,7 @@ def get_comparators_high_res_random(
     highest_res_datasets_max = max(
         [datasets[dtag].reflections.resolution().resolution for dtag in highest_res_datasets])
 
-    comparators = {}
+    comparators = { 0: {}}
     for dtag in dtag_list:
         current_res = datasets[dtag].reflections.resolution().resolution
 
@@ -32,7 +32,7 @@ def get_comparators_high_res_random(
         truncated_datasets = [dtag for dtag in dtag_list if
                               datasets[dtag].reflections.resolution().resolution < truncation_res]
 
-        comparators[dtag] = list(
+        comparators[0][dtag] = list(
             np.random.choice(
                 truncated_datasets,
                 size=comparison_min_comparators,
