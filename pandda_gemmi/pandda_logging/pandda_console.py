@@ -5,6 +5,8 @@ from rich.panel import Panel
 from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
+from rich.pretty import Pretty
+
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
@@ -420,7 +422,7 @@ class PanDDAConsole:
         printable = self.indent_text(f"label counts are: ")
         self.console.print(printable)
 
-        printable = self.indent_text(label_counts)
+        printable = self.indent_text(Pretty(label_counts))
         self.console.print(printable)
 
         printable = self.indent_text(f"Structure factors are: {structure_factors}")
