@@ -36,8 +36,11 @@ class PanDDAConsole:
         self.console.print(printable)
 
         # Print the version info
-        self.indent_text(f"PanDDA Version: {version}")
-        self.indent_text(f"PanDDA Version GitHub Commit Hash: {git_hash}")
+        printable = self.indent_text(f"PanDDA Version: {version}")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"PanDDA Version GitHub Commit Hash: {git_hash}")
+        self.console.print(printable)
 
     def start_parse_command_line_args(self):
         printable = self.wrap_title("Parsing Command Line Arguments")
