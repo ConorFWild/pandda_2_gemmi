@@ -392,12 +392,12 @@ def summarise_datasets(self, datasets_initial, dataset_statistics):
     ucalpha = dataset_statistics.unit_cells["alpha"]
     ucbeta = dataset_statistics.unit_cells["beta"]
     ucgamma = dataset_statistics.unit_cells["gamma"]
-    unit_cell_table.add_row("a", str(np.min(uca)), str(np.mean(uca)), str(np.max(uca)))
-    unit_cell_table.add_row("b", str(np.min(ucb)), str(np.mean(ucb)), str(np.max(ucb)))
-    unit_cell_table.add_row("c", str(np.min(ucc)), str(np.mean(ucc)), str(np.max(ucc)))
-    unit_cell_table.add_row("alpha", str(np.min(ucalpha)), str(np.mean(ucalpha)), str(np.max(ucalpha)))
-    unit_cell_table.add_row("beta", str(np.min(ucbeta)), str(np.mean(ucbeta)), str(np.max(ucbeta)))
-    unit_cell_table.add_row("gamma", str(np.min(ucgamma)), str(np.mean(ucgamma)), str(np.max(ucgamma)))
+    unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)), str(round(np.max(uca), 2)))
+    unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)), str(round(np.max(ucb), 2)))
+    unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)), str(round(np.max(ucc), 2)))
+    unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)), str(round(np.max(ucalpha), 2)))
+    unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)), str(round(np.max(ucbeta), 2)))
+    unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)), str(round(np.max(ucgamma), 2)))
 
     self.console.print(unit_cell_table)
 
@@ -409,7 +409,7 @@ def summarise_datasets(self, datasets_initial, dataset_statistics):
     resolution_table.add_column("Min")
     resolution_table.add_column("Mean")
     resolution_table.add_column("Max")
-    resolution_table.add_row(str(np.min(ress)), str(np.mean(ress)), str(np.max(ress)))
+    resolution_table.add_row(str(round(np.min(ress), 2)), str(round(np.mean(ress), 2)), str(round(np.max(ress), 2)))
 
     self.console.print(
         resolution_table
@@ -449,7 +449,7 @@ def summarise_datasets(self, datasets_initial, dataset_statistics):
         dataset = datasets_initial[dtag]
         table.add_row(
             dtag.dtag,
-            str(dataset.reflections.reflections.resolution_high()),
+            str(round(dataset.reflections.reflections.resolution_high(), 2)),
             dataset.reflections.reflections.spacegroup.hm,
         )
 
