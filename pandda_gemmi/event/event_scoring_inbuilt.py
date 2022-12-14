@@ -837,7 +837,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     scores_signal_to_noise = []
     logs = []
     optimised_structures = []
-    for j in range(10):
+    for j in range(5):
         start_diff_ev = time.time()
 
         res = optimize.differential_evolution(
