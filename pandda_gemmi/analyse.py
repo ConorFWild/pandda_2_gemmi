@@ -291,15 +291,15 @@ def get_filter_reference_compatability(
     filters = {}
 
     if "dissimilar_models" in filter_keys:
-        print("filter models")
+        # print("filter models")
         filters["dissimilar_models"] = FilterDissimilarModels(pandda_args.max_rmsd_to_reference)
 
     if "large_gaps" in filter_keys:
-        print("filter gaps")
+        # print("filter gaps")
         filters["large_gaps"] = FilterIncompleteModels()
 
     if "dissimilar_spacegroups" in filter_keys:
-        print("filter sg")
+        # print("filter sg")
         filters["dissimilar_spacegroups"] = FilterDifferentSpacegroups()
 
     return FiltersReferenceCompatibility(filters, datasets_validator)

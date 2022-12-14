@@ -125,7 +125,7 @@ class PanDDAConsole:
 
             printable = self.indent_text(
                 (
-                    f"Tmp directory: {pandda_args.distributed_tmp} \n"
+                    f"Number of CPUs: {pandda_args.local_cpus} \n"
                 ),
                 indent=8)
             self.console.print(printable)
