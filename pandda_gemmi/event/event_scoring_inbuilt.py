@@ -796,6 +796,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
                                    zmap_grid,
                                    resolution,
                                    rate,
+                                   event_fit_num_trys=5,
                                    debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
@@ -837,7 +838,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     scores_signal_to_noise = []
     logs = []
     optimised_structures = []
-    for j in range(5):
+    for j in range(event_fit_num_trys):
         start_diff_ev = time.time()
 
         res = optimize.differential_evolution(
@@ -1353,6 +1354,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
 
 def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid, res, rate,
+                              event_fit_num_trys=5,
                               debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
@@ -1363,7 +1365,8 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
     for conformer_id, conformer in fragment_conformers.conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
         # results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
-        results[conformer_id] = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate, debug)
+        results[conformer_id] = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate,
+                                                               event_fit_num_trys, debug)
 
     # scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     # structures = {conformer_id: result[1] for conformer_id, result in results.items()}
@@ -1382,10 +1385,12 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface, res, rate,
+                  event_fit_num_trys=5,
                   debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
-    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, res, rate, debug)
+    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, res, rate,
+                                                      event_fit_num_trys, debug)
 
     return EventScoringResult(ligand_fitting_result)
 
@@ -1416,6 +1421,7 @@ def score_clusters(
         zmaps,
         fragment_dataset,
         res, rate,
+event_fit_num_trys=5,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -1448,7 +1454,8 @@ def score_clusters(
 
         zmap_grid = zmaps[cluster_id]
 
-        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, res, rate, debug)
+        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, res, rate, event_fit_num_trys,
+                                            debug)
 
     return results
 
@@ -1756,6 +1763,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  event_density_score=1.0,
                  protein_score=-1.0,
                  protein_event_overlap_score=0.0,
+                 event_fit_num_trys=5,
                  debug: Debug = Debug.DEFAULT,
                  ) -> EventScoringResultsInterface:
         # Get the events and their BDCs
@@ -1846,7 +1854,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 {(0, 0): event.cluster},
                 {(0, 0): event_map_reference_grid},
                 processed_dataset,
-                res, rate,
+                res, rate, event_fit_num_trys,
                 debug=debug,
             )
             time_scoring_finish = time.time()
