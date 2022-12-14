@@ -324,24 +324,33 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # CHeck dependencies
     # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
     console.start_dependancy_check()
-    check_dependencies(pandda_args)
+    failed_dependency_list = check_dependencies(pandda_args)
+    if len(failed_dependency_list) != 0:
+        console.print_failed_dependencies(failed_dependency_list)
+        raise Exception("Missing Dependencies!")
+    else:
+        console.print_successful_dependency_check()
 
     # Initialise log
     # with STDOUTManager('Initialising log...', '\tPanDDA log initialised!'):
     console.start_log()
+    log_path = pandda_args.out_dir / constants.PANDDA_LOG_FILE
     pandda_log: Dict = {}
     pandda_log[constants.LOG_START] = time.time()
     initial_args = log_arguments(pandda_args, )
 
     pandda_log[constants.LOG_ARGUMENTS] = initial_args
+    console.started_log(log_path)
 
     # Get global processor
     console.start_initialise_shell_processor()
     process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
+    console.print_initialized_global_processor(pandda_args)
 
     # Get local processor
     console.start_initialise_multiprocessor()
     process_local: ProcessorInterface = get_process_local(pandda_args)
+    console.print_initialized_local_processor(pandda_args)
 
     # Get reflection smoothing function
     smooth_func: SmoothBFactorsInterface = get_smooth_func(pandda_args)
@@ -459,23 +468,28 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if pandda_args.debug >= Debug.PRINT_NUMERICS:
             print(datasets_initial)
 
-        # If structure factors not given, check if any common ones are available
-        with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
-            if not pandda_args.structure_factors:
-                potential_structure_factors: Optional[StructureFactorsInterface] = get_common_structure_factors(
-                    datasets_initial)
-                # If still no structure factors
-                if not potential_structure_factors:
-                    raise Exception(
-                        "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
-                else:
-                    structure_factors: StructureFactorsInterface = potential_structure_factors
-            else:
-                structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
-                                                                                pandda_args.structure_factors[1],
-                                                                                )
 
-        print(f"Structure factors are: {structure_factors}")
+        ###################################################################
+        # # If structure factors not given, check if any common ones are available
+        ###################################################################
+        console.start_identify_structure_factors()
+        # with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
+        label_counts = None
+        if not pandda_args.structure_factors:
+            potential_structure_factors, label_counts = get_common_structure_factors(
+                datasets_initial)
+            # If still no structure factors
+            if not potential_structure_factors:
+                raise Exception(
+                    "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
+            else:
+                structure_factors: StructureFactorsInterface = potential_structure_factors
+        else:
+            structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
+                                                                            pandda_args.structure_factors[1],
+                                                                            )
+
+        console.summarise_structure_factors(structure_factors, label_counts)
 
 
         ###################################################################
@@ -502,48 +516,50 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_reference_selection()
 
         # Select refernce
-        with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
-            reference: ReferenceInterface = GetReferenceDataset()(
-                datasets_wilson,
-                datasets_statistics,
-            )
-            pandda_log["Reference Dtag"] = str(reference.dtag)
-            console.summarise_reference(reference)
-            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-                print(reference.dtag)
+        # with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
+        reference: ReferenceInterface = GetReferenceDataset()(
+            datasets_wilson,
+            datasets_statistics,
+        )
+        pandda_log["Reference Dtag"] = str(reference.dtag)
+        console.summarise_reference(reference)
+        if pandda_args.debug >= Debug.PRINT_SUMMARIES:
+            print(reference.dtag)
 
-            if pandda_args.debug >= Debug.AVERAGE_MAPS:
-                with open(pandda_fs_model.pandda_dir / "reference.pickle", "wb") as f:
-                    pickle.dump(reference, f)
+        if pandda_args.debug >= Debug.AVERAGE_MAPS:
+            with open(pandda_fs_model.pandda_dir / "reference.pickle", "wb") as f:
+                pickle.dump(reference, f)
 
         ###################################################################
         # # B Factor smoothing
         ###################################################################
         console.start_b_factor_smoothing()
 
-        with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
-            start = time.time()
-            datasets_smoother: DatasetsInterface = {
-                smoothed_dtag: smoothed_dataset
-                for smoothed_dtag, smoothed_dataset
-                in zip(
-                    datasets_wilson,
-                    process_local(
-                        [
-                            Partial(smooth_func).paramaterise(
-                                dataset,
-                                reference,
-                                structure_factors,
-                            )
-                            for dtag, dataset
-                            in datasets_wilson.items()
-                        ]
-                    )
+        # with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
+        start = time.time()
+        datasets_smoother: DatasetsInterface = {
+            smoothed_dtag: smoothed_dataset
+            for smoothed_dtag, smoothed_dataset
+            in zip(
+                datasets_wilson,
+                process_local(
+                    [
+                        Partial(smooth_func).paramaterise(
+                            dataset,
+                            reference,
+                            structure_factors,
+                        )
+                        for dtag, dataset
+                        in datasets_wilson.items()
+                    ]
                 )
-            }
+            )
+        }
 
-            finish = time.time()
-            pandda_log["Time to perform b factor smoothing"] = finish - start
+        finish = time.time()
+        pandda_log["Time to perform b factor smoothing"] = finish - start
+
+        console.summarise_b_factor_smoothing(datasets_smoother)
 
         ###################################################################
         # # Reference compatability filters
@@ -563,22 +579,24 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_get_grid()
 
         # Grid
-        with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
-            grid: GridInterface = GetGrid()(reference,
-                                            pandda_args.outer_mask,
-                                            pandda_args.inner_mask_symmetry,
-                                            # sample_rate=pandda_args.sample_rate,
-                                            sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
-                                            debug=pandda_args.debug
-                                            )
+        # with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
+        grid: GridInterface = GetGrid()(reference,
+                                        pandda_args.outer_mask,
+                                        pandda_args.inner_mask_symmetry,
+                                        # sample_rate=pandda_args.sample_rate,
+                                        sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
+                                        debug=pandda_args.debug
+                                        )
 
-            if pandda_args.debug >= Debug.AVERAGE_MAPS:
-                with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
-                    pickle.dump(grid, f)
+        if pandda_args.debug >= Debug.AVERAGE_MAPS:
+            with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
+                pickle.dump(grid, f)
 
-                grid.partitioning.save_maps(
-                    pandda_fs_model.pandda_dir
-                )
+            grid.partitioning.save_maps(
+                pandda_fs_model.pandda_dir
+            )
+
+        console.summarise_get_grid(grid)
 
         ###################################################################
         # # Getting alignments
@@ -586,33 +604,35 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         console.start_alignments()
 
-        with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
-            alignments: AlignmentsInterface = GetAlignments()(
-                reference,
-                datasets,
-            )
+        # with STDOUTManager('Getting local alignments of the electron density to the reference...', f'\tDone!'):
+        alignments: AlignmentsInterface = GetAlignments()(
+            reference,
+            datasets,
+        )
 
-            if pandda_args.debug >= Debug.AVERAGE_MAPS:
-                with open(pandda_fs_model.pandda_dir / "alignments.pickle", "wb") as f:
-                    pickle.dump(alignments, f)
+        if pandda_args.debug >= Debug.AVERAGE_MAPS:
+            with open(pandda_fs_model.pandda_dir / "alignments.pickle", "wb") as f:
+                pickle.dump(alignments, f)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        console.summarise_local_alignment()
 
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
         console.start_get_comparators()
 
-        with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
-                           f'\tDone!'):
-            # TODO: Fix typing for comparators func
-            comparators: ComparatorsInterface = comparators_func(
-                datasets,
-                alignments,
-                grid,
-                structure_factors,
-                pandda_fs_model,
-            )
+        # with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
+        #                    f'\tDone!'):
+        # TODO: Fix typing for comparators func
+        comparators: ComparatorsInterface = comparators_func(
+            datasets,
+            alignments,
+            grid,
+            structure_factors,
+            pandda_fs_model,
+        )
 
         # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
         #     pandda_log["Cluster Assignments"] = {str(dtag): int(cluster) for dtag, cluster in
@@ -630,6 +650,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # printer.pprint(comparators)
 
         update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        console.summarise_get_comarators(comparators)
 
         ###################################################################
         # # Process shells
@@ -807,98 +829,108 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         if autobuild_func:
             console.start_autobuilding()
 
-            with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
+            # with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
 
-                if pandda_args.global_processing == 'serial':
-                    process_autobuilds = process_local
-                else:
-                    process_autobuilds = process_global
+            if pandda_args.global_processing == 'serial':
+                process_autobuilds = process_local
+            else:
+                process_autobuilds = process_global
 
-                time_autobuild_start = time.time()
-                autobuild_results: AutobuildResultsInterface = {
+            time_autobuild_start = time.time()
+            autobuild_results: AutobuildResultsInterface = {
+                event_id: autobuild_result
+                for event_id, autobuild_result
+                in zip(
+                    all_events,
+                    process_autobuilds(
+                        [
+                            Partial(autobuild_func).paramaterise(
+                                datasets[event_id.dtag],
+                                all_events[event_id],
+                                pandda_fs_model,
+                                cif_strategy=pandda_args.cif_strategy,
+                                cut=2.0,
+                                rhofit_coord=pandda_args.rhofit_coord,
+                                debug=pandda_args.debug,
+                            )
+                            for event_id
+                            in all_events
+                        ],
+                    )
+                )
+            }
+
+            time_autobuild_finish = time.time()
+            pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
+
+            # Save results
+            pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
+            pandda_log["autobuild_scores"] = {}
+
+            for event_id, autobuild_result in autobuild_results.items():
+                dtag = str(event_id.dtag)
+                if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
+                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
+
+                event_idx = int(event_id.event_idx.event_idx)
+
+                pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
+
+                if dtag not in pandda_log["autobuild_scores"]:
+                    pandda_log["autobuild_scores"][dtag] = {}
+                pandda_log["autobuild_scores"][dtag][event_idx] = autobuild_result.scores
+
+            console.summarise_autobuilding(autobuild_results)
+
+            # with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
+            console.start_autobuild_model_update()
+            # Add the best fragment by scoring method to default model
+            pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
+            pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
+            autobuild_to_event = {}
+            dataset_selected_events = {}
+            for dtag in datasets:
+                dataset_autobuild_results: AutobuildResultsInterface = {
                     event_id: autobuild_result
                     for event_id, autobuild_result
-                    in zip(
-                        all_events,
-                        process_autobuilds(
-                            [
-                                Partial(autobuild_func).paramaterise(
-                                    datasets[event_id.dtag],
-                                    all_events[event_id],
-                                    pandda_fs_model,
-                                    cif_strategy=pandda_args.cif_strategy,
-                                    cut=2.0,
-                                    rhofit_coord=pandda_args.rhofit_coord,
-                                    debug=pandda_args.debug,
-                                )
-                                for event_id
-                                in all_events
-                            ],
-                        )
-                    )
+                    in autobuild_results.items()
+                    if dtag == event_id.dtag
                 }
 
-                time_autobuild_finish = time.time()
-                pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
+                if len(dataset_autobuild_results) == 0:
+                    # print("\tNo autobuilds for this dataset!")
+                    continue
 
-                # Save results
-                pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
-                pandda_log["autobuild_scores"] = {}
+                all_scores = {}
+                for event_id, autobuild_result in dataset_autobuild_results.items():
+                    for path, score in autobuild_result.scores.items():
+                        all_scores[path] = score
+                        autobuild_to_event[path] = (dtag.dtag, event_id.event_idx.event_idx, path)
 
-                for event_id, autobuild_result in autobuild_results.items():
-                    dtag = str(event_id.dtag)
-                    if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
-                        pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
+                if len(all_scores) == 0:
+                    # print(f"\tNo autobuilds for this dataset!")
+                    continue
 
-                    event_idx = int(event_id.event_idx.event_idx)
+                # Select fragment build
+                selected_fragement_path = max(
+                    all_scores,
+                    key=lambda _path: all_scores[_path],
+                )
 
-                    pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
+                dataset_selected_events[dtag.dtag] = autobuild_to_event[selected_fragement_path]
 
-                    if dtag not in pandda_log["autobuild_scores"]:
-                        pandda_log["autobuild_scores"][dtag] = {}
-                    pandda_log["autobuild_scores"][dtag][event_idx] = autobuild_result.scores
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][str(dtag)] = str(selected_fragement_path)
+                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][str(dtag)] = float(
+                    all_scores[selected_fragement_path])
 
-            with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
-                # Add the best fragment by scoring method to default model
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
-                pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
-                for dtag in datasets:
-                    dataset_autobuild_results: AutobuildResultsInterface = {
-                        event_id: autobuild_result
-                        for event_id, autobuild_result
-                        in autobuild_results.items()
-                        if dtag == event_id.dtag
-                    }
+                # Copy to pandda models
+                model_path = str(pandda_fs_model.processed_datasets.processed_datasets[dtag].input_pdb)
+                pandda_model_path = pandda_fs_model.processed_datasets.processed_datasets[
+                                        dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(str(dtag))
+                merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
+                save_pdb_file(merged_structure, pandda_model_path)
 
-                    if len(dataset_autobuild_results) == 0:
-                        # print("\tNo autobuilds for this dataset!")
-                        continue
-
-                    all_scores = {}
-                    for event_id, autobuild_result in dataset_autobuild_results.items():
-                        for path, score in autobuild_result.scores.items():
-                            all_scores[path] = score
-
-                    if len(all_scores) == 0:
-                        # print(f"\tNo autobuilds for this dataset!")
-                        continue
-
-                    # Select fragment build
-                    selected_fragement_path = max(
-                        all_scores,
-                        key=lambda _path: all_scores[_path],
-                    )
-
-                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][str(dtag)] = str(selected_fragement_path)
-                    pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][str(dtag)] = float(
-                        all_scores[selected_fragement_path])
-
-                    # Copy to pandda models
-                    model_path = str(pandda_fs_model.processed_datasets.processed_datasets[dtag].input_pdb)
-                    pandda_model_path = pandda_fs_model.processed_datasets.processed_datasets[
-                                            dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(str(dtag))
-                    merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
-                    save_pdb_file(merged_structure, pandda_model_path)
+            console.summarise_autobuild_model_update(dataset_selected_events)
 
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
@@ -1000,12 +1032,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         console.start_assign_sites()
 
         # Get the events and assign sites to them
-        with STDOUTManager('Assigning sites to each event', f'\tDone!'):
-            sites: SitesInterface = get_sites(
-                all_events,
-                grid,
-            )
-            all_events_sites: EventsInterface = add_sites_to_events(all_events, sites, )
+        # with STDOUTManager('Assigning sites to each event', f'\tDone!'):
+        sites: SitesInterface = get_sites(
+            all_events,
+            grid,
+        )
+        all_events_sites: EventsInterface = add_sites_to_events(all_events, sites, )
 
         console.summarise_sites(sites)
 
@@ -1022,37 +1054,47 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         )
 
         # Output a csv of the events
-        with STDOUTManager('Building and outputting event table...', f'\tDone!'):
+        # with STDOUTManager('Building and outputting event table...', f'\tDone!'):
             # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
-            event_table: EventTableInterface = GetEventTable()(
-                all_events,
-                sites,
-                event_ranking,
-            )
-            event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
+        console.start_event_table_output()
+        event_table: EventTableInterface = GetEventTable()(
+            all_events,
+            sites,
+            event_ranking,
+        )
+        event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
+        console.summarise_event_table_output(pandda_fs_model.analyses.pandda_analyse_events_file)
 
         # Output site table
-        with STDOUTManager('Building and outputting site table...', f'\tDone!'):
-            # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
-            #                                                        pandda_args.max_site_distance_cutoff)
-            site_table: SiteTableInterface = GetSiteTable()(all_events,
-                                                            sites,
-                                                            pandda_args.max_site_distance_cutoff)
-            site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+        # with STDOUTManager('Building and outputting site table...', f'\tDone!'):
+        console.start_site_table_output()
+
+        # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
+        #                                                        pandda_args.max_site_distance_cutoff)
+        site_table: SiteTableInterface = GetSiteTable()(all_events,
+                                                        sites,
+                                                        pandda_args.max_site_distance_cutoff)
+        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
+        console.summarise_site_table_output(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
 
         time_finish = time.time()
         pandda_log[constants.LOG_TIME] = time_finish - time_start
 
         # Output json log
-        with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
-            if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-                printer.pprint(pandda_log)
-            save_json_log(
-                pandda_log,
-                pandda_args.out_dir / constants.PANDDA_LOG_FILE,
-            )
+        console.start_log_save()
+        # with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
+        if pandda_args.debug >= Debug.PRINT_SUMMARIES:
+            printer.pprint(pandda_log)
+        save_json_log(
+            pandda_log,
+            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
+        )
+        console.summarise_log_save(pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
-        print(f"PanDDA ran in: {time_finish - time_start}")
+        # print(f"PanDDA ran in: {time_finish - time_start}")
+        console.summarise_run(time_finish - time_start)
 
     ###################################################################
     # # Handle Exceptions
@@ -1077,10 +1119,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
 
 if __name__ == '__main__':
-    with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
-        args = PanDDAArgs.from_command_line()
-        print(args)
-        print(args.only_datasets)
-        console.summarise_arguments(args)
+    # with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
+    console.start_pandda()
 
+    # Parse Command Line Arguments
+    console.start_parse_command_line_args()
+    args = PanDDAArgs.from_command_line()
+    console.summarise_arguments(args)
+
+    # Process the PanDDA
     process_pandda(args)

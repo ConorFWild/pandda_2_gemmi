@@ -1,4 +1,9 @@
 ###################################################################
+# # Run Info
+###################################################################
+VERSION = "0.1.0"
+
+###################################################################
 # # Pandda File names
 ###################################################################
 
@@ -267,7 +272,7 @@ ARGS_DEBUG_HELP = "A boolean value giving whether or not to print debugging info
 ##########################
 ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT: int = 25
 ARGS_COMPARISON_STRATEGY_DEFAULT: str = "cluster"
-ARGS_LOCAL_PROCESSING_DEFAULT:str = "ray"
+ARGS_LOCAL_PROCESSING_DEFAULT:str = "multiprocessing_spawn"
 ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
@@ -285,7 +290,7 @@ CONSOLE_START_LOG = "Initialising log..."
 CONSOLE_START_INIT_SHELL_PROCCESS = "Getting shell processor..."
 CONSOLE_START_INIT_MULTIPROCESS = "Getting multiprocessor..."
 CONSOLE_START_FS_MODEL = "Building model of file system..."
-CONSOLE_START_LOAD_DATASETS = "'Loading datasets...'"
+CONSOLE_START_LOAD_DATASETS = "Loading datasets..."
 CONSOLE_START_QUALITY_FILTERS = "Filtering datasets based on data quality..."
 CONSOLE_START_REF_SELEC = "Selecting reference structure for alignment..."
 CONSOLE_START_B_FACTOR_SMOOTHING = "Performing B factor smoothing of reflections..."

@@ -217,7 +217,7 @@ class ReferenceInterface(Protocol):
 class DatasetInterface(Protocol):
     structure: StructureInterface
     reflections: ReflectionsInterface
-
+    smoothing_factor: float
 
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 

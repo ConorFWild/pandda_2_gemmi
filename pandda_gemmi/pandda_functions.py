@@ -2016,11 +2016,11 @@ def get_common_structure_factors(datasets: DatasetsInterface):
             key = lambda _key: label_counts[_key],
         )
 
-        return StructureFactors(most_common_structure_factors[0], most_common_structure_factors[1])
+        return StructureFactors(most_common_structure_factors[0], most_common_structure_factors[1]), label_counts
 
     # If couldn't find common names in any dataset return None
     else:
-        return None
+        return None, label_counts
 
 
 class GetStructureFactors:
