@@ -351,7 +351,7 @@ def get_cluster_assignment_hdbscan(reduced_array):
     )
     clusterer.fit(reduced_array)
     labels = clusterer.labels_
-    print(f"Labels are: {labels}")
+    # print(f"Labels are: {labels}")
     probabilities = clusterer.probabilities_
 
     return labels
@@ -573,7 +573,7 @@ class GetComparatorsCluster(GetComparatorsInterface):
             debug=self.debug,
         )
 
-        print(comparators_multiple)
+        # print(comparators_multiple)
 
 
         return comparators_multiple
