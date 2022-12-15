@@ -84,13 +84,13 @@ ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]smiles"
 
 ARGS_DATA_QUALITY_FILTERS = "--data_quality_filters"
 ARGS_DATA_QUALITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include \"structure_factors\", " \
-                                    "\"resolution\" and \"rfree\"."
-ARGS_DATA_QUALITY_FILTERS_DEFAULT =     [ "structure_factors", "resolution", "rfree" ],
+                                 "\"resolution\" and \"rfree\"."
+ARGS_DATA_QUALITY_FILTERS_DEFAULT = ["structure_factors", "resolution", "rfree"],
 
 ARGS_REFERENCE_COMPARABILITY_FILTERS = "--reference_comparability_filters"
 ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include " \
                                             "\"dissimilar_models\", \"large_gaps\" and \"dissimilar_spacegroups\""
-ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT =     ["dissimilar_models", "large_gaps",]
+ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT = ["dissimilar_models", "large_gaps", ]
 
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
@@ -282,7 +282,7 @@ ARGS_DEBUG_HELP = "A boolean value giving whether or not to print debugging info
 ##########################
 ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT: int = 25
 ARGS_COMPARISON_STRATEGY_DEFAULT: str = "cluster"
-ARGS_LOCAL_PROCESSING_DEFAULT:str = "multiprocessing_spawn"
+ARGS_LOCAL_PROCESSING_DEFAULT: str = "multiprocessing_spawn"
 ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
@@ -290,7 +290,6 @@ ARGS_RANK_METHOD_DEFAULT: str = "event_score"
 ARGS_MIN_BDC_DEFAULT: float = 0.0
 ARGS_MAX_BDC_DEFAULT: float = 0.95
 ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
-
 
 ###################################################################
 # # Console constants
