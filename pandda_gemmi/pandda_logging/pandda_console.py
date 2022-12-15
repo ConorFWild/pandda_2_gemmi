@@ -461,7 +461,7 @@ class PanDDAConsole:
 
 
     def summarise_structure_factors(self, structure_factors, label_counts):
-        printable = self.indent_text(f"label counts are: ")
+        printable = self.indent_text(f"Label counts are: ")
         self.console.print(printable)
 
         printable = self.indent_text(Pretty(label_counts), indent=8)
