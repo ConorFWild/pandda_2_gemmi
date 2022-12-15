@@ -234,21 +234,17 @@ class PanDDAConsole:
                 indent=8)
             self.console.print(printable)
 
-
     def start_process_shells(self):
         printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
         self.console.print(printable)
-
 
     def start_autobuilding(self):
         printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
         self.console.print(printable)
 
-
     def summarise_autobuilding(self, autobuild_results: AutobuildResultsInterface):
         printable = self.indent_text(f"Autobuilt all event maps")
         self.console.print(printable)
-
 
     def summarise_autobuild_model_update(self, dataset_selected_events):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
@@ -267,66 +263,53 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-
     def start_autobuild_model_update(self, ):
         printable = self.wrap_title("Updating PanDDA Models With Best Autobuilds")
         self.console.print(printable)
-
 
     def start_ranking(self):
         printable = self.wrap_title(constants.CONSOLE_START_RANKING)
         self.console.print(printable)
 
-
     def start_assign_sites(self):
         printable = self.wrap_title(constants.CONSOLE_START_ASSIGN_SITES)
         self.console.print(printable)
-
 
     def start_run_summary(self):
         printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
         self.console.print(printable)
 
-
     def start_event_table_output(self):
         printable = self.wrap_title(f"Writing Event Table")
         self.console.print(printable)
-
 
     def summarise_event_table_output(self, path):
         printable = self.indent_text(f"Event table written to: {str(path)}")
         self.console.print(printable)
 
-
     def start_site_table_output(self):
         printable = self.wrap_title(f"Writing Site Table")
         self.console.print(printable)
-
 
     def summarise_site_table_output(self, path):
         printable = self.indent_text(f"Site table written to: {str(path)}")
         self.console.print(printable)
 
-
     def start_log_save(self):
         printable = self.wrap_title(f"Saving JSON log of run...")
         self.console.print(printable)
-
 
     def summarise_log_save(self, path):
         printable = self.indent_text(f"JSON log written to: {str(path)}")
         self.console.print(printable)
 
-
     def summarise_run(self, time):
         printable = self.wrap_title(f"PanDDA ran in {time}")
         self.console.print(printable)
 
-
     def start_classification(self):
         printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
         self.console.print(printable)
-
 
     def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
@@ -353,7 +336,6 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-
     def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Event Classifications"
@@ -369,7 +351,6 @@ class PanDDAConsole:
             )
 
         self.console.print(event_class_table)
-
 
     def summarise_datasets(self, datasets_initial, dataset_statistics):
         # Statistics
@@ -392,12 +373,18 @@ class PanDDAConsole:
         ucalpha = dataset_statistics.unit_cells["alpha"]
         ucbeta = dataset_statistics.unit_cells["beta"]
         ucgamma = dataset_statistics.unit_cells["gamma"]
-        unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)), str(round(np.max(uca), 2)))
-        unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)), str(round(np.max(ucb), 2)))
-        unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)), str(round(np.max(ucc), 2)))
-        unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)), str(round(np.max(ucalpha), 2)))
-        unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)), str(round(np.max(ucbeta), 2)))
-        unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)), str(round(np.max(ucgamma), 2)))
+        unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)),
+                                str(round(np.max(uca), 2)))
+        unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)),
+                                str(round(np.max(ucb), 2)))
+        unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)),
+                                str(round(np.max(ucc), 2)))
+        unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)),
+                                str(round(np.max(ucalpha), 2)))
+        unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)),
+                                str(round(np.max(ucbeta), 2)))
+        unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)),
+                                str(round(np.max(ucgamma), 2)))
 
         self.console.print(unit_cell_table)
 
@@ -454,11 +441,9 @@ class PanDDAConsole:
 
         self.console.print(table)
 
-
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
         self.console.print(printable)
-
 
     def summarise_structure_factors(self, structure_factors, label_counts):
         printable = self.indent_text(f"Label counts are: ")
@@ -469,7 +454,6 @@ class PanDDAConsole:
 
         printable = self.indent_text(f"Structure factors are: {structure_factors.f} {structure_factors.phi}")
         self.console.print(printable)
-
 
     def summarise_shells(self,
                          shell_results: ShellResultsInterface,
@@ -507,7 +491,6 @@ class PanDDAConsole:
 
         self.console.print(event_table)
 
-
     def summarise_sites(self, sites):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Event Classifications"
@@ -524,23 +507,18 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-
     def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
         for filter_key, filtered in filtered_dtags.items():
             self.console.print(f"Filtered with {filter_key}: {filtered}")
 
-
     def print_exception(self, ):
         self.console.print_exception()
-
 
     def save(self, console_log_file):
         self.console.save_html(str(console_log_file))
 
-
     def __enter__(self):
         ...
-
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         ...
