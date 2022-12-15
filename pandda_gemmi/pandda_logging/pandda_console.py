@@ -118,7 +118,7 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def print_initialized_local_processor(self, pandda_args: PanDDAArgs):
-        printable = self.indent_text(f"Started the shell processor in mode {pandda_args.local_processing}")
+        printable = self.indent_text(f"Started the multiprocessor in mode {pandda_args.local_processing}")
         self.console.print(printable)
 
         if pandda_args.local_processing != "serial":
