@@ -82,6 +82,16 @@ ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated w
                                 "the crystal."
 ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]smiles"
 
+ARGS_DATA_QUALITY_FILTERS = "--data_quality_filters"
+ARGS_DATA_QUALITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include \"structure_factors\", " \
+                                    "\"resolution\" and \"rfree\"."
+ARGS_DATA_QUALITY_FILTERS_DEFAULT =     [ "structure_factors", "resolution", "rfree" ],
+
+ARGS_REFERENCE_COMPARABILITY_FILTERS = "--reference_comparability_filters"
+ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include " \
+                                            "\"dissimilar_models\", \"large_gaps\" and \"dissimilar_spacegroups\""
+ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT =     ["dissimilar_models", "large_gaps",]
+
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
                              "bound in the crystal."

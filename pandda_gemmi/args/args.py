@@ -19,6 +19,8 @@ class PanDDAArgs:
     ligand_pdb_regex: str = constants.ARGS_LIGAND_PDB_REGEX_DEFAULT
     ligand_smiles_regex: str = constants.ARGS_LIGAND_SMILES_REGEX_DEFAULT
     statmaps: bool = False
+    data_quality_filters: List[str] = constants.ARGS_DATA_QUALITY_FILTERS_DEFAULT
+    reference_comparability_filters: List[str] = constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT
     low_memory: bool = False
     ground_state_datasets: Optional[List[str]] = None
     exclude_from_z_map_analysis: Optional[List[str]] = None
@@ -324,6 +326,18 @@ class PanDDAArgs:
             type=lambda x: bool(strtobool(x)),
             default=False,
             help=constants.ARGS_SIMILAR_MODELS_ONLY_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_DATA_QUALITY_FILTERS,
+            type=lambda x: ",".split(x),
+            default=constants.ARGS_DATA_QUALITY_FILTERS_DEFAULT,
+            help=constants.ARGS_DATA_QUALITY_FILTERS_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_REFERENCE_COMPARABILITY_FILTERS,
+            type=lambda x: ",".split(x),
+            default=constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT,
+            help=constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP,
         )
 
         # Comparator set finding actions
