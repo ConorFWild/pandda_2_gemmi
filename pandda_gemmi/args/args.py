@@ -329,13 +329,13 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_DATA_QUALITY_FILTERS,
-            type=lambda x: ",".split(x),
+            type=lambda x: x.split(","),
             default=constants.ARGS_DATA_QUALITY_FILTERS_DEFAULT,
             help=constants.ARGS_DATA_QUALITY_FILTERS_HELP,
         )
         parser.add_argument(
             constants.ARGS_REFERENCE_COMPARABILITY_FILTERS,
-            type=lambda x: ",".split(x),
+            type=lambda x: x.split(","),
             default=constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT,
             help=constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP,
         )
