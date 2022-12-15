@@ -94,7 +94,8 @@ class DaskDistributedProcessor(ProcessorInterface):
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
 
-        result_futures = self.client.map(run_multiprocessing, funcs)
+        func_futures = self.client.scatter(funcs)
+        result_futures = self.client.map(run_multiprocessing, func_futures)
 
         results = self.client.gather(result_futures)
 
