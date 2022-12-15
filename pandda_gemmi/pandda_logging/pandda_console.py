@@ -235,316 +235,315 @@ class PanDDAConsole:
             self.console.print(printable)
 
 
-def start_process_shells(self):
-    printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
-    self.console.print(printable)
+    def start_process_shells(self):
+        printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
+        self.console.print(printable)
 
 
-def start_autobuilding(self):
-    printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
-    self.console.print(printable)
+    def start_autobuilding(self):
+        printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
+        self.console.print(printable)
 
 
-def summarise_autobuilding(self, autobuild_results: AutobuildResultsInterface):
-    printable = self.indent_text(f"Autobuilt all event maps")
-    self.console.print(printable)
+    def summarise_autobuilding(self, autobuild_results: AutobuildResultsInterface):
+        printable = self.indent_text(f"Autobuilt all event maps")
+        self.console.print(printable)
 
 
-def summarise_autobuild_model_update(self, dataset_selected_events):
-    event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    event_class_table.title = "Selected Autobuilds"
-    event_class_table.add_column("Dtag")
-    event_class_table.add_column("Event ID")
-    event_class_table.add_column("Autobuild Path")
+    def summarise_autobuild_model_update(self, dataset_selected_events):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Selected Autobuilds"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event ID")
+        event_class_table.add_column("Autobuild Path")
 
-    for _dtag in dataset_selected_events:
-        dtag, event_idx, path = dataset_selected_events[_dtag]
-        event_class_table.add_row(
-            str(dtag),
-            int(event_idx),
-            path.name
+        for _dtag in dataset_selected_events:
+            dtag, event_idx, path = dataset_selected_events[_dtag]
+            event_class_table.add_row(
+                str(dtag),
+                int(event_idx),
+                path.name
+            )
+
+        self.console.print(event_class_table)
+
+
+    def start_autobuild_model_update(self, ):
+        printable = self.wrap_title("Updating PanDDA Models With Best Autobuilds")
+        self.console.print(printable)
+
+
+    def start_ranking(self):
+        printable = self.wrap_title(constants.CONSOLE_START_RANKING)
+        self.console.print(printable)
+
+
+    def start_assign_sites(self):
+        printable = self.wrap_title(constants.CONSOLE_START_ASSIGN_SITES)
+        self.console.print(printable)
+
+
+    def start_run_summary(self):
+        printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
+        self.console.print(printable)
+
+
+    def start_event_table_output(self):
+        printable = self.wrap_title(f"Writing Event Table")
+        self.console.print(printable)
+
+
+    def summarise_event_table_output(self, path):
+        printable = self.indent_text(f"Event table written to: {str(path)}")
+        self.console.print(printable)
+
+
+    def start_site_table_output(self):
+        printable = self.wrap_title(f"Writing Site Table")
+        self.console.print(printable)
+
+
+    def summarise_site_table_output(self, path):
+        printable = self.indent_text(f"Site table written to: {str(path)}")
+        self.console.print(printable)
+
+
+    def start_log_save(self):
+        printable = self.wrap_title(f"Saving JSON log of run...")
+        self.console.print(printable)
+
+
+    def summarise_log_save(self, path):
+        printable = self.indent_text(f"JSON log written to: {str(path)}")
+        self.console.print(printable)
+
+
+    def summarise_run(self, time):
+        printable = self.wrap_title(f"PanDDA ran in {time}")
+        self.console.print(printable)
+
+
+    def start_classification(self):
+        printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
+        self.console.print(printable)
+
+
+    def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Autobuild Scores"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Autobuild Score")
+
+        for event_id, autobuild_result in autobuild_results.items():
+            selected_build = autobuild_result.selected_fragment_path
+
+            if not selected_build:
+                build_score_string = "None"
+            else:
+
+                selected_build_score = autobuild_result.scores[selected_build]
+                build_score_string = str(round(selected_build_score, 2))
+
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                build_score_string,
+            )
+
+        self.console.print(event_class_table)
+
+
+    def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Class")
+
+        for event_id, event_class in event_classifications.items():
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(event_class),
+            )
+
+        self.console.print(event_class_table)
+
+
+    def summarise_datasets(self, datasets_initial, dataset_statistics):
+        # Statistics
+        # printable = self.indent_text(
+        #     f"Unit cell statistics"
+        # )
+        # self.console.print(printable)
+
+        # Unit cells
+        unit_cell_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        unit_cell_table.title = "Unit Cell Statistics"
+        unit_cell_table.add_column("Parameter")
+        unit_cell_table.add_column("Min")
+        unit_cell_table.add_column("Max")
+        unit_cell_table.add_column("Mean")
+
+        uca = dataset_statistics.unit_cells["a"]
+        ucb = dataset_statistics.unit_cells["b"]
+        ucc = dataset_statistics.unit_cells["c"]
+        ucalpha = dataset_statistics.unit_cells["alpha"]
+        ucbeta = dataset_statistics.unit_cells["beta"]
+        ucgamma = dataset_statistics.unit_cells["gamma"]
+        unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)), str(round(np.max(uca), 2)))
+        unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)), str(round(np.max(ucb), 2)))
+        unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)), str(round(np.max(ucc), 2)))
+        unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)), str(round(np.max(ucalpha), 2)))
+        unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)), str(round(np.max(ucbeta), 2)))
+        unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)), str(round(np.max(ucgamma), 2)))
+
+        self.console.print(unit_cell_table)
+
+        # Resolutions
+        ress = dataset_statistics.resolutions
+
+        resolution_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        resolution_table.title = "Resolutions"
+        resolution_table.add_column("Min")
+        resolution_table.add_column("Mean")
+        resolution_table.add_column("Max")
+        resolution_table.add_row(str(round(np.min(ress), 2)), str(round(np.mean(ress), 2)), str(round(np.max(ress), 2)))
+
+        self.console.print(
+            resolution_table
         )
 
-    self.console.print(event_class_table)
+        # Spacegroups
+        sgtable = Table(show_header=True, header_style="bold magenta", expand=True)
+        sgtable.title = "Spacegroups"
+        sgtable.add_column("Spacegroup")
+        sgtable.add_column("Count")
+        values, counts = np.unique(dataset_statistics.spacegroups, return_counts=True)
+        for sg, count in zip(values, counts):
+            sgtable.add_row(sg, str(count))
+
+        self.console.print(sgtable)
+
+        # Chains
+        chain_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        chain_table.title = "Chains"
+        chain_table.add_column("Chains")
+        chain_table.add_column("Count")
+        values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains], return_counts=True)
+        for chains, count in zip(values, counts):
+            chain_table.add_row(chains, str(count))
+        self.console.print(chain_table)
+
+        # Datasets
+        table = Table(show_header=True, header_style="bold magenta", expand=True)
+        table.title = "Datasets"
+        # Columns
+        table.add_column("Dtag")
+        table.add_column("Resolution")
+
+        # Rows
+        for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
+            dataset = datasets_initial[dtag]
+            table.add_row(
+                dtag.dtag,
+                str(round(dataset.reflections.reflections.resolution_high(), 2)),
+                dataset.reflections.reflections.spacegroup.hm,
+            )
+
+        self.console.print(table)
+
+
+    def start_identify_structure_factors(self, ):
+        printable = self.wrap_title("Getting Structure Factors...")
+        self.console.print(printable)
+
+
+    def summarise_structure_factors(self, structure_factors, label_counts):
+        printable = self.indent_text(f"label counts are: ")
+        self.console.print(printable)
+
+        printable = self.indent_text(Pretty(label_counts), indent=8)
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Structure factors are: {structure_factors.f} {structure_factors.phi}")
+        self.console.print(printable)
+
+
+    def summarise_shells(self,
+                         shell_results: ShellResultsInterface,
+                         events: EventsInterface,
+                         event_scores: EventScoresInterface,
+                         ):
+        event_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_table.title = "Shell Events"
+        event_table.add_column("Res")
+        event_table.add_column("Dtag")
+        event_table.add_column("Event Number")
+        event_table.add_column("Event Score")
+        event_table.add_column("Event Size")
+
+        for res, shell_result in shell_results.items():
+            res = shell_result.shell.res
+            dataset_results = shell_result.dataset_results
+            for dtag, dataset_result in dataset_results.items():
+                dataset_events = dataset_result.events
+                dataset_event_scores = dataset_result.event_scores
+                for event_id, event in dataset_events.items():
+                    event_score = dataset_event_scores[event_id]
+                    selected_structure_score = event_score.get_selected_structure_score()
+                    if selected_structure_score:
+                        score = round(selected_structure_score, 2)
+                    else:
+                        score = None
+                    event_table.add_row(
+                        str(round(res, 2)),
+                        str(event_id.dtag.dtag),
+                        str(event_id.event_idx.event_idx),
+                        str(score),
+                        str(event.cluster.indexes[0].size)
+                    )
+
+        self.console.print(event_table)
+
+
+    def summarise_sites(self, sites):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Event Classifications"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event Number")
+        event_class_table.add_column("Site")
+
+        for event_id, site_id in sites.event_to_site.items():
+            event_class_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(site_id.site_id),
+            )
 
+        self.console.print(event_class_table)
 
-def start_autobuild_model_update(self, ):
-    printable = self.wrap_title("Updating PanDDA Models With Best Autobuilds")
-    self.console.print(printable)
 
+    def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
+        for filter_key, filtered in filtered_dtags.items():
+            self.console.print(f"Filtered with {filter_key}: {filtered}")
 
-def start_ranking(self):
-    printable = self.wrap_title(constants.CONSOLE_START_RANKING)
-    self.console.print(printable)
 
+    def print_exception(self, ):
+        self.console.print_exception()
 
-def start_assign_sites(self):
-    printable = self.wrap_title(constants.CONSOLE_START_ASSIGN_SITES)
-    self.console.print(printable)
 
+    def save(self, console_log_file):
+        self.console.save_html(str(console_log_file))
 
-def start_run_summary(self):
-    printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
-    self.console.print(printable)
 
+    def __enter__(self):
+        ...
 
-def start_event_table_output(self):
-    printable = self.wrap_title(f"Writing Event Table")
-    self.console.print(printable)
 
-
-def summarise_event_table_output(self, path):
-    printable = self.indent_text(f"Event table written to: {str(path)}")
-    self.console.print(printable)
-
-
-def start_site_table_output(self):
-    printable = self.wrap_title(f"Writing Site Table")
-    self.console.print(printable)
-
-
-def summarise_site_table_output(self, path):
-    printable = self.indent_text(f"Site table written to: {str(path)}")
-    self.console.print(printable)
-
-
-def start_log_save(self):
-    printable = self.wrap_title(f"Saving JSON log of run...")
-    self.console.print(printable)
-
-
-def summarise_log_save(self, path):
-    printable = self.indent_text(f"JSON log written to: {str(path)}")
-    self.console.print(printable)
-
-
-def summarise_run(self, time):
-    printable = self.wrap_title(f"PanDDA ran in {time}")
-    self.console.print(printable)
-
-
-def start_classification(self):
-    printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
-    self.console.print(printable)
-
-
-def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
-    event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    event_class_table.title = "Autobuild Scores"
-    event_class_table.add_column("Dtag")
-    event_class_table.add_column("Event Number")
-    event_class_table.add_column("Autobuild Score")
-
-    for event_id, autobuild_result in autobuild_results.items():
-        selected_build = autobuild_result.selected_fragment_path
-
-        if not selected_build:
-            build_score_string = "None"
-        else:
-
-            selected_build_score = autobuild_result.scores[selected_build]
-            build_score_string = str(round(selected_build_score, 2))
-
-        event_class_table.add_row(
-            str(event_id.dtag.dtag),
-            str(event_id.event_idx.event_idx),
-            build_score_string,
-        )
-
-    self.console.print(event_class_table)
-
-
-def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
-    event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    event_class_table.title = "Event Classifications"
-    event_class_table.add_column("Dtag")
-    event_class_table.add_column("Event Number")
-    event_class_table.add_column("Class")
-
-    for event_id, event_class in event_classifications.items():
-        event_class_table.add_row(
-            str(event_id.dtag.dtag),
-            str(event_id.event_idx.event_idx),
-            str(event_class),
-        )
-
-    self.console.print(event_class_table)
-
-
-def summarise_datasets(self, datasets_initial, dataset_statistics):
-    # Statistics
-    # printable = self.indent_text(
-    #     f"Unit cell statistics"
-    # )
-    # self.console.print(printable)
-
-    # Unit cells
-    unit_cell_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    unit_cell_table.title = "Unit Cell Statistics"
-    unit_cell_table.add_column("Parameter")
-    unit_cell_table.add_column("Min")
-    unit_cell_table.add_column("Max")
-    unit_cell_table.add_column("Mean")
-
-    uca = dataset_statistics.unit_cells["a"]
-    ucb = dataset_statistics.unit_cells["b"]
-    ucc = dataset_statistics.unit_cells["c"]
-    ucalpha = dataset_statistics.unit_cells["alpha"]
-    ucbeta = dataset_statistics.unit_cells["beta"]
-    ucgamma = dataset_statistics.unit_cells["gamma"]
-    unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)), str(round(np.max(uca), 2)))
-    unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)), str(round(np.max(ucb), 2)))
-    unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)), str(round(np.max(ucc), 2)))
-    unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)), str(round(np.max(ucalpha), 2)))
-    unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)), str(round(np.max(ucbeta), 2)))
-    unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)), str(round(np.max(ucgamma), 2)))
-
-    self.console.print(unit_cell_table)
-
-    # Resolutions
-    ress = dataset_statistics.resolutions
-
-    resolution_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    resolution_table.title = "Resolutions"
-    resolution_table.add_column("Min")
-    resolution_table.add_column("Mean")
-    resolution_table.add_column("Max")
-    resolution_table.add_row(str(round(np.min(ress), 2)), str(round(np.mean(ress), 2)), str(round(np.max(ress), 2)))
-
-    self.console.print(
-        resolution_table
-    )
-
-    # Spacegroups
-    sgtable = Table(show_header=True, header_style="bold magenta", expand=True)
-    sgtable.title = "Spacegroups"
-    sgtable.add_column("Spacegroup")
-    sgtable.add_column("Count")
-    values, counts = np.unique(dataset_statistics.spacegroups, return_counts=True)
-    for sg, count in zip(values, counts):
-        sgtable.add_row(sg, str(count))
-
-    self.console.print(sgtable)
-
-    # Chains
-    chain_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    chain_table.title = "Chains"
-    chain_table.add_column("Chains")
-    chain_table.add_column("Count")
-    values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains], return_counts=True)
-    for chains, count in zip(values, counts):
-        chain_table.add_row(chains, str(count))
-    self.console.print(chain_table)
-
-    # Datasets
-    table = Table(show_header=True, header_style="bold magenta", expand=True)
-    table.title = "Datasets"
-    # Columns
-    table.add_column("Dtag")
-    table.add_column("Resolution")
-    table.add_column("Spacegroup")
-
-    # Rows
-    for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
-        dataset = datasets_initial[dtag]
-        table.add_row(
-            dtag.dtag,
-            str(round(dataset.reflections.reflections.resolution_high(), 2)),
-            dataset.reflections.reflections.spacegroup.hm,
-        )
-
-    self.console.print(table)
-
-
-def start_identify_structure_factors(self, ):
-    printable = self.wrap_title("Getting Structure Factors...")
-    self.console.print(printable)
-
-
-def summarise_structure_factors(self, structure_factors, label_counts):
-    printable = self.indent_text(f"label counts are: ")
-    self.console.print(printable)
-
-    printable = self.indent_text(Pretty(label_counts), indent=8)
-    self.console.print(printable)
-
-    printable = self.indent_text(f"Structure factors are: {structure_factors.f} {structure_factors.phi}")
-    self.console.print(printable)
-
-
-def summarise_shells(self,
-                     shell_results: ShellResultsInterface,
-                     events: EventsInterface,
-                     event_scores: EventScoresInterface,
-                     ):
-    event_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    event_table.title = "Shell Events"
-    event_table.add_column("Res")
-    event_table.add_column("Dtag")
-    event_table.add_column("Event Number")
-    event_table.add_column("Event Score")
-    event_table.add_column("Event Size")
-
-    for res, shell_result in shell_results.items():
-        res = shell_result.shell.res
-        dataset_results = shell_result.dataset_results
-        for dtag, dataset_result in dataset_results.items():
-            dataset_events = dataset_result.events
-            dataset_event_scores = dataset_result.event_scores
-            for event_id, event in dataset_events.items():
-                event_score = dataset_event_scores[event_id]
-                selected_structure_score = event_score.get_selected_structure_score()
-                if selected_structure_score:
-                    score = round(selected_structure_score, 2)
-                else:
-                    score = None
-                event_table.add_row(
-                    str(round(res, 2)),
-                    str(event_id.dtag.dtag),
-                    str(event_id.event_idx.event_idx),
-                    str(score),
-                    str(event.cluster.indexes[0].size)
-                )
-
-    self.console.print(event_table)
-
-
-def summarise_sites(self, sites):
-    event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-    event_class_table.title = "Event Classifications"
-    event_class_table.add_column("Dtag")
-    event_class_table.add_column("Event Number")
-    event_class_table.add_column("Site")
-
-    for event_id, site_id in sites.event_to_site.items():
-        event_class_table.add_row(
-            str(event_id.dtag.dtag),
-            str(event_id.event_idx.event_idx),
-            str(site_id.site_id),
-        )
-
-    self.console.print(event_class_table)
-
-
-def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
-    for filter_key, filtered in filtered_dtags.items():
-        self.console.print(f"Filtered with {filter_key}: {filtered}")
-
-
-def print_exception(self, ):
-    self.console.print_exception()
-
-
-def save(self, console_log_file):
-    self.console.save_html(str(console_log_file))
-
-
-def __enter__(self):
-    ...
-
-
-def __exit__(self, exc_type, exc_val, exc_tb):
-    ...
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        ...
 
 
 def get_pandda_console():
