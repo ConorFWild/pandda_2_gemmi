@@ -936,8 +936,9 @@ def score_conformer_nonquant_array(cluster: Cluster,
         # score = 1-float(res.fun)
         # print(f"\t\t\t\tScore: {score}")
 
-    print(f"Best fit score: {1 - min(scores)}")
-    print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"Best fit score: {1 - min(scores)}")
+        print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
 
     best_score_index = np.argmax(scores_signal_to_noise)
     best_score = scores_signal_to_noise[best_score_index]
@@ -1895,9 +1896,10 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                             )
                         )
 
-                string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
-                         f"{event.cluster.values.size}"
-                print(string)
+                if debug >= Debug.PRINT_NUMERICS:
+                    string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
+                             f"{event.cluster.values.size}"
+                    print(string)
 
                 event_scores[event_id] = result
 
