@@ -261,8 +261,8 @@ class PanDDAConsole:
             dtag, event_idx, path = dataset_selected_events[_dtag]
             event_class_table.add_row(
                 str(dtag),
-                int(event_idx),
-                path.name
+                str(int(event_idx)),
+                Path(path).name
             )
 
         self.console.print(event_class_table)
