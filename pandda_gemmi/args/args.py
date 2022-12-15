@@ -609,7 +609,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_DEBUG,
             type=lambda x: debug_mapping(int(x)),
-            default=False,
+            default=Debug.DEFAULT,
             help=constants.ARGS_DEBUG_HELP,
         )
 
