@@ -177,7 +177,7 @@ class PanDDAConsole:
         for dtag, dataset in datasets.items():
             event_class_table.add_row(
                 str(dtag.dtag),
-                round(dataset.smoothing_factor, 2),
+                str(round(dataset.smoothing_factor, 2)),
             )
 
         self.console.print(event_class_table)
