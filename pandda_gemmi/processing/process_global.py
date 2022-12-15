@@ -97,7 +97,7 @@ class DaskDistributedProcessor(ProcessorInterface):
         func_futures = self.client.scatter(funcs)
         result_futures = self.client.map(run_multiprocessing, func_futures)
 
-        progress(result_futures)
+        # progress(result_futures)
 
         results = self.client.gather(result_futures)
 
