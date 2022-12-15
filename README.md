@@ -21,7 +21,9 @@ If you uncertain about the correctness of the results, then a GitHub issue is ap
 
 ## Installation
 
-It is recommended that you install PanDDA 2 in its own python 3.8 anaconda environment. This can be achieved by installing anaconda and then:
+It is recommended that you install PanDDA 2 in its own python 3.8 anaconda environment. If you do not have an Anaconda enviroment you can install one by following the instructions at https://www.anaconda.com/products/distribution#linux. 
+
+Then:
 
 ```bash
 conda create -n pandda2 python=3.9
@@ -88,7 +90,7 @@ python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb
 
 # Submitting
 chmod 777 submit.sh
-qsub -V -o submit.o -e submit.e -q medium.q -pe smp 20 -l m_mem_free=15G submit.sh
+qsub -V -o submit.o -e submit.e -q medium.q -pe smp 12 -l m_mem_free=15G submit.sh
 
 ```
 
@@ -125,13 +127,5 @@ Current limitations with the interaction between pandda.inspect and PanDDA 2 mea
 Therefore, the highest scoring autobuild by RSCC from any event in each dataset is selected and included in the initial model pandda.inspect shows the user. 
 
 This has the effect that users may open apparently good hit density with no autobuild present, if another hit which is better fit by the autobuilding is present in the same dataset.
-
-
-## Running faster
-
-
-### Typical timelines (quick, difficult, ect...)
-
-### What can be made faster or not / what takes time
 
 
