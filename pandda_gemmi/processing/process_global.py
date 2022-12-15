@@ -1,5 +1,5 @@
 import dask
-from dask.distributed import Client
+from dask.distributed import Client, progress
 from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
 from pandda_gemmi.analyse_interface import *
@@ -96,6 +96,8 @@ class DaskDistributedProcessor(ProcessorInterface):
 
         func_futures = self.client.scatter(funcs)
         result_futures = self.client.map(run_multiprocessing, func_futures)
+
+        progress(result_futures)
 
         results = self.client.gather(result_futures)
 
