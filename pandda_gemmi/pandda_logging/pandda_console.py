@@ -162,7 +162,8 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def summarise_reference(self, reference):
-        self.console.print(str(reference.dtag))
+        printable = self.indent_text(f"Reference dataset is: {str(reference.dtag)}")
+        self.console.print(printable)
 
     def start_b_factor_smoothing(self):
         printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
