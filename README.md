@@ -8,6 +8,7 @@
  - Cleaner logs
  - Improved ranking for unbuildable events
  - Memory performance optimizations
+ - Which filters to apply to datasets can be configured with --data_quality_filters and --reference_comparability_filters
 
 ## Reporting Errors
 
