@@ -18,7 +18,7 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
     result = func(*args, **kwargs)
 
     with open(output_path, "wb") as f:
-        pickle.dump(f, result)
+        pickle.dump(result, f)
 
 
 if __name__ == "__main__":

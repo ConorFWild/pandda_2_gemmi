@@ -50,7 +50,7 @@ class QSubScheduler:
         code = secrets.token_hex(16)
         path = self.tmp_dir / code
         with open(path, "wb") as f:
-            pickle.dump(f, obj)
+            pickle.dump(obj, f)
 
         return path
 
