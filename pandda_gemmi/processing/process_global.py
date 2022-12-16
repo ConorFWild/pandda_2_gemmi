@@ -53,7 +53,7 @@ class SGEFuture:
         stdout, stderr = p.communicate()
         print(str(stdout))
 
-        matches = re.findall("\n[\s]+([0-9]+)", str(stdout))
+        matches = re.findall("\\n[\s]+([0-9]+)", str(stdout))
 
         print(matches)
 
