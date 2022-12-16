@@ -84,7 +84,8 @@ from pandda_gemmi.processing import (
     ProcessLocalSerial,
     ProcessLocalSpawn,
     ProcessLocalThreading,
-    DaskDistributedProcessor
+    DaskDistributedProcessor,
+    DistributedProcessor
 )
 
 from pandda_gemmi import event_classification
@@ -185,18 +186,30 @@ def get_process_global(pandda_args, distributed_tmp):
         #     client=client,
         #     tmp_dir=distributed_tmp
         # )
-        process_global = DaskDistributedProcessor(
-            scheduler=pandda_args.distributed_scheduler,
-            num_workers=pandda_args.distributed_num_workers,
-            queue=pandda_args.distributed_queue,
-            project=pandda_args.distributed_project,
-            cores_per_worker=pandda_args.local_cpus,
-            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
-            resource_spec=pandda_args.distributed_resource_spec,
-            job_extra=pandda_args.distributed_job_extra,
-            walltime=pandda_args.distributed_walltime,
-            watcher=pandda_args.distributed_watcher,
-        )
+        # process_global = DaskDistributedProcessor(
+        #     scheduler=pandda_args.distributed_scheduler,
+        #     num_workers=pandda_args.distributed_num_workers,
+        #     queue=pandda_args.distributed_queue,
+        #     project=pandda_args.distributed_project,
+        #     cores_per_worker=pandda_args.local_cpus,
+        #     distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+        #     resource_spec=pandda_args.distributed_resource_spec,
+        #     job_extra=pandda_args.distributed_job_extra,
+        #     walltime=pandda_args.distributed_walltime,
+        #     watcher=pandda_args.distributed_watcher,
+        # )
+        process_global = DistributedProcessor(distributed_tmp,
+                             scheduler=pandda_args.distributed_scheduler,
+                                 num_workers=pandda_args.distributed_num_workers,
+                                 queue=pandda_args.distributed_queue,
+                                 project=pandda_args.distributed_project,
+                                 cores_per_worker=pandda_args.local_cpus,
+                                 distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+                                 resource_spec=pandda_args.distributed_resource_spec,
+                                 job_extra=pandda_args.distributed_job_extra,
+                                 walltime=pandda_args.distributed_walltime,
+                                 watcher=pandda_args.distributed_watcher,
+                             )
 
     else:
         raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")
@@ -319,7 +332,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     time_start = time.time()
 
     # Process args
-    distributed_tmp = Path(pandda_args.distributed_tmp)
+    # distributed_tmp = Path(pandda_args.distributed_tmp)
 
     # CHeck dependencies
     # with STDOUTManager('Checking dependencies...', '\tAll dependencies validated!'):
@@ -341,11 +354,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     pandda_log[constants.LOG_ARGUMENTS] = initial_args
     console.started_log(log_path)
-
-    # Get global processor
-    console.start_initialise_shell_processor()
-    process_global: ProcessorInterface = get_process_global(pandda_args, distributed_tmp)
-    console.print_initialized_global_processor(pandda_args)
 
     # Get local processor
     console.start_initialise_multiprocessor()
@@ -459,6 +467,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
         if pandda_args.debug >= Debug.PRINT_NUMERICS:
             print(datasets_initial)
+
+        ###################################################################
+        # # Get global processor
+        ###################################################################
+        console.start_initialise_shell_processor()
+        process_global: ProcessorInterface = get_process_global(pandda_args, pandda_fs_model.tmp_dir)
+        console.print_initialized_global_processor(pandda_args)
 
 
         ###################################################################

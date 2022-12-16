@@ -731,6 +731,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
     shell_dirs: Optional[ShellDirs]
     console_log_file: Path
     events_json_file: Path
+    tmp_dir: Path
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -789,6 +790,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
 
+    tmp_dir = output_out_dir / "tmp"
+
     return PanDDAFSModel(pandda_dir=output_out_dir,
                          data_dirs=data_dirs,
                          analyses=analyses,
@@ -796,7 +799,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
                          log_file=log_path,
                          shell_dirs=None,
                          console_log_file=console_log_file,
-                         events_json_file=events_json_file
+                         events_json_file=events_json_file,
+                         tmp_dir=tmp_dir
                          )
 
 

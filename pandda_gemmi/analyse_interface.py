@@ -159,6 +159,7 @@ class PanDDAFSModelInterface(Protocol):
     shell_dirs: Optional[ShellDirsInterface]
     console_log_file: Path
     events_json_file: Path
+    tmp_dir: Path
 
     def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None)\
             -> None:
