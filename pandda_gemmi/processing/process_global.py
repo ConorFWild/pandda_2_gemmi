@@ -4,6 +4,8 @@ import pickle
 import secrets
 import sys
 import time
+import os
+import inspect
 
 import dask
 from dask.distributed import Client, progress
@@ -133,7 +135,9 @@ class QSubScheduler:
 
         output_path, code = self.generate_io_path()
 
-        run_process_shell_path = Path(sys.path[0]).resolve() / "run_process_shell.py"
+        # run_process_shell_path = Path(sys.path[0]).resolve() / "run_process_shell.py"
+        f = inspect.getframeinfo(inspect.currentframe()).filename
+        run_process_shell_path = Path(os.path.dirname(os.path.abspath(f)))
         print(run_process_shell_path)
 
         job_script = job_script_template.format(
