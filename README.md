@@ -37,7 +37,6 @@ pip install -e .
 cd _gemmi
 pip install .
 pip install numpy==1.21.0
-
 ```
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
@@ -46,11 +45,13 @@ Installing PanDDA 2 this way will add various scripts to your path, but only whi
 
 ## Running PanDDA 2
 
-Once you have installed PanDDA 2 in a conda environment, running it is as simple as:
+PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2
+
+
+Once you have installed PanDDA 2 in a conda environment, it can be run with autobuilding and automated ground state identification with the following invocation: 
 
 ```bash
 python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
-
 ```
 
 
@@ -60,19 +61,6 @@ If you want to run the lightest possible PanDDA (no clustering of datasets, no a
 
 ```bash
 python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --autobuild=False --rank_method="size" --comparison_strategy="high_res_first" <options>
-
-```
-
-
-### Running With Autobuilding
-PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit) and run PanDDA 2 with the autobuild flag on.
-
-Important to note is that by default this will require *phenix.elbow* to be in the path to handle cifs for autobuilding. Support for using *grade* instead is in the process of being added. 
-
-An example:
-```bash
-python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
-
 ```
 
 
@@ -92,7 +80,6 @@ python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb
 # Submitting
 chmod 777 submit.sh
 qsub -V -o submit.o -e submit.e -q medium.q -pe smp 12 -l m_mem_free=15G submit.sh
-
 ```
 
 
