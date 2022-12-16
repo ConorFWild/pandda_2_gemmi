@@ -48,7 +48,7 @@ Installing PanDDA 2 this way will add various scripts to your path, but only whi
 PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit).
 
 
-Once you have installed PanDDA 2 in a conda environment, it can be run with autobuilding and automated ground state identification with the following invocation: 
+Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following: 
 
 ```bash
 python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
