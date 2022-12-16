@@ -51,6 +51,7 @@ class SGEFuture:
             stderr=subprocess.PIPE
         )
         stdout, stderr = p.communicate()
+        print(str(stdout))
 
         matches = re.findall("\n[\s]+([0-9]+)", str(stdout))
 
