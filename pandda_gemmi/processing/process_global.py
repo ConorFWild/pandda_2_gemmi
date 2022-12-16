@@ -98,10 +98,10 @@ class DaskDistributedProcessor(ProcessorInterface):
         # result_futures = self.client.map(run_multiprocessing, func_futures)
         result_futures = []
         for func in funcs:
-            args = [self.client.scatter(arg) for arg in func.args]
-            kwargs = {kwrd: self.client.scatter(kwarg) for kwrd, kwarg in func.kwargs.items()}
+            arg_futures = [self.client.scatter(arg) for arg in func.args]
+            kwarg_futures = {kwrd: self.client.scatter(kwarg) for kwrd, kwarg in func.kwargs.items()}
             # result_futures.append(self.client.submit(func.func, *func.args, **func.kwargs))
-            result_futures.append(self.client.submit(func.func, *args, **kwargs))
+            result_futures.append(self.client.submit(func.func, *arg_futures, **kwarg_futures))
 
         # progress(result_futures)
 
