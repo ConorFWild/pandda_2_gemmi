@@ -93,6 +93,8 @@ class QSubScheduler:
     def generate_io_path(self, ):
         code = secrets.token_hex(16)
         path = self.tmp_dir / f"pickle_{code}.pickle"
+        if path.exists():
+            os.remove(path)
         return path, code
 
     def save(self, obj):
