@@ -90,12 +90,12 @@ class QSubScheduler:
 
     def generate_io_path(self, ):
         code = secrets.token_hex(16)
-        path = self.tmp_dir / code
+        path = self.tmp_dir / f"pickle_{code}.pickle"
         return path, code
 
     def save(self, obj):
-        code = secrets.token_hex(16)
-        path = self.tmp_dir / code
+
+        path, code = self.generate_io_path()
         with open(path, "wb") as f:
             pickle.dump(obj, f)
 
