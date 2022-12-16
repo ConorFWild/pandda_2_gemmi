@@ -228,7 +228,7 @@ class DistributedProcessor(ProcessorInterface):
                 queue=queue,
                 project=project,
                 cores=cores_per_worker,
-                mem_per_core=f"{distributed_mem_per_core}G",
+                mem_per_core=f"{distributed_mem_per_core}",
                 walltime=walltime,
                 job_extra=extra,
                 tmp_dir=tmp_dir
