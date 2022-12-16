@@ -194,7 +194,7 @@ class QSubScheduler:
             completed = [x for x in task_status if x == SGEResultStatus.DONE]
             failed = [x for x in task_status if x == SGEResultStatus.FAILED]
             running = [x for x in task_status if x == SGEResultStatus.RUNNING]
-            print(f"\tCompleted {len(completed)}; failed {len(failed)}; running {len(running)}' out of {len(task_status)} "
+            print(f"\tCompleted {len(completed)}; failed {len(failed)}; running {len(running)} out of {len(task_status)} "
                   f"tasks...")
             time.sleep(60)
             task_status = [f.status() for f in sge_futures]
