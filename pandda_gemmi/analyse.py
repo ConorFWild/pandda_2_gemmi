@@ -366,21 +366,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     datasets_validator: DatasetsValidatorInterface = DatasetsValidator(pandda_args.min_characterisation_datasets)
     filter_data_quality: FiltersDataQualityInterface = get_filter_data_quality(
         args.data_quality_filters,
-        [
-            "structure_factors",
-            "resolution",
-            "rfree"
-        ],
         datasets_validator,
         pandda_args
     )
     filter_reference_compatability: FiltersReferenceCompatibilityInterface = get_filter_reference_compatability(
-        args.reference_comparability_filters
-        [
-            "dissimilar_models",
-            "large_gaps",
-            # "dissimilar_spacegroups",
-        ],
+        args.reference_comparability_filters,
         datasets_validator,
         pandda_args
     )
