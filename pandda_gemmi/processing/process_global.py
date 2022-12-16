@@ -50,11 +50,26 @@ class SGEFuture:
         )
         stdout, stderr = p.communicate()
 
+        matches = re.findall("^[\s]+([0-9]+)", str(stdout))
+
+        print(matches)
+
+        if self.job_id in matches:
+            return True
+
+        else:
+            return False
+
     def status(self):
         if self.result_path.exists():
             return SGEResultStatus.DONE
 
         is_in_queue = self.is_in_queue()
+
+        if is_in_queue:
+            return SGEResultStatus.RUNNING
+        else:
+            return SGEResultStatus.FAILED
 
 class QSubScheduler:
     def __init__(self,
@@ -167,15 +182,18 @@ class QSubScheduler:
         return obj
 
     def gather(self, sge_futures: List[SGEFuture]):
-        task_status = [output_path.exists() for output_path in output_paths]
-        while not all(task_status):
-            task_status = [output_path.exists() for output_path in output_paths]
-            completed = [x for x in task_status if x]
-
-            print(f"\tCompleted {len(completed)} out of {len(task_status)} tasks...")
+        task_status = [f.status() for f in sge_futures]
+        while not all([task_stat == SGEResultStatus.DONE for task_stat in task_status]):
+            completed = [x for x in task_status if x == SGEResultStatus.DONE]
+            failed = [x for x in task_status if x == SGEResultStatus.FAILED]
+            running = [x for x in task_status if x == SGEResultStatus.RUNNING]
+            print(f"\tCompleted {len(completed)}; failed {len(failed)}; running {len(running)}' out of {len(task_status)} "
+                  f"tasks...")
             time.sleep(60)
+            task_status = [f.status() for f in sge_futures]
 
-        results = [self.load(output_path) for output_path in output_paths]
+
+        results = [self.load(sge_future.result_path) for sge_future in sge_futures]
 
         return results
 
