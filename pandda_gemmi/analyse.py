@@ -165,7 +165,7 @@ def get_comparator_func(pandda_args: PanDDAArgs,
     return comparators_func
 
 
-def get_process_global(pandda_args, distributed_tmp):
+def get_process_global(pandda_args, distributed_tmp, debug = Debug.DEFAULT):
     if pandda_args.global_processing == "serial":
         process_global = process_global_serial
     elif pandda_args.global_processing == "distributed":
@@ -209,6 +209,7 @@ def get_process_global(pandda_args, distributed_tmp):
                                  job_extra=pandda_args.distributed_job_extra,
                                  walltime=pandda_args.distributed_walltime,
                                  watcher=pandda_args.distributed_watcher,
+                                              debug=debug,
                              )
 
     else:
@@ -472,7 +473,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Get global processor
         ###################################################################
         console.start_initialise_shell_processor()
-        process_global: ProcessorInterface = get_process_global(pandda_args, pandda_fs_model.tmp_dir)
+        process_global: ProcessorInterface = get_process_global(pandda_args, pandda_fs_model.tmp_dir, pandda_args.debug)
         console.print_initialized_global_processor(pandda_args)
 
 

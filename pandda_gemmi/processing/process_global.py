@@ -21,6 +21,7 @@ class SGEResultStatus(IntEnum):
     DONE = 2
     FAILED = 3
 
+
 def run_multiprocessing(func: PartialInterface[P, V]) -> V:
     return func()
 
@@ -34,14 +35,15 @@ submit_command = "qsub -V -pe smp {cores} -l m_mem_free={mem_per_core}G -q mediu
                  "job_script_path}"
 
 
-
 class SGEFuture:
     def __init__(self,
                  result_path: Path,
                  job_id: str,
+                 debug: Debug=Debug.DEFAULT,
                  ):
         self.result_path = result_path
         self.job_id = job_id
+        self.debug = debug
 
     def is_in_queue(self):
         p = subprocess.Popen(
@@ -51,11 +53,14 @@ class SGEFuture:
             stderr=subprocess.PIPE
         )
         stdout, stderr = p.communicate()
-        print(str(stdout))
+
+        if self.debug >= Debug.PRINT_NUMERICS:
+            print(str(stdout))
 
         matches = re.findall(self.job_id, str(stdout))
 
-        print(matches)
+        if self.debug >= Debug.PRINT_NUMERICS:
+            print(matches)
 
         if len(matches) > 0:
             return True
@@ -74,6 +79,7 @@ class SGEFuture:
         else:
             return SGEResultStatus.FAILED
 
+
 class QSubScheduler:
     def __init__(self,
                  queue,
@@ -82,7 +88,8 @@ class QSubScheduler:
                  mem_per_core,
                  walltime,
                  job_extra,
-                 tmp_dir):
+                 tmp_dir,
+                 debug: Debug = Debug.DEFAULT):
         self.queue = queue
         self.project = project
         self.cores = cores
@@ -90,6 +97,7 @@ class QSubScheduler:
         self.walltime = walltime
         self.job_extra = job_extra
         self.tmp_dir: Path = tmp_dir
+        self.debug = debug
 
     def generate_io_path(self, ):
         code = secrets.token_hex(16)
@@ -114,8 +122,10 @@ class QSubScheduler:
             stderr=subprocess.PIPE
         )
         stdout, stderr = p.communicate()
-        print(stdout)
-        print(stderr)
+        if self.debug >= Debug.PRINT_NUMERICS:
+
+            print(stdout)
+            print(stderr)
 
     def write_script(self, job_script, job_script_path):
         with open(job_script_path, "w") as f:
@@ -141,7 +151,9 @@ class QSubScheduler:
         # run_process_shell_path = Path(sys.path[0]).resolve() / "run_process_shell.py"
         f = inspect.getframeinfo(inspect.currentframe()).filename
         run_process_shell_path = Path(os.path.dirname(os.path.abspath(f))) / "run_process_shell.py"
-        print(run_process_shell_path)
+        if self.debug >= Debug.PRINT_NUMERICS:
+
+            print(run_process_shell_path)
 
         job_script = job_script_template.format(
             python_path=sys.executable,
@@ -151,7 +163,9 @@ class QSubScheduler:
             arg_paths=arg_paths_string,
             kwarg_paths=kwarg_paths_string,
         )
-        print(job_script)
+        if self.debug >= Debug.PRINT_NUMERICS:
+
+            print(job_script)
 
         self.write_script(job_script, job_script_path)
 
@@ -166,7 +180,9 @@ class QSubScheduler:
             out_path=out_path,
             err_path=err_path
         )
-        print(_submit_command)
+        if self.debug >= Debug.PRINT_NUMERICS:
+
+            print(_submit_command)
 
         # Submit
         p = subprocess.Popen(
@@ -176,8 +192,10 @@ class QSubScheduler:
             stderr=subprocess.PIPE
         )
         stdout, stderr = p.communicate()
-        print(stdout)
-        print(stderr)
+        if self.debug >= Debug.PRINT_NUMERICS:
+
+            print(stdout)
+            print(stderr)
 
         job_id = re.search(
             "Your job ([0-9]+) ",
@@ -198,15 +216,16 @@ class QSubScheduler:
             completed = [x for x in task_status if x == SGEResultStatus.DONE]
             failed = [x for x in task_status if x == SGEResultStatus.FAILED]
             running = [x for x in task_status if x == SGEResultStatus.RUNNING]
-            print(f"\tCompleted {len(completed)}; failed {len(failed)}; running {len(running)} out of {len(task_status)} "
-                  f"tasks...")
+            print(
+                f"\tCompleted {len(completed)}; failed {len(failed)}; running {len(running)} out of {len(task_status)} "
+                f"tasks...")
             time.sleep(60)
             task_status = [f.status() for f in sge_futures]
-
 
         results = [self.load(sge_future.result_path) for sge_future in sge_futures]
 
         return results
+
 
 class DistributedProcessor(ProcessorInterface):
     def __init__(self,
@@ -221,6 +240,7 @@ class DistributedProcessor(ProcessorInterface):
                  job_extra=("",),
                  walltime="150:00:00",
                  watcher=True,
+                 debug: Debug =Debug.DEFAULT,
                  ):
         schedulers = ["HTCONDOR", "PBS", "SGE", "SLURM"]
         if scheduler not in schedulers:
@@ -242,7 +262,8 @@ class DistributedProcessor(ProcessorInterface):
                 mem_per_core=f"{distributed_mem_per_core}",
                 walltime=walltime,
                 job_extra=extra,
-                tmp_dir=tmp_dir
+                tmp_dir=tmp_dir,
+                debug=debug
             )
 
         elif scheduler == "SLURM":
