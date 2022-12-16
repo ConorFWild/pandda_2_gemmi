@@ -771,7 +771,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
         self.analyses.build()
 
         if not self.tmp_dir.exists():
-            os.mkdir(str(self.pandda_dir))
+            os.mkdir(str(self.tmp_dir))
 
 
 def get_pandda_fs_model(input_data_dirs: Path,
