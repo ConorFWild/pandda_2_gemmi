@@ -2008,7 +2008,7 @@ def get_common_structure_factors(datasets: DatasetsInterface):
                     else:
                         label_counts[common_f_phi_label_pair] += 1
 
-    print(f"Label counts are: {label_counts}")
+    # print(f"Label counts are: {label_counts}")
 
     if len(label_counts) != 0:
         most_common_structure_factors = max(
@@ -2016,11 +2016,11 @@ def get_common_structure_factors(datasets: DatasetsInterface):
             key = lambda _key: label_counts[_key],
         )
 
-        return StructureFactors(most_common_structure_factors[0], most_common_structure_factors[1])
+        return StructureFactors(most_common_structure_factors[0], most_common_structure_factors[1]), label_counts
 
     # If couldn't find common names in any dataset return None
     else:
-        return None
+        return None, label_counts
 
 
 class GetStructureFactors:

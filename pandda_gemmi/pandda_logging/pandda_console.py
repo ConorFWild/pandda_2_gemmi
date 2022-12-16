@@ -5,15 +5,46 @@ from rich.panel import Panel
 from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
+from rich.pretty import Pretty
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
+from pandda_gemmi.args import PanDDAArgs
+
+import subprocess
+
+
+def get_git_revision_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+
+
+def get_git_revision_short_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 
 
 class PanDDAConsole:
 
     def __init__(self):
         self.console = Console(record=True)
+
+    def start_pandda(self):
+        version = constants.VERSION
+        git_hash = get_git_revision_short_hash()
+
+        # Print the program title
+        printable = self.wrap_title("PanDDA 2")
+        self.console.print(printable)
+
+        # Print the version info
+        printable = self.indent_text(f"PanDDA Version: {version}")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"PanDDA Version GitHub Commit Hash: {git_hash}")
+        self.console.print(printable)
+
+    def start_parse_command_line_args(self):
+        printable = self.wrap_title("Parsing Command Line Arguments")
+        self.console.print(printable)
 
     def summarise_arguments(self, args):
         self.console.print(args)
@@ -25,17 +56,81 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_DEPENDENCY_CHECK)
         self.console.print(printable)
 
+    def print_failed_dependencies(self, failed_dependency_list):
+        printable = self.indent_text("Failed some dependency checks!")
+        self.console.print(printable)
+
+        for failed_dependency in failed_dependency_list:
+
+            printable = self.indent_text(f"The options...", indent=8)
+            self.console.print(printable)
+            for option in failed_dependency.options:
+                printable = self.indent_text(f"{option.name} : {option.option_value}", indent=12)
+                self.console.print(printable)
+
+            printable = self.indent_text(f"Induce the unmet dependencies...", indent=8)
+            self.console.print(printable)
+            for dependency in failed_dependency.dependencies:
+                printable = self.indent_text(f"{dependency.name} : {dependency.status}", indent=12)
+                self.console.print(printable)
+
+        printable = self.indent_text("PanDDA will now exit...")
+        self.console.print(printable)
+
+    def print_successful_dependency_check(self):
+        printable = self.indent_text("All dependencies are present!")
+        self.console.print(printable)
+
     def start_log(self):
         printable = self.wrap_title(constants.CONSOLE_START_LOG)
+        self.console.print(printable)
+
+    def started_log(self, log_path):
+        printable = self.indent_text(f"Started log at {log_path}")
         self.console.print(printable)
 
     def start_initialise_shell_processor(self):
         printable = self.wrap_title(constants.CONSOLE_START_INIT_SHELL_PROCCESS)
         self.console.print(printable)
 
+    def print_initialized_global_processor(self, pandda_args: PanDDAArgs):
+        printable = self.indent_text(f"Started the shell processor in mode {pandda_args.global_processing}")
+        self.console.print(printable)
+
+        if pandda_args.global_processing == "distributed":
+            printable = self.indent_text(f"Distributed options are:")
+            self.console.print(printable)
+
+            printable = self.indent_text(
+                (
+                    f"Tmp directory: {pandda_args.distributed_tmp} \n"
+                    f"Number of workers: {pandda_args.distributed_num_workers} \n"
+                    f"Project (for SGE): {pandda_args.distributed_project} \n"
+                    f"Queue (for SGE): {pandda_args.distributed_queue} \n"
+                    f"Cores per worker: {pandda_args.distributed_cores_per_worker} \n"
+                    f"Memory per core: {pandda_args.distributed_mem_per_core} \n"
+                ),
+                indent=8)
+            self.console.print(printable)
+
     def start_initialise_multiprocessor(self):
         printable = self.wrap_title(constants.CONSOLE_START_INIT_MULTIPROCESS)
         self.console.print(printable)
+
+    def print_initialized_local_processor(self, pandda_args: PanDDAArgs):
+        printable = self.indent_text(f"Started the multiprocessor in mode {pandda_args.local_processing}")
+        self.console.print(printable)
+
+        if pandda_args.local_processing != "serial":
+            printable = self.indent_text(f"Multiprocessing options are:")
+            self.console.print(printable)
+
+            printable = self.indent_text(
+                (
+                    f"Number of CPUs: {pandda_args.local_cpus} \n"
+                ),
+                indent=8)
+            self.console.print(printable)
 
     def start_fs_model(self):
         printable = self.wrap_title(constants.CONSOLE_START_FS_MODEL)
@@ -67,11 +162,26 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def summarise_reference(self, reference):
-        self.console.print(str(reference.dtag))
+        printable = self.indent_text(f"Reference dataset is: {str(reference.dtag)}")
+        self.console.print(printable)
 
     def start_b_factor_smoothing(self):
         printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
         self.console.print(printable)
+
+    def summarise_b_factor_smoothing(self, datasets: DatasetsInterface):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Smoothing Factors"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Smoothing Factor")
+
+        for dtag, dataset in datasets.items():
+            event_class_table.add_row(
+                str(dtag.dtag),
+                str(round(dataset.smoothing_factor, 2)),
+            )
+
+        self.console.print(event_class_table)
 
     def start_reference_comparability_filters(self):
         printable = self.wrap_title(constants.CONSOLE_START_REF_COMPAT_FILTERS)
@@ -81,13 +191,49 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_GET_GRID)
         self.console.print(printable)
 
+    def summarise_get_grid(self, grid: GridInterface):
+        printable = self.indent_text(f"Got Grid. Paramaters are:")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"nu: {grid.grid.nu} nv: {grid.grid.nv} nw: {grid.grid.nw}", indent=8)
+        self.console.print(printable)
+
     def start_alignments(self):
         printable = self.wrap_title(constants.CONSOLE_START_ALIGN)
+        self.console.print(printable)
+
+    def summarise_local_alignment(self, ):
+        printable = self.indent_text(f"Locally aligned all datasets to reference")
         self.console.print(printable)
 
     def start_get_comparators(self):
         printable = self.wrap_title(constants.CONSOLE_START_GET_COMPAR)
         self.console.print(printable)
+
+    def summarise_get_comarators(self, comparators):
+        # self.console.print(comparators)
+        first_set = list(comparators.values())[0]
+
+        printable = self.indent_text(f"Found {len(first_set)} statistical models.")
+        self.console.print(printable)
+
+    def start_get_shells(self):
+        printable = self.wrap_title(f"Getting shells...")
+        self.console.print(printable)
+
+    def summarise_get_shells(self, shells):
+        printable = self.indent_text(f"Got {len(shells)} for processing. Shells are:")
+        self.console.print(printable)
+
+        for shell_number, shell in shells.items():
+            printable = self.indent_text(
+                (
+                    f"{shell.res}: "
+                    f"Num test dtags: {len(shell.test_dtags)} "
+                    f"Total num dtags: {len(shell.all_dtags)}"
+                ),
+                indent=8)
+            self.console.print(printable)
 
     def start_process_shells(self):
         printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
@@ -95,6 +241,31 @@ class PanDDAConsole:
 
     def start_autobuilding(self):
         printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
+        self.console.print(printable)
+
+    def summarise_autobuilding(self, autobuild_results: AutobuildResultsInterface):
+        printable = self.indent_text(f"Autobuilt all event maps")
+        self.console.print(printable)
+
+    def summarise_autobuild_model_update(self, dataset_selected_events):
+        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_class_table.title = "Selected Autobuilds"
+        event_class_table.add_column("Dtag")
+        event_class_table.add_column("Event ID")
+        event_class_table.add_column("Autobuild Path")
+
+        for _dtag in dataset_selected_events:
+            dtag, event_idx, path = dataset_selected_events[_dtag]
+            event_class_table.add_row(
+                str(dtag),
+                str(int(event_idx)),
+                Path(path).name
+            )
+
+        self.console.print(event_class_table)
+
+    def start_autobuild_model_update(self, ):
+        printable = self.wrap_title("Updating PanDDA Models With Best Autobuilds")
         self.console.print(printable)
 
     def start_ranking(self):
@@ -107,6 +278,34 @@ class PanDDAConsole:
 
     def start_run_summary(self):
         printable = self.wrap_title(constants.CONSOLE_START_SUMMARY)
+        self.console.print(printable)
+
+    def start_event_table_output(self):
+        printable = self.wrap_title(f"Writing Event Table")
+        self.console.print(printable)
+
+    def summarise_event_table_output(self, path):
+        printable = self.indent_text(f"Event table written to: {str(path)}")
+        self.console.print(printable)
+
+    def start_site_table_output(self):
+        printable = self.wrap_title(f"Writing Site Table")
+        self.console.print(printable)
+
+    def summarise_site_table_output(self, path):
+        printable = self.indent_text(f"Site table written to: {str(path)}")
+        self.console.print(printable)
+
+    def start_log_save(self):
+        printable = self.wrap_title(f"Saving JSON log of run...")
+        self.console.print(printable)
+
+    def summarise_log_save(self, path):
+        printable = self.indent_text(f"JSON log written to: {str(path)}")
+        self.console.print(printable)
+
+    def summarise_run(self, time):
+        printable = self.wrap_title(f"PanDDA ran in {time}")
         self.console.print(printable)
 
     def start_classification(self):
@@ -155,7 +354,6 @@ class PanDDAConsole:
         self.console.print(event_class_table)
 
     def summarise_datasets(self, datasets_initial, dataset_statistics):
-
         # Statistics
         # printable = self.indent_text(
         #     f"Unit cell statistics"
@@ -176,12 +374,18 @@ class PanDDAConsole:
         ucalpha = dataset_statistics.unit_cells["alpha"]
         ucbeta = dataset_statistics.unit_cells["beta"]
         ucgamma = dataset_statistics.unit_cells["gamma"]
-        unit_cell_table.add_row("a", str(np.min(uca)), str(np.mean(uca)), str(np.max(uca)))
-        unit_cell_table.add_row("b", str(np.min(ucb)), str(np.mean(ucb)), str(np.max(ucb)))
-        unit_cell_table.add_row("c", str(np.min(ucc)), str(np.mean(ucc)), str(np.max(ucc)))
-        unit_cell_table.add_row("alpha", str(np.min(ucalpha)), str(np.mean(ucalpha)), str(np.max(ucalpha)))
-        unit_cell_table.add_row("beta", str(np.min(ucbeta)), str(np.mean(ucbeta)), str(np.max(ucbeta)))
-        unit_cell_table.add_row("gamma", str(np.min(ucgamma)), str(np.mean(ucgamma)), str(np.max(ucgamma)))
+        unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)),
+                                str(round(np.max(uca), 2)))
+        unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)),
+                                str(round(np.max(ucb), 2)))
+        unit_cell_table.add_row("c", str(round(np.min(ucc), 2)), str(round(np.mean(ucc), 2)),
+                                str(round(np.max(ucc), 2)))
+        unit_cell_table.add_row("alpha", str(round(np.min(ucalpha), 2)), str(round(np.mean(ucalpha), 2)),
+                                str(round(np.max(ucalpha), 2)))
+        unit_cell_table.add_row("beta", str(round(np.min(ucbeta), 2)), str(round(np.mean(ucbeta), 2)),
+                                str(round(np.max(ucbeta), 2)))
+        unit_cell_table.add_row("gamma", str(round(np.min(ucgamma), 2)), str(round(np.mean(ucgamma), 2)),
+                                str(round(np.max(ucgamma), 2)))
 
         self.console.print(unit_cell_table)
 
@@ -193,7 +397,7 @@ class PanDDAConsole:
         resolution_table.add_column("Min")
         resolution_table.add_column("Mean")
         resolution_table.add_column("Max")
-        resolution_table.add_row(str(np.min(ress)), str(np.mean(ress)), str(np.max(ress)))
+        resolution_table.add_row(str(round(np.min(ress), 2)), str(round(np.mean(ress), 2)), str(round(np.max(ress), 2)))
 
         self.console.print(
             resolution_table
@@ -226,18 +430,31 @@ class PanDDAConsole:
         # Columns
         table.add_column("Dtag")
         table.add_column("Resolution")
-        table.add_column("Spacegroup")
 
         # Rows
         for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
             dataset = datasets_initial[dtag]
             table.add_row(
                 dtag.dtag,
-                str(dataset.reflections.reflections.resolution_high()),
+                str(round(dataset.reflections.reflections.resolution_high(), 2)),
                 dataset.reflections.reflections.spacegroup.hm,
             )
 
         self.console.print(table)
+
+    def start_identify_structure_factors(self, ):
+        printable = self.wrap_title("Getting Structure Factors...")
+        self.console.print(printable)
+
+    def summarise_structure_factors(self, structure_factors, label_counts):
+        printable = self.indent_text(f"Label counts are: ")
+        self.console.print(printable)
+
+        printable = self.indent_text(Pretty(label_counts), indent=8)
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Structure factors are: {structure_factors.f} {structure_factors.phi}")
+        self.console.print(printable)
 
     def summarise_shells(self,
                          shell_results: ShellResultsInterface,
@@ -295,8 +512,7 @@ class PanDDAConsole:
         for filter_key, filtered in filtered_dtags.items():
             self.console.print(f"Filtered with {filter_key}: {filtered}")
 
-
-    def print_exception(self,):
+    def print_exception(self, ):
         self.console.print_exception()
 
     def save(self, console_log_file):

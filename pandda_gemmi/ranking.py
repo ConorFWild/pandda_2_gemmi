@@ -112,7 +112,7 @@ class GetEventRankingEventScore:
 class GetEventRankingEventScore:
 
     def __init__(self, cutoff=0.55):
-        self.event_score_cutoff = 0.55
+        self.event_score_cutoff = cutoff
 
     def __call__(self, events:EventsInterface,
                  event_scores: EventScoresInterface,

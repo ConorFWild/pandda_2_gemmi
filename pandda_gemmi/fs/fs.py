@@ -15,6 +15,7 @@ set_loky_pickler('pickle')
 from typing import *
 from functools import partial
 
+from pandda_gemmi.common import Partial
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
 from pandda_gemmi.python_types import *
@@ -192,7 +193,6 @@ class LigandDir:
                 ligand_pdb_path_dict[ligand_key] = None
 
         # print(f"\tPaths dicts are: {ligand_smiles_path_dict}; {ligand_cif_path_dict}; {ligand_pdb_path_dict}")
-
 
         return LigandDir(path,
                          ligand_smiles_path_dict,
@@ -539,7 +539,7 @@ class ProcessedDataset(ProcessedDatasetInterface):
     log_path: Path
 
     @staticmethod
-    def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path) -> ProcessedDataset:
+    def from_dataset_dir(dataset_dir: DatasetDir, processed_dataset_dir: Path, ) -> ProcessedDataset:
         dataset_models_dir = processed_dataset_dir / PANDDA_MODELLED_STRUCTURES_DIR
 
         # Copy the input pdb and mtz
@@ -556,6 +556,7 @@ class ProcessedDataset(ProcessedDatasetInterface):
         input_ligand_pdb = processed_dataset_dir / PANDDA_LIGAND_PDB_FILE
         input_ligand_smiles = processed_dataset_dir / PANDDA_LIGAND_SMILES_FILE
 
+        # Define the output Files
         z_map_file = ZMapFile.from_dir(processed_dataset_dir, processed_dataset_dir.name)
         event_map_files = EventMapFiles.from_dir(processed_dataset_dir)
 
@@ -584,7 +585,9 @@ class ProcessedDataset(ProcessedDatasetInterface):
             log_path=log_path,
         )
 
-    def build(self):
+    def build(self,
+              get_dataset_smiles: GetDatasetSmilesInterface,
+              ):
         if not self.path.exists():
             os.mkdir(str(self.path))
 
@@ -594,6 +597,14 @@ class ProcessedDataset(ProcessedDatasetInterface):
         if self.source_ligand_cif: shutil.copyfile(self.source_ligand_cif, self.input_ligand_cif)
         if self.source_ligand_pdb: shutil.copyfile(self.source_ligand_pdb, self.input_ligand_pdb)
         if self.source_ligand_smiles: shutil.copyfile(self.source_ligand_smiles, self.input_ligand_smiles)
+
+        get_dataset_smiles(
+            self.path,
+            self.input_ligand_smiles,
+            self.source_ligand_pdb,
+            self.source_ligand_cif,
+            self.source_ligand_smiles
+        )
 
         input_ligand_dir_path = self.input_ligand_dir
         if not input_ligand_dir_path.exists():
@@ -647,14 +658,14 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
         for dtag in self.processed_datasets:
             yield dtag
 
-    def build(self, process_local=None):
+    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: ProcessorInterface=None):
         if not self.path.exists():
             os.mkdir(str(self.path))
 
         if process_local:
             process_local(
                 [
-                    self.processed_datasets[dtag].build
+                    Partial(self.processed_datasets[dtag].build).paramaterise(get_dataset_smiles)
                     for dtag
                     in self.processed_datasets
                 ]
@@ -663,7 +674,7 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
         else:
 
             for dtag in self.processed_datasets:
-                self.processed_datasets[dtag].build()
+                self.processed_datasets[dtag].build(get_dataset_smiles)
 
 
 @dataclasses.dataclass()
@@ -720,6 +731,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
     shell_dirs: Optional[ShellDirs]
     console_log_file: Path
     events_json_file: Path
+    tmp_dir: Path
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -751,12 +763,15 @@ class PanDDAFSModel(PanDDAFSModelInterface):
                              events_json_file=events_json_file,
                              )
 
-    def build(self, overwrite=False, process_local=None):
+    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, overwrite=False, process_local=None):
         if not self.pandda_dir.exists():
             os.mkdir(str(self.pandda_dir))
 
-        self.processed_datasets.build(process_local=process_local)
+        self.processed_datasets.build(get_dataset_smiles, process_local=process_local)
         self.analyses.build()
+
+        if not self.tmp_dir.exists():
+            os.mkdir(str(self.tmp_dir))
 
 
 def get_pandda_fs_model(input_data_dirs: Path,
@@ -778,6 +793,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     events_json_file = output_out_dir / PANDDA_EVENT_JSON_FILE
 
+    tmp_dir = output_out_dir / "tmp"
+
     return PanDDAFSModel(pandda_dir=output_out_dir,
                          data_dirs=data_dirs,
                          analyses=analyses,
@@ -785,7 +802,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
                          log_file=log_path,
                          shell_dirs=None,
                          console_log_file=console_log_file,
-                         events_json_file=events_json_file
+                         events_json_file=events_json_file,
+                         tmp_dir=tmp_dir
                          )
 
 
@@ -798,9 +816,8 @@ class GetPanDDAFSModel(GetPanDDAFSModelInterface):
                  ligand_dir_regex: str,
                  ligand_cif_regex: str,
                  ligand_pdb_regex: str,
-                 ligand_smiles_regex: str
+                 ligand_smiles_regex: str,
                  ):
-
         self.data_dirs = data_dirs
         self.out_dir = out_dir
         self.pdb_regex = pdb_regex

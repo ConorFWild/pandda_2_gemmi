@@ -159,8 +159,10 @@ class PanDDAFSModelInterface(Protocol):
     shell_dirs: Optional[ShellDirsInterface]
     console_log_file: Path
     events_json_file: Path
+    tmp_dir: Path
 
-    def build(self) -> None:
+    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None)\
+            -> None:
         ...
 
     # def get_pandda_dir(self) -> Path:
@@ -216,7 +218,7 @@ class ReferenceInterface(Protocol):
 class DatasetInterface(Protocol):
     structure: StructureInterface
     reflections: ReflectionsInterface
-
+    smoothing_factor: float
 
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 
@@ -672,6 +674,14 @@ class AnalyseModelInterface(Protocol):
                  ) -> ModelResultInterface:
         ...
 
+class GetDatasetSmilesInterface(Protocol):
+    def __call__(self, processed_dataset_path: Path,
+                 output_smiles_path: Path,
+                 ligand_pdb_path: Optional[Path],
+                 ligand_cif_path: Optional[Path],
+                 ligand_smiles_path: Optional[Path],
+                 ) -> Optional[Path]:
+        ...
 
 class DatasetsValidatorInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface, exception: str):

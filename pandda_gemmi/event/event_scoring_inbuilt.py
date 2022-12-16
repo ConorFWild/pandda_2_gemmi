@@ -9,7 +9,6 @@ from scipy import spatial as spsp, optimize
 from pathlib import Path
 import time
 
-from openbabel import pybel
 
 #
 from pandda_gemmi.analyse_interface import *
@@ -196,66 +195,6 @@ def structures_from_cif(
     return {ConfomerID(0): structure}
 
 
-def smiles_path_from_cif(
-        fragment_dataset: ProcessedDatasetInterface,
-        debug: Debug = Debug.DEFAULT):
-    source_ligand_cif = fragment_dataset.source_ligand_cif
-
-    # Run phenix to normalize cif
-    cif_path, pdb_path = generate_cif(
-        source_ligand_cif,
-        fragment_dataset.path
-    )
-
-    # # Open new pdb with open babel
-    # mol = next(pybel.readfile("pdb", str(pdb_path)))
-    #
-    # # Convert to cif and back again to deal with psky Hs that confuse RDKIT
-    # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
-
-    # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(str(pdb_path))
-
-    # Write smiles
-    smiles = Chem.MolToSmiles(mol)
-
-    # Write the smiles
-    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
-    with open(smiles_path, "w") as f:
-        f.write(smiles)
-
-    return smiles_path
-
-
-def smiles_path_from_pdb(
-        fragment_dataset: ProcessedDatasetInterface,
-        debug: Debug = Debug.DEFAULT):
-    source_ligand_pdb = fragment_dataset.source_ligand_pdb
-
-    # Run phenix to normalize cif
-    cif_path, pdb_path = generate_cif(
-        source_ligand_pdb,
-        fragment_dataset.path
-    )
-
-    # # Open new pdb with open babel
-    # mol = next(pybel.readfile("pdb", str(pdb_path)))
-    #
-    # # Convert to cif and back again to deal with psky Hs that confuse RDKIT
-    # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
-
-    # Read pdb to rdkit
-    mol = Chem.MolFromPDBFile(str(pdb_path))
-
-    # Write smiles
-    smiles = Chem.MolToSmiles(mol)
-
-    # Write the smiles
-    smiles_path = fragment_dataset.path / "phenix_smiles.smiles"
-    with open(smiles_path, "w") as f:
-        f.write(smiles)
-
-    return smiles_path
 
 
 class Conformers(ConformersInterface):
@@ -314,7 +253,7 @@ def get_conformers(
     #     smiles_path = smiles_path_from_pdb(fragment_dataset, debug)
     #
     # print(f"Generated smiles: {smiles_path}")
-    smiles_path = fragment_dataset.smiles_path
+    smiles_path = fragment_dataset.input_ligand_smiles
 
     if smiles_path is None:
         return Conformers(
@@ -857,6 +796,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
                                    zmap_grid,
                                    resolution,
                                    rate,
+                                   event_fit_num_trys=5,
                                    debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
@@ -898,7 +838,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
     scores_signal_to_noise = []
     logs = []
     optimised_structures = []
-    for j in range(10):
+    for j in range(event_fit_num_trys):
         start_diff_ev = time.time()
 
         res = optimize.differential_evolution(
@@ -996,8 +936,9 @@ def score_conformer_nonquant_array(cluster: Cluster,
         # score = 1-float(res.fun)
         # print(f"\t\t\t\tScore: {score}")
 
-    print(f"Best fit score: {1 - min(scores)}")
-    print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
+    if debug >= Debug.PRINT_NUMERICS:
+        print(f"Best fit score: {1 - min(scores)}")
+        print(f"Best signal to noise score: {max(scores_signal_to_noise)}")
 
     best_score_index = np.argmax(scores_signal_to_noise)
     best_score = scores_signal_to_noise[best_score_index]
@@ -1414,6 +1355,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
 
 def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid, res, rate,
+                              event_fit_num_trys=5,
                               debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
@@ -1424,7 +1366,8 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
     for conformer_id, conformer in fragment_conformers.conformers.items():
         # results[conformer_id] = score_conformer(cluster, conformer, zmap_grid, debug)
         # results[conformer_id] = score_conformer_array(cluster, conformer, zmap_grid, debug)
-        results[conformer_id] = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate, debug)
+        results[conformer_id] = score_conformer_nonquant_array(cluster, conformer, zmap_grid, res, rate,
+                                                               event_fit_num_trys, debug)
 
     # scores = {conformer_id: result[0] for conformer_id, result in results.items()}
     # structures = {conformer_id: result[1] for conformer_id, result in results.items()}
@@ -1443,10 +1386,12 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface, res, rate,
+                  event_fit_num_trys=5,
                   debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
-    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, res, rate, debug)
+    ligand_fitting_result = score_fragment_conformers(cluster, fragment_conformers, zmap_grid, res, rate,
+                                                      event_fit_num_trys, debug)
 
     return EventScoringResult(ligand_fitting_result)
 
@@ -1477,6 +1422,7 @@ def score_clusters(
         zmaps,
         fragment_dataset,
         res, rate,
+event_fit_num_trys=5,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -1509,7 +1455,8 @@ def score_clusters(
 
         zmap_grid = zmaps[cluster_id]
 
-        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, res, rate, debug)
+        results[cluster_id] = score_cluster(cluster, zmap_grid, fragment_conformers, res, rate, event_fit_num_trys,
+                                            debug)
 
     return results
 
@@ -1817,6 +1764,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  event_density_score=1.0,
                  protein_score=-1.0,
                  protein_event_overlap_score=0.0,
+                 event_fit_num_trys=5,
                  debug: Debug = Debug.DEFAULT,
                  ) -> EventScoringResultsInterface:
         # Get the events and their BDCs
@@ -1907,7 +1855,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                 {(0, 0): event.cluster},
                 {(0, 0): event_map_reference_grid},
                 processed_dataset,
-                res, rate,
+                res, rate, event_fit_num_trys,
                 debug=debug,
             )
             time_scoring_finish = time.time()
@@ -1948,9 +1896,10 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                             )
                         )
 
-                string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
-                         f"{event.cluster.values.size}"
-                print(string)
+                if debug >= Debug.PRINT_NUMERICS:
+                    string = f"\t\tModel {model_number} Event {event_id.event_idx.event_idx} Score {score} Event Size " \
+                             f"{event.cluster.values.size}"
+                    print(string)
 
                 event_scores[event_id] = result
 

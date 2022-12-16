@@ -1,4 +1,9 @@
 ###################################################################
+# # Run Info
+###################################################################
+VERSION = "0.1.0"
+
+###################################################################
 # # Pandda File names
 ###################################################################
 
@@ -76,6 +81,16 @@ ARGS_LIGAND_SMILES_REGEX = "--ligand_smiles_regex"
 ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated with each ligand that may be bound in " \
                                 "the crystal."
 ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]smiles"
+
+ARGS_DATA_QUALITY_FILTERS = "--data_quality_filters"
+ARGS_DATA_QUALITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include \"structure_factors\", " \
+                                 "\"resolution\" and \"rfree\"."
+ARGS_DATA_QUALITY_FILTERS_DEFAULT = ("structure_factors", "resolution", "rfree")
+
+ARGS_REFERENCE_COMPARABILITY_FILTERS = "--reference_comparability_filters"
+ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include " \
+                                            "\"dissimilar_models\", \"large_gaps\" and \"dissimilar_spacegroups\""
+ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT = ("dissimilar_models", "large_gaps", )
 
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
@@ -257,7 +272,7 @@ ARGS_CIF_STRATEGY_HELP = "A string giving the strategy with which to generate th
                          "'default', 'elbow', 'grade' and 'grade2'. If default then the cifs found in the dataset " \
                          "directories will be used, otherwise they will be generated from the smiles found." \
                          "otherwise the smiles "
-ARGS_CIF_STRATEGY_DEFAULT = "elbow"
+ARGS_CIF_STRATEGY_DEFAULT = "default"
 ARGS_RANK_METHOD = "--rank_method"
 ARGS_RANK_METHOD_HELP = "A string giving the ranking method to be used from 'size' and 'autobuild'. If 'size' then " \
                         "the size of event will be used. If 'autobuild' then the scores from autobuilding will be used."
@@ -267,7 +282,7 @@ ARGS_DEBUG_HELP = "A boolean value giving whether or not to print debugging info
 ##########################
 ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT: int = 25
 ARGS_COMPARISON_STRATEGY_DEFAULT: str = "cluster"
-ARGS_LOCAL_PROCESSING_DEFAULT:str = "ray"
+ARGS_LOCAL_PROCESSING_DEFAULT: str = "multiprocessing_spawn"
 ARGS_LOCAL_CPUS_DEFAULT: int = 6
 ARGS_MEMORY_AVAILABILITY_DEFAULT: str = "low"
 ARGS_AUTOBUILD_DEFAULT: bool = True
@@ -275,7 +290,6 @@ ARGS_RANK_METHOD_DEFAULT: str = "event_score"
 ARGS_MIN_BDC_DEFAULT: float = 0.0
 ARGS_MAX_BDC_DEFAULT: float = 0.95
 ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
-
 
 ###################################################################
 # # Console constants
@@ -285,7 +299,7 @@ CONSOLE_START_LOG = "Initialising log..."
 CONSOLE_START_INIT_SHELL_PROCCESS = "Getting shell processor..."
 CONSOLE_START_INIT_MULTIPROCESS = "Getting multiprocessor..."
 CONSOLE_START_FS_MODEL = "Building model of file system..."
-CONSOLE_START_LOAD_DATASETS = "'Loading datasets...'"
+CONSOLE_START_LOAD_DATASETS = "Loading datasets..."
 CONSOLE_START_QUALITY_FILTERS = "Filtering datasets based on data quality..."
 CONSOLE_START_REF_SELEC = "Selecting reference structure for alignment..."
 CONSOLE_START_B_FACTOR_SMOOTHING = "Performing B factor smoothing of reflections..."

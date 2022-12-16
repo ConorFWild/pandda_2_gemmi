@@ -1099,6 +1099,7 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     # Create new dataset
     smoothed_dataset = Dataset(dataset.structure,
                                Reflections(new_reflections),
+                               smoothing_factor=float(min_scale)
                                )
 
     return smoothed_dataset
