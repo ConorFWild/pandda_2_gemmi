@@ -171,7 +171,10 @@ class QSubScheduler:
         print(stdout)
         print(stderr)
 
-        job_id = re.search("Your job ([0-9]+) ", str(stdout)).groups()[0]
+        job_id = re.search(
+            "Your job ([0-9]+) ",
+            str(stdout),
+        ).groups()[0]
 
         return SGEFuture(output_path, job_id)
 
