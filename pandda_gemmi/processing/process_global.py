@@ -2,6 +2,7 @@ import re
 import subprocess
 import pickle
 import secrets
+import sys
 import time
 
 import dask
@@ -10,6 +11,13 @@ from dask_jobqueue import HTCondorCluster, PBSCluster, SGECluster, SLURMCluster
 
 from pandda_gemmi.analyse_interface import *
 
+from enum import IntEnum
+
+
+class SGEResultStatus(IntEnum):
+    RUNNING = 1
+    DONE = 2
+    FAILED = 3
 
 def run_multiprocessing(func: PartialInterface[P, V]) -> V:
     return func()
@@ -23,6 +31,30 @@ job_script_template = (
 submit_command = "qsub -V -pe smp {cores} -l m_mem_free={mem_per_core}G -q medium.q -o {out_path} -e {err_path}.q {" \
                  "job_script_path}"
 
+
+
+class SGEFuture:
+    def __init__(self,
+                 result_path: Path,
+                 job_id: str,
+                 ):
+        self.result_path = result_path
+        self.job_id = job_id
+
+    def is_in_queue(self):
+        p = subprocess.Popen(
+            f"qstat",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = p.communicate()
+
+    def status(self):
+        if self.result_path.exists():
+            return SGEResultStatus.DONE
+
+        is_in_queue = self.is_in_queue()
 
 class QSubScheduler:
     def __init__(self,
@@ -86,11 +118,15 @@ class QSubScheduler:
 
         output_path, code = self.generate_io_path()
 
+        run_process_shell_path = Path(sys.path[0]).resolve() / "run_process_shell.py"
+        print(run_process_shell_path)
+
         job_script = job_script_template.format(
-            func_path,
-            output_path,
-            arg_paths,
-            kwarg_paths,
+            run_process_shell_path=run_process_shell_path,
+            func_path=func_path,
+            output_path=output_path,
+            arg_paths=arg_paths_string,
+            kwarg_paths=kwarg_paths_string,
         )
         print(job_script)
 
@@ -122,7 +158,7 @@ class QSubScheduler:
 
         job_id = re.match("Your job ([0-9]+) ", str(stdout)).groups()
 
-        return output_path
+        return SGEFuture(output_path, job_id)
 
     def load(self, path):
         with open(path, "rb") as f:
@@ -130,7 +166,7 @@ class QSubScheduler:
 
         return obj
 
-    def gather(self, output_paths):
+    def gather(self, sge_futures: List[SGEFuture]):
         task_status = [output_path.exists() for output_path in output_paths]
         while not all(task_status):
             task_status = [output_path.exists() for output_path in output_paths]
