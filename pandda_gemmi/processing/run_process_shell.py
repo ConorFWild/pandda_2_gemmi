@@ -13,7 +13,7 @@ def path_to_obj(path):
 def run(func_path, output_path, *arg_paths, **kwarg_paths):
     func = path_to_obj(func_path)
     args = [path_to_obj(arg_path) for arg_path in arg_paths]
-    kwargs = {kwrd: path_to_obj(kwarg_path) for kwrd, kwarg_path in kwarg_paths}
+    kwargs = {kwrd: path_to_obj(kwarg_path) for kwrd, kwarg_path in kwarg_paths.items()}
 
     result = func(*args, **kwargs)
 
