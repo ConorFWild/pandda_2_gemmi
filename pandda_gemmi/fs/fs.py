@@ -770,6 +770,9 @@ class PanDDAFSModel(PanDDAFSModelInterface):
         self.processed_datasets.build(get_dataset_smiles, process_local=process_local)
         self.analyses.build()
 
+        if not self.tmp_dir.exists():
+            os.mkdir(str(self.pandda_dir))
+
 
 def get_pandda_fs_model(input_data_dirs: Path,
                         output_out_dir: Path,
