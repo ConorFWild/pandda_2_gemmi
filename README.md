@@ -4,6 +4,7 @@
 
  - Improved README.md
  - Phenix dependency removed
+ - PanDDA defaults to using present cifs with no rebuilding
  - Cleaner logs
  - Improved ranking for unbuildable events
  - Memory performance optimizations
