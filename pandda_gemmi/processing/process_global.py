@@ -137,7 +137,7 @@ class QSubScheduler:
 
         # run_process_shell_path = Path(sys.path[0]).resolve() / "run_process_shell.py"
         f = inspect.getframeinfo(inspect.currentframe()).filename
-        run_process_shell_path = Path(os.path.dirname(os.path.abspath(f)))
+        run_process_shell_path = Path(os.path.dirname(os.path.abspath(f))) / "run_process_shell.py"
         print(run_process_shell_path)
 
         job_script = job_script_template.format(
