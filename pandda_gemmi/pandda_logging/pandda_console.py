@@ -30,7 +30,7 @@ def get_git_revision_hash() -> str:
 
     stdout, stderr = p.communicate()
 
-    return str(stdout)
+    return str(stdout.decode('ascii').strip())
 
 
 def get_git_revision_short_hash() -> str:
@@ -46,7 +46,7 @@ def get_git_revision_short_hash() -> str:
 
     stdout, stderr = p.communicate()
 
-    return str(stdout)
+    return str(stdout.decode('ascii').strip())
 
 
 class PanDDAConsole:
