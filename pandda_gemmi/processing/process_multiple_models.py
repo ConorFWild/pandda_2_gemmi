@@ -11,6 +11,8 @@ from typing import Set
 import pickle
 
 from pandda_gemmi.processing.process_local import ProcessLocalSerial
+from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
+console = PanDDAConsole()
 
 printer = pprint.PrettyPrinter()
 
@@ -1136,8 +1138,8 @@ def process_shell_multiple_models(
         score_events_func: GetEventScoreInterface,
         debug: Debug = Debug.DEFAULT,
 ):
-    if debug >= Debug.PRINT_SUMMARIES:
-        print(f"Processing shell at resolution: {shell.res}")
+    if debug >= Debug.DEFAULT:
+        console.print_starting_process_shell(shell)
 
     if memory_availability == "very_low":
         process_local_in_shell: ProcessorInterface = ProcessLocalSerial()
@@ -1176,8 +1178,9 @@ def process_shell_multiple_models(
     ###################################################################
     # # Homogonise shell datasets by truncation of resolution
     ###################################################################
-    if debug >= Debug.PRINT_SUMMARIES:
-        print(f"\tTruncating shell datasets")
+    if debug >= Debug.DEFAULT:
+        console.print_starting_truncating_shells()
+
     shell_working_resolution: ResolutionInterface = Resolution(
         max([datasets[dtag].reflections.get_resolution() for dtag in shell.all_dtags]))
     shell_truncated_datasets: DatasetsInterface = truncate(
@@ -1189,11 +1192,14 @@ def process_shell_multiple_models(
     # shell_truncated_datasets = shell_datasets
     shell_log["Shell Working Resolution"] = shell_working_resolution.resolution
 
+    if debug >= Debug.DEFAULT:
+        console.print_summarise_truncating_shells(shell_truncated_datasets)
+
     ###################################################################
     # # Generate aligned Xmaps
     ###################################################################
-    if debug >= Debug.PRINT_SUMMARIES:
-        print(f"\tLoading xmaps")
+    if debug >= Debug.DEFAULT:
+        console.print_starting_loading_xmaps()
 
     time_xmaps_start = time.time()
 
@@ -1243,11 +1249,14 @@ def process_shell_multiple_models(
             #     pandda_fs_model.pandda_dir / f"{shell.res}_{dtag}.ccp4"
             # )
 
+    if debug >= Debug.DEFAULT:
+        console.print_summarise_loading_xmaps(xmaps, time_xmaps_finish - time_xmaps_start)
+
     ###################################################################
     # # Get the models to test
     ###################################################################
-    if debug >= Debug.PRINT_SUMMARIES:
-        print(f"\tGetting models")
+    if debug >= Debug.DEFAULT:
+        console.print_starting_get_models()
     models: ModelsInterface = get_models(
         shell.test_dtags,
         shell.train_dtags,
@@ -1264,12 +1273,18 @@ def process_shell_multiple_models(
                 pandda_fs_model.pandda_dir / f"{shell.res}_{model_key}_mean.ccp4"
             )
 
+    if debug >= Debug.DEFAULT:
+        console.print_summarise_get_models(models)
+
     ###################################################################
     # # Process each test dataset
     ###################################################################
     # Now that all the data is loaded, get the comparison set and process each test dtag
 
-    # process_dataset_paramaterized = 
+    # process_dataset_paramaterized =
+
+    if debug >= Debug.DEFAULT:
+        console.print_starting_process_datasets()
 
     # Process each dataset in the shell
     all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
@@ -1324,6 +1339,8 @@ def process_shell_multiple_models(
         ],
     )
 
+
+
     # Update shell log with dataset results
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
     for result in results:
@@ -1340,5 +1357,8 @@ def process_shell_multiple_models(
         log=shell_log,
 
     )
+
+    if debug >= Debug.DEFAULT:
+        console.print_summarise_process_datasets(shell_result)
 
     return shell_result

@@ -31,6 +31,7 @@ from pandda_gemmi.model import Model, Zmap
 from pandda_gemmi.event import Event
 
 
+
 def run(func: Partial):
     return func()
 

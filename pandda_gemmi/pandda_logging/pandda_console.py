@@ -1,3 +1,6 @@
+import inspect
+import os
+
 import numpy as np
 
 from rich.console import Console
@@ -15,11 +18,35 @@ import subprocess
 
 
 def get_git_revision_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    # return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    f = inspect.getframeinfo(inspect.currentframe()).filename
+    path_to_check = Path(os.path.dirname(os.path.abspath(f)))
+    p = subprocess.Popen(
+        f"cd {path_to_check}; git rev-parse HEAD",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+
+    stdout, stderr = p.communicate()
+
+    return str(stdout)
 
 
 def get_git_revision_short_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    # return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    f = inspect.getframeinfo(inspect.currentframe()).filename
+    path_to_check = Path(os.path.dirname(os.path.abspath(f)))
+    p = subprocess.Popen(
+        f"cd {path_to_check}; git rev-parse --short HEAD",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+
+    stdout, stderr = p.communicate()
+
+    return str(stdout)
 
 
 class PanDDAConsole:
@@ -238,6 +265,51 @@ class PanDDAConsole:
     def start_process_shells(self):
         printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
         self.console.print(printable)
+
+    def print_starting_process_shell(self, shell: ShellInterface):
+        printable = self.wrap_title("Processing Shell!")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Processing shell at resolution: {shell.res}")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"There are {len(shell.test_dtags)} datasets to analyse in this shell. These are:")
+        self.console.print(printable)
+
+        for dtag in shell.test_dtags:
+            printable = self.indent_text(f"{dtag.dtag}", indent=8)
+            self.console.print(printable)
+
+    def print_starting_truncating_shells(self):
+        printable = self.wrap_title(f"\tTruncating shell datasets")
+        self.console.print(printable)
+
+    def print_summarise_truncating_shells(self, shell_truncated_datasets: DatasetsInterface):
+        printable = self.indent_text(f"Truncated {len(shell_truncated_datasets)} datasets for processing...")
+        self.console.print(printable)
+
+    def print_starting_loading_xmaps(self):
+        printable = self.wrap_title(f"\tLoading xmaps")
+        self.console.print(printable)
+
+    def print_summarise_loading_xmaps(self, xmaps: XmapsInterface, xmap_processing_time: float):
+        printable = self.indent_text(f"Loaded {len(xmaps)} aligned XMaps in {xmap_processing_time}")
+        self.console.print(printable)
+
+    def print_starting_get_models(self):
+        printable = self.wrap_title(f"\tGetting models")
+        self.console.print(printable)
+
+    def print_summarise_get_models(self, models: ModelsInterface):
+        printable = self.indent_text(f"Got {len(models)} models!")
+        self.console.print(printable)
+
+    def print_starting_process_datasets(self):
+        printable = self.wrap_title(f"Processing test datasets")
+        self.console.print(printable)
+
+    def print_summarise_process_datasets(self, shell_result: ShellResultInterface):
+        print(f"\tProcessed test datasets!")
 
     def start_autobuilding(self):
         printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)

@@ -796,7 +796,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
                                    zmap_grid,
                                    resolution,
                                    rate,
-                                   event_fit_num_trys=5,
+                                   event_fit_num_trys=3,
                                    debug: Debug = Debug.DEFAULT) -> ConformerFittingResultInterface:
     # Center the conformer at the cluster
     centroid_cart = cluster.centroid
@@ -1355,7 +1355,7 @@ def score_conformer(cluster: Cluster, conformer, zmap_grid, debug=False):
 
 
 def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface, zmap_grid, res, rate,
-                              event_fit_num_trys=5,
+                              event_fit_num_trys=3,
                               debug: Debug = Debug.DEFAULT) -> LigandFittingResultInterface:
     if debug >= Debug.PRINT_NUMERICS:
         print("\t\t\t\tGetting fragment conformers from model")
@@ -1386,7 +1386,7 @@ def score_fragment_conformers(cluster, fragment_conformers: ConformersInterface,
 
 
 def score_cluster(cluster, zmap_grid: gemmi.FloatGrid, fragment_conformers: ConformersInterface, res, rate,
-                  event_fit_num_trys=5,
+                  event_fit_num_trys=3,
                   debug: Debug = Debug.DEFAULT) -> EventScoringResultInterface:
     if debug:
         print(f"\t\t\t\tScoring cluster")
@@ -1422,7 +1422,7 @@ def score_clusters(
         zmaps,
         fragment_dataset,
         res, rate,
-event_fit_num_trys=5,
+event_fit_num_trys=3,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -1764,7 +1764,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                  event_density_score=1.0,
                  protein_score=-1.0,
                  protein_event_overlap_score=0.0,
-                 event_fit_num_trys=5,
+                 event_fit_num_trys=3,
                  debug: Debug = Debug.DEFAULT,
                  ) -> EventScoringResultsInterface:
         # Get the events and their BDCs
