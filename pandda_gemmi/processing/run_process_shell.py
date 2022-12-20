@@ -11,7 +11,7 @@ def path_to_obj(path):
 
 
 def run(func_path, output_path, *arg_paths, **kwarg_paths):
-    print(f"Running qsub'd process...")
+    print(f"Processed arguments...")
     print(f"Function path is: {func_path}")
     print(f"Argument paths are: ")
     for arg_path in arg_paths:
@@ -41,4 +41,5 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
 
 if __name__ == "__main__":
+    print(f"Running qsub'd process...")
     fire.Fire(run)
