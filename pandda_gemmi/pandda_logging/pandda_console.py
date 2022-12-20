@@ -239,6 +239,44 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
         self.console.print(printable)
 
+    def print_starting_process_shell(self, shell: ShellInterface):
+        printable = self.wrap_title("Processing Shell!")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Processing shell at resolution: {shell.res}")
+        self.console.print(printable)
+
+    def print_starting_truncating_shells(self):
+        printable = self.wrap_title(f"\tTruncating shell datasets")
+        self.console.print(printable)
+
+    def print_summarise_truncating_shells(self, shell_truncated_datasets: DatasetsInterface):
+        printable = self.indent_text(f"Truncated {len(shell_truncated_datasets)} datasets for processing...")
+        self.console.print(printable)
+
+    def print_starting_loading_xmaps(self):
+        printable = self.wrap_title(f"\tLoading xmaps")
+        self.console.print(printable)
+
+    def print_summarise_loading_xmaps(self, xmaps: XmapsInterface, xmap_processing_time: float):
+        printable = self.indent_text(f"Loaded {len(xmaps)} aligned XMaps in {xmap_processing_time}")
+        self.console.print(printable)
+
+    def print_starting_get_models(self):
+        printable = self.wrap_title(f"\tGetting models")
+        self.console.print(printable)
+
+    def print_summarise_get_models(self, models: ModelsInterface):
+        printable = self.indent_text(f"Got {len(models)} models!")
+        self.console.print(printable)
+
+    def print_starting_process_datasets(self):
+        printable = self.wrap_title(f"Processing test datasets")
+        self.console.print(printable)
+
+    def print_summarise_process_datasets(self, shell_result: ShellResultInterface):
+        print(f"\tProcessed test datasets!")
+
     def start_autobuilding(self):
         printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
         self.console.print(printable)
