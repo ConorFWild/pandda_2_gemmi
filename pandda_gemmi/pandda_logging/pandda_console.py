@@ -246,6 +246,13 @@ class PanDDAConsole:
         printable = self.indent_text(f"Processing shell at resolution: {shell.res}")
         self.console.print(printable)
 
+        printable = self.indent_text(f"There are {len(shell.test_dtags)} datasets to analyse in this shell. These are:")
+        self.console.print(printable)
+
+        for dtag in shell.test_dtags:
+            printable = self.indent_text(f"{dtag.dtag}", indent=8)
+            self.console.print(printable)
+
     def print_starting_truncating_shells(self):
         printable = self.wrap_title(f"\tTruncating shell datasets")
         self.console.print(printable)
