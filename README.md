@@ -83,6 +83,23 @@ chmod 777 submit.sh
 qsub -V -o submit.o -e submit.e -q medium.q -pe smp 12 -l m_mem_free=15G submit.sh
 ```
 
+## PanDDA 2 Usage FAQ
+
+### The event map doesn't resemble the protein
+
+This is to be expected if the event map's event does not is not a fragment or actual meaningful change: in such cases the event map is effectively random and should be ignored.
+
+If there is clearly a fragment present but the event map's quality seems low for the protein: this is typically due to a poorly characterized ground state model and such event maps can be used as normal.
+
+### An event's density looks like the soaked fragment but it has not been autobuilt
+
+There are two possibilities. The first is that autobuilding the event has failed, typically because the outlying Z-values form a small blob.
+
+The second possibility is that the event has been autobuilt, but PanDDA prefers another event in the protein to merge into the model shown in pandda.inspect. This is because in the current version of PanDDA inspect only one autobuild can be chosen to display for any dataset, regarless of how many events it has. PanDDA does occasionally chose a poor autobuild over a good one, so it is important in such cases to manually build the good density and then check that if PanDDA has placed a fragment it too is in a sensible place.
+
+### Many datasets don't seem to have any event maps
+
+It is important to check the PanDDA logs to make sure that datasets you are interested in have not been filtered from consideration. 
 
 ## How PanDDA 2 works
 

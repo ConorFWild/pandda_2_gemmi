@@ -1,3 +1,5 @@
+import time
+
 import numpy
 import ray
 import multiprocessing as mp
@@ -73,10 +75,36 @@ class ProcessLocalSpawn(ProcessorInterface):
             #     run_multiprocessing,
             #     funcs,
             # )
-            results = pool.map(
-                run_multiprocessing,
-                funcs,
-            )
+            # results = pool.map(
+            #     run_multiprocessing,
+            #     funcs,
+            # )
+
+            start_time = time.time()
+            results = []
+            for func in funcs:
+                results.append(pool.apply(func.func, *func.args, **func.kwargs))
+
+            task_status = [result.ready() for result in results]
+            num_previously_completed = 0
+            num_completed = 0
+            num_tasks = len(task_status)
+            while not all(task_status):
+                current_time = time.time()
+
+                num_completed = len([x for x in task_status if x])
+                if num_completed != 0:
+                    average_time_per_task = (current_time - start_time) / num_completed
+                else:
+                    average_time_per_task = "-Unknown-"
+
+                if num_completed > num_previously_completed:
+                    print(f"\tCompleted {num_completed} out of {num_tasks} tasks. Average time per task: {average_time_per_task}.")
+
+                num_previously_completed = num_completed
+                time.sleep(15)
+                task_status = [result.ready() for result in results]
+
 
         return results
 
