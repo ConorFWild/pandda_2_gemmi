@@ -83,7 +83,7 @@ class ProcessLocalSpawn(ProcessorInterface):
             start_time = time.time()
             results = []
             for func in funcs:
-                results.append(pool.apply(func.func, *func.args, **func.kwargs))
+                results.append(pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
 
             task_status = [result.ready() for result in results]
             num_previously_completed = 0
