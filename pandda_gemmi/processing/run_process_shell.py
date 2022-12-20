@@ -20,6 +20,8 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
     for kwrd, kwarg_path in kwarg_paths.items():
         print(f"\t{kwrd} : {kwarg_path}")
 
+    print(f"Loading input!")
+
     func = path_to_obj(func_path)
     args = []
     for arg_path in arg_paths:
