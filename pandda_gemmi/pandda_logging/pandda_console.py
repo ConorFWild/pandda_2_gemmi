@@ -281,7 +281,7 @@ class PanDDAConsole:
             self.console.print(printable)
 
     def print_starting_truncating_shells(self):
-        printable = self.wrap_title(f"\tTruncating shell datasets")
+        printable = self.wrap_title(f"Truncating shell datasets")
         self.console.print(printable)
 
     def print_summarise_truncating_shells(self, shell_truncated_datasets: DatasetsInterface):
@@ -289,7 +289,7 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def print_starting_loading_xmaps(self):
-        printable = self.wrap_title(f"\tLoading xmaps")
+        printable = self.wrap_title(f"Loading xmaps")
         self.console.print(printable)
 
     def print_summarise_loading_xmaps(self, xmaps: XmapsInterface, xmap_processing_time: float):
@@ -297,7 +297,7 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def print_starting_get_models(self):
-        printable = self.wrap_title(f"\tGetting models")
+        printable = self.wrap_title(f"Getting models")
         self.console.print(printable)
 
     def print_summarise_get_models(self, models: ModelsInterface):
