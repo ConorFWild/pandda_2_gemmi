@@ -81,11 +81,11 @@ class ProcessLocalSpawn(ProcessorInterface):
             # )
 
             start_time = time.time()
-            results = []
+            result_futuress = []
             for func in funcs:
-                results.append(pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
+                result_futuress.append(pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
 
-            task_status = [result.ready() for result in results]
+            task_status = [result.ready() for result in result_futuress]
             num_previously_completed = 0
             num_completed = 0
             num_tasks = len(task_status)
@@ -103,8 +103,9 @@ class ProcessLocalSpawn(ProcessorInterface):
 
                 num_previously_completed = num_completed
                 time.sleep(15)
-                task_status = [result.ready() for result in results]
+                task_status = [result.ready() for result in result_futuress]
 
+        results = [result.get() for result in result_futuress]
 
         return results
 
