@@ -1,3 +1,6 @@
+import inspect
+import os
+
 import numpy as np
 
 from rich.console import Console
@@ -15,12 +18,34 @@ import subprocess
 
 
 def get_git_revision_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    # return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    f = inspect.getframeinfo(inspect.currentframe()).filename
+    path_to_check = Path(os.path.dirname(os.path.abspath(f)))
+    p = subprocess.Popen(
+        f"cd {path_to_check}; git rev-parse HEAD",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
 
+    stdout, stderr = p.communicate()
+
+    return str(stdout)
 
 def get_git_revision_short_hash() -> str:
-    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    # return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    f = inspect.getframeinfo(inspect.currentframe()).filename
+    path_to_check = Path(os.path.dirname(os.path.abspath(f)))
+    p = subprocess.Popen(
+        f"cd {path_to_check}; git rev-parse --short HEAD",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
 
+    stdout, stderr = p.communicate()
+
+    return str(stdout)
 
 class PanDDAConsole:
 
