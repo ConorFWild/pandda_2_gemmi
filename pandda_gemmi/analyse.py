@@ -920,7 +920,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 all_scores = {}
                 for event_id, autobuild_result in dataset_autobuild_results.items():
                     for path, score in autobuild_result.scores.items():
-                        all_scores[path] = score
+                        # all_scores[path] = score
+                        all_scores[path] = event_scores[event_id]
                         autobuild_to_event[path] = (dtag.dtag, event_id.event_idx.event_idx, path)
 
                 if len(all_scores) == 0:
