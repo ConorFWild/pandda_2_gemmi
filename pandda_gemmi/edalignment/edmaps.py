@@ -802,9 +802,14 @@ class LoadXmapFlat(LoadXMapFlatInterface):
 
 
 class GetMapStatistics:
-    def __init__(self, xmap: Union[XmapInterface, ZmapInterface]):
+    def __init__(self, xmap: Union[XmapInterface, ZmapInterface], grid: GridInterface):
         array = xmap.to_array()
 
+        protein_mask = grid.partitioning.protein_mask
+        protein_mask_array = np.array(protein_mask, copy=False, dtype=np.int8)
+
+        self.percent_outlying_protein = array[(array > 2) & (protein_mask_array == 1)].size / array[
+            protein_mask_array ==1].size
         self.mean = np.mean(array[array > 0])
         self.std = np.std(array[array > 0])
         self.greater_1 = array[array > 1.0].size

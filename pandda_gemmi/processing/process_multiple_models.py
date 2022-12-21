@@ -395,7 +395,7 @@ def get_models(
         # dataset_log[constants.LOG_DATASET_SIGMA_S] = summarise_array(sigma_s_m)
         # update_log(dataset_log, dataset_log_path)
 
-        model: Model = Model.from_mean_is_sms(
+        model: ModelInterface = Model.from_mean_is_sms(
             mean_array,
             sigma_is,
             sigma_s_m,
@@ -485,8 +485,11 @@ def analyse_model(
     model_log[constants.LOG_DATASET_Z_MAPS_TIME] = time_z_maps_finish - time_z_maps_start
     for dtag, zmap in zmaps.items():
         z_map_statistics = GetMapStatistics(
-            zmap
+            zmap,
+            grid
         )
+        print(f"Dataset {test_dtag} model {model_number} percent outlying "
+              f"protein {z_map_statistics.percent_outlying_protein}")
         model_log["ZMap statistics"] = {
             "mean": str(z_map_statistics.mean),
             "std": str(z_map_statistics.std),
