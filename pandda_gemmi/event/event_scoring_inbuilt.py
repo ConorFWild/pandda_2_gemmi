@@ -838,6 +838,8 @@ def score_conformer_nonquant_array(cluster: Cluster,
     scores_signal_to_noise = []
     logs = []
     optimised_structures = []
+    de_times = []
+    contour_score_times = []
     for j in range(event_fit_num_trys):
         start_diff_ev = time.time()
 
@@ -861,6 +863,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
             print(f"Fit Score: {res.fun}")
         scores.append(res.fun)
         finish_diff_ev = time.time()
+        de_times.append(str(finish_diff_ev-start_diff_ev))
         # TODO: back to debug
         # if debug:
         # print(f"\t\t\t\tdiff ev in: {finish_diff_ev - start_diff_ev}")
@@ -922,6 +925,7 @@ def score_conformer_nonquant_array(cluster: Cluster,
         #     resolution,
         #     rate
         # )
+        start_contour_score = time.time()
         score, log = score_structure_contour(
             optimised_structure,
             zmap_grid,
@@ -930,6 +934,8 @@ def score_conformer_nonquant_array(cluster: Cluster,
             # structure_map_high_cut=1.5
             structure_map_high_cut=0.6
         )
+        finish_contour_score = time.time()
+        contour_score_times.append(str(finish_contour_score-start_contour_score))
 
         scores_signal_to_noise.append(score)
         logs.append(log)
@@ -972,7 +978,9 @@ def score_conformer_nonquant_array(cluster: Cluster,
             "num_inner": best_score_log["num_inner"],
             "num_outer": best_score_log["num_outer"],
             "all_scores": best_score_log["scores"],
-            "scores_from_calc": best_score_log["scores_from_calc"]
+            "scores_from_calc": best_score_log["scores_from_calc"],
+            "DE Times": de_times,
+            "Contour Score Times": contour_score_times
         }
     )
 
@@ -1422,7 +1430,7 @@ def score_clusters(
         zmaps,
         fragment_dataset,
         res, rate,
-event_fit_num_trys=3,
+        event_fit_num_trys=3,
         debug: Debug = Debug.DEFAULT,
 ) -> Dict[Tuple[int, int], EventScoringResultInterface]:
     if debug >= Debug.PRINT_SUMMARIES:
