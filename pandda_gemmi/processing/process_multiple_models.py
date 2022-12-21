@@ -488,8 +488,8 @@ def analyse_model(
             zmap,
             grid
         )
-        print(f"Dataset {test_dtag} model {model_number} percent outlying "
-              f"protein {z_map_statistics.percent_outlying_protein}")
+        # print(f"Dataset {test_dtag} model {model_number} percent outlying "
+        #       f"protein {z_map_statistics.percent_outlying_protein}")
         model_log["ZMap statistics"] = {
             "mean": str(z_map_statistics.mean),
             "std": str(z_map_statistics.std),
