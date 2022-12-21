@@ -1273,6 +1273,9 @@ def process_shell_multiple_models(
     ###################################################################
     if debug >= Debug.DEFAULT:
         console.print_starting_get_models()
+
+    time_models_start = time.time()
+
     models: ModelsInterface = get_models(
         shell.test_dtags,
         shell.train_dtags,
@@ -1289,8 +1292,12 @@ def process_shell_multiple_models(
                 pandda_fs_model.pandda_dir / f"{shell.res}_{model_key}_mean.ccp4"
             )
 
+    time_models_finish = time.time()
+
     if debug >= Debug.DEFAULT:
-        console.print_summarise_get_models(models)
+        console.print_summarise_get_models(models, time_models_finish-time_models_start)
+
+
 
     ###################################################################
     # # Process each test dataset

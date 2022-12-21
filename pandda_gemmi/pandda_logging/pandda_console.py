@@ -300,8 +300,8 @@ class PanDDAConsole:
         printable = self.wrap_title(f"Getting models")
         self.console.print(printable)
 
-    def print_summarise_get_models(self, models: ModelsInterface):
-        printable = self.indent_text(f"Got {len(models)} models!")
+    def print_summarise_get_models(self, models: ModelsInterface, get_models_time: float):
+        printable = self.indent_text(f"Got {len(models)} models in {get_models_time} seconds!")
         self.console.print(printable)
 
     def print_starting_process_datasets(self):
