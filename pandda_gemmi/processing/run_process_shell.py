@@ -1,3 +1,4 @@
+import time
 import pickle
 
 import fire
@@ -31,8 +32,10 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
         kwargs[kwrd] = path_to_obj(kwarg_path)
 
     print(f"Loaded input. Running function!")
-
+    time_start_func = time.time()
     result = func(*args, **kwargs)
+    time_finish_func = time.time()
+    print(f"Ran subprocess function in: {time_finish_func-time_start_func} seconds!")
 
     print(f"Ran function: Pickeling results...")
 
@@ -43,5 +46,9 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
 
 if __name__ == "__main__":
+    time_start =time.time()
     print(f"Running qsub'd process...")
     fire.Fire(run)
+
+    time_finish = time.time()
+    print(f"Ran subprocess in: {time_finish-time_start} seconds!")

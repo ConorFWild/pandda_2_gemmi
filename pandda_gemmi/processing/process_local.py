@@ -112,7 +112,8 @@ class ProcessLocalSpawn(ProcessorInterface):
             else:
                 average_time_per_task = "-Unknown-"
 
-            print(f"\tCompleted {num_completed} out of {num_tasks} tasks. Average time per task: {average_time_per_task}.")
+            print(f"\tFinished tasks! Completed {num_completed} out of {num_tasks} tasks. Average time per task:"
+                  f" {average_time_per_task}.")
 
             results = [result.get() for result in result_futuress]
 
