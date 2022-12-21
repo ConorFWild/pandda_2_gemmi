@@ -430,6 +430,7 @@ def analyse_model(
         model,
         model_number,
         test_dtag,
+        dataset: DatasetInterface,
         dataset_xmap,
         reference,
         grid,
@@ -614,6 +615,15 @@ def analyse_model(
     model_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
     # update_log(dataset_log, dataset_log_path)
 
+    # Apply prior on number of events/protein chain and return if too many
+    num_protein_chains = len(set([resid.chain for resid in dataset.structure.protein_residue_ids()]))
+    num_events_prior = num_protein_chains * 3
+    if len(clusterings_merged[test_dtag].clustering) > num_events_prior:
+        clusterings_merged = FilterEDClusteringsSize()(clusterings_merged,
+                                                                          grid,
+                                                                          10000,
+                                                                          )
+
     # TODO: REMOVE: event blob analysis
     # blobfind_event_map_and_report_and_output(
     #     test_dtag,
@@ -635,7 +645,7 @@ def analyse_model(
     # )
 
     events: Events = Events.from_clusters(
-        clusterings_large,
+        clusterings_merged,
         model,
         {test_dtag: dataset_xmap, },
         grid,
@@ -842,6 +852,7 @@ def process_dataset_multiple_models(
                         model,
                         model_number,
                         test_dtag=test_dtag,
+                        dataset=dataset_truncated_datasets[test_dtag],
                         dataset_xmap=dataset_xmaps[test_dtag],
                         reference=reference,
                         grid=grid,
