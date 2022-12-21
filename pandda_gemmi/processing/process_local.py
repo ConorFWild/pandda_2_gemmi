@@ -94,7 +94,7 @@ class ProcessLocalSpawn(ProcessorInterface):
 
                 num_completed = len([x for x in task_status if x])
                 if num_completed != 0:
-                    average_time_per_task = (current_time - start_time) / num_completed
+                    average_time_per_task = round((current_time - start_time) / num_completed, 1)
                 else:
                     average_time_per_task = "-Unknown-"
 

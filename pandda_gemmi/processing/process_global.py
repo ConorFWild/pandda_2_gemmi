@@ -28,7 +28,7 @@ def run_multiprocessing(func: PartialInterface[P, V]) -> V:
 
 job_script_template = (
     "#!/bin/sh\n"
-    "{python_path} {run_process_shell_path} {func_path} {output_path} {arg_paths} {kwarg_paths}\n"
+    "{python_path} -u {run_process_shell_path} {func_path} {output_path} {arg_paths} {kwarg_paths}\n"
 )
 
 submit_command = "qsub -V -pe smp {cores} -l m_mem_free={mem_per_core}G -q medium.q -o {out_path} -e {err_path}.q {" \
