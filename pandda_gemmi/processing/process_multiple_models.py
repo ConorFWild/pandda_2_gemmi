@@ -496,6 +496,7 @@ def analyse_model(
             ">1.0": str(z_map_statistics.greater_1),
             ">2.0": str(z_map_statistics.greater_2),
             ">3.0": str(z_map_statistics.greater_3),
+            "Percent Outlying Protein": str(z_map_statistics.percent_outlying_protein)
         }
         if debug >= Debug.PRINT_SUMMARIES:
             print(model_log["ZMap statistics"])
@@ -1343,7 +1344,12 @@ def process_shell_multiple_models(
         ],
     )
 
-
+    for result in results:
+        if result:
+            result_dtag = result.dtag
+            for model_number, model_log in result.log["Model logs"].items():
+                precent_outlying_protein = model_log["ZMap statistics"]["Percent Outlying Protein"]
+                print(f"Dataset {result_dtag.dtag} model {model_number} percentage outlying protein {precent_outlying_protein}")
 
     # Update shell log with dataset results
     shell_log[constants.LOG_SHELL_DATASET_LOGS] = {}
