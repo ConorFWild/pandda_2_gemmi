@@ -105,7 +105,16 @@ class ProcessLocalSpawn(ProcessorInterface):
                 time.sleep(15)
                 task_status = [result.ready() for result in result_futuress]
 
-        results = [result.get() for result in result_futuress]
+            current_time = time.time()
+            num_completed = len([x for x in task_status if x])
+            if num_completed != 0:
+                average_time_per_task = round((current_time - start_time) / num_completed, 1)
+            else:
+                average_time_per_task = "-Unknown-"
+
+            print(f"\tCompleted {num_completed} out of {num_tasks} tasks. Average time per task: {average_time_per_task}.")
+
+            results = [result.get() for result in result_futuress]
 
         return results
 
