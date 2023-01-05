@@ -29,7 +29,7 @@ def autobuild_inbuilt(
     structure = event_scoring_result.get_selected_structure()
 
     # Make autobuild dir if it is not there
-    autobuild_dir = pandda_fs.processed_datasets.processed_datasets[event_id.dtag].path / "autobuilds"
+    autobuild_dir = pandda_fs.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}"
     if not autobuild_dir:
         os.mkdir(autobuild_dir)
 
