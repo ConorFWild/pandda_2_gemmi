@@ -91,6 +91,7 @@ from pandda_gemmi.processing import (
 
 from pandda_gemmi import event_classification
 from pandda_gemmi.sites import GetSites
+from event_rescoring import RescoreEventsAutobuildScore, RescoreEventsEventScore, RescoreEventsAutobuildRSCC, RescoreEventsSize
 from pandda_gemmi.analyse_interface import *
 
 joblib.externals.loky.set_loky_pickler('pickle')
@@ -984,6 +985,46 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
             console.summarise_autobuilds(autobuild_results)
+
+        ###################################################################
+        # # Rescore Events
+        ###################################################################
+
+        if pandda_args.rescore_event_method == "size":
+            event_rescoring_function = RescoreEventsSize()
+        elif pandda_args.rescore_event_method == "autobuild_rscc":
+            event_rescoring_function = RescoreEventsAutobuildRSCC()
+        elif pandda_args.rescore_event_method == "event_score":
+            event_rescoring_function = RescoreEventsEventScore()
+        elif pandda_args.rescore_event_method == "autobuild_score":
+            event_rescoring_function = RescoreEventsAutobuildScore()
+        else:
+            raise NotImplementedError(f"Event rescoring method \"{pandda_args.rescore_event_method}\" if not a valid event rescoring method.")
+
+        event_scores = {
+                event_id: event_score
+                for event_id, event_score
+                in zip(
+                    all_events,
+                    process_local(
+                        [
+                            Partial(
+                                event_rescoring_function).paramaterise(
+                                event_id,
+                                event,
+                                pandda_fs_model,
+                                datasets[event_id.dtag],
+                                event_scores[event_id],
+                                autobuild_results[event_id],
+                                grid,
+                                debug=pandda_args.debug,
+                            )
+                            for event_id, event
+                            in all_events.items()
+                        ],
+                    )
+                )
+            }
 
         ###################################################################
         # # Classify Events

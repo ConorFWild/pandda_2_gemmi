@@ -120,6 +120,12 @@ ARGS_JOB_PARAMS_FILE = "--job_params_file"
 ARGS_JOB_PARAMS_FILE_HELP = "DEPRECATED."
 ARGS_LOW_MEMORY = "--low_memory"
 ARGS_LOW_MEMORY_HELP = "DEPREACTED. "
+
+
+ARGS_RESCORE_EVENT_METHOD = "--rescore_event_method"
+ARGS_RESCORE_EVENT_METHOD_DEFAULT = "event_score"
+ARGS_RESCORE_EVENT_METHOD_HELP = "The method for scoring the events for ranking, classification and autobuild selection."
+
 ARGS_DISTRIBUTED_SCHEDULER = "--distributed_scheduler"
 ARGS_DISTRIBUTED_SCHEDULER_HELP = "A string from 'HTCONDOR', 'PBS', 'SGE', 'SLURM' that gives the name of which " \
                                   "cluster to " \

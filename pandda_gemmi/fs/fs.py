@@ -474,7 +474,7 @@ class StdMapFile:
 
 
 @dataclasses.dataclass()
-class EventMapFile:
+class EventMapFile(EventMapFileInterface):
     path: Path
 
     @staticmethod
@@ -488,7 +488,7 @@ class EventMapFile:
 
 
 @dataclasses.dataclass()
-class EventMapFiles:
+class EventMapFiles(EventMapFilesInterface):
     path: Path
     event_map_files: typing.Dict[EventIDX, EventMapFile]
 

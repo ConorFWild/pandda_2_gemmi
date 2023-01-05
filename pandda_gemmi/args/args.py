@@ -90,6 +90,7 @@ class PanDDAArgs:
     rhofit_coord: bool = False
     cif_strategy: str = constants.ARGS_CIF_STRATEGY_DEFAULT
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
+    rescore_event_method: str = constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT
     debug: Debug = Debug.DEFAULT
 
     @staticmethod
@@ -190,6 +191,11 @@ class PanDDAArgs:
             type=lambda x: bool(strtobool(x)),
             default=False,
             help=constants.ARGS_LOW_MEMORY_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_RESCORE_EVENT_METHOD,
+            default=constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT,
+            help=constants.ARGS_RESCORE_EVENT_METHOD_HELP
         )
 
         # Distribution

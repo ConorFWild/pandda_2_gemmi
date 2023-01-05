@@ -98,8 +98,15 @@ class ZMapFileInterface(Protocol):
     path: Path
 
 
+class EventMapFileInterface(Protocol):
+    path: Path
+
+
 class EventMapFilesInterface(Protocol):
     def add_event(self, event: EventInterface):
+        ...
+
+    def __getitem__(self, item: EventIDInterface) -> EventMapFileInterface:
         ...
 
 
@@ -161,7 +168,7 @@ class PanDDAFSModelInterface(Protocol):
     events_json_file: Path
     tmp_dir: Path
 
-    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None)\
+    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None) \
             -> None:
         ...
 
@@ -219,6 +226,7 @@ class DatasetInterface(Protocol):
     structure: StructureInterface
     reflections: ReflectionsInterface
     smoothing_factor: float
+
 
 DatasetsInterface = Dict[DtagInterface, DatasetInterface]
 
@@ -674,6 +682,7 @@ class AnalyseModelInterface(Protocol):
                  ) -> ModelResultInterface:
         ...
 
+
 class GetDatasetSmilesInterface(Protocol):
     def __call__(self, processed_dataset_path: Path,
                  output_smiles_path: Path,
@@ -682,6 +691,7 @@ class GetDatasetSmilesInterface(Protocol):
                  ligand_smiles_path: Optional[Path],
                  ) -> Optional[Path]:
         ...
+
 
 class DatasetsValidatorInterface(Protocol):
     def __call__(self, datasets: DatasetsInterface, exception: str):
@@ -949,12 +959,16 @@ class GetAutobuildResultRhofitInterface(Protocol):
                  ) -> AutobuildResultInterface:
         ...
 
+
 class GetAutobuildResultInbuiltInterface(Protocol):
     tag: Literal["inbuilt"] = "inbuilt"
+
     def __call__(self, *args, **kwargs):
         ...
 
+
 GetAutobuildResultInterface = Union[GetAutobuildResultRhofitInterface, GetAutobuildResultInbuiltInterface]
+
 
 class GetSitesInterface(Protocol):
     def __call__(self,
@@ -1031,3 +1045,5 @@ class GetEventRankingSizeAutobuildInterface(Protocol):
 GetEventRankingInterface = Union[
     GetEventRankingAutobuildInterface, GetEventRankingSizeInterface, GetEventRankingSizeAutobuildInterface
 ]
+
+RSCCSInterface = MutableMapping[Tuple[str, int], float]

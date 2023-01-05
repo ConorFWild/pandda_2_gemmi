@@ -33,16 +33,28 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
     print(f"Loaded input. Running function!")
     time_start_func = time.time()
-    result = func(*args, **kwargs)
-    time_finish_func = time.time()
-    print(f"Ran subprocess function in: {time_finish_func-time_start_func} seconds!")
+    try:
+        result = func(*args, **kwargs)
 
-    print(f"Ran function: Pickeling results...")
+        time_finish_func = time.time()
+        print(f"Ran subprocess function in: {time_finish_func-time_start_func} seconds!")
 
-    with open(output_path, "wb") as f:
-        pickle.dump(result, f)
+        print(f"Ran function: Pickeling results...")
 
-    print(f"Pickeled results! Returning!")
+        with open(output_path, "wb") as f:
+            pickle.dump(result, f)
+
+        print(f"Pickeled results! Returning!")
+
+    except Exception as e:
+
+        print(f"Ran function with exception: Pickeling results...")
+
+        with open(output_path, "wb") as f:
+            pickle.dump(e, f)
+
+        print(f"Pickeled exception! Returning!")
+
 
 
 if __name__ == "__main__":
