@@ -935,7 +935,9 @@ GetEventScoreInterface = Union[
     GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface, GetEventScoreSizeInterface]
 
 
-class GetAutobuildResultInterface(Protocol):
+class GetAutobuildResultRhofitInterface(Protocol):
+    tag: Literal["rhofit"] = "rhofit"
+
     def __call__(self,
                  dataset: DatasetInterface,
                  event: EventInterface,
@@ -947,6 +949,12 @@ class GetAutobuildResultInterface(Protocol):
                  ) -> AutobuildResultInterface:
         ...
 
+class GetAutobuildResultInbuiltInterface(Protocol):
+    tag: Literal["inbuilt"] = "inbuilt"
+    def __call__(self, *args, **kwargs):
+        ...
+
+GetAutobuildResultInterface = Union[GetAutobuildResultRhofitInterface, GetAutobuildResultInbuiltInterface]
 
 class GetSitesInterface(Protocol):
     def __call__(self,

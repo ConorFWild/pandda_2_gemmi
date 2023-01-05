@@ -65,10 +65,11 @@ from pandda_gemmi.ranking import (
     GetEventRankingSizeAutobuild,
     GetEventRankingEventScore
 )
-from pandda_gemmi.autobuild.autobuild import (
+from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
+    GetAutobuildResultInbuilt
 )
 from pandda_gemmi.tables import (
     GetEventTable,
@@ -406,7 +407,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
 
         elif pandda_args.autobuild_strategy == "inbuilt":
-            raise NotImplementedError("Autobuilding with inbuilt method is not yet implemented")
+            autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultInbuilt()
 
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
@@ -853,28 +854,58 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 process_autobuilds = process_global
 
             time_autobuild_start = time.time()
-            autobuild_results: AutobuildResultsInterface = {
-                event_id: autobuild_result
-                for event_id, autobuild_result
-                in zip(
-                    all_events,
-                    process_autobuilds(
-                        [
-                            Partial(autobuild_func).paramaterise(
-                                datasets[event_id.dtag],
-                                all_events[event_id],
-                                pandda_fs_model,
-                                cif_strategy=pandda_args.cif_strategy,
-                                cut=2.0,
-                                rhofit_coord=pandda_args.rhofit_coord,
-                                debug=pandda_args.debug,
-                            )
-                            for event_id
-                            in all_events
-                        ],
+
+            if autobuild_func.tag == "rhofit":
+                autobuild_results: AutobuildResultsInterface = {
+                    event_id: autobuild_result
+                    for event_id, autobuild_result
+                    in zip(
+                        all_events,
+                        process_autobuilds(
+                            [
+                                Partial(autobuild_func).paramaterise(
+                                    datasets[event_id.dtag],
+                                    all_events[event_id],
+                                    pandda_fs_model,
+                                    cif_strategy=pandda_args.cif_strategy,
+                                    cut=2.0,
+                                    rhofit_coord=pandda_args.rhofit_coord,
+                                    debug=pandda_args.debug,
+                                )
+                                for event_id
+                                in all_events
+                            ],
+                        )
                     )
-                )
-            }
+                }
+            elif autobuild_func.tag == "inbuilt":
+                event_scoring_results = {}
+                for res, shell_result in shell_results.items():
+                    if shell_result:
+                        for dtag, dataset_result in shell_result.dataset_results.items():
+                            for event_id, event_scoring_result in dataset_result.event_scores.items():
+                                event_scoring_results[event_id] = event_scoring_result
+
+                autobuild_results: AutobuildResultsInterface = {
+                    event_id: autobuild_result
+                    for event_id, autobuild_result
+                    in zip(
+                        all_events,
+                        process_autobuilds(
+                            [
+                                Partial(autobuild_func).paramaterise(
+                                    datasets[event_id.dtag],
+                                    all_events[event_id],
+                                    pandda_fs_model,
+                                    event_scoring_results,
+                                    debug=pandda_args.debug,
+                                )
+                                for event_id
+                                in all_events
+                            ],
+                        )
+                    )
+                }
 
             time_autobuild_finish = time.time()
             pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start

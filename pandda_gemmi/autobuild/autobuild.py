@@ -1399,7 +1399,7 @@ def autobuild_rhofit(dataset: Dataset,
 #                             )
 
 class GetAutobuildResultRhofit(GetAutobuildResultInterface):
-
+    tag = "rhofit"
     def __call__(self,
                  dataset: DatasetInterface,
                  event: EventInterface,
