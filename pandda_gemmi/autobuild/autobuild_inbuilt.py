@@ -30,7 +30,7 @@ def autobuild_inbuilt(
 
     # Make autobuild dir if it is not there
     autobuild_dir = pandda_fs.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}"
-    if not autobuild_dir:
+    if not autobuild_dir.exists():
         os.mkdir(autobuild_dir)
 
     # Save autobuild to dir

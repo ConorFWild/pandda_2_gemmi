@@ -413,6 +413,19 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
 
+    # Get the rescoring function
+    if pandda_args.rescore_event_method == "size":
+        event_rescoring_function = RescoreEventsSize()
+    elif pandda_args.rescore_event_method == "autobuild_rscc":
+        event_rescoring_function = RescoreEventsAutobuildRSCC()
+    elif pandda_args.rescore_event_method == "event_score":
+        event_rescoring_function = RescoreEventsEventScore()
+    elif pandda_args.rescore_event_method == "autobuild_score":
+        event_rescoring_function = RescoreEventsAutobuildScore()
+    else:
+        raise NotImplementedError(
+            f"Event rescoring method \"{pandda_args.rescore_event_method}\" if not a valid event rescoring method.")
+
     # Get the event classification function
     if pandda_args.autobuild:
         get_event_class: GetEventClassInterface = event_classification.GetEventClassAutobuildScore(0.4, 0.25)
@@ -991,17 +1004,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Rescore Events
         ###################################################################
         console.start_rescoring(pandda_args.rescore_event_method)
-
-        if pandda_args.rescore_event_method == "size":
-            event_rescoring_function = RescoreEventsSize()
-        elif pandda_args.rescore_event_method == "autobuild_rscc":
-            event_rescoring_function = RescoreEventsAutobuildRSCC()
-        elif pandda_args.rescore_event_method == "event_score":
-            event_rescoring_function = RescoreEventsEventScore()
-        elif pandda_args.rescore_event_method == "autobuild_score":
-            event_rescoring_function = RescoreEventsAutobuildScore()
-        else:
-            raise NotImplementedError(f"Event rescoring method \"{pandda_args.rescore_event_method}\" if not a valid event rescoring method.")
 
         event_scores = {
                 event_id: event_score
