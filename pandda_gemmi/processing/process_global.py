@@ -235,7 +235,7 @@ class DistributedProcessor(ProcessorInterface):
                  queue=None,
                  project=None,
                  cores_per_worker=12,
-                 distributed_mem_per_core=10,
+                 distributed_mem_per_core=15,
                  resource_spec="",
                  job_extra=("",),
                  walltime="150:00:00",
