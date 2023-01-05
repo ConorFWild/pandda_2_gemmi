@@ -894,6 +894,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                         process_autobuilds(
                             [
                                 Partial(autobuild_func).paramaterise(
+                                    event_id,
                                     datasets[event_id.dtag],
                                     all_events[event_id],
                                     pandda_fs_model,

@@ -18,7 +18,8 @@ class AutobuildResult:
 
 
 def autobuild_inbuilt(
-        event_id: EventIDInterface, dataset: DatasetInterface,
+        event_id: EventIDInterface,
+        dataset: DatasetInterface,
         event: EventInterface,
         pandda_fs: PanDDAFSModelInterface,
         event_scoring_result: EventScoringResultInterface,
