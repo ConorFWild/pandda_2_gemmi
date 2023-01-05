@@ -211,6 +211,7 @@ class QSubScheduler:
         return obj
 
     def gather(self, sge_futures: List[SGEFuture]):
+        time.sleep(5)
         task_status = [f.status() for f in sge_futures]
         while not all([task_stat == SGEResultStatus.DONE for task_stat in task_status]):
             completed = [x for x in task_status if x == SGEResultStatus.DONE]

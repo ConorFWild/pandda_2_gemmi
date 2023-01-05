@@ -409,6 +409,34 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
+    def start_rescoring(self, rescore_event_method: str):
+        printable = self.wrap_title("Rescoring Events...")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Rescoring method is: {str(rescore_event_method)}")
+        self.console.print(printable)
+
+    def summarise_rescoring(self, event_scores: EventScoresInterface):
+        printable = self.indent_text(f"Rescored events. Printing new event score table.")
+        self.console.print(printable)
+
+        event_table = Table(show_header=True, header_style="bold magenta", expand=True)
+        event_table.title = "Event Scores"
+        event_table.add_column("Dtag")
+        event_table.add_column("Event Number")
+        event_table.add_column("Event Score")
+
+
+        for event_id, event_score in event_scores.items():
+            event_table.add_row(
+                str(event_id.dtag.dtag),
+                str(event_id.event_idx.event_idx),
+                str(round(float(event_score), 2)),
+            )
+
+        self.console.print(event_table)
+
+
     def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Event Classifications"

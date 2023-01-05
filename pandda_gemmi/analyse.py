@@ -989,6 +989,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Rescore Events
         ###################################################################
+        console.start_rescoring(pandda_args.rescore_event_method)
 
         if pandda_args.rescore_event_method == "size":
             event_rescoring_function = RescoreEventsSize()
@@ -1025,6 +1026,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                     )
                 )
             }
+
+        console.summarise_rescoring(event_scores)
 
         ###################################################################
         # # Classify Events

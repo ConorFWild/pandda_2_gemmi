@@ -101,6 +101,10 @@ The second possibility is that the event has been autobuilt, but PanDDA prefers 
 
 It is important to check the PanDDA logs to make sure that datasets you are interested in have not been filtered from consideration. 
 
+### An event has been autobuilt but incorrectly
+
+Autobuilding PanDDA events is not perfect and the method can sometimes fail. If you see an event in pandda.inspect that appears to resemble the fragment but the autobuild is poor, the advice is to correct the autobuild and save the new model.
+
 ## How PanDDA 2 works
 
 PanDDA 2 differs from PanDDA 1 in two major methodological ways. 
