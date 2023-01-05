@@ -426,7 +426,6 @@ class PanDDAConsole:
         event_table.add_column("Event Number")
         event_table.add_column("Event Score")
 
-
         for event_id, event_score in event_scores.items():
             event_table.add_row(
                 str(event_id.dtag.dtag),
@@ -435,7 +434,6 @@ class PanDDAConsole:
             )
 
         self.console.print(event_table)
-
 
     def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)

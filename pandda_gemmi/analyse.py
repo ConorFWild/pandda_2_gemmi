@@ -852,7 +852,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             if pandda_args.global_processing == 'serial':
                 process_autobuilds = process_local
             else:
-                process_autobuilds = process_global
+                # process_autobuilds = process_global
+                process_autobuilds = process_local
 
             time_autobuild_start = time.time()
 
@@ -899,7 +900,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                     datasets[event_id.dtag],
                                     all_events[event_id],
                                     pandda_fs_model,
-                                    event_scoring_results,
+                                    event_scoring_results[event_id],
                                     debug=pandda_args.debug,
                                 )
                                 for event_id
