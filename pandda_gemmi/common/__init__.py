@@ -5,3 +5,4 @@ from pandda_gemmi.common.delayed import delayed, DelayedFuncReady, DelayedFuncWa
 from pandda_gemmi.common.positions_array import PositionsArray
 from pandda_gemmi.common.partial_func import Partial
 # from pandda_gemmi.common.debug import Debug
+from pandda_gemmi.common.update_log import update_log

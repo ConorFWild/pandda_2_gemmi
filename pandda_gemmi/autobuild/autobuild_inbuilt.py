@@ -42,7 +42,7 @@ def autobuild_inbuilt(
         return AutobuildResult(
             True,
             [str(structure_path), ],
-            {event_id: event_scoring_result.get_selected_structure_score(), },
+            {str(structure_path): event_scoring_result.get_selected_structure_score(), },
             "",
             str(structure_path),
             ""
