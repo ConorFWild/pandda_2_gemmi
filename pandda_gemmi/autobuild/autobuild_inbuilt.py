@@ -58,8 +58,8 @@ def autobuild_inbuilt(
         )
 
 
-class GetAutobuildResultInbuilt(GetAutobuildResultInterface):
-    tag = "inbuilt"
+class GetAutobuildResultInbuilt(GetAutobuildResultInbuiltInterface):
+    tag: Literal["inbuilt"] = "inbuilt"
 
     def __call__(self,
                  event_id: EventIDInterface,

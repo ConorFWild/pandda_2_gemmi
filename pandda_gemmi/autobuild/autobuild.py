@@ -1398,8 +1398,9 @@ def autobuild_rhofit(dataset: Dataset,
 #                             debug
 #                             )
 
-class GetAutobuildResultRhofit(GetAutobuildResultInterface):
-    tag = "rhofit"
+class GetAutobuildResultRhofit(GetAutobuildResultRhofitInterface):
+    tag: Literal["rhofit"] = "rhofit"
+
     def __call__(self,
                  dataset: DatasetInterface,
                  event: EventInterface,
