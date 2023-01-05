@@ -6,5 +6,6 @@ from pandda_gemmi.analyse_lib.get_datasets_smoother import get_datasets_smoother
 from pandda_gemmi.analyse_lib.get_alignments import get_alignments
 from pandda_gemmi.analyse_lib.get_shell_results import get_shell_results
 from pandda_gemmi.analyse_lib.get_autobuild_results import get_autobuild_results
+from pandda_gemmi.analyse_lib.get_event_classifications import get_event_classifications
 from pandda_gemmi.analyse_lib.get_event_ranking import get_event_ranking
 from pandda_gemmi.analyse_lib.handle_exception import handle_exception

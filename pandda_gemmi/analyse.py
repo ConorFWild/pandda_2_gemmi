@@ -23,6 +23,7 @@ from pandda_gemmi.analyse_lib import (
 get_alignments,
     get_shell_results,
     get_autobuild_results,
+get_event_classifications,
     get_event_ranking,
     handle_exception
 )
@@ -533,8 +534,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Getting alignments
         ###################################################################
-        alignments = get_alignments(pandda_args, console, pandda_log, pandda_fs_model, datasets, reference)
-
+        alignments: AlignmentsInterface = get_alignments(pandda_args, console, pandda_log, pandda_fs_model, datasets, reference)
 
         ###################################################################
         # # Assign comparison datasets
@@ -654,33 +654,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Classify Events
         ###################################################################
-        console.start_classification()
-
-        # If autobuild results are available, use them
-        if get_event_class.tag == "autobuild":
-            event_classifications: EventClassificationsInterface = {
-                event_id: get_event_class(
-                    event,
-                    autobuild_results[event_id],
-                )
-                for event_id, event
-                in all_events.items()
-            }
-        elif get_event_class.tag == "trivial":
-            event_classifications: EventClassificationsInterface = {
-                event_id: get_event_class(event)
-                for event_id, event
-                in all_events.items()
-            }
-        else:
-            raise Exception("No event classifier specified!")
-
-        console.summarise_event_classifications(event_classifications)
-
-        update_log(
-            pandda_log,
-            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
-        )
+        event_classifications = get_event_classifications(pandda_args, console, pandda_log, get_event_class, all_events, autobuild_results)
 
         ###################################################################
         # # Rank Events
@@ -766,6 +740,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # If an exception has occured, print relevant information to the console and save the log
     except Exception as e:
         handle_exception(pandda_args, console, e, pandda_log)
+
+
+
 
 
 if __name__ == '__main__':
