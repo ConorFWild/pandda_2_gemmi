@@ -19,7 +19,7 @@ def get_autobuild_results(pandda_args, console, process_local,
             process_autobuilds = process_local
         else:
             # process_autobuilds = process_global
-            process_autobuilds = process_local
+            process_autobuilds = process_global
 
         time_autobuild_start = time.time()
 

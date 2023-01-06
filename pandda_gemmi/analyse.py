@@ -1,11 +1,5 @@
-# Base python
-import os
-import traceback
 import time
 import pprint
-from functools import partial
-import json
-import pickle
 
 # Scientific python libraries
 import joblib
@@ -44,71 +38,32 @@ from pandda_gemmi.analyse_lib import (
     get_event_ranking,
     handle_exception
 )
-from pandda_gemmi.common import Partial, update_log
 from pandda_gemmi.args import PanDDAArgs
-from pandda_gemmi.dataset.dataset import GetReferenceDataset
-from pandda_gemmi.edalignment.grid import GetGrid
 from pandda_gemmi.smiles import GetDatasetSmiles
-from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
+from pandda_gemmi.pandda_logging import log_arguments, PanDDAConsole
 from pandda_gemmi.dependencies import check_dependencies
 from pandda_gemmi.dataset import (
-    StructureFactors,
-    SmoothBFactors,
-    DatasetsStatistics,
     drop_columns,
-    GetDatasets,
-    GetReferenceDataset,
 )
-from pandda_gemmi.edalignment import (GetGrid, GetAlignments,
-                                      LoadXmap, LoadXmapFlat
-                                      )
 from pandda_gemmi.filters import (
-    FiltersDataQuality,
-    FiltersReferenceCompatibility,
-    FilterNoStructureFactors,
-    FilterResolutionDatasets,
-    FilterRFree,
-    FilterDissimilarModels,
-    FilterIncompleteModels,
-    FilterDifferentSpacegroups,
     DatasetsValidator
 )
-from pandda_gemmi.comparators import (
-    GetComparatorsHybrid, GetComparatorsHighResFirst, GetComparatorsHighResRandom, GetComparatorsHighRes,
-    GetComparatorsCluster)
-from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.logs import (
     save_json_log,
 )
-
 from pandda_gemmi.pandda_functions import (
-    get_dask_client,
-    process_global_serial,
-    process_global_dask,
     get_common_structure_factors,
 )
 from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events, GetEventScoreSize
-
-
 from pandda_gemmi.tables import (
     GetEventTable,
     GetSiteTable,
     SaveEvents
 )
 from pandda_gemmi.processing import (
-    process_shell,
     process_shell_multiple_models,
-    analyse_model,
-    ProcessLocalRay,
-    ProcessLocalSerial,
-    ProcessLocalSpawn,
-    ProcessLocalThreading,
-    DaskDistributedProcessor,
-    DistributedProcessor
 )
-
 from pandda_gemmi.sites import GetSites
-
 from pandda_gemmi.analyse_interface import *
 
 joblib.externals.loky.set_loky_pickler('pickle')
@@ -183,7 +138,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
 
     # Set up autobuilding function
-    autobuild_func:Optional[GetAutobuildResultInterface] = get_autobuild_func(pandda_args)
+    autobuild_func: Optional[GetAutobuildResultInterface] = get_autobuild_func(pandda_args)
 
     # Get the rescoring function
     event_rescoring_function = get_event_rescoring_func(pandda_args)
@@ -224,15 +179,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Data Quality filters
         ###################################################################
-        console.start_data_quality_filters()
-
-        datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                                     datasets_initial.items()}
-
-        datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
-        console.summarise_filtered_datasets(
-            filter_data_quality.filtered_dtags
-        )
+        datasets_quality_filtered = get_data_quality_filtered_datasets(filter_data_quality, datasets_initial,
+                                                                       structure_factors)
 
         ###################################################################
         # # Truncate columns
@@ -254,14 +202,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Reference compatability filters
         ###################################################################
-        console.start_reference_comparability_filters()
-
-        datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
-        datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
-                                       datasets_reference.items()}
-        console.summarise_filtered_datasets(
-            filter_reference_compatability.filtered_dtags
-        )
+        datasets = get_reference_compatability_filtered_datasets(filter_reference_compatability, datasets_smoother,
+                                                                 reference)
 
         ###################################################################
         # # Getting grid
@@ -322,76 +264,19 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                                           event_scores,
                                           autobuild_results, pandda_log)
 
-        # console.summarise_event_ranking(event_classifications)
-
         ###################################################################
         # # Assign Sites
         ###################################################################
-        console.start_assign_sites()
-
-        # Get the events and assign sites to them
-        # with STDOUTManager('Assigning sites to each event', f'\tDone!'):
-        sites: SitesInterface = get_sites(
-            all_events,
-            grid,
-        )
-        all_events_sites: EventsInterface = add_sites_to_events(all_events, sites, )
-
-        console.summarise_sites(sites)
+        sites = get_event_sites(get_sites, grid, all_events)
 
         ###################################################################
         # # Output pandda summary information
         ###################################################################
-        console.start_run_summary()
+        get_event_table(pandda_fs_model, all_events, event_ranking, sites)
 
-        # Save the events to json
-        SaveEvents()(
-            all_events,
-            sites,
-            pandda_fs_model.events_json_file
-        )
+        get_site_table(pandda_args, pandda_fs_model, all_events, sites)
 
-        # Output a csv of the events
-        # with STDOUTManager('Building and outputting event table...', f'\tDone!'):
-        # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
-        console.start_event_table_output()
-        event_table: EventTableInterface = GetEventTable()(
-            all_events,
-            sites,
-            event_ranking,
-        )
-        event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
-        console.summarise_event_table_output(pandda_fs_model.analyses.pandda_analyse_events_file)
-
-        # Output site table
-        # with STDOUTManager('Building and outputting site table...', f'\tDone!'):
-        console.start_site_table_output()
-
-        # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
-        #                                                        pandda_args.max_site_distance_cutoff)
-        site_table: SiteTableInterface = GetSiteTable()(all_events,
-                                                        sites,
-                                                        pandda_args.max_site_distance_cutoff)
-        site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
-
-        console.summarise_site_table_output(pandda_fs_model.analyses.pandda_analyse_sites_file)
-
-        time_finish = time.time()
-        pandda_log[constants.LOG_TIME] = time_finish - time_start
-
-        # Output json log
-        console.start_log_save()
-        # with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
-        if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-            printer.pprint(pandda_log)
-        save_json_log(
-            pandda_log,
-            pandda_args.out_dir / constants.PANDDA_LOG_FILE,
-        )
-        console.summarise_log_save(pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-
-        # print(f"PanDDA ran in: {time_finish - time_start}")
-        console.summarise_run(time_finish - time_start)
+        summarize_run(pandda_args, pandda_log, time_start)
 
     ###################################################################
     # # Handle Exceptions
@@ -399,6 +284,92 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     # If an exception has occured, print relevant information to the console and save the log
     except Exception as e:
         handle_exception(pandda_args, console, e, pandda_log)
+
+
+def summarize_run(pandda_args, pandda_log, time_start):
+    time_finish = time.time()
+    pandda_log[constants.LOG_TIME] = time_finish - time_start
+    # Output json log
+    console.start_log_save()
+    # with STDOUTManager('Saving json log with detailed information on run...', f'\tDone!'):
+    if pandda_args.debug >= Debug.PRINT_SUMMARIES:
+        printer.pprint(pandda_log)
+    save_json_log(
+        pandda_log,
+        pandda_args.out_dir / constants.PANDDA_LOG_FILE,
+    )
+    console.summarise_log_save(pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+    # print(f"PanDDA ran in: {time_finish - time_start}")
+    console.summarise_run(time_finish - time_start)
+
+
+def get_site_table(pandda_args, pandda_fs_model, all_events, sites):
+    # Output site table
+    # with STDOUTManager('Building and outputting site table...', f'\tDone!'):
+    console.start_site_table_output()
+    # site_table: SiteTableInterface = SiteTable.from_events(all_events_sites,
+    #                                                        pandda_args.max_site_distance_cutoff)
+    site_table: SiteTableInterface = GetSiteTable()(all_events,
+                                                    sites,
+                                                    pandda_args.max_site_distance_cutoff)
+    site_table.save(pandda_fs_model.analyses.pandda_analyse_sites_file)
+    console.summarise_site_table_output(pandda_fs_model.analyses.pandda_analyse_sites_file)
+
+
+def get_event_table(pandda_fs_model, all_events, event_ranking, sites):
+    console.start_run_summary()
+    # Save the events to json
+    SaveEvents()(
+        all_events,
+        sites,
+        pandda_fs_model.events_json_file
+    )
+    # Output a csv of the events
+    # with STDOUTManager('Building and outputting event table...', f'\tDone!'):
+    # event_table: EventTableInterface = EventTable.from_events(all_events_sites)
+    console.start_event_table_output()
+    event_table: EventTableInterface = GetEventTable()(
+        all_events,
+        sites,
+        event_ranking,
+    )
+    event_table.save(pandda_fs_model.analyses.pandda_analyse_events_file)
+    console.summarise_event_table_output(pandda_fs_model.analyses.pandda_analyse_events_file)
+
+
+def get_event_sites(get_sites, grid, all_events):
+    console.start_assign_sites()
+    # Get the events and assign sites to them
+    # with STDOUTManager('Assigning sites to each event', f'\tDone!'):
+    sites: SitesInterface = get_sites(
+        all_events,
+        grid,
+    )
+    all_events_sites: EventsInterface = add_sites_to_events(all_events, sites, )
+    console.summarise_sites(sites)
+    return sites
+
+
+def get_reference_compatability_filtered_datasets(filter_reference_compatability, datasets_smoother, reference):
+    console.start_reference_comparability_filters()
+    datasets_reference: DatasetsInterface = filter_reference_compatability(datasets_smoother, reference)
+    datasets: DatasetsInterface = {dtag: dataset for dtag, dataset in
+                                   datasets_reference.items()}
+    console.summarise_filtered_datasets(
+        filter_reference_compatability.filtered_dtags
+    )
+    return datasets
+
+
+def get_data_quality_filtered_datasets(filter_data_quality, datasets_initial, structure_factors):
+    console.start_data_quality_filters()
+    datasets_for_filtering: DatasetsInterface = {dtag: dataset for dtag, dataset in
+                                                 datasets_initial.items()}
+    datasets_quality_filtered: DatasetsInterface = filter_data_quality(datasets_for_filtering, structure_factors)
+    console.summarise_filtered_datasets(
+        filter_data_quality.filtered_dtags
+    )
+    return datasets_quality_filtered
 
 
 if __name__ == '__main__':

@@ -65,4 +65,6 @@ def get_event_ranking(pandda_args, console, pandda_fs_model, datasets, grid, all
 
     update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
 
+    # console.summarise_event_ranking(event_classifications)
+
     return event_ranking
