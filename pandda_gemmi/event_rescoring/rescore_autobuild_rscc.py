@@ -18,7 +18,7 @@ class RescoreEventsAutobuildRSCC:
                  ):
         dataset_bound_state_model_path = autobuild_result.selected_fragment_path
         event_map_path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files[
-            event_id].path
+            event_id.event_idx].path
         resolution = dataset.reflections.get_resolution()
         tmp_dir = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}"
 

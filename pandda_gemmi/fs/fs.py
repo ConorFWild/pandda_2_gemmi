@@ -490,7 +490,7 @@ class EventMapFile(EventMapFileInterface):
 @dataclasses.dataclass()
 class EventMapFiles(EventMapFilesInterface):
     path: Path
-    event_map_files: typing.Dict[EventIDX, EventMapFile]
+    event_map_files: typing.Dict[EventIDXInterface, EventMapFile]
 
     # @staticmethod
     # def from_events(events: Events, xmaps: Xmaps):
@@ -507,7 +507,7 @@ class EventMapFiles(EventMapFilesInterface):
 
         self.event_map_files = event_map_files
 
-    def add_event(self, event: Event):
+    def add_event(self, event: EventInterface):
         self.event_map_files[event.event_id.event_idx] = EventMapFile.from_event(event, self.path)
 
     def __iter__(self):

@@ -106,7 +106,7 @@ class EventMapFilesInterface(Protocol):
     def add_event(self, event: EventInterface):
         ...
 
-    def __getitem__(self, item: EventIDInterface) -> EventMapFileInterface:
+    def __getitem__(self, item: EventIDXInterface) -> EventMapFileInterface:
         ...
 
 
@@ -438,6 +438,7 @@ class BDCInterface(Protocol):
 
 
 class EventInterface(Protocol):
+    event_id: EventIDInterface
     bdc: BDCInterface
     cluster: EDClusterInterface
 
