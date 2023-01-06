@@ -648,6 +648,7 @@ class PanDDAArgs:
             ligand_smiles_regex=args.ligand_smiles_regex,
             statmaps=args.statmaps,
             low_memory=args.low_memory,
+            rescore_event_method=args.rescore_event_method,
             ground_state_datasets=args.ground_state_datasets,
             exclude_from_z_map_analysis=args.exclude_from_z_map_analysis,
             exclude_from_characterisation=args.exclude_from_characterisation,
