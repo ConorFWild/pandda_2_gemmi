@@ -20,10 +20,12 @@ from pandda_gemmi.analyse_lib import (
     get_structure_factors,
     get_reference,
     get_datasets_smoother,
-get_alignments,
+    get_grid,
+    get_alignments,
+    get_shells,
     get_shell_results,
     get_autobuild_results,
-get_event_classifications,
+    get_event_classifications,
     get_event_ranking,
     handle_exception
 )
@@ -68,7 +70,6 @@ from pandda_gemmi.pandda_functions import (
     get_dask_client,
     process_global_serial,
     process_global_dask,
-    get_shells,
     get_common_structure_factors,
 )
 from pandda_gemmi.event import GetEventScoreInbuilt, add_sites_to_events, GetEventScoreSize
@@ -84,7 +85,6 @@ from pandda_gemmi.tables import (
     GetSiteTable,
     SaveEvents
 )
-from pandda_gemmi.fs import GetPanDDAFSModel, GetShellDirs
 from pandda_gemmi.processing import (
     process_shell,
     process_shell_multiple_models,
@@ -509,32 +509,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Getting grid
         ###################################################################
-        console.start_get_grid()
-
-        # Grid
-        # with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
-        grid: GridInterface = GetGrid()(reference,
-                                        pandda_args.outer_mask,
-                                        pandda_args.inner_mask_symmetry,
-                                        # sample_rate=pandda_args.sample_rate,
-                                        sample_rate=reference.dataset.reflections.get_resolution() / 0.5,
-                                        debug=pandda_args.debug
-                                        )
-
-        if pandda_args.debug >= Debug.AVERAGE_MAPS:
-            with open(pandda_fs_model.pandda_dir / "grid.pickle", "wb") as f:
-                pickle.dump(grid, f)
-
-            grid.partitioning.save_maps(
-                pandda_fs_model.pandda_dir
-            )
-
-        console.summarise_get_grid(grid)
+        grid = get_grid(pandda_args, console, pandda_fs_model, reference)
 
         ###################################################################
         # # Getting alignments
         ###################################################################
-        alignments: AlignmentsInterface = get_alignments(pandda_args, console, pandda_log, pandda_fs_model, datasets, reference)
+        alignments: AlignmentsInterface = get_alignments(pandda_args, console, pandda_log, pandda_fs_model, datasets,
+                                                         reference)
 
         ###################################################################
         # # Assign comparison datasets
@@ -574,33 +555,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Get the shells
         ###################################################################
-        console.start_get_shells()
-
-        # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
-        # sake of computational efficiency
-        shells: ShellsInterface = get_shells_multiple_models(
-            datasets,
-            comparators,
-            pandda_args.min_characterisation_datasets,
-            pandda_args.max_shell_datasets,
-            pandda_args.high_res_increment,
-            pandda_args.only_datasets,
-            debug=pandda_args.debug,
-        )
-        if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-            print('Got shells that support multiple models')
-            for shell_res, shell in shells.items():
-                print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
-                for cluster_num, dtags in shell.train_dtags.items():
-                    print(f'\t\t{cluster_num}: {dtags[:5]}')
-
-        pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
-        pandda_fs_model.shell_dirs.build()
-
-        if pandda_args.debug >= Debug.PRINT_NUMERICS:
-            printer.pprint(shells)
-
-        console.summarise_get_shells(shells)
+        shells = get_shells(pandda_args, console, pandda_fs_model, datasets, comparators)
 
         ###################################################################
         # # Process shells
@@ -654,7 +609,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Classify Events
         ###################################################################
-        event_classifications = get_event_classifications(pandda_args, console, pandda_log, get_event_class, all_events, autobuild_results)
+        event_classifications = get_event_classifications(pandda_args, console, pandda_log, get_event_class, all_events,
+                                                          autobuild_results)
 
         ###################################################################
         # # Rank Events

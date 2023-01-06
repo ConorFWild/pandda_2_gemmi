@@ -3,7 +3,9 @@ from pandda_gemmi.analyse_lib.get_datasets import get_datasets
 from pandda_gemmi.analyse_lib.get_structure_factors import get_structure_factors
 from pandda_gemmi.analyse_lib.get_reference import get_reference
 from pandda_gemmi.analyse_lib.get_datasets_smoother import get_datasets_smoother
+from pandda_gemmi.analyse_lib.get_grid import get_grid
 from pandda_gemmi.analyse_lib.get_alignments import get_alignments
+from pandda_gemmi.analyse_lib.get_shells import get_shells
 from pandda_gemmi.analyse_lib.get_shell_results import get_shell_results
 from pandda_gemmi.analyse_lib.get_autobuild_results import get_autobuild_results
 from pandda_gemmi.analyse_lib.get_event_classifications import get_event_classifications
