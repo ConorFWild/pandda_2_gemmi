@@ -30,7 +30,7 @@ Then:
 ```bash
 conda create -n pandda2 python=3.9
 conda activate pandda2
-conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib rich seaborn rdkit openbabel
+conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib rich seaborn rdkit openbabel mrcfile
 pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi

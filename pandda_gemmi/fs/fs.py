@@ -362,6 +362,81 @@ class DatasetDir:
         #     print(e)
         #     return None
 
+@dataclasses.dataclass()
+class DatasetDirCryoEM:
+    path: Path
+    input_pdb_file: Path
+    input_mtz_file: Path
+    ligand_dir: Union[LigandDir, None]
+    source_ligand_cif: Union[Path, None]
+    source_ligand_pdb: Union[Path, None]
+    source_ligand_smiles: Optional[Path]
+
+    @staticmethod
+    def from_path(path: Path,
+                  pdb_regex: str,
+                  mtz_regex: str,
+                  ligand_dir_name: str,
+                  ligand_cif_regex: str,
+                  ligand_pdb_regex: str,
+                  ligand_smiles_regex: str,
+                  ):
+
+        # Get pdb
+        input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
+        if len(input_pdb_files) == 0:
+            return None
+        else:
+            input_pdb_file: Path = input_pdb_files[0]
+
+        # Get data
+        input_data_files = [data_path for data_path in path.glob(mtz_regex)]
+        if len(input_data_files) == 0:
+            return None
+        else:
+            input_data_file: Path = input_data_files[0]
+
+        # Make a mtz file from the data
+        input_mtz_file = path / "dimple.mtz"
+        from pandda_gemmi.analyse_cryoem_lib import mrc_to_mtz
+        mrc_to_mtz(input_data_file, path / "")
+
+        source_ligand_dir = path / ligand_dir_name
+
+        if source_ligand_dir.exists():
+            ligand_dir = LigandDir.from_path(
+                source_ligand_dir,
+                ligand_cif_regex,
+                ligand_pdb_regex,
+                ligand_smiles_regex
+            )
+            # ligand_search_path = source_ligand_dir
+            # print(f"Got ligand dir for dataset: {path.name}")
+
+            source_ligand_smiles = ligand_dir.get_first_ligand_smiles()
+            source_ligand_cif = ligand_dir.get_first_ligand_cif()
+            source_ligand_pdb = ligand_dir.get_first_ligand_pdb()
+
+
+        else:
+            ligand_dir = None
+            # ligand_search_path = path
+            source_ligand_smiles = None
+            source_ligand_cif = None
+            source_ligand_pdb = None
+
+
+        return DatasetDir(
+            path=path,
+            input_pdb_file=input_pdb_file,
+            input_mtz_file=input_mtz_file,
+            ligand_dir=ligand_dir,
+            source_ligand_cif=source_ligand_cif,
+            source_ligand_pdb=source_ligand_pdb,
+            source_ligand_smiles=source_ligand_smiles
+        )
+
+
 
 @dataclasses.dataclass()
 class DataDirs:
@@ -676,6 +751,63 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
             for dtag in self.processed_datasets:
                 self.processed_datasets[dtag].build(get_dataset_smiles)
 
+# @dataclasses.dataclass()
+# class ProcessedDatasetsCryoEM(ProcessedDatasetsInterface):
+#     path: Path
+#     processed_datasets: typing.Dict[Dtag, ProcessedDataset]
+#
+#     @staticmethod
+#     def from_data_dirs(data_dirs: DataDirs, processed_datasets_dir: Path, process_local=None):
+#         processed_datasets = {}
+#
+#         if process_local:
+#             results = process_local(
+#                 [
+#                     partial(
+#                         ProcessedDatasetCryoEM.from_dataset_dir,
+#                         dataset_dir,
+#                         processed_datasets_dir / dtag.dtag,
+#                     )
+#                     for dtag, dataset_dir
+#                     in data_dirs.dataset_dirs.items()
+#                 ]
+#             )
+#
+#             processed_datasets = {dtag: result for dtag, result in zip(data_dirs.dataset_dirs, results, )}
+#
+#         else:
+#             for dtag, dataset_dir in data_dirs.dataset_dirs.items():
+#                 processed_datasets[dtag] = ProcessedDataset.from_dataset_dir(dataset_dir,
+#                                                                              processed_datasets_dir / dtag.dtag,
+#                                                                              )
+#
+#         return ProcessedDatasets(processed_datasets_dir,
+#                                  processed_datasets)
+#
+#     def __getitem__(self, item):
+#         return self.processed_datasets[item]
+#
+#     def __iter__(self):
+#         for dtag in self.processed_datasets:
+#             yield dtag
+#
+#     def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: ProcessorInterface=None):
+#         if not self.path.exists():
+#             os.mkdir(str(self.path))
+#
+#         if process_local:
+#             process_local(
+#                 [
+#                     Partial(self.processed_datasets[dtag].build).paramaterise(get_dataset_smiles)
+#                     for dtag
+#                     in self.processed_datasets
+#                 ]
+#             )
+#
+#         else:
+#
+#             for dtag in self.processed_datasets:
+#                 self.processed_datasets[dtag].build(get_dataset_smiles)
 
 @dataclasses.dataclass()
 class ShellDir:

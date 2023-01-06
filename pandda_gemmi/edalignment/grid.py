@@ -6,6 +6,8 @@ import dataclasses
 import itertools
 from pathlib import Path
 
+import gemmi
+import numpy as np
 from scipy import spatial
 from joblib.externals.loky import set_loky_pickler
 from pandda_gemmi.analyse_interface import GetGridInterface
