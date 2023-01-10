@@ -1,30 +1,14 @@
 # Base python
-import dataclasses
-import time
-import pprint
-from functools import partial
-import os
-import json
-from typing import Set
-import pickle
-
 
 # Scientific python libraries
-# import ray
 import numpy as np
-import gemmi
 
 ## Custom Imports
-
-from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
-
 from pandda_gemmi.analyse_interface import *
-
 from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID, Partial
-
-from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
-from pandda_gemmi.model import Zmap, Model, Zmaps
+from pandda_gemmi.common import Dtag
+from pandda_gemmi.edalignment import XmapArray
+from pandda_gemmi.model import Model
 
 
 def get_models(
