@@ -27,7 +27,7 @@ class RescoreEventsAutobuildRSCC:
             os.mkdir(tmp_dir)
 
         # Get RSCCs from phenix
-        rsccs: RSCCSInterface = get_rscc(
+        rsccs: Optional[RSCCSInterface] = get_rscc(
             dataset_bound_state_model_path,
             event_map_path,
             resolution,
@@ -35,7 +35,10 @@ class RescoreEventsAutobuildRSCC:
         )
 
         # Get an RSCC if there is one
-        if len(rsccs) != 0:
-            return max(rsccs.values())
-        else:
+        if not rsccs:
             return -0.01
+        if len(rsccs) == 0:
+            return -0.01
+
+
+        return max(rsccs.values())

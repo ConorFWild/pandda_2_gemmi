@@ -255,7 +255,7 @@ class PanDDAConsole:
         for shell_number, shell in shells.items():
             printable = self.indent_text(
                 (
-                    f"{shell.res}: "
+                    f"{round(shell.res, 2)}: "
                     f"Num test dtags: {len(shell.test_dtags)} "
                     f"Total num dtags: {len(shell.all_dtags)}"
                 ),

@@ -2,6 +2,8 @@ import re
 import subprocess
 import pathlib
 
+from pandda_gemmi.analyse_interface import *
+
 MATCH_REGEX = "([^\s]+)\s+LIG\s+([^\s]+)\s+([^\s]+)"
 
 PHENIX_MODEL_MAP_CC_SCRIPT = (
@@ -20,7 +22,7 @@ def get_rscc(
         event_map_path,
         resolution,
         tmp_dir,
-):
+) -> Optional[RSCCSInterface]:
     # Make phenix command
     script = PHENIX_MODEL_MAP_CC_SCRIPT.format(
         tmp_dir=tmp_dir,
