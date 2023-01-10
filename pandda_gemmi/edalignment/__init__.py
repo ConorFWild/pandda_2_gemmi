@@ -7,4 +7,4 @@ from pandda_gemmi.edalignment.edmaps import (
    LoadXmap,
     LoadXmapFlat, GetMapStatistics
 )
-from save_maps import save_array_to_map_file, save_xmap, save_raw_xmap
+from pandda_gemmi.edalignment.save_maps import save_array_to_map_file, save_xmap, save_raw_xmap

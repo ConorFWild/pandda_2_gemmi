@@ -40,5 +40,4 @@ class RescoreEventsAutobuildRSCC:
         if len(rsccs) == 0:
             return -0.01
 
-
         return max(rsccs.values())
