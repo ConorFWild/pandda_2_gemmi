@@ -19,10 +19,6 @@ printer = pprint.PrettyPrinter()
 # import ray
 
 ## Custom Imports
-from pandda_gemmi.logs import (
-    summarise_array,
-)
-
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
@@ -31,23 +27,13 @@ from pandda_gemmi.pandda_functions import (
     save_native_frame_zmap,
     save_reference_frame_zmap,
 )
-from pandda_gemmi.python_types import *
 from pandda_gemmi.common import Dtag, EventID, Partial
-from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
-from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
-                                  Resolution, )
-from pandda_gemmi.shells import Shell, ShellMultipleModels
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
-from pandda_gemmi.model import Zmap, Model, Zmaps
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
     save_event_map,
 )
-from pandda_gemmi.density_clustering import (
-    GetEDClustering, FilterEDClusteringsSize,
-    FilterEDClusteringsPeak,
-    MergeEDClusterings,
-)
+
 
 def process_dataset_multiple_models(
         test_dtag: DtagInterface,

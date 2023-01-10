@@ -23,9 +23,7 @@ import numpy as np
 import gemmi
 
 ## Custom Imports
-from pandda_gemmi.logs import (
-    summarise_array,
-)
+
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
