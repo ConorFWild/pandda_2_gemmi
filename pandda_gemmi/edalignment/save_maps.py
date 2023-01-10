@@ -8,10 +8,8 @@ import json
 from typing import Set
 import pickle
 
-from pandda_gemmi.processing.process_local import ProcessLocalSerial
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
-from pandda_gemmi.processing.process_dataset import process_dataset_multiple_models
-from pandda_gemmi.model.get_models import get_models
+
 
 console = PanDDAConsole()
 
@@ -26,30 +24,6 @@ import gemmi
 
 
 from pandda_gemmi.analyse_interface import *
-from pandda_gemmi import constants
-from pandda_gemmi.pandda_functions import (
-    process_local_serial,
-    truncate,
-    save_native_frame_zmap,
-    save_reference_frame_zmap,
-)
-from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID, Partial
-from pandda_gemmi.fs import PanDDAFSModel, MeanMapFile, StdMapFile
-from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
-                                  Resolution, )
-from pandda_gemmi.shells import Shell, ShellMultipleModels
-from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
-from pandda_gemmi.model import Zmap, Model, Zmaps
-from pandda_gemmi.event import (
-    Event, Clusterings, Clustering, Events, get_event_mask_indicies,
-    save_event_map,
-)
-from pandda_gemmi.density_clustering import (
-    GetEDClustering, FilterEDClusteringsSize,
-    FilterEDClusteringsPeak,
-    MergeEDClusterings,
-)
 
 
 def save_array_to_map_file(
