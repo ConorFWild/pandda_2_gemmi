@@ -13,7 +13,7 @@ from pandda_gemmi.analyse_interface import AlignmentsInterface, DatasetsInterfac
 printer = pprint.PrettyPrinter()
 
 # Scientific python libraries
-
+import numpy as np
 
 ## Custom Imports
 from pandda_gemmi.logs import (

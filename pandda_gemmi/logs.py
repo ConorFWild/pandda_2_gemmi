@@ -7,6 +7,8 @@ from pathlib import Path
 
 printer = PrettyPrinter(indent=1)
 
+import numpy as np
+
 # from pandda_gemmi.pandda_types import *
 from pandda_gemmi.common import Dtag
 from pandda_gemmi.dataset import Dataset
