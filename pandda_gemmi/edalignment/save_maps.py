@@ -10,11 +10,6 @@ import pickle
 
 from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
 
-
-console = PanDDAConsole()
-
-printer = pprint.PrettyPrinter()
-
 # Scientific python libraries
 # import ray
 import numpy as np

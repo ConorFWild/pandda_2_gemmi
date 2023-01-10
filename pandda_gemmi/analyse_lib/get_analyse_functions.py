@@ -30,14 +30,13 @@ from pandda_gemmi.comparators import (
     GetComparatorsHybrid, GetComparatorsHighResFirst, GetComparatorsHighResRandom, GetComparatorsHighRes,
     GetComparatorsCluster)
 
-from pandda_gemmi.pandda_functions import (
-    process_global_serial,
-
-)
+# from pandda_gemmi.pandda_functions import (
+#     process_global_serial,
+#
+# )
 from pandda_gemmi.event import GetEventScoreInbuilt, GetEventScoreSize
 
 from pandda_gemmi.processing import (
-
     analyse_model,
     ProcessLocalRay,
     ProcessLocalSerial,
@@ -122,7 +121,7 @@ def get_comparator_func(pandda_args: PanDDAArgs,
 
 def get_process_global(pandda_args, distributed_tmp, debug=Debug.DEFAULT):
     if pandda_args.global_processing == "serial":
-        process_global = process_global_serial
+        process_global = ProcessLocalSerial()
     elif pandda_args.global_processing == "distributed":
         # client = get_dask_client(
         #     scheduler=pandda_args.distributed_scheduler,
