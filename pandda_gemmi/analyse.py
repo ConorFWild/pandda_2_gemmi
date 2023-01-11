@@ -286,7 +286,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
 
 if __name__ == '__main__':
-    # with STDOUTManager('Parsing command line args', '\tParsed command line arguments!'):
     console.start_pandda()
 
     # Parse Command Line Arguments

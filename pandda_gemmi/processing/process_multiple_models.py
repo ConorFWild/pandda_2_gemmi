@@ -28,12 +28,7 @@ from pandda_gemmi.dataset import (StructureFactors, Dataset, Datasets,
 from pandda_gemmi.edalignment import save_xmap, save_raw_xmap, save_array_to_map_file
 
 
-@dataclasses.dataclass()
-class DatasetResult(DatasetResultInterface):
-    dtag: DtagInterface
-    events: MutableMapping[EventIDInterface, EventInterface]
-    event_scores: EventScoringResultsInterface
-    log: Dict
+
 
 
 @dataclasses.dataclass()

@@ -27,12 +27,124 @@ from pandda_gemmi.pandda_functions import (
     save_native_frame_zmap,
     save_reference_frame_zmap,
 )
-from pandda_gemmi.common import Dtag, EventID, Partial
+from pandda_gemmi.common import Dtag, EventID, Partial, update_log
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
     save_event_map,
 )
+
+
+@dataclasses.dataclass()
+class DatasetResult(DatasetResultInterface):
+    dtag: DtagInterface
+    events: MutableMapping[EventIDInterface, EventInterface]
+    event_scores: EventScoringResultsInterface
+    log: Dict
+
+
+class ModelSelection(ModelSelectionInterface):
+    def __init__(self, selected_model_id: ModelIDInterface, log: Dict) -> None:
+        self.selected_model_id = selected_model_id
+        self.log = log
+
+
+def EXPERIMENTAL_select_model(
+        model_results: ModelResultsInterface,
+        inner_mask: CrystallographicGridInterface,
+        processed_dataset: ProcessedDatasetInterface,
+        debug: Debug = Debug.DEFAULT,
+) -> ModelSelectionInterface:
+    log = {}
+
+    model_event_scores: Dict[ModelIDInterface, Dict[EventIDInterface, EventScoringResultInterface]] = {
+        model_id: model.event_scores for
+        model_id,
+        model in model_results.items()
+    }
+
+    if debug >= Debug.PRINT_NUMERICS:
+        print("Event scores for each model are:")
+        print(model_event_scores)
+
+        for model_id, event_scores in model_event_scores.items():
+            print(f"Best score for model: {model_id}")
+            print(
+                [
+                    event_scores[score_id].get_selected_structure_score()
+                    for score_id
+                    in event_scores
+                ]
+            )
+            for event_id, event_score_result in event_scores.items():
+                print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
+                print(event_score_result.log())
+
+    # Score the top clusters#
+    model_scores = {}
+    for model_id, event_scores in model_event_scores.items():
+        selected_event_scores = [
+            event_scores[event_id].get_selected_structure_score()
+            for event_id
+            in event_scores
+        ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"\tModel {model_id} all scores: {selected_event_scores}")
+
+        filtered_model_scores = [
+                                    selected_event_score
+                                    for selected_event_score
+                                    in selected_event_scores
+                                    if selected_event_score
+                                ] + [-0.001, ]
+        if debug >= Debug.PRINT_NUMERICS:
+            print(f"\tModel {model_id}: filtered scores: {filtered_model_scores}")
+
+        maximum_event_score = max(
+            filtered_model_scores
+        )
+        model_scores[model_id] = maximum_event_score
+
+    # model_scores = {
+    #     model_id: max(
+    #         [
+    #             event_scores[score_id].get_selected_structure_score()
+    #             for score_id
+    #             in event_scores
+    #             if event_scores[score_id].get_selected_structure_score() is not None
+    #         ] + [0.0, ])
+    #     for model_id, event_scores
+    #     in model_event_scores.items()
+    # }
+
+    if debug >= Debug.PRINT_SUMMARIES:
+        print("Maximum score of any event for each model are are:")
+        print(model_scores)
+
+    log['model_scores'] = {
+        model_id: float(score)
+        for model_id, score
+        in model_scores.items()
+    }
+
+    if len(model_scores) == 0:
+        return ModelSelection(0, log)
+
+    else:
+        selected_model_number = max(
+            model_scores,
+            key=lambda _score: model_scores[_score],
+        )  # [0]
+
+    return ModelSelection(selected_model_number, log)
+
+
+class SelectModel:
+
+    def __call__(self, model_results: ModelResultsInterface, ):
+        return EXPERIMENTAL_select_model(
+            model_results,
+        )
 
 
 def process_dataset_multiple_models(
