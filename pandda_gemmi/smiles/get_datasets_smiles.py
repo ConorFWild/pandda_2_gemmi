@@ -21,7 +21,7 @@ class GetDatasetSmiles(GetDatasetSmilesInterface):
         pdb_path = processed_dataset_path / "tmp.pdb"
         try:
             pybel_reader = pybel.readfile("cif", str(source_ligand_cif))
-            pybel_mol = pybel_reader.next()
+            pybel_mol = next(pybel_reader)
         except Exception as e:
             print(f"exception is: {e}")
             raise Exception(f"Error in extracting smiles from cif file: {str(source_ligand_cif)}. Unable to iterate file!")

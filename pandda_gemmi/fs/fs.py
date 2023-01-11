@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 
 from joblib.externals.loky import set_loky_pickler
+from openbabel import pybel
 
 set_loky_pickler('pickle')
 
@@ -80,6 +81,33 @@ class DatasetModels:
         return DatasetModels(path=path)
 
 
+def can_open_smiles_path(path: Path):
+    try:
+        pybel_reader = pybel.readfile("smiles", str(path))
+        pybel_mol = next(pybel_reader)
+    except Exception as e:
+        return False
+    return True
+
+
+def can_open_cif_path(path: Path):
+    try:
+        pybel_reader = pybel.readfile("cif", str(path))
+        pybel_mol = next(pybel_reader)
+    except Exception as e:
+        return False
+    return True
+
+
+def can_open_pdb_path(path: Path):
+    try:
+        pybel_reader = pybel.readfile("pdb", str(path))
+        pybel_mol = next(pybel_reader)
+    except Exception as e:
+        return False
+    return True
+
+
 @dataclasses.dataclass()
 class LigandDir:
     path: Path
@@ -136,18 +164,21 @@ class LigandDir:
                 _ligand_smile_path.stem
                 for _ligand_smile_path
                 in ligand_smiles_paths
+                if can_open_smiles_path(_ligand_smile_path)
             ]
         elif len(ligand_cif_paths) != 0:
             ligand_keys = [
                 _ligand_cif_path.stem
                 for _ligand_cif_path
                 in ligand_cif_paths
+                if can_open_pdb_path(_ligand_cif_path)
             ]
         elif len(ligand_pdb_paths) != 0:
             ligand_keys = [
                 _ligand_pdb_path.stem
                 for _ligand_pdb_path
                 in ligand_pdb_paths
+                if can_open_pdb_path(_ligand_pdb_path)
             ]
         else:
             ligand_keys = []
@@ -162,7 +193,6 @@ class LigandDir:
 
         # For each ligand key, add the path to the relecant file to the relevant dict, or None
         for ligand_key in ligand_keys:
-            print(ligand_keys)
             # Smiles
             ligand_smiles_dict = {_ligand_smiles_path.stem: _ligand_smiles_path
                                   for _ligand_smiles_path
@@ -364,6 +394,7 @@ class DatasetDir:
         #     print(e)
         #     return None
 
+
 @dataclasses.dataclass()
 class DatasetDirCryoEM:
     path: Path
@@ -427,7 +458,6 @@ class DatasetDirCryoEM:
             source_ligand_cif = None
             source_ligand_pdb = None
 
-
         return DatasetDir(
             path=path,
             input_pdb_file=input_pdb_file,
@@ -437,7 +467,6 @@ class DatasetDirCryoEM:
             source_ligand_pdb=source_ligand_pdb,
             source_ligand_smiles=source_ligand_smiles
         )
-
 
 
 @dataclasses.dataclass()
@@ -735,7 +764,7 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
         for dtag in self.processed_datasets:
             yield dtag
 
-    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: ProcessorInterface=None):
+    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: ProcessorInterface = None):
         if not self.path.exists():
             os.mkdir(str(self.path))
 
@@ -752,6 +781,7 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
 
             for dtag in self.processed_datasets:
                 self.processed_datasets[dtag].build(get_dataset_smiles)
+
 
 # @dataclasses.dataclass()
 # class ProcessedDatasetsCryoEM(ProcessedDatasetsInterface):
