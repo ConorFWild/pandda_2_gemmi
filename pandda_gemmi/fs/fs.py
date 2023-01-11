@@ -162,6 +162,7 @@ class LigandDir:
 
         # For each ligand key, add the path to the relecant file to the relevant dict, or None
         for ligand_key in ligand_keys:
+            print(ligand_keys)
             # Smiles
             ligand_smiles_dict = {_ligand_smiles_path.stem: _ligand_smiles_path
                                   for _ligand_smiles_path
@@ -208,6 +209,7 @@ class LigandDir:
             return self.smiles[self.ligand_keys[0]]
 
     def get_first_ligand_cif(self):
+        # Make sure to only accept cifs that can be read by pybel
         if len(self.ligand_keys) == 0:
             return None
         else:
