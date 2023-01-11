@@ -451,7 +451,7 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-    def summarise_datasets(self, datasets_initial, dataset_statistics):
+    def summarise_datasets(self, datasets_initial, dataset_statistics, fs: PanDDAFSModelInterface):
         # Statistics
         # printable = self.indent_text(
         #     f"Unit cell statistics"
@@ -528,14 +528,34 @@ class PanDDAConsole:
         # Columns
         table.add_column("Dtag")
         table.add_column("Resolution")
+        table.add_column("Spacegroup")
+        table.add_column("SMILES?")
+        table.add_column("CIF?")
+        table.add_column("PDB?")
+
 
         # Rows
         for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
             dataset = datasets_initial[dtag]
+            has_smiles = False
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_smiles:
+                has_smiles = True
+
+            has_cif = False
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_cif:
+                has_cif = True
+
+            has_pdb = False
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_pdb:
+                has_pdb = True
+
             table.add_row(
                 dtag.dtag,
                 str(round(dataset.reflections.reflections.resolution_high(), 2)),
                 dataset.reflections.reflections.spacegroup.hm,
+                str(has_smiles),
+                str(has_cif),
+                str(has_pdb)
             )
 
         self.console.print(table)

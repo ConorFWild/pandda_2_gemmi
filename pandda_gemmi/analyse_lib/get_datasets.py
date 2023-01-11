@@ -7,7 +7,7 @@ def get_datasets(pandda_args, console, pandda_fs_model):
     console.start_load_datasets()
     datasets_initial: DatasetsInterface = GetDatasets()(pandda_fs_model, )
     datasets_statistics: DatasetsStatisticsInterface = DatasetsStatistics(datasets_initial)
-    console.summarise_datasets(datasets_initial, datasets_statistics)
+    console.summarise_datasets(datasets_initial, datasets_statistics, pandda_fs_model)
 
     if pandda_args.debug >= Debug.PRINT_NUMERICS:
         print(datasets_initial)
