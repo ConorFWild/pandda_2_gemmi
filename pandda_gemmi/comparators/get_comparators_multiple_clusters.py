@@ -166,7 +166,7 @@ grid, structure_factors, sample_rate,
 ):
     # Get reduced array
     total_sample_size = len(shell_truncated_datasets)
-    batch_size = min(90, total_sample_size)
+    batch_size = min(300, total_sample_size)
     num_batches = (total_sample_size // batch_size) + 1
     # batches = [
     #     np.arange(x*batch_size, min((x+1)*batch_size, total_sample_size))

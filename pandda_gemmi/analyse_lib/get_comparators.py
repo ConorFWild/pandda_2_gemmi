@@ -2,8 +2,10 @@ from pandda_gemmi.common import update_log
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 
-def get_comparators(pandda_args, console, pandda_fs_model, pandda_log, comparators_func, datasets, structure_factors, alignments,
-                grid):
+
+def get_comparators(pandda_args, console, pandda_fs_model, pandda_log, comparators_func, datasets, structure_factors,
+                    alignments,
+                    grid):
     console.start_get_comparators()
     # with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
     #                    f'\tDone!'):
