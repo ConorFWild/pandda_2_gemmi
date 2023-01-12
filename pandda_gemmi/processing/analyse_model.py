@@ -256,15 +256,15 @@ def analyse_model(
     # update_log(dataset_log, dataset_log_path)
 
     # Apply prior on number of events/protein chain and return if too many
-    num_protein_chains = len(set([resid.chain for resid in dataset.structure.protein_residue_ids()]))
-    num_events_prior = num_protein_chains * 3
-    # Only check if any events remain!
-    if test_dtag in clusterings_merged:
-        if len(clusterings_merged[test_dtag].clustering) > num_events_prior:
-            clusterings_merged = FilterEDClusteringsSize()(clusterings_merged,
-                                                                              grid,
-                                                                              10000,
-                                                                              )
+    # num_protein_chains = len(set([resid.chain for resid in dataset.structure.protein_residue_ids()]))
+    # num_events_prior = num_protein_chains * 3
+    # # Only check if any events remain!
+    # if test_dtag in clusterings_merged:
+    #     if len(clusterings_merged[test_dtag].clustering) > num_events_prior:
+    #         clusterings_merged = FilterEDClusteringsSize()(clusterings_merged,
+    #                                                                           grid,
+    #                                                                           10000,
+    #                                                                           )
 
 
     # TODO: REMOVE: event blob analysis

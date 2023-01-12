@@ -224,8 +224,11 @@ def process_dataset_multiple_models(
         )
     }
 
-    dataset_log["Model logs"] = {model_number: model_result.model_log for model_number, model_result in
-                                 model_results.items()}  #
+    dataset_log["Model logs"] = {
+        model_number: model_result.model_log
+        for model_number, model_result
+        in model_results.items()
+    }  #
 
     time_model_analysis_finish = time.time()
 
@@ -364,6 +367,7 @@ def process_dataset_multiple_models(
     events = model_results[model_selection.selected_model_id].events
 
     time_event_finish = time.time()
+    dataset_log["Number of events"] = len(events)
     dataset_log[constants.LOG_DATASET_EVENT_TIME] = time_event_finish - time_event_start
     update_log(dataset_log, dataset_log_path)
 
