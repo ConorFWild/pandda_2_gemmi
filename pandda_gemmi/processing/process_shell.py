@@ -9,14 +9,70 @@ from pandda_gemmi.autobuild import (
 from pandda_gemmi import constants
 
 
-def get_shell_results(pandda_args, console, process_global, process_local, pandda_fs_model, process_shell_function,
-                      load_xmap_func, analyse_model_func, score_events_func, shells, structure_factors, datasets,
-                      reference, alignments, grid, pandda_log, ):
+def get_shell_results_async(pandda_args,
+                            console,
+                            process_global,
+                            process_local,
+                            pandda_fs_model,
+                            process_shell_function,
+                            load_xmap_func, analyse_model_func, score_events_func, shells, structure_factors, datasets,
+                            reference, alignments, grid, pandda_log, ):
     console.start_process_shells()
 
     # Process the shells
     time_shells_start = time.time()
     # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
+
+    for res, shell in shells.items():
+        console = PanDDAConsole()
+        printer = pprint.PrettyPrinter()
+
+        if debug >= Debug.DEFAULT:
+            console.print_starting_process_shell(shell)
+
+        process_local_in_dataset, process_local_in_shell, process_local_over_datasets = get_processors(process_local,
+                                                                                                       memory_availability)
+
+        time_shell_start = time.time()
+        if pandda_fs_model.shell_dirs:
+            shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
+        else:
+            raise Exception(
+                "Attempted to find the log path for the shell, but no shell dir added to pandda_fs_model somehow.")
+        shell_log = {}
+
+        # Seperate out test and train datasets
+        shell_datasets: DatasetsInterface = {
+            dtag: dataset
+            for dtag, dataset
+            in datasets.items()
+            if dtag in shell.all_dtags
+        }
+        shell_log[constants.LOG_SHELL_DATASETS] = [dtag.dtag for dtag in shell_datasets]
+        update_log(shell_log, shell_log_path)
+
+        ###################################################################
+        # # Homogonise shell datasets by truncation of resolution
+        ###################################################################
+        shell_truncated_datasets = get_shell_datasets(console, datasets, structure_factors, shell, shell_datasets,
+                                                      shell_log, debug)
+
+        ###################################################################
+        # # Generate aligned Xmaps
+        ###################################################################
+        xmaps = get_xmaps(console, pandda_fs_model, process_local_in_shell, load_xmap_func, structure_factors,
+                          alignments,
+                          grid, shell, shell_truncated_datasets, sample_rate, shell_log, debug, shell_log_path)
+
+        ###################################################################
+        # # Get the models to test
+        ###################################################################
+        models = get_shell_models(console, pandda_fs_model, process_local_in_shell, shell, grid, xmaps, debug)
+
+        ###################################################################
+        # # Process each test dataset
+        ###################################################################
+
 
     shell_results: ShellResultsInterface = {
         shell_id: shell_result
@@ -102,5 +158,3 @@ def get_shell_results(pandda_args, console, process_global, process_local, pandd
     console.summarise_shells(shell_results, all_events, event_scores)
 
     return shell_results, all_events, event_scores
-
-

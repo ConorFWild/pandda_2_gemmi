@@ -10,6 +10,8 @@ from sklearn.cluster import DBSCAN
 from joblib.externals.loky import set_loky_pickler
 from pandda_gemmi.analyse_interface import AlignmentInterface, AlignmentsInterface, CrystallographicGridInterface, DatasetsInterface, EDClusteringsInterface, EventsInterface, GridInterface, ModelInterface, PanDDAFSModelInterface, ProcessorInterface, StructureFactorsInterface, XmapsInterface
 
+import gemmi
+import numpy as np
 set_loky_pickler('pickle')
 
 from pandda_gemmi.analyse_interface import *

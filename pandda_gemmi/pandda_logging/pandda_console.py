@@ -634,7 +634,7 @@ class PanDDAConsole:
         self.console.print_exception()
 
     def save(self, console_log_file):
-        self.console.save_html(str(console_log_file))
+        self.console.save_text(str(console_log_file))
 
     def __enter__(self):
         ...

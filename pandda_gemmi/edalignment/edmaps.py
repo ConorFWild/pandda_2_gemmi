@@ -13,6 +13,8 @@ from pandda_gemmi.analyse_interface import LoadXMapInterface
 
 set_loky_pickler('pickle')
 # import ray
+import gemmi
+import numpy as np
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.python_types import *

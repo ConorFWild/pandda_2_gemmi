@@ -1,4 +1,3 @@
-
 # Base python
 import dataclasses
 import time
@@ -10,7 +9,8 @@ from typing import Set
 import pickle
 
 from pandda_gemmi.processing.process_local import ProcessLocalSerial
-from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole
+from pandda_gemmi.pandda_logging import STDOUTManager, log_arguments, PanDDAConsole, update_log
+
 console = PanDDAConsole()
 
 printer = pprint.PrettyPrinter()
@@ -65,7 +65,6 @@ class ModelResult(ModelResultInterface):
         self.model_log = model_log
 
 
-
 def analyse_model(
         model,
         model_number,
@@ -74,7 +73,7 @@ def analyse_model(
         dataset_xmap,
         reference,
         grid,
-        dataset_processed_dataset,
+        dataset_processed_dataset: ProcessedDatasetInterface,
         dataset_alignment,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
@@ -92,8 +91,14 @@ def analyse_model(
 
     model_log = {}
 
+    # Make the model directory
+    model_dir: Path = dataset_processed_dataset.path / f"model_{model_number}"
+    if not model_dir.exists():
+        os.mkdir(model_dir)
+    model_log_path = model_dir / "log.json"
+
     # model_log[constants.LOG_DATASET_TRAIN] = [_dtag.dtag for _dtag in shell.train_dtags[model_number]]
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # masked_xmap_array = XmapArray.from_xmaps(
     #     dataset_xmaps,
@@ -142,7 +147,7 @@ def analyse_model(
         if debug >= Debug.PRINT_SUMMARIES:
             print(model_log["ZMap statistics"])
 
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     ###################################################################
     # # Cluster the outlying density
@@ -189,7 +194,8 @@ def analyse_model(
 
     model_log[constants.LOG_DATASET_INITIAL_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings.values()])
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
+
     cluster_sizes = {}
     for dtag, clustering in clusterings.items():
         for cluster_num, cluster in clustering.clustering.items():
@@ -206,7 +212,7 @@ def analyse_model(
         ))
         if j < 10
     }
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # Filter out small clusters
     clusterings_large: EDClusteringsInterface = FilterEDClusteringsSize()(clusterings,
@@ -219,7 +225,7 @@ def analyse_model(
              zip(clusterings_large, clusterings_large.values())}))
     model_log[constants.LOG_DATASET_LARGE_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_large.values()])
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # Filter out weak clusters (low peak z score)
     clusterings_peaked: EDClusteringsInterface = FilterEDClusteringsPeak()(clusterings_large,
@@ -231,7 +237,7 @@ def analyse_model(
              zip(clusterings_peaked, clusterings_peaked.values())}))
     model_log[constants.LOG_DATASET_PEAKED_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_peaked.values()])
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # Add the event mask
     for clustering_id, clustering in clusterings_peaked.items():
@@ -248,12 +254,12 @@ def analyse_model(
              zip(clusterings_merged, clusterings_merged.values())}))
     model_log[constants.LOG_DATASET_MERGED_CLUSTERS_NUM] = sum(
         [len(clustering) for clustering in clusterings_merged.values()])
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # Log the clustering
     time_cluster_finish = time.time()
     model_log[constants.LOG_DATASET_CLUSTER_TIME] = time_cluster_finish - time_cluster_start
-    # update_log(dataset_log, dataset_log_path)
+    update_log(model_log, model_log_path)
 
     # Apply prior on number of events/protein chain and return if too many
     # num_protein_chains = len(set([resid.chain for resid in dataset.structure.protein_residue_ids()]))
@@ -265,7 +271,6 @@ def analyse_model(
     #                                                                           grid,
     #                                                                           10000,
     #                                                                           )
-
 
     # TODO: REMOVE: event blob analysis
     # blobfind_event_map_and_report_and_output(
@@ -381,6 +386,8 @@ def analyse_model(
         model_log[int(event_id.event_idx)] = event_scoring_result.log()
         # model_log['noise'][int(event_num)] = noises[event_num]
 
+    update_log(model_log, model_log_path)
+
     time_model_analysis_finish = time.time()
 
     # model_results = {
@@ -412,5 +419,7 @@ def analyse_model(
         for event_id, event_score_result in model_results.event_scores.items():
             print(f"event log: {event_id.event_idx.event_idx} {event_id.dtag.dtag}")
             print(event_score_result.log())
+
+    update_log(model_log, model_log_path)
 
     return model_results

@@ -10,7 +10,8 @@ from pandda_gemmi import constants
 
 
 def get_autobuild_results(pandda_args, console, process_local,
-                          process_global, autobuild_func, pandda_fs_model, datasets, all_events, shell_results, pandda_log, event_scores,):
+                          process_global, autobuild_func, pandda_fs_model, datasets, all_events, shell_results,
+                          pandda_log, event_scores, ):
     autobuild_results = {}
     if autobuild_func:
         console.start_autobuilding()
