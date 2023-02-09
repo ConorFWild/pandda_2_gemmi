@@ -236,6 +236,19 @@ def get_shells_multiple_models(
             # Empty the accumulator
             dtag_accumulator = [_current_dtag,]
 
+    if len(dtag_accumulator) != 0:
+        low_res_dtag = dtag_accumulator[-1]
+        low_res = resolutions[low_res_dtag]
+        low_res_dtag_comparators = comparators[low_res_dtag]
+
+        # Test dtags are accumulator set
+        shells_test[low_res] = dtag_accumulator
+
+        # Get the comparators for the lowest res dtag in accumulator (i.e. test set with res better <= train)
+        shells_train[low_res] = {}
+        for comparator_num, comparator_dtags in low_res_dtag_comparators.items():
+            shells_train[low_res][comparator_num] = comparator_dtags[:min_characterisation_datasets]
+
     # Create shells
     shells = {}
     for res in shells_test:
