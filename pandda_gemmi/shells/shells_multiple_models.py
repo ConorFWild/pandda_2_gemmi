@@ -207,7 +207,10 @@ def get_shells_multiple_models(
         # Check if the new dtag makes the shell too wide or large
         new_accumlator_size = len(dtag_accumulator) + 1
         current_dataset_res = datasets[_current_dtag].reflections.get_resolution()
-        highest_shell_res = datasets[dtag_accumulator[0]].reflections.get_resolution()
+        if len(dtag_accumulator) != 0:
+            highest_shell_res = datasets[dtag_accumulator[0]].reflections.get_resolution()
+        else:
+            highest_shell_res = 0.0
         new_accumulator_width = current_dataset_res - highest_shell_res
 
         # If not, Add the dtag to the accumulator and continue
@@ -219,15 +222,16 @@ def get_shells_multiple_models(
         else:
             # Get the current dataset resolutions
             low_res_dtag = dtag_accumulator[-1]
+            low_res = resolutions[low_res_dtag]
             low_res_dtag_comparators = comparators[low_res_dtag]
 
             # Test dtags are accumulator set
-            shells_test[current_dataset_res] = dtag_accumulator
+            shells_test[low_res] = dtag_accumulator
 
             # Get the comparators for the lowest res dtag in accumulator (i.e. test set with res better <= train)
-            shells_train[current_dataset_res] = {}
+            shells_train[low_res] = {}
             for comparator_num, comparator_dtags in low_res_dtag_comparators.items():
-                shells_train[current_dataset_res][comparator_num] = comparator_dtags[:min_characterisation_datasets]
+                shells_train[low_res][comparator_num] = comparator_dtags[:min_characterisation_datasets]
 
             # Empty the accumulator
             dtag_accumulator = [_current_dtag,]
