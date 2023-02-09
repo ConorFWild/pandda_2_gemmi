@@ -14,7 +14,7 @@ class Partial(PartialInterface[P, V]):
                      *args: P.args,
                      **kwargs: P.kwargs,
                      ):
-        self.args = self.args + args
+        self.args = self.args + [_arg for _arg in args]
         self.kwargs = self.kwargs.update(kwargs)
         # return self.func(*self.args, **self.kwargs)
         return self
