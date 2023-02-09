@@ -4,7 +4,6 @@ from pandda_gemmi.analyse_interface import *
 class Partial(PartialInterface[P, V]):
     def __init__(self,
                  func: Callable[P, V],
-
                  ):
         self.func = func
         self.args = []

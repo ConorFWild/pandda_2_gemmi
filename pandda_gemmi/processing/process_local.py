@@ -83,6 +83,7 @@ class ProcessLocalSpawn(ProcessorInterface):
             start_time = time.time()
             result_futuress = []
             for func in funcs:
+                print(f"kwds: {func.kwargs}")
                 result_futuress.append(pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
 
             task_status = [result.ready() for result in result_futuress]
