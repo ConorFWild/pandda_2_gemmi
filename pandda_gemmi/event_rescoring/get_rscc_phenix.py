@@ -4,7 +4,10 @@ import pathlib
 
 from pandda_gemmi.analyse_interface import *
 
-MATCH_REGEX = "([^\s]+)\s+LIG\s+([^\s]+)\s+([^\s]+)"
+MATCH_REGEX = (
+    "([^\s]+)\s+LIG\s+([^\s]+)\s+([^\s]+)",
+    "([^\s]+)\s+XXX\s+([^\s]+)\s+([^\s]+)",
+)
 
 PHENIX_MODEL_MAP_CC_SCRIPT = (
     "cd {tmp_dir}; "
@@ -46,13 +49,14 @@ def get_rscc(
         with open(results_path, "r") as f:
             for line in f.readlines():
                 # print(line)
-                match = re.match(MATCH_REGEX, str(line))
-                if not match:
-                    continue
-                chain = match.groups()[0]
-                res = int(match.groups()[1])
-                rscc = float(match.groups()[2])
-                results[(chain, res)] = rscc
+                for match_regex in MATCH_REGEX:
+                    match = re.match(match_regex, str(line))
+                    if not match:
+                        continue
+                    chain = match.groups()[0]
+                    res = int(match.groups()[1])
+                    rscc = float(match.groups()[2])
+                    results[(chain, res)] = rscc
 
         return results
 
