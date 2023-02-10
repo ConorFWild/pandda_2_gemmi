@@ -340,7 +340,7 @@ def get_shell_results_async(
             ###################################################################
             # # Generate train Xmaps
             ###################################################################
-            train_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets if
+            train_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
                                       _dtag in comparators}
             train_xmaps = get_xmaps(
                 console,
