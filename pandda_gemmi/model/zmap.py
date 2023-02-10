@@ -8,11 +8,14 @@ from functools import partial
 from scipy import stats
 from joblib.externals.loky import set_loky_pickler
 
-from pandda_gemmi.analyse_interface import DtagInterface, GridInterface, ModelIDInterface, ModelInterface, NDArrayInterface, XmapsInterface
+from pandda_gemmi.analyse_interface import DtagInterface, GridInterface, ModelIDInterface, ModelInterface, \
+    NDArrayInterface, XmapsInterface
+
 set_loky_pickler('pickle')
 from matplotlib import pyplot as plt
 from scipy import optimize
 import seaborn as sns
+
 sns.set_theme()
 
 from pandda_gemmi.analyse_interface import *
@@ -461,8 +464,8 @@ class Model(ModelInterface):
         ccp4.update_ccp4_header(2, True)
         ccp4.write_ccp4_map(str(pandda_dir / PANDDA_SIGMA_S_M_FILE.format(
             number=shell.number,
-                                                                          res=shell.res_min.resolution,
-                                                                          )))
+            res=shell.res_min.resolution,
+        )))
 
 
 @dataclasses.dataclass()
@@ -470,7 +473,7 @@ class Zmap(ZmapInterface):
     zmap: gemmi.FloatGrid
 
     @staticmethod
-    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, model_number=0, debug: Debug=Debug.DEFAULT):
+    def from_xmap(model: Model, xmap: Xmap, dtag: Dtag, model_number=0, debug: Debug = Debug.DEFAULT):
 
         # Get zmap
         zmap_array = model.evaluate(xmap, dtag)
@@ -581,8 +584,8 @@ class Zmaps:
     zmaps: typing.Dict[Dtag, Zmap]
 
     @staticmethod
-    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface=0,
-                   debug: Debug=Debug.DEFAULT):
+    def from_xmaps(model: ModelInterface, xmaps: XmapsInterface, model_number: ModelIDInterface = 0,
+                   debug: Debug = Debug.DEFAULT):
         zmaps = {}
         for dtag in xmaps:
             xmap = xmaps[dtag]

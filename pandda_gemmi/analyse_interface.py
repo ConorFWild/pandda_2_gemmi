@@ -38,7 +38,29 @@ class PanDDAConsoleInterface(Protocol):
 
 
 class ProcessorInterface(Protocol):
+    tag: Literal["not_async"]
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
+        ...
+
+class FutureStatus(IntEnum):
+    RUNNING = 1
+    DONE = 2
+    FAILED = 3
+
+class FutureInterface(Protocol):
+    def status(self):
+        ...
+
+    def get(self):
+        ...
+
+class ProcessorAsyncInterface(Protocol):
+    tag: Literal["async"]
+
+    def submit(self, func: Callable[P, V]) -> V:
+        ...
+
+    def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         ...
 
 
@@ -141,6 +163,7 @@ class ProcessedDatasetsInterface(Protocol):
 
 class ShellDirInterface(Protocol):
     log_path: Path
+    path: Path
 
 
 # ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]

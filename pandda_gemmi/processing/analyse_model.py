@@ -20,7 +20,6 @@ printer = pprint.PrettyPrinter()
 
 ## Custom Imports
 
-
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 from pandda_gemmi.pandda_functions import (
@@ -30,7 +29,7 @@ from pandda_gemmi.pandda_functions import (
     save_reference_frame_zmap,
 )
 from pandda_gemmi.python_types import *
-from pandda_gemmi.common import Dtag, EventID, Partial
+from pandda_gemmi.common import Dtag, EventID, Partial, cache, uncache
 
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
 from pandda_gemmi.model import Zmap, Model, Zmaps
@@ -390,18 +389,9 @@ def analyse_model(
 
     time_model_analysis_finish = time.time()
 
-    # model_results = {
-    #     'zmap': zmaps[test_dtag],
-    #     'clusterings': clusterings,
-    #     'clusterings_large': clusterings_large,
-    #     'clusterings_peaked': clusterings_peaked,
-    #     'clusterings_merged': clusterings_merged,
-    #     'events': events,
-    #     'event_scores': event_scores,
-    #     'log': model_log
-    # }
+    zmap_cache = cache(output_dir, zmaps[test_dtag])
     model_results: ModelResult = ModelResult(
-        zmaps[test_dtag],
+        zmap_cache,
         clusterings,
         clusterings_large,
         clusterings_peaked,

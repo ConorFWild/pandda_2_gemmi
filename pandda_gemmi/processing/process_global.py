@@ -79,6 +79,19 @@ class SGEFuture:
         else:
             return SGEResultStatus.FAILED
 
+    def get(self):
+        status = self.status()
+        while not status == SGEResultStatus.DONE:
+            if status == SGEResultStatus.FAILED:
+                raise Exception()
+            time.sleep(10)
+        return self.load()
+
+    def load(self,):
+        with open(self.result_path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
 
 class QSubScheduler:
     def __init__(self,
@@ -237,7 +250,7 @@ class QSubScheduler:
         return results
 
 
-class DistributedProcessor(ProcessorInterface):
+class DistributedProcessor(ProcessorAsyncInterface):
     def __init__(self,
                  tmp_dir,
                  scheduler="SGE",
@@ -283,6 +296,7 @@ class DistributedProcessor(ProcessorInterface):
             raise Exception(f"Scheduler {scheduler} is not one of the supported schedulers: {schedulers}")
 
         self.client = cluster
+        self.tag = "async"
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         result_futures = []
@@ -298,6 +312,14 @@ class DistributedProcessor(ProcessorInterface):
         results = self.client.gather(result_futures)
 
         return results
+
+    def submit(self, func: Callable[P, V]) -> V:
+        func_path = self.client.save(func.func)
+        arg_pickle_paths = [self.client.save(arg) for arg in func.args]
+        kwarg_pickle_paths = {kwrd: self.client.save(kwarg) for kwrd, kwarg in func.kwargs.items()}
+        result_future = self.client.submit(func_path, *arg_pickle_paths, **kwarg_pickle_paths)
+
+        return result_future
 
 
 class DaskDistributedProcessor(ProcessorInterface):

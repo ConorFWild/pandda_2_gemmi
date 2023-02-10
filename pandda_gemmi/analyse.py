@@ -34,6 +34,7 @@ from pandda_gemmi.analyse_lib import (
     get_comparators,
     get_shells,
     get_shell_results,
+    get_shell_results_async,
     get_autobuild_results,
     get_rescored_events,
     get_event_classifications,
@@ -154,55 +155,64 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Get fs model
         ###################################################################
-        pandda_fs_model = get_fs_model(pandda_args, console, pandda_log, process_local, get_dataset_smiles, )
+        pandda_fs_model = get_fs_model(
+            pandda_args, console, pandda_log, process_local, get_dataset_smiles, )
 
         ###################################################################
         # # Load datasets
         ###################################################################
         # Get datasets
-        datasets_initial, datasets_statistics = get_datasets(pandda_args, console, pandda_fs_model)
+        datasets_initial, datasets_statistics = get_datasets(
+            pandda_args, console, pandda_fs_model)
 
         ###################################################################
         # # Get global processor
         ###################################################################
         console.start_initialise_shell_processor()
-        process_global: ProcessorInterface = get_process_global(pandda_args, pandda_fs_model.tmp_dir, pandda_args.debug)
+        process_global: Union[ProcessorInterface, ProcessorAsyncInterface] = get_process_global(
+            pandda_args, pandda_fs_model.tmp_dir, pandda_args.debug)
         console.print_initialized_global_processor(pandda_args)
 
         ###################################################################
         # # If structure factors not given, check if any common ones are available
         ###################################################################
-        structure_factors = get_structure_factors(pandda_args, console, get_common_structure_factors, datasets_initial)
+        structure_factors = get_structure_factors(
+            pandda_args, console, get_common_structure_factors, datasets_initial)
 
         ###################################################################
         # # Data Quality filters
         ###################################################################
-        datasets_quality_filtered = get_data_quality_filtered_datasets(console, filter_data_quality, datasets_initial,
-                                                                       structure_factors)
+        datasets_quality_filtered = get_data_quality_filtered_datasets(
+            console, filter_data_quality, datasets_initial,
+            structure_factors)
 
         ###################################################################
         # # Truncate columns
         ###################################################################
-        datasets_wilson: DatasetsInterface = drop_columns(datasets_quality_filtered, structure_factors)
+        datasets_wilson: DatasetsInterface = drop_columns(
+            datasets_quality_filtered, structure_factors)
 
         ###################################################################
         # # Reference Selection
         ###################################################################
-        reference = get_reference(pandda_args, console, pandda_log, pandda_fs_model, datasets_wilson,
-                                  datasets_statistics)
+        reference = get_reference(
+            pandda_args, console, pandda_log, pandda_fs_model, datasets_wilson,
+            datasets_statistics)
 
         ###################################################################
         # # B Factor smoothing
         ###################################################################
-        datasets_smoother = get_datasets_smoother(console, smooth_func, process_local, datasets_wilson, reference,
-                                                  structure_factors, pandda_log)
+        datasets_smoother = get_datasets_smoother(
+            console, smooth_func, process_local, datasets_wilson, reference,
+            structure_factors, pandda_log)
 
         ###################################################################
         # # Reference compatability filters
         ###################################################################
-        datasets = get_reference_compatability_filtered_datasets(console, filter_reference_compatability,
-                                                                 datasets_smoother,
-                                                                 reference)
+        datasets = get_reference_compatability_filtered_datasets(
+            console, filter_reference_compatability,
+            datasets_smoother,
+            reference)
 
         ###################################################################
         # # Getting grid
@@ -212,14 +222,16 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Getting alignments
         ###################################################################
-        alignments: AlignmentsInterface = get_alignments(pandda_args, console, pandda_log, pandda_fs_model, datasets,
-                                                         reference)
+        alignments: AlignmentsInterface = get_alignments(
+            pandda_args, console, pandda_log, pandda_fs_model, datasets,
+            reference)
 
         ###################################################################
         # # Assign comparison datasets
         ###################################################################
-        comparators = get_comparators(pandda_args, console, pandda_fs_model, pandda_log, comparators_func, datasets,
-                                      structure_factors, alignments, grid)
+        comparators = get_comparators(
+            pandda_args, console, pandda_fs_model, pandda_log, comparators_func, datasets,
+            structure_factors, alignments, grid)
 
         ###################################################################
         # # Get the shells
@@ -229,53 +241,87 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Process shells
         ###################################################################
-        shell_results, all_events, event_scores = get_shell_results(pandda_args, console, process_global, process_local,
-                                                                    pandda_fs_model, process_shell_multiple_models,
-                                                                    load_xmap_func, analyse_model_func,
-                                                                    score_events_func, shells, structure_factors,
-                                                                    datasets, reference, alignments, grid, pandda_log, )
+        if process_global.tag == "async":
+            shell_results, all_events, event_scores = get_shell_results_async(
+                pandda_args,
+                console,
+                process_global,
+                process_local,
+                pandda_fs_model,
+                load_xmap_func,
+                analyse_model_func,
+                score_events_func,
+                shells,
+                structure_factors,
+                datasets,
+                reference,
+                alignments,
+                grid,
+                pandda_log,
+            )
+
+        elif process_global.tag == "not_async":
+            shell_results, all_events, event_scores = get_shell_results(
+                pandda_args, console, process_global,
+                process_local,
+                pandda_fs_model,
+                process_shell_multiple_models,
+                load_xmap_func, analyse_model_func,
+                score_events_func, shells, structure_factors,
+                datasets, reference, alignments, grid,
+                pandda_log, )
+        else:
+            raise Exception(f"Processor tag: {process_global.tag} : not recognized!")
 
         ###################################################################
         # # Autobuilding
         ###################################################################
         # Autobuild the results if set to
-        autobuild_results = get_autobuild_results(pandda_args, console, process_local, process_global, autobuild_func,
-                                                  pandda_fs_model, datasets, all_events, shell_results, pandda_log,
-                                                  event_scores, )
+        autobuild_results = get_autobuild_results(
+            pandda_args, console, process_local, process_global, autobuild_func,
+            pandda_fs_model, datasets, all_events, shell_results, pandda_log,
+            event_scores, )
 
         ###################################################################
         # # Rescore Events
         ###################################################################
-        event_scores = get_rescored_events(pandda_fs_model, pandda_args, console, process_local,
-                                           event_rescoring_function,
-                                           datasets, grid, all_events, event_scores, autobuild_results)
+        event_scores = get_rescored_events(
+            pandda_fs_model, pandda_args, console, process_local,
+            event_rescoring_function,
+            datasets, grid, all_events, event_scores, autobuild_results)
 
         ###################################################################
         # # Classify Events
         ###################################################################
-        event_classifications = get_event_classifications(pandda_args, console, pandda_log, get_event_class, all_events,
-                                                          autobuild_results)
+        event_classifications = get_event_classifications(
+            pandda_args, console, pandda_log, get_event_class, all_events,
+            autobuild_results)
 
         ###################################################################
         # # Rank Events
         ###################################################################
-        event_ranking = get_event_ranking(pandda_args, console, pandda_fs_model, datasets, grid, all_events,
-                                          event_scores,
-                                          autobuild_results, pandda_log)
+        event_ranking = get_event_ranking(
+            pandda_args, console, pandda_fs_model, datasets, grid, all_events,
+            event_scores,
+            autobuild_results, pandda_log)
 
         ###################################################################
         # # Assign Sites
         ###################################################################
-        sites = get_event_sites(console, get_sites, grid, all_events)
+        sites = get_event_sites(
+            console, get_sites, grid, all_events)
 
         ###################################################################
         # # Output pandda summary information
         ###################################################################
-        get_event_table(console, pandda_fs_model, all_events, event_ranking, sites)
+        get_event_table(
+            console, pandda_fs_model, all_events, event_ranking, sites)
 
-        get_site_table(pandda_args, console, pandda_fs_model, all_events, sites)
+        get_site_table(
+            pandda_args, console, pandda_fs_model, all_events, sites)
 
-        summarize_run(pandda_args, console, pandda_log, time_start)
+        summarize_run(
+            pandda_args, console, pandda_log, time_start)
 
     ###################################################################
     # # Handle Exceptions

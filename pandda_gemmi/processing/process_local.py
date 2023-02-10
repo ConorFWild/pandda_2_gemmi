@@ -6,15 +6,20 @@ import multiprocessing as mp
 from joblib import Parallel, delayed
 
 from pandda_gemmi.analyse_interface import *
+from pandda_gemmi.processing.process_global import SGEResultStatus, SGEFuture
 
 
 class ProcessLocalSerial(ProcessorInterface):
+    def __init__(self):
+        self.tag: Literal["not_async"] = "not_async"
+
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         results = []
         for func in funcs:
             results.append(func())
 
         return results
+
 
 
 @ray.remote
@@ -33,7 +38,7 @@ class ProcessLocalRay(ProcessorInterface):
 
     def __init__(self, local_cpus):
         ray.init(num_cpus=local_cpus)
-
+        self.tag: Literal["not_async"] = "not_async"
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         assert ray.is_initialized() == True
@@ -63,6 +68,7 @@ class ProcessLocalSpawn(ProcessorInterface):
 
     def __init__(self, n_jobs: int):
         self.n_jobs = n_jobs
+        self.tag: Literal["not_async"] = "not_async"
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         try:
@@ -123,6 +129,7 @@ class ProcessLocalSpawn(ProcessorInterface):
 class ProcessLocalThreading(ProcessorInterface):
     def __init__(self, n_jobs: int):
         self.n_jobs = n_jobs
+        self.tag: Literal["not_async"] = "not_async"
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         results = Parallel(

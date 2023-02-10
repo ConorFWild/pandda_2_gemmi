@@ -27,7 +27,7 @@ from pandda_gemmi.pandda_functions import (
     save_native_frame_zmap,
     save_reference_frame_zmap,
 )
-from pandda_gemmi.common import Dtag, EventID, Partial, update_log
+from pandda_gemmi.common import Dtag, EventID, Partial, update_log, cache, uncache
 from pandda_gemmi.edalignment import Partitioning, Xmap, XmapArray, Grid, from_unaligned_dataset_c, GetMapStatistics
 from pandda_gemmi.event import (
     Event, Clusterings, Clustering, Events, get_event_mask_indicies,
@@ -174,7 +174,6 @@ def process_dataset_multiple_models(
         process_local: ProcessorInterface,
         debug: Debug = Debug.DEFAULT,
 ) -> DatasetResultInterface:
-
     if debug >= Debug.PRINT_SUMMARIES:
         print(f'\tProcessing dtag: {test_dtag}')
     time_dataset_start = time.time()
@@ -254,7 +253,7 @@ def process_dataset_multiple_models(
     )
     selected_model: ModelInterface = models[model_selection.selected_model_id]
     selected_model_clusterings = model_results[model_selection.selected_model_id].clusterings_merged
-    zmap = model_results[model_selection.selected_model_id].zmap
+    zmap = uncache(model_results[model_selection.selected_model_id].zmap)
     dataset_log['Selected model'] = int(model_selection.selected_model_id)
     dataset_log['Model selection log'] = model_selection.log
 
