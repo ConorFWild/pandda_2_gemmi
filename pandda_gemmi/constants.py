@@ -137,12 +137,16 @@ ARGS_DISTRIBUTED_PROJECT_HELP = "A string that gives the name of the SGE project
 ARGS_DISTRIBUTED_NUM_WORKERS = "--distributed_num_workers"
 ARGS_DISTRIBUTED_NUM_WORKERS_HELP = "An integer that gives the number of nodes to attempt to use for distributed " \
                                     "computing."
+ARGS_DISTRIBUTED_NUM_WORKERS_DEFAULT = 150
+
 ARGS_DISTRIBUTED_CORES_PER_WORKER = "--distributed_cores_per_worker"
 ARGS_DISTRIBUTED_CORES_PER_WORKER_HELP = "An integer that gives the number of cores per node for distributed computing."
+ARGS_DISTRIBUTED_CORES_PER_WORKER_DEFAULT = 1
+
 ARGS_DISTRIBUTED_MEM_PER_CORE = "--distributed_mem_per_core"
 ARGS_DISTRIBUTED_MEM_PER_CORE_HELP = "An integer that gives the number of GB of RAM to request for each " \
                                      "distributed process."
-ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT = 15
+ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT = 6
 
 ARGS_DISTRIBUTED_RESOURCE_SPEC = "--distributed_resource_spec"
 ARGS_DISTRIBUTED_RESOURCE_SPEC_HELP = "A string that gives which resources to request for a distributed SGE job."

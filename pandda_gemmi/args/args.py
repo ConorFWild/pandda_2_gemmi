@@ -76,8 +76,8 @@ class PanDDAArgs:
     distributed_scheduler: str = "SGE"
     distributed_queue: str = "medium.q"
     distributed_project: str = "labxchem"
-    distributed_num_workers: int = 12
-    distributed_cores_per_worker: int = 12
+    distributed_num_workers: int = constants.ARGS_DISTRIBUTED_NUM_WORKERS_DEFAULT
+    distributed_cores_per_worker: int = constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_DEFAULT
     distributed_mem_per_core: int = constants.ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT
     distributed_resource_spec: str = f"m_mem_free={constants.ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT}G"
     distributed_tmp: str = "/tmp"
@@ -220,13 +220,13 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_NUM_WORKERS,
             type=int,
-            default=12,
+            default=constants.ARGS_DISTRIBUTED_NUM_WORKERS_DEFAULT,
             help=constants.ARGS_DISTRIBUTED_NUM_WORKERS_HELP,
         )
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_CORES_PER_WORKER,
             type=int,
-            default=12,
+            default=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_DEFAULT,
             help=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_HELP,
         )
         parser.add_argument(
