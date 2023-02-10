@@ -274,15 +274,15 @@ def get_shells_multiple_models(
         shells[res] = shell
 
     # Delete any shells that are empty
-    shells_to_delete = []
-    for res in reses:
-        if len(shells_test[res]) == 0 or len(shells_train[res]) == 0:
-            shells_to_delete.append(res)
-
-    for res in shells_to_delete:
-        del shells[res]
-
-    return shells
+    # shells_to_delete = []
+    # for res in reses:
+    #     if len(shells_test[res]) == 0 or len(shells_train[res]) == 0:
+    #         shells_to_delete.append(res)
+    #
+    # for res in shells_to_delete:
+    #     del shells[res]
+    #
+    # return shells
 
 
 @dataclasses.dataclass()
