@@ -282,7 +282,7 @@ def get_shells_multiple_models(
     # for res in shells_to_delete:
     #     del shells[res]
     #
-    # return shells
+    return shells
 
 
 @dataclasses.dataclass()
