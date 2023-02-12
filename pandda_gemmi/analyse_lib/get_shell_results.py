@@ -370,10 +370,15 @@ def get_shell_results_async(
             ###################################################################
             # # Get the model to test
             ###################################################################
+            combined_xmaps = {}
+            for dtag, xmap in test_xmaps.items():
+                combined_xmaps[dtag] = xmap
+            for dtag, xmap in train_xmaps.items():
+                combined_xmaps[dtag] = xmap
             model: ModelInterface = get_models(
                 shell.test_dtags,
-                {model_number: comparators},
-                train_xmaps.update(test_xmaps),
+                {model_number: comparators,},
+                combined_xmaps,
                 grid,
                 process_local
             )
