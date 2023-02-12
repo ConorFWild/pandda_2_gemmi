@@ -345,7 +345,7 @@ def get_shell_results_async(
             test_xmaps,
         )
         for model_number, comparators in shell.train_dtags.items():
-
+            time_model_start = time.time()
             ###################################################################
             # # Generate train Xmaps
             ###################################################################
@@ -412,9 +412,11 @@ def get_shell_results_async(
                         debug=pandda_args.debug
                     )
                 )
+            time_model_finish = time.time()
+            print(f"\t\tProcessed model in {time_model_finish-time_model_start}")
 
         time_shell_finish = time.time()
-        print(f"Processed shell in {time_shell_finish-time_shell_start}")
+        print(f"\tProcessed shell in {time_shell_finish-time_shell_start}")
 
     ###################################################################
     # # Await the results...
