@@ -312,7 +312,8 @@ def get_shell_results_async(
         ###################################################################
         # # Generate test Xmaps
         ###################################################################
-        test_datasets_to_load = {_dtag: _dataset
+        test_datasets_to_load = {
+            _dtag: _dataset
                                  for _dtag, _dataset in shell_truncated_datasets.items()
                                  if _dtag in shell.test_dtags}
 
