@@ -316,6 +316,7 @@ def get_shell_results_async(
                                  for _dtag, _dataset in shell_truncated_datasets.items()
                                  if _dtag in shell.test_dtags}
 
+
         test_xmaps = get_xmaps(
             console,
             pandda_fs_model,
