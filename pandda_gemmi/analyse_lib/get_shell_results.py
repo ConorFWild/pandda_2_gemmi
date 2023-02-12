@@ -248,7 +248,7 @@ def merge_shell_dataset_results(datasets_results: DatasetResultsInterface,
 def get_shell_results_async(
         pandda_args,
         console,
-        process_global: ProcessorInterface,
+        process_global: ProcessorAsyncInterface,
         process_local: ProcessorInterface,
         pandda_fs_model: PanDDAFSModelInterface,
         load_xmap_func,
