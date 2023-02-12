@@ -413,6 +413,9 @@ def get_shell_results_async(
                     )
                 )
 
+        time_shell_finish = time.time()
+        print(f"Processed shell in {time_shell_finish-time_shell_start}")
+
     ###################################################################
     # # Await the results...
     ###################################################################
