@@ -381,7 +381,7 @@ def get_shell_results_async(
                 combined_xmaps,
                 grid,
                 process_local
-            )
+            )[model_number]
             model_caches[(res, model_number)] = cache(
                 pandda_fs_model.shell_dirs.shell_dirs[res].path,
                 model,
