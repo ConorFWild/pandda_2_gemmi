@@ -81,7 +81,7 @@ def merge_dataset_model_results(
     )
     selected_model: ModelInterface = shell_models[model_selection.selected_model_id]
     selected_model_clusterings = model_results[model_selection.selected_model_id].clusterings_merged
-    zmap = model_results[model_selection.selected_model_id].zmap
+    zmap = uncache(model_results[model_selection.selected_model_id].zmap)
     dataset_log['Selected model'] = int(model_selection.selected_model_id)
     dataset_log['Model selection log'] = model_selection.log
 
@@ -121,26 +121,26 @@ def merge_dataset_model_results(
     )
 
     # TODO: Remove altogether
-    if debug >= Debug.DATASET_MAPS:
-        for model_number, model_result in model_results.items():
-            save_reference_frame_zmap(
-                pandda_fs_model.processed_datasets.processed_datasets[
-                    test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
-                model_result.zmap
-            )
-            save_native_frame_zmap(
-                pandda_fs_model.processed_datasets.processed_datasets[
-                    test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
-                model_result.zmap,
-                dataset_truncated_datasets[test_dtag],
-                alignments[test_dtag],
-                grid,
-                structure_factors,
-                outer_mask,
-                inner_mask_symmetry,
-                partitioning,
-                sample_rate,
-            )
+    # if debug >= Debug.DATASET_MAPS:
+    #     for model_number, model_result in model_results.items():
+    #         save_reference_frame_zmap(
+    #             pandda_fs_model.processed_datasets.processed_datasets[
+    #                 test_dtag].z_map_file.path.parent / f'{model_number}_ref.ccp4',
+    #             model_result.zmap
+    #         )
+    #         save_native_frame_zmap(
+    #             pandda_fs_model.processed_datasets.processed_datasets[
+    #                 test_dtag].z_map_file.path.parent / f'{model_number}_native.ccp4',
+    #             model_result.zmap,
+    #             dataset_truncated_datasets[test_dtag],
+    #             alignments[test_dtag],
+    #             grid,
+    #             structure_factors,
+    #             outer_mask,
+    #             inner_mask_symmetry,
+    #             partitioning,
+    #             sample_rate,
+    #         )
 
     time_output_zmap_finish = time.time()
     dataset_log['Time to output z map'] = time_output_zmap_finish - time_output_zmap_start
