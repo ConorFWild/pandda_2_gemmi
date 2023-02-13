@@ -377,7 +377,7 @@ def get_shell_results_async(
                 combined_xmaps[dtag] = xmap
             model: ModelInterface = get_models(
                 shell.test_dtags,
-                {model_number: comparators,},
+                {model_number: comparators, },
                 combined_xmaps,
                 grid,
                 process_local
@@ -444,10 +444,10 @@ def get_shell_results_async(
                 #         debug=pandda_args.debug
                 #     )()
             time_model_finish = time.time()
-            print(f"\t\tProcessed model in {time_model_finish-time_model_start}")
+            print(f"\t\tProcessed model in {time_model_finish - time_model_start}")
 
         time_shell_finish = time.time()
-        print(f"\tProcessed shell in {time_shell_finish-time_shell_start}")
+        print(f"\tProcessed shell in {time_shell_finish - time_shell_start}")
 
     ###################################################################
     # # Await the results...
@@ -459,9 +459,11 @@ def get_shell_results_async(
     ###################################################################
     # # Get the dataset results
     ###################################################################
+    get_results_start = time.time()
     shell_results = {}
     for res, shell in shells.items():
         print(f"\tAssembing shell results for shell: {res}")
+        time_shell_result_start = time.time()
         shell_dtag_results = {}
         shell_models = {model_cache_id[1]: uncache(model_cache_path) for model_cache_id, model_cache_path in
                         model_caches.items() if model_cache_id[0] == res}
@@ -469,8 +471,12 @@ def get_shell_results_async(
         shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
         for dtag in shell.test_dtags:
             print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
-            dtag_model_results = {model_id: model_result for model_id, model_result in model_results.items() if
-                                  model_id[1] == dtag}
+            model_assemble_start = time.time()
+            dtag_model_results = {
+                model_id[2]: model_result
+                for model_id, model_result
+                in model_results.items() if
+                model_id[1] == dtag}
             dataset_result = merge_dataset_model_results(
                 dtag,
                 dtag_model_results,
@@ -486,7 +492,9 @@ def get_shell_results_async(
                 pandda_args.sample_rate,
                 pandda_args.debug,
             )
+            model_assemble_finish = time.time()
             shell_dtag_results[dtag] = dataset_result
+            print(f"\t\t\tGet dataset result in: {model_assemble_finish-model_assemble_start}")
         shell_result = merge_shell_dataset_results(
             shell_dtag_results,
             shell,
@@ -494,9 +502,12 @@ def get_shell_results_async(
             console,
             pandda_args.debug
         )
+        time_shell_result_finish = time.time()
+        print(f"\t\tGot shell result in {time_shell_result_finish-time_shell_result_start}")
 
         shell_results[res] = shell_result
-    print("Assembled all shell results!")
+    get_results_finish = time.time()
+    print(f"Assembled all shell results in {get_results_finish - get_results_start}!")
 
     ###################################################################
     # # Get the model to test
