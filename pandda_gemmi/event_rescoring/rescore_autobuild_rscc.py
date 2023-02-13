@@ -20,7 +20,7 @@ class RescoreEventsAutobuildRSCC:
         event_map_path = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files[
             event_id.event_idx].path
         resolution = dataset.reflections.get_resolution()
-        tmp_dir = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}"
+        tmp_dir = pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f"model_{event_id.event_idx.event_idx}"
 
         # Make the tmp dir if there is one
         if not tmp_dir.exists():
