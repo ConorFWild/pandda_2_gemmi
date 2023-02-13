@@ -452,6 +452,7 @@ def get_shell_results_async(
     ###################################################################
     # # Await the results...
     ###################################################################
+    print(f"Processed all shells, awaiting results!")
     model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
 
     ###################################################################

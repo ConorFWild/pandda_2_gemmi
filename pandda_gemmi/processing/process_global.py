@@ -85,6 +85,8 @@ class SGEFuture:
             if status == SGEResultStatus.FAILED:
                 raise Exception()
             time.sleep(10)
+            status = self.status()
+
         return self.load()
 
     def load(self,):
