@@ -272,6 +272,8 @@ def get_shell_results_async(
     shell_truncated_datasets_cache = {}
     shell_xmaps_chace = {}
 
+    time_shell_submit_start = time.time()
+
     for res, shell in shells.items():
         console = PanDDAConsole()
         # printer = pprint.PrettyPrinter()
@@ -449,10 +451,11 @@ def get_shell_results_async(
         time_shell_finish = time.time()
         print(f"\tProcessed shell in {time_shell_finish - time_shell_start}")
 
+    time_shell_submit_finish = time.time()
     ###################################################################
     # # Await the results...
     ###################################################################
-    print(f"Processed all shells, awaiting results!")
+    print(f"Processed all shells in {time_shell_submit_finish-time_shell_submit_start}, awaiting results!")
     model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
     print(f"Got all shell results!")
 
