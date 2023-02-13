@@ -472,15 +472,19 @@ def get_shell_results_async(
                         model_caches.items() if model_cache_id[0] == res}
         shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
         shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
+        model_assemble_start = time.time()
+
+        dtags = []
+        dtag_model_result_funcs = []
         for dtag in shell.test_dtags:
             print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
-            model_assemble_start = time.time()
             dtag_model_results = {
                 model_id[2]: model_result
                 for model_id, model_result
                 in model_results.items() if
                 model_id[1] == dtag}
-            dataset_result = merge_dataset_model_results(
+            dtag_model_result_funcs.append(
+                Partial(merge_dataset_model_results).paramaterise(
                 dtag,
                 dtag_model_results,
                 shell_models,
@@ -495,9 +499,19 @@ def get_shell_results_async(
                 pandda_args.sample_rate,
                 pandda_args.debug,
             )
-            model_assemble_finish = time.time()
-            shell_dtag_results[dtag] = dataset_result
-            print(f"\t\t\tGet dataset result in: {model_assemble_finish-model_assemble_start}")
+            )
+            dtags.append(dtag)
+
+
+        shell_dtag_results_list = process_local(
+            dtag_model_result_funcs
+        )
+        shell_dtag_results = {dtag: result for dtag, result in zip(dtags, shell_dtag_results_list)}
+
+        model_assemble_finish = time.time()
+        # shell_dtag_results[dtag] = dataset_result
+        print(f"\t\t\tGet dataset result in: {model_assemble_finish - model_assemble_start}")
+
         shell_result = merge_shell_dataset_results(
             shell_dtag_results,
             shell,

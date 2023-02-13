@@ -93,23 +93,6 @@ class PanDDALoadDatasets:
         datasets_statistics: DatasetsStatisticsInterface = self.get_dataset_statistics(datasets_initial)
         self.console.summarise_datasets(datasets_initial, datasets_statistics)
 
-        # if pandda_args.debug >= Debug.PRINT_NUMERICS:
-        #     print(datasets_initial)
-
-        # If structure factors not given, check if any common ones are available
-        # with STDOUTManager('Looking for common structure factors in datasets...', f'\tFound structure factors!'):
-        # if not self.structure_factors:
-        #     potential_structure_factors: Optional[StructureFactorsInterface] = self.get_common_structure_factors(
-        #         datasets_initial)
-        #     # If still no structure factors
-        #     if not potential_structure_factors:
-        #         raise Exception(
-        #             "No common structure factors found in mtzs. Please manually provide the labels with the --structure_factors option.")
-        #     else:
-        #         structure_factors: StructureFactorsInterface = potential_structure_factors
-        # else:
-        #     structure_factors: StructureFactorsInterface = StructureFactors(pandda_args.structure_factors[0],
-        #                                                                     pandda_args.structure_factors[1])
         structure_factors = self.get_structure_factors_func(datasets_initial)
 
         return datasets_initial
@@ -1657,6 +1640,26 @@ class PanDDA:
         alignments = self.get_alignments(datasets, reference)
 
         processed_datasets = self.process_datasets(datasets, reference, grid, alignments)
+
+        shells = ...
+
+        for shell in shells:
+            truncated_datasets = ...
+
+            test_xmaps = ...
+
+            for model_spec in shell.model_specifications:
+                train_xmaps = ...
+
+                model = self.get_model()
+
+            processed_datasets = ...
+            for dataset in shell.test_datasets:
+                zmap = ...
+
+                events = filter_clusters()
+
+                event_scores = ...
 
         autobuilds = self.autobuild(processed_datasets, fs_model)
 

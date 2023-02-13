@@ -422,8 +422,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     get_dataset_statistics_func = DatasetsStatistics()
     get_structure_factors_func = GetStructureFactors()
 
-
-
     # Function to get the alignments
     get_alignments_func = GetAlignments()
 
