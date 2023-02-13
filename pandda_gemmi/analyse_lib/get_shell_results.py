@@ -454,18 +454,21 @@ def get_shell_results_async(
     ###################################################################
     print(f"Processed all shells, awaiting results!")
     model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
+    print(f"Got all shell results!")
 
     ###################################################################
     # # Get the dataset results
     ###################################################################
     shell_results = {}
     for res, shell in shells.items():
+        print(f"\tAssembing shell results for shell: {res}")
         shell_dtag_results = {}
         shell_models = {model_cache_id[1]: uncache(model_cache_path) for model_cache_id, model_cache_path in
                         model_caches.items() if model_cache_id[0] == res}
         shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
         shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
         for dtag in shell.test_dtags:
+            print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
             dtag_model_results = {model_id: model_result for model_id, model_result in model_results.items() if
                                   model_id[1] == dtag}
             dataset_result = merge_dataset_model_results(
@@ -493,6 +496,7 @@ def get_shell_results_async(
         )
 
         shell_results[res] = shell_result
+    print("Assembled all shell results!")
 
     ###################################################################
     # # Get the model to test
