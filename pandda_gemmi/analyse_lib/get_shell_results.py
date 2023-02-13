@@ -391,35 +391,10 @@ def get_shell_results_async(
             # # Process each test dataset
             ###################################################################
             for test_dtag in shell.test_dtags:
+                print(f"\t\t\tSubmitting: {test_dtag.dtag}")
                 future_id = (res, test_dtag, model_number)
-                # shell_dataset_model_futures[future_id] = process_global.submit(
-                #     Partial(
-                #         analyse_model_func).paramaterise(
-                #         model,
-                #         model_number,
-                #         test_dtag=test_dtag,
-                #         dataset=shell_truncated_datasets[test_dtag],
-                #         dataset_xmap=test_xmaps[test_dtag],
-                #         reference=reference,
-                #         grid=grid,
-                #         dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                #         dataset_alignment=alignments[test_dtag],
-                #         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                #         min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
-                #         contour_level=pandda_args.contour_level,
-                #         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                #         min_blob_volume=pandda_args.min_blob_volume,
-                #         min_blob_z_peak=pandda_args.min_blob_z_peak,
-                #         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
-                #         score_events_func=score_events_func,
-                #         res=shell.res,
-                #         rate=0.5,
-                #         debug=pandda_args.debug
-                #     )
-                # )
-
-                # shell_dataset_model_futures[future_id] = process_global.submit(
-                Partial(
+                shell_dataset_model_futures[future_id] = process_global.submit(
+                    Partial(
                         analyse_model_func).paramaterise(
                         model,
                         model_number,
@@ -441,7 +416,33 @@ def get_shell_results_async(
                         res=shell.res,
                         rate=0.5,
                         debug=pandda_args.debug
-                    )()
+                    )
+                )
+
+                # shell_dataset_model_futures[future_id] = process_global.submit(
+                # Partial(
+                #         analyse_model_func).paramaterise(
+                #         model,
+                #         model_number,
+                #         test_dtag=test_dtag,
+                #         dataset=shell_truncated_datasets[test_dtag],
+                #         dataset_xmap=test_xmaps[test_dtag],
+                #         reference=reference,
+                #         grid=grid,
+                #         dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                #         dataset_alignment=alignments[test_dtag],
+                #         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                #         min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
+                #         contour_level=pandda_args.contour_level,
+                #         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                #         min_blob_volume=pandda_args.min_blob_volume,
+                #         min_blob_z_peak=pandda_args.min_blob_z_peak,
+                #         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                #         score_events_func=score_events_func,
+                #         res=shell.res,
+                #         rate=0.5,
+                #         debug=pandda_args.debug
+                #     )()
             time_model_finish = time.time()
             print(f"\t\tProcessed model in {time_model_finish-time_model_start}")
 
