@@ -95,6 +95,7 @@ def can_open_cif_path(path: Path):
         pybel_reader = pybel.readfile("cif", str(path))
         pybel_mol = next(pybel_reader)
     except Exception as e:
+        print(e)
         return False
     return True
 
