@@ -171,7 +171,7 @@ class LigandDir:
                 _ligand_cif_path.stem
                 for _ligand_cif_path
                 in ligand_cif_paths
-                if can_open_pdb_path(_ligand_cif_path)
+                if can_open_cif_path(_ligand_cif_path)
             ]
         elif len(ligand_pdb_paths) != 0:
             ligand_keys = [
