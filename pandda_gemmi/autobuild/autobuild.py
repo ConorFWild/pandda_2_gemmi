@@ -1217,6 +1217,8 @@ def autobuild_rhofit(dataset: Dataset,
     if cif_strategy == "default":
         if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Making cif with default strategy using cif {cif_path}")
+        print(f"\t{event.event_id}   Making cif with default strategy using cif {cif_path}")
+
         if not cif_path:
             return AutobuildResult(
                 False,
