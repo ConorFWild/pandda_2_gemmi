@@ -323,6 +323,7 @@ def rhofit(truncated_model_path: Path, truncated_xmap_path: Path, mtz_path: Path
         out_dir=str(out_dir),
         cut=cut,
     )
+    print(rhofit_command)
 
     # Execute job script
     execute(rhofit_command)
@@ -1181,7 +1182,7 @@ def autobuild_rhofit(dataset: Dataset,
         print(e)
 
     # Log
-    autobuilding_log_file = out_dir / "log.json"
+    autobuilding_log_file = out_dir / "autobuild_log.json"
     autobuilding_log = {}
 
     #
@@ -1319,9 +1320,14 @@ def autobuild_rhofit(dataset: Dataset,
         if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Using rhofit without coord")
 
+
+        print(f"\t{event.event_id}   Using rhofit without coord")
+
         rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, debug)
 
     autobuilding_log["rhofit_command"] = str(rhofit_command)
+    with open(autobuilding_log_file, "w") as f:
+        json.dump(autobuilding_log, f)
 
     # TODO: See if this change works
     # Score rhofit builds
