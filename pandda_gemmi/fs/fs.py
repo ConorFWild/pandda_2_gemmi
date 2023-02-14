@@ -774,19 +774,19 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
         if not self.path.exists():
             os.mkdir(str(self.path))
 
-        if process_local:
-            process_local(
-                [
-                    Partial(self.processed_datasets[dtag].build).paramaterise(get_dataset_smiles)
-                    for dtag
-                    in self.processed_datasets
-                ]
-            )
+        # if process_local:
+        #     process_local(
+        #         [
+        #             Partial(self.processed_datasets[dtag].build).paramaterise(get_dataset_smiles)
+        #             for dtag
+        #             in self.processed_datasets
+        #         ]
+        #     )
+        #
+        # else:
 
-        else:
-
-            for dtag in self.processed_datasets:
-                self.processed_datasets[dtag].build(get_dataset_smiles)
+        for dtag in self.processed_datasets:
+            self.processed_datasets[dtag].build(get_dataset_smiles)
 
 
 # @dataclasses.dataclass()
