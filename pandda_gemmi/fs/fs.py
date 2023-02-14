@@ -489,7 +489,7 @@ class DataDirs:
 
             results = process_local(
                 [
-                    partial(DatasetDir.from_path,
+                    Partial(DatasetDir.from_path).paramaterise(
                             dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
                             ligand_cif_regex,
                             ligand_pdb_regex, ligand_smiles_regex)
@@ -514,6 +514,8 @@ class DataDirs:
                     dataset_dirs[dtag] = dataset_dir
 
         for dtag, data_dir in dataset_dirs.items():
+            print(f"#######")
+            print(f"Ligand Dir path: {dtag.dtag}: {data_dir.ligand_dir}")
             print(f"CIF path: {dtag.dtag}: {data_dir.source_ligand_cif}")
 
         return DataDirs(dataset_dirs)
