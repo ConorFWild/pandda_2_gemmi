@@ -20,6 +20,8 @@ def get_fs_model(pandda_args, console, pandda_log, process_local, get_dataset_sm
         pandda_args.ligand_pdb_regex,
         pandda_args.ligand_smiles_regex,
     )()
+    for dtag, model_dir in pandda_fs_model.data_dirs.items():
+        print(f"Data dir cif: {dtag.dtag}: {model_dir.c}")
     pandda_fs_model.build(get_dataset_smiles, process_local=process_local)
     time_fs_model_building_finish = time.time()
     pandda_log["FS model building time"] = time_fs_model_building_finish - time_fs_model_building_start

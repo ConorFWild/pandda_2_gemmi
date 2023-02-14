@@ -1118,6 +1118,10 @@ class SmoothBFactors(SmoothBFactorsInterface):
         return smooth(dataset, reference, structure_factors)
 
 
+class PostprocessDatasets:
+    def __call__(self, datasets, reference):
+        ...
+
 # @ray.remote
 # class SmoothBFactorRayInternal(SmoothBFactors):
 #     ...

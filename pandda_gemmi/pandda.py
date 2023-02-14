@@ -29,7 +29,6 @@ from pandda_gemmi.analyse_interface import *
 
 class PanDDAGetFSModel:
     def __init__(self, get_pandda_fs_model_func, get_dataset_smiles_func, pandda_console, log):
-
         self.get_pandda_fs_model_func = get_pandda_fs_model_func
         self.get_dataset_smiles = get_dataset_smiles_func
         self.console = pandda_console
@@ -130,6 +129,7 @@ class PanDDAFilterReference:
         self.filter_reference_compatability = filter_reference_compatability
         self.console = console
         self.log = log
+
     def __call__(self, datasets_smoother, reference) -> DatasetsInterface:
         self.console.start_reference_comparability_filters()
 
@@ -154,7 +154,7 @@ class PanDDAPostprocessDatasets:
         self.console = console
         self.log = log
 
-    def __call__(self, datasets_quality_filtered, reference, structure_factors,):
+    def __call__(self, datasets_quality_filtered, reference, structure_factors, ):
         datasets_wilson: DatasetsInterface = drop_columns(
             datasets_quality_filtered,
             structure_factors,
@@ -205,9 +205,11 @@ class PanDDAGetAlignments:
     def __init__(self,
                  get_alignments,
                  console,
+                 log
                  ):
         self.get_alignments = get_alignments
         self.console = console
+        self.log = log
 
     def __call__(self, datasets, reference):
         self.console.start_alignments()
@@ -1008,20 +1010,16 @@ class PanDDAGetModels:
         return models
 
 
-
 class PanDDAGetShellResults:
     def __init__(self,
-                 get_comparators,
-                 get_shells,
-                 process_shell,
+                 get_shell_results,
                  console,
+                 log
                  ):
 
-        self.get_comparators = get_comparators
-        self.get_shells = get_shells
-        self.process_shell = process_shell
-
-        self.log = {}
+        self.get_shell_results = get_shell_results
+        self.console = console
+        self.log = log
 
     def __call__(self, datassets, reference, grid, alignments, ):
 
@@ -1139,10 +1137,12 @@ class PanDDAGetShellResults:
 class PanDDAGetAutobuilds:
     def __init__(self,
                  autobuild_func,
-                 console
+                 console,
+                 log
                  ):
         self.autobuild_func = autobuild_func
         self.console = console
+        self.log = log
 
     def __call__(self, datasets, pandda_fs_model, events):
         autobuild_results = process_autobuilds(
@@ -1158,24 +1158,30 @@ class PanDDAGetAutobuilds:
         return autobuild_results
 
 
+class PanDDARescoreEvents:
+    def __init__(self,
+                 rescore_events_func,
+                 console,
+                 log):
+        self.rescore_events_func = rescore_events_func
+        self.console = console
+        self.log = log
+
+    def __call__(self, datasets, events, pandda_fs_model, ):
+        rescored_events = self.rescore_events_func(datasets, events, pandda_fs_model)
+        return rescored_events
+
+
 class PanDDASummariseRun:
 
     def __init__(self,
-                 get_event_class,
-                 get_event_ranking,
-                 get_sites,
-                 save_events,
-                 get_event_table,
-                 get_site_table,
+                 summarize_run_func,
                  console,
+                 log
                  ):
-        self.get_event_class = get_event_class
-        self.get_event_ranking = get_event_ranking
-        self.get_sites = get_sites
-        self.save_events = save_events
-        self.get_event_table = get_event_table
-        self.get_site_table = get_site_table
+        self.summarize_run_func = summarize_run_func
         self.console = console
+        self.log = log
 
     def __call__(self, *args, **kwargs):
         ###################################################################
@@ -1365,7 +1371,7 @@ class PanDDA:
 
         rescored_events = self.rescore_events(events, autobuilds)
 
-        self.summarise_run(processed_datasets, autobuilds)
+        self.summarise_run(processed_datasets, autobuilds, rescored_events)
 
     def __call__(self):
         ...

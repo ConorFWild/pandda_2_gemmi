@@ -5,6 +5,7 @@ from pandda_gemmi.edalignment.edmaps import (
     from_unaligned_dataset_c_flat,
     #from_unaligned_dataset_c_ray, from_unaligned_dataset_c_flat_ray,
    LoadXmap,
-    LoadXmapFlat, GetMapStatistics
+    LoadXmapFlat, GetMapStatistics,
+GetXmaps
 )
 from pandda_gemmi.edalignment.save_maps import save_array_to_map_file, save_xmap, save_raw_xmap

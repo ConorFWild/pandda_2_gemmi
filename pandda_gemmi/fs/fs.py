@@ -513,6 +513,9 @@ class DataDirs:
                 if dataset_dir:
                     dataset_dirs[dtag] = dataset_dir
 
+        for dtag, data_dir in dataset_dirs.items():
+            print(f"CIF path: {dtag.dtag}: {data_dir.source_ligand_cif}")
+
         return DataDirs(dataset_dirs)
 
     def to_dict(self):
@@ -736,8 +739,8 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
         if process_local:
             results = process_local(
                 [
-                    partial(
-                        ProcessedDataset.from_dataset_dir,
+                    Partial(
+                        ProcessedDataset.from_dataset_dir).paramaterise(
                         dataset_dir,
                         processed_datasets_dir / dtag.dtag,
                     )

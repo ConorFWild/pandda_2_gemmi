@@ -27,9 +27,10 @@ from pandda_gemmi.dataset import (
     drop_columns,
     GetDatasets,
     GetReferenceDataset,
+    PostprocessDatasets
 )
 from pandda_gemmi.edalignment import (GetGrid, GetAlignments,
-                                      LoadXmap, LoadXmapFlat
+                                      LoadXmap, LoadXmapFlat, GetXmaps
                                       )
 from pandda_gemmi.filters import (
     FiltersDataQuality,
@@ -68,6 +69,7 @@ from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
+    GetAutobuilds
 )
 from pandda_gemmi.tables import (
     GetEventTable,
@@ -82,6 +84,7 @@ from pandda_gemmi.processing import (
     ProcessLocalRay,
     ProcessLocalSerial,
     ProcessLocalSpawn,
+    SummarizeRun
 )
 from pandda_gemmi.density_clustering import (
     GetEDClustering)
@@ -200,6 +203,10 @@ def configure_filter_data_quality_func(
     return FiltersDataQuality(filters, datasets_validator)
 
 
+def configure_event_class_func(pandda_args):
+    ...
+
+
 def configure_filter_reference_compatability_func(
         filter_keys: List[str],
         datasets_validator: DatasetsValidatorInterface,
@@ -254,10 +261,23 @@ def configure_event_ranking_func(pandda_args):
     return event_ranking_func
 
 
+def configure_processor_postprocess(pandda_args):
+    ...
+
+
+def configure_rescore_event_func(pandda_args):
+    ...
+
+
+def configure_autobuild_func(pandda_args):
+    ...
+
+
+def configure_autobuild_processor_func(pandda_args):
+    ...
+
+
 def process_pandda(pandda_args: PanDDAArgs, ):
-    ###################################################################
-    # # Configuration
-    ###################################################################
     # Process args
     pandda_log = {}
 
@@ -269,10 +289,6 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     initial_args = log_arguments(pandda_args, )
 
     pandda_log[constants.LOG_ARGUMENTS] = initial_args
-
-    ###################################################################
-    # # Assemble the PanDDA
-    ###################################################################
 
     # Construct the PanDDA
     get_fs_model = PanDDAGetFSModel(
@@ -331,7 +347,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
     postprocess_datasets = PanDDAPostprocessDatasets(
         PostprocessDatasets(
             SmoothBFactors(),
-            configure_processor_postprocess()
+            configure_processor_postprocess(pandda_args)
         ),
         console,
         pandda_log,
@@ -355,23 +371,29 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 PanDDAGetHomogenisedDatasets(
                     TruncateDatasetReflections(),
                 ),
-                GetXmaps(),
-                PanDDAGetModel(),
+                GetXmaps(
+                    LoadXmap,
+                    configure_get_xmap_processor(pandda_args)
+                ),
+                PanDDAGetModel(
+                    configure_get_model_processor(pandda_args)
+                ),
                 PanDDAProcessModel(
                     PanDDAGetZmap(),
                     PanDDAGetEvents(GetEDClustering()),
-                    PanDDAScoreEvents(score_events_func, ),
+                    PanDDAScoreEvents(configure_score_events_func(pandda_args)),
                     PanDDAGetModelResult(),
                 )
             ),
+            configure_shell_processor(pandda_args)
         ),
         console,
         pandda_log,
     )
     get_autobuilds = PanDDAGetAutobuilds(
         GetAutobuilds(
-            configure_autobuild_func(),
-            configure_autobuild_processor_func(),
+            configure_autobuild_func(pandda_args),
+            configure_autobuild_processor_func(pandda_args),
         ),
         console,
         pandda_log,
@@ -382,7 +404,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         pandda_log,
     )
     summarise_run = PanDDASummariseRun(
-        SummariseRun(
+        SummarizeRun(
             configure_event_class_func(pandda_args),
             configure_event_ranking_func(pandda_args),
             GetSites(pandda_args.max_site_distance_cutoff),

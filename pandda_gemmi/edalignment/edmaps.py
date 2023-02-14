@@ -733,6 +733,20 @@ class LoadXmap(LoadXMapInterface):
             sample_rate: float = 3) -> XmapInterface:
         return from_unaligned_dataset_c(dataset, alignment, grid, structure_factors, sample_rate)
 
+class GetXmaps:
+    def __init__(self,
+                 get_xmap_func,
+                 processor,
+                 ):
+        self.get_xmap_func = get_xmap_func
+        self.processor = processor
+
+    def __call__(self, datasets):
+        xmaps = self.processor({dtag: self.get_xmap_func()
+                                for dtag, dataset
+                                in datasets.items()})
+
+        return xmaps
 
 def from_unaligned_dataset_c_flat(dataset: DatasetInterface,
                                   alignment: AlignmentInterface,

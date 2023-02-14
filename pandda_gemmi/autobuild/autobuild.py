@@ -1418,3 +1418,21 @@ class GetAutobuildResultRhofit(GetAutobuildResultRhofitInterface):
                  rhofit_coord: bool,
                  debug: Debug) -> AutobuildResultInterface:
         return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)
+
+
+class GetAutobuilds:
+    def __init__(self, autobuild_func, autobuild_processor):
+        self.autobuild_func = autobuild_func
+        self.autobuild_processor = autobuild_processor
+
+    def __call__(self, datasets, events, pandda_fs_model):
+        results = self.autobuild_processor(
+            {event_id: self.autobuild_func(
+                datasets[event_id.dtag],
+                events[event_id],
+                pandda_fs_model
+            )
+            for event_id
+            in events
+            }
+        )

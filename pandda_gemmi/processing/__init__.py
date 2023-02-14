@@ -7,3 +7,4 @@ from pandda_gemmi.processing.process_local import (
 from pandda_gemmi.processing.process_global import DaskDistributedProcessor, DistributedProcessor
 from pandda_gemmi.processing.analyse_model import analyse_model
 from pandda_gemmi.processing.process_dataset import process_dataset_multiple_models
+from pandda_gemmi.processing.summarize_run import SummarizeRun
