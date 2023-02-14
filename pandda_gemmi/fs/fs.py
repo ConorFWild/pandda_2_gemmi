@@ -183,8 +183,8 @@ class LigandDir:
         else:
             ligand_keys = []
 
-        # print(f"\tLigand keys are: {ligand_keys}")
-        # print(f"\tPaths are: {ligand_smiles_paths}; {ligand_cif_paths}; {ligand_pdb_paths}")
+        print(f"\tLigand keys are: {ligand_keys}")
+        print(f"\tPaths are: {ligand_smiles_paths}; {ligand_cif_paths}; {ligand_pdb_paths}")
 
         # Generate dics
         ligand_smiles_path_dict = {}
