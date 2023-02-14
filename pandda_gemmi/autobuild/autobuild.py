@@ -1156,7 +1156,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 
 def autobuild_rhofit(dataset: Dataset,
                      event: Event,
-                     pandda_fs,
+                     pandda_fs:PanDDAFSModelInterface,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
@@ -1173,8 +1173,8 @@ def autobuild_rhofit(dataset: Dataset,
     out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"model_{event.event_id.event_idx.event_idx}"
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
-    cif_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_cif
-    smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].source_ligand_smiles
+    cif_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_cif
+    smiles_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_smiles
 
     try:
         os.mkdir(str(out_dir))

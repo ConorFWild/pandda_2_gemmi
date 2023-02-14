@@ -28,83 +28,56 @@ from pandda_gemmi.analyse_interface import *
 
 
 class PanDDAGetFSModel:
-    def __init__(self, get_pandda_fs_model_func, pandda_console):
-        # self.data_dirs = pandda_args.data_dirs
-        # self.out_dir = pandda_args.out_dir
-        # self.pdb_regex = pandda_args.pdb_regex
-        # self.mtz_regex = pandda_args.mtz_regex
-        # self.ligand_dir_regex = pandda_args.ligand_dir_regex
-        # self.ligand_cif_regex = pandda_args.ligand_cif_regex
-        # self.ligand_pdb_regex = pandda_args.ligand_pdb_regex
-        # self.ligand_smiles_regex = pandda_args.ligand_smiles_regex
+    def __init__(self, get_pandda_fs_model_func, get_dataset_smiles_func, pandda_console, log):
 
         self.get_pandda_fs_model_func = get_pandda_fs_model_func
-
+        self.get_dataset_smiles = get_dataset_smiles_func
         self.console = pandda_console
+        self.log = log
 
     def __call__(self, ):
         self.console.start_fs_model()
-
         time_fs_model_building_start = time.time()
-        pandda_fs_model: PanDDAFSModelInterface = self.get_pandda_fs_model_func(
-            # self.data_dirs,
-            # self.out_dir,
-            # self.pdb_regex,
-            # self.mtz_regex,
-            # self.ligand_dir_regex,
-            # self.ligand_cif_regex,
-            # self.ligand_pdb_regex,
-            # self.ligand_smiles_regex,
-        )
-        pandda_fs_model.build()
+        pandda_fs_model: PanDDAFSModelInterface = self.get_pandda_fs_model_func()
+        pandda_fs_model.build(self.get_dataset_smiles)
         time_fs_model_building_finish = time.time()
         self.console.update_log("FS model building time", time_fs_model_building_finish - time_fs_model_building_start)
-
-        # if pandda_args.debug >= Debug.AVERAGE_MAPS:
-        #     with open(pandda_fs_model.pandda_dir / "pandda_fs_model.pickle", "wb") as f:
-        #         pickle.dump(pandda_fs_model, f)
-
         self.console.summarise_fs_model(pandda_fs_model)
-        # self.console.update_logupdate_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-        # if pandda_args.debug >= Debug.PRINT_NUMERICS:
-        #     for dtag, data_dir in pandda_fs_model.data_dirs.dataset_dirs.items():
-        #         print(dtag)
-        #         print(data_dir.source_ligand_cif)
-        #         print(data_dir.source_ligand_smiles)
+        return pandda_fs_model
 
 
 class PanDDALoadDatasets:
     def __init__(self,
                  get_datasets_func,
                  get_dataset_statistics_func,
-                 # get_common_structure_factors_func,
                  get_structure_factors_func,
                  pandda_console,
+                 log
                  ):
         self.get_datasets = get_datasets_func
         self.get_dataset_statistics = get_dataset_statistics_func
-        # self.get_common_structure_factors = get_common_structure_factors_func
         self.get_structure_factors_func = get_structure_factors_func
         self.console = pandda_console
+        self.log = log
 
     def __call__(self, pandda_fs_model: PanDDAFSModelInterface):
         self.console.start_load_datasets()
         datasets_initial: DatasetsInterface = self.get_datasets(pandda_fs_model, )
         datasets_statistics: DatasetsStatisticsInterface = self.get_dataset_statistics(datasets_initial)
         self.console.summarise_datasets(datasets_initial, datasets_statistics)
-
         structure_factors = self.get_structure_factors_func(datasets_initial)
-
-        return datasets_initial
+        return datasets_initial, structure_factors
 
 
 class PanDDAFilterDatasets:
     def __init__(self,
                  filter_data_quality_func,
                  console,
+                 log
                  ):
         self.filter_data_quality = filter_data_quality_func
         self.console = console
+        self.log = log
 
     def __call__(self, datasets: DatasetsInterface):
         self.console.start_data_quality_filters()
@@ -128,28 +101,22 @@ class PanDDAGetReference:
     def __init__(self,
                  get_reference,
                  console,
+                 log
                  ):
         self.get_reference = get_reference
         self.console = console
+        self.log = log
 
     def __call__(self, datasets_wilson):
         self.console.start_reference_selection()
 
         # Select refernce
-        # with STDOUTManager('Deciding on reference dataset...', f'\tDone!'):
         reference: ReferenceInterface = self.get_reference()(
             datasets_wilson,
-            # datasets_statistics,
         )
         self.console.pandda_log["Reference Dtag"] = str(reference.dtag)
         self.console.summarise_reference(reference)
-        # if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-        #     print(reference.dtag)
-        #
-        # if pandda_args.debug >= Debug.AVERAGE_MAPS:
-        #     with open(pandda_fs_model.pandda_dir / "reference.pickle", "wb") as f:
-        #         pickle.dump(reference, f)
-        #
+
         return reference
 
 
@@ -158,10 +125,11 @@ class PanDDAFilterReference:
     def __init__(self,
                  filter_reference_compatability,
                  console,
+                 log
                  ):
         self.filter_reference_compatability = filter_reference_compatability
         self.console = console
-
+        self.log = log
     def __call__(self, datasets_smoother, reference) -> DatasetsInterface:
         self.console.start_reference_comparability_filters()
 
@@ -179,40 +147,23 @@ class PanDDAPostprocessDatasets:
 
     def __init__(self,
                  smooth_func,
-                 processor,
                  console,
+                 log
                  ):
         self.smooth_func = smooth_func
-        self.processor = processor
         self.console = console
+        self.log = log
 
-    def __call__(self, datasets_quality_filtered, reference):
+    def __call__(self, datasets_quality_filtered, reference, structure_factors,):
         datasets_wilson: DatasetsInterface = drop_columns(
             datasets_quality_filtered,
-            # structure_factors,
+            structure_factors,
         )
 
         self.console.start_b_factor_smoothing()
         # with STDOUTManager('Performing b-factor smoothing...', f'\tDone!'):
         start = time.time()
-        datasets_smoother: DatasetsInterface = {
-            smoothed_dtag: smoothed_dataset
-            for smoothed_dtag, smoothed_dataset
-            in zip(
-                datasets_wilson,
-                self.processor(
-                    [
-                        Partial(self.smooth_func).paramaterise(
-                            dataset,
-                            reference,
-                            # structure_factors,
-                        )
-                        for dtag, dataset
-                        in datasets_wilson.items()
-                    ]
-                )
-            )
-        }
+        datasets_smoother: DatasetsInterface = self.smooth_func(datasets_wilson, reference, structure_factors)
 
         finish = time.time()
         # pandda_log["Time to perform b factor smoothing"] = finish - start
@@ -222,9 +173,10 @@ class PanDDAPostprocessDatasets:
 
 class PanDDAGetGrid:
 
-    def __init__(self, get_grid_func, console, ):
+    def __init__(self, get_grid_func, console, log):
         self.get_grid_func = get_grid_func
         self.console = console
+        self.log = log
 
     def __call__(self, reference):
         self.console.start_get_grid()
@@ -547,6 +499,7 @@ class PanDDAScoreEvents:
 
         return event_scores
 
+
 @dataclasses.dataclass()
 class PanDDAModelResult:
     model_result: ModelResultInterface
@@ -555,7 +508,6 @@ class PanDDAModelResult:
 
 class PanDDAGetModelResult:
     def __init__(self):
-
         self.log = {}
 
     def __call__(self, zmap, events, event_scores):
@@ -584,7 +536,6 @@ class PanDDAGetModelResult:
 
         time_model_analysis_finish = time.time()
 
-
         # model_log["Model analysis time"] = time_model_analysis_finish - time_model_analysis_start
         # if debug >= Debug.PRINT_SUMMARIES:
         #     print(f"\t\tModel analysis time: {time_model_analysis_finish - time_model_analysis_start}")
@@ -596,7 +547,7 @@ class PanDDAGetModelResult:
 
         return PanDDAModelResult(
             model_results,
-            time_model_analysis_finish-time_model_analysis_start,
+            time_model_analysis_finish - time_model_analysis_start,
         )
 
 
@@ -1057,141 +1008,6 @@ class PanDDAGetModels:
         return models
 
 
-class PanDDAGetDatasetResults:
-    def __init__(self,
-                 process_dataset_func,
-                 processor,
-                 # console,
-                 ):
-        self.process_dataset_func = process_dataset_func
-        self.processor = processor
-
-    def __call__(self, pandda_fs_model, datasets, reference, grid, alignments, shell, xmaps, models, ):
-        ###################################################################
-        # # Process each test dataset
-        ###################################################################
-        # Now that all the data is loaded, get the comparison set and process each test dtag
-
-        # process_dataset_paramaterized =
-
-        # Process each dataset in the shell
-        all_train_dtags_unmerged = [_dtag for l in shell.train_dtags.values() for _dtag in l]
-        all_train_dtags = []
-        for _dtag in all_train_dtags_unmerged:
-            if _dtag not in all_train_dtags:
-                all_train_dtags.append(_dtag)
-
-        # if debug >= Debug.PRINT_NUMERICS:
-        #     print(f"\tAll train datasets are: {all_train_dtags}")
-        # dataset_dtags = {_dtag:  for _dtag in shell.test_dtags for n in shell.train_dtags}
-        dataset_dtags = {_dtag: [_dtag] + all_train_dtags for _dtag in shell.test_dtags}
-        # if debug >= Debug.PRINT_NUMERICS:
-        #     print(f"\tDataset dtags are: {dataset_dtags}")
-        results: List[DatasetResultInterface] = self.processor(
-            [
-                Partial(
-                    self.process_dataset_func).paramaterise(
-                    test_dtag,
-                    dataset_truncated_datasets={_dtag: shell_truncated_datasets[_dtag] for _dtag in
-                                                dataset_dtags[test_dtag]},
-                    dataset_xmaps={_dtag: xmaps[_dtag] for _dtag in dataset_dtags[test_dtag]},
-                    models=models,
-                    shell=shell,
-                    alignments=alignments,
-                    pandda_fs_model=pandda_fs_model,
-                    reference=reference,
-                    grid=grid,
-                )
-
-                for test_dtag
-                in shell.test_dtags
-            ],
-        )
-
-        return results
-
-
-class PanDDAGetShellResult:
-    def __call__(self, shell: ShellInterface, dataset_results: DatasetResultsInterface):
-        time_shell_finish = time.time()
-        shell_log[constants.LOG_SHELL_TIME] = time_shell_finish - time_shell_start
-        update_log(shell_log, shell_log_path)
-
-        shell_result: ShellResultInterface = ShellResult(
-            shell=shell,
-            dataset_results={dtag: result for dtag, result in zip(shell.test_dtags, results) if result},
-            log=shell_log,
-
-        )
-
-        return shell_result
-
-
-class PanDDAProcessShell:
-    def __init__(self,
-                 # process_shell,
-                 # process_local,
-                 # pandda_args,
-                 # # structure_factors,
-                 # load_xmap_func,
-                 # analyse_model_func,
-                 # score_events_func,
-                 get_shell_datasets,
-                 homogenise_datasets,
-                 get_shell_xmaps,
-                 get_models,
-                 get_dataset_results,
-                 get_shell_result,
-                 # processor_in_shell,
-                 # processor_in_dataset,
-                 # processor_in_model,
-                 console,
-                 ):
-        self.get_shell_datasets = get_shell_datasets
-        self.homogenise_datasets = homogenise_datasets
-        self.get_shell_xmaps = get_shell_xmaps
-        self.get_models = get_models
-        self.get_dataset_results = get_dataset_results
-        self.get_shell_result = get_shell_result
-        # self.process_shell = process_shell
-        # self.
-        self.console = console
-        # self.process_local = process_local,
-
-        self.log = {}
-
-    def __call__(self,
-                 shell,
-                 datasets,
-                 alignments,
-                 grid,
-                 pandda_fs_model,
-                 reference,
-                 ):
-        shell_datasets = self.get_shell_datasets(datasets, shell)
-
-        shell_datasets = self.homogenise_datasets(shell_datasets)
-
-        shell_xmaps = self.get_shell_xmaps(shell_datasets, grid, alignments)
-
-        models = self.get_models(
-            shell,
-            shell_xmaps,
-            grid,
-        )
-
-        dataset_results = self.get_dataset_results(
-            shell_datasets,
-            shell,
-            grid,
-            alignments,
-            models,
-        )
-
-        shell_result = self.get_shell_result(dataset_results)
-
-        return shell_result
-
 
 class PanDDAGetShellResults:
     def __init__(self,
@@ -1208,134 +1024,116 @@ class PanDDAGetShellResults:
         self.log = {}
 
     def __call__(self, datassets, reference, grid, alignments, ):
-        ###################################################################
-        # # Assign comparison datasets
-        ###################################################################
-        self.console.start_get_comparators()
 
-        # with STDOUTManager('Deciding on the datasets to characterise the groundstate for each dataset to analyse...',
-        #                    f'\tDone!'):
-        # TODO: Fix typing for comparators func
-        comparators: ComparatorsInterface = self.comparators_func(
-            datasets,
-            alignments,
-            grid,
-            structure_factors,
-            pandda_fs_model,
-        )
+        shell_dataset_model_futures = {}
+        model_caches = {}
+        shell_truncated_datasets_cache = {}
+        shell_xmaps_chace = {}
 
-        # update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+        for res, shell in shells.items():
 
-        ###################################################################
-        # # Process shells
-        ###################################################################
-        self.console.start_process_shells()
+            shell_datasets: DatasetsInterface = {
+                dtag: dataset
+                for dtag, dataset
+                in datasets.items()
+                if dtag in shell.all_dtags
+            }
 
-        # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
-        # sake of computational efficiency
-        # with STDOUTManager('Deciding on how to partition the datasets into resolution shells for processing...',
-        #                    f'\tDone!'):
-        # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-        shells: ShellsInterface = self.get_shells(
-            datasets,
-            comparators,
-            pandda_args.min_characterisation_datasets,
-            pandda_args.max_shell_datasets,
-            pandda_args.high_res_increment,
-            pandda_args.only_datasets,
-            debug=pandda_args.debug,
-        )
-        # if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-        #     print('Got shells that support multiple models')
-        #     for shell_res, shell in shells.items():
-        #         print(f'\tShell res: {shell.res}: {shell.test_dtags[:3]}')
-        #         for cluster_num, dtags in shell.train_dtags.items():
-        #             print(f'\t\t{cluster_num}: {dtags[:5]}')
-
-        # else:
-        #     shells: ShellsInterface = get_shells(
-        #         datasets,
-        #         comparators,
-        #         pandda_args.min_characterisation_datasets,
-        #         pandda_args.max_shell_datasets,
-        #         pandda_args.high_res_increment,
-        #         pandda_args.only_datasets,
-        #
-        #     )
-        pandda_fs_model.shell_dirs = GetShellDirs()(pandda_fs_model.pandda_dir, shells)
-        pandda_fs_model.shell_dirs.build()
-
-        # if pandda_args.debug >= Debug.PRINT_NUMERICS:
-        #     printer.pprint(shells)
-
-        # Process the shells
-        # with STDOUTManager('Processing the shells...', f'\tDone!'):
-        #     time_shells_start = time.time()
-        # if pandda_args.comparison_strategy == "cluster" or pandda_args.comparison_strategy == "hybrid":
-
-        shell_results: ShellResultsInterface = {
-            shell_id: shell_result
-            for shell_id, shell_result
-            in zip(
-                shells,
-                process_global(
-                    [
-                        Partial(self.process_shell).paramaterise(
-                            shell,
-                            datasets,
-                            alignments,
-                            grid,
-                            pandda_fs_model,
-                            reference,
-                        )
-                        for res, shell
-                        in shells.items()
-                    ],
-                )
+            shell_truncated_datasets = get_shell_datasets(
+                console,
+                datasets,
+                structure_factors,
+                shell,
+                shell_datasets,
+                shell_log,
+                pandda_args.debug,
             )
-        }
+            shell_truncated_datasets_cache[res] = cache(
+                pandda_fs_model.shell_dirs.shell_dirs[res].path,
+                shell_truncated_datasets,
+            )
 
-        time_shells_finish = time.time()
-        self.console.pandda_log[constants.LOG_SHELLS] = {
-            res: shell_result.log
-            for res, shell_result
-            in shell_results.items()
-            if shell_result
-        }
-        self.console.pandda_log["Time to process all shells"] = time_shells_finish - time_shells_start
-        # if pandda_args.debug >= Debug.PRINT_SUMMARIES:
-        #     print(f"Time to process all shells: {time_shells_finish - time_shells_start}")
+            test_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
+                                     _dtag in shell.test_dtags}
 
-        all_events: EventsInterface = {}
-        for res, shell_result in shell_results.items():
-            if shell_result:
-                for dtag, dataset_result in shell_result.dataset_results.items():
-                    all_events.update(dataset_result.events)
+            test_xmaps = get_xmaps(
+                console,
+                pandda_fs_model,
+                process_local_in_shell,
+                load_xmap_func,
+                structure_factors,
+                alignments,
+                grid,
+                shell,
+                test_datasets_to_load,
+                pandda_args.sample_rate,
+                shell_log,
+                pandda_args.debug,
+                shell_log_path,
+            )
+            shell_xmaps_chace[res] = cache(
+                pandda_fs_model.shell_dirs.shell_dirs[res].path,
+                test_xmaps,
+            )
+            for model_number, comparators in shell.train_dtags.items():
+                train_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
+                                          _dtag in comparators}
+                train_xmaps = get_xmaps(
+                    console,
+                    pandda_fs_model,
+                    process_local_in_shell,
+                    load_xmap_func,
+                    structure_factors,
+                    alignments,
+                    grid,
+                    shell,
+                    train_datasets_to_load,
+                    pandda_args.sample_rate,
+                    shell_log,
+                    pandda_args.debug,
+                    shell_log_path,
+                )
 
-        event_scores: EventScoresInterface = {}
-        for res, shell_result in shell_results.items():
-            if shell_result:
-                for dtag, dataset_result in shell_result.dataset_results.items():
-                    event_scores.update(
-                        {
-                            event_id: event_scoring_result.get_selected_structure_score()
-                            for event_id, event_scoring_result
-                            in dataset_result.event_scores.items()
-                        }
+                model: ModelInterface = get_models(
+                    shell.test_dtags,
+                    {model_number: comparators, },
+                    test_xmaps | train_xmaps,
+                    grid,
+                    process_local
+                )[model_number]
+                model_caches[(res, model_number)] = cache(
+                    pandda_fs_model.shell_dirs.shell_dirs[res].path,
+                    model,
+                )
+
+                for test_dtag in shell.test_dtags:
+                    future_id = (res, test_dtag, model_number)
+                    shell_dataset_model_futures[future_id] = process_global.submit(
+                        Partial(
+                            analyse_model_func).paramaterise(
+                            model,
+                            model_number,
+                            test_dtag=test_dtag,
+                            dataset=shell_truncated_datasets[test_dtag],
+                            dataset_xmap=test_xmaps[test_dtag],
+                            reference=reference,
+                            grid=grid,
+                            dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                            dataset_alignment=alignments[test_dtag],
+                        )
                     )
 
-        # Add the event maps to the fs
-        # for event_id, event in all_events.items():
-        #     pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
-        #
-        # update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-        #
-        # if pandda_args.debug >= Debug.PRINT_NUMERICS:
-        #     print(shell_results)
-        #     print(all_events)
-        #     print(event_scores)
+        model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
 
-        self.console.summarise_shells(shell_results, all_events, event_scores)
+        shell_results = assemble_results()
+
+        all_events: EventsInterface = get_events()
+
+        # Add the event maps to the fs
+        for event_id, event in all_events.items():
+            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
+
+        return shell_results, all_events, event_scores
 
 
 class PanDDAGetAutobuilds:
@@ -1346,98 +1144,18 @@ class PanDDAGetAutobuilds:
         self.autobuild_func = autobuild_func
         self.console = console
 
-    def __call__(self, processed_datasets, pandda_fs_model):
-        # Autobuild the results if set to
-        autobuild_results = {}
-        # if autobuild_func:
-        self.console.start_autobuilding()
-
-        # with STDOUTManager('Attempting to autobuild events...', f'\tDone!'):
-
-        # if pandda_args.global_processing == 'serial':
-        #     process_autobuilds = process_local
-        # else:
-        #     process_autobuilds = process_global
-
-        time_autobuild_start = time.time()
-        autobuild_results: AutobuildResultsInterface = {
-            event_id: autobuild_result
-            for event_id, autobuild_result
-            in zip(
-                all_events,
-                process_autobuilds(
-                    [
-                        Partial(self.autobuild_func).paramaterise(
-                            processed_datasets[event_id.dtag],
-                            all_events[event_id],
-                            pandda_fs_model,
-                        )
-                        for event_id
-                        in all_events
-                    ],
-                )
+    def __call__(self, datasets, pandda_fs_model, events):
+        autobuild_results = process_autobuilds(
+            {event_id: Partial(autobuild_func).paramaterise(
+                datasets[event_id.dtag],
+                events[event_id],
             )
-        }
+                for event_id
+                in all_events
+            },
+        )
 
-        time_autobuild_finish = time.time()
-        self.console.pandda_log[constants.LOG_AUTOBUILD_TIME] = time_autobuild_finish - time_autobuild_start
-
-        # Save results
-        self.console.pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
-        for event_id, autobuild_result in autobuild_results.items():
-            dtag = str(event_id.dtag)
-            if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
-                self.console.pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag] = {}
-
-            event_idx = int(event_id.event_idx.event_idx)
-
-            self.console.pandda_log[constants.LOG_AUTOBUILD_COMMANDS][dtag][event_idx] = autobuild_result.log()
-
-        # with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
-        # Add the best fragment by scoring method to default model
-        self.console.pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS] = {}
-        self.console.pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES] = {}
-        for dtag in processed_datasets:
-            dataset_autobuild_results: AutobuildResultsInterface = {
-                event_id: autobuild_result
-                for event_id, autobuild_result
-                in autobuild_results.items()
-                if dtag == event_id.dtag
-            }
-
-            if len(dataset_autobuild_results) == 0:
-                # print("\tNo autobuilds for this dataset!")
-                continue
-
-            all_scores = {}
-            for event_id, autobuild_result in dataset_autobuild_results.items():
-                for path, score in autobuild_result.scores.items():
-                    all_scores[path] = score
-
-            if len(all_scores) == 0:
-                # print(f"\tNo autobuilds for this dataset!")
-                continue
-
-            # Select fragment build
-            selected_fragement_path = max(
-                all_scores,
-                key=lambda _path: all_scores[_path],
-            )
-
-            self.console.pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILDS][str(dtag)] = str(selected_fragement_path)
-            self.console.pandda_log[constants.LOG_AUTOBUILD_SELECTED_BUILD_SCORES][str(dtag)] = float(
-                all_scores[selected_fragement_path])
-
-            # Copy to pandda models
-            model_path = str(pandda_fs_model.processed_datasets.processed_datasets[dtag].input_pdb)
-            pandda_model_path = pandda_fs_model.processed_datasets.processed_datasets[
-                                    dtag].dataset_models.path / constants.PANDDA_EVENT_MODEL.format(str(dtag))
-            merged_structure = merge_ligand_into_structure_from_paths(model_path, selected_fragement_path)
-            save_pdb_file(merged_structure, pandda_model_path)
-
-        # self.console.update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
-
-        self.console.summarise_autobuilds(autobuild_results)
+        return autobuild_results
 
 
 class PanDDASummariseRun:
@@ -1608,6 +1326,7 @@ class PanDDA:
                  get_alignments,
                  process_datasets,
                  autobuild,
+                 rescore_events,
                  summarise_run,
                  ):
         self.get_fs_model = get_fs_model
@@ -1620,6 +1339,7 @@ class PanDDA:
         self.get_alignments = get_alignments
         self.process_datasets = process_datasets
         self.autobuild = autobuild
+        self.rescore_events = rescore_events
         self.summarise_run = summarise_run
 
     def __call__(self, ):
@@ -1639,28 +1359,13 @@ class PanDDA:
 
         alignments = self.get_alignments(datasets, reference)
 
-        processed_datasets = self.process_datasets(datasets, reference, grid, alignments)
+        events = self.process_datasets(datasets, reference, grid, alignments)
 
-        shells = ...
+        autobuilds = self.autobuild(datasets, events, fs_model)
 
-        for shell in shells:
-            truncated_datasets = ...
-
-            test_xmaps = ...
-
-            for model_spec in shell.model_specifications:
-                train_xmaps = ...
-
-                model = self.get_model()
-
-            processed_datasets = ...
-            for dataset in shell.test_datasets:
-                zmap = ...
-
-                events = filter_clusters()
-
-                event_scores = ...
-
-        autobuilds = self.autobuild(processed_datasets, fs_model)
+        rescored_events = self.rescore_events(events, autobuilds)
 
         self.summarise_run(processed_datasets, autobuilds)
+
+    def __call__(self):
+        ...

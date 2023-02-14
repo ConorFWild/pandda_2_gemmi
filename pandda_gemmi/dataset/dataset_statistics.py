@@ -57,3 +57,7 @@ class DatasetsStatistics(DatasetsStatisticsInterface):
             chains.append(dataset_chains)
 
         return chains
+
+class GetDatasetStatistics:
+    def __call__(self, datasets: DatasetsInterface):
+        return DatasetsStatistics(datasets)

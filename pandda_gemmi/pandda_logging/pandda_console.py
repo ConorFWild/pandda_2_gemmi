@@ -538,15 +538,15 @@ class PanDDAConsole:
         for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
             dataset = datasets_initial[dtag]
             has_smiles = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_smiles:
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_smiles.exists():
                 has_smiles = True
 
             has_cif = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_cif:
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_cif.exists():
                 has_cif = True
 
             has_pdb = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_pdb:
+            if fs.processed_datasets.processed_datasets[dtag].input_ligand_pdb.exists():
                 has_pdb = True
 
             table.add_row(
