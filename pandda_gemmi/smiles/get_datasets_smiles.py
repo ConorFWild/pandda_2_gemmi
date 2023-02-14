@@ -74,7 +74,9 @@ class GetDatasetSmiles(GetDatasetSmilesInterface):
         # smiles = pybel.readstring("cif", mol.write("cif")).write("smiles")
 
         # Read pdb to rdkit
+        print(source_ligand_pdb)
         mol = Chem.MolFromPDBFile(str(source_ligand_pdb))
+        print(mol)
 
         # Write smiles
         smiles = Chem.MolToSmiles(mol)
