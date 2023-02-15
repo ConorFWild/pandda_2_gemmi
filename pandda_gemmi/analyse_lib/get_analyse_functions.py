@@ -42,7 +42,8 @@ from pandda_gemmi.processing import (
     ProcessLocalSerial,
     ProcessLocalSpawn,
     ProcessLocalThreading,
-    DistributedProcessor
+    DistributedProcessor,
+    DaskDistributedProcessor
 )
 from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
@@ -165,6 +166,20 @@ def get_process_global(pandda_args, distributed_tmp, debug=Debug.DEFAULT):
                                               watcher=pandda_args.distributed_watcher,
                                               debug=debug,
                                               )
+
+    elif pandda_args.global_processing == "dask_distributed":
+        process_global = DaskDistributedProcessor(
+            scheduler=pandda_args.distributed_scheduler,
+            num_workers=pandda_args.distributed_num_workers,
+            queue=pandda_args.distributed_queue,
+            project=pandda_args.distributed_project,
+            cores_per_worker=pandda_args.local_cpus,
+            distributed_mem_per_core=pandda_args.distributed_mem_per_core,
+            resource_spec=pandda_args.distributed_resource_spec,
+            job_extra=pandda_args.distributed_job_extra,
+            walltime=pandda_args.distributed_walltime,
+            watcher=pandda_args.distributed_watcher,
+        )
 
     else:
         raise Exception(f"Could not find an implementation of --global_processing: {pandda_args.global_processing}")

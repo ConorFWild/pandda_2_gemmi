@@ -737,7 +737,6 @@ def transform_structure_to_unit_cell(
                     new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
                     atom.pos = new_pos
 
-
     return st
 
 
