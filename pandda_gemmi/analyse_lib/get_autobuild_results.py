@@ -63,7 +63,7 @@ def get_autobuild_results(pandda_args, console, process_local,
                     in all_events
                 ]
             )
-            autobuild_results = {_event_id: future.get() for _event_id, future in zip(futures, all_events)}
+            autobuild_results = {_event_id: future.get() for _event_id, future in zip(all_events, futures,π)}
 
         elif autobuild_func.tag == "inbuilt":
             event_scoring_results = {}
