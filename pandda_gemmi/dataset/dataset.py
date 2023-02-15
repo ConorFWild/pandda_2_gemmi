@@ -14,8 +14,10 @@ set_loky_pickler('pickle')
 
 from sklearn import neighbors
 
+import numpy as np
 import pandas as pd
 # import ray
+import gemmi
 
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.constants import *
@@ -707,6 +709,38 @@ class Reference:
         else:
             raise Exception("Failed to find a minimum resolution datatag. THis should be impossible. Contact mantainer.")
 
+
+def transform_structure_to_unit_cell(
+            structure: StructureInterface
+        ):
+    st = structure.structure.clone()
+    structure_poss = []
+    for model in st:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    pos = atom.pos
+                    structure_poss.append([pos.x, pos.y, pos.z])
+
+    pos_array = np.array(structure_poss)
+    min_pos = -np.min(pos_array, axis=0)
+
+    transform = gemmi.Transform()
+    transform.vec.fromlist(min_pos.tolist())
+
+    for model in st:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    pos = atom.pos
+                    new_pos_vec = transform.apply(pos)
+                    new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
+                    atom.pos = new_pos
+
+
+    return st
+
+
 def get_reference_from_datasets(
     datasets: DatasetsInterface, 
     dataset_statistics: DatasetsStatisticsInterface) -> ReferenceInterface:
@@ -743,8 +777,20 @@ def get_reference_from_datasets(
         # min_resolution_structure = datasets[min_resolution_dtag].structure
         # min_resolution_reflections = datasets[min_resolution_dtag].reflections
 
+        # Translate reference into unit cell 0 + buffer
+        reference_dataset = datasets[min_resolution_dtag]
+        new_structure = transform_structure_to_unit_cell(
+            reference_dataset.structure
+        )
+
+        #
+        new_dataset = Dataset(
+            new_structure,
+            reference_dataset.reflections,
+        )
+
         return Reference(min_resolution_dtag,
-                         datasets[min_resolution_dtag]
+                         new_dataset
                          )
 
 class GetReferenceDataset(GetReferenceDatasetInterface):

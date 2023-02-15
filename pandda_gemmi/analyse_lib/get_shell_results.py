@@ -455,7 +455,7 @@ def get_shell_results_async(
     ###################################################################
     # # Await the results...
     ###################################################################
-    print(f"Submitted all shells in {time_shell_submit_finish-time_shell_submit_start}, awaiting results!")
+    print(f"Submitted all shells in {time_shell_submit_finish - time_shell_submit_start}, awaiting results!")
     model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
     print(f"Got all shell results!")
 
@@ -485,23 +485,22 @@ def get_shell_results_async(
                 model_id[1] == dtag}
             dtag_model_result_funcs.append(
                 Partial(merge_dataset_model_results).paramaterise(
-                dtag,
-                dtag_model_results,
-                shell_models,
-                grid,
-                {dtag: shell_xmaps[dtag]},
-                pandda_fs_model,
-                {dtag: shell_truncated_datasets[dtag]},
-                structure_factors,
-                pandda_args.outer_mask,
-                pandda_args.inner_mask_symmetry,
-                alignments,
-                pandda_args.sample_rate,
-                pandda_args.debug,
-            )
+                    dtag,
+                    dtag_model_results,
+                    shell_models,
+                    grid,
+                    {dtag: shell_xmaps[dtag]},
+                    pandda_fs_model,
+                    {dtag: shell_truncated_datasets[dtag]},
+                    structure_factors,
+                    pandda_args.outer_mask,
+                    pandda_args.inner_mask_symmetry,
+                    alignments,
+                    pandda_args.sample_rate,
+                    pandda_args.debug,
+                )
             )
             dtags.append(dtag)
-
 
         shell_dtag_results_list = process_local(
             dtag_model_result_funcs
@@ -520,7 +519,7 @@ def get_shell_results_async(
             pandda_args.debug
         )
         time_shell_result_finish = time.time()
-        print(f"\t\tGot shell result in {time_shell_result_finish-time_shell_result_start}")
+        print(f"\t\tGot shell result in {time_shell_result_finish - time_shell_result_start}")
 
         shell_results[res] = shell_result
     get_results_finish = time.time()
