@@ -3,6 +3,7 @@ import time
 from pandda_gemmi.common import update_log, Partial
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
+from pandda_gemmi.processing import ProcessLocalThreading
 
 
 def get_autobuild_results(pandda_args, console, process_local,
@@ -21,28 +22,49 @@ def get_autobuild_results(pandda_args, console, process_local,
         time_autobuild_start = time.time()
 
         if autobuild_func.tag == "rhofit":
-            autobuild_results: AutobuildResultsInterface = {
-                event_id: autobuild_result
-                for event_id, autobuild_result
-                in zip(
-                    all_events,
-                    process_autobuilds(
-                        [
-                            Partial(autobuild_func).paramaterise(
-                                datasets[event_id.dtag],
-                                all_events[event_id],
-                                pandda_fs_model,
-                                cif_strategy=pandda_args.cif_strategy,
-                                cut=2.0,
-                                rhofit_coord=pandda_args.rhofit_coord,
-                                debug=pandda_args.debug,
-                            )
-                            for event_id
-                            in all_events
-                        ],
+
+            # autobuild_results: AutobuildResultsInterface = {
+            #     event_id: autobuild_result
+            #     for event_id, autobuild_result
+            #     in zip(
+            #         all_events,
+            #         process_autobuilds(
+            #             [
+            #                 Partial(autobuild_func).paramaterise(
+            #                     datasets[event_id.dtag],
+            #                     all_events[event_id],
+            #                     pandda_fs_model,
+            #                     cif_strategy=pandda_args.cif_strategy,
+            #                     cut=2.0,
+            #                     rhofit_coord=pandda_args.rhofit_coord,
+            #                     debug=pandda_args.debug,
+            #                 )
+            #                 for event_id
+            #                 in all_events
+            #             ],
+            #         )
+            #     )
+            # }
+            futures = ProcessLocalThreading(pandda_args.local_cpus)(
+                [
+                    Partial(process_autobuilds.submit).paramaterise(
+                        Partial(autobuild_func).paramaterise(
+                                                datasets[event_id.dtag],
+                                                all_events[event_id],
+                                                pandda_fs_model,
+                                                cif_strategy=pandda_args.cif_strategy,
+                                                cut=2.0,
+                                                rhofit_coord=pandda_args.rhofit_coord,
+                                                debug=pandda_args.debug,
+                                            )
+
                     )
-                )
-            }
+                    for event_id
+                    in all_events
+                ]
+            )
+            autobuild_results = {_event_id: future.get() for _event_id, future in zip(futures, all_events)}
+
         elif autobuild_func.tag == "inbuilt":
             event_scoring_results = {}
             for res, shell_result in shell_results.items():
