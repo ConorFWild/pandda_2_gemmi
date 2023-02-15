@@ -108,47 +108,47 @@ class GetEventRankingEventScore:
 
         return unique_dtag_ranked_event_ids
 
-
-class GetEventRankingEventScore:
-
-    def __init__(self, cutoff=0.55):
-        self.event_score_cutoff = cutoff
-
-    def __call__(self, events:EventsInterface,
-                 event_scores: EventScoresInterface,
-                 datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
-        # Rank events with a score
-        ranked_event_ids = list(
-            sorted(
-                [
-                    event_id
-                    for event_id
-                    in events.keys()
-                ],
-                key=lambda event_id: event_scores[event_id],
-                reverse=True,
-            )
-        )
-
-        # Get the highest scoring event for each dataset
-        dtags = []
-        unique_dtag_ranked_event_ids = []
-        for event_id in ranked_event_ids:
-            _dtag = event_id.dtag
-            if _dtag in dtags:
-                continue
-            else:
-                unique_dtag_ranked_event_ids.append(event_id)
-                dtags.append(_dtag)
-
-        # Add the rest in order of score
-        for event_id in ranked_event_ids:
-            if event_id in unique_dtag_ranked_event_ids:
-                continue
-            else:
-                unique_dtag_ranked_event_ids.append(event_id)
-
-        return unique_dtag_ranked_event_ids
+#
+# class GetEventRankingEventScore:
+#
+#     def __init__(self, cutoff=0.55):
+#         self.event_score_cutoff = cutoff
+#
+#     def __call__(self, events:EventsInterface,
+#                  event_scores: EventScoresInterface,
+#                  datasets: DatasetsInterface, pandda_fs_model: PanDDAFSModelInterface) -> EventRankingInterface:
+#         # Rank events with a score
+#         ranked_event_ids = list(
+#             sorted(
+#                 [
+#                     event_id
+#                     for event_id
+#                     in events.keys()
+#                 ],
+#                 key=lambda event_id: event_scores[event_id],
+#                 reverse=True,
+#             )
+#         )
+#
+#         # Get the highest scoring event for each dataset
+#         dtags = []
+#         unique_dtag_ranked_event_ids = []
+#         for event_id in ranked_event_ids:
+#             _dtag = event_id.dtag
+#             if _dtag in dtags:
+#                 continue
+#             else:
+#                 unique_dtag_ranked_event_ids.append(event_id)
+#                 dtags.append(_dtag)
+#
+#         # Add the rest in order of score
+#         for event_id in ranked_event_ids:
+#             if event_id in unique_dtag_ranked_event_ids:
+#                 continue
+#             else:
+#                 unique_dtag_ranked_event_ids.append(event_id)
+#
+#         return unique_dtag_ranked_event_ids
 
 
 class GetEventRankingAutobuild(GetEventRankingAutobuildInterface):

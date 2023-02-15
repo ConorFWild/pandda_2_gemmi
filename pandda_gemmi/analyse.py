@@ -42,7 +42,8 @@ from pandda_gemmi.analyse_lib import (
     get_event_sites, get_event_table,
     get_site_table,
     summarize_run,
-    handle_exception
+    handle_exception,
+generate_fragment_bound_structures,
 )
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.smiles import GetDatasetSmiles
@@ -285,10 +286,23 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Rescore Events
         ###################################################################
-        event_scores = get_rescored_events(
+        new_event_scores = get_rescored_events(
             pandda_fs_model, pandda_args, console, process_local,
             event_rescoring_function,
             datasets, grid, all_events, event_scores, autobuild_results)
+
+        ###################################################################
+        # # Generate Bound State Models
+        ###################################################################
+        generate_fragment_bound_structures(
+            pandda_args,
+            pandda_fs_model,
+            datasets,
+            autobuild_results,
+            new_event_scores,
+            console,
+            pandda_log
+        )
 
         ###################################################################
         # # Classify Events
@@ -302,7 +316,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         event_ranking = get_event_ranking(
             pandda_args, console, pandda_fs_model, datasets, grid, all_events,
-            event_scores,
+            new_event_scores,
             autobuild_results, pandda_log)
 
         ###################################################################

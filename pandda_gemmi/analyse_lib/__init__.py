@@ -20,3 +20,4 @@ from pandda_gemmi.analyse_lib.get_event_table import get_event_table
 from pandda_gemmi.analyse_lib.get_site_table import get_site_table
 from pandda_gemmi.analyse_lib.summarize_run import summarize_run
 from pandda_gemmi.analyse_lib.handle_exception import handle_exception
+from pandda_gemmi.analyse_lib.generate_fragment_bound_structures import generate_fragment_bound_structures
