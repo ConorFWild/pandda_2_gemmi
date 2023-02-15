@@ -784,7 +784,7 @@ def get_reference_from_datasets(
 
         #
         new_dataset = Dataset(
-            new_structure,
+            Structure(new_structure, reference_dataset.structure.path),
             reference_dataset.reflections,
         )
 
