@@ -395,7 +395,7 @@ def get_shell_results_async(
             # # Process each test dataset
             ###################################################################
 
-            thread_processor(
+            futures = thread_processor(
                 [
                     Partial(process_global.submit).paramaterise(
                         Partial(
@@ -427,6 +427,12 @@ def get_shell_results_async(
                     in shell.test_dtags
                 ]
             )
+            for test_dtag, future in zip(shell.test_dtags, futures):
+                print(f"\t\t\tSubmitting: {test_dtag.dtag}")
+                future_id = (res, test_dtag, model_number)
+
+                shell_dataset_model_futures[future_id] = future
+
             #
             # for test_dtag in shell.test_dtags:
             #     print(f"\t\t\tSubmitting: {test_dtag.dtag}")
