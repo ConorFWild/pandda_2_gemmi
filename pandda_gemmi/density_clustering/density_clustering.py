@@ -379,9 +379,9 @@ def get_clustering_from_zmap(zmap: ZmapInterface, reference: ReferenceInterface,
                     point_array[:, 2],
                     )
     point_tuple_wrapped = (
-        np.mod(point_array[:, 0], grid.grid.nu),
-        np.mod(point_array[:, 1], grid.grid.nv),
-        np.mod(point_array[:, 2], grid.grid.nw),
+        np.mod(point_array[:, 0], grid.spacing[0]),
+        np.mod(point_array[:, 1], grid.spacing[1]),
+        np.mod(point_array[:, 2], grid.spacing[2]),
     )
 
     extrema_point_mask = extrema_mask_array[point_tuple_wrapped] == 1
@@ -391,7 +391,7 @@ def get_clustering_from_zmap(zmap: ZmapInterface, reference: ReferenceInterface,
         point_tuple_wrapped[1][extrema_point_mask],
         point_tuple_wrapped[2][extrema_point_mask],
     )
-    extrema_fractional_array = extrema_point_array / np.array([grid.grid.nu, grid.grid.nv, grid.grid.nw]).reshape(
+    extrema_fractional_array = extrema_point_array / np.array([grid.spacing[0], grid.spacing[1], grid.spacing[2]]).reshape(
         (1, 3))
 
     # TODO: possible bottleneck
@@ -420,10 +420,12 @@ def get_clustering_from_zmap(zmap: ZmapInterface, reference: ReferenceInterface,
 
     extrema_cart_coords_array = np.array(positions)  # n, 3
 
-    point_000 = grid.grid.get_point(0, 0, 0)
-    point_111 = grid.grid.get_point(1, 1, 1)
-    position_000 = grid.grid.point_to_position(point_000)
-    position_111 = grid.grid.point_to_position(point_111)
+    grid_gemmi = grid.new_grid()
+
+    point_000 = grid_gemmi.get_point(0, 0, 0)
+    point_111 = grid_gemmi.get_point(1, 1, 1)
+    position_000 = grid_gemmi.point_to_position(point_000)
+    position_111 = grid_gemmi.point_to_position(point_111)
     clustering_cutoff = position_000.dist(position_111) * cluster_cutoff_distance_multiplier
 
     if extrema_cart_coords_array.size < 10:

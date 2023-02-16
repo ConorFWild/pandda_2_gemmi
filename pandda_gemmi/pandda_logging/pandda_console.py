@@ -222,7 +222,7 @@ class PanDDAConsole:
         printable = self.indent_text(f"Got Grid. Paramaters are:")
         self.console.print(printable)
 
-        printable = self.indent_text(f"nu: {grid.grid.nu} nv: {grid.grid.nv} nw: {grid.grid.nw}", indent=8)
+        printable = self.indent_text(f"nu: {grid.spacing[0]} nv: {grid.spacing[1]} nw: {grid.spacing[2]}", indent=8)
         self.console.print(printable)
 
     def start_alignments(self):
