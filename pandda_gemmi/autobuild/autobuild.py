@@ -29,6 +29,7 @@ from pandda_gemmi.dataset import (StructureFactors, Structure, Reflections, Data
 from pandda_gemmi.event import Event
 from pandda_gemmi.scoring.scoring import event_map_to_contour_score_map, score_structure_contour
 from pandda_gemmi.autobuild.cif import generate_cif, generate_cif_grade, generate_cif_grade2
+from pandda_gemmi.event_rescoring.get_rscc_phenix import get_rscc
 
 
 @dataclasses.dataclass()
@@ -300,8 +301,6 @@ def cut_out_xmap(xmap_path: Path, coord: Coord, out_dir: Path):
                                                  )
 
     return cut_out_event_map_file
-
-
 
 
 # #####################
@@ -1058,6 +1057,47 @@ def score_builds_contour(
     return scores, rescoring_log
 
 
+def score_builds_rscc(
+        pandda_fs_model: PanDDAFSModelInterface,
+        rhofit_dir: Path,
+        event_map_path,
+        dataset: DatasetInterface,
+        event: EventInterface,
+):
+    scores = {}
+    rescoring_log = {}
+
+    regex = "Hit_*.pdb"
+    rescoring_log["regex"] = regex
+
+    resolution = dataset.reflections.get_resolution()
+    tmp_dir = pandda_fs_model.processed_datasets.processed_datasets[
+                  event.event_id.dtag].path / f"model_{event.event_id.event_idx.event_idx}"
+
+    # Make the tmp dir if there is one
+    if not tmp_dir.exists():
+        os.mkdir(tmp_dir)
+
+    for model_path in rhofit_dir.glob(regex):
+        rsccs: Optional[RSCCSInterface] = get_rscc(
+            model_path,
+            event_map_path,
+            resolution,
+            tmp_dir,
+        )
+
+        if not rsccs:
+            scores[model_path] = -0.01
+            continue
+        if len(rsccs) == 0:
+            scores[model_path] = -0.01
+            continue
+
+        scores[model_path] = max(rsccs.values())
+
+    return scores, rescoring_log
+
+
 def save_score_dictionary(score_dictionary, path):
     with open(str(path), "w") as f:
         json.dump(score_dictionary, f)
@@ -1156,7 +1196,7 @@ def merge_ligand_into_structure_from_paths(receptor_path, ligand_path):
 
 def autobuild_rhofit(dataset: Dataset,
                      event: Event,
-                     pandda_fs:PanDDAFSModelInterface,
+                     pandda_fs: PanDDAFSModelInterface,
                      cif_strategy,
                      cut: float = 2.0,
                      rhofit_coord: bool = False,
@@ -1322,7 +1362,6 @@ def autobuild_rhofit(dataset: Dataset,
         if debug >= Debug.PRINT_SUMMARIES:
             print(f"\t{event.event_id}   Using rhofit without coord")
 
-
         print(f"\t{event.event_id}   Using rhofit without coord")
 
         rhofit_command = rhofit(truncated_model_path, truncated_xmap_path, mtz_path, cif_path, out_dir, cut, debug)
@@ -1340,13 +1379,20 @@ def autobuild_rhofit(dataset: Dataset,
     #     zmap_path,
     #     dataset,
     # )
-    score_dictionary, rescoring_log = score_builds_contour(
-        out_dir / "rhofit",
-        score_model_path,
-        score_map_path,
-        zmap_path,
-        dataset,
-        event,
+    # score_dictionary, rescoring_log = score_builds_contour(
+    #     out_dir / "rhofit",
+    #     score_model_path,
+    #     score_map_path,
+    #     zmap_path,
+    #     dataset,
+    #     event,
+    # )
+    score_dictionary, rescoring_log = score_builds_rscc(
+        pandda_fs_model=pandda_fs,
+        rhofit_dir=out_dir / "rhofit",
+        event_map_path=build_map_path,
+        dataset=dataset,
+        event=event,
     )
 
     autobuilding_log["rescoring_log"] = rescoring_log
@@ -1432,7 +1478,7 @@ class GetAutobuilds:
                 events[event_id],
                 pandda_fs_model
             )
-            for event_id
-            in events
+                for event_id
+                in events
             }
         )
