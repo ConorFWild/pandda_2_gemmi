@@ -228,6 +228,18 @@ class PanDDAConsole:
         )
         self.console.print(printable)
 
+        printable = self.indent_text(
+            f"a: {grid.unit_cell[0]} b: {grid.unit_cell[1]} c: {grid.unit_cell[2]}",
+            indent=8,
+        )
+        self.console.print(printable)
+
+        printable = self.indent_text(
+            f"alpha: {grid.unit_cell[3]} beta: {grid.unit_cell[4]} gamma: {grid.unit_cell[5]}",
+            indent=8,
+        )
+        self.console.print(printable)
+
     def start_alignments(self):
         printable = self.wrap_title(constants.CONSOLE_START_ALIGN)
         self.console.print(printable)
