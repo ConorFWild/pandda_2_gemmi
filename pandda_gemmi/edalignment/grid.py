@@ -661,6 +661,7 @@ class ReferenceGrid(GridInterface):
 
     @staticmethod
     def unit_cell_from_reference(reference: ReferenceInterface):
+        offset = 3.0
         cell = reference.dataset.reflections.reflections.cell
         return (
             cell.a,
@@ -738,8 +739,18 @@ def get_grid_from_reference(
         sample_rate: float = 3.0,
         debug: Debug = Debug.DEFAULT
 ):
-    unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
+    # unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
+    step = 0.5
+    offset = 3.0
     spacing = ReferenceGrid.spacing_from_reference(reference, sample_rate)
+    unit_cell = (
+        float(spacing[0]*step),
+        float(spacing[1]*step),
+        float(spacing[2]*step),
+        float(90),
+        float(90),
+        float(90)
+    )
 
     grid = gemmi.FloatGrid(*spacing)
     grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
