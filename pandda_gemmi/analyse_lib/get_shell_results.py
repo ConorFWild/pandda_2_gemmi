@@ -395,6 +395,34 @@ def get_shell_results_async(
             # # Process each test dataset
             ###################################################################
 
+            futures = [Partial(
+                analyse_model_func).paramaterise(
+                model,
+                model_number,
+                test_dtag=test_dtag,
+                dataset=shell_truncated_datasets[test_dtag],
+                dataset_xmap=test_xmaps[test_dtag],
+                reference=reference,
+                grid=grid,
+                dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                dataset_alignment=alignments[test_dtag],
+                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                min_bdc=pandda_args.min_bdc,
+                max_bdc=pandda_args.max_bdc,
+                contour_level=pandda_args.contour_level,
+                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                min_blob_volume=pandda_args.min_blob_volume,
+                min_blob_z_peak=pandda_args.min_blob_z_peak,
+                output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                score_events_func=score_events_func,
+                res=shell.res,
+                rate=0.5,
+                debug=pandda_args.debug
+            )()
+                       for test_dtag
+                       in shell.test_dtags
+            ]
+
             futures = thread_processor(
                 [
                     Partial(process_global.submit).paramaterise(
@@ -500,6 +528,7 @@ def get_shell_results_async(
     ###################################################################
     print(f"Submitted all shells in {time_shell_submit_finish - time_shell_submit_start}, awaiting results!")
     model_results = {_future_id: future.get() for _future_id, future in shell_dataset_model_futures.items()}
+    print([model_result for model_result in model_results.values()])
     print(f"Got all shell results!")
 
     ###################################################################
