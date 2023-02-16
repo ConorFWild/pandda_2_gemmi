@@ -208,7 +208,7 @@ class PanDDAConsole:
         printable = self.indent_text(f"Reference model min pos: {min_pos[0]} {min_pos[1]} {min_pos[2]}")
         self.console.print(printable)
 
-        printable = self.indent_text(f"Reference model min pos: {max_pos[0]} {max_pos[1]} {max_pos[2]}")
+        printable = self.indent_text(f"Reference model max pos: {max_pos[0]} {max_pos[1]} {max_pos[2]}")
         self.console.print(printable)
 
     def start_b_factor_smoothing(self):
