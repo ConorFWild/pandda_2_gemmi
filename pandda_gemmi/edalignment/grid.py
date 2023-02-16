@@ -20,7 +20,6 @@ from pandda_gemmi.python_types import *
 from pandda_gemmi.dataset import ResidueID, Reference, Structure, Symops
 
 
-
 @dataclasses.dataclass()
 class Partitioning(PartitioningInterface):
     partitioning: typing.Dict[ResidueIDInterface, typing.Dict[GridCoordInterface, PositionInterface]]
@@ -42,7 +41,7 @@ class Partitioning(PartitioningInterface):
                        grid: gemmi.FloatGrid,
                        mask_radius: float,
                        mask_radius_symmetry: float,
-                       debug: Debug=Debug.DEFAULT
+                       debug: Debug = Debug.DEFAULT
                        ):
 
         return Partitioning.from_structure(reference.dataset.structure,
@@ -54,7 +53,7 @@ class Partitioning(PartitioningInterface):
 
     @staticmethod
     def get_coord_tuple(grid, ca_position_array, structure: Structure, mask_radius: float = 6.0, buffer: float = 3.0,
-                        debug: Debug=Debug.DEFAULT):
+                        debug: Debug = Debug.DEFAULT):
         # Get the bounds
         min_x = ca_position_array[:, 0].min() - buffer
         max_x = ca_position_array[:, 0].max() + buffer
@@ -248,7 +247,7 @@ class Partitioning(PartitioningInterface):
                        grid: CrystallographicGridInterface,
                        mask_radius: float,
                        mask_radius_symmetry: float,
-                       debug: Debug=Debug.DEFAULT,
+                       debug: Debug = Debug.DEFAULT,
                        ):
         poss = []
         res_indexes = {}
@@ -621,13 +620,98 @@ class Grid(GridInterface):
                                          )
         self.grid = data[0].to_gemmi()
 
+@dataclasses.dataclass()
+class ReferenceGrid(GridInterface):
+    spacing: Tuple[int, int, int]
+    unit_cell: Tuple[float, float, float, float, float, float]
+    spacegroup: int
+    partitioning: Partitioning
 
-def get_grid_from_reference(
+    def new_grid(self):
+        # spacing = [self.grid.nu, self.grid.nv, self.grid.nw]
+        # unit_cell = self.grid.unit_cell
+
+        grid = gemmi.FloatGrid(*self.spacing)
+        grid.set_unit_cell(gemmi.UnitCell(*self.unit_cell))
+        grid.spacegroup = gemmi.find_spacegroup_by_number(self.spacegroup)
+        grid_array = np.array(grid, copy=False)
+        grid_array[:, :, :] = 0
+
+        return grid
+
+    @staticmethod
+    def spacing_from_reference(reference: ReferenceInterface, sample_rate: float = 3.0):
+        step = 0.5
+        # spacing = reference.dataset.reflections.reflections.get_size_for_hkl(sample_rate=sample_rate)
+        offset = 3.0
+        structure_poss = []
+        for model in reference.dataset.structure.structure:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        pos = atom.pos
+                        structure_poss.append([pos.x, pos.y, pos.z])
+
+        pos_array = np.array(structure_poss)
+        max_pos = np.max(pos_array, axis=0) + offset
+
+        spacing_array = np.ciel(max_pos / step)
+
+        return spacing_array.tolist()
+
+    @staticmethod
+    def unit_cell_from_reference(reference: ReferenceInterface):
+        cell = reference.dataset.reflections.reflections.cell
+        return (
+            cell.a,
+            cell.b,
+            cell.c,
+            cell.alpha,
+            cell.beta,
+            cell.gamma
+        )
+
+    # def __getitem__(self, item):
+    #     return self.grid[item]
+
+    def volume(self) -> float:
+        unit_cell = gemmi.UnitCell(*self.unit_cell)
+        return unit_cell.volume
+
+    def size(self) -> int:
+        spacing = self.spacing
+        return spacing[0] * spacing[1] * spacing[2]
+
+    def shape(self):
+        return self.spacing
+
+    def __getstate__(self):
+        # grid_python = Int8GridPython.from_gemmi(self.grid)
+        partitioning_python = self.partitioning.__getstate__()
+
+        return (self.spacing, self.unit_cell, self.spacegroup, partitioning_python)
+
+    def __setstate__(self, data):
+        self.partitioning = Partitioning(
+            data[3][0],
+                                         data[3][1].to_gemmi(),
+                                         data[3][2].to_gemmi(),
+                                         data[3][3].to_gemmi(),
+                                         data[3][4].to_gemmi(),
+                                         data[3][5]
+                                         )
+        # self.grid = data[0].to_gemmi()
+        self.spacing = data[0]
+        self.unit_cell = data[1]
+        self.spacegroup = data[2]
+
+
+def get_grid_from_reference_dep(
         reference: ReferenceInterface,
         mask_radius: float,
         mask_radius_symmetry: float,
         sample_rate: float = 3.0,
-        debug: Debug=Debug.DEFAULT
+        debug: Debug = Debug.DEFAULT
 ):
     unit_cell = Grid.unit_cell_from_reference(reference)
     spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
@@ -637,12 +721,40 @@ def get_grid_from_reference(
     grid.set_unit_cell(unit_cell)
     grid.spacegroup = reference.dataset.reflections.spacegroup()
 
-    partitioning = Partitioning.from_reference(reference,
-                                               grid,
-                                               mask_radius,
-                                               mask_radius_symmetry, debug=debug)
+    partitioning = Partitioning.from_reference(
+        reference,
+        grid,
+        mask_radius,
+        mask_radius_symmetry,
+        debug=debug
+    )
 
     return Grid(grid, partitioning)
+
+def get_grid_from_reference(
+        reference: ReferenceInterface,
+        mask_radius: float,
+        mask_radius_symmetry: float,
+        sample_rate: float = 3.0,
+        debug: Debug = Debug.DEFAULT
+):
+    unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
+    spacing = ReferenceGrid.spacing_from_reference(reference, sample_rate)
+
+    grid = gemmi.FloatGrid(*spacing)
+    grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    grid.set_unit_cell(gemmi.UnitCell(*unit_cell))
+    # grid.spacegroup = reference.dataset.reflections.spacegroup()
+
+    partitioning = Partitioning.from_reference(
+        reference,
+        grid,
+        mask_radius,
+        mask_radius_symmetry,
+        debug=debug
+    )
+
+    return ReferenceGrid(spacing, unit_cell, gemmi.find_spacegroup_by_name("P 1").number, partitioning)
 
 
 class GetGrid(GetGridInterface):
@@ -651,7 +763,7 @@ class GetGrid(GetGridInterface):
                  outer_mask: float,
                  inner_mask_symmetry: float,
                  sample_rate: float,
-                 debug: Debug=Debug.DEFAULT,
+                 debug: Debug = Debug.DEFAULT,
                  ) -> GridInterface:
         return get_grid_from_reference(
             reference,

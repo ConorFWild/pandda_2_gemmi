@@ -334,13 +334,21 @@ class CrystallographicGridInterface(Protocol):
         ...
 
 
+# class GridInterface(Protocol):
+#     grid: CrystallographicGridInterface
+#     partitioning: PartitioningInterface
+#
+#     def new_grid(self) -> CrystallographicGridInterface:
+#         ...
+
 class GridInterface(Protocol):
-    grid: CrystallographicGridInterface
+    spacing: Tuple[int, int, int]
+    unit_cell: Tuple[float, float, float, float, float, float]
+    spacegroup: int
     partitioning: PartitioningInterface
 
     def new_grid(self) -> CrystallographicGridInterface:
         ...
-
 
 class AlignmentInterface(Protocol):
     def __iter__(self) -> Iterator[ResidueIDInterface]:

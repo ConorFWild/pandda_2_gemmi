@@ -711,7 +711,8 @@ class Reference:
 
 
 def transform_structure_to_unit_cell(
-            structure: StructureInterface
+            structure: StructureInterface,
+        offset = 3.0
         ):
     st = structure.structure.clone()
     structure_poss = []
@@ -723,7 +724,7 @@ def transform_structure_to_unit_cell(
                     structure_poss.append([pos.x, pos.y, pos.z])
 
     pos_array = np.array(structure_poss)
-    min_pos = -np.min(pos_array, axis=0)
+    min_pos = (-np.min(pos_array, axis=0)) + offset
 
     transform = gemmi.Transform()
     transform.vec.fromlist(min_pos.tolist())
