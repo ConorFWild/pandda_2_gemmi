@@ -1805,7 +1805,7 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
 
         outer_mask_grid = gemmi.Int8Grid(*grid.spacing)
         outer_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        outer_mask_grid.set_unit_cell(gemmi.UnitCell(grid.unit_cell))
+        outer_mask_grid.set_unit_cell(gemmi.UnitCell(*grid.unit_cell))
         for atom in reference.dataset.structure.protein_atoms():
             pos = atom.pos
             outer_mask_grid.set_points_around(pos,
