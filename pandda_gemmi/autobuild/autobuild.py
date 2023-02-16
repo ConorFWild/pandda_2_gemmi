@@ -1093,7 +1093,7 @@ def score_builds_rscc(
             scores[model_path] = -0.01
             continue
 
-        scores[model_path] = max(rsccs.values())
+        scores[str(model_path)] = max(rsccs.values())
 
     return scores, rescoring_log
 
