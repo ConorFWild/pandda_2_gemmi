@@ -1931,3 +1931,5 @@ class GetEventScoreInbuilt(GetEventScoreInbuiltInterface):
                   f"{len(events.events)}")
 
         return event_scores
+
+
