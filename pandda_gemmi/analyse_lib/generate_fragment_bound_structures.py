@@ -35,7 +35,7 @@ def generate_fragment_bound_structures(
 
         all_scores = {}
         for event_id, autobuild_result in dataset_autobuild_results.items():
-            for path, autobuild_score in autobuild_result.scores:
+            for path, autobuild_score in autobuild_result.scores.items():
                 all_scores[path] = autobuild_score
                 # all_scores[path] = event_scores[event_id]
                 autobuild_to_event[path] = (dtag.dtag, event_id.event_idx.event_idx, path)
