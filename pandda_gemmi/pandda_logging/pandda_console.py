@@ -192,6 +192,25 @@ class PanDDAConsole:
         printable = self.indent_text(f"Reference dataset is: {str(reference.dtag)}")
         self.console.print(printable)
 
+        st = reference.dataset.structure.structure.clone()
+        structure_poss = []
+        for model in st:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        pos = atom.pos
+                        structure_poss.append([pos.x, pos.y, pos.z])
+
+        pos_array = np.array(structure_poss)
+        min_pos = np.min(pos_array, axis=0)
+        max_pos = np.max(pos_array, axis=0)
+
+        printable = self.indent_text(f"Reference model min pos: {min_pos[0]} {min_pos[1]} {min_pos[2]}")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Reference model min pos: {max_pos[0]} {max_pos[1]} {max_pos[2]}")
+        self.console.print(printable)
+
     def start_b_factor_smoothing(self):
         printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
         self.console.print(printable)
