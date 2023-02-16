@@ -655,7 +655,7 @@ class ReferenceGrid(GridInterface):
         pos_array = np.array(structure_poss)
         max_pos = np.max(pos_array, axis=0) + offset
 
-        spacing_array = np.ciel(max_pos / step)
+        spacing_array = np.ceil(max_pos / step)
 
         return spacing_array.tolist()
 
