@@ -657,7 +657,7 @@ class ReferenceGrid(GridInterface):
 
         spacing_array = np.ceil(max_pos / step)
 
-        return spacing_array.tolist()
+        return (int(x) for x in spacing_array)
 
     @staticmethod
     def unit_cell_from_reference(reference: ReferenceInterface):
