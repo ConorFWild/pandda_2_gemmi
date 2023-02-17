@@ -1088,8 +1088,8 @@ class PanDDAFSModel(PanDDAFSModelInterface):
 
         return f
 
-    def save(self, path):
-        with open(path, "wb") as f:
+    def save(self,):
+        with open(self.pandda_dir / "pandda_fs_model.pickle", "wb") as f:
             pickle.dump(self, f)
 
 

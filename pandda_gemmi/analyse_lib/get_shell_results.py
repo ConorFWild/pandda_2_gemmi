@@ -695,6 +695,8 @@ def get_shell_results_async(
 
         pandda_fs_model.event_scores_file.save(event_scores)
 
+    pandda_fs_model.save()
+
     return shell_results, all_events, event_scores
 
 
