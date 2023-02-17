@@ -63,7 +63,9 @@ def get_autobuild_results(pandda_args, console, process_local,
                     in all_events
                 ]
             )
+            print(f"Submitted all futures")
             autobuild_results = {_event_id: future.get() for _event_id, future in zip(all_events, futures,)}
+            print("Got all futures!")
 
         elif autobuild_func.tag == "inbuilt":
             event_scoring_results = {}
@@ -102,6 +104,7 @@ def get_autobuild_results(pandda_args, console, process_local,
         pandda_log[constants.LOG_AUTOBUILD_COMMANDS] = {}
         pandda_log["autobuild_scores"] = {}
 
+        print(f"Parsing results")
         for event_id, autobuild_result in autobuild_results.items():
             dtag = str(event_id.dtag)
             if dtag not in pandda_log[constants.LOG_AUTOBUILD_COMMANDS]:
