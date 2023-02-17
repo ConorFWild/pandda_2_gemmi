@@ -8,7 +8,8 @@ from pandda_gemmi.edalignment import GetAlignments, Alignments
 def get_alignments(pandda_args, console, pandda_log, pandda_fs_model: PanDDAFSModelInterface, datasets, reference):
     console.start_alignments()
 
-    if len(pandda_fs_model.alignment_files) != 0:
+    alignment_files_exist = [alignment_file.path.exists() for alignment_file in pandda_fs_model.alignment_files.items()]
+    if (len(alignment_files_exist) > 0) & all(alignment_files_exist):
         alignments = Alignments({dtag: alignment_file.load() for dtag, alignment_file in pandda_fs_model.alignment_files.items()})
 
     else:
