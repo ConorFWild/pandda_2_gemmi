@@ -864,7 +864,7 @@ class XmapFile(XmapFileInterface):
         m = gemmi.read_ccp4_map(str(self.path))
         m.setup(float('nan'))
 
-        return m.grid
+        return Xmap(m.grid)
 
 
 @dataclasses.dataclass()
