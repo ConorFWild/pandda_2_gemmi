@@ -413,3 +413,48 @@ def analyse_model(
     update_log(model_log, model_log_path)
 
     return model_results
+
+def analyse_model_wrapper(
+        pandda_fs_model: PanDDAFSModelInterface,
+        model_number,
+        test_dtag,
+        dataset: DatasetInterface,
+        reference,
+        dataset_processed_dataset: ProcessedDatasetInterface,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        output_dir,
+        score_events_func: GetEventScoreInterface,
+        res, rate,
+        debug: Debug = Debug.DEFAULT
+) -> ModelResultInterface:
+    model = pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[model_number].load()
+    grid = pandda_fs_model.grid_file.load()
+    dataset_alignment = pandda_fs_model.alignment_files[test_dtag].load()
+    dataset_xmap = pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[test_dtag]
+
+    return analyse_model(
+        model,
+        model_number,
+        test_dtag,
+        dataset,
+        dataset_xmap,
+        reference,
+        grid,
+        dataset_processed_dataset,
+        dataset_alignment,
+        max_site_distance_cutoff,
+        min_bdc, max_bdc,
+        contour_level,
+        cluster_cutoff_distance_multiplier,
+        min_blob_volume,
+        min_blob_z_peak,
+        output_dir,
+        score_events_func,
+        res, rate,
+        debug
+)

@@ -164,13 +164,54 @@ class ProcessedDatasetsInterface(Protocol):
 class ShellDirInterface(Protocol):
     log_path: Path
     path: Path
+    xmap_paths: Dict[DtagInterface, XmapFileInterface]
+    model_paths: Dict[int, ModelFileInterface]
 
 
 # ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
 
+class XmapFileInterface(Protocol):
+    path: Path
+
+    def save(self, xmap: XmapInterface):
+        ...
+
+    def load(self):
+        ...
+
+
+class ModelFileInterface(Protocol):
+    path: Path
+
+    def save(self, model: ModelInterface):
+        ...
+
+    def load(self):
+        ...
+
+class GridFileInterface(Protocol):
+    path: Path
+
+    def save(self, grid: GridInterface):
+        ...
+
+    def load(self):
+        ...
+
+class AlignmentFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: AlignmentInterface):
+        ...
+
+    def load(self):
+        ...
+
+
 class ShellDirsInterface(Protocol):
     path: Path
     shell_dirs: Dict[float, ShellDirInterface]
+
 
     def build(self) -> None:
         ...
@@ -190,6 +231,9 @@ class PanDDAFSModelInterface(Protocol):
     console_log_file: Path
     events_json_file: Path
     tmp_dir: Path
+    grid_file: GridFileInterface
+    alignment_files: Dict[DtagInterface, AlignmentFileInterface]
+
 
     def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None) \
             -> None:

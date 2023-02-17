@@ -4,7 +4,7 @@ from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.edalignment import GetGrid
 
 
-def get_grid(pandda_args, console, pandda_fs_model, reference):
+def get_grid(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, reference):
     console.start_get_grid()
     # Grid
     # with STDOUTManager('Getting the analysis grid...', f'\tDone!'):
@@ -22,5 +22,8 @@ def get_grid(pandda_args, console, pandda_fs_model, reference):
         grid.partitioning.save_maps(
             pandda_fs_model.pandda_dir
         )
+
+    pandda_fs_model.grid_file.save(grid)
+
     console.summarise_get_grid(grid)
     return grid

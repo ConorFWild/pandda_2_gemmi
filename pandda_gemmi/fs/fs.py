@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pickle
 import typing
 import dataclasses
 
@@ -10,6 +11,7 @@ import re
 
 from joblib.externals.loky import set_loky_pickler
 from openbabel import pybel
+import gemmi
 
 set_loky_pickler('pickle')
 
@@ -491,9 +493,9 @@ class DataDirs:
             results = process_local(
                 [
                     Partial(DatasetDir.from_path).paramaterise(
-                            dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
-                            ligand_cif_regex,
-                            ligand_pdb_regex, ligand_smiles_regex)
+                        dataset_dir_path, pdb_regex, mtz_regex, ligand_dir_name,
+                        ligand_cif_regex,
+                        ligand_pdb_regex, ligand_smiles_regex)
                     for dataset_dir_path
                     in dataset_dir_paths
                 ]
@@ -847,16 +849,92 @@ class ProcessedDatasets(ProcessedDatasetsInterface):
 #             for dtag in self.processed_datasets:
 #                 self.processed_datasets[dtag].build(get_dataset_smiles)
 
+
 @dataclasses.dataclass()
-class ShellDir:
+class XmapFile(XmapFileInterface):
+    path: Path
+
+    def save(self, xmap: XmapInterface):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = xmap.xmap
+        ccp4.update_ccp4_header()
+        ccp4.write_ccp4_map(str(self.path))
+
+    def load(self):
+        m = gemmi.read_ccp4_map(str(self.path))
+        m.setup(float('nan'))
+
+        return m.grid
+
+
+@dataclasses.dataclass()
+class ModelFile(ModelFileInterface):
+    path: Path
+
+    def save(self, model: ModelInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(model, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class GridFile(GridFileInterface):
+    path: Path
+
+    def save(self, grid: GridInterface):
+        ...
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class AlignmentFile(AlignmentFileInterface):
+    path: Path
+
+    def save(self, alignments: AlignmentInterface):
+        ...
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class ShellDir(ShellDirInterface):
     path: Path
     log_path: Path
+    xmap_paths: Dict[DtagInterface, XmapFileInterface]
+    model_paths: Dict[int, ModelFileInterface]
 
     @staticmethod
-    def from_shell(shells_dir, shell_res):
+    def from_shell(shells_dir, shell_res, shell: ShellInterface):
         shell_dir = shells_dir / str(shell_res)
         log_path = shell_dir / "log.json"
-        return ShellDir(shell_dir, log_path)
+        return ShellDir(
+            shell_dir,
+            log_path,
+            {
+                dtag: XmapFile(shell_dir / f"{dtag.dtag}.ccp4")
+                for dtag
+                in shell.all_dtags
+             },
+            {
+                model_number: ModelFile(shell_dir / f"{model_number}.pickle")
+                for model_number
+                in shell.train_dtags
+            }
+        )
 
     def build(self):
         if not self.path.exists():
@@ -867,6 +945,7 @@ class ShellDir:
 class ShellDirs(ShellDirsInterface):
     path: Path
     shell_dirs: Dict[float, ShellDir]
+
 
     def build(self):
         if not self.path.exists():
@@ -881,7 +960,7 @@ def get_shell_dirs_from_pandda_dir(pandda_dir: Path, shells: ShellsInterface) ->
 
     shell_dirs = {}
     for shell_res, shell in shells.items():
-        shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res)
+        shell_dirs[shell_res] = ShellDir.from_shell(shells_dir, shell_res, shell)
 
     return ShellDirs(shells_dir, shell_dirs)
 
@@ -902,6 +981,8 @@ class PanDDAFSModel(PanDDAFSModelInterface):
     console_log_file: Path
     events_json_file: Path
     tmp_dir: Path
+    grid_file: GridFileInterface
+    alignment_files: Dict[DtagInterface, AlignmentFileInterface]
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -965,6 +1046,14 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     tmp_dir = output_out_dir / "tmp"
 
+    grid_file = GridFile(output_out_dir / "grid.pickle")
+
+    alignment_files = {
+        dtag: AlignmentFile(output_out_dir / f"{dtag.dtag}_alignment.pickle")
+    for dtag
+    in data_dirs.dataset_dirs
+                       }
+
     return PanDDAFSModel(pandda_dir=output_out_dir,
                          data_dirs=data_dirs,
                          analyses=analyses,
@@ -973,7 +1062,9 @@ def get_pandda_fs_model(input_data_dirs: Path,
                          shell_dirs=None,
                          console_log_file=console_log_file,
                          events_json_file=events_json_file,
-                         tmp_dir=tmp_dir
+                         tmp_dir=tmp_dir,
+                         grid_file=grid_file,
+                         alignment_files=alignment_files
                          )
 
 

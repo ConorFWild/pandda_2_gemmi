@@ -237,7 +237,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Get the shells
         ###################################################################
-        shells = get_shells(pandda_args, console, pandda_fs_model, datasets, comparators)
+        shells = get_shells(
+            pandda_args,
+            console,
+            pandda_fs_model,
+            datasets,
+            comparators,
+        )
 
         ###################################################################
         # # Process shells
@@ -308,16 +314,28 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # # Classify Events
         ###################################################################
         event_classifications = get_event_classifications(
-            pandda_args, console, pandda_log, get_event_class, all_events,
-            autobuild_results)
+            pandda_args,
+            console,
+            pandda_log,
+            get_event_class,
+            all_events,
+            autobuild_results,
+        )
 
         ###################################################################
         # # Rank Events
         ###################################################################
         event_ranking = get_event_ranking(
-            pandda_args, console, pandda_fs_model, datasets, grid, all_events,
+            pandda_args,
+            console,
+            pandda_fs_model,
+            datasets,
+            grid,
+            all_events,
             event_scores,
-            autobuild_results, pandda_log)
+            autobuild_results,
+            pandda_log,
+        )
 
         ###################################################################
         # # Assign Sites

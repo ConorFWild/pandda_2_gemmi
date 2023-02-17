@@ -268,9 +268,9 @@ def get_shell_results_async(
     time_shells_start = time.time()
 
     shell_dataset_model_futures = {}
-    model_caches = {}
+    # model_caches = {}
     shell_truncated_datasets_cache = {}
-    shell_xmaps_chace = {}
+    # shell_xmaps_chace = {}
 
     time_shell_submit_start = time.time()
 
@@ -344,10 +344,14 @@ def get_shell_results_async(
             pandda_args.debug,
             shell_log_path,
         )
-        shell_xmaps_chace[res] = cache(
-            pandda_fs_model.shell_dirs.shell_dirs[res].path,
-            test_xmaps,
-        )
+        # shell_xmaps_chace[res] = cache(
+        #     pandda_fs_model.shell_dirs.shell_dirs[res].path,
+        #     test_xmaps,
+        # )
+
+        for _dtag, _xmap in test_xmaps.items():
+            pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].save(_xmap)
+
         for model_number, comparators in shell.train_dtags.items():
             time_model_start = time.time()
             ###################################################################
@@ -370,6 +374,8 @@ def get_shell_results_async(
                 pandda_args.debug,
                 shell_log_path,
             )
+            for _dtag, _xmap in train_xmaps.items():
+                pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].save(_xmap)
 
             ###################################################################
             # # Get the model to test
@@ -386,10 +392,12 @@ def get_shell_results_async(
                 grid,
                 process_local
             )[model_number]
-            model_caches[(res, model_number)] = cache(
-                pandda_fs_model.shell_dirs.shell_dirs[res].path,
-                model,
-            )
+            # model_caches[(res, model_number)] = cache(
+            #     pandda_fs_model.shell_dirs.shell_dirs[res].path,
+            #     model,
+            # )
+            # for _model_number, _model in mo.items():
+            pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[model_number].save(model)
 
             ###################################################################
             # # Process each test dataset
@@ -544,10 +552,20 @@ def get_shell_results_async(
         print(f"\tAssembing shell results for shell: {res}")
         time_shell_result_start = time.time()
         shell_dtag_results = {}
-        shell_models = {model_cache_id[1]: uncache(model_cache_path) for model_cache_id, model_cache_path in
-                        model_caches.items() if model_cache_id[0] == res}
+        # shell_models = {model_cache_id[1]: uncache(model_cache_path) for model_cache_id, model_cache_path in
+        #                 model_caches.items() if model_cache_id[0] == res}
+        shell_models = {
+            _model_number: pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[_model_number].load()
+            for _model_number
+            in pandda_fs_model.shell_dirs.shell_dirs[res].model_paths
+        }
         shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
-        shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
+        # shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
+        shell_xmaps = {
+            _dtag: pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].load()
+            for _dtag
+            in pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths
+        }
         model_assemble_start = time.time()
 
         # dtags = []

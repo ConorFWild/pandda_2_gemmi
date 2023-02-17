@@ -1,5 +1,6 @@
 import time
 import pickle
+import traceback
 
 import fire
 
@@ -49,6 +50,8 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
     except Exception as e:
 
         print(f"Ran function with exception: Pickeling results...")
+
+        traceback.format_exc()
 
         with open(output_path, "wb") as f:
             pickle.dump(e, f)
