@@ -887,7 +887,8 @@ class GridFile(GridFileInterface):
     path: Path
 
     def save(self, grid: GridInterface):
-        ...
+        with open(self.path, "wb") as f:
+            pickle.dump(grid, f)
 
     def load(self):
         with open(self.path, "rb") as f:
@@ -901,7 +902,98 @@ class AlignmentFile(AlignmentFileInterface):
     path: Path
 
     def save(self, alignments: AlignmentInterface):
-        ...
+        with open(self.path, "wb") as f:
+            pickle.dump(alignments, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class EventFile(EventFileInterface):
+    path: Path
+
+    def save(self, event: EventInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(event, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class ShellResultFile(ShellResultFileInterface):
+    path: Path
+
+    def save(self, shell_result: ShellResultInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(shell_result, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class DatasetFile(DatasetFileInterface):
+    path: Path
+
+    def save(self, dataset: DatasetInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(dataset, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class EventScoresFile(EventScoresFileInterface):
+    path: Path
+
+    def save(self, event_scores: EventScoresInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(event_scores, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class ShellFile(ShellFileInterface):
+    path: Path
+
+    def save(self, shell: ShellsInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(shell, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
+
+@dataclasses.dataclass()
+class ComparatorsFile(ComparatorsFileInterface):
+    path: Path
+
+    def save(self, comparators: ComparatorsInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(comparators, f)
 
     def load(self):
         with open(self.path, "rb") as f:
@@ -928,7 +1020,7 @@ class ShellDir(ShellDirInterface):
                 dtag: XmapFile(shell_dir / f"{dtag.dtag}.ccp4")
                 for dtag
                 in shell.all_dtags
-             },
+            },
             {
                 model_number: ModelFile(shell_dir / f"{model_number}.pickle")
                 for model_number
@@ -945,7 +1037,6 @@ class ShellDir(ShellDirInterface):
 class ShellDirs(ShellDirsInterface):
     path: Path
     shell_dirs: Dict[float, ShellDir]
-
 
     def build(self):
         if not self.path.exists():
@@ -983,6 +1074,24 @@ class PanDDAFSModel(PanDDAFSModelInterface):
     tmp_dir: Path
     grid_file: GridFileInterface
     alignment_files: Dict[DtagInterface, AlignmentFileInterface]
+    event_files: Dict[EventIDInterface, EventFileInterface]
+    shell_result_files: Dict[float, ShellResultFileInterface]
+    dataset_files: Dict[DtagInterface, DatasetFileInterface]
+    event_scores_file: EventScoresFileInterface
+    shell_files: Dict[float, ShellFileInterface]
+    comparators_file: ComparatorsFileInterface
+
+    @staticmethod
+    def load(path):
+        with open(path, "rb") as f:
+            obj = pickle.load(f)
+
+        return f
+
+    def save(self, path):
+        with open(path, "wb") as f:
+            pickle.dump(self, f)
+
 
     @staticmethod
     def from_dir(input_data_dirs: Path,
@@ -1050,22 +1159,33 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     alignment_files = {
         dtag: AlignmentFile(output_out_dir / f"{dtag.dtag}_alignment.pickle")
-    for dtag
-    in data_dirs.dataset_dirs
-                       }
+        for dtag
+        in data_dirs.dataset_dirs
+    }
 
-    return PanDDAFSModel(pandda_dir=output_out_dir,
-                         data_dirs=data_dirs,
-                         analyses=analyses,
-                         processed_datasets=processed_datasets,
-                         log_file=log_path,
-                         shell_dirs=None,
-                         console_log_file=console_log_file,
-                         events_json_file=events_json_file,
-                         tmp_dir=tmp_dir,
-                         grid_file=grid_file,
-                         alignment_files=alignment_files
-                         )
+    event_scores_file = EventScoresFile(output_out_dir / "event_scores.pickle")
+
+    comparators_file = ComparatorsFile(output_out_dir / "comparators.pickle")
+
+    return PanDDAFSModel(
+        pandda_dir=output_out_dir,
+        data_dirs=data_dirs,
+        analyses=analyses,
+        processed_datasets=processed_datasets,
+        log_file=log_path,
+        shell_dirs=None,
+        console_log_file=console_log_file,
+        events_json_file=events_json_file,
+        tmp_dir=tmp_dir,
+        grid_file=grid_file,
+        alignment_files=alignment_files,
+        event_files={},
+        shell_result_files={},
+        dataset_files={},
+        event_scores_file=event_scores_file,
+        shell_files={},
+        comparators_file=comparators_file,
+    )
 
 
 class GetPanDDAFSModel(GetPanDDAFSModelInterface):

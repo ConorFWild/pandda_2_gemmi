@@ -32,6 +32,7 @@ from pandda_gemmi.event import (
     Events,
     save_event_map,
 )
+from pandda_gemmi.fs import ShellResultFile, EventScoresFile, EventFile
 
 
 def merge_dataset_model_results(
@@ -681,6 +682,13 @@ def get_shell_results_async(
 
     console.summarise_shells(shell_results, all_events, event_scores)
 
+    for event_id, event in all_events.items():
+        event_file = EventFile(pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}.pickle")
+        event_file.save(event)
+        pandda_fs_model.event_files[event_id] = event_file
+
+    pandda_fs_model.event_scores_file.save(event_scores)
+
     return shell_results, all_events, event_scores
 
 
@@ -775,5 +783,11 @@ def get_shell_results(pandda_args, console, process_global, process_local, pandd
         print(event_scores)
 
     console.summarise_shells(shell_results, all_events, event_scores)
+
+    # for res, shell_result in shell_results.items():
+    #     shell_result_file = She
+    #     pandda_fs_model.shell_results_file[res] = Eve
+
+    pandda_fs_model.event_scores_file.save(event_scores)
 
     return shell_results, all_events, event_scores

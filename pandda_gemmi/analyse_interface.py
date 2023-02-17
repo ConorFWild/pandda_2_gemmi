@@ -207,6 +207,60 @@ class AlignmentFileInterface(Protocol):
     def load(self):
         ...
 
+class EventFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: EventInterface):
+        ...
+
+    def load(self):
+        ...
+
+class ShellResultFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: ShellResultInterface):
+        ...
+
+    def load(self):
+        ...
+
+class DatasetFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: DatasetInterface):
+        ...
+
+    def load(self):
+        ...
+
+class EventScoresFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: EventScoresInterface):
+        ...
+
+    def load(self):
+        ...
+
+class ShellFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: ShellInterface):
+        ...
+
+    def load(self):
+        ...
+
+class ComparatorsFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: ComparatorsInterface):
+        ...
+
+    def load(self):
+        ...
+
 
 class ShellDirsInterface(Protocol):
     path: Path
@@ -233,9 +287,15 @@ class PanDDAFSModelInterface(Protocol):
     tmp_dir: Path
     grid_file: GridFileInterface
     alignment_files: Dict[DtagInterface, AlignmentFileInterface]
+    event_files: Dict[EventIDInterface, EventFileInterface]
+    shell_result_files: Dict[float, ShellResultFileInterface]
+    dataset_files: Dict[DtagInterface, DatasetFileInterface]
+    event_scores_file: EventScoresFileInterface
+    shell_files: Dict[float, ShellFileInterface]
+    comparators_file: ComparatorsFileInterface
 
 
-    def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None) \
+def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None) \
             -> None:
         ...
 

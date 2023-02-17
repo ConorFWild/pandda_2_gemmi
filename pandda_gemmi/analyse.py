@@ -156,6 +156,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Get fs model
         ###################################################################
+
         pandda_fs_model = get_fs_model(
             pandda_args, console, pandda_log, process_local, get_dataset_smiles, )
 
@@ -286,8 +287,13 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         # Autobuild the results if set to
         autobuild_results = get_autobuild_results(
             pandda_args, console, process_local, process_global, autobuild_func,
-            pandda_fs_model, datasets, all_events, shell_results, pandda_log,
-            event_scores, )
+            pandda_fs_model,
+            datasets,
+            all_events,
+            shell_results,
+            pandda_log,
+            event_scores,
+        )
 
         ###################################################################
         # # Rescore Events

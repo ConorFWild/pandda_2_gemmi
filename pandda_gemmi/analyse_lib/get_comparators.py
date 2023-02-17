@@ -3,7 +3,7 @@ from pandda_gemmi.analyse_interface import *
 from pandda_gemmi import constants
 
 
-def get_comparators(pandda_args, console, pandda_fs_model, pandda_log, comparators_func, datasets, structure_factors,
+def get_comparators(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, pandda_log, comparators_func, datasets, structure_factors,
                     alignments,
                     grid):
     console.start_get_comparators()
@@ -32,4 +32,5 @@ def get_comparators(pandda_args, console, pandda_fs_model, pandda_log, comparato
     # printer.pprint(comparators)
     update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
     console.summarise_get_comarators(comparators)
+    pandda_fs_model.comparators_file.save(comparators)
     return comparators

@@ -1,9 +1,9 @@
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.fs import GetShellDirs
+from pandda_gemmi.fs import ShellResultFile, ShellFile
 
-
-def get_shells(pandda_args, console, pandda_fs_model, datasets, comparators):
+def get_shells(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, datasets, comparators):
     console.start_get_shells()
     # Partition the Analysis into shells in which all datasets are being processed at a similar resolution for the
     # sake of computational efficiency
@@ -27,4 +27,12 @@ def get_shells(pandda_args, console, pandda_fs_model, datasets, comparators):
     # if pandda_args.debug >= Debug.PRINT_NUMERICS:
     #     printer.pprint(shells)
     console.summarise_get_shells(shells)
+
+    for res, shell in shells.items():
+        shell_file = ShellFile(pandda_fs_model.shell_dirs.shell_dirs[res].path / "shell.pickle")
+        shell_result_file = ShellResultFile(pandda_fs_model.shell_dirs.shell_dirs[res].path / "shell_result.pickle")
+        pandda_fs_model.shell_files[res] = shell_file
+        pandda_fs_model.shell_result_files[res] = shell_result_file
+
+
     return shells
