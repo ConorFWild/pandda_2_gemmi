@@ -1086,7 +1086,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
         with open(path, "rb") as f:
             obj = pickle.load(f)
 
-        return f
+        return obj
 
     def save(self,):
         with open(self.pandda_dir / "pandda_fs_model.pickle", "wb") as f:
