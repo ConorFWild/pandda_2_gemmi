@@ -14,7 +14,6 @@ def get_fs_model(pandda_args, console, pandda_log, process_local, get_dataset_sm
     pandda_fs_model_path = pandda_args.out_dir / "pandda_fs_model.pickle"
     if pandda_fs_model_path.exists():
         pandda_fs_model = PanDDAFSModel.load(pandda_fs_model_path)
-
     else:
         pandda_fs_model: PanDDAFSModelInterface = GetPanDDAFSModel(
             pandda_args.data_dirs,
