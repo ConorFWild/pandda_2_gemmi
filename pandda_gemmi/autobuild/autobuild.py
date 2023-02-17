@@ -1210,7 +1210,7 @@ def autobuild_rhofit(dataset: Dataset,
     zmap_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
     build_map_path = pandda_fs.processed_datasets[event.event_id.dtag].event_map_files[event.event_id.event_idx].path
     # score_map_path = pandda_fs.processed_datasets[event.event_id.dtag].z_map_file.path
-    out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"model_{event.event_id.event_idx.event_idx}"
+    out_dir = pandda_fs.processed_datasets[event.event_id.dtag].path / f"event_{event.event_id.event_idx.event_idx}"
     model_path = processed_dataset_dir.input_pdb
     mtz_path = processed_dataset_dir.input_mtz
     cif_path = pandda_fs.processed_datasets[event.event_id.dtag].input_ligand_cif
