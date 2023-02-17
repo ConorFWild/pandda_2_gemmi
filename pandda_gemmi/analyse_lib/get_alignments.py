@@ -22,7 +22,7 @@ def get_alignments(pandda_args, console, pandda_log, pandda_fs_model: PanDDAFSMo
 
     console.summarise_local_alignment()
 
-    for dtag, alignment in alignments.items():
+    for dtag, alignment in alignments.alignments.items():
         pandda_fs_model.alignment_files[dtag].save(alignment)
 
     return alignments
