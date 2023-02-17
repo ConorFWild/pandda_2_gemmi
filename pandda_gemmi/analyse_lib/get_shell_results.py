@@ -693,9 +693,12 @@ def get_shell_results_async(
             event_file.save(event)
             pandda_fs_model.event_files[event_id] = event_file
 
+        for res, shell_result in shell_results.items():
+            pandda_fs_model.shell_result_files[res].save(shell_result)
+
         pandda_fs_model.event_scores_file.save(event_scores)
 
-    pandda_fs_model.save()
+        pandda_fs_model.save()
 
     return shell_results, all_events, event_scores
 
