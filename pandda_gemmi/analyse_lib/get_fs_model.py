@@ -11,7 +11,7 @@ from pandda_gemmi.fs import PanDDAFSModel
 def get_fs_model(pandda_args, console, pandda_log, process_local, get_dataset_smiles, ):
     console.start_fs_model()
     time_fs_model_building_start = time.time()
-    pandda_fs_model_path = (pandda_args.out_dir / "pandda_fs_model.pickle").exists()
+    pandda_fs_model_path = pandda_args.out_dir / "pandda_fs_model.pickle"
     if pandda_fs_model_path.exists():
         pandda_fs_model = PanDDAFSModel.load(pandda_fs_model_path)
 
