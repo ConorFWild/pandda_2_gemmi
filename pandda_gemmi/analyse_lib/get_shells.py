@@ -3,9 +3,11 @@ from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.fs import GetShellDirs
 from pandda_gemmi.fs import ShellResultFile, ShellFile
 
+
 def get_shells(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, datasets, comparators):
     console.start_get_shells()
-    if len(pandda_fs_model.shell_files) != 0:
+    shell_files_exist = [shell_file.path.exists() for shell_file in pandda_fs_model.shell_files.values()]
+    if (len(shell_files_exist) > 0) & all(shell_files_exist):
         shells = {res: shell_file.load() for res, shell_file in pandda_fs_model.shell_files.items()}
 
     else:
@@ -37,6 +39,5 @@ def get_shells(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, da
             shell_result_file = ShellResultFile(pandda_fs_model.shell_dirs.shell_dirs[res].path / "shell_result.pickle")
             pandda_fs_model.shell_files[res] = shell_file
             pandda_fs_model.shell_result_files[res] = shell_result_file
-
 
     return shells
