@@ -19,6 +19,7 @@ def get_reference(pandda_args,
         )
         pandda_log["Reference Dtag"] = str(reference.dtag)
         console.summarise_reference(reference)
+        pandda_fs_model.reference_file.save(reference)
         if pandda_args.debug >= Debug.PRINT_SUMMARIES:
             print(reference.dtag)
 
