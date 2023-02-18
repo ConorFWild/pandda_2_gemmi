@@ -606,6 +606,7 @@ def get_shell_results_async(
             }
             model_assemble_start = time.time()
 
+
             # dtags = []
             for dtag in shell.test_dtags:
                 print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
