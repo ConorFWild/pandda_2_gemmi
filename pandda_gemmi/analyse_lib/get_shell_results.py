@@ -276,7 +276,7 @@ def get_shell_results_async(
 
         shell_dataset_model_futures = {}
         # model_caches = {}
-        shell_truncated_datasets_cache = {}
+        # shell_truncated_datasets_cache = {}
         # shell_xmaps_chace = {}
 
         time_shell_submit_start = time.time()
@@ -591,7 +591,13 @@ def get_shell_results_async(
                 for _model_number
                 in pandda_fs_model.shell_dirs.shell_dirs[res].model_paths
             }
-            shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
+            # shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
+            shell_truncated_datasets = {
+                dtag: shell_truncated_dataset_file.load()
+                for dtag, shell_truncated_dataset_file
+                in pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files.items()
+            }
+
             # shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
             shell_xmaps = {
                 _dtag: pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].load()
