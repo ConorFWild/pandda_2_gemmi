@@ -63,8 +63,9 @@ def get_autobuild_results(pandda_args, console, process_local,
             #         in all_events
             #     ]
             # )
+            futures = []
             for event_id in all_events:
-                process_autobuilds.submit(
+                future = process_autobuilds.submit(
                     Partial(autobuild_func).paramaterise(
                         event_id.dtag,
                         event_id,
@@ -75,6 +76,7 @@ def get_autobuild_results(pandda_args, console, process_local,
                         debug=pandda_args.debug,
                     )
                 )
+                futures.append(future)
             print(f"Submitted all futures")
             autobuild_results = {_event_id: future.get() for _event_id, future in zip(all_events, futures,)}
             print("Got all futures!")
