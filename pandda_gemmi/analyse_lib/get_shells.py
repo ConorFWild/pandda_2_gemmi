@@ -1,7 +1,7 @@
 from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.shells import get_shells_multiple_models
 from pandda_gemmi.fs import GetShellDirs
-from pandda_gemmi.fs import ShellResultFile, ShellFile
+from pandda_gemmi.fs import ShellResultFile, ShellFile, DatasetFile
 
 
 def get_shells(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, datasets, comparators):
@@ -37,7 +37,13 @@ def get_shells(pandda_args, console, pandda_fs_model: PanDDAFSModelInterface, da
         for res, shell in shells.items():
             shell_file = ShellFile(pandda_fs_model.shell_dirs.shell_dirs[res].path / "shell.pickle")
             shell_result_file = ShellResultFile(pandda_fs_model.shell_dirs.shell_dirs[res].path / "shell_result.pickle")
+
             pandda_fs_model.shell_files[res] = shell_file
             pandda_fs_model.shell_result_files[res] = shell_result_file
+
+            for dtag in shell.all_dtags:
+                truncated_dataset_file = DatasetFile(
+                    pandda_fs_model.shell_dirs.shell_dirs[res].path / f"{dtag.dtag}.pickle")
+                pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files[dtag] = truncated_dataset_file
 
     return shells

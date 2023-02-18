@@ -160,12 +160,21 @@ class ProcessedDatasetsInterface(Protocol):
     path: Path
     processed_datasets: Dict[DtagInterface, ProcessedDatasetInterface]
 
+class DatasetFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: DatasetInterface):
+        ...
+
+    def load(self):
+        ...
 
 class ShellDirInterface(Protocol):
     log_path: Path
     path: Path
     xmap_paths: Dict[DtagInterface, XmapFileInterface]
     model_paths: Dict[int, ModelFileInterface]
+    truncated_dataset_files: Dict[DtagInterface, DatasetFileInterface]
 
 
 # ShellDirsInterface = Dict[DtagInterface, ShellDirInterface]
@@ -225,14 +234,7 @@ class ShellResultFileInterface(Protocol):
     def load(self):
         ...
 
-class DatasetFileInterface(Protocol):
-    path: Path
 
-    def save(self, alignments: DatasetInterface):
-        ...
-
-    def load(self):
-        ...
 
 class EventScoresFileInterface(Protocol):
     path: Path
@@ -256,6 +258,15 @@ class ComparatorsFileInterface(Protocol):
     path: Path
 
     def save(self, alignments: ComparatorsInterface):
+        ...
+
+    def load(self):
+        ...
+
+class ReferenceFileInterface(Protocol):
+    path: Path
+
+    def save(self, alignments: ReferenceInterface):
         ...
 
     def load(self):
@@ -293,6 +304,7 @@ class PanDDAFSModelInterface(Protocol):
     event_scores_file: EventScoresFileInterface
     shell_files: Dict[float, ShellFileInterface]
     comparators_file: ComparatorsFileInterface
+    reference_file: ReferenceFileInterface
 
 
 def build(self, get_dataset_smiles: GetDatasetSmilesInterface, process_local: Optional[ProcessorInterface] = None) \

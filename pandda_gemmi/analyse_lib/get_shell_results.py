@@ -323,10 +323,12 @@ def get_shell_results_async(
                 shell_log,
                 pandda_args.debug,
             )
-            shell_truncated_datasets_cache[res] = cache(
-                pandda_fs_model.shell_dirs.shell_dirs[res].path,
-                shell_truncated_datasets,
-            )
+            # shell_truncated_datasets_cache[res] = cache(
+            #     pandda_fs_model.shell_dirs.shell_dirs[res].path,
+            #     shell_truncated_datasets,
+            # )
+            for dtag, shell_truncated_dataset in shell_truncated_datasets.items():
+                pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files[dtag].save(shell_truncated_dataset)
 
             ###################################################################
             # # Generate test Xmaps
@@ -439,43 +441,66 @@ def get_shell_results_async(
                 #            in shell.test_dtags
                 # ]
 
-                futures = thread_processor(
-                    [
-                        Partial(process_global.submit).paramaterise(
-                            Partial(
-                                analyse_model_func).paramaterise(
-                                model,
-                                model_number,
-                                test_dtag=test_dtag,
-                                dataset=shell_truncated_datasets[test_dtag],
-                                dataset_xmap=test_xmaps[test_dtag],
-                                reference=reference,
-                                grid=grid,
-                                dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                                dataset_alignment=alignments[test_dtag],
-                                max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                                min_bdc=pandda_args.min_bdc,
-                                max_bdc=pandda_args.max_bdc,
-                                contour_level=pandda_args.contour_level,
-                                cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                                min_blob_volume=pandda_args.min_blob_volume,
-                                min_blob_z_peak=pandda_args.min_blob_z_peak,
-                                output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
-                                score_events_func=score_events_func,
-                                res=shell.res,
-                                rate=0.5,
-                                debug=pandda_args.debug
-                            )
-                        )
-                        for test_dtag
-                        in shell.test_dtags
-                    ]
-                )
-                for test_dtag, future in zip(shell.test_dtags, futures):
+                for test_dtag in shell.test_dtags:
                     print(f"\t\t\tSubmitting: {test_dtag.dtag}")
                     future_id = (res, test_dtag, model_number)
 
-                    shell_dataset_model_futures[future_id] = future
+                    shell_dataset_model_futures[future_id] = process_global.submit(
+                        Partial(analyse_model_func).paramaterise(
+                            pandda_fs_model,
+                            model_number,
+                            test_dtag,
+                            max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                            min_bdc=pandda_args.min_bdc,
+                            max_bdc=pandda_args.max_bdc,
+                            contour_level=pandda_args.contour_level,
+                            cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                            min_blob_volume=pandda_args.min_blob_volume,
+                            min_blob_z_peak=pandda_args.min_blob_z_peak,
+                            output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                            score_events_func=score_events_func,
+                            res=shell.res,
+                            rate=0.5,
+                            debug=pandda_args.debug
+                        )
+                    )
+                # futures = thread_processor(
+                #     [
+                #         Partial(process_global.submit).paramaterise(
+                #             Partial(
+                #                 analyse_model_func).paramaterise(
+                #                 model,
+                #                 model_number,
+                #                 test_dtag=test_dtag,
+                #                 dataset=shell_truncated_datasets[test_dtag],
+                #                 dataset_xmap=test_xmaps[test_dtag],
+                #                 reference=reference,
+                #                 grid=grid,
+                #                 dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                #                 dataset_alignment=alignments[test_dtag],
+                #                 max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                #                 min_bdc=pandda_args.min_bdc,
+                #                 max_bdc=pandda_args.max_bdc,
+                #                 contour_level=pandda_args.contour_level,
+                #                 cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                #                 min_blob_volume=pandda_args.min_blob_volume,
+                #                 min_blob_z_peak=pandda_args.min_blob_z_peak,
+                #                 output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                #                 score_events_func=score_events_func,
+                #                 res=shell.res,
+                #                 rate=0.5,
+                #                 debug=pandda_args.debug
+                #             )
+                #         )
+                #         for test_dtag
+                #         in shell.test_dtags
+                #     ]
+                # )
+                # for test_dtag, future in zip(shell.test_dtags, futures):
+                #     print(f"\t\t\tSubmitting: {test_dtag.dtag}")
+                #     future_id = (res, test_dtag, model_number)
+                #
+                #     shell_dataset_model_futures[future_id] = future
 
                 #
                 # for test_dtag in shell.test_dtags:
@@ -508,30 +533,30 @@ def get_shell_results_async(
                 #         )
                 #     )
 
-                    # shell_dataset_model_futures[future_id] = process_global.submit(
-                    # Partial(
-                    #         analyse_model_func).paramaterise(
-                    #         model,
-                    #         model_number,
-                    #         test_dtag=test_dtag,
-                    #         dataset=shell_truncated_datasets[test_dtag],
-                    #         dataset_xmap=test_xmaps[test_dtag],
-                    #         reference=reference,
-                    #         grid=grid,
-                    #         dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                    #         dataset_alignment=alignments[test_dtag],
-                    #         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                    #         min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
-                    #         contour_level=pandda_args.contour_level,
-                    #         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                    #         min_blob_volume=pandda_args.min_blob_volume,
-                    #         min_blob_z_peak=pandda_args.min_blob_z_peak,
-                    #         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
-                    #         score_events_func=score_events_func,
-                    #         res=shell.res,
-                    #         rate=0.5,
-                    #         debug=pandda_args.debug
-                    #     )()
+                # shell_dataset_model_futures[future_id] = process_global.submit(
+                # Partial(
+                #         analyse_model_func).paramaterise(
+                #         model,
+                #         model_number,
+                #         test_dtag=test_dtag,
+                #         dataset=shell_truncated_datasets[test_dtag],
+                #         dataset_xmap=test_xmaps[test_dtag],
+                #         reference=reference,
+                #         grid=grid,
+                #         dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                #         dataset_alignment=alignments[test_dtag],
+                #         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                #         min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
+                #         contour_level=pandda_args.contour_level,
+                #         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                #         min_blob_volume=pandda_args.min_blob_volume,
+                #         min_blob_z_peak=pandda_args.min_blob_z_peak,
+                #         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                #         score_events_func=score_events_func,
+                #         res=shell.res,
+                #         rate=0.5,
+                #         debug=pandda_args.debug
+                #     )()
                 time_model_finish = time.time()
                 print(f"\t\tProcessed model in {time_model_finish - time_model_start}")
 
@@ -585,20 +610,20 @@ def get_shell_results_async(
                     model_id[1] == dtag}
                 dtag_model_result_future_id = (res, dtag)
                 process_dataset = Partial(merge_dataset_model_results).paramaterise(
-                        dtag,
-                        dtag_model_results,
-                        shell_models,
-                        grid,
-                        {dtag: shell_xmaps[dtag]},
-                        pandda_fs_model,
-                        {dtag: shell_truncated_datasets[dtag]},
-                        structure_factors,
-                        pandda_args.outer_mask,
-                        pandda_args.inner_mask_symmetry,
-                        alignments,
-                        pandda_args.sample_rate,
-                        pandda_args.debug,
-                    )
+                    dtag,
+                    dtag_model_results,
+                    shell_models,
+                    grid,
+                    {dtag: shell_xmaps[dtag]},
+                    pandda_fs_model,
+                    {dtag: shell_truncated_datasets[dtag]},
+                    structure_factors,
+                    pandda_args.outer_mask,
+                    pandda_args.inner_mask_symmetry,
+                    alignments,
+                    pandda_args.sample_rate,
+                    pandda_args.debug,
+                )
 
                 # dtags.append(dtag)
                 future = process_global.submit(process_dataset)
@@ -689,7 +714,8 @@ def get_shell_results_async(
         console.summarise_shells(shell_results, all_events, event_scores)
 
         for event_id, event in all_events.items():
-            event_file = EventFile(pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].path / f"{event_id.event_idx.event_idx}.pickle")
+            event_file = EventFile(pandda_fs_model.processed_datasets.processed_datasets[
+                                       event_id.dtag].path / f"{event_id.event_idx.event_idx}.pickle")
             event_file.save(event)
             pandda_fs_model.event_files[event_id] = event_file
 

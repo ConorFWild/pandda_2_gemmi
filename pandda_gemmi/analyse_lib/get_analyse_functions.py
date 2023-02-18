@@ -38,6 +38,7 @@ from pandda_gemmi.event import GetEventScoreInbuilt, GetEventScoreSize
 
 from pandda_gemmi.processing import (
     analyse_model,
+    analyse_model_wrapper,
     ProcessLocalRay,
     ProcessLocalSerial,
     ProcessLocalSpawn,
@@ -243,7 +244,9 @@ def get_load_xmap_flat_func(pandda_args) -> LoadXMapFlatInterface:
 
 
 def get_analyse_model_func(pandda_args):
-    analyse_model_func = analyse_model
+    # analyse_model_func = analyse_model
+    analyse_model_func = analyse_model_wrapper
+
     return analyse_model_func
 
 

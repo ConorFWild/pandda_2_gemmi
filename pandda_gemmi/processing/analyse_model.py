@@ -418,9 +418,6 @@ def analyse_model_wrapper(
         pandda_fs_model: PanDDAFSModelInterface,
         model_number,
         test_dtag,
-        dataset: DatasetInterface,
-        reference,
-        dataset_processed_dataset: ProcessedDatasetInterface,
         max_site_distance_cutoff,
         min_bdc, max_bdc,
         contour_level,
@@ -432,10 +429,13 @@ def analyse_model_wrapper(
         res, rate,
         debug: Debug = Debug.DEFAULT
 ) -> ModelResultInterface:
+    dataset = pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files[test_dtag].load()
     model = pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[model_number].load()
     grid = pandda_fs_model.grid_file.load()
     dataset_alignment = pandda_fs_model.alignment_files[test_dtag].load()
-    dataset_xmap = pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[test_dtag]
+    dataset_xmap = pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[test_dtag].load()
+    dataset_processed_dataset = pandda_fs_model.processed_datasets.processed_datasets[test_dtag]
+    reference = pandda_fs_model.reference_file.load()
 
     return analyse_model(
         model,

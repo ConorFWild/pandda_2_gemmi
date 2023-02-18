@@ -1001,6 +1001,20 @@ class ComparatorsFile(ComparatorsFileInterface):
 
         return obj
 
+@dataclasses.dataclass()
+class ReferenceFile(ReferenceFileInterface):
+    path: Path
+
+    def save(self, comparators: ReferenceInterface):
+        with open(self.path, "wb") as f:
+            pickle.dump(comparators, f)
+
+    def load(self):
+        with open(self.path, "rb") as f:
+            obj = pickle.load(f)
+
+        return obj
+
 
 @dataclasses.dataclass()
 class ShellDir(ShellDirInterface):
@@ -1008,6 +1022,7 @@ class ShellDir(ShellDirInterface):
     log_path: Path
     xmap_paths: Dict[DtagInterface, XmapFileInterface]
     model_paths: Dict[int, ModelFileInterface]
+    truncated_dataset_files: Dict[DtagInterface, DatasetFileInterface]
 
     @staticmethod
     def from_shell(shells_dir, shell_res, shell: ShellInterface):
@@ -1025,7 +1040,8 @@ class ShellDir(ShellDirInterface):
                 model_number: ModelFile(shell_dir / f"{model_number}.pickle")
                 for model_number
                 in shell.train_dtags
-            }
+            },
+            {}
         )
 
     def build(self):
@@ -1080,6 +1096,7 @@ class PanDDAFSModel(PanDDAFSModelInterface):
     event_scores_file: EventScoresFileInterface
     shell_files: Dict[float, ShellFileInterface]
     comparators_file: ComparatorsFileInterface
+    reference_file: ReferenceFileInterface
 
     @staticmethod
     def load(path):
@@ -1167,6 +1184,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     comparators_file = ComparatorsFile(output_out_dir / "comparators.pickle")
 
+    reference_file = ReferenceFile(output_out_dir / "reference.pickle")
+
     return PanDDAFSModel(
         pandda_dir=output_out_dir,
         data_dirs=data_dirs,
@@ -1185,6 +1204,7 @@ def get_pandda_fs_model(input_data_dirs: Path,
         event_scores_file=event_scores_file,
         shell_files={},
         comparators_file=comparators_file,
+        reference_file=reference_file
     )
 
 
