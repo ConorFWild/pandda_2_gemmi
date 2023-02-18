@@ -51,7 +51,7 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
         print(f"Ran function with exception: Pickeling results...")
 
-        traceback.format_exc()
+        print(traceback.format_exc())
 
         with open(output_path, "wb") as f:
             pickle.dump(e, f)
@@ -61,7 +61,7 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
 
 if __name__ == "__main__":
-    time_start =time.time()
+    time_start = time.time()
     print(f"Running qsub'd process...")
     fire.Fire(run)
 
