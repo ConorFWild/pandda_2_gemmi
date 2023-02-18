@@ -4,7 +4,9 @@ from pandda_gemmi.analyse_interface import *
 from pandda_gemmi.dataset import GetReferenceDataset
 
 
-def get_reference(pandda_args, console, pandda_log, pandda_fs_model: PanDDAFSModelInterface, datasets_wilson, datasets_statistics):
+def get_reference(pandda_args,
+                  console, pandda_log,
+                  pandda_fs_model: PanDDAFSModelInterface, datasets_wilson, datasets_statistics):
     console.start_reference_selection()
     if pandda_fs_model.reference_file.path.exists():
         reference = pandda_fs_model.reference_file.load()
