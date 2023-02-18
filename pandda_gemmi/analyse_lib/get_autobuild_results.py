@@ -45,24 +45,36 @@ def get_autobuild_results(pandda_args, console, process_local,
             #         )
             #     )
             # }
-            futures = ProcessLocalThreading(pandda_args.local_cpus)(
-                [
-                    Partial(process_autobuilds.submit).paramaterise(
-                        Partial(autobuild_func).paramaterise(
-                                                datasets[event_id.dtag],
-                                                all_events[event_id],
-                                                pandda_fs_model,
-                                                cif_strategy=pandda_args.cif_strategy,
-                                                cut=2.0,
-                                                rhofit_coord=pandda_args.rhofit_coord,
-                                                debug=pandda_args.debug,
-                                            )
-
+            # futures = ProcessLocalThreading(pandda_args.local_cpus)(
+            #     [
+            #         Partial(process_autobuilds.submit).paramaterise(
+            #             Partial(autobuild_func).paramaterise(
+            #                                     datasets[event_id.dtag],
+            #                                     all_events[event_id],
+            #                                     pandda_fs_model,
+            #                                     cif_strategy=pandda_args.cif_strategy,
+            #                                     cut=2.0,
+            #                                     rhofit_coord=pandda_args.rhofit_coord,
+            #                                     debug=pandda_args.debug,
+            #                                 )
+            #
+            #         )
+            #         for event_id
+            #         in all_events
+            #     ]
+            # )
+            for event_id in all_events:
+                process_autobuilds.submit(
+                    Partial(autobuild_func).paramaterise(
+                        event_id.dtag,
+                        event_id,
+                        pandda_fs_model,
+                        cif_strategy=pandda_args.cif_strategy,
+                        cut=2.0,
+                        rhofit_coord=pandda_args.rhofit_coord,
+                        debug=pandda_args.debug,
                     )
-                    for event_id
-                    in all_events
-                ]
-            )
+                )
             print(f"Submitted all futures")
             autobuild_results = {_event_id: future.get() for _event_id, future in zip(all_events, futures,)}
             print("Got all futures!")

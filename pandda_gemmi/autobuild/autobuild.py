@@ -1465,6 +1465,10 @@ class GetAutobuildResultRhofit(GetAutobuildResultRhofitInterface):
                  debug: Debug) -> AutobuildResultInterface:
         return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)
 
+def get_autobuild_result_rhofit_wrapper(dtag, event_id, pandda_fs: PanDDAFSModelInterface, cif_strategy, cut, rhofit_coord, debug):
+    dataset = pandda_fs.dataset_files[dtag].load()
+    event = pandda_fs.event_files[event_id].load()
+    return autobuild_rhofit(dataset, event, pandda_fs, cif_strategy, cut, rhofit_coord, debug)
 
 class GetAutobuilds:
     def __init__(self, autobuild_func, autobuild_processor):

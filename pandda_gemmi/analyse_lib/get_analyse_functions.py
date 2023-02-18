@@ -50,7 +50,8 @@ from pandda_gemmi.autobuild import (
     merge_ligand_into_structure_from_paths,
     save_pdb_file,
     GetAutobuildResultRhofit,
-    GetAutobuildResultInbuilt
+    GetAutobuildResultInbuilt,
+get_autobuild_result_rhofit_wrapper
 )
 from pandda_gemmi import event_classification
 
@@ -326,7 +327,8 @@ def get_autobuild_func(pandda_args, ):
 
         # with STDOUTManager('Setting up autobuilding...', '\tSet up autobuilding!'):
         if pandda_args.autobuild_strategy == "rhofit":
-            autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
+            # autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultRhofit()
+            autobuild_func = get_autobuild_result_rhofit_wrapper
 
         elif pandda_args.autobuild_strategy == "inbuilt":
             autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultInbuilt()
