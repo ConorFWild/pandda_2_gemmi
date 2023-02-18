@@ -214,7 +214,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         datasets = get_reference_compatability_filtered_datasets(
             console, filter_reference_compatability,
             datasets_smoother,
-            reference)
+            reference,
+        pandda_fs_model)
+
 
         ###################################################################
         # # Getting grid

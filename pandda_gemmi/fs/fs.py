@@ -1186,6 +1186,8 @@ def get_pandda_fs_model(input_data_dirs: Path,
 
     reference_file = ReferenceFile(output_out_dir / "reference.pickle")
 
+    dataset_files = {dtag: DatasetFile(processed_dataset.path / f"{dtag.dtag}.pickle") for dtag, processed_dataset in processed_datasets.processed_datasets.items()}
+
     return PanDDAFSModel(
         pandda_dir=output_out_dir,
         data_dirs=data_dirs,
@@ -1200,7 +1202,7 @@ def get_pandda_fs_model(input_data_dirs: Path,
         alignment_files=alignment_files,
         event_files={},
         shell_result_files={},
-        dataset_files={},
+        dataset_files=dataset_files,
         event_scores_file=event_scores_file,
         shell_files={},
         comparators_file=comparators_file,
