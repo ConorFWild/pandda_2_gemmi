@@ -73,14 +73,13 @@ class SGEFuture:
 
         is_in_queue = self.is_in_queue()
         result_path_exists = self.result_path.exists()
+        if is_in_queue:
+            # if not result_path_exists:
+            return SGEResultStatus.RUNNING
 
         if result_path_exists:
             if not is_in_queue:
                 return SGEResultStatus.DONE
-
-        if is_in_queue:
-            # if not result_path_exists:
-            return SGEResultStatus.RUNNING
 
         if not is_in_queue:
             if not result_path_exists:
