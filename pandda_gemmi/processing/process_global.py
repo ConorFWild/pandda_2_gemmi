@@ -6,6 +6,7 @@ import sys
 import time
 import os
 import inspect
+import traceback
 
 import dask
 from dask.distributed import Client, progress
@@ -69,10 +70,12 @@ class SGEFuture:
             return False
 
     def status(self):
-        if self.result_path.exists():
-            return SGEResultStatus.DONE
 
         is_in_queue = self.is_in_queue()
+
+        if self.result_path.exists():
+            if not is_in_queue:
+                return SGEResultStatus.DONE
 
         if is_in_queue:
             return SGEResultStatus.RUNNING
@@ -90,8 +93,14 @@ class SGEFuture:
         return self.load()
 
     def load(self,):
-        with open(self.result_path, "rb") as f:
-            obj = pickle.load(f)
+        try:
+            with open(self.result_path, "rb") as f:
+                obj = pickle.load(f)
+        except Exception as e:
+            print(f"Error in opening pickle path: {self.result_path}")
+            print(traceback.format_exc())
+            raise e
+
 
         return obj
 
@@ -115,7 +124,7 @@ class QSubScheduler:
         self.debug = debug
 
     def generate_io_path(self, ):
-        code = secrets.token_hex(16)
+        code = secrets.token_hex(32)
         path = self.tmp_dir / f"pickle_{code}.pickle"
         if path.exists():
             os.remove(path)
