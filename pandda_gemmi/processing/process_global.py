@@ -72,15 +72,21 @@ class SGEFuture:
     def status(self):
 
         is_in_queue = self.is_in_queue()
+        result_path_exists = self.result_path.exists()
 
-        if self.result_path.exists():
+        if result_path_exists:
             if not is_in_queue:
                 return SGEResultStatus.DONE
 
         if is_in_queue:
-            return SGEResultStatus.RUNNING
-        else:
-            return SGEResultStatus.FAILED
+            if not result_path_exists:
+                return SGEResultStatus.RUNNING
+
+        if not is_in_queue:
+            if not result_path_exists:
+                return SGEResultStatus.FAILED
+
+        raise Exception()
 
     def get(self):
         status = self.status()
