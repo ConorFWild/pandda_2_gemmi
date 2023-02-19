@@ -42,8 +42,6 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
 
         print(f"Ran function: Pickeling results...")
 
-        with open()
-
         with open(output_path, "wb") as f:
             pickle.dump(result, f)
 
