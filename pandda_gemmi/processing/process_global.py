@@ -45,6 +45,7 @@ class SGEFuture:
         self.result_path = result_path
         self.job_id = job_id
         self.debug = debug
+        self.time_began = time.time()
 
     def is_in_queue(self):
         p = subprocess.Popen(
@@ -81,9 +82,12 @@ class SGEFuture:
             if not is_in_queue:
                 return SGEResultStatus.DONE
 
-        if not is_in_queue:
-            if not result_path_exists:
-                return SGEResultStatus.FAILED
+        if (time.time() - self.time_began) > 60.0:
+            if not is_in_queue:
+                if not result_path_exists:
+                    return SGEResultStatus.FAILED
+        else:
+            return SGEResultStatus.RUNNING
 
         raise Exception()
 
