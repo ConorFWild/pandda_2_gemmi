@@ -79,8 +79,8 @@ class SGEFuture:
                 return SGEResultStatus.DONE
 
         if is_in_queue:
-            if not result_path_exists:
-                return SGEResultStatus.RUNNING
+            # if not result_path_exists:
+            return SGEResultStatus.RUNNING
 
         if not is_in_queue:
             if not result_path_exists:
