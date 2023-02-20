@@ -92,7 +92,7 @@ class SGEFuture:
         raise Exception()
 
     def get(self):
-        time.sleep(1)
+        # time.sleep(1)
         status = self.status()
         while not status == SGEResultStatus.DONE:
             if status == SGEResultStatus.FAILED:
