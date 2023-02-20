@@ -1087,10 +1087,10 @@ def score_builds_rscc(
         )
 
         if not rsccs:
-            scores[model_path] = -0.01
+            scores[str(model_path)] = -0.01
             continue
         if len(rsccs) == 0:
-            scores[model_path] = -0.01
+            scores[str(model_path)] = -0.01
             continue
 
         scores[str(model_path)] = max(rsccs.values())
