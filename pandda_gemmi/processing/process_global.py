@@ -230,10 +230,16 @@ class QSubScheduler:
             print(stdout)
             print(stderr)
 
-        job_id = re.search(
-            "Your job ([0-9]+) ",
-            str(stdout),
-        ).groups()[0]
+        try:
+            job_id = re.search(
+                "Your job ([0-9]+) ",
+                str(stdout),
+            ).groups()[0]
+        except Exception as e:
+            print(f"Could not find job id in string")
+            print(f"stdout: {stdout}")
+            print(f"stderr: {stderr}")
+            raise e
 
         return SGEFuture(output_path, job_id)
 
