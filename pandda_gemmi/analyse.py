@@ -215,8 +215,8 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             console, filter_reference_compatability,
             datasets_smoother,
             reference,
-        pandda_fs_model)
-
+            pandda_fs_model,
+        )
 
         ###################################################################
         # # Getting grid
@@ -288,7 +288,11 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # Autobuild the results if set to
         autobuild_results = get_autobuild_results(
-            pandda_args, console, process_local, process_global, autobuild_func,
+            pandda_args,
+            console,
+            process_local,
+            process_global,
+            autobuild_func,
             pandda_fs_model,
             datasets,
             all_events,
