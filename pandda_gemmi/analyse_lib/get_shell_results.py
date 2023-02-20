@@ -645,10 +645,13 @@ def get_shell_results_async(
             # shell_dtag_results[dtag] = dataset_result
             print(f"\t\t\tGet dataset result in: {model_assemble_finish - model_assemble_start}")
 
+
+        print(f"Submitted all shells in: {time.time() - get_results_start}")
+        dtag_model_results = {future_id: future.get() for future_id, future in dtag_model_result_futures.items()}
+
         get_results_finish = time.time()
         print(f"Assembled all shell results in {get_results_finish - get_results_start}!")
 
-        dtag_model_results = {future_id: future.get() for future_id, future in dtag_model_result_futures.items()}
 
         ###################################################################
         # # Get the model to test
