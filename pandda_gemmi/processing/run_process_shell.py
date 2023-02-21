@@ -1,3 +1,4 @@
+import os
 import time
 import pickle
 import traceback
@@ -57,6 +58,12 @@ def run(func_path, output_path, *arg_paths, **kwarg_paths):
             pickle.dump(e, f)
 
         print(f"Pickeled exception! Returning!")
+
+    for arg_path in arg_paths:
+        os.remove(arg_path)
+
+    for kwrd, kwarg_path in kwargs.items():
+        os.remove(kwarg_path)
 
 
 
