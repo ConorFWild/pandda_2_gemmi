@@ -1048,7 +1048,7 @@ def score_builds_contour(
             rate=0.0,
         )
 
-        save_xmap(rescore_log["grid"], rhofit_dir / "structure_map.ccp4")
+        # save_xmap(rescore_log["grid"], rhofit_dir / "structure_map.ccp4")
 
         del rescore_log["grid"]
         scores[str(model_path)] = score
@@ -1379,21 +1379,21 @@ def autobuild_rhofit(dataset: Dataset,
     #     zmap_path,
     #     dataset,
     # )
-    # score_dictionary, rescoring_log = score_builds_contour(
-    #     out_dir / "rhofit",
-    #     score_model_path,
-    #     score_map_path,
-    #     zmap_path,
-    #     dataset,
-    #     event,
-    # )
-    score_dictionary, rescoring_log = score_builds_rscc(
-        pandda_fs_model=pandda_fs,
-        rhofit_dir=out_dir / "rhofit",
-        event_map_path=build_map_path,
-        dataset=dataset,
-        event=event,
+    score_dictionary, rescoring_log = score_builds_contour(
+        out_dir / "rhofit",
+        score_model_path,
+        score_map_path,
+        zmap_path,
+        dataset,
+        event,
     )
+    # score_dictionary, rescoring_log = score_builds_rscc(
+    #     pandda_fs_model=pandda_fs,
+    #     rhofit_dir=out_dir / "rhofit",
+    #     event_map_path=build_map_path,
+    #     dataset=dataset,
+    #     event=event,
+    # )
 
     autobuilding_log["rescoring_log"] = rescoring_log
 
