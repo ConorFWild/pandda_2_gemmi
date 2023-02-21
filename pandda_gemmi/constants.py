@@ -301,7 +301,7 @@ ARGS_AUTOBUILD_DEFAULT: bool = True
 ARGS_RANK_METHOD_DEFAULT: str = "event_score"
 ARGS_MIN_BDC_DEFAULT: float = 0.0
 ARGS_MAX_BDC_DEFAULT: float = 0.95
-ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 1.732
+ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 5.0
 
 ###################################################################
 # # Console constants
