@@ -97,7 +97,10 @@ def get_autobuild_results(pandda_args, console, process_local,
             )
 
             print(f"Submitted all futures")
-            autobuild_results = {_event_id: future.get() for _event_id, future in zip(all_events, futures,)}
+            autobuild_results={}
+            for _event_id, future in zip(all_events, futures, ):
+                print(_event_id)
+                autobuild_results[_event_id] = future.get()
             print("Got all futures!")
 
         elif autobuild_func.tag == "inbuilt":
