@@ -200,7 +200,7 @@ class GetEventScoreCNN(GetEventScoreCNNInterface):
                 LigandFittingResult(
                     {
                         ConfomerID(0): ConformerFittingResult(
-                            model_annotation,
+                            float(model_annotation),
                             None,
                             None
                         )
