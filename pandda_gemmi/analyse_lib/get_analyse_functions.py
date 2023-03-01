@@ -246,7 +246,10 @@ def get_load_xmap_flat_func(pandda_args) -> LoadXMapFlatInterface:
 
 def get_analyse_model_func(pandda_args):
     # analyse_model_func = analyse_model
-    analyse_model_func = analyse_model_wrapper
+    if pandda_args.global_processing == "distributed":
+        analyse_model_func = analyse_model_wrapper
+    else:
+        analyse_model_func = analyse_model
 
     return analyse_model_func
 

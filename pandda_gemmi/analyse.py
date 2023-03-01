@@ -35,6 +35,7 @@ from pandda_gemmi.analyse_lib import (
     get_shells,
     get_shell_results,
     get_shell_results_async,
+get_shell_results_serial,
     get_autobuild_results,
     get_rescored_events,
     get_event_classifications,
@@ -253,6 +254,24 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         if process_global.tag == "async":
             shell_results, all_events, event_scores = get_shell_results_async(
+                pandda_args,
+                console,
+                process_global,
+                process_local,
+                pandda_fs_model,
+                load_xmap_func,
+                analyse_model_func,
+                score_events_func,
+                shells,
+                structure_factors,
+                datasets,
+                reference,
+                alignments,
+                grid,
+                pandda_log,
+            )
+        elif process_global.tag == "serial":
+            shell_results, all_events, event_scores = get_shell_results_serial(
                 pandda_args,
                 console,
                 process_global,

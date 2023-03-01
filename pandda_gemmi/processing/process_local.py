@@ -11,7 +11,7 @@ from pandda_gemmi.processing.process_global import SGEResultStatus, SGEFuture
 
 class ProcessLocalSerial(ProcessorInterface):
     def __init__(self):
-        self.tag: Literal["not_async"] = "not_async"
+        self.tag: Literal["serial"] = "serial"
 
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         results = []

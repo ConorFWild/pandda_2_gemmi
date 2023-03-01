@@ -738,6 +738,374 @@ def get_shell_results_async(
 
     return shell_results, all_events, event_scores
 
+def get_shell_results_serial(
+        pandda_args,
+        console,
+        process_global: ProcessorAsyncInterface,
+        process_local: ProcessorInterface,
+        pandda_fs_model: PanDDAFSModelInterface,
+        load_xmap_func,
+        analyse_model_func,
+        score_events_func,
+        shells: ShellsInterface,
+        structure_factors,
+        datasets: DatasetsInterface,
+        reference: ReferenceInterface,
+        alignments: AlignmentsInterface,
+        grid: GridInterface,
+        pandda_log,
+):
+    console.start_process_shells()
+
+    if pandda_fs_model.event_scores_file.path.exists():
+        event_scores = pandda_fs_model.event_scores_file.load()
+        all_events = {event_id: event_file.load() for event_id, event_file in pandda_fs_model.event_files.items()}
+        shell_results = {res: shell_file.load() for res, shell_file in pandda_fs_model.shell_result_files.items()}
+
+    else:
+        # Process the shells
+        time_shells_start = time.time()
+
+        shell_dataset_model_futures = {}
+        # model_caches = {}
+        # shell_truncated_datasets_cache = {}
+        # shell_xmaps_chace = {}
+
+        time_shell_submit_start = time.time()
+
+        for res, shell in shells.items():
+            console = PanDDAConsole()
+            # printer = pprint.PrettyPrinter()
+
+            if pandda_args.debug >= Debug.DEFAULT:
+                console.print_starting_process_shell(shell)
+
+            process_local_in_dataset, process_local_in_shell, process_local_over_datasets = get_processors(
+                process_local,
+                pandda_args.memory_availability,
+            )
+
+            time_shell_start = time.time()
+            if pandda_fs_model.shell_dirs:
+                shell_log_path = pandda_fs_model.shell_dirs.shell_dirs[shell.res].log_path
+            else:
+                raise Exception(
+                    "Attempted to find the log path for the shell, but no shell dir added to pandda_fs_model somehow.")
+            shell_log = {}
+
+            # Seperate out test and train datasets
+            shell_datasets: DatasetsInterface = {
+                dtag: dataset
+                for dtag, dataset
+                in datasets.items()
+                if dtag in shell.all_dtags
+            }
+            shell_log[constants.LOG_SHELL_DATASETS] = [dtag.dtag for dtag in shell_datasets]
+            update_log(shell_log, shell_log_path)
+
+            ###################################################################
+            # # Homogonise shell datasets by truncation of resolution
+            ###################################################################
+            shell_truncated_datasets = get_shell_datasets(
+                console,
+                datasets,
+                structure_factors,
+                shell,
+                shell_datasets,
+                shell_log,
+                pandda_args.debug,
+            )
+            # shell_truncated_datasets_cache[res] = cache(
+            #     pandda_fs_model.shell_dirs.shell_dirs[res].path,
+            #     shell_truncated_datasets,
+            # )
+            for dtag, shell_truncated_dataset in shell_truncated_datasets.items():
+                pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files[dtag].save(shell_truncated_dataset)
+
+            ###################################################################
+            # # Generate test Xmaps
+            ###################################################################
+            test_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
+                                     _dtag in shell.test_dtags}
+
+            thread_processor = ProcessLocalThreading(pandda_args.local_cpus)
+
+            test_xmaps = get_xmaps(
+                console,
+                pandda_fs_model,
+                process_local_in_shell,
+                load_xmap_func,
+                structure_factors,
+                alignments,
+                grid,
+                shell,
+                test_datasets_to_load,
+                pandda_args.sample_rate,
+                shell_log,
+                pandda_args.debug,
+                shell_log_path,
+            )
+
+
+            for _dtag, _xmap in test_xmaps.items():
+                pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].save(_xmap)
+
+            for model_number, comparators in shell.train_dtags.items():
+                time_model_start = time.time()
+                ###################################################################
+                # # Generate train Xmaps
+                ###################################################################
+                train_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
+                                          _dtag in comparators}
+                train_xmaps = get_xmaps(
+                    console,
+                    pandda_fs_model,
+                    process_local_in_shell,
+                    load_xmap_func,
+                    structure_factors,
+                    alignments,
+                    grid,
+                    shell,
+                    train_datasets_to_load,
+                    pandda_args.sample_rate,
+                    shell_log,
+                    pandda_args.debug,
+                    shell_log_path,
+                )
+                for _dtag, _xmap in train_xmaps.items():
+                    pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].save(_xmap)
+
+                ###################################################################
+                # # Get the model to test
+                ###################################################################
+                combined_xmaps = {}
+                for dtag, xmap in test_xmaps.items():
+                    combined_xmaps[dtag] = xmap
+                for dtag, xmap in train_xmaps.items():
+                    combined_xmaps[dtag] = xmap
+                model: ModelInterface = get_models(
+                    shell.test_dtags,
+                    {model_number: comparators, },
+                    combined_xmaps,
+                    grid,
+                    process_local
+                )[model_number]
+                # model_caches[(res, model_number)] = cache(
+                #     pandda_fs_model.shell_dirs.shell_dirs[res].path,
+                #     model,
+                # )
+                # for _model_number, _model in mo.items():
+                pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[model_number].save(model)
+
+                ###################################################################
+                # # Process each test dataset
+                ###################################################################
+
+                for test_dtag in shell.test_dtags:
+                    print(f"\t\t\tSubmitting: {test_dtag.dtag}")
+                    future_id = (res, test_dtag, model_number)
+
+                    shell_dataset_model_futures[future_id] = analyse_model_func(
+                        model,
+                        model_number,
+                        test_dtag=test_dtag,
+                        dataset=shell_truncated_datasets[test_dtag],
+                        dataset_xmap=test_xmaps[test_dtag],
+                        reference=reference,
+                        grid=grid,
+                        dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
+                        dataset_alignment=alignments[test_dtag],
+                        max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
+                        min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
+                        contour_level=pandda_args.contour_level,
+                        cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
+                        min_blob_volume=pandda_args.min_blob_volume,
+                        min_blob_z_peak=pandda_args.min_blob_z_peak,
+                        output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
+                        score_events_func=score_events_func,
+                        res=shell.res,
+                        rate=0.5,
+                        debug=pandda_args.debug
+                        )
+
+                time_model_finish = time.time()
+                print(f"\t\tProcessed model in {time_model_finish - time_model_start}")
+
+            time_shell_finish = time.time()
+            print(f"\tProcessed shell in {time_shell_finish - time_shell_start}")
+
+        time_shell_submit_finish = time.time()
+        ###################################################################
+        # # Await the results...
+        ###################################################################
+        model_results = shell_dataset_model_futures
+        print([model_result for model_result in model_results.values()])
+        print(f"Got all shell results!")
+
+        ###################################################################
+        # # Get the dataset results
+        ###################################################################
+        get_results_start = time.time()
+        dtag_model_result_futures = {}
+
+        for res, shell in shells.items():
+            print(f"\tAssembing shell results for shell: {res}")
+            time_shell_result_start = time.time()
+            shell_dtag_results = {}
+            # shell_models = {model_cache_id[1]: uncache(model_cache_path) for model_cache_id, model_cache_path in
+            #                 model_caches.items() if model_cache_id[0] == res}
+            shell_models = {
+                _model_number: pandda_fs_model.shell_dirs.shell_dirs[res].model_paths[_model_number].load()
+                for _model_number
+                in pandda_fs_model.shell_dirs.shell_dirs[res].model_paths
+            }
+            # shell_truncated_datasets = uncache(shell_truncated_datasets_cache[res], remove=True)
+            shell_truncated_datasets = {
+                dtag: shell_truncated_dataset_file.load()
+                for dtag, shell_truncated_dataset_file
+                in pandda_fs_model.shell_dirs.shell_dirs[res].truncated_dataset_files.items()
+            }
+
+            # shell_xmaps = uncache(shell_xmaps_chace[res], remove=True)
+            shell_xmaps = {
+                _dtag: pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].load()
+                for _dtag
+                in pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths
+            }
+            model_assemble_start = time.time()
+
+
+            # dtags = []
+            for dtag in shell.test_dtags:
+                print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
+                dtag_model_results = {
+                    model_id[2]: model_result
+                    for model_id, model_result
+                    in model_results.items() if
+                    model_id[1] == dtag}
+                dtag_model_result_future_id = (res, dtag)
+                process_dataset = merge_dataset_model_results(
+                    dtag,
+                    dtag_model_results,
+                    shell_models,
+                    grid,
+                    {dtag: shell_xmaps[dtag]},
+                    pandda_fs_model,
+                    {dtag: shell_truncated_datasets[dtag]},
+                    structure_factors,
+                    pandda_args.outer_mask,
+                    pandda_args.inner_mask_symmetry,
+                    alignments,
+                    pandda_args.sample_rate,
+                    pandda_args.debug,
+                )
+
+                # dtags.append(dtag)
+                # future = process_global.submit(process_dataset)
+                dtag_model_result_futures[dtag_model_result_future_id] = process_dataset
+
+            # shell_dtag_results_list = process_local(
+            #     dtag_model_result_funcs
+            # )
+            # shell_dtag_results = {dtag: result for dtag, result in zip(dtags, shell_dtag_results_list)}
+
+            model_assemble_finish = time.time()
+            # shell_dtag_results[dtag] = dataset_result
+            print(f"\t\t\tGet dataset result in: {model_assemble_finish - model_assemble_start}")
+
+
+        print(f"Submitted all shells in: {time.time() - get_results_start}")
+        dtag_model_results = dtag_model_result_futures
+
+        get_results_finish = time.time()
+        print(f"Assembled all shell results in {get_results_finish - get_results_start}!")
+
+
+        ###################################################################
+        # # Get the model to test
+        ###################################################################
+
+        shell_results = {}
+        for res, shell in shells.items():
+            shell_dtag_results = {
+                future_id[1]: _result
+                for future_id, _result
+                in dtag_model_results.items()
+                if future_id[0] == res
+            }
+            shell_result = merge_shell_dataset_results(
+                shell_dtag_results,
+                shell,
+                pandda_fs_model,
+                console,
+                pandda_args.debug
+            )
+            time_shell_result_finish = time.time()
+            # print(f"\t\tGot shell result in {time_shell_result_finish - time_shell_result_start}")
+
+            shell_results[res] = shell_result
+
+        ###################################################################
+        # # Get the model to test
+        ###################################################################
+
+        pandda_log[constants.LOG_SHELLS] = {
+            res: shell_result.log
+            for res, shell_result
+            in shell_results.items()
+            if shell_result
+        }
+        time_shells_finish = time.time()
+        pandda_log["Time to process all shells"] = time_shells_finish - time_shells_start
+        if pandda_args.debug >= Debug.PRINT_SUMMARIES:
+            print(f"Time to process all shells: {time_shells_finish - time_shells_start}")
+
+        all_events: EventsInterface = {}
+        for res, shell_result in shell_results.items():
+            if shell_result:
+                for dtag, dataset_result in shell_result.dataset_results.items():
+                    all_events.update(dataset_result.events)
+
+        event_scores: EventScoresInterface = {}
+        for res, shell_result in shell_results.items():
+            if shell_result:
+                for dtag, dataset_result in shell_result.dataset_results.items():
+                    event_scores.update(
+                        {
+                            event_id: event_scoring_result.get_selected_structure_score()
+                            for event_id, event_scoring_result
+                            in dataset_result.event_scores.items()
+                        }
+                    )
+
+        # Add the event maps to the fs
+        for event_id, event in all_events.items():
+            pandda_fs_model.processed_datasets.processed_datasets[event_id.dtag].event_map_files.add_event(event)
+
+        update_log(pandda_log, pandda_args.out_dir / constants.PANDDA_LOG_FILE)
+
+        if pandda_args.debug >= Debug.PRINT_NUMERICS:
+            print(shell_results)
+            print(all_events)
+            print(event_scores)
+
+        console.summarise_shells(shell_results, all_events, event_scores)
+
+        for event_id, event in all_events.items():
+            event_file = EventFile(pandda_fs_model.processed_datasets.processed_datasets[
+                                       event_id.dtag].path / f"{event_id.event_idx.event_idx}.pickle")
+            event_file.save(event)
+            pandda_fs_model.event_files[event_id] = event_file
+
+        for res, shell_result in shell_results.items():
+            pandda_fs_model.shell_result_files[res].save(shell_result)
+
+        pandda_fs_model.event_scores_file.save(event_scores)
+
+        pandda_fs_model.save()
+
+    return shell_results, all_events, event_scores
+
 
 def get_shell_results(pandda_args, console, process_global, process_local, pandda_fs_model, process_shell_function,
                       load_xmap_func, analyse_model_func, score_events_func, shells, structure_factors, datasets,
