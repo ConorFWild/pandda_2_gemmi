@@ -346,7 +346,24 @@ def analyse_model(
     # elif score_events_func.tag == "autobuild":
     #     raise NotImplementedError()
     elif score_events_func.tag == "cnn":
-        event_scores: EventScoringResultsInterface = score_events_func()
+        event_scores: EventScoringResultsInterface = score_events_func(
+            test_dtag,
+            model_number,
+            dataset_processed_dataset,
+            dataset_xmap,
+            zmaps[test_dtag],
+            events,
+            model,
+            grid,
+            dataset_alignment,
+            max_site_distance_cutoff,
+            min_bdc, max_bdc,
+            reference,
+            res, rate,
+            event_map_cut=2.0,
+            structure_output_folder=output_dir,
+            debug=debug
+        )
 
     elif score_events_func.tag == "size":
         event_scores: EventScoringResultsInterface = score_events_func(
