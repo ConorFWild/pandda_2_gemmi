@@ -187,6 +187,7 @@ class GetEventScoreCNN(GetEventScoreCNNInterface):
 
             # Track score
             model_annotation = model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]
+            print(f"{model_number} {test_dtag.dtag} {event_id.event_idx.event_idx} {model_annotation}")
             event_scores[event_id] = EventScoringResult(
                 LigandFittingResult(
                     {
