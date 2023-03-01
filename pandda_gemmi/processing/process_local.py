@@ -202,7 +202,7 @@ class ProcessLocalSpawn(ProcessorInterface):
     def __setstate__(self, state):
         self.n_jobs = state[0]
         self.tag = state[1]
-        self.pool = mp.Pool(self.n_jobs)
+        self.pool = Parallel(n_jobs=self.n_jobs)
 
 
 class ProcessLocalThreading(ProcessorInterface):
