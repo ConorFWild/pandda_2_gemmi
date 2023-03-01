@@ -147,13 +147,13 @@ class GetEventScoreCNN(GetEventScoreCNNInterface):
             dev = "cpu"
 
         # Load the model
-        model = resnet18(num_classes=2, num_input=4)
+        cnn = resnet18(num_classes=2, num_input=4)
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
-        model.load_state_dict(torch.load(cnn_path, map_location=dev))
+        cnn.load_state_dict(torch.load(cnn_path, map_location=dev))
 
         # Add model to device
-        model.to(dev)
-        model.eval()
+        cnn.to(dev)
+        cnn.eval()
 
         # Annotate the events
         event_scores = {}
@@ -191,7 +191,7 @@ class GetEventScoreCNN(GetEventScoreCNNInterface):
             image_c = image_t.to(dev)
 
             # Run model
-            model_annotation = model(image_c)
+            model_annotation = cnn(image_c)
 
             # Track score
             model_annotation = model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]
