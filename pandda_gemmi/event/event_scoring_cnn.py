@@ -46,6 +46,13 @@ def get_sample_transform_from_event(event: EventInterface,
             initial_transform
         )
     )
+
+    transform = gemmi.Transform()
+    transform.vec.fromlist([
+        event.cluster.centroid[j] - sample_grid_centroid[j]
+        for j
+        in [0,1,2]
+    ])
     corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
     corner_n_pos = transform.apply(gemmi.Position(
         float(n),
