@@ -2,3 +2,4 @@ from pandda_gemmi.event.event import Event, Events, Cluster, Clustering, Cluster
 # from pandda_gemmi.event.event_scoring import score_events
 from pandda_gemmi.event.event_scoring_inbuilt import GetEventScoreInbuilt
 from pandda_gemmi.event.event_score_size import GetEventScoreSize
+from pandda_gemmi.event.event_scoring_cnn import GetEventScoreCNN

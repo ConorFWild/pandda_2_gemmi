@@ -34,7 +34,7 @@ from pandda_gemmi.comparators import (
 #     process_global_serial,
 #
 # )
-from pandda_gemmi.event import GetEventScoreInbuilt, GetEventScoreSize
+from pandda_gemmi.event import GetEventScoreInbuilt, GetEventScoreSize, GetEventScoreCNN
 
 from pandda_gemmi.processing import (
     analyse_model,
@@ -297,6 +297,8 @@ def get_score_events_func(pandda_args: PanDDAArgs) -> GetEventScoreInterface:
         return GetEventScoreInbuilt()
     elif pandda_args.event_score == "size":
         return GetEventScoreSize()
+    elif pandda_args.event_score == "cnn":
+        return GetEventScoreCNN()
 
 
 def get_event_classification_func(pandda_args):

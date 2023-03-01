@@ -345,6 +345,8 @@ def analyse_model(
         )
     # elif score_events_func.tag == "autobuild":
     #     raise NotImplementedError()
+    elif score_events_func.tag == "cnn":
+        event_scores: EventScoringResultsInterface = score_events_func()
 
     elif score_events_func.tag == "size":
         event_scores: EventScoringResultsInterface = score_events_func(

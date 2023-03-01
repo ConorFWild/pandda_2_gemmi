@@ -1088,9 +1088,29 @@ class GetEventScoreSizeInterface(Protocol):
                  ) -> EventScoringResultsInterface:
         ...
 
+class GetEventScoreCNNInterface(Protocol):
+    tag: Literal["cnn"]
+
+    def __call__(self, test_dtag,
+                 model_number,
+                 dataset_processed_dataset,
+                 dataset_xmap,
+                 zmap,
+                 events,
+                 model,
+                 grid,
+                 dataset_alignment,
+                 max_site_distance_cutoff,
+                 min_bdc, max_bdc,
+                 reference,
+                 res, rate,
+                 structure_output_folder,
+                 debug: Debug
+                 ) -> EventScoringResultsInterface:
+        ...
 
 GetEventScoreInterface = Union[
-    GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface, GetEventScoreSizeInterface]
+    GetEventScoreInbuiltInterface, GetEventScoreAutobuildInterface, GetEventScoreSizeInterface, GetEventScoreCNNInterface]
 
 
 class GetAutobuildResultRhofitInterface(Protocol):
