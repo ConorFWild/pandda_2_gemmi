@@ -68,6 +68,7 @@ class ProcessLocalSpawn(ProcessorInterface):
 
     def __init__(self, n_jobs: int):
         self.n_jobs = n_jobs
+        self.pool = mp.Pool(self.n_jobs)
         self.tag: Literal["not_async"] = "not_async"
 
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
@@ -76,7 +77,6 @@ class ProcessLocalSpawn(ProcessorInterface):
         except Exception as e:
             print(e)
 
-        with mp.Pool(self.n_jobs) as pool:
             # results = pool.map(
             #     run_multiprocessing,
             #     funcs,
@@ -86,44 +86,52 @@ class ProcessLocalSpawn(ProcessorInterface):
             #     funcs,
             # )
 
-            start_time = time.time()
-            result_futuress = []
-            for func in funcs:
-                result_futuress.append(pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
+        start_time = time.time()
+        result_futuress = []
+        for func in funcs:
+            result_futuress.append(self.pool.apply_async(func.func, args=func.args, kwds=func.kwargs))
 
-            task_status = [result.ready() for result in result_futuress]
-            num_previously_completed = 0
-            num_completed = 0
-            num_tasks = len(task_status)
-            while not all(task_status):
-                current_time = time.time()
-
-                num_completed = len([x for x in task_status if x])
-                if num_completed != 0:
-                    average_time_per_task = round((current_time - start_time) / num_completed, 1)
-                else:
-                    average_time_per_task = "-Unknown-"
-
-                if num_completed > num_previously_completed:
-                    print(f"\tCompleted {num_completed} out of {num_tasks} tasks. Average time per task: {average_time_per_task}.")
-
-                num_previously_completed = num_completed
-                time.sleep(15)
-                task_status = [result.ready() for result in result_futuress]
-
+        task_status = [result.ready() for result in result_futuress]
+        num_previously_completed = 0
+        num_completed = 0
+        num_tasks = len(task_status)
+        while not all(task_status):
             current_time = time.time()
+
             num_completed = len([x for x in task_status if x])
             if num_completed != 0:
                 average_time_per_task = round((current_time - start_time) / num_completed, 1)
             else:
                 average_time_per_task = "-Unknown-"
 
-            print(f"\tFinished tasks! Completed {num_completed} out of {num_tasks} tasks. Average time per task:"
-                  f" {average_time_per_task}.")
+            if num_completed > num_previously_completed:
+                print(f"\tCompleted {num_completed} out of {num_tasks} tasks. Average time per task: {average_time_per_task}.")
 
-            results = [result.get() for result in result_futuress]
+            num_previously_completed = num_completed
+            time.sleep(15)
+            task_status = [result.ready() for result in result_futuress]
+
+        current_time = time.time()
+        num_completed = len([x for x in task_status if x])
+        if num_completed != 0:
+            average_time_per_task = round((current_time - start_time) / num_completed, 1)
+        else:
+            average_time_per_task = "-Unknown-"
+
+        print(f"\tFinished tasks! Completed {num_completed} out of {num_tasks} tasks. Average time per task:"
+              f" {average_time_per_task}.")
+
+        results = [result.get() for result in result_futuress]
 
         return results
+
+    def __getstate__(self):
+        return (self.n_jobs, self.tag)
+
+    def __setstate__(self, state):
+        self.n_jobs = state[0]
+        self.tag = state[1]
+        self.pool = mp.Pool(self.n_jobs)
 
 
 class ProcessLocalThreading(ProcessorInterface):
