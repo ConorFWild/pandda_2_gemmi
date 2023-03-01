@@ -41,11 +41,11 @@ def get_sample_transform_from_event(event: EventInterface,
     event_centre_transform.vec.fromlist([x for x in event.cluster.centroid])
 
     # Apply random translation
-    transform = event_centre_transform.combine(
-        centre_grid_transform.combine(
-            initial_transform
-        )
-    )
+    # transform = event_centre_transform.combine(
+    #     centre_grid_transform.combine(
+    #         initial_transform
+    #     )
+    # )
 
     transform = gemmi.Transform()
     transform.vec.fromlist([
