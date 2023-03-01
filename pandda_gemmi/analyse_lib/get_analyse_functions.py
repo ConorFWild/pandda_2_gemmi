@@ -338,6 +338,11 @@ def get_autobuild_func(pandda_args, ):
         elif pandda_args.autobuild_strategy == "inbuilt":
             autobuild_func: Optional[GetAutobuildResultInterface] = GetAutobuildResultInbuilt()
 
+
         else:
             raise Exception(f"Autobuild strategy: {pandda_args.autobuild_strategy} is not valid!")
+
+    else:
+        autobuild_func = None
+
     return autobuild_func

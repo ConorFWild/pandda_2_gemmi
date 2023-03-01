@@ -159,5 +159,7 @@ def get_autobuild_results(pandda_args, console, process_local,
         # with STDOUTManager('Updating the PanDDA models with best scoring fragment build...', f'\tDone!'):
         console.start_autobuild_model_update()
 
+    else:
+        autobuild_results = None
 
     return autobuild_results
