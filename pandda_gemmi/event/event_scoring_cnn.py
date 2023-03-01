@@ -53,6 +53,7 @@ def get_sample_transform_from_event(event: EventInterface,
         for j
         in [0,1,2]
     ])
+    transform.mat.fromlist(scale_matrix.tolist())
     corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
     corner_n_pos = transform.apply(gemmi.Position(
         float(n),
