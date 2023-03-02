@@ -349,18 +349,18 @@ def get_autobuild_func(pandda_args, ):
 
 
 def event_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface, threshold: float = 0.8):
-    return {event_id: event for event_id, event in events if event_scores[event_id] > threshold}
+    return {event_id: event for event_id, event in events.items() if event_scores[event_id] > threshold}
 
 
 def autobuild_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface,
                                     threshold: float = 0.8):
-    return {event_id: event for event_id, event in events if event_scores[event_id] > threshold}
+    return {event_id: event for event_id, event in events.items() if event_scores[event_id] > threshold}
 
 
 def autobuild_criteria_all(events: EventsInterface,
                            event_scores: EventScoresInterface,
                            threshold: float = 0.8):
-    return {event_id: event for event_id, event in events}
+    return {event_id: event for event_id, event in events.items()}
 
 
 def merge_criteria_highest_scoring_event(
