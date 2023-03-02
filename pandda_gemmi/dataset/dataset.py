@@ -769,7 +769,7 @@ def transform_structure_to_unit_cell(
         float(90)
     )
 
-    st.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    st.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     st.cell = gemmi.UnitCell(*unit_cell)
 
     return st
