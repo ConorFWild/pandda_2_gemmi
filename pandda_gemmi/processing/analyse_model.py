@@ -271,25 +271,6 @@ def analyse_model(
     #                                                                           10000,
     #                                                                           )
 
-    # TODO: REMOVE: event blob analysis
-    # blobfind_event_map_and_report_and_output(
-    #     test_dtag,
-    #     model_number,
-    #     dataset_truncated_datasets[test_dtag],
-    #     dataset_xmaps,
-    #     zmaps[test_dtag],
-    #     clusterings_large,
-    #     model,
-    #     dataset_xmaps,
-    #     grid,
-    #     alignments,
-    #     max_site_distance_cutoff,
-    #     min_bdc, max_bdc,
-    #     reference,
-    #     contour_level,
-    #     cluster_cutoff_distance_multiplier,
-    #     pandda_fs_model
-    # )
 
     events: Events = Events.from_clusters(
         clusterings_merged,

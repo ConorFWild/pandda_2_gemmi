@@ -51,7 +51,7 @@ from pandda_gemmi.autobuild import (
     save_pdb_file,
     GetAutobuildResultRhofit,
     GetAutobuildResultInbuilt,
-GetAutobuildResultRhofitWrapper
+    GetAutobuildResultRhofitWrapper
 )
 from pandda_gemmi import event_classification
 
@@ -346,3 +346,81 @@ def get_autobuild_func(pandda_args, ):
         autobuild_func = None
 
     return autobuild_func
+
+
+def event_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface, threshold: float = 0.8):
+    return {event_id: event for event_id, event in events if event_scores[event_id] > threshold}
+
+
+def autobuild_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface,
+                                    threshold: float = 0.8):
+    return {event_id: event for event_id, event in events if event_scores[event_id] > threshold}
+
+
+def autobuild_criteria_all(events: EventsInterface,
+                           event_scores: EventScoresInterface,
+                           threshold: float = 0.8):
+    return {event_id: event for event_id, event in events}
+
+
+def merge_criteria_highest_scoring_event(
+        events: EventsInterface,
+        event_scores: EventScoresInterface,
+        autobuild_results: AutobuildResultsInterface,
+        threshold: float = 0.8):
+    highest_scoring_event_id = max(event_scores, key=lambda _event_id: event_scores[_event_id])
+    all_scores = {}
+    for event_id, autobuild_result in autobuild_results.items():
+        if event_id != highest_scoring_event_id:
+            continue
+        for path, autobuild_score in autobuild_result.scores.items():
+            all_scores[path] = autobuild_score
+
+    if len(all_scores) == 0:
+        return None
+
+    # Select fragment build
+    selected_fragement_path = max(
+        all_scores,
+        key=lambda _path: all_scores[_path],
+    )
+
+    return selected_fragement_path
+
+
+def merge_criteria_highest_scoring_autobuild(
+        events: EventsInterface,
+        event_scores: EventScoresInterface,
+        autobuild_results: AutobuildResultsInterface,
+        threshold: float = 0.8):
+    all_scores = {}
+    for event_id, autobuild_result in autobuild_results.items():
+        for path, autobuild_score in autobuild_result.scores.items():
+            all_scores[path] = autobuild_score
+
+    if len(all_scores) == 0:
+        return None
+
+    # Select fragment build
+    selected_fragement_path = max(
+        all_scores,
+        key=lambda _path: all_scores[_path],
+    )
+
+    return selected_fragement_path
+
+
+# Get the autobuild criterion
+def get_autobuild_criterion(pandda_args: PanDDAArgs):
+    if pandda_args.event_score == "cnn":
+        return autobuild_criteria_high_scoring
+    else:
+        return autobuild_criteria_all
+
+
+# Get the autobuild merge criterion
+def get_autobuild_merge_criterion(pandda_args: PanDDAArgs):
+    if pandda_args.event_score == "cnn":
+        return merge_criteria_highest_scoring_event
+    else:
+        return

@@ -8,7 +8,7 @@ from pandda_gemmi.processing import ProcessLocalThreading
 
 def get_autobuild_results(pandda_args, console, process_local,
                           process_global, autobuild_func, pandda_fs_model, datasets, all_events, shell_results,
-                          pandda_log, event_scores, ):
+                          pandda_log, event_scores, autobuild_criterion):
     autobuild_results = {}
     if autobuild_func:
         console.start_autobuilding()
@@ -78,30 +78,24 @@ def get_autobuild_results(pandda_args, console, process_local,
             #     )
             #     futures.append(future)
 
-            futures = ProcessLocalThreading(pandda_args.local_cpus)(
-                [
-                    Partial(process_autobuilds.submit).paramaterise(
-                        Partial(autobuild_func).paramaterise(
-                            event_id.dtag,
-                            event_id,
-                            pandda_fs_model,
-                            cif_strategy=pandda_args.cif_strategy,
-                            cut=2.0,
-                            rhofit_coord=pandda_args.rhofit_coord,
-                            debug=pandda_args.debug,
-                                            )
-                    )
-                    for event_id
-                    in all_events
-                ]
-            )
+            events_to_autobuild = autobuild_criterion(all_events, event_scores)
 
-            print(f"Submitted all futures")
-            autobuild_results={}
-            for _event_id, future in zip(all_events, futures, ):
-                print(_event_id)
-                autobuild_results[_event_id] = future.get()
-            print("Got all futures!")
+            funcs = {}
+            for event_id, event in events_to_autobuild.items():
+                func = Partial(autobuild_func).paramaterise(
+                    event_id.dtag,
+                    event_id,
+                    pandda_fs_model,
+                    cif_strategy=pandda_args.cif_strategy,
+                    cut=2.0,
+                    rhofit_coord=pandda_args.rhofit_coord,
+                    debug=pandda_args.debug,
+                )
+                funcs[event_id] = func
+
+            results = process_autobuilds.process_dict(funcs)
+            for event_id, result in results.items():
+                autobuild_results[event_id] = result
 
         elif autobuild_func.tag == "inbuilt":
             event_scoring_results = {}

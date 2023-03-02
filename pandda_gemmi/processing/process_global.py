@@ -339,6 +339,22 @@ class DistributedProcessor(ProcessorAsyncInterface):
 
         return results
 
+    def process_dict(self, funcs):
+
+        result_futures = []
+        for func_key, func in funcs.items():
+            func_path = self.client.save(func.func)
+            arg_pickle_paths = [self.client.save(arg) for arg in func.args]
+            kwarg_pickle_paths = {kwrd: self.client.save(kwarg) for kwrd, kwarg in func.kwargs.items()}
+            # result_futures.append(self.client.submit(func.func, *func.args, **func.kwargs))
+            result_futures.append(self.client.submit(func_path, *arg_pickle_paths, **kwarg_pickle_paths))
+
+        # progress(result_futures)
+
+        results = self.client.gather(result_futures)
+
+        return {key: result for key, result in zip(funcs, results)}
+
     def submit(self, func: Callable[P, V]) -> V:
         func_path = self.client.save(func.func)
         arg_pickle_paths = [self.client.save(arg) for arg in func.args]

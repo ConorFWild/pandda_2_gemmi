@@ -45,6 +45,8 @@ get_shell_results_serial,
     summarize_run,
     handle_exception,
 generate_fragment_bound_structures,
+get_autobuild_criterion,
+get_autobuild_merge_criterion
 )
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.smiles import GetDatasetSmiles
@@ -140,6 +142,12 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Set up autobuilding function
     autobuild_func: Optional[GetAutobuildResultInterface] = get_autobuild_func(pandda_args)
+
+    # Get the autobuild criterion
+    autobuild_criterion = get_autobuild_criterion(pandda_args)
+
+    # Get the autobuild merge criterion
+    autobuild_merge_criterion = get_autobuild_merge_criterion(pandda_args)
 
     # Get the rescoring function
     event_rescoring_function = get_event_rescoring_func(pandda_args)
@@ -318,6 +326,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             shell_results,
             pandda_log,
             event_scores,
+            autobuild_criterion
         )
 
         ###################################################################
@@ -336,7 +345,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
             pandda_fs_model,
             datasets,
             autobuild_results,
+            all_events,
             event_scores,
+            autobuild_merge_criterion,
             console,
             pandda_log
         )

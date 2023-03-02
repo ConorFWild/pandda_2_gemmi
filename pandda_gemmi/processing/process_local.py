@@ -21,6 +21,8 @@ class ProcessLocalSerial(ProcessorInterface):
 
         return results
 
+    def process_dict(self, funcs):
+        return {key: func() for key, func in funcs.items()}
 
 
 @ray.remote
@@ -61,6 +63,13 @@ class ProcessLocalRay(ProcessorInterface):
         tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
         results = ray.get(tasks)
         return results
+
+    def process_dict(self, funcs):
+        assert ray.is_initialized() == True
+        tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs.values()]
+        results = ray.get(tasks)
+
+        return {key: result for key, result in zip(funcs, results)}
 
     def reset(self):
         ray.shutdown()
@@ -202,6 +211,11 @@ class ProcessLocalSpawn(ProcessorInterface):
         results = self.pool(delayed(func.func)(*func.args, **func.kwargs) for func in funcs)
 
         return results
+
+    def process_dict(self, funcs):
+        results = self.pool(delayed(func.func)(*func.args, **func.kwargs) for func in funcs)
+
+        return {key: result for key, result in zip(funcs, results)}
 
     def __getstate__(self):
         return (self.n_jobs, self.tag)

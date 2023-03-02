@@ -24,6 +24,7 @@ class Debug(IntEnum):
 
 T = TypeVar('T', )
 V = TypeVar("V")
+Q = TypeVar("Q")
 P = ParamSpec("P")
 
 NDArrayInterface = NDArray[np.float_]
@@ -40,6 +41,9 @@ class PanDDAConsoleInterface(Protocol):
 class ProcessorInterface(Protocol):
     tag: Literal["not_async"]
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
+        ...
+
+    def process_dict(self, funcs: Dict[Q, Callable[P, V]]) -> Dict[Q, V]:
         ...
 
 class FutureStatus(IntEnum):

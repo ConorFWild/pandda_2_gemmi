@@ -243,31 +243,23 @@ def get_shell_models(console, pandda_fs_model, process_local_in_shell, shell, gr
     return models
 
 
-def get_xmaps(console, pandda_fs_model, process_local_in_shell, load_xmap_func, structure_factors, alignments, grid,
+def get_xmaps(console, pandda_fs_model, process_local_in_shell: ProcessorInterface, load_xmap_func, structure_factors, alignments, grid,
               shell, shell_truncated_datasets, sample_rate, shell_log, debug, shell_log_path):
     if debug >= Debug.DEFAULT:
         console.print_starting_loading_xmaps()
     time_xmaps_start = time.time()
-    xmaps: XmapsInterface = {
-        dtag: xmap
-        for dtag, xmap
-        in zip(
-            shell_truncated_datasets,
-            process_local_in_shell(
-                [
-                    Partial(load_xmap_func).paramaterise(
-                        shell_truncated_datasets[key],
-                        alignments[key],
-                        grid=grid,
-                        structure_factors=structure_factors,
-                        sample_rate=shell.res / 0.5,
-                    )
-                    for key
-                    in shell_truncated_datasets
-                ]
-            )
+    funcs = {
+        key: Partial(load_xmap_func).paramaterise(
+            shell_truncated_datasets[key],
+            alignments[key],
+            grid=grid,
+            structure_factors=structure_factors,
+            sample_rate=shell.res / 0.5,
         )
+        for key
+        in shell_truncated_datasets
     }
+    xmaps: XmapsInterface = process_local_in_shell.process_dict(funcs)
     time_xmaps_finish = time.time()
     shell_log[constants.LOG_SHELL_XMAP_TIME] = time_xmaps_finish - time_xmaps_start
     update_log(shell_log, shell_log_path)

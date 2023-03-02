@@ -12,7 +12,9 @@ def generate_fragment_bound_structures(
         pandda_fs_model,
         datasets,
         autobuild_results,
+        all_events,
         event_scores,
+        merge_criterion,
         console,
         pandda_log
 ):
@@ -27,6 +29,18 @@ def generate_fragment_bound_structures(
                 event_id: autobuild_result
                 for event_id, autobuild_result
                 in autobuild_results.items()
+                if dtag == event_id.dtag
+            }
+            dataset_events: EventsInterface = {
+                event_id: event
+                for event_id, event
+                in all_events.items()
+                if dtag == event_id.dtag
+            }
+            dataset_event_scores = {
+                event_id: event_score
+                for event_id, event_score
+                in event_scores.items()
                 if dtag == event_id.dtag
             }
 
@@ -45,11 +59,13 @@ def generate_fragment_bound_structures(
                 # print(f"\tNo autobuilds for this dataset!")
                 continue
 
+            selected_fragement_path = merge_criterion(dataset_events, dataset_event_scores, dataset_autobuild_results)
+
             # Select fragment build
-            selected_fragement_path = max(
-                all_scores,
-                key=lambda _path: all_scores[_path],
-            )
+            # selected_fragement_path = max(
+            #     all_scores,
+            #     key=lambda _path: all_scores[_path],
+            # )
 
             dataset_selected_events[dtag.dtag] = autobuild_to_event[selected_fragement_path]
 

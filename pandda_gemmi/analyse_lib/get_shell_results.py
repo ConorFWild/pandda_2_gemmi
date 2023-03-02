@@ -606,7 +606,6 @@ def get_shell_results_async(
             }
             model_assemble_start = time.time()
 
-
             # dtags = []
             for dtag in shell.test_dtags:
                 print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
@@ -645,13 +644,11 @@ def get_shell_results_async(
             # shell_dtag_results[dtag] = dataset_result
             print(f"\t\t\tGet dataset result in: {model_assemble_finish - model_assemble_start}")
 
-
         print(f"Submitted all shells in: {time.time() - get_results_start}")
         dtag_model_results = {future_id: future.get() for future_id, future in dtag_model_result_futures.items()}
 
         get_results_finish = time.time()
         print(f"Assembled all shell results in {get_results_finish - get_results_start}!")
-
 
         ###################################################################
         # # Get the model to test
@@ -737,6 +734,7 @@ def get_shell_results_async(
         pandda_fs_model.save()
 
     return shell_results, all_events, event_scores
+
 
 def get_shell_results_serial(
         pandda_args,
@@ -828,8 +826,6 @@ def get_shell_results_serial(
             test_datasets_to_load = {_dtag: _dataset for _dtag, _dataset in shell_truncated_datasets.items() if
                                      _dtag in shell.test_dtags}
 
-            thread_processor = ProcessLocalThreading(pandda_args.local_cpus)
-
             test_xmaps = get_xmaps(
                 console,
                 pandda_fs_model,
@@ -845,7 +841,6 @@ def get_shell_results_serial(
                 pandda_args.debug,
                 shell_log_path,
             )
-
 
             for _dtag, _xmap in test_xmaps.items():
                 pandda_fs_model.shell_dirs.shell_dirs[res].xmap_paths[_dtag].save(_xmap)
@@ -901,14 +896,8 @@ def get_shell_results_serial(
                 # # Process each test dataset
                 ###################################################################
 
-                future_ids = []
-                funcs = []
-                for test_dtag in shell.test_dtags:
-                    print(f"\t\t\tSubmitting: {test_dtag.dtag}")
-                    future_id = (res, test_dtag, model_number)
-
-                    funcs.append(
-                        Partial(analyse_model_func).paramaterise(
+                funcs = {
+                    test_dtag: Partial(analyse_model_func).paramaterise(
                         model,
                         model_number,
                         test_dtag=test_dtag,
@@ -929,40 +918,15 @@ def get_shell_results_serial(
                         res=shell.res,
                         rate=0.5,
                         debug=pandda_args.debug
-                        )
                     )
-                    future_ids.append(future_id)
+                    for test_dtag
+                    in shell.test_dtags
+                }
 
-                results = process_local(funcs)
-                for future_id, result in zip(future_ids, results):
+                results = process_local.process_dict(funcs)
+                for future_id, result in results.items():
                     shell_dataset_model_futures[future_id] = result
 
-                # for test_dtag in shell.test_dtags:
-                #     print(f"\t\t\tSubmitting: {test_dtag.dtag}")
-                #     future_id = (res, test_dtag, model_number)
-                #
-                #     shell_dataset_model_futures[future_id] = analyse_model_func(
-                #         model,
-                #         model_number,
-                #         test_dtag=test_dtag,
-                #         dataset=shell_truncated_datasets[test_dtag],
-                #         dataset_xmap=test_xmaps[test_dtag],
-                #         reference=reference,
-                #         grid=grid,
-                #         dataset_processed_dataset=pandda_fs_model.processed_datasets.processed_datasets[test_dtag],
-                #         dataset_alignment=alignments[test_dtag],
-                #         max_site_distance_cutoff=pandda_args.max_site_distance_cutoff,
-                #         min_bdc=pandda_args.min_bdc, max_bdc=pandda_args.max_bdc,
-                #         contour_level=pandda_args.contour_level,
-                #         cluster_cutoff_distance_multiplier=pandda_args.cluster_cutoff_distance_multiplier,
-                #         min_blob_volume=pandda_args.min_blob_volume,
-                #         min_blob_z_peak=pandda_args.min_blob_z_peak,
-                #         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
-                #         score_events_func=score_events_func,
-                #         res=shell.res,
-                #         rate=0.5,
-                #         debug=pandda_args.debug
-                #         )
 
                 time_model_finish = time.time()
                 print(f"\t\tProcessed model in {time_model_finish - time_model_start}")
@@ -1010,11 +974,9 @@ def get_shell_results_serial(
             }
             model_assemble_start = time.time()
 
-
             # dtags = []
 
-            future_ids = []
-            funcs = []
+            funcs = {}
             for dtag in shell.test_dtags:
                 print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
                 dtag_model_results = {
@@ -1039,14 +1001,11 @@ def get_shell_results_serial(
                     pandda_args.debug,
                 )
 
-                # dtags.append(dtag)
-                # future = process_global.submit(process_dataset)
-                future_ids.append(dtag_model_result_future_id)
-                funcs.append(process_dataset)
+                funcs[dtag_model_result_future_id] = process_dataset
 
-            results = process_local(funcs)
+            results = process_local.process_dict(funcs)
 
-            for future_id, result in zip(future_ids, results):
+            for future_id, result in results.items():
                 dtag_model_result_futures[future_id] = result
 
             # shell_dtag_results_list = process_local(
@@ -1058,13 +1017,11 @@ def get_shell_results_serial(
             # shell_dtag_results[dtag] = dataset_result
             print(f"\t\t\tGet dataset result in: {model_assemble_finish - model_assemble_start}")
 
-
         print(f"Submitted all shells in: {time.time() - get_results_start}")
         dtag_model_results = dtag_model_result_futures
 
         get_results_finish = time.time()
         print(f"Assembled all shell results in {get_results_finish - get_results_start}!")
-
 
         ###################################################################
         # # Get the model to test
