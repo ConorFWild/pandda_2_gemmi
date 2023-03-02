@@ -641,9 +641,9 @@ class ReferenceGrid(GridInterface):
 
     @staticmethod
     def spacing_from_reference(reference: ReferenceInterface, step, offset, sample_rate: float = 3.0, ):
-        step = 0.5
+        step = step
         # spacing = reference.dataset.reflections.reflections.get_size_for_hkl(sample_rate=sample_rate)
-        offset = 3.0
+        offset = offset
         structure_poss = []
         for model in reference.dataset.structure.structure:
             for chain in model:
@@ -741,7 +741,7 @@ def get_grid_from_reference(
 ):
     # unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
     step = 0.5
-    offset = 3.0
+    offset = 6.0
     spacing = ReferenceGrid.spacing_from_reference(reference, step, offset, sample_rate,)
     unit_cell = (
         float(spacing[0]*step),

@@ -709,9 +709,28 @@ class Reference:
         else:
             raise Exception("Failed to find a minimum resolution datatag. THis should be impossible. Contact mantainer.")
 
+def spacing_from_reference(structure, step, offset,  ):
+    step = step
+    # spacing = reference.dataset.reflections.reflections.get_size_for_hkl(sample_rate=sample_rate)
+    offset = offset
+    structure_poss = []
+    for model in structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    pos = atom.pos
+                    structure_poss.append([pos.x, pos.y, pos.z])
+
+    pos_array = np.array(structure_poss)
+    max_pos = np.max(pos_array, axis=0) + offset
+
+    spacing_array = np.ceil(max_pos / step)
+
+    return tuple(int(x) for x in spacing_array)
 
 def transform_structure_to_unit_cell(
             structure: StructureInterface,
+        step=0.5,
         offset = 3.0
         ):
     st = structure.structure.clone()
@@ -737,6 +756,21 @@ def transform_structure_to_unit_cell(
                     new_pos_vec = transform.apply(pos)
                     new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
                     atom.pos = new_pos
+
+    step = 0.5
+    offset = 6.0
+    spacing = spacing_from_reference(st, step, offset, )
+    unit_cell = (
+        float(spacing[0] * step),
+        float(spacing[1] * step),
+        float(spacing[2] * step),
+        float(90),
+        float(90),
+        float(90)
+    )
+
+    st.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    st.cell = gemmi.UnitCell(*unit_cell)
 
     return st
 
@@ -780,7 +814,9 @@ def get_reference_from_datasets(
         # Translate reference into unit cell 0 + buffer
         reference_dataset = datasets[min_resolution_dtag]
         new_structure = transform_structure_to_unit_cell(
-            reference_dataset.structure
+            reference_dataset.structure,
+            step=0.5,
+            offset=6.0
         )
 
         #
