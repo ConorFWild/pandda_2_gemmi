@@ -192,7 +192,7 @@ class ProcessLocalSpawn(ProcessorInterface):
         #
         # results = [result.get() for result in result_futuress]
 
-        results = self.pool(funcs)
+        results = self.pool(func for func in funcs)
 
         return results
 
