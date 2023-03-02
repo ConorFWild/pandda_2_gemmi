@@ -1086,7 +1086,7 @@ def smooth(dataset, reference: Reference, structure_factors: StructureFactors):
     y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
 
     # Optimise the scale factor
-    for scale in np.linspace(-4, 4, 100):
+    for scale in np.linspace(-15, 15, 300):
         y_s = y * np.exp(scale * r)
         # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
         # knn_y.fit(r.reshape(-1, 1),
