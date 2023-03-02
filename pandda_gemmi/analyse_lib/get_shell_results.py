@@ -897,7 +897,7 @@ def get_shell_results_serial(
                 ###################################################################
 
                 funcs = {
-                    test_dtag: Partial(analyse_model_func).paramaterise(
+                    (shell.res, test_dtag, model_number): Partial(analyse_model_func).paramaterise(
                         model,
                         model_number,
                         test_dtag=test_dtag,
