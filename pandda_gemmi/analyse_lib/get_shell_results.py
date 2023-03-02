@@ -1047,7 +1047,7 @@ def get_shell_results_serial(
             results = process_local(funcs)
 
             for future_id, result in zip(future_ids, results):
-                dtag_model_result_futures[dtag_model_result_future_id] = result
+                dtag_model_result_futures[future_id] = result
 
             # shell_dtag_results_list = process_local(
             #     dtag_model_result_funcs
