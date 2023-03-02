@@ -423,4 +423,4 @@ def get_autobuild_merge_criterion(pandda_args: PanDDAArgs):
     if pandda_args.event_score == "cnn":
         return merge_criteria_highest_scoring_event
     else:
-        return
+        return merge_criteria_highest_scoring_autobuild

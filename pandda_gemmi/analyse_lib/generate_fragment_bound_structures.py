@@ -59,7 +59,14 @@ def generate_fragment_bound_structures(
                 # print(f"\tNo autobuilds for this dataset!")
                 continue
 
-            selected_fragement_path = merge_criterion(dataset_events, dataset_event_scores, dataset_autobuild_results)
+            selected_fragement_path = merge_criterion(
+                dataset_events,
+                dataset_event_scores,
+                dataset_autobuild_results,
+            )
+
+            if not selected_fragement_path:
+                continue
 
             # Select fragment build
             # selected_fragement_path = max(
