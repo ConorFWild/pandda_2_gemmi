@@ -38,6 +38,7 @@ def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
 class ProcessLocalRay(ProcessorInterface):
 
     def __init__(self, local_cpus):
+        self.local_cpus = local_cpus
         ray.init(num_cpus=local_cpus)
         self.tag: Literal["not_async"] = "not_async"
 
@@ -60,6 +61,10 @@ class ProcessLocalRay(ProcessorInterface):
         tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs]
         results = ray.get(tasks)
         return results
+
+    def reset(self):
+        ray.shutdown()
+        ray.init(num_cpus=self.local_cpus)
 
 
 def run_multiprocessing(func: PartialInterface[P, V]) -> V:
