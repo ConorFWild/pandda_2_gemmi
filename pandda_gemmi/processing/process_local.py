@@ -55,7 +55,7 @@ class ProcessLocalRay(ProcessorInterface):
         tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs]
         # print(tasks)
         results = ray.get(tasks)
-        gc.collect()
+        # gc.collect()
         return results
 
     def process_local_ray(self, funcs):
@@ -66,7 +66,8 @@ class ProcessLocalRay(ProcessorInterface):
 
     def process_dict(self, funcs):
         assert ray.is_initialized() == True
-        tasks = [f.func.remote(*f.args, **f.kwargs) for f in funcs.values()]
+        tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs]
+        # print(tasks)
         results = ray.get(tasks)
 
         return {key: result for key, result in zip(funcs, results)}
