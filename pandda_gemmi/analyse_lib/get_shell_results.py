@@ -907,7 +907,8 @@ def get_shell_results_serial(
                     print(f"\t\t\tSubmitting: {test_dtag.dtag}")
                     future_id = (res, test_dtag, model_number)
 
-                    shell_dataset_model_futures[future_id] = Partial(analyse_model_func).paramaterise(
+                    funcs.append(
+                        Partial(analyse_model_func).paramaterise(
                         model,
                         model_number,
                         test_dtag=test_dtag,
@@ -929,6 +930,8 @@ def get_shell_results_serial(
                         rate=0.5,
                         debug=pandda_args.debug
                         )
+                    )
+                    future_ids.append(future_id)
 
                 results = process_local(funcs)
                 for future_id, result in zip(future_ids, results):
@@ -1009,6 +1012,9 @@ def get_shell_results_serial(
 
 
             # dtags = []
+
+            future_ids = []
+            funcs = []
             for dtag in shell.test_dtags:
                 print(f"\t\tAssembling dtag results for dtag: {dtag.dtag}")
                 dtag_model_results = {
@@ -1017,7 +1023,7 @@ def get_shell_results_serial(
                     in model_results.items() if
                     model_id[1] == dtag}
                 dtag_model_result_future_id = (res, dtag)
-                process_dataset = merge_dataset_model_results(
+                process_dataset = Partial(merge_dataset_model_results).paramaterise(
                     dtag,
                     dtag_model_results,
                     shell_models,
@@ -1035,7 +1041,13 @@ def get_shell_results_serial(
 
                 # dtags.append(dtag)
                 # future = process_global.submit(process_dataset)
-                dtag_model_result_futures[dtag_model_result_future_id] = process_dataset
+                future_ids.append(dtag_model_result_future_id)
+                funcs.append(process_dataset)
+
+            results = process_local(funcs)
+
+            for future_id, result in zip(future_ids, results):
+                dtag_model_result_futures[dtag_model_result_future_id] = result
 
             # shell_dtag_results_list = process_local(
             #     dtag_model_result_funcs
