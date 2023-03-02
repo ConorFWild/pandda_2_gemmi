@@ -1,3 +1,4 @@
+import gc
 import time
 
 import numpy
@@ -51,6 +52,7 @@ class ProcessLocalRay(ProcessorInterface):
         tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs]
         # print(tasks)
         results = ray.get(tasks)
+        gc.collect()
         return results
 
     def process_local_ray(self, funcs):
