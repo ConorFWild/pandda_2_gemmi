@@ -355,14 +355,14 @@ def process_pandda(pandda_args: PanDDAArgs, ):
         ###################################################################
         # # Classify Events
         ###################################################################
-        event_classifications = get_event_classifications(
-            pandda_args,
-            console,
-            pandda_log,
-            get_event_class,
-            all_events,
-            autobuild_results,
-        )
+        # event_classifications = get_event_classifications(
+        #     pandda_args,
+        #     console,
+        #     pandda_log,
+        #     get_event_class,
+        #     all_events,
+        #     autobuild_results,
+        # )
 
         ###################################################################
         # # Rank Events
