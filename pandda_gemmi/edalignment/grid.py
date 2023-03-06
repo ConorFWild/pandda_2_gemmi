@@ -458,7 +458,7 @@ class Partitioning(PartitioningInterface):
         all_points_array = np.concatenate(point_arrays, axis=0)
         all_positions_array = np.concatenate(position_arrays, axis=0)
 
-        unique_points, indexes = np.unique(all_points_array)
+        unique_points, indexes = np.unique(all_points_array, axis=0)
         unique_positions = all_positions_array[indexes, :]
 
         return unique_points, unique_positions
@@ -529,8 +529,6 @@ class Partitioning(PartitioningInterface):
         symmetry_mask.set_unit_cell(grid.unit_cell)
         # symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
         # symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
-
-        # Construct the total mask
 
         # Get the grid points and their corresponding positions (NOT wrapped)
         # that are close to the protein
