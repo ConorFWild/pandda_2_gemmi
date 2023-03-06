@@ -932,30 +932,30 @@ class ReferenceGrid(GridInterface):
         self.spacegroup = data[2]
 
 
-def get_grid_from_reference_dep(
-        reference: ReferenceInterface,
-        mask_radius: float,
-        mask_radius_symmetry: float,
-        sample_rate: float = 3.0,
-        debug: Debug = Debug.DEFAULT
-):
-    unit_cell = Grid.unit_cell_from_reference(reference)
-    spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
-
-    grid = gemmi.FloatGrid(*spacing)
-    grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    grid.set_unit_cell(unit_cell)
-    grid.spacegroup = reference.dataset.reflections.spacegroup()
-
-    partitioning = Partitioning.from_reference(
-        reference,
-        grid,
-        mask_radius,
-        mask_radius_symmetry,
-        debug=debug
-    )
-
-    return Grid(grid, partitioning)
+# def get_grid_from_reference_dep(
+#         reference: ReferenceInterface,
+#         mask_radius: float,
+#         mask_radius_symmetry: float,
+#         sample_rate: float = 3.0,
+#         debug: Debug = Debug.DEFAULT
+# ):
+#     unit_cell = Grid.unit_cell_from_reference(reference)
+#     spacing: typing.List[int] = Grid.spacing_from_reference(reference, sample_rate)
+#
+#     grid = gemmi.FloatGrid(*spacing)
+#     grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+#     grid.set_unit_cell(unit_cell)
+#     grid.spacegroup = reference.dataset.reflections.spacegroup()
+#
+#     partitioning = Partitioning.from_reference(
+#         reference,
+#         grid,
+#         mask_radius,
+#         mask_radius_symmetry,
+#         debug=debug
+#     )
+#
+#     return Grid(grid, partitioning)
 
 
 def get_grid_from_reference(
@@ -967,7 +967,7 @@ def get_grid_from_reference(
 ):
     # unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
     step = 0.5
-    offset = 6.0
+    offset = mask_radius
     spacing = ReferenceGrid.spacing_from_reference(reference, step, offset, sample_rate, )
     unit_cell = (
         float(spacing[0] * step),
