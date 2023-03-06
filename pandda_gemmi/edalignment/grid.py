@@ -392,6 +392,8 @@ class Partitioning(PartitioningInterface):
     @staticmethod
     def get_nearby_grid_points(grid, position, radius):
         # Get the fractional position
+        print(f"##########")
+
         fractional = grid.unit_cell.fractionalize(position)
 
 
@@ -421,6 +423,8 @@ class Partitioning(PartitioningInterface):
             )
             ]
         )
+        print(f"Grid point array shape: {grid_point_array.shape}")
+        print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the point positions
         position_array = Partitioning.orthogonalize_fractional_array(
@@ -430,12 +434,16 @@ class Partitioning(PartitioningInterface):
             ),
             grid,
         )
+        print(f"Grid position array shape: {position_array.shape}")
+        print(f"Grid position first element: {position_array[0, :]}")
 
         # Get the distances to the position
         distance_array = np.linalg.norm(
             position_array - np.array([position.x, position.y, position.z]),
             axis=1,
         )
+        print(f"Distance array shape: {distance_array.shape}")
+        print(f"Distance array first element: {distance_array[0]}")
 
         # Mask the points on distances
         points_within_radius = grid_point_array[distance_array < radius]
@@ -447,7 +455,6 @@ class Partitioning(PartitioningInterface):
         point_bounds_min = np.min(points_within_radius, axis=0)
         point_bounds_max = np.max(points_within_radius, axis=0)
 
-        print(f"##########")
         print(f"Original position was: {position.x} {position.y} {position.z}")
         print(f"Orth bounding box min: {orth_bounds_min}")
         print(f"Orth bounding box max: {orth_bounds_max}")
