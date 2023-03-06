@@ -585,7 +585,7 @@ class Partitioning(PartitioningInterface):
 
             # Add point and position to partition
             point_tuple = (int(point_row[0]), int(point_row[1]), int(point_row[2]))
-            partitions[res_id][point_tuple] = gemmi.Position(
+            partitions[res_id][point_tuple] = (
                 float(position_row[0]),
                 float(position_row[1]),
                 float(position_row[2])
