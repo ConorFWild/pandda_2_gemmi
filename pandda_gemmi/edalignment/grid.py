@@ -406,6 +406,8 @@ class Partitioning(PartitioningInterface):
         fractional_min = np.min(fractional_corner_array, axis=0)
         fractional_max = np.max(fractional_corner_array, axis=1)
 
+        print(f"Fractional min: {fractional_min}")
+        print(f"Fractional max: {fractional_max}")
 
         # Find the fractional bounding box
         # x, y, z = fractional.x, fractional.y, fractional.z
@@ -427,6 +429,7 @@ class Partitioning(PartitioningInterface):
         w0 = np.floor(fractional_min[2] * grid.nw)
         w1 = np.ceil(fractional_max[2] * grid.nw)
 
+        print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
         # Get the grid points
         grid_point_array = np.array(
