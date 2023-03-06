@@ -72,7 +72,8 @@ def save_event_map(
         mask_radius,
         partitioning,
         mask_radius_symmetry,
-        sample_rate * 2,  # TODO: remove?
+        # sample_rate * 2,  # TODO: remove?
+        sample_rate,
     )
 
     # # # Get the event bounding box
@@ -381,6 +382,7 @@ class Events:
             model: ModelInterface,
             pandda_fs_model: PanDDAFSModelInterface,
             grid: GridInterface,
+            partitioning,
             structure_factors: StructureFactorsInterface,
             outer_mask: float,
             inner_mask_symmetry: float ,
@@ -421,20 +423,20 @@ class Events:
                 ) == 0:
                     event_dtag_list.append(dtag)
 
-            results = mapper(
-                delayed(
-                    Partitioning.from_structure_multiprocess)(
-                    datasets[dtag].structure,
-                    # grid,
-                    native_grid,
-                    outer_mask,
-                    inner_mask_symmetry,
-                )
-                for dtag
-                in event_dtag_list
-            )
+            # results = mapper(
+            #     delayed(
+            #         Partitioning.from_structure_multiprocess)(
+            #         datasets[dtag].structure,
+            #         # grid,
+            #         native_grid,
+            #         outer_mask,
+            #         inner_mask_symmetry,
+            #     )
+            #     for dtag
+            #     in event_dtag_list
+            # )
 
-            partitioning_dict = {dtag: partitioning for dtag, partitioning in zip(event_dtag_list, results)}
+            # partitioning_dict = {dtag: partitioning for dtag, partitioning in zip(event_dtag_list, results)}
 
             results = mapper(
                 delayed(
@@ -449,7 +451,8 @@ class Events:
                     structure_factors,
                     outer_mask,
                     inner_mask_symmetry,
-                    partitioning_dict[event_id.dtag],
+                    # partitioning_dict[event_id.dtag],
+                    partitioning,
                     sample_rate,
                 )
                 for event_id

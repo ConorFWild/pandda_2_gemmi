@@ -162,6 +162,7 @@ def merge_dataset_model_results(
         selected_model,
         pandda_fs_model,
         grid,
+        partitioning,
         structure_factors,
         outer_mask,
         inner_mask_symmetry,

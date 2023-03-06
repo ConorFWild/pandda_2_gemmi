@@ -97,8 +97,8 @@ def merge_dataset_model_results(
     native_grid = dataset_truncated_datasets[test_dtag].reflections.transform_f_phi_to_map(
         structure_factors.f,
         structure_factors.phi,
-        # sample_rate=sample_rate,  # TODO: make this d_min/0.5?
-        sample_rate=dataset_truncated_datasets[test_dtag].reflections.get_resolution() / 0.5
+        sample_rate=sample_rate,  # TODO: make this d_min/0.5?
+        # sample_rate=dataset_truncated_datasets[test_dtag].reflections.get_resolution() / 0.5
     )
 
     partitioning = Partitioning.from_structure_multiprocess(
@@ -173,6 +173,7 @@ def merge_dataset_model_results(
         selected_model,
         pandda_fs_model,
         grid,
+        partitioning,
         structure_factors,
         outer_mask,
         inner_mask_symmetry,

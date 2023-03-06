@@ -443,8 +443,8 @@ class Xmap(XmapInterface):
         moving_xmap_grid: gemmi.FloatGrid = dataset.reflections.transform_f_phi_to_map(
             structure_factors.f,
             structure_factors.phi,
-            # sample_rate=sample_rate,
-            sample_rate=dataset.reflections.get_resolution() / 0.5,
+            sample_rate=sample_rate,
+            # sample_rate=dataset.reflections.get_resolution() / 0.5,
         )
 
         new_grid = gemmi.FloatGrid(*[moving_xmap_grid.nu,
@@ -716,8 +716,8 @@ def from_unaligned_dataset_c(dataset: DatasetInterface,
                                          alignment,
                                          grid,
                                          structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.get_resolution() / 0.5
+                                         sample_rate,
+                                         # dataset.reflections.get_resolution() / 0.5
                                          )
 
     return xmap
@@ -757,8 +757,8 @@ def from_unaligned_dataset_c_flat(dataset: DatasetInterface,
                                          alignment,
                                          grid,
                                          structure_factors,
-                                         # sample_rate,
-                                         dataset.reflections.get_resolution() / 0.5
+                                         sample_rate,
+                                         # dataset.reflections.get_resolution() / 0.5
                                          )
 
     xmap_array = xmap.to_array()

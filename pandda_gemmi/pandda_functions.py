@@ -2060,7 +2060,8 @@ def save_native_frame_zmap(
         mask_radius,
         partitioning,
         mask_radius_symmetry,
-        sample_rate * 2,  # TODO: delete 2
+        # sample_rate * 2,  # TODO: delete 2
+        sample_rate
     )
 
     ccp4 = gemmi.Ccp4Map()
