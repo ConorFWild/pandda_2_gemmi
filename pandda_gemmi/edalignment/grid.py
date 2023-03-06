@@ -242,6 +242,227 @@ class Partitioning(PartitioningInterface):
                                            mask_radius,
                                            mask_radius_symmetry, )
 
+    # @staticmethod
+    # def from_structure(structure: StructureInterface,
+    #                    grid: CrystallographicGridInterface,
+    #                    mask_radius: float,
+    #                    mask_radius_symmetry: float,
+    #                    debug: Debug = Debug.DEFAULT,
+    #                    ):
+    #     poss = []
+    #     res_indexes = {}
+    #
+    #     for i, res_id in enumerate(structure.protein_residue_ids()):
+    #         res_span = structure[res_id]
+    #         res = res_span[0]
+    #         ca = res["CA"][0]
+    #         orthogonal = ca.pos
+    #         poss.append(orthogonal)
+    #         res_indexes[i] = res_id
+    #
+    #     ca_position_array = np.array([[x for x in pos] for pos in poss])
+    #
+    #     kdtree = spatial.KDTree(ca_position_array)
+    #
+    #     mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+    #     mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    #     mask.set_unit_cell(grid.unit_cell)
+    #     for atom in structure.protein_atoms():
+    #         pos = atom.pos
+    #         mask.set_points_around(pos,
+    #                                radius=mask_radius,
+    #                                value=1,
+    #                                )
+    #     mask_array = np.array(mask, copy=False, dtype=np.int8)
+    #
+    #     # Get the inner mask
+    #     inner_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+    #     inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    #     inner_mask.set_unit_cell(grid.unit_cell)
+    #     for atom in structure.protein_atoms():
+    #         pos = atom.pos
+    #         inner_mask.set_points_around(pos,
+    #                                      radius=mask_radius_symmetry,
+    #                                      value=1,
+    #                                      )
+    #     # mask_array = np.array(mask, copy=False, dtype=np.int8)
+    #
+    #     # Get the contact mask
+    #     contact_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+    #     contact_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    #     contact_mask.set_unit_cell(grid.unit_cell)
+    #     for atom in structure.protein_atoms():
+    #         pos = atom.pos
+    #         contact_mask.set_points_around(pos,
+    #                                        radius=4.0,
+    #                                        value=1,
+    #                                        )
+    #     # mask_array = np.array(mask, copy=False, dtype=np.int8)
+    #
+    #     # Mask the symmetry points
+    #     symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
+    #     symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
+    #
+    #     coord_tuple_source, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
+    #         mask,
+    #         ca_position_array,
+    #         structure,
+    #         mask_radius,
+    #         debug=debug,
+    #     )
+    #
+    #     # Mask by protein
+    #     protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
+    #
+    #     # Mask by symmetry
+    #     symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
+    #
+    #     # Combine masks
+    #     combined_indicies = np.zeros(symmetry_mask_indicies.shape)
+    #     combined_indicies[protein_mask_indicies == 1] = 1
+    #     combined_indicies[symmetry_mask_indicies == 1] = 0
+    #
+    #     # Resample coords
+    #     coord_tuple = (coord_tuple_source[0][combined_indicies == 1],
+    #                    coord_tuple_source[1][combined_indicies == 1],
+    #                    coord_tuple_source[2][combined_indicies == 1],
+    #                    )
+    #
+    #     #
+    #     coord_array = np.concatenate(
+    #         [
+    #             coord_tuple[0].reshape((-1, 1)),
+    #             coord_tuple[1].reshape((-1, 1)),
+    #             coord_tuple[2].reshape((-1, 1)),
+    #         ],
+    #         axis=1,
+    #     )
+    #
+    #     # Get positions
+    #     position_list = Partitioning.get_position_list(mask, coord_array)
+    #     position_array = np.array(position_list)
+    #
+    #     distances, indexes = kdtree.query(position_array)
+    #
+    #     # Get the partitions
+    #     partitions = {}
+    #     for i, coord_as_array in enumerate(coord_array):
+    #         coord = (int(coord_as_array[0]),
+    #                  int(coord_as_array[1]),
+    #                  int(coord_as_array[2]),
+    #                  )
+    #         position = position_list[i]
+    #
+    #         res_num = indexes[i]
+    #
+    #         res_id = res_indexes[res_num]
+    #         if res_id not in partitions:
+    #             partitions[res_id] = {}
+    #
+    #         # partitions[res_id][coord] = gemmi.Position(*position)
+    #
+    #         coord_unit_cell = (int(coord_array_unit_cell_in_mask[0][i]),
+    #                            int(coord_array_unit_cell_in_mask[1][i]),
+    #                            int(coord_array_unit_cell_in_mask[2][i]),
+    #                            )
+    #         partitions[res_id][coord] = position
+    #
+    #     total_mask = np.zeros(mask_array.shape, dtype=np.int8)
+    #     total_mask[
+    #         coord_array_unit_cell_in_mask[0][combined_indicies == 1],
+    #         coord_array_unit_cell_in_mask[1][combined_indicies == 1],
+    #         coord_array_unit_cell_in_mask[2][combined_indicies == 1],
+    #     ] = 1
+    #
+    #     return Partitioning(partitions, mask,
+    #                         inner_mask,
+    #                         contact_mask,
+    #                         symmetry_mask, total_mask)
+    @staticmethod
+    def fractionalize_grid_point_array(grid_point_array, grid):
+        return grid_point_array * np.array([grid.nu, grid.nv, grid.nw])
+
+    @staticmethod
+    def orthogonalize_fractional_array(fractional_array, grid):
+        orthogonalization_matrix = np.array(grid.orth.mat.tolist())
+        orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
+
+        return orthogonal_array
+
+    @staticmethod
+    def get_nearby_grid_points(grid, position, radius):
+        # Get the fractional position
+        fractional = grid.fractionalize(position)
+
+        # Find the fractional bounding box
+        x, y, z = fractional.x, fractional.y, fractional.z
+        dx = radius / grid.nu
+        dy = radius / grid.nv
+        dz = radius / grid.nw
+
+        # Find the grid bounding box
+        u0 = np.floor((x - dx) * grid.nu)
+        u1 = np.ceil((x + dx) * grid.nu)
+        v0 = np.floor((y - dy) * grid.nv)
+        v1 = np.ceil((y + dy) * grid.nv)
+        w0 = np.floor((z - dz) * grid.nw)
+        w1 = np.ceil((z + dz) * grid.nw)
+
+        # Get the grid points
+        grid_point_array = np.array(
+            [
+                xyz_tuple
+                for xyz_tuple
+                in itertools.product(
+                np.arange(u0, u1 + 1),
+                np.arange(v0, v1 + 1),
+                np.arange(w0, w1 + 1),
+            )
+            ]
+        )
+
+        # Get the point positions
+        position_array = Partitioning.orthogonalize_fractional_array(
+            Partitioning.fractionalize_grid_point_array(
+                grid_point_array,
+                grid,
+            ),
+            grid,
+        )
+
+        # Get the distances to the position
+        distance_array = np.linalg.norm(
+            position_array - np.array([position.x, position.y, position.z]),
+            axis=1,
+        )
+
+        # Mask the points on distances
+        points_within_radius = grid_point_array[distance_array < radius]
+        positions_within_radius = position_array[distance_array < radius]
+
+        return points_within_radius, positions_within_radius
+
+    @staticmethod
+    def get_grid_points_around_protein(st, grid, radius):
+        point_arrays = []
+        position_arrays = []
+        for atom in st.protein_atoms():
+            point_array, position_array = Partitioning.get_nearby_grid_points(
+                grid,
+                atom.pos,
+                radius
+            )
+            point_arrays.append(point_array)
+            position_arrays.append(position_array)
+
+        all_points_array = np.concatenate(point_arrays, axis=0)
+        all_positions_array = np.concatenate(position_arrays, axis=0)
+
+        unique_points, indexes = np.unique(all_points_array)
+        unique_positions = all_positions_array[indexes, :]
+
+        return unique_points, unique_positions
+
     @staticmethod
     def from_structure(structure: StructureInterface,
                        grid: CrystallographicGridInterface,
@@ -252,6 +473,8 @@ class Partitioning(PartitioningInterface):
         poss = []
         res_indexes = {}
 
+        # Build a kdtree of the CA's that will be used to determine which
+        # Grid points are within the vornoi cell around each CA
         for i, res_id in enumerate(structure.protein_residue_ids()):
             res_span = structure[res_id]
             res = res_span[0]
@@ -264,6 +487,7 @@ class Partitioning(PartitioningInterface):
 
         kdtree = spatial.KDTree(ca_position_array)
 
+        # Determine the outer mask grid
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         mask.set_unit_cell(grid.unit_cell)
@@ -291,93 +515,67 @@ class Partitioning(PartitioningInterface):
         contact_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         contact_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         contact_mask.set_unit_cell(grid.unit_cell)
-        for atom in structure.protein_atoms():
-            pos = atom.pos
-            contact_mask.set_points_around(pos,
-                                           radius=4.0,
-                                           value=1,
-                                           )
+        # for atom in structure.protein_atoms():
+        #     pos = atom.pos
+        #     contact_mask.set_points_around(pos,
+        #                                    radius=4.0,
+        #                                    value=1,
+        #                                    )
         # mask_array = np.array(mask, copy=False, dtype=np.int8)
 
         # Mask the symmetry points
-        symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
-        symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
+        symmetry_mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        symmetry_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        symmetry_mask.set_unit_cell(grid.unit_cell)
+        # symmetry_mask = Partitioning.get_symmetry_contact_mask(structure, grid, mask, mask_radius_symmetry)
+        # symmetry_mask_array = np.array(symmetry_mask, copy=False, dtype=np.int8)
 
-        coord_tuple_source, coord_array_unit_cell_in_mask = Partitioning.get_coord_tuple(
-            mask,
-            ca_position_array,
+        # Construct the total mask
+
+        # Get the grid points and their corresponding positions (NOT wrapped)
+        # that are close to the protein
+        point_array, position_array = Partitioning.get_grid_points_around_protein(
             structure,
-            mask_radius,
-            debug=debug,
+            mask,
+            mask_radius
         )
 
-        # Mask by protein
-        protein_mask_indicies = mask_array[coord_array_unit_cell_in_mask]
-
-        # Mask by symmetry
-        symmetry_mask_indicies = symmetry_mask_array[coord_array_unit_cell_in_mask]
-
-        # Combine masks
-        combined_indicies = np.zeros(symmetry_mask_indicies.shape)
-        combined_indicies[protein_mask_indicies == 1] = 1
-        combined_indicies[symmetry_mask_indicies == 1] = 0
-
-        # Resample coords
-        coord_tuple = (coord_tuple_source[0][combined_indicies == 1],
-                       coord_tuple_source[1][combined_indicies == 1],
-                       coord_tuple_source[2][combined_indicies == 1],
-                       )
-
-        #
-        coord_array = np.concatenate(
-            [
-                coord_tuple[0].reshape((-1, 1)),
-                coord_tuple[1].reshape((-1, 1)),
-                coord_tuple[2].reshape((-1, 1)),
-            ],
-            axis=1,
-        )
-
-        # Get positions
-        position_list = Partitioning.get_position_list(mask, coord_array)
-        position_array = np.array(position_list)
-
+        # Query the position array using the kdtree to construct voronoi cells of positions
         distances, indexes = kdtree.query(position_array)
 
-        # Get the partitions
+        # Construct the partitions
         partitions = {}
-        for i, coord_as_array in enumerate(coord_array):
-            coord = (int(coord_as_array[0]),
-                     int(coord_as_array[1]),
-                     int(coord_as_array[2]),
-                     )
-            position = position_list[i]
+        for index in range(point_array.shape[0]):
+            point_row = point_array[index, :]
+            position_row = position_array[index, :]
+            closest_ca_index = indexes[index]
 
-            res_num = indexes[i]
+            # Get the name of the residue associated with the ca
+            res_id = res_indexes[closest_ca_index]
 
-            res_id = res_indexes[res_num]
+            # Begin partition if not already began
             if res_id not in partitions:
                 partitions[res_id] = {}
 
-            # partitions[res_id][coord] = gemmi.Position(*position)
-
-            coord_unit_cell = (int(coord_array_unit_cell_in_mask[0][i]),
-                               int(coord_array_unit_cell_in_mask[1][i]),
-                               int(coord_array_unit_cell_in_mask[2][i]),
-                               )
-            partitions[res_id][coord] = position
+            # Add point and position to partition
+            point_tuple = (int(point_row[0]), int(point_row[1]), int(point_row[2]))
+            partitions[res_id][point_tuple] = gemmi.Position(
+                float(position_row[0]),
+                float(position_row[1]),
+                float(position_row[2])
+            )
 
         total_mask = np.zeros(mask_array.shape, dtype=np.int8)
-        total_mask[
-            coord_array_unit_cell_in_mask[0][combined_indicies == 1],
-            coord_array_unit_cell_in_mask[1][combined_indicies == 1],
-            coord_array_unit_cell_in_mask[2][combined_indicies == 1],
-        ] = 1
+        total_mask[:, :, :] = mask_array[:, :, :]
 
-        return Partitioning(partitions, mask,
-                            inner_mask,
-                            contact_mask,
-                            symmetry_mask, total_mask)
+        return Partitioning(
+            partitions,
+            mask,
+            inner_mask,
+            contact_mask,
+            symmetry_mask,
+            total_mask,
+        )
 
     def coord_tuple(self):
 
@@ -620,6 +818,7 @@ class Grid(GridInterface):
                                          )
         self.grid = data[0].to_gemmi()
 
+
 @dataclasses.dataclass()
 class ReferenceGrid(GridInterface):
     spacing: Tuple[int, int, int]
@@ -695,12 +894,12 @@ class ReferenceGrid(GridInterface):
     def __setstate__(self, data):
         self.partitioning = Partitioning(
             data[3][0],
-                                         data[3][1].to_gemmi(),
-                                         data[3][2].to_gemmi(),
-                                         data[3][3].to_gemmi(),
-                                         data[3][4].to_gemmi(),
-                                         data[3][5]
-                                         )
+            data[3][1].to_gemmi(),
+            data[3][2].to_gemmi(),
+            data[3][3].to_gemmi(),
+            data[3][4].to_gemmi(),
+            data[3][5]
+        )
         # self.grid = data[0].to_gemmi()
         self.spacing = data[0]
         self.unit_cell = data[1]
@@ -732,6 +931,7 @@ def get_grid_from_reference_dep(
 
     return Grid(grid, partitioning)
 
+
 def get_grid_from_reference(
         reference: ReferenceInterface,
         mask_radius: float,
@@ -742,11 +942,11 @@ def get_grid_from_reference(
     # unit_cell = ReferenceGrid.unit_cell_from_reference(reference)
     step = 0.5
     offset = 6.0
-    spacing = ReferenceGrid.spacing_from_reference(reference, step, offset, sample_rate,)
+    spacing = ReferenceGrid.spacing_from_reference(reference, step, offset, sample_rate, )
     unit_cell = (
-        float(spacing[0]*step),
-        float(spacing[1]*step),
-        float(spacing[2]*step),
+        float(spacing[0] * step),
+        float(spacing[1] * step),
+        float(spacing[2] * step),
         float(90),
         float(90),
         float(90)
