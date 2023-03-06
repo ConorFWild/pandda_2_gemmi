@@ -481,7 +481,7 @@ class Partitioning(PartitioningInterface):
         all_points_array = np.concatenate(point_arrays, axis=0)
         all_positions_array = np.concatenate(position_arrays, axis=0)
 
-        unique_points, indexes = np.unique(all_points_array, axis=0)
+        unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
         unique_positions = all_positions_array[indexes, :]
 
         return unique_points, unique_positions
