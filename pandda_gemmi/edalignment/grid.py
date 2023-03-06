@@ -384,7 +384,7 @@ class Partitioning(PartitioningInterface):
 
     @staticmethod
     def orthogonalize_fractional_array(fractional_array, grid):
-        orthogonalization_matrix = np.array(grid.orth.mat.tolist())
+        orthogonalization_matrix = np.array(grid.unit_cell.orth.mat.tolist())
         orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
 
         return orthogonal_array
