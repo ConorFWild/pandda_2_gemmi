@@ -394,22 +394,39 @@ class Partitioning(PartitioningInterface):
         # Get the fractional position
         print(f"##########")
 
-        fractional = grid.unit_cell.fractionalize(position)
+        x, y, z = position.x, position.y, position.z
+
+        corners = []
+        for dx, dy, dz in itertools.product([[-radius, + radius], [-radius, + radius], [-radius, + radius]]):
+            corner = gemmi.Position(x+dx, y+dy, z+dz)
+            corner_fractional = grid.unit_cell.fractionalize(corner)
+            corners.append([corner_fractional.x, corner_fractional.y, corner_fractional.z])
+
+        fractional_corner_array = np.array(corners)
+        fractional_min = np.min(fractional_corner_array, axis=0)
+        fractional_max = np.max(fractional_corner_array, axis=1)
 
 
         # Find the fractional bounding box
-        x, y, z = fractional.x, fractional.y, fractional.z
-        dx = radius / grid.nu
-        dy = radius / grid.nv
-        dz = radius / grid.nw
+        # x, y, z = fractional.x, fractional.y, fractional.z
+        # dx = radius / grid.nu
+        # dy = radius / grid.nv
+        # dz = radius / grid.nw
+        #
+        # # Find the grid bounding box
+        # u0 = np.floor((x - dx) * grid.nu)
+        # u1 = np.ceil((x + dx) * grid.nu)
+        # v0 = np.floor((y - dy) * grid.nv)
+        # v1 = np.ceil((y + dy) * grid.nv)
+        # w0 = np.floor((z - dz) * grid.nw)
+        # w1 = np.ceil((z + dz) * grid.nw)
+        u0 = np.floor(fractional_min[0] * grid.nu)
+        u1 = np.ceil(fractional_max[0] * grid.nu)
+        v0 = np.floor(fractional_min[1] * grid.nv)
+        v1 = np.ceil(fractional_max[1] * grid.nv)
+        w0 = np.floor(fractional_min[2] * grid.nw)
+        w1 = np.ceil(fractional_max[2] * grid.nw)
 
-        # Find the grid bounding box
-        u0 = np.floor((x - dx) * grid.nu)
-        u1 = np.ceil((x + dx) * grid.nu)
-        v0 = np.floor((y - dy) * grid.nv)
-        v1 = np.ceil((y + dy) * grid.nv)
-        w0 = np.floor((z - dz) * grid.nw)
-        w1 = np.ceil((z + dz) * grid.nw)
 
         # Get the grid points
         grid_point_array = np.array(
@@ -448,6 +465,7 @@ class Partitioning(PartitioningInterface):
         # Mask the points on distances
         points_within_radius = grid_point_array[distance_array < radius]
         positions_within_radius = position_array[distance_array < radius]
+        print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
 
         # Bounding box orth
         orth_bounds_min = np.min(positions_within_radius, axis=0)
