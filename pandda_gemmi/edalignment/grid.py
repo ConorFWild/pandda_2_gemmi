@@ -483,6 +483,8 @@ class Partitioning(PartitioningInterface):
 
         unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
         unique_positions = all_positions_array[indexes, :]
+        print(f"Unique points shape: {unique_points.shape}")
+        print(f"Unique positions shape: {unique_positions.shape}")
 
         return unique_points, unique_positions
 
