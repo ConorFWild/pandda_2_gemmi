@@ -404,7 +404,7 @@ class Partitioning(PartitioningInterface):
 
         fractional_corner_array = np.array(corners)
         fractional_min = np.min(fractional_corner_array, axis=0)
-        fractional_max = np.max(fractional_corner_array, axis=1)
+        fractional_max = np.max(fractional_corner_array, axis=0)
 
         print(f"Fractional min: {fractional_min}")
         print(f"Fractional max: {fractional_max}")
