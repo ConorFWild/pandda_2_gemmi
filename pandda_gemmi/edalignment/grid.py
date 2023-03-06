@@ -380,7 +380,7 @@ class Partitioning(PartitioningInterface):
     #                         symmetry_mask, total_mask)
     @staticmethod
     def fractionalize_grid_point_array(grid_point_array, grid):
-        return grid_point_array * np.array([grid.nu, grid.nv, grid.nw])
+        return grid_point_array / np.array([grid.nu, grid.nv, grid.nw])
 
     @staticmethod
     def orthogonalize_fractional_array(fractional_array, grid):
