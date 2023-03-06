@@ -440,6 +440,21 @@ class Partitioning(PartitioningInterface):
         points_within_radius = grid_point_array[distance_array < radius]
         positions_within_radius = position_array[distance_array < radius]
 
+        # Bounding box orth
+        orth_bounds_min = np.min(positions_within_radius, axis=0)
+        orth_bounds_max = np.max(positions_within_radius, axis=0)
+        point_bounds_min = np.min(points_within_radius, axis=0)
+        point_bounds_max = np.max(points_within_radius, axis=0)
+
+        print(f"##########")
+        print(f"Original position was: {position.x} {position.y} {position.z}")
+        print(f"Orth bounding box min: {orth_bounds_min}")
+        print(f"Orth bounding box max: {orth_bounds_max}")
+        print(f"Point bounding box min: {point_bounds_min}")
+        print(f"Point bounding box max: {point_bounds_max}")
+        print(f"First point pos pair: {positions_within_radius[0,:]} {positions_within_radius[0,:]}")
+        print(f"Last point pos pair: {positions_within_radius[-1,:]} {positions_within_radius[-1,:]}")
+
         return points_within_radius, positions_within_radius
 
     @staticmethod
