@@ -392,7 +392,7 @@ class Partitioning(PartitioningInterface):
     @staticmethod
     def get_nearby_grid_points(grid, position, radius):
         # Get the fractional position
-        fractional = grid.fractionalize(position)
+        fractional = grid.unit_cell.fractionalize(position)
 
         # Find the fractional bounding box
         x, y, z = fractional.x, fractional.y, fractional.z
