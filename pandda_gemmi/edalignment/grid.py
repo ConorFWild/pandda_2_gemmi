@@ -397,7 +397,7 @@ class Partitioning(PartitioningInterface):
         x, y, z = position.x, position.y, position.z
 
         corners = []
-        for dx, dy, dz in itertools.product([[-radius, + radius], [-radius, + radius], [-radius, + radius]]):
+        for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
             corner = gemmi.Position(x+dx, y+dy, z+dz)
             corner_fractional = grid.unit_cell.fractionalize(corner)
             corners.append([corner_fractional.x, corner_fractional.y, corner_fractional.z])
