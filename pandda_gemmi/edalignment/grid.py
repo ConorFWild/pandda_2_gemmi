@@ -394,6 +394,7 @@ class Partitioning(PartitioningInterface):
         # Get the fractional position
         fractional = grid.unit_cell.fractionalize(position)
 
+
         # Find the fractional bounding box
         x, y, z = fractional.x, fractional.y, fractional.z
         dx = radius / grid.nu
