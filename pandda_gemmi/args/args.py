@@ -46,7 +46,7 @@ class PanDDAArgs:
     grid_spacing: float = 0.5
     padding: float = 3.0
     density_scaling: bool = True
-    outer_mask: float = 8.0
+    outer_mask: float = constants.ARGS_OUTER_MASK_DEFAULT
     inner_mask: float = 2.0
     inner_mask_symmetry: float = 2.0
     contour_level: float = 2.5
@@ -493,7 +493,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_OUTER_MASK,
             type=float,
-            default=8.0,
+            default=constants.ARGS_OUTER_MASK_DEFAULT,
             help=constants.ARGS_OUTER_MASK_HELP,
         )
         parser.add_argument(

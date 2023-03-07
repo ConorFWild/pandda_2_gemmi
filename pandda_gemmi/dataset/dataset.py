@@ -777,7 +777,9 @@ def transform_structure_to_unit_cell(
 
 def get_reference_from_datasets(
     datasets: DatasetsInterface, 
-    dataset_statistics: DatasetsStatisticsInterface) -> ReferenceInterface:
+    dataset_statistics: DatasetsStatisticsInterface,
+        mask_radius
+) -> ReferenceInterface:
         # Reference.assert_from_datasets(datasets)
 
         unique_spacegroups, counts = np.unique(
@@ -816,7 +818,7 @@ def get_reference_from_datasets(
         new_structure = transform_structure_to_unit_cell(
             reference_dataset.structure,
             step=0.5,
-            offset=6.0
+            offset=mask_radius
         )
 
         #
@@ -834,8 +836,9 @@ class GetReferenceDataset(GetReferenceDatasetInterface):
     def __call__(self, 
     datasets: DatasetsInterface, 
     dataset_statistics: DatasetsStatisticsInterface,
+                 mask_radius: float
     ) -> ReferenceInterface:
-        return get_reference_from_datasets(datasets, dataset_statistics)
+        return get_reference_from_datasets(datasets, dataset_statistics, mask_radius)
     
 
 @dataclasses.dataclass()

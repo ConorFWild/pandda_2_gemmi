@@ -237,8 +237,11 @@ ARGS_PADDING = "--padding"
 ARGS_PADDING_HELP = "DEPRECATED"
 ARGS_DENSITY_SCALING = "--density_scaling"
 ARGS_DENSITY_SCALING_HELP = "DEPRECATED"
+
 ARGS_OUTER_MASK = "--outer_mask"
 ARGS_OUTER_MASK_HELP = "The radius around the protein to consider for analysis."
+ARGS_OUTER_MASK_DEFAULT = 6.0
+
 ARGS_INNER_MASK = "--inner_mask"
 ARGS_INNER_MASK_HELP = "The radius around the protein to consider as protein density."
 ARGS_INNER_MASK_SYMMETRY = "--inner_mask_symmetry"

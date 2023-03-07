@@ -16,6 +16,7 @@ def get_reference(pandda_args,
         reference: ReferenceInterface = GetReferenceDataset()(
             datasets_wilson,
             datasets_statistics,
+            pandda_args.outer_mask
         )
         pandda_log["Reference Dtag"] = str(reference.dtag)
         console.summarise_reference(reference)
