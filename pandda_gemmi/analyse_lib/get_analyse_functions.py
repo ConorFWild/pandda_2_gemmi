@@ -351,6 +351,15 @@ def get_autobuild_func(pandda_args, ):
 def event_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface, threshold: float = 0.8):
     return {event_id: event for event_id, event in events.items() if event_scores[event_id] > threshold}
 
+def event_criteria_all(events: EventsInterface, event_scores: EventScoresInterface):
+    return {event_id: event for event_id, event in events.items()}
+
+def get_event_criteria(pandda_args):
+    if pandda_args.event_score == "cnn":
+        return event_criteria_high_scoring
+    else:
+        return event_criteria_all
+
 
 def autobuild_criteria_high_scoring(events: EventsInterface, event_scores: EventScoresInterface,
                                     threshold: float = 0.8):

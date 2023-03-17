@@ -746,6 +746,7 @@ def get_shell_results_serial(
         load_xmap_func,
         analyse_model_func,
         score_events_func,
+event_criteria,
         shells: ShellsInterface,
         structure_factors,
         datasets: DatasetsInterface,
@@ -916,6 +917,7 @@ def get_shell_results_serial(
                         min_blob_z_peak=pandda_args.min_blob_z_peak,
                         output_dir=pandda_fs_model.processed_datasets.processed_datasets[test_dtag].path,
                         score_events_func=score_events_func,
+                        event_criteria=event_criteria,
                         res=shell.res,
                         rate=0.5,
                         debug=pandda_args.debug

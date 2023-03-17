@@ -82,7 +82,9 @@ def analyse_model(
         min_blob_z_peak,
         output_dir,
         score_events_func: GetEventScoreInterface,
-        res, rate,
+        event_criteria,
+        res,
+        rate,
         debug: Debug = Debug.DEFAULT
 ) -> ModelResultInterface:
     if debug >= Debug.PRINT_SUMMARIES:
@@ -380,6 +382,15 @@ def analyse_model(
     model_log['score'] = {}
     model_log['noise'] = {}
 
+    # Filter the events
+    events_filtered = event_criteria(events, event_scores)
+    event_scores_filtered = {
+        event_id: event_score_result
+        for event_id, event_score_result
+        in event_scores.items()
+        if event_id in events_filtered
+    }
+
     for event_id, event_scoring_result in event_scores.items():
         model_log['score'][int(event_id.event_idx)] = event_scoring_result.get_selected_structure_score()
         model_log[int(event_id.event_idx)] = event_scoring_result.log()
@@ -396,8 +407,10 @@ def analyse_model(
         clusterings_large,
         clusterings_peaked,
         clusterings_merged,
-        {event_id: event for event_id, event in events.events.items()},
-        event_scores,
+        events_filtered,
+        event_scores_filtered,
+        # {event_id: event for event_id, event in events.events.items()},
+        # event_scores,
         model_log
     )
 

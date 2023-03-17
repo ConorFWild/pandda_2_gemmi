@@ -46,7 +46,8 @@ get_shell_results_serial,
     handle_exception,
 generate_fragment_bound_structures,
 get_autobuild_criterion,
-get_autobuild_merge_criterion
+get_autobuild_merge_criterion,
+get_event_criteria
 )
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.smiles import GetDatasetSmiles
@@ -139,6 +140,9 @@ def process_pandda(pandda_args: PanDDAArgs, ):
 
     # Get the event scoring func
     score_events_func: GetEventScoreInterface = get_score_events_func(pandda_args)
+
+    # Get the event criteria
+    event_criteria = get_event_criteria(pandda_args)
 
     # Set up autobuilding function
     autobuild_func: Optional[GetAutobuildResultInterface] = get_autobuild_func(pandda_args)
@@ -288,6 +292,7 @@ def process_pandda(pandda_args: PanDDAArgs, ):
                 load_xmap_func,
                 analyse_model_func,
                 score_events_func,
+                event_criteria,
                 shells,
                 structure_factors,
                 datasets,
