@@ -383,7 +383,7 @@ def analyse_model(
     model_log['noise'] = {}
 
     # Filter the events
-    events_filtered = event_criteria(events, event_scores)
+    events_filtered = event_criteria(events.events, event_scores)
     event_scores_filtered = {
         event_id: event_score_result
         for event_id, event_score_result
