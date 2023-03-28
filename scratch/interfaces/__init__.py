@@ -1,9 +1,18 @@
 from typing import *
 from typing_extensions import ParamSpec, Concatenate, Self
+from pathlib import Path
+
+class LigandFilesInterface(Protocol):
+    ligand_cif: Path
+    ligand_smiles : Path
+    ligand_pdb : Path
 
 
 class DatasetDirInterface(Protocol):
     dtag: str
+    input_pdb_file: Path
+    input_mtz_file: Path
+    ligand_files: Dict[str, LigandFilesInterface]
 
 
 class PanDDAInputInterface(Protocol):
@@ -35,6 +44,9 @@ class ResolutionInterface(Protocol):
 
 
 class ReflectionsInterface(Protocol):
+    path: Path
+    reflections: Any
+
     def get_resolution(self) -> float:
         ...
 

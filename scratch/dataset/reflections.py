@@ -4,6 +4,9 @@ import dataclasses
 import numpy as np
 import gemmi
 
+from pathlib import Path
+
+from ..interfaces import *
 
 @dataclasses.dataclass()
 class SpacegroupPython:
@@ -135,7 +138,11 @@ class MtzPython:
         return mtz
 
 
-class Reflections:
-    def __init__(self, path):
+class Reflections(ReflectionsInterface):
+    def __init__(self, path: Path, reflections):
         self.path = path
-        self.reflections = gemmi.read_mtz_file(str(path))
+        self.reflections = reflections
+
+    @classmethod
+    def from_path(cls, path: Path):
+        return cls(path, gemmi.read_mtz_file(str(path)))

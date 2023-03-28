@@ -25,7 +25,7 @@ def get_input_mtz_file(path, mtz_regex):
 class LigandFiles:
     def __init__(self, ligand_cif, ligand_smiles, ligand_pdb):
         self.ligand_cif = ligand_cif
-        self.ligand_smiles = ligand_smile
+        self.ligand_smiles = ligand_smiles
         self.ligand_pdb = ligand_pdb
 
 
