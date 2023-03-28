@@ -350,7 +350,7 @@ def get_autobuild_func(pandda_args, ):
 
 def event_criteria_high_scoring(events: EventsInterface, event_scores: EventScoringResultsInterface,
                                 # threshold: float = 0.1,
-threshold: float = 0.0,
+                                threshold: float = 0.0,
                                 ):
     return {event_id: event for event_id, event in events.items() if event_scores[event_id].get_selected_structure_score() > threshold}
 
