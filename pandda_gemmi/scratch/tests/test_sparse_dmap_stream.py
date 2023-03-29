@@ -48,7 +48,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Got reference frame")
 
     # Get the dmaps
-    print(f"##### Loading sparse dmaps #####")
+    print(f"##### Getting sparse dmap loader #####")
     dmaps: SparseDMapStream = SparseDMapStream(
         datasets,
         reference_frame,

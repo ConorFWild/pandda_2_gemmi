@@ -64,13 +64,15 @@ class GridMask:
 
 
 def get_grid_from_dataset(dataset: DatasetInterface):
-    ...
+    return dataset.reflections.transform_f_phi_to_map()
 
 
 class DFrame:
     def __init__(self, dataset: DatasetInterface, ):
-        # Get the grid parameters
+        # Get the grid
         grid = get_grid_from_dataset(dataset)
+
+        # Get the grid parameters
         uc = grid.unit_cell
         self.unit_cell = (uc.a, uc.b, uc.c, uc.alpha, uc.beta, uc.gamma)
         self.spacegroup = gemmi.find_spacegroup_by_name("P 1").number

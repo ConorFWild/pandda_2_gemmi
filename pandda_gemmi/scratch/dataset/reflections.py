@@ -7,7 +7,7 @@ import gemmi
 from pathlib import Path
 
 from ..interfaces import *
-
+from .. import constants
 
 @dataclasses.dataclass()
 class SpacegroupPython:
@@ -141,10 +141,28 @@ class MtzPython:
 
 
 class Reflections(ReflectionsInterface):
-    def __init__(self, path: Path, reflections):
+    def __init__(self, path: Path, f: str, phi: str, reflections):
         self.path = path
         self.reflections = reflections
 
     @classmethod
     def from_path(cls, path: Path):
-        return cls(path, gemmi.read_mtz_file(str(path)))
+        reflections = gemmi.read_mtz_file(str(path))
+        f, phi = cls.get_structure_factors(reflections)
+        return cls(path, f, phi, reflections)
+
+    @classmethod
+    def get_structure_factors(cls, reflections):
+        column_labels = reflections.columns()
+        for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
+
+            f_label = common_f_phi_label_pair[0]
+            phi_label = common_f_phi_label_pair[1]
+            if f_label in column_labels:
+                if phi_label in column_labels:
+                    return f_label, phi_label
+
+        return None, None
+
+
+    def transform_f_phi_to_map(self, sample_rate:float=3.0):
