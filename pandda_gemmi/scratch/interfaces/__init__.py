@@ -9,10 +9,11 @@ class LigandFilesInterface(Protocol):
 
 
 class DatasetDirInterface(Protocol):
+
     dtag: str
     input_pdb_file: Path
     input_mtz_file: Path
-    ligand_files: Dict[str, LigandFilesInterface]
+    input_ligands: Dict[str, LigandFilesInterface]
 
 
 class PanDDAInputInterface(Protocol):

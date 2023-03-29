@@ -22,7 +22,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         dataset_dir.dtag: XRayDataset(
             dataset_dir.input_pdb_file,
             dataset_dir.input_mtz_file,
-            dataset_dir.ligand_files,
+            dataset_dir.input_ligands,
         )
         for dataset_dir
         in fs.input.dataset_dirs.values()
