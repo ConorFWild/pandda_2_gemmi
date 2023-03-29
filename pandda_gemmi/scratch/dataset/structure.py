@@ -46,9 +46,13 @@ class ResidueID:
 
 
 class Structure:
-    def __init__(self, path):
+    def __init__(self, path, structure):
         self.path = path
-        self.structure = gemmi.read_structure(str(path))
+        self.structure = structure
+
+    @classmethod
+    def from_path(cls, path):
+        return cls(path, gemmi.read_structure(str(path)))
 
     def __getitem__(self, item: ResidueID):
         return self.structure[item.model][item.chain][item.insertion]
