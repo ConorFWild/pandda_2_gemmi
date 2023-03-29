@@ -144,6 +144,8 @@ class Reflections(ReflectionsInterface):
     def __init__(self, path: Path, f: str, phi: str, reflections):
         self.path = path
         self.reflections = reflections
+        self.f = f
+        self.phi = phi
 
     @classmethod
     def from_path(cls, path: Path):
@@ -166,3 +168,4 @@ class Reflections(ReflectionsInterface):
 
 
     def transform_f_phi_to_map(self, sample_rate:float=3.0):
+        return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
