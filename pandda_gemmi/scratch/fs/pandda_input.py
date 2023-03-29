@@ -58,7 +58,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
 
 
 def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, ):
-    path_ligands = parse_dir_ligands(path, ligand_dir_regex, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, )
+    path_ligands = parse_dir_ligands(path, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, )
     for ligand_dir_path in path.glob("*"):
         if re.match(ligand_dir_regex, path.name):
             ligand_dir_ligands = parse_dir_ligands(
