@@ -15,9 +15,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Data dir is {data_dir} and output dir is {out_dir}")
 
     # Parse the FS
+    print(f"##### Loading filesystem #####")
     fs: PanDDAFSInterface = PanDDAFS(Path(data_dir), Path(out_dir))
 
     # Get the datasets
+    print(f"##### Getting datasets #####")
     datasets: Dict[str, DatasetInterface] = {
         dataset_dir.dtag: XRayDataset(
             dataset_dir.input_pdb_file,
@@ -30,18 +32,23 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Got {len(datasets)} datasets")
 
     # Get the test dataset
+    print(f"##### Getting test dataset #####")
     dtag = list(datasets.keys())[0]
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
 
     # Get the alignments
+    print(f"##### Getting alignments #####")
     alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
     print(f"Got {len(alignments)} alignments")
 
     # Get the reference frame
+    print(f"##### Getting reference frame #####")
     reference_frame: DFrame = DFrame(dataset)
+    print(f"Got reference frame")
 
     # Get the dmaps
+    print(f"##### Loading sparse dmaps #####")
     dmaps: SparseDMapStream = SparseDMapStream(
         datasets,
         reference_frame,
