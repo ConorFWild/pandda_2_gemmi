@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ..interfaces import *
 
+
 @dataclasses.dataclass()
 class SpacegroupPython:
     spacegroup: str
@@ -31,7 +32,7 @@ class UnitCellPython:
     gamma: float
 
     @staticmethod
-    def from_gemmi(unit_cell: gemmi.UnitCell):
+    def from_gemmi(unit_cell: UnitCellInterface):
         return UnitCellPython(unit_cell.a,
                               unit_cell.b,
                               unit_cell.c,
@@ -59,13 +60,14 @@ class MtzDatasetPython:
     wavelength: float
 
     @staticmethod
-    def from_gemmi(dataset: gemmi.Dataset):
-        return MtzDatasetPython(dataset.id,
-                                dataset.project_name,
-                                dataset.crystal_name,
-                                dataset.dataset_name,
-                                dataset.wavelength,
-                                )
+    def from_gemmi(mtz_dataset):
+        return MtzDatasetPython(
+            dataset.id,
+            dataset.project_name,
+            dataset.crystal_name,
+            dataset.dataset_name,
+            dataset.wavelength,
+        )
 
 
 @dataclasses.dataclass()
