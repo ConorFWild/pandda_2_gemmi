@@ -42,14 +42,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     begin_align = time.time()
     alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
     finish_align = time.time()
-    print(f"Got {len(alignments)} alignments in {finish_align-begin_align}")
+    print(f"Got {len(alignments)} alignments in {round(finish_align-begin_align, 1)}")
 
     # Get the reference frame
     print(f"##### Getting reference frame #####")
     begin_get_frame = time.time()
     reference_frame: DFrame = DFrame(dataset)
     finish_get_frame = time.time()
-    print(f"Got reference frame in {finish_get_frame-begin_get_frame}")
+    print(f"Got reference frame in {round(finish_get_frame-begin_get_frame, 1)}")
 
     # Get the dmaps
     print(f"##### Getting sparse dmap loader #####")
