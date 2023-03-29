@@ -1,2 +1,2 @@
-from alignment import Alignment
-from dframe import DFrame
+from .alignment import Alignment
+from .dframe import DFrame
