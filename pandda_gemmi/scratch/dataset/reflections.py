@@ -155,7 +155,7 @@ class Reflections(ReflectionsInterface):
 
     @classmethod
     def get_structure_factors(cls, reflections):
-        column_labels = reflections.columns
+        column_labels = reflections.column_labels()
         for common_f_phi_label_pair in constants.COMMON_F_PHI_LABEL_PAIRS:
 
             f_label = common_f_phi_label_pair[0]
