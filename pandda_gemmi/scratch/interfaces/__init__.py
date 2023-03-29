@@ -42,6 +42,28 @@ class StructureInterface(Protocol):
 class ResolutionInterface(Protocol):
     ...
 
+class PositionInterface(Protocol):
+    ...
+
+
+class FractionalInterface(Protocol):
+    ...
+
+
+GridCoordInterface = Tuple[int, int, int]
+
+class UnitCellInterface(Protocol):
+    def fractionalize(self, pos: PositionInterface) -> FractionalInterface:
+        ...
+
+class CrystallographicGridInterface(Protocol):
+    nu: int
+    nv: int
+    nw: int
+    unit_cell: UnitCellInterface
+
+    def interpolate_value(self, grid_coord: FractionalInterface) -> float:
+        ...
 
 class ReflectionsInterface(Protocol):
     path: Path
