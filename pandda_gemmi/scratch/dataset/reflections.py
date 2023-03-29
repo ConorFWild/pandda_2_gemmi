@@ -95,7 +95,7 @@ class MtzPython:
     columns: List
 
     @staticmethod
-    def from_gemmi(mtz: gemmi.Mtz):
+    def from_gemmi(mtz):
         mtz_title = mtz.title
         mtz_history = mtz.history
         array = np.array(mtz, copy=True)
