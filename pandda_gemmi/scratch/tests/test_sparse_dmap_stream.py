@@ -4,11 +4,11 @@ from typing import Dict, List
 import time
 from pathlib import Path
 
-from ..interfaces import *
-from ..fs import PanDDAFS
-from ..dataset import XRayDataset
-from ..dmaps import DMap, SparseDMap, SparseDMapStream, TruncateReflections, SmoothReflections
-from ..alignment import Alignment, DFrame
+from pandda_gemmi.scratch.interfaces import *
+from pandda_gemmi.scratch.fs import PanDDAFS
+from pandda_gemmi.scratch.dataset import XRayDataset
+from pandda_gemmi.scratch.dmaps import DMap, SparseDMap, SparseDMapStream, TruncateReflections, SmoothReflections
+from pandda_gemmi.scratch.alignment import Alignment, DFrame
 
 
 def test_sparse_dmap_stream(data_dir, out_dir):
