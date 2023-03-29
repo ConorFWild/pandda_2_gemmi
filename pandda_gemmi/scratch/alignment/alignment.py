@@ -2,6 +2,7 @@ import dataclasses
 
 import numpy as np
 import scipy
+from scipy import spatial
 import gemmi
 
 from ..interfaces import *
@@ -91,7 +92,7 @@ class Transform:
         de_meaned = dataset_selection - mean
         de_meaned_ref = reference_selection - mean_ref
 
-        rotation, rmsd = scipy.spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+        rotation, rmsd = spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
 
         com_reference = mean_ref
 
@@ -157,7 +158,7 @@ class Alignment:
             raise Exception()
 
         # Other kdtree
-        reference_tree = scipy.spatial.KDTree(reference_atom_array)
+        reference_tree = spatial.KDTree(reference_atom_array)
 
         if reference_atom_array.size != dataset_atom_array.size:
             # raise AlignmentUnmatchedAtomsError(reference_atom_array,
