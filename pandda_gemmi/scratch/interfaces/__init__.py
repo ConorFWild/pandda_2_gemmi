@@ -49,6 +49,9 @@ class PositionInterface(Protocol):
 class FractionalInterface(Protocol):
     ...
 
+class SpacegroupInterface(Protocol):
+    def xhm(self) -> str:
+        ...
 
 GridCoordInterface = Tuple[int, int, int]
 

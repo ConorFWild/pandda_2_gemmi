@@ -13,7 +13,7 @@ class SpacegroupPython:
     spacegroup: str
 
     @staticmethod
-    def from_gemmi(spacegroup: gemmi.spacegroup):
+    def from_gemmi(spacegroup: SpacegroupInterface):
         spacegroup_name = spacegroup.xhm()
         return SpacegroupPython(spacegroup_name)
 
