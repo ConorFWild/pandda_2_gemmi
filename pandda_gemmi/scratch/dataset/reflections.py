@@ -62,11 +62,11 @@ class MtzDatasetPython:
     @staticmethod
     def from_gemmi(mtz_dataset):
         return MtzDatasetPython(
-            dataset.id,
-            dataset.project_name,
-            dataset.crystal_name,
-            dataset.dataset_name,
-            dataset.wavelength,
+            mtz_dataset.id,
+            mtz_dataset.project_name,
+            mtz_dataset.crystal_name,
+            mtz_dataset.dataset_name,
+            mtz_dataset.wavelength,
         )
 
 
@@ -77,7 +77,7 @@ class MtzColumnPython:
     label: str
 
     @staticmethod
-    def from_gemmi(column: gemmi.Column):
+    def from_gemmi(column):
         return MtzColumnPython(column.dataset_id,
                                column.type,
                                column.label,
