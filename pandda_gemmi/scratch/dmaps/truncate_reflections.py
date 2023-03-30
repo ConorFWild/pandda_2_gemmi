@@ -1,12 +1,12 @@
 from ..interfaces import *
-from ..dataset import Reflections
+from ..dataset import Reflections, XRayDataset
 
 import gemmi
 import numpy as np
 import pandas as pd
 
 
-def truncate_reflections(reflections: Reflections, index=None) -> Reflections:
+def truncate_reflections(reflections, index=None):
     new_reflections = gemmi.Mtz(with_base=False)
 
     # Set dataset properties
@@ -49,10 +49,10 @@ def truncate_reflections(reflections: Reflections, index=None) -> Reflections:
     new_reflections.update_reso()
     # print(new_reflections.make_miller_array().shape)
 
-    return Reflections(reflections.path, new_reflections)
+    return new_reflections
 
 
-def truncate_resolution(reflections: ReflectionsInterface, resolution: float) -> ReflectionsInterface:
+def truncate_resolution(reflections, resolution: float):
     new_reflections = gemmi.Mtz(with_base=False)
 
     # Set dataset properties
@@ -97,35 +97,35 @@ def truncate_resolution(reflections: ReflectionsInterface, resolution: float) ->
     # Update resolution
     new_reflections.update_reso()
 
-    return Reflections(reflections.path, new_reflections)
+    return new_reflections
 
 
-def common_reflections(reflections: Reflections,
-                       reference_ref: Reflections,
-                       ):
-    # Get own reflections
-    dtag_reflections = self.reflections.reflections
-    dtag_reflections_array = np.array(dtag_reflections, copy=True)
-    dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
-                                          columns=dtag_reflections.column_labels(),
-                                          )
-    dtag_reflections_table.set_index(["H", "K", "L"], inplace=True)
-    dtag_flattened_index = dtag_reflections_table[
-        ~dtag_reflections_table[structure_factors.f].isna()].index.to_flat_index()
-
-    # Get reference
-    reference_reflections = reference_ref.reflections
-    reference_reflections_array = np.array(reference_reflections, copy=True)
-    reference_reflections_table = pd.DataFrame(reference_reflections_array,
-                                               columns=reference_reflections.column_labels(),
-                                               )
-    reference_reflections_table.set_index(["H", "K", "L"], inplace=True)
-    reference_flattened_index = reference_reflections_table[
-        ~reference_reflections_table[structure_factors.f].isna()].index.to_flat_index()
-
-    running_index = dtag_flattened_index.intersection(reference_flattened_index)
-
-    return running_index.to_list()
+# def common_reflections(reflections: Reflections,
+#                        reference_ref: Reflections,
+#                        ):
+#     # Get own reflections
+#     dtag_reflections = self.reflections.reflections
+#     dtag_reflections_array = np.array(dtag_reflections, copy=True)
+#     dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+#                                           columns=dtag_reflections.column_labels(),
+#                                           )
+#     dtag_reflections_table.set_index(["H", "K", "L"], inplace=True)
+#     dtag_flattened_index = dtag_reflections_table[
+#         ~dtag_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+#
+#     # Get reference
+#     reference_reflections = reference_ref.reflections
+#     reference_reflections_array = np.array(reference_reflections, copy=True)
+#     reference_reflections_table = pd.DataFrame(reference_reflections_array,
+#                                                columns=reference_reflections.column_labels(),
+#                                                )
+#     reference_reflections_table.set_index(["H", "K", "L"], inplace=True)
+#     reference_flattened_index = reference_reflections_table[
+#         ~reference_reflections_table[structure_factors.f].isna()].index.to_flat_index()
+#
+#     running_index = dtag_flattened_index.intersection(reference_flattened_index)
+#
+#     return running_index.to_list()
 
 
 def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
@@ -140,8 +140,8 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
                                          )
         reflections_table.set_index(["H", "K", "L"], inplace=True)
 
-        is_na = reflections_table[structure_factors.f].isna()
-        is_zero = reflections_table[structure_factors.f].abs() < tol
+        is_na = reflections_table[dataset.reflections.f].isna()
+        is_zero = reflections_table[dataset.reflections.f].abs() < tol
         mask = ~(is_na | is_zero)
 
         flattened_index = reflections_table[mask].index.to_flat_index()
@@ -177,20 +177,41 @@ class TruncateReflections:
         dataset_resolution_truncated = new_datasets_resolution
 
         # Get common set of reflections
-        common_reflections = common_reflections(dataset_resolution_truncated)
+        self.common_reflections_set = common_reflections(dataset_resolution_truncated)
 
-        # truncate on reflections
-        new_datasets_reflections = {}
-        for dtag in dataset_resolution_truncated:
-            reflections = dataset_resolution_truncated[dtag].reflections.reflections
-            reflections_array = np.array(reflections)
+        self.resolution = resolution
 
-            print(f"Truncated reflections: {dtag}")
-            truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections,
-                                                                                        )
-            reflections = truncated_dataset.reflections.reflections
-            reflections_array = np.array(reflections)
+    def __call__(self, dataset: DatasetInterface):
 
-            new_datasets_reflections[dtag] = truncated_dataset
+        new_reflections = Reflections(
+            dataset.reflections.path,
+            dataset.reflections.f,
+            dataset.reflections.phi,
+            # truncate_reflections(dataset.reflections.reflections, self.common_reflections_set)
+            truncate_resolution(dataset.reflections.reflections, self.resolution)
+        )
 
-        return new_datasets_reflections
+        new_dataset = XRayDataset(
+            dataset.structure,
+            new_reflections,
+            dataset.ligand_files
+        )
+
+        return new_dataset
+
+        # # truncate on reflections
+        # new_datasets_reflections = {}
+        # for dtag in dataset_resolution_truncated:
+        #     reflections = dataset_resolution_truncated[dtag].reflections.reflections
+        #     reflections_array = np.array(reflections)
+        #
+        #     print(f"Truncated reflections: {dtag}")
+        #     truncated_dataset = dataset_resolution_truncated[dtag].truncate_reflections(common_reflections_set,
+        #                                                                                 )
+        #     truncated_dataset = truncate_reflections(reflections, index)
+        #     reflections = truncated_dataset.reflections.reflections
+        #     reflections_array = np.array(reflections)
+        #
+        #     new_datasets_reflections[dtag] = truncated_dataset
+        #
+        # return new_datasets_reflections

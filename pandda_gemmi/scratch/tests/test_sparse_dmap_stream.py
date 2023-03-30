@@ -75,5 +75,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     }
     time_finish = time.time()
 
+
 if __name__ == "__main__":
     fire.Fire(test_sparse_dmap_stream)

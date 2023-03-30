@@ -24,20 +24,31 @@ class TransformPython:
 
 @dataclasses.dataclass()
 class Transform:
-    transform: gemmi.Transform
+    # transform: gemmi.Transform
+    vec: np.array
+    mat: np.array
     com_reference: np.array
     com_moving: np.array
+
+    def get_transform(self):
+        transform = gemmi.Transform()
+        transform.vec.fromlist( self.vec.tolist())
+        transform.mat.fromlist(self.mat.tolist())
+        return transform
 
     def apply_moving_to_reference(
             self,
             positions: Dict[Tuple[int], gemmi.Position],
     ) -> Dict[Tuple[int], gemmi.Position]:
         transformed_positions = {}
+
+        transform = self.get_transform()
+
         for index, position in positions.items():
             rotation_frame_position = gemmi.Position(position[0] - self.com_moving[0],
                                                      position[1] - self.com_moving[1],
                                                      position[2] - self.com_moving[2])
-            transformed_vector = self.transform.apply(rotation_frame_position)
+            transformed_vector = transform.apply(rotation_frame_position)
 
             transformed_positions[index] = gemmi.Position(transformed_vector[0] + self.com_reference[0],
                                                           transformed_vector[1] + self.com_reference[1],
@@ -50,7 +61,7 @@ class Transform:
             positions: Dict[Tuple[int], gemmi.Position],
     ) -> Dict[
         Tuple[int], gemmi.Position]:
-        inverse_transform = self.transform.inverse()
+        inverse_transform = self.get_transform().inverse()
         transformed_positions = {}
         for index, position in positions.items():
             rotation_frame_position = gemmi.Position(position[0] - self.com_reference[0],
@@ -66,11 +77,11 @@ class Transform:
 
     @staticmethod
     def from_translation_rotation(translation, rotation, com_reference, com_moving):
-        transform = gemmi.Transform()
-        transform.vec.fromlist(translation.tolist())
-        transform.mat.fromlist(rotation.as_matrix().tolist())
+        # transform = gemmi.Transform()
+        # transform.vec.fromlist(translation.tolist())
+        # transform.mat.fromlist(rotation.as_matrix().tolist())
 
-        return Transform(transform, com_reference, com_moving)
+        return Transform(translation, rotation, com_reference, com_moving)
 
     @staticmethod
     def pos_to_list(pos: gemmi.Position):
@@ -100,17 +111,17 @@ class Transform:
 
         return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
 
-    def __getstate__(self):
-        transform_python = TransformPython.from_gemmi(self.transform)
-        com_reference = self.com_reference
-        com_moving = self.com_moving
-        return (transform_python, com_reference, com_moving)
-
-    def __setstate__(self, data):
-        transform_gemmi = data[0].to_gemmi()
-        self.transform = transform_gemmi
-        self.com_reference = data[1]
-        self.com_moving = data[2]
+    # def __getstate__(self):
+    #     transform_python = TransformPython.from_gemmi(self.transform)
+    #     com_reference = self.com_reference
+    #     com_moving = self.com_moving
+    #     return (transform_python, com_reference, com_moving)
+    #
+    # def __setstate__(self, data):
+    #     transform_gemmi = data[0].to_gemmi()
+    #     self.transform = transform_gemmi
+    #     self.com_reference = data[1]
+    #     self.com_moving = data[2]
 
 
 class Alignment:

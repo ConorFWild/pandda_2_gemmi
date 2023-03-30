@@ -1,3 +1,3 @@
 from .dataset import XRayDataset
-from .dataset import Reflections
-from .dataset import Structure
+from .reflections import Reflections
+from .structure import Structure, ResidueID
