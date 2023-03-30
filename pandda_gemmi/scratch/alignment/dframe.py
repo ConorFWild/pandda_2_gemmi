@@ -29,7 +29,7 @@ class StructureArray:
                         positions.append([pos.x, pos.y, pos.z])
 
         self.chains = np.array(chains)
-        self.residues = np.array(residue)
+        self.seq_ids = np.array(seq_ids)
         self.insertions = np.array(insertions)
         self.atom_ids = np.array(atom_ids)
         self.positions = np.array(positions)
