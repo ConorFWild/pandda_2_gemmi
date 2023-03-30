@@ -163,26 +163,25 @@ class TruncateReflections:
                  datasets: Dict[str, DatasetInterface],
                  resolution: float,
                  ):
-        new_datasets_resolution = {}
-
-        # Truncate by common resolution
-        for dtag in datasets:
-            truncated_dataset = truncate_resolution(
-                datasets[dtag],
-                resolution,
-            )
-
-            new_datasets_resolution[dtag] = truncated_dataset
-
-        dataset_resolution_truncated = new_datasets_resolution
+        # new_datasets_resolution = {}
+        #
+        # # Truncate by common resolution
+        # for dtag in datasets:
+        #     truncated_dataset = truncate_resolution(
+        #         datasets[dtag],
+        #         resolution,
+        #     )
+        #
+        #     new_datasets_resolution[dtag] = truncated_dataset
+        #
+        # dataset_resolution_truncated = new_datasets_resolution
 
         # Get common set of reflections
-        self.common_reflections_set = common_reflections(dataset_resolution_truncated)
+        self.common_reflections_set = common_reflections(datasets)
 
         self.resolution = resolution
 
     def __call__(self, dataset: DatasetInterface):
-
         new_reflections = Reflections(
             dataset.reflections.path,
             dataset.reflections.f,

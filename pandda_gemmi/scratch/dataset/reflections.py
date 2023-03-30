@@ -147,6 +147,9 @@ class Reflections(ReflectionsInterface):
         self.f = f
         self.phi = phi
 
+    def resolution(self):
+        return self.reflections.resolution_high()
+
     @classmethod
     def from_path(cls, path: Path):
         reflections = gemmi.read_mtz_file(str(path))

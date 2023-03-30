@@ -60,7 +60,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         [
             TruncateReflections(
                 datasets,
-                dataset.reflections.resolution,
+                dataset.reflections.resolution(),
             ),
             SmoothReflections(dataset)
         ],
@@ -69,9 +69,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # Load
     time_begin = time.time()
     dmaps_sparse: Dict[str, SparseDMap] = {
-        dtag: dmap_sparse
-        for dtag, dmap_sparse
-        in dmaps.parallel_load(processor)
+        dtag: dmaps.load(dtag)
+        for dtag
+        in datasets
     }
     time_finish = time.time()
 

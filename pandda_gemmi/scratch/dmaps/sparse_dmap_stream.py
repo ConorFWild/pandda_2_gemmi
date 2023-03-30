@@ -15,6 +15,9 @@ class SparseDMapStream:
                  transforms
                  ):
         self.datasets = datasets
+        self.dframe = reference_frame
+        self.alignments = alignments
+        self.transforms = transforms
         ...
 
     def load(self, dtag: str):

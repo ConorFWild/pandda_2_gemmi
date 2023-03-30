@@ -95,6 +95,9 @@ class ReflectionsInterface(Protocol):
     def transform_f_phi_to_map(self, sample_rate: float = 3.0) -> CrystallographicGridInterface:
         ...
 
+    def resolution(self) -> float:
+        ...
+
 
 class DatasetInterface(Protocol):
     structure: StructureInterface
