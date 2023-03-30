@@ -12,11 +12,27 @@ class PointPositionArray:
 
 class StructureArray:
     def __init__(self, structure):
-        self.chain
-        self.residue
-        self.insertion
-        self.atom_id
-        self.position
+        chains = []
+        seq_ids = []
+        insertions = []
+        atom_ids = []
+        positions = []
+        for model in structure:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        chains.append(chain.name)
+                        seq_ids.append(residue.seqid.num)
+                        insertions.append(residue.seqid.icode)
+                        atom_ids.append(atom.name)
+                        pos = atom.pos
+                        positions.append([pos.x, pos.y, pos.z])
+
+        self.chains = np.array(chains)
+        self.residues = np.array(residue)
+        self.insertions = np.array(insertions)
+        self.atom_ids = np.array(atom_ids)
+        self.positions = np.array(positions)
 
         ...
 
@@ -27,7 +43,7 @@ class GridPartitioning:
         st_array = StructureArray(dataset.structure)
 
         # Get the tree
-        kdtree = scipy.spatial.KDTree(st_array.position)
+        kdtree = scipy.spatial.KDTree(st_array.positions)
 
         # Get the point array
         point_position_array = PointPositionArray(dataset.structure, grid, mask)
@@ -38,9 +54,9 @@ class GridPartitioning:
         # Get partions
         self.partitions = {
             (
-                st_array.chain[index],
-                st_array.residue[index],
-                st_array.insertion[index],
+                st_array.chains[index],
+                st_array.residues[index],
+                st_array.insertions[index],
             ): point_position_array.points[indexes == index]
             for index
             in indexes
