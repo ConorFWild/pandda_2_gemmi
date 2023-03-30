@@ -67,6 +67,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
 
     # Load
+    print(f"##### Getting sparse xmaps #####")
     time_begin = time.time()
     dmaps_sparse: Dict[str, SparseDMap] = {
         dtag: dmaps.load(dtag)
@@ -74,6 +75,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         in datasets
     }
     time_finish = time.time()
+    print(f"Got sparse xmaps in {round(time_finish-time_begin, 1)}")
+
 
 
 if __name__ == "__main__":
