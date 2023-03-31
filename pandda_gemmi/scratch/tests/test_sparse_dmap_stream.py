@@ -82,25 +82,32 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
 
     # Load
-    print(f"##### Getting sparse xmaps #####")
-    time_begin = time.time()
-    dmaps_sparse: Dict[str, SparseDMap] = {
-        dtag: dmaps.load(dtag)
-        for dtag
-        in datasets
-    }
-    time_finish = time.time()
-    print(f"Got sparse xmaps in {round(time_finish - time_begin, 1)}")
+    # print(f"##### Getting sparse xmaps #####")
+    # time_begin = time.time()
+    # dmaps_sparse: Dict[str, SparseDMap] = {
+    #     dtag: dmaps.load(dtag)
+    #     for dtag
+    #     in datasets
+    # }
+    # time_finish = time.time()
+    # print(f"Got sparse xmaps in {round(time_finish - time_begin, 1)}")
+    #
+    # print(f"##### Saving aligned maps #####")
+    # time_begin = time.time()
+    # for dtag, dmap_sparse in dmaps_sparse.items():
+    #     save_dmap(
+    #         reference_frame.unmask(dmap_sparse),
+    #         Path(out_dir) / f"{dtag}.ccp4"
+    #     )
+    # time_finish = time.time()
+    # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
 
-    print(f"##### Saving aligned maps #####")
-    time_begin = time.time()
-    for dtag, dmap_sparse in dmaps_sparse.items():
+    for dtag in datasets:
+        dmap_sparse = dmaps.load(dtag)
         save_dmap(
-            reference_frame.unmask(dmap_sparse),
-            Path(out_dir) / f"{dtag}.ccp4"
-        )
-    time_finish = time.time()
-    print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
+                reference_frame.unmask(dmap_sparse),
+                Path(out_dir) / f"{dtag}.ccp4"
+            )
 
 
 if __name__ == "__main__":
