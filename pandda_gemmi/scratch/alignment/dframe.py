@@ -174,7 +174,7 @@ class StructureArray:
         positions = []
         for model in structure.structure:
             for chain in model:
-                for residue in chain:
+                for residue in chain.first_conformer():
                     for atom in residue:
                         models.append(model.name)
                         chains.append(chain.name)

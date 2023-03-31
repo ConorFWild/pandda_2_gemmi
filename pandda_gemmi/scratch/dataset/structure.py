@@ -60,7 +60,7 @@ class Structure:
     def protein_residue_ids(self):
         for model in self.structure:
             for chain in model:
-                for residue in chain.get_polymer():
+                for residue in chain.get_polymer().first_conformer():
                     if residue.name.upper() not in constants.RESIDUE_NAMES:
                         continue
 
@@ -75,7 +75,7 @@ class Structure:
     def protein_atoms(self):
         for model in self.structure:
             for chain in model:
-                for residue in chain.get_polymer():
+                for residue in chain.get_polymer().first_conformer():
 
                     if residue.name.upper() not in constants.RESIDUE_NAMES:
                         continue
@@ -88,7 +88,7 @@ class Structure:
 
             for model in self.structure:
                 for chain in model:
-                    for residue in chain:
+                    for residue in chain.first_conformer():
                         if residue.is_water():
                             continue
 
@@ -98,7 +98,7 @@ class Structure:
         else:
             for model in self.structure:
                 for chain in model:
-                    for residue in chain:
+                    for residue in chain.first_conformer():
 
                         for atom in residue:
                             yield atom
