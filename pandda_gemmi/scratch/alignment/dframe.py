@@ -172,7 +172,7 @@ class StructureArray:
         insertions = []
         atom_ids = []
         positions = []
-        for model in structure:
+        for model in structure.structure:
             for chain in model:
                 for residue in chain:
                     for atom in residue:
