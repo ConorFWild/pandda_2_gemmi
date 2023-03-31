@@ -142,6 +142,7 @@ class SmoothReflections:
         # Update resolution
         new_reflections.update_reso()
 
+
         # Create new dataset
         smoothed_dataset = XRayDataset(
             dataset.structure,
