@@ -201,9 +201,11 @@ class GridPartitioning:
     def __init__(self, dataset, grid, ):
         # Get the structure array
         st_array = StructureArray.from_structure(dataset.structure)
+        print(f"Structure array shape: {st_array.positions.shape}")
 
         # CA point_position_array
         ca_point_position_array = st_array.mask(st_array.atom_ids == "CA")
+        print(f"CA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
         kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
