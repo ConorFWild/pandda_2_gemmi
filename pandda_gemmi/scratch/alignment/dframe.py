@@ -186,6 +186,7 @@ class StructureArray:
 
         return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
+
     def mask(self, mask):
         return StructureArray(
             self.models[mask],
