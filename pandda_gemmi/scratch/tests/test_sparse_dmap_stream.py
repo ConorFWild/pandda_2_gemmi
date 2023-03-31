@@ -21,7 +21,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # Get the datasets
     print(f"##### Getting datasets #####")
     datasets: Dict[str, DatasetInterface] = {
-        dataset_dir.dtag: XRayDataset(
+        dataset_dir.dtag: XRayDataset.from_paths(
             dataset_dir.input_pdb_file,
             dataset_dir.input_mtz_file,
             dataset_dir.input_ligands,
