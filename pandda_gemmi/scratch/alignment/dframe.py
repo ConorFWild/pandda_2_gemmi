@@ -225,6 +225,8 @@ class GridPartitioning:
         }
 
 
+
+
 class GridMask:
     def __init__(self, dataset: DatasetInterface, grid, mask_radius=6.0):
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])

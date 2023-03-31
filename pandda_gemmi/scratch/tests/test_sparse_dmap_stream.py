@@ -67,12 +67,29 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     for resid, partition in reference_frame.partitioning.partitions.items():
         print(f"\tResid: {resid} : {partition.points.shape}")
 
+    #
     grid = reference_frame.get_grid()
     grid_array = np.array(grid, copy=False)
     grid_array[reference_frame.mask.indicies] = 1.0
     save_dmap(
         grid,
         Path(out_dir) / f"reference.ccp4"
+    )
+
+    # Save a partition mask
+    grid = reference_frame.get_grid()
+    grid_array = np.array(grid, copy=False)
+    for resid, partition in reference_frame.partitioning.partitions.items():
+        grid_array[
+            (
+                partition.points[:,0].flatten(),
+                partition.points[:,1].flatten(),
+                partition.points[:,2].flatten(),
+            )
+        ] = 1.0
+    save_dmap(
+        grid,
+        Path(out_dir) / f"reference_partitions.ccp4"
     )
 
     # Get the dmaps
