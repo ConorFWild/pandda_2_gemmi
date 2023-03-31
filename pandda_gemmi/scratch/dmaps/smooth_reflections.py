@@ -19,7 +19,7 @@ class SmoothReflections:
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
 
         # # Truncate
-        reference_reflections = truncate_reflections( self.reference_dataset, common_reflections_set) #.truncate_reflections(common_reflections)
+        reference_reflections = truncate_reflections( self.reference_dataset.reflections, common_reflections_set) #.truncate_reflections(common_reflections)
         dtag_reflections = truncate_reflections( dataset.reflections.reflections, common_reflections_set) #truncate_reflections(common_reflections)
 
         # Refference array
