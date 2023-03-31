@@ -61,8 +61,8 @@ class Structure:
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer().first_conformer():
-                    if residue.name.upper() not in constants.RESIDUE_NAMES:
-                        continue
+                    # if residue.name.upper() not in constants.RESIDUE_NAMES:
+                    #     continue
 
                     try:
                         has_ca = residue["CA"][0]
@@ -77,8 +77,8 @@ class Structure:
             for chain in model:
                 for residue in chain.get_polymer().first_conformer():
 
-                    if residue.name.upper() not in constants.RESIDUE_NAMES:
-                        continue
+                    # if residue.name.upper() not in constants.RESIDUE_NAMES:
+                    #     continue
 
                     for atom in residue:
                         yield atom
