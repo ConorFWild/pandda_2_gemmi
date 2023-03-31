@@ -83,6 +83,8 @@ class Structure:
                     for atom in residue:
                         yield atom
 
+
+
     def all_atoms(self, exclude_waters=False):
         if exclude_waters:
 
