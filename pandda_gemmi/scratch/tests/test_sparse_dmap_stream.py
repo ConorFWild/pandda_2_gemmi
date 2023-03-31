@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 import gemmi
+import numpy as np
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
@@ -65,6 +66,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Got reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
     for resid, partition in reference_frame.partitioning.partitions.items():
         print(f"\tResid: {resid} : {partition.points.shape}")
+
+    grid = reference_frame.get_grid()
+    grid_array = np.array(grid, copy=False)
+    grid_array[reference_frame.mask.indicies] = 1.0
+    save_dmap(
+        grid_array,
+        Path(out_dir) / f"reference.ccp4"
+    )
 
     # Get the dmaps
     print(f"##### Getting sparse dmap loader #####")
