@@ -81,7 +81,7 @@ class Transform:
         # transform.vec.fromlist(translation.tolist())
         # transform.mat.fromlist(rotation.as_matrix().tolist())
 
-        return Transform(translation, rotation, com_reference, com_moving)
+        return Transform(translation, rotation.as_matrix(), com_reference, com_moving)
 
     @staticmethod
     def pos_to_list(pos: gemmi.Position):
