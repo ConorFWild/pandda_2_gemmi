@@ -1,6 +1,7 @@
 from ..interfaces import *
 
 from ..dataset import Reflections, XRayDataset
+from .truncate_reflections import truncate_reflections, common_reflections
 
 import numpy as np
 import pandas as pd
@@ -15,42 +16,41 @@ class SmoothReflections:
     def __call__(self, dataset: DatasetInterface):
 
         # # Get common set of reflections
-        # common_reflections = dataset.common_reflections(reference_dataset.reflections,
-        #                                                 structure_factors,
-        #                                                 )
-        #
+        common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
+
         # # Truncate
-        # truncated_reference = reference.dataset.truncate_reflections(common_reflections)
-        # truncated_dataset = dataset.truncate_reflections(common_reflections)
+        reference_reflections = truncate_reflections( self.reference_dataset, common_reflections_set) #.truncate_reflections(common_reflections)
+        dtag_reflections = truncate_reflections( dataset, common_reflections_set) #truncate_reflections(common_reflections)
 
         # Refference array
-        reference_reflections = self.reference_dataset.reflections.reflections
+        # reference_reflections = truncated_reference.reflections.reflections
         reference_reflections_array = np.array(reference_reflections,
                                                copy=True,
                                                )
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
                                                    columns=reference_reflections.column_labels(),
                                                    )
-        reference_f_array = reference_reflections_table[self.reference_dataset.reflections.f].to_numpy()
+        reference_f_array = reference_reflections_table[reference_reflections.reflections.f].to_numpy()
 
         # Dtag array
-        dtag_reflections = dataset.reflections.reflections
+        # dtag_reflections = truncated_dataset.reflections.reflections
         dtag_reflections_array = np.array(dtag_reflections,
                                           copy=True,
                                           )
         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
                                               columns=dtag_reflections.column_labels(),
                                               )
-        dtag_f_array = dtag_reflections_table[dataset.reflections.f].to_numpy()
+        dtag_f_array = dtag_reflections_table[dtag_reflections.reflections.f].to_numpy()
 
         # Resolution array
-        resolution_array = reference_reflections.make_1_d2_array()
+        reference_resolution_array = reference_reflections.make_1_d2_array()
+        dtag_resolution_array = dtag_reflections.make_1_d2_array()
 
         # Prepare optimisation
         x = reference_f_array
         y = dtag_f_array
 
-        r = resolution_array
+        r = reference_resolution_array
 
         sample_grid = np.linspace(min(r), max(r), 100)
 
@@ -90,6 +90,19 @@ class SmoothReflections:
             scales.append(scale)
             rmsds.append(rmsd)
 
+        # x = reference_f_array
+        # y = dtag_f_array
+        #
+        # x_r = reference_resolution_array
+        # y_r = dtag_resolution_array
+        #
+        # min_r = max([min(x_r), min(y_r)])
+        # max_r = min([max(x_r), max(y_r)])
+        # r_bins = np.linspace(min_r, max_r, 100)
+        # # y_r_bins = np.linspace(min(y_r), max(y_r), 100)
+        # x_inds = np.digitize(r, r_bins,)
+        # y_inds = np.digitize(r, r_bins, )
+        #
         min_scale = scales[np.argmin(rmsds)]
 
         # Get the original reflections
