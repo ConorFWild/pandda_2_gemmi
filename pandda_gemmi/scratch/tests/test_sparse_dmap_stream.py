@@ -71,7 +71,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     grid_array = np.array(grid, copy=False)
     grid_array[reference_frame.mask.indicies] = 1.0
     save_dmap(
-        grid_array,
+        grid,
         Path(out_dir) / f"reference.ccp4"
     )
 

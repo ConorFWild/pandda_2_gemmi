@@ -267,7 +267,7 @@ class DFrame:
         grid.set_unit_cell(gemmi.UnitCell(*self.unit_cell))
         grid.spacegroup = gemmi.find_spacegroup_by_number(self.spacegroup)
         grid_array = np.array(grid, copy=False)
-        grid_array[:, :, :] = 0
+        grid_array[:, :, :] = 0.0
         return grid
 
     def unmask(self, sparse_dmap):
