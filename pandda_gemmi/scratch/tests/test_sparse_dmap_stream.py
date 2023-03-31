@@ -82,9 +82,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     for resid, partition in reference_frame.partitioning.partitions.items():
         grid_array[
             (
-                partition.points[:,0].flatten(),
-                partition.points[:,1].flatten(),
-                partition.points[:,2].flatten(),
+                partition.points[:, 0].flatten(),
+                partition.points[:, 1].flatten(),
+                partition.points[:, 2].flatten(),
             )
         ] = 1.0
     save_dmap(

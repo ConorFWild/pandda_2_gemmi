@@ -218,7 +218,7 @@ class GridPartitioning:
 
         # Get partions
         self.partitions = {
-            ResidueID(st_array.models[index], st_array.chains[index], st_array.seq_ids[index], ): PointPositionArray(
+            ResidueID(ca_point_position_array.models[index], ca_point_position_array.chains[index], ca_point_position_array.seq_ids[index], ): PointPositionArray(
                 point_position_array.points[indexes == index],
                 point_position_array.positions[indexes == index]
             )
