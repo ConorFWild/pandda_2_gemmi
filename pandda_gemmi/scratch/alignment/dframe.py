@@ -145,7 +145,7 @@ class PointPositionArray:
         # print(f"Unique points shape: {unique_points.shape}")
         # print(f"Unique positions shape: {unique_positions.shape}")
 
-        return unique_points, unique_positions
+        return unique_points.astype(int), unique_positions
 
     @classmethod
     def from_structure(cls, st: StructureInterface, grid, radius: float = 6.0):
