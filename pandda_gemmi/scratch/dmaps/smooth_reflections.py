@@ -20,7 +20,7 @@ class SmoothReflections:
 
         # # Truncate
         reference_reflections = truncate_reflections( self.reference_dataset, common_reflections_set) #.truncate_reflections(common_reflections)
-        dtag_reflections = truncate_reflections( dataset, common_reflections_set) #truncate_reflections(common_reflections)
+        dtag_reflections = truncate_reflections( dataset.reflections.reflections, common_reflections_set) #truncate_reflections(common_reflections)
 
         # Refference array
         # reference_reflections = truncated_reference.reflections.reflections
@@ -30,7 +30,7 @@ class SmoothReflections:
         reference_reflections_table = pd.DataFrame(reference_reflections_array,
                                                    columns=reference_reflections.column_labels(),
                                                    )
-        reference_f_array = reference_reflections_table[reference_reflections.reflections.f].to_numpy()
+        reference_f_array = reference_reflections_table[self.reference_dataset.reflections.f].to_numpy()
 
         # Dtag array
         # dtag_reflections = truncated_dataset.reflections.reflections
@@ -40,7 +40,7 @@ class SmoothReflections:
         dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
                                               columns=dtag_reflections.column_labels(),
                                               )
-        dtag_f_array = dtag_reflections_table[dtag_reflections.reflections.f].to_numpy()
+        dtag_f_array = dtag_reflections_table[dataset.reflections.f].to_numpy()
 
         # Resolution array
         reference_resolution_array = reference_reflections.make_1_d2_array()
