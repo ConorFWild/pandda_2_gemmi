@@ -119,7 +119,7 @@ class PointPositionArray:
         print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
         print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
 
-        return points_within_radius, positions_within_radius
+        return points_within_radius.astype(int), positions_within_radius
 
     @staticmethod
     def get_grid_points_around_protein(st: StructureInterface, grid, radius):
@@ -145,7 +145,7 @@ class PointPositionArray:
         # print(f"Unique points shape: {unique_points.shape}")
         # print(f"Unique positions shape: {unique_positions.shape}")
 
-        return unique_points.astype(int), unique_positions
+        return unique_points, unique_positions
 
     @classmethod
     def from_structure(cls, st: StructureInterface, grid, radius: float = 6.0):
