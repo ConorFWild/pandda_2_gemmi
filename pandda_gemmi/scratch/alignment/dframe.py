@@ -154,7 +154,19 @@ class PointPositionArray:
 
 
 class StructureArray:
-    def __init__(self, structure):
+    def __init__(self, models, chains, seq_ids, insertions, atom_ids, positions):
+
+
+        self.models = np.array(models)
+        self.chains = np.array(chains)
+        self.seq_ids = np.array(seq_ids)
+        self.insertions = np.array(insertions)
+        self.atom_ids = np.array(atom_ids)
+        self.positions = np.array(positions)
+
+    @classmethod
+    def from_structure(cls, structure):
+        models = []
         chains = []
         seq_ids = []
         insertions = []
@@ -164,44 +176,55 @@ class StructureArray:
             for chain in model:
                 for residue in chain:
                     for atom in residue:
+                        models.append(model.name)
                         chains.append(chain.name)
-                        seq_ids.append(residue.seqid.num)
+                        seq_ids.append(str(residue.seqid.num))
                         insertions.append(residue.seqid.icode)
                         atom_ids.append(atom.name)
                         pos = atom.pos
                         positions.append([pos.x, pos.y, pos.z])
 
-        self.chains = np.array(chains)
-        self.seq_ids = np.array(seq_ids)
-        self.insertions = np.array(insertions)
-        self.atom_ids = np.array(atom_ids)
-        self.positions = np.array(positions)
+        return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
+    def mask(self, mask):
+        return StructureArray(
+            self.models[mask],
+            self.chains[mask],
+            self.seq_ids[mask],
+            self.insertions[mask],
+            self.atom_ids[mask],
+            self.positions[mask,:]
+        )
         ...
 
 
 class GridPartitioning:
     def __init__(self, dataset, grid, ):
         # Get the structure array
-        st_array = StructureArray(dataset.structure)
+        st_array = StructureArray.from_structure(dataset.structure)
+
+        # CA point_position_array
+        ca_point_position_array = st_array.mask(st_array.atom_ids == "CA")
 
         # Get the tree
-        kdtree = scipy.spatial.KDTree(st_array.positions)
+        kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
 
         # Get the point array
         point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
 
+
+
         # Get the NN indexes
-        distances, indexes = kdtree.query(point_position_array)
+        distances, indexes = kdtree.query(point_position_array.positions)
 
         # Get partions
         self.partitions = {
-            ResidueID(st_array.chains[index], st_array.seq_ids[index], st_array.insertions[index]): PointPositionArray(
+            ResidueID(st_array.models[index], st_array.chains[index], st_array.seq_ids[index], ): PointPositionArray(
                 point_position_array.points[indexes == index],
                 point_position_array.positions[indexes == index]
             )
             for index
-            in indexes
+            in np.unique(indexes)
         }
 
 
