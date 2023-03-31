@@ -47,7 +47,7 @@ class SparseDMapStream:
             com_moving = al.com_moving
             com_reference = al.com_reference
 
-            points = point_position_array.points.tolist()
+            points = point_position_array.points.astype(int).tolist()
             positions = point_position_array.positions.tolist()
 
             gemmi.interpolate_points_single(
