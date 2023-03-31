@@ -195,7 +195,6 @@ class StructureArray:
             self.atom_ids[mask],
             self.positions[mask,:]
         )
-        ...
 
 
 class GridPartitioning:
@@ -211,8 +210,6 @@ class GridPartitioning:
 
         # Get the point array
         point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
-
-
 
         # Get the NN indexes
         distances, indexes = kdtree.query(point_position_array.positions)
