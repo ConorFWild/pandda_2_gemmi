@@ -269,3 +269,10 @@ class DFrame:
         grid_array = np.array(grid, copy=False)
         grid_array[:, :, :] = 0
         return grid
+
+    def unmask(self, sparse_dmap):
+        grid = self.get_grid()
+        grid_array = np.array(grid, copy=False)
+        grid_array[self.mask.indicies] = sparse_dmap.data
+        return grid
+
