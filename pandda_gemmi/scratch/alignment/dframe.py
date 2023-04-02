@@ -8,7 +8,7 @@ from ..interfaces import *
 from ..dataset import ResidueID
 
 
-class PointPositionArray:
+class PointPositionArray(PointPositionArrayInterface):
     def __init__(self, points, positions):
         self.points = points
         self.positions = positions
@@ -156,7 +156,6 @@ class PointPositionArray:
 class StructureArray:
     def __init__(self, models, chains, seq_ids, insertions, atom_ids, positions):
 
-
         self.models = np.array(models)
         self.chains = np.array(chains)
         self.seq_ids = np.array(seq_ids)
@@ -186,9 +185,6 @@ class StructureArray:
 
         return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
-
-
-
     def mask(self, mask):
         return StructureArray(
             self.models[mask],
@@ -196,8 +192,9 @@ class StructureArray:
             self.seq_ids[mask],
             self.insertions[mask],
             self.atom_ids[mask],
-            self.positions[mask,:]
+            self.positions[mask, :]
         )
+
 
 def contains(string, pattern):
     if pattern in string:
@@ -205,14 +202,16 @@ def contains(string, pattern):
     else:
         return False
 
-class GridPartitioning:
+
+class GridPartitioning(GridPartitioningInterface):
     def __init__(self, dataset, grid, ):
         # Get the structure array
         st_array = StructureArray.from_structure(dataset.structure)
         print(f"Structure array shape: {st_array.positions.shape}")
 
         # CA point_position_array
-        ca_point_position_array = st_array.mask(np.array([contains(atom_id, "CA") for atom_id in st_array.atom_ids]))
+        ca_point_position_array = st_array.mask(
+            np.array([contains(str(atom_id).upper(), "CA") for atom_id in st_array.atom_ids]))
         print(f"CA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
@@ -226,7 +225,11 @@ class GridPartitioning:
 
         # Get partions
         self.partitions = {
-            ResidueID(ca_point_position_array.models[index], ca_point_position_array.chains[index], ca_point_position_array.seq_ids[index], ): PointPositionArray(
+            ResidueID(
+                ca_point_position_array.models[index],
+                ca_point_position_array.chains[index],
+                ca_point_position_array.seq_ids[index],
+            ): PointPositionArray(
                 point_position_array.points[indexes == index],
                 point_position_array.positions[indexes == index]
             )
@@ -235,9 +238,7 @@ class GridPartitioning:
         }
 
 
-
-
-class GridMask:
+class GridMask(GridMaskInterface):
     def __init__(self, dataset: DatasetInterface, grid, mask_radius=6.0):
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -287,4 +288,3 @@ class DFrame:
         grid_array = np.array(grid, copy=False)
         grid_array[self.mask.indicies] = sparse_dmap.data
         return grid
-

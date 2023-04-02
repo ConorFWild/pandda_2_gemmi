@@ -45,7 +45,15 @@ class ResidueID:
         return hash((self.model, self.chain, self.insertion))
 
 
-class Structure:
+def is_protein_residue(residue):
+    for atom in residue:
+        if "CA" in atom.name.upper():
+            return True
+
+    return False
+
+
+class Structure(StructureInterface):
     def __init__(self, path, structure):
         self.path = path
         self.structure = structure
@@ -64,18 +72,20 @@ class Structure:
                     # if residue.name.upper() not in constants.RESIDUE_NAMES:
                     #     continue
 
-                    try:
-                        # has_ca = residue["CA"][0]
-                        has_ca = None
-                        for atom in residue:
-                            if "CA" in atom.name:
-                                has_ca = atom
-                        if not has_ca:
-                            print(f"Missing residue {residue.name}")
-                            continue
-                    except Exception as e:
-                        print(f"Missing residue {residue.name}")
-
+                    # try:
+                    #     # has_ca = residue["CA"][0]
+                    #     has_ca = None
+                    #     for atom in residue:
+                    #         if "CA" in atom.name:
+                    #             has_ca = atom
+                    #     if not has_ca:
+                    #         print(f"Missing residue {residue.name}")
+                    #         continue
+                    # except Exception as e:
+                    #     print(f"Missing residue {residue.name}")
+                    #
+                    #     continue
+                    if not is_protein_residue(residue):
                         continue
 
                     resid = ResidueID.from_residue_chain(model, chain, residue)
@@ -89,10 +99,11 @@ class Structure:
                     # if residue.name.upper() not in constants.RESIDUE_NAMES:
                     #     continue
 
+                    if not is_protein_residue(residue):
+                        continue
+
                     for atom in residue:
                         yield atom
-
-
 
     def all_atoms(self, exclude_waters=False):
         if exclude_waters:
