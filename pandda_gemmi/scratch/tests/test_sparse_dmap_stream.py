@@ -80,6 +80,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     grid = reference_frame.get_grid()
     grid_array = np.array(grid, copy=False)
     for resid, partition in reference_frame.partitioning.partitions.items():
+        if int(resid.residue) != 238:
+            continue
         grid_array[
             (
                 partition.points[:, 0].flatten(),
@@ -92,6 +94,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         Path(out_dir) / f"reference_partitions.ccp4"
     )
 
+    exit()
     # Get the dmaps
     print(f"##### Getting sparse dmap loader #####")
     dmaps: SparseDMapStream = SparseDMapStream(
