@@ -212,10 +212,11 @@ class GridPartitioning(GridPartitioningInterface):
         # CA point_position_array
         used_insertions = []
         ca_mask = []
-        for insertion, atom_id in zip(st_array.insertions, st_array.atom_ids): #[st_array.insertions == insertion]:
-            if (insertion not in used_insertions) and contains(str(atom_id).upper(), "CA"):
+        for j, atom_id in enumerate(st_array.atom_ids): #[st_array.insertions == insertion]:
+            seqid = st_array.seq_ids[j]
+            if (seqid not in used_insertions) and contains(str(atom_id).upper(), "CA"):
                 ca_mask.append(True)
-                used_insertions.append(insertion)
+                used_insertions.append(seqid)
             else:
                 ca_mask.append(False)
 

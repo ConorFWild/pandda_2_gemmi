@@ -26,23 +26,23 @@ class StructurePython:
 class ResidueID:
     model: str
     chain: str
-    insertion: str
+    number: int
 
     @staticmethod
     def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
         return ResidueID(model.name,
                          chain.name,
-                         str(res.seqid.num),
+                         int(res.seqid.num),
                          )
 
     def __eq__(self, other) -> bool:
         if isinstance(other, type(self)):
-            return ((self.model, self.chain, self.insertion) ==
-                    (other.model, other.chain, other.insertion))
+            return ((self.model, self.chain, self.number) ==
+                    (other.model, other.chain, other.number))
         return NotImplemented
 
     def __hash__(self):
-        return hash((self.model, self.chain, self.insertion))
+        return hash((self.model, self.chain, self.number))
 
 
 def is_protein_residue(residue):
@@ -63,7 +63,7 @@ class Structure(StructureInterface):
         return cls(path, gemmi.read_structure(str(path)))
 
     def __getitem__(self, item: ResidueID):
-        return self.structure[item.model][item.chain][item.insertion]
+        return self.structure[item.model][item.chain][item.number]
 
     def protein_residue_ids(self):
         for model in self.structure:
