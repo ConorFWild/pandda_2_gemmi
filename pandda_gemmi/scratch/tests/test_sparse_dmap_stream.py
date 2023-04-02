@@ -134,6 +134,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"##### Loading DMaps #####")
     time_begin = time.time()
     for dtag in datasets:
+        print(f"##### {dtag} #####")
         dmap_sparse = dmaps.load(dtag)
         # save_dmap(
         #         reference_frame.unmask(dmap_sparse),
