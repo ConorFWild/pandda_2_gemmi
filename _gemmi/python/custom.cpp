@@ -1,6 +1,7 @@
 // An empty file that makes easier to add custom functions.
 //
 #include <iostream>
+#include <thread>
 
 #include "gemmi/ccp4.hpp"
 #include "gemmi/gz.hpp"  // for MaybeGzipped
