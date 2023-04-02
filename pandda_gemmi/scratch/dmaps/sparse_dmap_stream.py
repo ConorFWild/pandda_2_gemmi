@@ -77,6 +77,7 @@ class SparseDMapStream:
             transform_list,
             com_moving_list,
             com_reference_list,
+            12
         )
 
         return SparseDMap.from_xmap(aligned_xmap, dframe)
