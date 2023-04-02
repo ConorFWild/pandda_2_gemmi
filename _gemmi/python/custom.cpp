@@ -269,7 +269,21 @@ void interpolate_points_multiple_parallel(
       // Dispatch a thread on the chunks
       threads.push_back(
         std::thread(
-          interpolate_points_multiple,
+//          interpolate_points_multiple,
+//          moving_map,
+//          interpolated_map,
+//          point_arr_chunk,
+//          pos_arr_chunk,
+//          transform_chunk,
+//          com_moving_chunk,
+//          com_reference_chunk
+        [moving_map,
+          interpolated_map,
+          point_arr_chunk,
+          pos_arr_chunk,
+          transform_chunk,
+          com_moving_chunk,
+          com_reference_chunk](){interpolate_points_multiple(
           moving_map,
           interpolated_map,
           point_arr_chunk,
@@ -277,6 +291,8 @@ void interpolate_points_multiple_parallel(
           transform_chunk,
           com_moving_chunk,
           com_reference_chunk
+          );
+          }
         )
       );
 
