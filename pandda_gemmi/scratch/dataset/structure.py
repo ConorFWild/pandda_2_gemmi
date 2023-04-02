@@ -71,8 +71,11 @@ class Structure:
                             if "CA" in atom.name:
                                 has_ca = atom
                         if not has_ca:
+                            print(f"Missing residue {residue.name}")
                             continue
                     except Exception as e:
+                        print(f"Missing residue {residue.name}")
+
                         continue
 
                     resid = ResidueID.from_residue_chain(model, chain, residue)
