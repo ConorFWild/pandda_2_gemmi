@@ -154,8 +154,8 @@ void interpolate_points_single_array(
     const std::vector<double> com_reference
     )
 {
-    auto r_point = point_array.template mutable_unchecked<2>();
-    auto r_pos = pos_array.template mutable_unchecked<2>();
+    auto r_point = point_array..mutable_unchecked<2>();
+    auto r_pos = pos_array.mutable_unchecked<2>();
 
     for (std::size_t i=0; i < r_point.shape(0); i++)
     {
