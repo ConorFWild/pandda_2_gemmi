@@ -210,8 +210,16 @@ class GridPartitioning(GridPartitioningInterface):
         print(f"Structure array shape: {st_array.positions.shape}")
 
         # CA point_position_array
-        ca_point_position_array = st_array.mask(
-            np.array([contains(str(atom_id).upper(), "CA") for atom_id in st_array.atom_ids]))
+        used_insertions = []
+        ca_mask = []
+        for insertion, atom_id in zip(st_array.insertions, st_array.atom_ids): #[st_array.insertions == insertion]:
+            if (insertion not in used_insertions) and contains(str(atom_id).upper(), "CA"):
+                ca_mask.append(True)
+                used_insertions.append(insertion)
+            else:
+                ca_mask.append(False)
+
+        ca_point_position_array = st_array.mask(np.array(ca_mask))
         print(f"CA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
