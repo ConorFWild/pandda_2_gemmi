@@ -146,8 +146,8 @@ void interpolate_points_single(
 void interpolate_points_single_array(
     const Grid<float>& moving_map,
     Grid<float>& interpolated_map,
-    const py::array_t<int> point_vec,
-    const py::array_t<double> pos_vec,
+    const py::array_t<int> point_array,
+    const py::array_t<double> pos_array,
     const Transform transform,
     const std::vector<double> com_moving,
     const std::vector<double> com_reference
