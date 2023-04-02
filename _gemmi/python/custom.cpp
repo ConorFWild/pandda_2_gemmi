@@ -275,7 +275,7 @@ void interpolate_points_multiple_parallel(
 
     };
 
-    for (std::size_t k=0; k < threads.size(); threads++) {
+    for (std::size_t k=0; k < threads.size(); k++) {
       threads[k].join();
     };
 
