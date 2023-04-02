@@ -131,12 +131,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # time_finish = time.time()
     # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
 
+    print(f"##### Loading DMaps #####")
+    time_begin = time.time()
     for dtag in datasets:
         dmap_sparse = dmaps.load(dtag)
         save_dmap(
                 reference_frame.unmask(dmap_sparse),
                 Path(out_dir) / f"{dtag}.ccp4"
             )
+    time_finish = time.time()
+    print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
 
 
 if __name__ == "__main__":

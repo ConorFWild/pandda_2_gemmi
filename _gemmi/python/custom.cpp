@@ -277,22 +277,6 @@ void interpolate_points_multiple_parallel(
           transform_chunk,
           com_moving_chunk,
           com_reference_chunk
-//        [moving_map,
-//          interpolated_map,
-//          point_arr_chunk,
-//          pos_arr_chunk,
-//          transform_chunk,
-//          com_moving_chunk,
-//          com_reference_chunk](){interpolate_points_multiple(
-//          moving_map,
-//          interpolated_map,
-//          point_arr_chunk,
-//          pos_arr_chunk,
-//          transform_chunk,
-//          com_moving_chunk,
-//          com_reference_chunk
-//          );
-//          }
         )
       );
 
@@ -302,19 +286,6 @@ void interpolate_points_multiple_parallel(
       threads[k].join();
     };
 
-//    for (std::size_t i=0; i < point_arr_vec.size(); i++)
-//    {
-//      interpolate_points_single_array(
-//        moving_map,
-//        interpolated_map,
-//        point_arr_vec[i],
-//        pos_arr_vec[i],
-//        transform_vec[i],
-//        com_moving_vec[i],
-//        com_reference_vec[i]
-//      );
-//
-//    };
 
 
 }
