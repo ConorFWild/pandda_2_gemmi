@@ -213,10 +213,10 @@ class GridPartitioning(GridPartitioningInterface):
         used_insertions = []
         ca_mask = []
         for j, atom_id in enumerate(st_array.atom_ids): #[st_array.insertions == insertion]:
-            seqid = st_array.seq_ids[j]
-            if (seqid not in used_insertions) and contains(str(atom_id).upper(), "CA"):
+            key = (st_array.chains[j], st_array.seq_ids[j])
+            if (key not in used_insertions) and contains(str(atom_id).upper(), "CA"):
                 ca_mask.append(True)
-                used_insertions.append(seqid)
+                used_insertions.append(key)
             else:
                 ca_mask.append(False)
 
