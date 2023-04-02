@@ -6,8 +6,8 @@ import numpy as np
 
 
 class ResidueIDInterface(Protocol):
+    model: str
     chain: str
-    residue: int
     insertion: str
 
 
