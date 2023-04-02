@@ -35,7 +35,6 @@ class SparseDMapStream:
 
     @staticmethod
     def align_xmap(xmap: CrystallographicGridInterface, dframe: DFrameInterface, alignment: AlignmentInterface):
-
         aligned_xmap = dframe.get_grid()
 
         # for residue_id in dframe.partitioning.partitions:
@@ -60,25 +59,27 @@ class SparseDMapStream:
         #         com_moving,
         #         com_reference,
         #     )
-        points_list = [dframe.partitioning.partitions[residue_id].points for residue_id in dframe.partitioning.partitions]
-        positions_list = [dframe.partitioning.partitions[residue_id].positions for residue_id in dframe.partitioning.partitions]
-        transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in dframe.partitioning.partitions]
+        points_list = [dframe.partitioning.partitions[residue_id].points for residue_id in
+                       dframe.partitioning.partitions]
+        positions_list = [dframe.partitioning.partitions[residue_id].positions for residue_id in
+                          dframe.partitioning.partitions]
+        transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
+                          dframe.partitioning.partitions]
         com_moving_list = [alignment.transforms[residue_id].com_moving for residue_id in dframe.partitioning.partitions]
-        com_reference_list = [alignment.transforms[residue_id].com_reference for residue_id in dframe.partitioning.partitions]
+        com_reference_list = [alignment.transforms[residue_id].com_reference for residue_id in
+                              dframe.partitioning.partitions]
 
-
-        gemmi.interpolate_points_multiple(
+        gemmi.interpolate_points_multiple_parallel(
             xmap,
-                    aligned_xmap,
-                    points_list,
-                    positions_list,
-                    transform_list,
-                    com_moving_list,
-                    com_reference_list,
+            aligned_xmap,
+            points_list,
+            positions_list,
+            transform_list,
+            com_moving_list,
+            com_reference_list,
         )
 
         return SparseDMap.from_xmap(aligned_xmap, dframe)
 
     def __getitem__(self, dtag):
         ...
-

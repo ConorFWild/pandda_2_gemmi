@@ -159,26 +159,11 @@ void interpolate_points_single_array(
     for (std::size_t i=0; i < r_point.shape(0); i++)
     {
         // Position
-//        std::vector<int> point = point_vec[i];
         Position pos = Position(
           r_pos(i,0),
           r_pos(i,1),
           r_pos(i,2)
         );
-
-//        Fractional fractional = Fractional(
-//            point[0] * (1.0 / interpolated_map.nu),
-//            point[1] * (1.0 / interpolated_map.nv),
-//            point[2] * (1.0 / interpolated_map.nw)
-//            );
-//
-//        Position pos = interpolated_map.unit_cell.orthogonalize(fractional);
-        // std::vector<float> pos_python = pos_vec[i];
-        // Position pos = Position(pos_python[0], pos_python[1], pos_python[2]);
-
-        // Transform transform = transform_vec[i];
-        // std::vector<double> com_moving = com_moving_vec[i];
-        // std::vector<double> com_reference = com_reference_vec[i];
 
         //Subtract reference com
         pos.x -= com_reference[0];
@@ -225,7 +210,6 @@ void interpolate_points_multiple(
 {
     for (std::size_t i=0; i < point_arr_vec.size(); i++)
     {
-
       interpolate_points_single_array(
         moving_map,
         interpolated_map,
@@ -237,6 +221,77 @@ void interpolate_points_multiple(
       );
 
     };
+
+
+}
+
+void interpolate_points_multiple_parallel(
+    const Grid<float>& moving_map,
+    Grid<float>& interpolated_map,
+    const std::vector<py::array_t<int>> point_arr_vec,
+    const std::vector<py::array_t<double>> pos_arr_vec,
+    const std::vector<Transform> transform_vec,
+    const std::vector<std::vector<double>> com_moving_vec,
+    const std::vector<std::vector<double>> com_reference_vec,
+    const int num_threads
+    )
+{
+    std::vector<std::thread> threads;
+
+    // Get number of items to process with each thread
+    int items_per_thread = (point_arr_vec.size() / num_threads) + 1;
+
+    // Chunk and dispatch
+    for (std::size_t thread_num=0; thread_num < num_threads; thread_num++)
+    {
+      const std::vector<py::array_t<int>> point_arr_chunk;
+      const std::vector<py::array_t<double>> pos_arr_chunk;
+      const std::vector<Transform> transform_chunk;
+      const std::vector<std::vector<double>> com_moving_chunk;
+      const std::vector<std::vector<double>> com_reference_chunk;
+      int initial = thread_num*items_per_thread;
+
+      // Construct the chunks to process
+      for (std::size_t k=initial; k < std::min(point_arr_vec.size(), initial+items_per_thread), ; k++)
+      {
+        point_arr_chunk.push_back(point_arr_vec[k]);
+        pos_arr_chunk.push_back(pos_arr_vec[k]);
+        transform_chunk.push_back(transform_vec[k]);
+        com_moving_chunk.push_back(com_moving_vec[k]);
+        com_reference_chunk.push_back(com_reference_vec[k]);
+      };
+
+      // Dispatch a thread on the chunks
+      threads.push_back(
+        std::thread(
+          interpolate_points_multiple,
+          point_arr_chunk,
+          pos_arr_chunk,
+          transform_chunk,
+          com_moving_chunk,
+          com_reference_chunk
+        )
+      );
+
+    };
+
+    for (auto &th : threads) {
+      th.join();
+    };
+
+//    for (std::size_t i=0; i < point_arr_vec.size(); i++)
+//    {
+//      interpolate_points_single_array(
+//        moving_map,
+//        interpolated_map,
+//        point_arr_vec[i],
+//        pos_arr_vec[i],
+//        transform_vec[i],
+//        com_moving_vec[i],
+//        com_reference_vec[i]
+//      );
+//
+//    };
 
 
 }
@@ -336,6 +391,12 @@ void add_custom(py::module& m) {
         &interpolate_points_multiple,
         "Interpolates a list of points and transforms."
     );
+          m.def(
+        "interpolate_points_multiple_parallel",
+        &interpolate_points_multiple_parallel,
+        "Interpolates a list of points and transforms."
+    );
+
     //   m.def(
     //     "interpolate_pos_array",
     //     &interpolate_pos_array,
