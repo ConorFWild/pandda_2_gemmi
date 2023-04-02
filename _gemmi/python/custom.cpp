@@ -246,11 +246,11 @@ void interpolate_points_multiple_parallel(
     // Chunk and dispatch
     for (std::size_t thread_num=0; thread_num < num_threads; thread_num++)
     {
-      const std::vector<py::array_t<int>> point_arr_chunk;
-      const std::vector<py::array_t<double>> pos_arr_chunk;
-      const std::vector<Transform> transform_chunk;
-      const std::vector<std::vector<double>> com_moving_chunk;
-      const std::vector<std::vector<double>> com_reference_chunk;
+      std::vector<py::array_t<int>> point_arr_chunk;
+      std::vector<py::array_t<double>> pos_arr_chunk;
+      std::vector<Transform> transform_chunk;
+      std::vector<std::vector<double>> com_moving_chunk;
+      std::vector<std::vector<double>> com_reference_chunk;
       int initial = thread_num*items_per_thread;
       int point_arr_vec_size = point_arr_vec.size();
       int upper_bound = initial+items_per_thread;
