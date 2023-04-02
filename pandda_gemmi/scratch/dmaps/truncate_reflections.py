@@ -199,7 +199,7 @@ class TruncateReflections:
             dataset.ligand_files
         )
         finish_truncate_reflections = time.time()
-        print(f"\t\tFFT: {finish_truncate_reflections-begin_truncate_reflections}")
+        print(f"\t\tTruncate: {finish_truncate_reflections-begin_truncate_reflections}")
 
         return new_dataset
 
