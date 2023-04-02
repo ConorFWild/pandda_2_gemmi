@@ -65,7 +65,13 @@ class Structure:
                     #     continue
 
                     try:
-                        has_ca = residue["CA"][0]
+                        # has_ca = residue["CA"][0]
+                        has_ca = None
+                        for atom in residue:
+                            if "CA" in atom.name:
+                                has_ca = atom
+                        if not has_ca:
+                            continue
                     except Exception as e:
                         continue
 

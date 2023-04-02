@@ -199,6 +199,11 @@ class StructureArray:
             self.positions[mask,:]
         )
 
+def contains(string, pattern):
+    if pattern in string:
+        return True
+    else:
+        return False
 
 class GridPartitioning:
     def __init__(self, dataset, grid, ):
@@ -207,7 +212,7 @@ class GridPartitioning:
         print(f"Structure array shape: {st_array.positions.shape}")
 
         # CA point_position_array
-        ca_point_position_array = st_array.mask(st_array.atom_ids == "CA")
+        ca_point_position_array = st_array.mask(np.array([contains(atom_id, "CA") for atom_id in st_array.atom_ids]))
         print(f"CA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
