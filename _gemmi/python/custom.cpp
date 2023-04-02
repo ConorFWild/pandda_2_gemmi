@@ -147,15 +147,15 @@ void interpolate_points_single(
 void interpolate_points_single_array(
     const Grid<float>& moving_map,
     Grid<float>& interpolated_map,
-    const py::array_t<int> point_array,
-    const py::array_t<double> pos_array,
+     py::array_t<int> point_array,
+     py::array_t<double> pos_array,
     const Transform transform,
     const std::vector<double> com_moving,
     const std::vector<double> com_reference
     )
 {
-    auto r_point = point_array.mutable_unchecked<2>();
-    auto r_pos = pos_array.mutable_unchecked<2>();
+    auto r_point = point_array.template mutable_unchecked<2>();
+    auto r_pos = pos_array.template mutable_unchecked<2>();
 
     for (std::size_t i=0; i < r_point.shape(0); i++)
     {
@@ -202,8 +202,8 @@ void interpolate_points_single_array(
 void interpolate_points_multiple(
     const Grid<float>& moving_map,
     Grid<float>& interpolated_map,
-    const std::vector<py::array_t<int>> point_arr_vec,
-    const std::vector<py::array_t<double>> pos_arr_vec,
+     std::vector<py::array_t<int>> point_arr_vec,
+     std::vector<py::array_t<double>> pos_arr_vec,
     const std::vector<Transform> transform_vec,
     const std::vector<std::vector<double>> com_moving_vec,
     const std::vector<std::vector<double>> com_reference_vec
@@ -226,11 +226,12 @@ void interpolate_points_multiple(
 
 }
 
+
 void interpolate_points_multiple_parallel(
     const Grid<float>& moving_map,
     Grid<float>& interpolated_map,
-    const std::vector<py::array_t<int>> point_arr_vec,
-    const std::vector<py::array_t<double>> pos_arr_vec,
+     std::vector<py::array_t<int>> point_arr_vec,
+     std::vector<py::array_t<double>> pos_arr_vec,
     const std::vector<Transform> transform_vec,
     const std::vector<std::vector<double>> com_moving_vec,
     const std::vector<std::vector<double>> com_reference_vec,
