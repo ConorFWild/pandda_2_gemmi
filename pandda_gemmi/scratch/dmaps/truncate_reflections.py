@@ -1,3 +1,5 @@
+import time
+
 from ..interfaces import *
 from ..dataset import Reflections, XRayDataset
 
@@ -182,6 +184,7 @@ class TruncateReflections:
         self.resolution = resolution
 
     def __call__(self, dataset: DatasetInterface):
+        begin_truncate_reflections = time.time()
         new_reflections = Reflections(
             dataset.reflections.path,
             dataset.reflections.f,
@@ -195,6 +198,8 @@ class TruncateReflections:
             new_reflections,
             dataset.ligand_files
         )
+        finish_truncate_reflections = time.time()
+        print(f"\t\tFFT: {finish_truncate_reflections-begin_truncate_reflections}")
 
         return new_dataset
 

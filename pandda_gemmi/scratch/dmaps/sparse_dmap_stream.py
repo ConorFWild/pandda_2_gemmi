@@ -78,7 +78,7 @@ class SparseDMapStream:
         com_reference_list = [alignment.transforms[residue_id].com_reference for residue_id in
                               dframe.partitioning.partitions]
         finish_listing = time.time()
-        print(f"\tInterpolation: {finish_listing-begin_listing}")
+        print(f"\tListing: {finish_listing-begin_listing}")
 
         begin_interpolate = time.time()
         gemmi.interpolate_points_multiple_parallel(

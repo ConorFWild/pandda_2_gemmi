@@ -1,3 +1,5 @@
+import time
+
 from ..interfaces import *
 
 from ..dataset import Reflections, XRayDataset
@@ -14,6 +16,9 @@ class SmoothReflections:
         self.reference_dataset = dataset
 
     def __call__(self, dataset: DatasetInterface):
+
+        begin_smooth_reflections = time.time()
+
 
         # # Get common set of reflections
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
@@ -153,5 +158,8 @@ class SmoothReflections:
             dataset.ligand_files
             # smoothing_factor=float(min_scale)
         )
+
+        finish_smooth_reflections = time.time()
+        print(f"\t\tFFT: {finish_smooth_reflections-begin_smooth_reflections}")
 
         return smoothed_dataset
