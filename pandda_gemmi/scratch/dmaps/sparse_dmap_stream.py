@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import gemmi
@@ -24,10 +25,17 @@ class SparseDMapStream:
         dataset = self.datasets[dtag]
         alignment = self.alignments[dtag]
 
+        begin_transform = time.time()
         for transform in self.transforms:
             dataset = transform(dataset)
+        finish_transform = time.time()
+        print(f"\tTransform: {finish_transform-begin_transform}")
 
+
+        begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
+        finish_fft = time.time()
+        print(f"\tFFT: {finish_fft-begin_fft}")
 
         aligned_xmap = SparseDMapStream.align_xmap(xmap, self.dframe, alignment)
 
@@ -59,6 +67,7 @@ class SparseDMapStream:
         #         com_moving,
         #         com_reference,
         #     )
+        begin_listing = time.time()
         points_list = [dframe.partitioning.partitions[residue_id].points for residue_id in
                        dframe.partitioning.partitions]
         positions_list = [dframe.partitioning.partitions[residue_id].positions for residue_id in
@@ -68,7 +77,10 @@ class SparseDMapStream:
         com_moving_list = [alignment.transforms[residue_id].com_moving for residue_id in dframe.partitioning.partitions]
         com_reference_list = [alignment.transforms[residue_id].com_reference for residue_id in
                               dframe.partitioning.partitions]
+        finish_listing = time.time()
+        print(f"\tInterpolation: {finish_listing-begin_listing}")
 
+        begin_interpolate = time.time()
         gemmi.interpolate_points_multiple_parallel(
             xmap,
             aligned_xmap,
@@ -79,6 +91,8 @@ class SparseDMapStream:
             com_reference_list,
             12
         )
+        finish_interpolate = time.time()
+        print(f"\tInterpolation: {finish_interpolate-begin_interpolate}")
 
         return SparseDMap.from_xmap(aligned_xmap, dframe)
 
