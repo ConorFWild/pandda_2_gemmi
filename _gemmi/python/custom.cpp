@@ -154,7 +154,7 @@ void interpolate_points_single_array(
     const std::vector<double> com_reference
     )
 {
-    auto r_point = point_array..mutable_unchecked<2>();
+    auto r_point = point_array.mutable_unchecked<2>();
     auto r_pos = pos_array.mutable_unchecked<2>();
 
     for (std::size_t i=0; i < r_point.shape(0); i++)
@@ -255,7 +255,7 @@ void interpolate_points_multiple_parallel(
       int upper_bound = initial+items_per_thread;
 
       // Construct the chunks to process
-      for (std::size_t k=initial; k < std::min(point_arr_vec_size, upper_bound), ; k++)
+      for (std::size_t k=initial; k < std::min(point_arr_vec_size, upper_bound) ; k++)
       {
         point_arr_chunk.push_back(point_arr_vec[k]);
         pos_arr_chunk.push_back(pos_arr_vec[k]);
