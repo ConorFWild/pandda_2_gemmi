@@ -252,7 +252,7 @@ void interpolate_points_multiple_parallel(
       std::vector<std::vector<double>> com_moving_chunk;
       std::vector<std::vector<double>> com_reference_chunk;
       std::size_t initial = thread_num*items_per_thread;
-      int point_arr_vec_size = point_arr_vec.size();
+      std::size_t point_arr_vec_size = point_arr_vec.size();
       std::size_t upper_bound = initial+items_per_thread;
 
       // Construct the chunks to process
