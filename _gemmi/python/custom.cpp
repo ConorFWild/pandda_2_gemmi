@@ -204,9 +204,9 @@ void interpolate_points_multiple(
     Grid<float>& interpolated_map,
      std::vector<py::array_t<int>> point_arr_vec,
      std::vector<py::array_t<double>> pos_arr_vec,
-    const std::vector<Transform> transform_vec,
-    const std::vector<std::vector<double>> com_moving_vec,
-    const std::vector<std::vector<double>> com_reference_vec
+    std::vector<Transform> transform_vec,
+    std::vector<std::vector<double>> com_moving_vec,
+    std::vector<std::vector<double>> com_reference_vec
     )
 {
     for (std::size_t i=0; i < point_arr_vec.size(); i++)
@@ -251,6 +251,7 @@ void interpolate_points_multiple_parallel(
       std::vector<Transform> transform_chunk;
       std::vector<std::vector<double>> com_moving_chunk;
       std::vector<std::vector<double>> com_reference_chunk;
+
       std::size_t initial = thread_num*items_per_thread;
       std::size_t point_arr_vec_size = point_arr_vec.size();
       std::size_t upper_bound = initial+items_per_thread;
