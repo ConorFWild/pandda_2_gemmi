@@ -26,13 +26,13 @@ class StructurePython:
 class ResidueID:
     model: str
     chain: str
-    number: int
+    number: str
 
     @staticmethod
     def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
         return ResidueID(model.name,
                          chain.name,
-                         int(res.seqid.num),
+                         str(res.seqid.num),
                          )
 
     def __eq__(self, other) -> bool:

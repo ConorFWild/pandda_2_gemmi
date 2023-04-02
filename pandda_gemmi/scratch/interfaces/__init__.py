@@ -8,7 +8,7 @@ import numpy as np
 class ResidueIDInterface(Protocol):
     model: str
     chain: str
-    number: int
+    number: str
 
 
 class LigandFilesInterface(Protocol):
