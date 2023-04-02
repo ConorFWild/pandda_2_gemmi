@@ -65,7 +65,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     finish_get_frame = time.time()
     print(f"Got reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
     for resid, partition in reference_frame.partitioning.partitions.items():
-        print(f"\tResid: {resid} : {partition.points.shape}")
+        print(f"\tResid: {resid} : {partition.points.shape} {partition.positions[0,:]}")
 
     #
     grid = reference_frame.get_grid()
