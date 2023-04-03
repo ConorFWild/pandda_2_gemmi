@@ -149,8 +149,8 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # print(f"Fractional min: {fractional_min}")
 
-        fractional_min = np.min(fractional_corner_array, axis=-1)
-        fractional_max = np.max(fractional_corner_array, axis=-1)
+        fractional_min = np.min(fractional_corner_array, axis=1)
+        fractional_max = np.max(fractional_corner_array, axis=1)
         print(f"\t\t\t\t\tFRACTIONAL min array shape: {fractional_min.shape}")
 
 
