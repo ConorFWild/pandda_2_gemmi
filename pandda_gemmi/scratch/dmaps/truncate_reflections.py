@@ -6,7 +6,53 @@ from ..dataset import Reflections, XRayDataset
 import gemmi
 import numpy as np
 import pandas as pd
+from numpy.lib import recfunctions as rfn
 
+dt = np.dtype([('h', 'i4'), ('k', 'i4'),('l', 'i4'),])
+# def truncate_reflections(reflections, index=None):
+#     new_reflections = gemmi.Mtz(with_base=False)
+#
+#     # Set dataset properties
+#     new_reflections.spacegroup = reflections.spacegroup
+#     new_reflections.set_cell_for_all(reflections.cell)
+#
+#     # Add dataset
+#     new_reflections.add_dataset("truncated")
+#
+#     # Add columns
+#     for column in reflections.columns:
+#         new_reflections.add_column(column.label, column.type)
+#
+#     # Get data
+#     data_array = np.array(reflections, copy=True)
+#     data = pd.DataFrame(data_array,
+#                         columns=reflections.column_labels(),
+#                         )
+#     data.set_index(["H", "K", "L"], inplace=True)
+#     # print(data)
+#     # print(self.reflections.make_miller_array().shape)
+#
+#     # Truncate by index
+#     data_indexed = data.loc[index]
+#
+#     # To numpy
+#     data_dropped_array = data_indexed.to_numpy()
+#
+#     # new data
+#     new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
+#                           data_dropped_array,
+#                           ]
+#                          )
+#     # print(new_data)
+#
+#     # Update
+#     new_reflections.set_data(new_data)
+#
+#     # Update resolution
+#     new_reflections.update_reso()
+#     # print(new_reflections.make_miller_array().shape)
+#
+#     return new_reflections
 
 def truncate_reflections(reflections, index=None):
     new_reflections = gemmi.Mtz(with_base=False)
@@ -23,25 +69,28 @@ def truncate_reflections(reflections, index=None):
         new_reflections.add_column(column.label, column.type)
 
     # Get data
-    data_array = np.array(reflections, copy=True)
-    data = pd.DataFrame(data_array,
-                        columns=reflections.column_labels(),
-                        )
-    data.set_index(["H", "K", "L"], inplace=True)
+    data_array = np.array(reflections, copy=False)
+    # data = pd.DataFrame(data_array,
+    #                     columns=reflections.column_labels(),
+    #                     )
+    # data.set_index(["H", "K", "L"], inplace=True)
+    # hkl_array = data_array[:, 0:3]
     # print(data)
     # print(self.reflections.make_miller_array().shape)
 
     # Truncate by index
-    data_indexed = data.loc[index]
+    # data_indexed = data.loc[index]
 
     # To numpy
-    data_dropped_array = data_indexed.to_numpy()
+    # data_dropped_array = data_indexed.to_numpy()
 
     # new data
-    new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
-                          data_dropped_array,
-                          ]
-                         )
+    # new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
+    #                       data_dropped_array,
+    #                       ]
+    #                      )
+    structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
+    new_data = data_array[np.in1d(structured_data_array, index)]
     # print(new_data)
 
     # Update
@@ -130,34 +179,76 @@ def truncate_resolution(reflections, resolution: float):
 #     return running_index.to_list()
 
 
+# def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
+#     running_index: Optional[pd.Index] = None
+#
+#     for dtag in datasets:
+#         dataset = datasets[dtag]
+#         reflections = dataset.reflections.reflections
+#         reflections_array = np.array(reflections, copy=True)
+#         reflections_table = pd.DataFrame(reflections_array,
+#                                          columns=reflections.column_labels(),
+#                                          )
+#         reflections_table.set_index(["H", "K", "L"], inplace=True)
+#
+#         is_na = reflections_table[dataset.reflections.f].isna()
+#         is_zero = reflections_table[dataset.reflections.f].abs() < tol
+#         mask = ~(is_na | is_zero)
+#
+#         flattened_index = reflections_table[mask].index.to_flat_index()
+#         if running_index is None:
+#             running_index = flattened_index
+#         if running_index is not None:
+#             running_index = running_index.intersection(flattened_index)
+#
+#     if running_index is not None:
+#         return running_index.to_list()
+#
+#     else:
+#         raise Exception(
+#             "Somehow a running index has not been calculated. This should be impossible. Contact mantainer.")
+
 def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
-    running_index: Optional[pd.Index] = None
+    # running_index: Optional[pd.Index] = None
 
-    for dtag in datasets:
-        dataset = datasets[dtag]
-        reflections = dataset.reflections.reflections
-        reflections_array = np.array(reflections, copy=True)
-        reflections_table = pd.DataFrame(reflections_array,
-                                         columns=reflections.column_labels(),
-                                         )
-        reflections_table.set_index(["H", "K", "L"], inplace=True)
+    hkls = np.vstack(
+        [
+            np.array(datasets[dtag].reflections.reflections, copy=False)[:,0:3]
+            for dtag
+            in datasets
+        ]
+        )
+    structured_data_array = rfn.unstructured_to_structured(hkls, dt)
 
-        is_na = reflections_table[dataset.reflections.f].isna()
-        is_zero = reflections_table[dataset.reflections.f].abs() < tol
-        mask = ~(is_na | is_zero)
+    unique_rows, counts = np.unique(structured_data_array, return_counts=True)
+    common_rows = unique_rows[counts == len(datasets)]
+    return common_rows
 
-        flattened_index = reflections_table[mask].index.to_flat_index()
-        if running_index is None:
-            running_index = flattened_index
-        if running_index is not None:
-            running_index = running_index.intersection(flattened_index)
-
-    if running_index is not None:
-        return running_index.to_list()
-
-    else:
-        raise Exception(
-            "Somehow a running index has not been calculated. This should be impossible. Contact mantainer.")
+    # for dtag in datasets:
+    #     dataset = datasets[dtag]
+    #     reflections = dataset.reflections.reflections
+    #     reflections_array = np.array(reflections, copy=True)
+    #     reflections_table = pd.DataFrame(reflections_array,
+    #                                      columns=reflections.column_labels(),
+    #                                      )
+    #     reflections_table.set_index(["H", "K", "L"], inplace=True)
+    #
+    #     is_na = reflections_table[dataset.reflections.f].isna()
+    #     is_zero = reflections_table[dataset.reflections.f].abs() < tol
+    #     mask = ~(is_na | is_zero)
+    #
+    #     flattened_index = reflections_table[mask].index.to_flat_index()
+    #     if running_index is None:
+    #         running_index = flattened_index
+    #     if running_index is not None:
+    #         running_index = running_index.intersection(flattened_index)
+    #
+    # if running_index is not None:
+    #     return running_index.to_list()
+    #
+    # else:
+    #     raise Exception(
+    #         "Somehow a running index has not been calculated. This should be impossible. Contact mantainer.")
 
 
 class TruncateReflections:
