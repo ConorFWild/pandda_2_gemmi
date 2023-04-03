@@ -253,6 +253,9 @@ class SmoothReflections:
         # Get the bin averages
         populated_bins, counts = np.unique(x_inds, return_counts=True)
         x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # print(f"\t\t\tsample NEW: {x_f}")
+        print(f"\t\t\txf NEW: {x_f}")
+
 
 
         y_inds = np.digitize(y, sample_grid)
@@ -322,6 +325,8 @@ class SmoothReflections:
                   x.reshape(-1, 1),
                   )
         x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+        print(f"\t\t\txf OLD: {x_f}")
+
 
         scales = []
         rmsds = []
