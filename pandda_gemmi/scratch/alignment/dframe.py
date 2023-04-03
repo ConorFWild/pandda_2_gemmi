@@ -116,9 +116,9 @@ class PointPositionArray(PointPositionArrayInterface):
         position_array = PointPositionArray.orthogonalize_fractional_array(
             PointPositionArray.fractionalize_grid_point_array(
                 grid_point_array,
-                grid,
+                np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
             ),
-            grid,
+            [grid.nu, grid.nv, grid.nw],
         )
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
