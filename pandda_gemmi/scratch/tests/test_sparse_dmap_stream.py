@@ -138,17 +138,23 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
 
     print(f"##### Loading DMaps #####")
+    # time_begin = time.time()
+    # sparse_dmaps = {}
+    # for dtag in datasets:
+    #     print(f"##### {dtag} #####")
+    #     sparse_dmaps[dtag] = dmaps.load(dtag)
+    #     # save_dmap(
+    #     #         reference_frame.unmask(dmap_sparse),
+    #     #         Path(out_dir) / f"{dtag}.ccp4"
+    #     #     )
+    # time_finish = time.time()
+    # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
+
     time_begin = time.time()
     sparse_dmaps = {}
-    for dtag in datasets:
-        print(f"##### {dtag} #####")
-        sparse_dmaps[dtag] = dmaps.load(dtag)
-        # save_dmap(
-        #         reference_frame.unmask(dmap_sparse),
-        #         Path(out_dir) / f"{dtag}.ccp4"
-        #     )
+    array = dmaps.array_load()
     time_finish = time.time()
-    print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
+    print(f"Loaded xmaps in {round(time_finish - time_begin, 1)} into shape {array.shape}")
 
     print(f"##### Masking dmaps #####")
     time_begin = time.time()

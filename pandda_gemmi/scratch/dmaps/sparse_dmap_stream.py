@@ -2,6 +2,7 @@ import time
 from pathlib import Path
 
 import gemmi
+import numpy as np
 
 from ..interfaces import *
 from .sparse_dmap import SparseDMap
@@ -40,6 +41,20 @@ class SparseDMapStream:
         aligned_xmap = SparseDMapStream.align_xmap(xmap, self.dframe, alignment)
 
         return aligned_xmap
+
+    def array_load(self, ):
+        # Get the shape to load datasets into
+        shape = (len(self.datasets), self.dframe.mask.indicies[0].size)
+
+        # Get the array
+        array = np.zeros(shape)
+
+        # Load each dataset in
+        for j, dtag in enumerate(self.datasets):
+            sparse_dmap = self.load(dtag)
+            array[j, :] = sparse_dmap.data
+
+        return array
 
     @staticmethod
     def align_xmap(xmap: CrystallographicGridInterface, dframe: DFrameInterface, alignment: AlignmentInterface):
