@@ -127,6 +127,7 @@ class PointPositionArray(PointPositionArrayInterface):
     def get_grid_points_around_protein(st: StructureInterface, grid, radius):
         point_arrays = []
         position_arrays = []
+
         begin = time.time()
         for atom in st.protein_atoms():
             point_array, position_array = PointPositionArray.get_nearby_grid_points(
@@ -146,7 +147,11 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"All points shape: {all_points_array.shape}")
         # print(f"All positions shape: {all_positions_array.shape}")
 
+        begin=time.time()
         unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
+        finish = time.time()
+        print(f"\t\t\t\tGot unique points in: {finish-begin}")
+
         unique_positions = all_positions_array[indexes, :]
         # print(f"Unique points shape: {unique_points.shape}")
         # print(f"Unique positions shape: {unique_positions.shape}")
