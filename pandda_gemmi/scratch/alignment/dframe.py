@@ -424,9 +424,9 @@ class PointPositionArray(PointPositionArrayInterface):
         #         atom_positions[j, :],
         #         radius
         #     )
-        # for point_position_array in point_position_arrays:
-        #     point_arrays.append(point_position_array[0])
-        #     position_arrays.append(point_position_array[1])
+        for point_position_array in point_position_arrays:
+            point_arrays.append(point_position_array[0])
+            position_arrays.append(point_position_array[1])
 
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
