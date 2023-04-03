@@ -11,7 +11,7 @@ import gemmi
 from sklearn import neighbors
 from scipy import optimize
 
-def rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
+def get_rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
     y_s = y * np.exp(scale * r)
         # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
         # knn_y.fit(r.reshape(-1, 1),
@@ -25,8 +25,8 @@ def rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
 
     y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in y_inds_unique[1:-2]])
 
-    rmsd = np.sum(np.abs(x_f - y_f))
-    return rmsd
+    _rmsd = np.sum(np.abs(x_f - y_f))
+    return _rmsd
 
 class SmoothReflections:
     def __init__(self, dataset: DatasetInterface):
@@ -107,10 +107,10 @@ class SmoothReflections:
             y_f = np.array(
                 [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
 
-            rmsd = np.sum(np.abs(x_f - y_f))
+            _rmsd = np.sum(np.abs(x_f - y_f))
 
             scales.append(scale)
-            rmsds.append(rmsd)
+            rmsds.append(_rmsd)
 
         # x = reference_f_array
         # y = dtag_f_array
@@ -259,7 +259,7 @@ class SmoothReflections:
         begin_solve = time.time()
         # y_inds_unique = np.unique(y_inds)
         min_scale = optimize.minimize(
-            lambda _scale: rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
             0.0,
             bounds=((-15.0,15.0),)
         ).x
@@ -293,7 +293,7 @@ class SmoothReflections:
         begin_solve = time.time()
         # y_inds_unique = np.unique(y_inds)
         min_scale = optimize.shgo(
-            lambda _scale: rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
             bounds=((-15.0, 15.0),)
         ).x
 
@@ -332,10 +332,10 @@ class SmoothReflections:
             y_f = np.array(
                 [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
 
-            rmsd = np.sum(np.abs(x_f - y_f))
+            _rmsd = np.sum(np.abs(x_f - y_f))
 
             scales.append(scale)
-            rmsds.append(rmsd)
+            rmsds.append(_rmsd)
 
 
         min_scale = scales[np.argmin(rmsds)]
