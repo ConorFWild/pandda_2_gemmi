@@ -200,6 +200,7 @@ class SmoothReflections:
 
         # Refference array
         # reference_reflections = truncated_reference.reflections.reflections
+        begin_preprocess = time.time()
         reference_reflections_array = np.array(reference_reflections,
                                                copy=True,
                                                )
@@ -252,6 +253,9 @@ class SmoothReflections:
         #           )
         y_inds = np.digitize(y, sample_grid)
 
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess-begin_preprocess}")
+
         # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
         # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
@@ -303,6 +307,7 @@ class SmoothReflections:
         # min_scale = scales[np.argmin(rmsds)]
 
         # Get the original reflections
+        begin_dataset = time.time()
         original_reflections = dataset.reflections.reflections
 
         original_reflections_array = np.array(original_reflections,
@@ -350,6 +355,8 @@ class SmoothReflections:
             dataset.ligand_files
             # smoothing_factor=float(min_scale)
         )
+        finish_dataset = time.time()
+        print(f"\t\t\tMake dataset: {finish_dataset-begin_dataset}")
 
         finish_smooth_reflections = time.time()
         print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
