@@ -148,7 +148,13 @@ class PointPositionArray(PointPositionArrayInterface):
         return points_within_radius.astype(int), positions_within_radius
 
     @staticmethod
-    def get_nearby_grid_points_parallel(spacing, fractionalization_matrix, orthogonalization_matrix, position, radius):
+    def get_nearby_grid_points_parallel(
+            spacing,
+            fractionalization_matrix,
+            orthogonalization_matrix,
+            position,
+            radius,
+    ):
         # Get the fractional position
         # print(f"##########")
 
@@ -161,6 +167,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 np.array([x + dx, y + dy, z + dz]).reshape((1, 3)),
                 fractionalization_matrix,
             )
+            print(corner_fractional.shape)
             corners.append([corner_fractional[0, 0], corner_fractional[0, 1], corner_fractional[0, 2]])
 
         fractional_corner_array = np.array(corners)
