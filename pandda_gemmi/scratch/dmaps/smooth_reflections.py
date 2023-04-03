@@ -235,9 +235,42 @@ class SmoothReflections:
 
         r = reference_resolution_array
 
+        ####################### NEW 20 #########################
 
+        # Get the resolution bins
+        sample_grid = np.linspace(np.min(r), np.max(r), 20)
 
-        ####################### NEW #########################
+        # Get the array that maps x values to bins
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
+
+        # Get the bin averages
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # print(f"\t\t\tsample NEW: {x_f}")
+        # print(f"\t\t\txf NEW: {x_f}")
+
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+
+        # Optimise the scale factor
+
+        begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
+        min_scale = optimize.minimize(
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            0.0,
+        ).x
+
+        # min_scale = optimize.fsolve(
+        #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+        #     0.0
+        # )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve NEW 20: {finish_solve - begin_solve} with scale: {min_scale}")
+
+        ####################### NEW 100 #########################
 
         # Get the resolution bins
         sample_grid = np.linspace(np.min(r), np.max(r), 100)
@@ -249,16 +282,12 @@ class SmoothReflections:
         populated_bins, counts = np.unique(x_inds, return_counts=True)
         x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
         # print(f"\t\t\tsample NEW: {x_f}")
-        print(f"\t\t\txf NEW: {x_f}")
-
-
+        # print(f"\t\t\txf NEW: {x_f}")
 
         y_inds = np.digitize(dtag_resolution_array, sample_grid)
 
         finish_preprocess = time.time()
-        print(f"\t\t\tPreprocess: {finish_preprocess-begin_preprocess}")
-
-
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
 
         # Optimise the scale factor
 
@@ -267,7 +296,6 @@ class SmoothReflections:
         min_scale = optimize.minimize(
             lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
             0.0,
-            bounds=((-15.0,15.0),)
         ).x
 
         # min_scale = optimize.fsolve(
@@ -275,9 +303,116 @@ class SmoothReflections:
         #     0.0
         # )
         finish_solve = time.time()
-        print(f"\t\t\tSolve NEW: {finish_solve-begin_solve} with scale: {min_scale}")
+        print(f"\t\t\tSolve NEW 100: {finish_solve - begin_solve} with scale: {min_scale}")
 
-        ####################### NEW SHGO #########################
+
+
+        ####################### NEW 20 bounded #########################
+
+        # Get the resolution bins
+        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+
+        # Get the array that maps x values to bins
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
+
+        # Get the bin averages
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # print(f"\t\t\tsample NEW: {x_f}")
+        # print(f"\t\t\txf NEW: {x_f}")
+
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+
+        # Optimise the scale factor
+
+        begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
+        min_scale = optimize.minimize(
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            0.0,
+            bounds=((-15.0, 15.0),)
+        ).x
+
+        # min_scale = optimize.fsolve(
+        #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+        #     0.0
+        # )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve NEW BOUNDED 20: {finish_solve - begin_solve} with scale: {min_scale}")
+
+        ####################### NEW 100 bounded #########################
+
+        # Get the resolution bins
+        sample_grid = np.linspace(np.min(r), np.max(r), 100)
+
+        # Get the array that maps x values to bins
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
+
+        # Get the bin averages
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # print(f"\t\t\tsample NEW: {x_f}")
+        # print(f"\t\t\txf NEW: {x_f}")
+
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+
+        # Optimise the scale factor
+
+        begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
+        min_scale = optimize.minimize(
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            0.0,
+            bounds=((-15.0, 15.0),)
+        ).x
+
+        # min_scale = optimize.fsolve(
+        #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+        #     0.0
+        # )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve NEW BOUNDED 100: {finish_solve - begin_solve} with scale: {min_scale}")
+
+        ####################### NEW 20 SHGO #########################
+
+        # Get the resolution bins
+        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+
+        # Get the array that maps x values to bins
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
+
+        # Get the bin averages
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+
+        # Optimise the scale factor
+
+        begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
+        min_scale = optimize.shgo(
+            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            bounds=((-15.0, 15.0),)
+        ).x
+
+        # min_scale = optimize.fsolve(
+        #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+        #     0.0
+        # )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve NEW SHGO 20: {finish_solve - begin_solve} with scale: {min_scale}")
+
+        ####################### NEW 100 SHGO #########################
 
         # Get the resolution bins
         sample_grid = np.linspace(np.min(r), np.max(r), 100)
@@ -308,7 +443,7 @@ class SmoothReflections:
         #     0.0
         # )
         finish_solve = time.time()
-        print(f"\t\t\tSolve NEW SHGO: {finish_solve - begin_solve} with scale: {min_scale}")
+        print(f"\t\t\tSolve NEW SHGO 100: {finish_solve - begin_solve} with scale: {min_scale}")
 
         ########################## OLD #########################
         begin_solve = time.time()
@@ -320,7 +455,7 @@ class SmoothReflections:
                   x.reshape(-1, 1),
                   )
         x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
-        print(f"\t\t\txf OLD: {x_f}")
+        # print(f"\t\t\txf OLD: {x_f}")
 
 
         scales = []
