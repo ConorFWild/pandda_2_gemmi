@@ -266,12 +266,13 @@ class SmoothReflections:
             lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
             0.0
         ).x
+
         # min_scale = optimize.fsolve(
         #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
         #     0.0
         # )
         finish_solve = time.time()
-        print(f"\t\t\tSolve: {finish_solve-begin_solve}")
+        print(f"\t\t\tSolve: {finish_solve-begin_solve} with scale: {min_scale}")
         # for scale in np.linspace(-15, 15, 300):
         #     y_s = y * np.exp(scale * r)
         #     # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
