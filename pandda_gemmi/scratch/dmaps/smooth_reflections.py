@@ -235,11 +235,6 @@ class SmoothReflections:
 
         r = reference_resolution_array
 
-        plt.scatter()
-        plt.scatter(r, x)
-        plt.scatter(r, x)
-        plt.savefig(f"{dataset.structure.path.parent.name}.png")
-        plt.clf()
 
 
         ####################### NEW #########################
