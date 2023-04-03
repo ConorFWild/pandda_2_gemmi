@@ -74,9 +74,9 @@ class PointPositionArray(PointPositionArrayInterface):
                 xyz_tuple
                 for xyz_tuple
                 in itertools.product(
-                np.arange(u0, u1 + 1),
-                np.arange(v0, v1 + 1),
-                np.arange(w0, w1 + 1),
+                    np.arange(u0, u1 + 1),
+                    np.arange(v0, v1 + 1),
+                    np.arange(w0, w1 + 1),
             )
             ]
         )
@@ -127,6 +127,7 @@ class PointPositionArray(PointPositionArrayInterface):
     def get_grid_points_around_protein(st: StructureInterface, grid, radius):
         point_arrays = []
         position_arrays = []
+        begin = time.time()
         for atom in st.protein_atoms():
             point_array, position_array = PointPositionArray.get_nearby_grid_points(
                 grid,
@@ -135,6 +136,9 @@ class PointPositionArray(PointPositionArrayInterface):
             )
             point_arrays.append(point_array)
             position_arrays.append(position_array)
+
+        finish = time.time()
+        print(f"\t\t\t\tGot nearby grid points arrays in: {finish-begin}")
 
         all_points_array = np.concatenate(point_arrays, axis=0)
         all_positions_array = np.concatenate(position_arrays, axis=0)
