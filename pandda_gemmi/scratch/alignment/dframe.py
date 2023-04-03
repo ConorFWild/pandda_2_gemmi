@@ -35,17 +35,17 @@ class PointPositionArray(PointPositionArrayInterface):
         return fractional_array
 
     @staticmethod
-    def fractionalize_grid_point_array_dep(grid_point_array, spacing):
+    def fractionalize_grid_point_array_mat(grid_point_array, spacing):
         return grid_point_array / np.array(spacing)
 
     @staticmethod
-    def orthogonalize_fractional_array_dep(fractional_array, orthogonalization_matrix):
+    def orthogonalize_fractional_array_mat(fractional_array, orthogonalization_matrix):
         orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
 
         return orthogonal_array
 
     @staticmethod
-    def fractionalize_orthogonal_array_dep(orthogonal_array, fractionalization_matrix):
+    def fractionalize_orthogonal_array_mat(orthogonal_array, fractionalization_matrix):
         fractional_array = np.matmul(fractionalization_matrix, orthogonal_array.T).T
 
         return fractional_array
@@ -170,7 +170,7 @@ class PointPositionArray(PointPositionArrayInterface):
         corners = []
         for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
             # corner = gemmi.Position(x + dx, y + dy, z + dz)
-            corner_fractional = PointPositionArray.fractionalize_orthogonal_array(
+            corner_fractional = PointPositionArray.fractionalize_orthogonal_array_mat(
                 np.array([x + dx, y + dy, z + dz]).reshape((1, 3)),
                 fractionalization_matrix,
             )
@@ -224,8 +224,8 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the point positions
-        position_array = PointPositionArray.orthogonalize_fractional_array(
-            PointPositionArray.fractionalize_grid_point_array(
+        position_array = PointPositionArray.orthogonalize_fractional_array_mat(
+            PointPositionArray.fractionalize_grid_point_array_mat(
                 grid_point_array,
                 spacing,
             ),
