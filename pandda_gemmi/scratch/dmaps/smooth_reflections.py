@@ -23,7 +23,7 @@ def rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
         # y_f = np.array(
         #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
 
-    y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in y_inds_unique])
+    y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in y_inds_unique[1:-2]])
 
     rmsd = np.sum(np.abs(x_f - y_f))
     return rmsd
@@ -241,8 +241,8 @@ class SmoothReflections:
         x_inds = np.digitize(x, sample_grid)
 
         # Get the bin averages
-        populated_bins = np.unique(x_inds)
-        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins])
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
 
         # knn_x = neighbors.RadiusNeighborsRegressor(0.01)
         # knn_x.fit(r.reshape(-1, 1),
