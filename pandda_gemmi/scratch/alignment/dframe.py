@@ -61,6 +61,11 @@ class PointPositionArray(PointPositionArrayInterface):
         for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
             corner = gemmi.Position(x + dx, y + dy, z + dz)
             corner_fractional = grid.unit_cell.fractionalize(corner)
+            corner_fractional_2 = PointPositionArray.fractionalize_orthogonal_array(
+                np.array().reshape((1,3)),
+                np.array(grid.unit_cell.fractionalization_matrix.tolist())
+            )
+            print(f"{(corner_fractional.x, corner_fractional.y, corner_fractional.z)} {corner_fractional_2}")
             corners.append([corner_fractional.x, corner_fractional.y, corner_fractional.z])
 
         fractional_corner_array = np.array(corners)
@@ -385,27 +390,28 @@ class PointPositionArray(PointPositionArrayInterface):
         for atom in st.protein_atoms():
             pos = atom.pos
             positions.append([pos.x, pos.y, pos.z])
-        #     point_array, position_array = PointPositionArray.get_nearby_grid_points(
-        #         grid,
-        #         atom.pos,
-        #         radius
-        #     )
-        #     point_arrays.append(point_array)
-        #     position_arrays.append(position_array)
+            point_array, position_array = PointPositionArray.get_nearby_grid_points(
+                grid,
+                atom.pos,
+                radius
+            )
+            point_arrays.append(point_array)
+            position_arrays.append(position_array)
 
-        atom_positions = np.array(positions)
-
-        point_position_arrays = processor([Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
-            [grid.nu, grid.nv, grid.nw],
-            np.array(grid.unit_cell.fractionalization_matrix.tolist()),
-            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-            atom_positions[j, :],
-            radius)
-            for j
-            in range(atom_positions.shape[0])
-        ]
-        )
-
+        # atom_positions = np.array(positions)
+        #
+        # point_position_arrays = processor(
+        #     [
+        #         Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
+        #             [grid.nu, grid.nv, grid.nw],
+        #             np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+        #             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+        #             atom_positions[j, :],
+        #             radius)
+        #         for j
+        #         in range(atom_positions.shape[0])
+        #     ]
+        # )
 
         # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
         # for j in range(atom_positions.shape[0]):
@@ -416,9 +422,9 @@ class PointPositionArray(PointPositionArrayInterface):
         #         atom_positions[j, :],
         #         radius
         #     )
-        for point_position_array in point_position_arrays:
-            point_arrays.append(point_position_array[0])
-            position_arrays.append(point_position_array[1])
+        # for point_position_array in point_position_arrays:
+        #     point_arrays.append(point_position_array[0])
+        #     position_arrays.append(point_position_array[1])
 
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
