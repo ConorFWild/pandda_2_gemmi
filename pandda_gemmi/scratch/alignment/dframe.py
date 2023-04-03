@@ -8,6 +8,7 @@ import numpy as np
 from ..interfaces import *
 from ..dataset import ResidueID
 from ..dmaps import SparseDMap
+from ..processor import Partial
 
 
 class PointPositionArray(PointPositionArrayInterface):
@@ -97,9 +98,9 @@ class PointPositionArray(PointPositionArrayInterface):
                 xyz_tuple
                 for xyz_tuple
                 in itertools.product(
-                    np.arange(u0, u1 + 1),
-                    np.arange(v0, v1 + 1),
-                    np.arange(w0, w1 + 1),
+                np.arange(u0, u1 + 1),
+                np.arange(v0, v1 + 1),
+                np.arange(w0, w1 + 1),
             )
             ]
         )
@@ -157,9 +158,9 @@ class PointPositionArray(PointPositionArrayInterface):
         for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
             # corner = gemmi.Position(x + dx, y + dy, z + dz)
             corner_fractional = PointPositionArray.fractionalize_orthogonal_array(
-                np.array([x + dx, y + dy, z + dz]).reshape((1,3)), fractionalization_matrix,
+                np.array([x + dx, y + dy, z + dz]).reshape((1, 3)), fractionalization_matrix,
             )
-            corners.append([corner_fractional[0,0], corner_fractional[0,1], corner_fractional[0,2]])
+            corners.append([corner_fractional[0, 0], corner_fractional[0, 1], corner_fractional[0, 2]])
 
         fractional_corner_array = np.array(corners)
         fractional_min = np.min(fractional_corner_array, axis=0)
@@ -268,7 +269,6 @@ class PointPositionArray(PointPositionArrayInterface):
         fractional_max = np.max(fractional_corner_array, axis=-1)
         # print(f"\t\t\t\t\tFRACTIONAL min array shape: {fractional_min.shape}")
 
-
         # print(f"Fractional min: {fractional_min}")
         # print(f"Fractional max: {fractional_max}")
 
@@ -287,7 +287,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # w1 = np.ceil((z + dz) * grid.nw)
         u0 = np.floor(fractional_min[:, 0] * grid.nu)
         u1 = np.ceil(fractional_max[:, 0] * grid.nu)
-        v0 = np.floor(fractional_min[: ,1] * grid.nv)
+        v0 = np.floor(fractional_min[:, 1] * grid.nv)
         v1 = np.ceil(fractional_max[:, 1] * grid.nv)
         w0 = np.floor(fractional_min[:, 2] * grid.nw)
         w1 = np.ceil(fractional_max[:, 2] * grid.nw)
@@ -303,23 +303,23 @@ class PointPositionArray(PointPositionArrayInterface):
                 mesh_grid[0, :, :].reshape((-1, 1)),
                 mesh_grid[1, :, :].reshape((-1, 1)),
                 mesh_grid[2, :, :].reshape((-1, 1)),
-                ]
+            ]
             )
-        #     np.array(
-        #     [
-        #         xyz_tuple
-        #         for xyz_tuple
-        #         in itertools.product(
-        #             np.arange(u0, u1 + 1),
-        #             np.arange(v0, v1 + 1),
-        #             np.arange(w0, w1 + 1),
-        #     )
-        #     ]
-        # )
-        # print(f"Grid point array shape: {grid_point_array.shape}")
-        # print(f"Grid point first element: {grid_point_array[0, :]}")
+            #     np.array(
+            #     [
+            #         xyz_tuple
+            #         for xyz_tuple
+            #         in itertools.product(
+            #             np.arange(u0, u1 + 1),
+            #             np.arange(v0, v1 + 1),
+            #             np.arange(w0, w1 + 1),
+            #     )
+            #     ]
+            # )
+            # print(f"Grid point array shape: {grid_point_array.shape}")
+            # print(f"Grid point first element: {grid_point_array[0, :]}")
 
-        # Get the point positions
+            # Get the point positions
             points_position_array = PointPositionArray.orthogonalize_fractional_array(
                 PointPositionArray.fractionalize_grid_point_array(
                     grid_point_array,
@@ -330,17 +330,17 @@ class PointPositionArray(PointPositionArrayInterface):
             # print(f"\t\t\t\t\t\tPoint position array shape: {fractional_min.shape}")
 
             # print(f"Grid position array shape: {position_array.shape}")
-        # print(f"Grid position first element: {position_array[0, :]}")
+            # print(f"Grid position first element: {position_array[0, :]}")
 
-        # Get the distances to the position
+            # Get the distances to the position
             distance_array = np.linalg.norm(
-                points_position_array - position_array[j,:],
+                points_position_array - position_array[j, :],
                 axis=1,
             )
-        # print(f"Distance array shape: {distance_array.shape}")
-        # print(f"Distance array first element: {distance_array[0]}")
+            # print(f"Distance array shape: {distance_array.shape}")
+            # print(f"Distance array first element: {distance_array[0]}")
 
-        # Mask the points on distances
+            # Mask the points on distances
             points_within_radius = grid_point_array[distance_array < radius]
             positions_within_radius = points_position_array[distance_array < radius]
             point_arrays.append(points_within_radius.astype(int))
@@ -364,7 +364,7 @@ class PointPositionArray(PointPositionArrayInterface):
         return point_arrays, position_arrays
 
     @staticmethod
-    def get_grid_points_around_protein(st: StructureInterface, grid, radius):
+    def get_grid_points_around_protein(st: StructureInterface, grid, radius, processor: ProcessorInterface):
         point_arrays = []
         position_arrays = []
 
@@ -384,20 +384,33 @@ class PointPositionArray(PointPositionArrayInterface):
 
         atom_positions = np.array(positions)
 
-        # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
-        for j in range(atom_positions.shape[0]):
-            point_array, position_array = PointPositionArray.get_nearby_grid_points_parallel(
-                [grid.nu, grid.nv, grid.nw],
-                np.array(grid.unit_cell.fractionalization_matrix.tolist()),
-                np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-                atom_positions[j, :],
-                radius
+        point_position_arrays = processor([Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
+            [grid.nu, grid.nv, grid.nw],
+            np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+            atom_positions[j, :],
+            radius)
+            for j
+            in range(atom_positions.shape[0])
+        ]
         )
-            point_arrays.append(point_array)
-            position_arrays.append(position_array)
+
+
+        # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
+        # for j in range(atom_positions.shape[0]):
+        #     point_array, position_array = PointPositionArray.get_nearby_grid_points_parallel(
+        #         [grid.nu, grid.nv, grid.nw],
+        #         np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+        #         np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+        #         atom_positions[j, :],
+        #         radius
+        #     )
+        for point_position_array in point_position_arrays:
+            point_arrays.append(point_position_array[0])
+            position_arrays.append(point_position_array[1])
 
         finish = time.time()
-        print(f"\t\t\t\tGot nearby grid point position arrays in: {finish-begin}")
+        print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
 
         all_points_array = np.concatenate(point_arrays, axis=0)
         all_positions_array = np.concatenate(position_arrays, axis=0)
@@ -405,14 +418,14 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"All points shape: {all_points_array.shape}")
         # print(f"All positions shape: {all_positions_array.shape}")
 
-        begin=time.time()
+        begin = time.time()
         # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
-        all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2], )
+        all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
         shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
         point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
         point_3d_array[all_point_indexes] = True
         unique_points = np.argwhere(point_3d_array)
-        unique_points_indexes = (unique_points[:, 0], unique_points[:, 1], unique_points[:, 2], )
+        unique_points_indexes = (unique_points[:, 0], unique_points[:, 1], unique_points[:, 2],)
         pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
@@ -429,7 +442,8 @@ class PointPositionArray(PointPositionArrayInterface):
         )
 
         finish = time.time()
-        print(f"\t\t\t\tGot unique points in: {finish-begin} with point shape {unique_points.shape} and pos shape {unique_positions.shape}")
+        print(
+            f"\t\t\t\tGot unique points in: {finish - begin} with point shape {unique_points.shape} and pos shape {unique_positions.shape}")
 
         # unique_positions = all_positions_array[indexes, :]
         # print(f"Unique points shape: {unique_points.shape}")
@@ -475,8 +489,6 @@ class StructureArray:
 
         return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
-
-
     def mask(self, mask):
         return StructureArray(
             self.models[mask],
@@ -515,27 +527,26 @@ class GridPartitioning(GridPartitioningInterface):
         begin = time.time()
         ca_point_position_array = st_array.mask(np.array(ca_mask))
         finish = time.time()
-        print(f"\t\t\tGot position array in : {finish-begin}")
+        print(f"\t\t\tGot position array in : {finish - begin}")
         print(f"\t\t\tCA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
-        begin=time.time()
+        begin = time.time()
         kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
         finish = time.time()
-        print(f"\t\t\tBuilt tree in : {finish-begin}")
+        print(f"\t\t\tBuilt tree in : {finish - begin}")
 
         # Get the point array
         begin = time.time()
         point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
         finish = time.time()
-        print(f"\t\t\tGot point position array : {finish-begin}")
+        print(f"\t\t\tGot point position array : {finish - begin}")
 
         # Get the NN indexes
-        begin=time.time()
+        begin = time.time()
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
-        print(f"\t\t\tQueryed points in : {finish-begin}")
-
+        print(f"\t\t\tQueryed points in : {finish - begin}")
 
         # Get partions
         self.partitions = {
@@ -601,13 +612,13 @@ class DFrame:
         begin_mask = time.time()
         self.mask = GridMask(dataset, grid)
         finish_mask = time.time()
-        print(f"\tGot mask in {finish_mask-begin_mask}")
+        print(f"\tGot mask in {finish_mask - begin_mask}")
 
         # Get the grid partitioning
         begin_partition = time.time()
         self.partitioning = GridPartitioning(dataset, grid, )
         finish_partition = time.time()
-        print(f"\tGot Partitions in {finish_partition-begin_partition}")
+        print(f"\tGot Partitions in {finish_partition - begin_partition}")
 
     def get_grid(self):
         grid = gemmi.FloatGrid(*self.spacing)
