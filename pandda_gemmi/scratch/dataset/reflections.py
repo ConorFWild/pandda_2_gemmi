@@ -3,6 +3,7 @@ import dataclasses
 
 import numpy as np
 import gemmi
+import pandas as pd
 
 from pathlib import Path
 
@@ -83,6 +84,63 @@ class MtzColumnPython:
                                column.label,
                                )
 
+def drop_columns(reflections, f, phi):
+    new_reflections = gemmi.Mtz(with_base=False)
+
+    # Set dataset properties
+    new_reflections.spacegroup = reflections.spacegroup
+    new_reflections.set_cell_for_all(reflections.cell)
+
+    # Add dataset
+    new_reflections.add_dataset("truncated")
+
+    free_flag = None
+
+    for column in reflections.columns:
+        if column.label == "FREE":
+            free_flag = "FREE"
+            break
+        if column.label == "FreeR_flag":
+            free_flag = "FreeR_flag"
+            break
+        if column.label == "R-free-flags":
+            free_flag = "R-free-flags"
+            break
+
+    if not free_flag:
+        raise Exception("No RFree Flag found!")
+
+    # Add columns
+    for column in reflections.columns:
+        if column.label in ["H", "K", "L", free_flag, f, phi]:
+            new_reflections.add_column(column.label, column.type)
+
+    # Get data
+    data_array = np.array(reflections, copy=True)
+    data = pd.DataFrame(data_array,
+                        columns=reflections.column_labels(),
+                        )
+    data.set_index(["H", "K", "L"], inplace=True)
+
+    # Truncate by columns
+    data_indexed = data[[free_flag, f, phi]]
+
+    # To numpy
+    data_dropped_array = data_indexed.to_numpy()
+
+    # new data
+    new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
+                          data_dropped_array,
+                          ]
+                         )
+
+    # Update
+    new_reflections.set_data(new_data)
+
+    # Update resolution
+    new_reflections.update_reso()
+
+    return new_reflections
 
 @dataclasses.dataclass()
 class MtzPython:
@@ -154,6 +212,8 @@ class Reflections(ReflectionsInterface):
     def from_path(cls, path: Path):
         reflections = gemmi.read_mtz_file(str(path))
         f, phi = cls.get_structure_factors(reflections)
+
+        reflections = drop_columns(reflections, f, phi)
         return cls(path, f, phi, reflections)
 
     @classmethod
