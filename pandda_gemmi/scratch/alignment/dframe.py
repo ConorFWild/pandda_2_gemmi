@@ -222,7 +222,10 @@ class GridPartitioning(GridPartitioningInterface):
             else:
                 ca_mask.append(False)
 
+        begin = time.time()
         ca_point_position_array = st_array.mask(np.array(ca_mask))
+        finish = time.time()
+        print(f"\t\t\tGot position array in : {finish-begin}")
         print(f"\t\t\tCA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
