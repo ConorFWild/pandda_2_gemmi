@@ -86,8 +86,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     grid = reference_frame.get_grid()
     grid_array = np.array(grid, copy=False)
     for resid, partition in reference_frame.partitioning.partitions.items():
-        if int(resid.number) != 238:
-            continue
+        # if int(resid.number) != 238:
+        #     continue
         grid_array[
             (
                 partition.points[:, 0].flatten(),
