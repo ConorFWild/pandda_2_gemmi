@@ -53,7 +53,7 @@ class PointPositionArray(PointPositionArrayInterface):
     @staticmethod
     def get_nearby_grid_points(grid, position, radius):
         # Get the fractional position
-        # print(f"##########")
+        print(f"##########")
 
         x, y, z = position.x, position.y, position.z
 
@@ -72,8 +72,8 @@ class PointPositionArray(PointPositionArrayInterface):
         fractional_min = np.min(fractional_corner_array, axis=0)
         fractional_max = np.max(fractional_corner_array, axis=0)
 
-        # print(f"Fractional min: {fractional_min}")
-        # print(f"Fractional max: {fractional_max}")
+        print(f"Fractional min: {fractional_min}")
+        print(f"Fractional max: {fractional_max}")
 
         # Find the fractional bounding box
         # x, y, z = fractional.x, fractional.y, fractional.z
@@ -95,7 +95,7 @@ class PointPositionArray(PointPositionArrayInterface):
         w0 = np.floor(fractional_min[2] * grid.nw)
         w1 = np.ceil(fractional_max[2] * grid.nw)
 
-        # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
+        print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
         # Get the grid points
         grid_point_array = np.array(
@@ -109,8 +109,8 @@ class PointPositionArray(PointPositionArrayInterface):
             )
             ]
         )
-        # print(f"Grid point array shape: {grid_point_array.shape}")
-        # print(f"Grid point first element: {grid_point_array[0, :]}")
+        print(f"Grid point array shape: {grid_point_array.shape}")
+        print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the point positions
         position_array = PointPositionArray.orthogonalize_fractional_array(
@@ -122,35 +122,35 @@ class PointPositionArray(PointPositionArrayInterface):
             # np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
             grid
         )
-        # print(f"Grid position array shape: {position_array.shape}")
-        # print(f"Grid position first element: {position_array[0, :]}")
+        print(f"Grid position array shape: {position_array.shape}")
+        print(f"Grid position first element: {position_array[0, :]}")
 
         # Get the distances to the position
         distance_array = np.linalg.norm(
             position_array - np.array([position.x, position.y, position.z]),
             axis=1,
         )
-        # print(f"Distance array shape: {distance_array.shape}")
-        # print(f"Distance array first element: {distance_array[0]}")
+        print(f"Distance array shape: {distance_array.shape}")
+        print(f"Distance array first element: {distance_array[0]}")
 
         # Mask the points on distances
         points_within_radius = grid_point_array[distance_array < radius]
         positions_within_radius = position_array[distance_array < radius]
-        # print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
+        print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
 
         # Bounding box orth
-        # orth_bounds_min = np.min(positions_within_radius, axis=0)
-        # orth_bounds_max = np.max(positions_within_radius, axis=0)
-        # point_bounds_min = np.min(points_within_radius, axis=0)
-        # point_bounds_max = np.max(points_within_radius, axis=0)
-        #
-        # print(f"Original position was: {position.x} {position.y} {position.z}")
-        # print(f"Orth bounding box min: {orth_bounds_min}")
-        # print(f"Orth bounding box max: {orth_bounds_max}")
-        # print(f"Point bounding box min: {point_bounds_min}")
-        # print(f"Point bounding box max: {point_bounds_max}")
-        # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
-        # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
+        orth_bounds_min = np.min(positions_within_radius, axis=0)
+        orth_bounds_max = np.max(positions_within_radius, axis=0)
+        point_bounds_min = np.min(points_within_radius, axis=0)
+        point_bounds_max = np.max(points_within_radius, axis=0)
+
+        print(f"Original position was: {position.x} {position.y} {position.z}")
+        print(f"Orth bounding box min: {orth_bounds_min}")
+        print(f"Orth bounding box max: {orth_bounds_max}")
+        print(f"Point bounding box min: {point_bounds_min}")
+        print(f"Point bounding box max: {point_bounds_max}")
+        print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
+        print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
 
         return points_within_radius.astype(int), positions_within_radius
 
