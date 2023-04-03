@@ -508,7 +508,7 @@ def contains(string, pattern):
 
 
 class GridPartitioning(GridPartitioningInterface):
-    def __init__(self, dataset, grid, ):
+    def __init__(self, dataset, grid, processor):
         # Get the structure array
         st_array = StructureArray.from_structure(dataset.structure)
         print(f"Structure array shape: {st_array.positions.shape}")
@@ -616,7 +616,7 @@ class DFrame:
 
         # Get the grid partitioning
         begin_partition = time.time()
-        self.partitioning = GridPartitioning(dataset, grid, )
+        self.partitioning = GridPartitioning(dataset, grid, processor)
         finish_partition = time.time()
         print(f"\tGot Partitions in {finish_partition - begin_partition}")
 
