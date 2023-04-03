@@ -187,7 +187,7 @@ class SmoothReflections:
         begin_common = time.time()
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
         finish_common = time.time()
-        print(f"\t\t\tCommon: {finish_common-begin_common}")
+        print(f"\t\t\tCommon: {finish_common-begin_common} with shape {common_reflections_set.shape}")
 
         # # Truncate
         begin_truncate = time.time()
@@ -209,6 +209,7 @@ class SmoothReflections:
                                                    )
         reference_f_array = reference_reflections_table[self.reference_dataset.reflections.f].to_numpy()
 
+
         # Dtag array
         # dtag_reflections = truncated_dataset.reflections.reflections
         dtag_reflections_array = np.array(dtag_reflections,
@@ -218,6 +219,9 @@ class SmoothReflections:
                                               columns=dtag_reflections.column_labels(),
                                               )
         dtag_f_array = dtag_reflections_table[dataset.reflections.f].to_numpy()
+        print(f"\t\t\tReference f array size: {reference_f_array.shape} and dtag f array size: {dtag_f_array.shape}")
+
+
 
         # Resolution array
         reference_resolution_array = reference_reflections.make_1_d2_array()
