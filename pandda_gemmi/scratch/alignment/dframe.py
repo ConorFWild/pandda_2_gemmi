@@ -145,8 +145,14 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Axis: Atom, coord, corner
         fractional_corner_array = np.stack([corner.reshape((-1,1)) for corner in corners], axis=-1)
+        print(f"\t\t\t\t\tFRACTIONAL corner array shape: {fractional_corner_array.shape}")
+
+        # print(f"Fractional min: {fractional_min}")
+
         fractional_min = np.min(fractional_corner_array, axis=-1)
         fractional_max = np.max(fractional_corner_array, axis=-1)
+        print(f"\t\t\t\t\tFRACTIONAL min array shape: {fractional_min.shape}")
+
 
         # print(f"Fractional min: {fractional_min}")
         # print(f"Fractional max: {fractional_max}")
@@ -241,7 +247,11 @@ class PointPositionArray(PointPositionArrayInterface):
         position_arrays = []
 
         begin = time.time()
-        # for atom in st.protein_atoms():
+        positions = []
+
+        for atom in st.protein_atoms():
+            pos = atom.pos
+            positions.append([pos.x, pos.y, pos.z])
         #     point_array, position_array = PointPositionArray.get_nearby_grid_points(
         #         grid,
         #         atom.pos,
@@ -250,7 +260,7 @@ class PointPositionArray(PointPositionArrayInterface):
         #     point_arrays.append(point_array)
         #     position_arrays.append(position_array)
 
-        atom_positions = StructureArray.from_structure(st).positions
+        atom_positions = np.array(positions)
 
         point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
 
@@ -333,27 +343,7 @@ class StructureArray:
 
         return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
-    @classmethod
-    def from_raw_structure(cls, structure):
-        models = []
-        chains = []
-        seq_ids = []
-        insertions = []
-        atom_ids = []
-        positions = []
-        for model in structure:
-            for chain in model:
-                for residue in chain.first_conformer():
-                    for atom in residue:
-                        models.append(model.name)
-                        chains.append(chain.name)
-                        seq_ids.append(str(residue.seqid.num))
-                        insertions.append(residue.seqid.icode)
-                        atom_ids.append(atom.name)
-                        pos = atom.pos
-                        positions.append([pos.x, pos.y, pos.z])
 
-        return cls(models, chains, seq_ids, insertions, atom_ids, positions)
 
     def mask(self, mask):
         return StructureArray(
