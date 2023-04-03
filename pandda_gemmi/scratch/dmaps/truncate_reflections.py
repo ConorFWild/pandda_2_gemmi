@@ -137,11 +137,12 @@ def truncate_reflections(reflections, index=None):
     #                       data_dropped_array,
     #                       ]
     #                      )
-    con_coords = np.vstack([data_array[:, 0:3], index])
+    data_hkl = data_array[:, 0:3].astype(int)
+    con_coords = np.vstack([data_hkl, index])
     size = np.max(con_coords, axis=0)-np.min(con_coords,axis=0)
     data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=np.bool)
     data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
-    mask = data_array_3d[(data_array[:,0], data_array[:, 1], data_array[:, 2])]
+    mask = data_array_3d[(data_hkl[:,0], data_hkl[:, 1], data_hkl[:, 2])]
 
 
     # structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
@@ -284,7 +285,7 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
     # running_index: Optional[pd.Index] = None
 
     hkl_arrays = [
-            np.array(datasets[dtag].reflections.reflections, copy=False)[:,0:3]
+            np.array(datasets[dtag].reflections.reflections, copy=False)[:,0:3].astype(int)
             for dtag
             in datasets
         ]
