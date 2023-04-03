@@ -180,7 +180,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     pca = PCA(n_components=min(200, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
     transformed = pca.fit_transform(sparse_dmap_inner_array)
     time_finish = time.time()
-    print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
+    print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {transformed.shape}")
 
 
 
