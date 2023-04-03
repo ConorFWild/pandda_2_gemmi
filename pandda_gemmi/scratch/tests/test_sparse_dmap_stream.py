@@ -139,15 +139,27 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     print(f"##### Loading DMaps #####")
     time_begin = time.time()
+    sparse_dmaps = {}
     for dtag in datasets:
         print(f"##### {dtag} #####")
-        dmap_sparse = dmaps.load(dtag)
-        save_dmap(
-                reference_frame.unmask(dmap_sparse),
-                Path(out_dir) / f"{dtag}.ccp4"
-            )
+        sparse_dmaps[dtag] = dmaps.load(dtag)
+        # save_dmap(
+        #         reference_frame.unmask(dmap_sparse),
+        #         Path(out_dir) / f"{dtag}.ccp4"
+        #     )
     time_finish = time.time()
     print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
+
+    print(f"##### Masking dmaps #####")
+    time_begin = time.time()
+    sparse_dmaps_inner = {}
+    for dtag in datasets:
+        print(f"##### {dtag} #####")
+        sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
+    time_finish = time.time()
+    sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
+    print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array}")
+
 
 
 if __name__ == "__main__":

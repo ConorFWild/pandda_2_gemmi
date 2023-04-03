@@ -7,6 +7,7 @@ import numpy as np
 
 from ..interfaces import *
 from ..dataset import ResidueID
+from ..dmaps import SparseDMap
 
 
 class PointPositionArray(PointPositionArrayInterface):
@@ -312,8 +313,24 @@ class DFrame:
         grid_array[:, :, :] = 0.0
         return grid
 
-    def unmask(self, sparse_dmap):
+    def unmask(self, sparse_dmap, ):
         grid = self.get_grid()
         grid_array = np.array(grid, copy=False)
         grid_array[self.mask.indicies] = sparse_dmap.data
         return grid
+
+    def unmask_inner(self, sparse_dmap, ):
+        grid = self.get_grid()
+        grid_array = np.array(grid, copy=False)
+        grid_array[self.mask.indicies_inner] = sparse_dmap.data
+        return grid
+
+    def mask(self, grid):
+        grid_array = np.array(grid, copy=False)
+        data = grid_array[self.mask.indicies]
+        return SparseDMap(data)
+
+    def mask_inner(self, grid):
+        grid_array = np.array(grid, copy=False)
+        data = grid_array[self.mask.indicies_inner]
+        return SparseDMap(data)
