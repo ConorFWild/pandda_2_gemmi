@@ -212,7 +212,9 @@ class PointPositionArray(PointPositionArrayInterface):
                 ),
                 grid,
             )
-        # print(f"Grid position array shape: {position_array.shape}")
+            print(f"\t\t\t\t\t\tPoint position array shape: {fractional_min.shape}")
+
+            # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
 
         # Get the distances to the position
