@@ -598,7 +598,7 @@ def get_grid_from_dataset(dataset: DatasetInterface):
 
 
 class DFrame:
-    def __init__(self, dataset: DatasetInterface, ):
+    def __init__(self, dataset: DatasetInterface, processor):
         # Get the grid
         grid = get_grid_from_dataset(dataset)
 
