@@ -237,7 +237,7 @@ class SmoothReflections:
         ####################### NEW #########################
 
         # Get the resolution bins
-        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+        sample_grid = np.linspace(np.min(r), np.max(r), 100)
 
         # Get the array that maps x values to bins
         x_inds = np.digitize(x, sample_grid)
@@ -274,7 +274,7 @@ class SmoothReflections:
         ####################### NEW SHGO #########################
 
         # Get the resolution bins
-        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+        sample_grid = np.linspace(np.min(r), np.max(r), 100)
 
         # Get the array that maps x values to bins
         x_inds = np.digitize(x, sample_grid)
