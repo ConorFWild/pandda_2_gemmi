@@ -154,7 +154,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_begin = time.time()
     sparse_dmaps_inner = {}
     for dtag in datasets:
-        print(f"##### {dtag} #####")
+        # print(f"##### {dtag} #####")
         sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
     time_finish = time.time()
     sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
