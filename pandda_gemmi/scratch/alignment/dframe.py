@@ -167,10 +167,12 @@ class PointPositionArray(PointPositionArrayInterface):
                 np.array([x + dx, y + dy, z + dz]).reshape((1, 3)),
                 fractionalization_matrix,
             )
-            print(corner_fractional.shape)
+            # print(corner_fractional.shape)
             corners.append([corner_fractional[0, 0], corner_fractional[0, 1], corner_fractional[0, 2]])
 
         fractional_corner_array = np.array(corners)
+        print(fractional_corner_array.shape)
+
         fractional_min = np.min(fractional_corner_array, axis=0)
         fractional_max = np.max(fractional_corner_array, axis=0)
 
