@@ -227,7 +227,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Mask the points on distances
             points_within_radius = grid_point_array[distance_array < radius]
-            positions_within_radius = position_array[distance_array < radius]
+            positions_within_radius = points_position_array[distance_array < radius]
             point_arrays.append(points_within_radius.astype(int))
             position_arrays.append(positions_within_radius)
         # print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
