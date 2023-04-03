@@ -386,13 +386,16 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
         for j in range(atom_positions.shape[0]):
-            point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_parallel(
+            point_array, position_array = PointPositionArray.get_nearby_grid_points_parallel(
                 [grid.nu, grid.nv, grid.nw],
                 np.array(grid.unit_cell.fractionalization_matrix.tolist()),
                 np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
                 atom_positions[j, :],
                 radius
         )
+            point_arrays.append(point_array)
+            position_arrays.append(position_array)
+
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish-begin}")
 
