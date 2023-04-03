@@ -223,16 +223,23 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_mask.append(False)
 
         ca_point_position_array = st_array.mask(np.array(ca_mask))
-        print(f"CA array shape: {ca_point_position_array.positions.shape}")
+        print(f"\t\t\tCA array shape: {ca_point_position_array.positions.shape}")
 
         # Get the tree
+        begin=time.time()
         kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
+        finish = time.time()
+        print(f"\t\t\tBuilt tree in : {finish-begin}")
 
         # Get the point array
         point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
 
         # Get the NN indexes
+        begin=time.time()
         distances, indexes = kdtree.query(point_position_array.positions)
+        finish = time.time()
+        print(f"\t\t\tQueryed points in : {finish-begin}")
+
 
         # Get partions
         self.partitions = {
