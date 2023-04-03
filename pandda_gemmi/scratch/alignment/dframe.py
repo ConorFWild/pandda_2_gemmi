@@ -431,7 +431,8 @@ class PointPositionArray(PointPositionArrayInterface):
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
 
-        all_points_array = np.concatenate(point_arrays, axis=0)
+        _all_points_array = np.concatenate(point_arrays, axis=0)
+        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1,3))
         all_positions_array = np.concatenate(position_arrays, axis=0)
 
         # print(f"All points shape: {all_points_array.shape}")
@@ -443,7 +444,7 @@ class PointPositionArray(PointPositionArrayInterface):
         shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
         point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
         point_3d_array[all_point_indexes] = True
-        unique_points = np.argwhere(point_3d_array)
+        unique_points = np.argwhere(point_3d_array) + np.min(_all_points_array, axis=0).reshape((1,3))
         unique_points_indexes = (unique_points[:, 0], unique_points[:, 1], unique_points[:, 2],)
         pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
