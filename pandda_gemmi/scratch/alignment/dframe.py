@@ -171,7 +171,7 @@ class PointPositionArray(PointPositionArrayInterface):
             corners.append([corner_fractional[0, 0], corner_fractional[0, 1], corner_fractional[0, 2]])
 
         fractional_corner_array = np.array(corners)
-        print(fractional_corner_array.shape)
+        # print(fractional_corner_array.shape)
 
         fractional_min = np.min(fractional_corner_array, axis=0)
         fractional_max = np.max(fractional_corner_array, axis=0)
@@ -192,7 +192,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # v1 = np.ceil((y + dy) * grid.nv)
         # w0 = np.floor((z - dz) * grid.nw)
         # w1 = np.ceil((z + dz) * grid.nw)
-        u0 = np.floor(fractional_min[0] * spacing[1])
+        u0 = np.floor(fractional_min[0] * spacing[0])
         u1 = np.ceil(fractional_max[0] * spacing[0])
         v0 = np.floor(fractional_min[1] * spacing[1])
         v1 = np.ceil(fractional_max[1] * spacing[1])
