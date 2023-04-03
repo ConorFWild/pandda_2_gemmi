@@ -140,7 +140,7 @@ def truncate_reflections(reflections, index=None):
     data_hkl = data_array[:, 0:3].astype(int)
     con_coords = np.vstack([data_hkl, index])
     size = np.max(con_coords, axis=0)-np.min(con_coords,axis=0)
-    data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=int)
+    data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=np.bool)
     data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
     mask = data_array_3d[(data_hkl[:,0], data_hkl[:, 1], data_hkl[:, 2])]
 
@@ -294,7 +294,7 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
         hkl_arrays
         )
     size = np.max(hkls, axis=0)-np.min(hkls,axis=0)
-    data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=np.bool)
+    data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=np.int)
     # data_array_3d = np.zeros((x for x in np.max(hkls, axis=0)-np.min(hkls,axis=0)), dtype=np.bool)
     for hkl_array in hkl_arrays:
         data_array_3d[(hkl_array[:, 0], hkl_array[:, 1], hkl_array[:, 2])] += 1
