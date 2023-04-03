@@ -158,7 +158,8 @@ class PointPositionArray(PointPositionArrayInterface):
         for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
             # corner = gemmi.Position(x + dx, y + dy, z + dz)
             corner_fractional = PointPositionArray.fractionalize_orthogonal_array(
-                np.array([x + dx, y + dy, z + dz]).reshape((1, 3)), fractionalization_matrix,
+                np.array([x + dx, y + dy, z + dz]).reshape((1, 3)),
+                fractionalization_matrix,
             )
             corners.append([corner_fractional[0, 0], corner_fractional[0, 1], corner_fractional[0, 2]])
 
