@@ -62,7 +62,7 @@ class PointPositionArray(PointPositionArrayInterface):
             corner = gemmi.Position(x + dx, y + dy, z + dz)
             corner_fractional = grid.unit_cell.fractionalize(corner)
             corner_fractional_2 = PointPositionArray.fractionalize_orthogonal_array(
-                np.array().reshape((1,3)),
+                np.array([corner.x, corner.y, corner.z]).reshape((1,3)),
                 np.array(grid.unit_cell.fractionalization_matrix.tolist())
             )
             print(f"{(corner_fractional.x, corner_fractional.y, corner_fractional.z)} {corner_fractional_2}")
