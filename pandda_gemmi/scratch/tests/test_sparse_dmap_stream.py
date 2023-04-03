@@ -177,7 +177,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
     time_begin = time.time()
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
-    pca = PCA(n_components=min(200, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+    pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
     transformed = pca.fit_transform(sparse_dmap_inner_array)
     time_finish = time.time()
     print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {transformed.shape}")
