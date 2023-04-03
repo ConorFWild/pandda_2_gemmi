@@ -248,7 +248,7 @@ class SmoothReflections:
         sample_grid = np.linspace(np.min(r), np.max(r), 100)
 
         # Get the array that maps x values to bins
-        x_inds = np.digitize(x, sample_grid)
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
 
         # Get the bin averages
         populated_bins, counts = np.unique(x_inds, return_counts=True)
@@ -258,7 +258,7 @@ class SmoothReflections:
 
 
 
-        y_inds = np.digitize(y, sample_grid)
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
 
         finish_preprocess = time.time()
         print(f"\t\t\tPreprocess: {finish_preprocess-begin_preprocess}")
@@ -288,13 +288,13 @@ class SmoothReflections:
         sample_grid = np.linspace(np.min(r), np.max(r), 100)
 
         # Get the array that maps x values to bins
-        x_inds = np.digitize(x, sample_grid)
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
 
         # Get the bin averages
         populated_bins, counts = np.unique(x_inds, return_counts=True)
         x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
 
-        y_inds = np.digitize(y, sample_grid)
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
 
         finish_preprocess = time.time()
         print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
