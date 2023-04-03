@@ -9,7 +9,23 @@ import numpy as np
 import pandas as pd
 import gemmi
 from sklearn import neighbors
+from scipy import optimize
 
+def rmsd(scale, y, r, y_inds, sample_grid, x_f):
+    y_s = y * np.exp(scale * r)
+        # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+        # knn_y.fit(r.reshape(-1, 1),
+        #           y_s.reshape(-1, 1),
+        #           )
+        #
+        # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+        # y_f = np.array(
+        #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
+    y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in np.arange(sample_grid.size)])
+
+    rmsd = np.sum(np.abs(x_f - y_f))
+    return rmsd
 
 class SmoothReflections:
     def __init__(self, dataset: DatasetInterface):
@@ -236,38 +252,43 @@ class SmoothReflections:
         # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
 
         # Optimise the scale factor
-        for scale in np.linspace(-15, 15, 300):
-            y_s = y * np.exp(scale * r)
-            # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-            # knn_y.fit(r.reshape(-1, 1),
-            #           y_s.reshape(-1, 1),
-            #           )
-            #
-            # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
-
-            # y_f = np.array(
-            #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
-            y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in np.arange(sample_grid.size)])
-
-            rmsd = np.sum(np.abs(x_f - y_f))
-
-            scales.append(scale)
-            rmsds.append(rmsd)
-
-        # x = reference_f_array
-        # y = dtag_f_array
+        min_scale = optimize.bisect(
+            lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+            -15,
+            15,
+        )
+        # for scale in np.linspace(-15, 15, 300):
+        #     y_s = y * np.exp(scale * r)
+        #     # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+        #     # knn_y.fit(r.reshape(-1, 1),
+        #     #           y_s.reshape(-1, 1),
+        #     #           )
+        #     #
+        #     # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
         #
-        # x_r = reference_resolution_array
-        # y_r = dtag_resolution_array
+        #     # y_f = np.array(
+        #     #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
+        #     y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in np.arange(sample_grid.size)])
         #
-        # min_r = max([min(x_r), min(y_r)])
-        # max_r = min([max(x_r), max(y_r)])
-        # r_bins = np.linspace(min_r, max_r, 100)
-        # # y_r_bins = np.linspace(min(y_r), max(y_r), 100)
-        # x_inds = np.digitize(r, r_bins,)
-        # y_inds = np.digitize(r, r_bins, )
+        #     rmsd = np.sum(np.abs(x_f - y_f))
         #
-        min_scale = scales[np.argmin(rmsds)]
+        #     scales.append(scale)
+        #     rmsds.append(rmsd)
+        #
+        # # x = reference_f_array
+        # # y = dtag_f_array
+        # #
+        # # x_r = reference_resolution_array
+        # # y_r = dtag_resolution_array
+        # #
+        # # min_r = max([min(x_r), min(y_r)])
+        # # max_r = min([max(x_r), max(y_r)])
+        # # r_bins = np.linspace(min_r, max_r, 100)
+        # # # y_r_bins = np.linspace(min(y_r), max(y_r), 100)
+        # # x_inds = np.digitize(r, r_bins,)
+        # # y_inds = np.digitize(r, r_bins, )
+        # #
+        # min_scale = scales[np.argmin(rmsds)]
 
         # Get the original reflections
         original_reflections = dataset.reflections.reflections
