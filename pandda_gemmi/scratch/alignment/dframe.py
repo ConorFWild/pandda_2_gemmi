@@ -27,6 +27,13 @@ class PointPositionArray(PointPositionArrayInterface):
         return orthogonal_array
 
     @staticmethod
+    def fractionalize_orthogonal_array(fractional_array, grid):
+        fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
+        fractional_array = np.matmul(fractionalization_matrix, fractional_array.T).T
+
+        return fractional_array
+
+    @staticmethod
     def get_nearby_grid_points(grid, position, radius):
         # Get the fractional position
         # print(f"##########")
@@ -124,19 +131,128 @@ class PointPositionArray(PointPositionArrayInterface):
         return points_within_radius.astype(int), positions_within_radius
 
     @staticmethod
+    def get_nearby_grid_points_vectorized(grid, position_array, radius):
+        # Get the fractional position
+        # print(f"##########")
+
+        # x, y, z = position.x, position.y, position.z
+
+        corners = []
+        for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
+            corner = position_array + np.array([dx, dy, dz])
+            corner_fractional = PointPositionArray.fractionalize_orthogonal_array(corner, grid)
+            corners.append(corner_fractional)
+
+        # Axis: Atom, coord, corner
+        fractional_corner_array = np.stack([corner.reshape((-1,1)) for corner in corners], axis=-1)
+        fractional_min = np.min(fractional_corner_array, axis=-1)
+        fractional_max = np.max(fractional_corner_array, axis=-1)
+
+        # print(f"Fractional min: {fractional_min}")
+        # print(f"Fractional max: {fractional_max}")
+
+        # Find the fractional bounding box
+        # x, y, z = fractional.x, fractional.y, fractional.z
+        # dx = radius / grid.nu
+        # dy = radius / grid.nv
+        # dz = radius / grid.nw
+        #
+        # # Find the grid bounding box
+        # u0 = np.floor((x - dx) * grid.nu)
+        # u1 = np.ceil((x + dx) * grid.nu)
+        # v0 = np.floor((y - dy) * grid.nv)
+        # v1 = np.ceil((y + dy) * grid.nv)
+        # w0 = np.floor((z - dz) * grid.nw)
+        # w1 = np.ceil((z + dz) * grid.nw)
+        u0 = np.floor(fractional_min[:, 0] * grid.nu)
+        u1 = np.ceil(fractional_max[:, 0] * grid.nu)
+        v0 = np.floor(fractional_min[: ,1] * grid.nv)
+        v1 = np.ceil(fractional_max[:, 1] * grid.nv)
+        w0 = np.floor(fractional_min[:, 2] * grid.nw)
+        w1 = np.ceil(fractional_max[:, 2] * grid.nw)
+
+        # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
+
+        # Get the grid points
+        point_arrays = []
+        position_arrays = []
+        for j in range(position_array.shape[0]):
+            grid = np.mgrid[u0: u1 + 1, v0: v1 + 1, w0: w1 + 1]
+            grid_point_array = grid.reshape((3, -1)).T
+        #     np.array(
+        #     [
+        #         xyz_tuple
+        #         for xyz_tuple
+        #         in itertools.product(
+        #             np.arange(u0, u1 + 1),
+        #             np.arange(v0, v1 + 1),
+        #             np.arange(w0, w1 + 1),
+        #     )
+        #     ]
+        # )
+        # print(f"Grid point array shape: {grid_point_array.shape}")
+        # print(f"Grid point first element: {grid_point_array[0, :]}")
+
+        # Get the point positions
+            points_position_array = PointPositionArray.orthogonalize_fractional_array(
+                PointPositionArray.fractionalize_grid_point_array(
+                    grid_point_array,
+                    grid,
+                ),
+                grid,
+            )
+        # print(f"Grid position array shape: {position_array.shape}")
+        # print(f"Grid position first element: {position_array[0, :]}")
+
+        # Get the distances to the position
+            distance_array = np.linalg.norm(
+                points_position_array - position_array[j,:],
+                axis=1,
+            )
+        # print(f"Distance array shape: {distance_array.shape}")
+        # print(f"Distance array first element: {distance_array[0]}")
+
+        # Mask the points on distances
+            points_within_radius = grid_point_array[distance_array < radius]
+            positions_within_radius = position_array[distance_array < radius]
+            point_arrays.append(points_within_radius.astype(int))
+            position_arrays.append(positions_within_radius)
+        # print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
+
+        # Bounding box orth
+        # orth_bounds_min = np.min(positions_within_radius, axis=0)
+        # orth_bounds_max = np.max(positions_within_radius, axis=0)
+        # point_bounds_min = np.min(points_within_radius, axis=0)
+        # point_bounds_max = np.max(points_within_radius, axis=0)
+        #
+        # print(f"Original position was: {position.x} {position.y} {position.z}")
+        # print(f"Orth bounding box min: {orth_bounds_min}")
+        # print(f"Orth bounding box max: {orth_bounds_max}")
+        # print(f"Point bounding box min: {point_bounds_min}")
+        # print(f"Point bounding box max: {point_bounds_max}")
+        # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
+        # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
+
+        return points_within_radius, positions_within_radius
+
+    @staticmethod
     def get_grid_points_around_protein(st: StructureInterface, grid, radius):
         point_arrays = []
         position_arrays = []
 
         begin = time.time()
-        for atom in st.protein_atoms():
-            point_array, position_array = PointPositionArray.get_nearby_grid_points(
-                grid,
-                atom.pos,
-                radius
-            )
-            point_arrays.append(point_array)
-            position_arrays.append(position_array)
+        # for atom in st.protein_atoms():
+        #     point_array, position_array = PointPositionArray.get_nearby_grid_points(
+        #         grid,
+        #         atom.pos,
+        #         radius
+        #     )
+        #     point_arrays.append(point_array)
+        #     position_arrays.append(position_array)
+
+        atom_positions = StructureArray.from_structure(st).positions
+
+        point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
 
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish-begin}")
@@ -204,6 +320,28 @@ class StructureArray:
         atom_ids = []
         positions = []
         for model in structure.structure:
+            for chain in model:
+                for residue in chain.first_conformer():
+                    for atom in residue:
+                        models.append(model.name)
+                        chains.append(chain.name)
+                        seq_ids.append(str(residue.seqid.num))
+                        insertions.append(residue.seqid.icode)
+                        atom_ids.append(atom.name)
+                        pos = atom.pos
+                        positions.append([pos.x, pos.y, pos.z])
+
+        return cls(models, chains, seq_ids, insertions, atom_ids, positions)
+
+    @classmethod
+    def from_raw_structure(cls, structure):
+        models = []
+        chains = []
+        seq_ids = []
+        insertions = []
+        atom_ids = []
+        positions = []
+        for model in structure:
             for chain in model:
                 for residue in chain.first_conformer():
                     for atom in residue:
