@@ -16,19 +16,35 @@ class PointPositionArray(PointPositionArrayInterface):
         self.positions = positions
 
     @staticmethod
-    def fractionalize_grid_point_array(grid_point_array, grid):
+    def fractionalize_grid_point_array_dep(grid_point_array, grid):
         return grid_point_array / np.array([grid.nu, grid.nv, grid.nw])
 
     @staticmethod
-    def orthogonalize_fractional_array(fractional_array, grid):
+    def orthogonalize_fractional_array_dep(fractional_array, grid):
         orthogonalization_matrix = np.array(grid.unit_cell.orthogonalization_matrix.tolist())
         orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
 
         return orthogonal_array
 
     @staticmethod
-    def fractionalize_orthogonal_array(fractional_array, grid):
+    def fractionalize_orthogonal_array_dep(fractional_array, grid):
         fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
+        fractional_array = np.matmul(fractionalization_matrix, fractional_array.T).T
+
+        return fractional_array
+
+    @staticmethod
+    def fractionalize_grid_point_array(grid_point_array, spacing):
+        return grid_point_array / np.array(spacing)
+
+    @staticmethod
+    def orthogonalize_fractional_array(fractional_array, orthogonalization_matrix):
+        orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
+
+        return orthogonal_array
+
+    @staticmethod
+    def fractionalize_orthogonal_array(fractional_array, fractionalization_matrix):
         fractional_array = np.matmul(fractionalization_matrix, fractional_array.T).T
 
         return fractional_array
@@ -104,6 +120,105 @@ class PointPositionArray(PointPositionArrayInterface):
         # Get the distances to the position
         distance_array = np.linalg.norm(
             position_array - np.array([position.x, position.y, position.z]),
+            axis=1,
+        )
+        # print(f"Distance array shape: {distance_array.shape}")
+        # print(f"Distance array first element: {distance_array[0]}")
+
+        # Mask the points on distances
+        points_within_radius = grid_point_array[distance_array < radius]
+        positions_within_radius = position_array[distance_array < radius]
+        # print(f"Had {grid_point_array.shape} points, of which {points_within_radius.shape} within radius")
+
+        # Bounding box orth
+        # orth_bounds_min = np.min(positions_within_radius, axis=0)
+        # orth_bounds_max = np.max(positions_within_radius, axis=0)
+        # point_bounds_min = np.min(points_within_radius, axis=0)
+        # point_bounds_max = np.max(points_within_radius, axis=0)
+        #
+        # print(f"Original position was: {position.x} {position.y} {position.z}")
+        # print(f"Orth bounding box min: {orth_bounds_min}")
+        # print(f"Orth bounding box max: {orth_bounds_max}")
+        # print(f"Point bounding box min: {point_bounds_min}")
+        # print(f"Point bounding box max: {point_bounds_max}")
+        # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
+        # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
+
+        return points_within_radius.astype(int), positions_within_radius
+
+    @staticmethod
+    def get_nearby_grid_points_parallel(spacing, fractionalization_matrix, orthogonalization_matrix, position, radius):
+        # Get the fractional position
+        # print(f"##########")
+
+        x, y, z = position[0], position[1], position[2]
+
+        corners = []
+        for dx, dy, dz in itertools.product([-radius, + radius], [-radius, + radius], [-radius, + radius]):
+            # corner = gemmi.Position(x + dx, y + dy, z + dz)
+            corner_fractional = PointPositionArray.fractionalize_orthogonal_array(
+                np.array([x + dx, y + dy, z + dz]).reshape((1,3)), fractionalization_matrix,
+            )
+            corners.append([corner_fractional[0,0], corner_fractional[0,1], corner_fractional[0,2]])
+
+        fractional_corner_array = np.array(corners)
+        fractional_min = np.min(fractional_corner_array, axis=0)
+        fractional_max = np.max(fractional_corner_array, axis=0)
+
+        # print(f"Fractional min: {fractional_min}")
+        # print(f"Fractional max: {fractional_max}")
+
+        # Find the fractional bounding box
+        # x, y, z = fractional.x, fractional.y, fractional.z
+        # dx = radius / grid.nu
+        # dy = radius / grid.nv
+        # dz = radius / grid.nw
+        #
+        # # Find the grid bounding box
+        # u0 = np.floor((x - dx) * grid.nu)
+        # u1 = np.ceil((x + dx) * grid.nu)
+        # v0 = np.floor((y - dy) * grid.nv)
+        # v1 = np.ceil((y + dy) * grid.nv)
+        # w0 = np.floor((z - dz) * grid.nw)
+        # w1 = np.ceil((z + dz) * grid.nw)
+        u0 = np.floor(fractional_min[0] * spacing[1])
+        u1 = np.ceil(fractional_max[0] * spacing[0])
+        v0 = np.floor(fractional_min[1] * spacing[1])
+        v1 = np.ceil(fractional_max[1] * spacing[1])
+        w0 = np.floor(fractional_min[2] * spacing[2])
+        w1 = np.ceil(fractional_max[2] * spacing[2])
+
+        # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
+
+        # Get the grid points
+        grid_point_array = np.array(
+            [
+                xyz_tuple
+                for xyz_tuple
+                in itertools.product(
+                np.arange(u0, u1 + 1),
+                np.arange(v0, v1 + 1),
+                np.arange(w0, w1 + 1),
+            )
+            ]
+        )
+        # print(f"Grid point array shape: {grid_point_array.shape}")
+        # print(f"Grid point first element: {grid_point_array[0, :]}")
+
+        # Get the point positions
+        position_array = PointPositionArray.orthogonalize_fractional_array(
+            PointPositionArray.fractionalize_grid_point_array(
+                grid_point_array,
+                spacing,
+            ),
+            orthogonalization_matrix,
+        )
+        # print(f"Grid position array shape: {position_array.shape}")
+        # print(f"Grid position first element: {position_array[0, :]}")
+
+        # Get the distances to the position
+        distance_array = np.linalg.norm(
+            position_array - np.array(position),
             axis=1,
         )
         # print(f"Distance array shape: {distance_array.shape}")
@@ -269,8 +384,15 @@ class PointPositionArray(PointPositionArrayInterface):
 
         atom_positions = np.array(positions)
 
-        point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
-
+        # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
+        for j in range(atom_positions.shape[0]):
+            point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_parallel(
+                [grid.nu, grid.nv, grid.nw],
+                np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+                np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+                atom_positions[j, :],
+                radius
+        )
         finish = time.time()
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish-begin}")
 
