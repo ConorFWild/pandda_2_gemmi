@@ -10,6 +10,7 @@ from pathlib import Path
 from ..interfaces import *
 from .. import constants
 
+
 @dataclasses.dataclass()
 class SpacegroupPython:
     spacegroup: str
@@ -84,6 +85,7 @@ class MtzColumnPython:
                                column.label,
                                )
 
+
 def drop_columns(reflections, f, phi):
     new_reflections = gemmi.Mtz(with_base=False)
 
@@ -141,6 +143,7 @@ def drop_columns(reflections, f, phi):
     new_reflections.update_reso()
 
     return new_reflections
+
 
 @dataclasses.dataclass()
 class MtzPython:
@@ -229,6 +232,5 @@ class Reflections(ReflectionsInterface):
 
         return None, None
 
-
-    def transform_f_phi_to_map(self, sample_rate:float=3.0):
+    def transform_f_phi_to_map(self, sample_rate: float = 3.0):
         return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)

@@ -262,10 +262,9 @@ class SmoothReflections:
 
         # Optimise the scale factor
         begin_solve = time.time()
-        min_scale = optimize.bisect(
+        min_scale = optimize.minimize(
             lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
-            -15,
-            15,
+            0.0
         )
         # min_scale = optimize.fsolve(
         #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
