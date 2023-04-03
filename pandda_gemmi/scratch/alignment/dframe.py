@@ -184,10 +184,11 @@ class PointPositionArray(PointPositionArrayInterface):
         position_arrays = []
         for j in range(position_array.shape[0]):
             mesh_grid = np.mgrid[u0[j]: u1[j] + 1, v0[j]: v1[j] + 1, w0[j]: w1[j] + 1]
-            grid_point_array = np.hstack(
+            grid_point_array = np.hstack([
                 mesh_grid[0, :, :].reshape((-1, 1)),
                 mesh_grid[1, :, :].reshape((-1, 1)),
                 mesh_grid[2, :, :].reshape((-1, 1)),
+                ]
             )
         #     np.array(
         #     [
