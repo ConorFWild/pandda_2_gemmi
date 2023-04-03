@@ -222,6 +222,7 @@ class PointPositionArray(PointPositionArrayInterface):
             ),
             orthogonalization_matrix,
         )
+        # print(f"")
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
 
