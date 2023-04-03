@@ -163,7 +163,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #     sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
     # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
     time_begin = time.time()
-    print(reference_frame.mask.indicies_sparse_inner[0].shape)
+    print([reference_frame.mask.indicies_sparse_inner[0].shape, len(reference_frame.mask.indicies_sparse_inner)])
     sparse_dmap_inner_array = array[reference_frame.mask.indicies_sparse_inner]
     time_finish = time.time()
     print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
