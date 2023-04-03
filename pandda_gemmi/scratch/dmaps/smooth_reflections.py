@@ -319,6 +319,6 @@ class SmoothReflections:
         )
 
         finish_smooth_reflections = time.time()
-        print(f"\t\tFFT: {finish_smooth_reflections-begin_smooth_reflections}")
+        print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
 
         return smoothed_dataset
