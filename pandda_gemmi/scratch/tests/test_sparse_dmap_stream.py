@@ -182,6 +182,19 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {transformed.shape}")
 
+    print(f"##### Pairwise distances #####")
+    # sparse_dmaps_inner = {}
+    # for dtag in datasets:
+    #     # print(f"##### {dtag} #####")
+    #     sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
+    # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
+    time_begin = time.time()
+    # distances = spatial.distance.pdist(sparse_dmap_inner_array)
+    # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+    distances = spatial.distance.pdist(transformed)
+    time_finish = time.time()
+    print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
+
 
 
 if __name__ == "__main__":
