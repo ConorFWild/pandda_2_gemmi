@@ -138,7 +138,7 @@ class PointPositionArray(PointPositionArrayInterface):
             position_arrays.append(position_array)
 
         finish = time.time()
-        print(f"\t\t\t\tGot nearby grid points arrays in: {finish-begin}")
+        print(f"\t\t\t\tGot nearby grid point position arrays in: {finish-begin}")
 
         all_points_array = np.concatenate(point_arrays, axis=0)
         all_positions_array = np.concatenate(position_arrays, axis=0)
