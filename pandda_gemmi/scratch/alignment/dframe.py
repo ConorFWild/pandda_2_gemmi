@@ -144,7 +144,7 @@ class PointPositionArray(PointPositionArrayInterface):
             corners.append(corner_fractional)
 
         # Axis: Atom, coord, corner
-        fractional_corner_array = np.stack([corner.reshape((-1,1)) for corner in corners], axis=-1)
+        fractional_corner_array = np.stack([corner for corner in corners], axis=-1)
         print(f"\t\t\t\t\tFRACTIONAL corner array shape: {fractional_corner_array.shape}")
 
         # print(f"Fractional min: {fractional_min}")
