@@ -183,7 +183,6 @@ class SmoothReflections:
 
         begin_smooth_reflections = time.time()
 
-
         # # Get common set of reflections
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
 
@@ -252,11 +251,14 @@ class SmoothReflections:
         # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
 
         # Optimise the scale factor
+        begin_solve = time.time()
         min_scale = optimize.bisect(
             lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
             -15,
             15,
         )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve: {finish_solve-begin_solve}")
         # for scale in np.linspace(-15, 15, 300):
         #     y_s = y * np.exp(scale * r)
         #     # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
