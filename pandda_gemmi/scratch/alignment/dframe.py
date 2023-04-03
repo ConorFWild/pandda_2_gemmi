@@ -151,7 +151,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
         all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2], )
         shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
-        point_3d_array = np.zeroes((shape[0], shape[1], shape[2]), dtype=bool)
+        point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
         point_3d_array[all_point_indexes] = True
         unique_points = np.argwhere(point_3d_array)
         unique_points_indexes = (unique_points[:, 0], unique_points[:, 1], unique_points[:, 2], )
