@@ -54,6 +54,54 @@ dt = np.dtype([('h', 'i4'), ('k', 'i4'),('l', 'i4'),])
 #
 #     return new_reflections
 
+# def truncate_reflections(reflections, index=None):
+#     new_reflections = gemmi.Mtz(with_base=False)
+#
+#     # Set dataset properties
+#     new_reflections.spacegroup = reflections.spacegroup
+#     new_reflections.set_cell_for_all(reflections.cell)
+#
+#     # Add dataset
+#     new_reflections.add_dataset("truncated")
+#
+#     # Add columns
+#     for column in reflections.columns:
+#         new_reflections.add_column(column.label, column.type)
+#
+#     # Get data
+#     data_array = np.array(reflections, copy=False)
+#     # data = pd.DataFrame(data_array,
+#     #                     columns=reflections.column_labels(),
+#     #                     )
+#     # data.set_index(["H", "K", "L"], inplace=True)
+#     # hkl_array = data_array[:, 0:3]
+#     # print(data)
+#     # print(self.reflections.make_miller_array().shape)
+#
+#     # Truncate by index
+#     # data_indexed = data.loc[index]
+#
+#     # To numpy
+#     # data_dropped_array = data_indexed.to_numpy()
+#
+#     # new data
+#     # new_data = np.hstack([data_indexed.index.to_frame().to_numpy(),
+#     #                       data_dropped_array,
+#     #                       ]
+#     #                      )
+#     structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
+#     new_data = data_array[np.in1d(structured_data_array, index)]
+#     # print(new_data)
+#
+#     # Update
+#     new_reflections.set_data(new_data)
+#
+#     # Update resolution
+#     new_reflections.update_reso()
+#     # print(new_reflections.make_miller_array().shape)
+#
+#     return new_reflections
+
 def truncate_reflections(reflections, index=None):
     new_reflections = gemmi.Mtz(with_base=False)
 
@@ -89,8 +137,15 @@ def truncate_reflections(reflections, index=None):
     #                       data_dropped_array,
     #                       ]
     #                      )
-    structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
-    new_data = data_array[np.in1d(structured_data_array, index)]
+    con_coords = np.vstack([data_array[:, 0:3], index])
+    data_array_3d = np.zeros((x for x in np.max(con_coords, axis=0)-np.min(con_coords,axis=0)), dtype=np.bool)
+    data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
+    mask = data_array_3d[(data_array[:,0], data_array[:, 1], data_array[:, 2])]
+
+
+    # structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
+    # new_data = data_array[np.in1d(structured_data_array, index)]
+    new_data = data_array[mask]
     # print(new_data)
 
     # Update
@@ -208,20 +263,44 @@ def truncate_resolution(reflections, resolution: float):
 #         raise Exception(
 #             "Somehow a running index has not been calculated. This should be impossible. Contact mantainer.")
 
+# def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
+#     # running_index: Optional[pd.Index] = None
+#
+#     hkls = np.vstack(
+#         [
+#             np.array(datasets[dtag].reflections.reflections, copy=False)[:,0:3]
+#             for dtag
+#             in datasets
+#         ]
+#         )
+#     structured_data_array = rfn.unstructured_to_structured(hkls, dt)
+#
+#     unique_rows, counts = np.unique(structured_data_array, return_counts=True)
+#     common_rows = unique_rows[counts == len(datasets)]
+#     return common_rows
+
 def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
     # running_index: Optional[pd.Index] = None
 
-    hkls = np.vstack(
-        [
+    hkl_arrays = [
             np.array(datasets[dtag].reflections.reflections, copy=False)[:,0:3]
             for dtag
             in datasets
         ]
-        )
-    structured_data_array = rfn.unstructured_to_structured(hkls, dt)
 
-    unique_rows, counts = np.unique(structured_data_array, return_counts=True)
-    common_rows = unique_rows[counts == len(datasets)]
+    hkls = np.vstack(
+        hkl_arrays
+        )
+    data_array_3d = np.zeros((x for x in np.max(hkls, axis=0)-np.min(hkls,axis=0)), dtype=np.bool)
+    for hkl_array in hkl_arrays:
+        data_array_3d[(hkl_array[:, 0], hkl_array[:, 1], hkl_array[:, 2])] += 1
+
+
+    # structured_data_array = rfn.unstructured_to_structured(hkls, dt)
+
+    # unique_rows, counts = np.unique(structured_data_array, return_counts=True)
+    # common_rows = unique_rows[counts == len(datasets)]
+    common_rows = np.argwhere(data_array_3d == len(datasets))
     return common_rows
 
     # for dtag in datasets:
