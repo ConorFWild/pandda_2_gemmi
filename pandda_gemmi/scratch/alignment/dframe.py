@@ -159,9 +159,9 @@ class PointPositionArray(PointPositionArrayInterface):
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
 
-        pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0].reshape(-1, 1)
-        pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1].reshape(-1, 1)
-        pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2].reshape(-1, 1)
+        pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0].reshape((-1, 1))
+        pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1].reshape((-1, 1))
+        pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2].reshape((-1, 1))
         unique_positions = np.hstack(
             [
                 pos_3d_arr_x[unique_points_indexes],
