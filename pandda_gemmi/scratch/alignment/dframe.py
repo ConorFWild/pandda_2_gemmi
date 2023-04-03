@@ -65,7 +65,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 np.array([corner.x, corner.y, corner.z]).reshape((1,3)),
                 np.array(grid.unit_cell.fractionalization_matrix.tolist())
             )
-            print(f"{(corner_fractional.x, corner_fractional.y, corner_fractional.z)} {corner_fractional_2}")
+            # print(f"{(corner_fractional.x, corner_fractional.y, corner_fractional.z)} {corner_fractional_2}")
             corners.append([corner_fractional.x, corner_fractional.y, corner_fractional.z])
 
         fractional_corner_array = np.array(corners)
