@@ -234,3 +234,13 @@ class Reflections(ReflectionsInterface):
 
     def transform_f_phi_to_map(self, sample_rate: float = 3.0):
         return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
+
+    def __getstate__(self):
+        return (MtzPython.from_gemmi(self.reflections), self.path)
+
+    def __setstate__(self, data: Tuple[MtzPython, Path]):
+        reflections_python = data[0]
+        path = data[1]
+        reflections = reflections_python.to_gemmi()
+        self.reflections = reflections
+        self.path = path
