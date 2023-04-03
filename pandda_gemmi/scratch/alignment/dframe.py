@@ -1,4 +1,5 @@
 import itertools
+import time
 
 import gemmi
 import scipy
@@ -248,7 +249,7 @@ class GridPartitioning(GridPartitioningInterface):
 
 
 class GridMask(GridMaskInterface):
-    def __init__(self, dataset: DatasetInterface, grid, mask_radius=6.0):
+    def __init__(self, dataset: DatasetInterface, grid, mask_radius=6.0, mask_radius_inner=2.0):
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         mask.set_unit_cell(grid.unit_cell)
@@ -261,6 +262,19 @@ class GridMask(GridMaskInterface):
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
         self.indicies = np.nonzero(mask_array)
+
+        mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        mask.set_unit_cell(grid.unit_cell)
+        for atom in dataset.structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(
+                pos,
+                radius=mask_radius_inner,
+                value=1,
+            )
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        self.indicies_inner = np.nonzero(mask_array)
 
 
 def get_grid_from_dataset(dataset: DatasetInterface):
@@ -279,10 +293,16 @@ class DFrame:
         self.spacing = (grid.nu, grid.nv, grid.nw)
 
         # Get the mask
+        begin_mask = time.time()
         self.mask = GridMask(dataset, grid)
+        finish_mask = time.time()
+        print(f"\tGot mask in {finish_mask-begin_mask}")
 
         # Get the grid partitioning
+        begin_partition = time.time()
         self.partitioning = GridPartitioning(dataset, grid, )
+        finish_partition = time.time()
+        print(f"\tGot Partitions in {finish_partition-begin_partition}")
 
     def get_grid(self):
         grid = gemmi.FloatGrid(*self.spacing)

@@ -12,7 +12,7 @@ from pandda_gemmi.scratch.fs import PanDDAFS
 from pandda_gemmi.scratch.dataset import XRayDataset
 from pandda_gemmi.scratch.dmaps import DMap, SparseDMap, SparseDMapStream, TruncateReflections, SmoothReflections
 from pandda_gemmi.scratch.alignment import Alignment, DFrame
-
+from pandda_gemmi.scratch.processor import ProcessLocalRay, Partial
 
 def save_dmap(dmap, path):
     ccp4 = gemmi.Ccp4Map()
@@ -27,6 +27,9 @@ def save_dmap(dmap, path):
 
 def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Data dir is {data_dir} and output dir is {out_dir}")
+
+    # Get processor
+    processor = ProcessLocalRay(12)
 
     # Parse the FS
     print(f"##### Loading filesystem #####")
@@ -54,7 +57,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # Get the alignments
     print(f"##### Getting alignments #####")
     begin_align = time.time()
-    alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
+    # alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
+    alignments: Dict[str, Alignment] = processor.process_dict(
+        {_dtag: Partial(Alignment).paramaterise(datasets[_dtag], dataset) for _dtag in datasets}
+    )
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
 

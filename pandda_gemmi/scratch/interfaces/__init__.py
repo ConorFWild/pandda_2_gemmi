@@ -4,6 +4,39 @@ from pathlib import Path
 
 import numpy as np
 
+T = TypeVar('T', )
+V = TypeVar("V")
+Q = TypeVar("Q")
+P = ParamSpec("P")
+
+
+class PartialInterface(Protocol[P, V]):
+    func: Callable[P, V]
+    args: Any
+    kwargs: Any
+
+    def __init__(self, func: Callable[P, V], ):
+        ...
+
+    def paramaterise(self,
+                     *args: P.args,
+                     **kwargs: P.kwargs,
+                     ) -> Self:
+        ...
+
+    def __call__(self) -> V:
+        ...
+
+
+class ProcessorInterface(Protocol):
+    tag: Literal["not_async"]
+
+    def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
+        ...
+
+    def process_dict(self, funcs: Dict[Q, Callable[P, V]]) -> Dict[Q, V]:
+        ...
+
 
 class ResidueIDInterface(Protocol):
     model: str
@@ -114,8 +147,10 @@ class PointPositionArrayInterface(Protocol):
 class GridPartitioningInterface(Protocol):
     partitions: Dict[ResidueIDInterface, PointPositionArrayInterface]
 
+
 class GridMaskInterface(Protocol):
     indicies: np.array
+
 
 class DFrameInterface(Protocol):
     partitioning: GridPartitioningInterface
@@ -144,6 +179,7 @@ class TransformInterface(Protocol):
             alignment_positions: Dict[GridCoordInterface, PositionInterface],
     ) -> Dict[GridCoordInterface, PositionInterface]:
         ...
+
 
 class AlignmentInterface(Protocol):
     transforms: Dict[ResidueIDInterface, TransformInterface]
