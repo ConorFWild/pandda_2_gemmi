@@ -446,46 +446,46 @@ class SmoothReflections:
         # finish_solve = time.time()
         # print(f"\t\t\tSolve NEW SHGO 100: {finish_solve - begin_solve} with scale: {min_scale}")
         #
-        ########################## OLD #########################
-        begin_solve = time.time()
-
-        sample_grid = np.linspace(min(r), max(r), 100)
-
-        knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-        knn_x.fit(r.reshape(-1, 1),
-                  x.reshape(-1, 1),
-                  )
-        x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
-        # print(f"\t\t\txf OLD: {x_f}")
-
-
-        scales = []
-        rmsds = []
-
-        knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-        knn_y.fit(r.reshape(-1, 1),
-                  (y * np.exp(0.0 * r)).reshape(-1, 1),
-                  )
-
-        y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
-
-        # Optimise the scale factor
-        for scale in np.linspace(-15, 15, 300):
-            y_s = y * np.exp(scale * r)
-
-            y_f = np.array(
-                [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
-
-            _rmsd = np.sum(np.abs(x_f - y_f))
-
-            scales.append(scale)
-            rmsds.append(_rmsd)
-
-
-        min_scale = scales[np.argmin(rmsds)]
-
-        finish_solve = time.time()
-        print(f"\t\t\tSolve OLD: {finish_solve - begin_solve} with scale: {min_scale}")
+        # ########################## OLD #########################
+        # begin_solve = time.time()
+        #
+        # sample_grid = np.linspace(min(r), max(r), 100)
+        #
+        # knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+        # knn_x.fit(r.reshape(-1, 1),
+        #           x.reshape(-1, 1),
+        #           )
+        # x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+        # # print(f"\t\t\txf OLD: {x_f}")
+        #
+        #
+        # scales = []
+        # rmsds = []
+        #
+        # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+        # knn_y.fit(r.reshape(-1, 1),
+        #           (y * np.exp(0.0 * r)).reshape(-1, 1),
+        #           )
+        #
+        # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
+        #
+        # # Optimise the scale factor
+        # for scale in np.linspace(-15, 15, 300):
+        #     y_s = y * np.exp(scale * r)
+        #
+        #     y_f = np.array(
+        #         [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
+        #
+        #     _rmsd = np.sum(np.abs(x_f - y_f))
+        #
+        #     scales.append(scale)
+        #     rmsds.append(_rmsd)
+        #
+        #
+        # min_scale = scales[np.argmin(rmsds)]
+        #
+        # finish_solve = time.time()
+        # print(f"\t\t\tSolve OLD: {finish_solve - begin_solve} with scale: {min_scale}")
 
         # Get the original reflections
         begin_dataset = time.time()
