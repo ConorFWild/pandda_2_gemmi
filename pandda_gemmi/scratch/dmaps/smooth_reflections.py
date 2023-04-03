@@ -268,7 +268,7 @@ class SmoothReflections:
         begin_solve = time.time()
         min_scale = optimize.minimize(
             lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
-            0.0
+            bounds=(-15.0,15.0)
         ).x
 
         # min_scale = optimize.fsolve(
