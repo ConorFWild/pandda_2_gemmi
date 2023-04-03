@@ -235,7 +235,10 @@ class GridPartitioning(GridPartitioningInterface):
         print(f"\t\t\tBuilt tree in : {finish-begin}")
 
         # Get the point array
+        begin = time.time()
         point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
+        finish = time.time()
+        print(f"\t\t\tGot point position array : {finish-begin}")
 
         # Get the NN indexes
         begin=time.time()
