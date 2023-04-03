@@ -611,7 +611,7 @@ class GridMask(GridMaskInterface):
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
         self.indicies_inner = np.nonzero(mask_array)
-        self.indicies_sparse_inner = np.nonzero(mask_array[self.indicies])
+        self.indicies_sparse_inner = mask_array[self.indicies] == 1.0
 
 
 def get_grid_from_dataset(dataset: DatasetInterface):
