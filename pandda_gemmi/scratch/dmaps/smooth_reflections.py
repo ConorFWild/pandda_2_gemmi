@@ -184,13 +184,19 @@ class SmoothReflections:
         begin_smooth_reflections = time.time()
 
         # # Get common set of reflections
+        begin_common = time.time()
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
+        finish_common = time.time()
+        print(f"\t\t\tCommon: {finish_common-begin_common}")
 
         # # Truncate
+        begin_truncate = time.time()
         reference_reflections = truncate_reflections(
             self.reference_dataset.reflections.reflections, common_reflections_set)
         dtag_reflections = truncate_reflections(
             dataset.reflections.reflections, common_reflections_set)
+        finish_truncate = time.time()
+        print(f"\t\t\tTruncate: {finish_truncate-begin_truncate}")
 
         # Refference array
         # reference_reflections = truncated_reference.reflections.reflections
