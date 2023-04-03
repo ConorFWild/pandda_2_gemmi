@@ -236,7 +236,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the NN indexes
         begin=time.time()
-        distances, indexes = kdtree.query(point_position_array.positions)
+        distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
         print(f"\t\t\tQueryed points in : {finish-begin}")
 
