@@ -145,13 +145,13 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Axis: Atom, coord, corner
         fractional_corner_array = np.stack([corner for corner in corners], axis=-1)
-        print(f"\t\t\t\t\tFRACTIONAL corner array shape: {fractional_corner_array.shape}")
+        # print(f"\t\t\t\t\tFRACTIONAL corner array shape: {fractional_corner_array.shape}")
 
         # print(f"Fractional min: {fractional_min}")
 
         fractional_min = np.min(fractional_corner_array, axis=-1)
         fractional_max = np.max(fractional_corner_array, axis=-1)
-        print(f"\t\t\t\t\tFRACTIONAL min array shape: {fractional_min.shape}")
+        # print(f"\t\t\t\t\tFRACTIONAL min array shape: {fractional_min.shape}")
 
 
         # print(f"Fractional min: {fractional_min}")
@@ -212,7 +212,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 ),
                 grid,
             )
-            print(f"\t\t\t\t\t\tPoint position array shape: {fractional_min.shape}")
+            # print(f"\t\t\t\t\t\tPoint position array shape: {fractional_min.shape}")
 
             # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
