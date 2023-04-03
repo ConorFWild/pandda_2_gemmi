@@ -6,6 +6,7 @@ from pathlib import Path
 
 import gemmi
 import numpy as np
+from scipy import spatial
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
@@ -150,9 +151,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #     #     )
     # time_finish = time.time()
     # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
-
     time_begin = time.time()
-    sparse_dmaps = {}
     array = dmaps.array_load()
     time_finish = time.time()
     print(f"Loaded xmaps in {round(time_finish - time_begin, 1)} into shape {array.shape}")
@@ -166,8 +165,19 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_begin = time.time()
     sparse_dmap_inner_array = array[:, reference_frame.mask.indicies_sparse_inner]
     time_finish = time.time()
-
     print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
+
+    print(f"##### Pairwise distances #####")
+    # sparse_dmaps_inner = {}
+    # for dtag in datasets:
+    #     # print(f"##### {dtag} #####")
+    #     sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
+    # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
+    time_begin = time.time()
+    spatial.pdist(sparse_dmap_inner_array)
+    time_finish = time.time()
+    print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
+
 
 
 if __name__ == "__main__":
