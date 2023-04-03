@@ -7,6 +7,7 @@ from pathlib import Path
 import gemmi
 import numpy as np
 from scipy import spatial
+from sklearn.decomposition import PCA
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
@@ -175,9 +176,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #     sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
     # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
     time_begin = time.time()
-    distances = spatial.distance.pdist(sparse_dmap_inner_array)
+    # distances = spatial.distance.pdist(sparse_dmap_inner_array)
+    pca = PCA(n_components=min(200, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+    transformed = pca.fit_transform(sparse_dmap_inner_array)
     time_finish = time.time()
-    print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
+    print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
 
 
 
