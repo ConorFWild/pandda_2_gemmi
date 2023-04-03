@@ -234,6 +234,8 @@ class SmoothReflections:
 
         r = reference_resolution_array
 
+        ####################### NEW #########################
+
         # Get the resolution bins
         sample_grid = np.linspace(np.min(r), np.max(r), 20)
 
@@ -244,27 +246,13 @@ class SmoothReflections:
         populated_bins, counts = np.unique(x_inds, return_counts=True)
         x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
 
-        # knn_x = neighbors.RadiusNeighborsRegressor(0.01)
-        # knn_x.fit(r.reshape(-1, 1),
-        #           x.reshape(-1, 1),
-        #           )
-        # x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-        scales = []
-        rmsds = []
-
-        # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-        # knn_y.fit(r.reshape(-1, 1),
-        #           (y * np.exp(0.0 * r)).reshape(-1, 1),
-        #           )
         y_inds = np.digitize(y, sample_grid)
 
         finish_preprocess = time.time()
         print(f"\t\t\tPreprocess: {finish_preprocess-begin_preprocess}")
 
-        # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
 
-        # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
 
         # Optimise the scale factor
 
@@ -281,39 +269,46 @@ class SmoothReflections:
         #     0.0
         # )
         finish_solve = time.time()
-        print(f"\t\t\tSolve: {finish_solve-begin_solve} with scale: {min_scale}")
-        # for scale in np.linspace(-15, 15, 300):
-        #     y_s = y * np.exp(scale * r)
-        #     # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
-        #     # knn_y.fit(r.reshape(-1, 1),
-        #     #           y_s.reshape(-1, 1),
-        #     #           )
-        #     #
-        #     # y_f = knn_y.predict(sample_grid[:, np.newaxis]).reshape(-1)
-        #
-        #     # y_f = np.array(
-        #     #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
-        #     y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in np.arange(sample_grid.size)])
-        #
-        #     rmsd = np.sum(np.abs(x_f - y_f))
-        #
-        #     scales.append(scale)
-        #     rmsds.append(rmsd)
-        #
-        # # x = reference_f_array
-        # # y = dtag_f_array
-        # #
-        # # x_r = reference_resolution_array
-        # # y_r = dtag_resolution_array
-        # #
-        # # min_r = max([min(x_r), min(y_r)])
-        # # max_r = min([max(x_r), max(y_r)])
-        # # r_bins = np.linspace(min_r, max_r, 100)
-        # # # y_r_bins = np.linspace(min(y_r), max(y_r), 100)
-        # # x_inds = np.digitize(r, r_bins,)
-        # # y_inds = np.digitize(r, r_bins, )
-        # #
-        # min_scale = scales[np.argmin(rmsds)]
+        print(f"\t\t\tSolve NEW: {finish_solve-begin_solve} with scale: {min_scale}")
+
+        ########################## OLD #########################
+        begin_solve = time.time()
+
+        sample_grid = np.linspace(min(r), max(r), 100)
+
+        knn_x = neighbors.RadiusNeighborsRegressor(0.01)
+        knn_x.fit(r.reshape(-1, 1),
+                  x.reshape(-1, 1),
+                  )
+        x_f = knn_x.predict(sample_grid[:, np.newaxis]).reshape(-1)
+
+        scales = []
+        rmsds = []
+
+        knn_y = neighbors.RadiusNeighborsRegressor(0.01)
+        knn_y.fit(r.reshape(-1, 1),
+                  (y * np.exp(0.0 * r)).reshape(-1, 1),
+                  )
+
+        y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
+
+        # Optimise the scale factor
+        for scale in np.linspace(-15, 15, 300):
+            y_s = y * np.exp(scale * r)
+
+            y_f = np.array(
+                [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
+
+            rmsd = np.sum(np.abs(x_f - y_f))
+
+            scales.append(scale)
+            rmsds.append(rmsd)
+
+
+        min_scale = scales[np.argmin(rmsds)]
+
+        finish_solve = time.time()
+        print(f"\t\t\tSolve OLD: {finish_solve - begin_solve} with scale: {min_scale}")
 
         # Get the original reflections
         begin_dataset = time.time()
