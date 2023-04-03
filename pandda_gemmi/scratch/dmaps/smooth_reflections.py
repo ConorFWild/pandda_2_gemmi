@@ -11,7 +11,7 @@ import gemmi
 from sklearn import neighbors
 from scipy import optimize
 
-def rmsd(scale, y, r, y_inds, sample_grid, x_f):
+def rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
     y_s = y * np.exp(scale * r)
         # knn_y = neighbors.RadiusNeighborsRegressor(0.01)
         # knn_y.fit(r.reshape(-1, 1),
@@ -22,7 +22,8 @@ def rmsd(scale, y, r, y_inds, sample_grid, x_f):
 
         # y_f = np.array(
         #     [np.mean(y_s[y_neighbours[1][j]]) for j, val in enumerate(sample_grid[:, np.newaxis].flatten())])
-    y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in np.arange(sample_grid.size)])
+
+    y_f = np.array([np.mean(y_s[y_inds == rb]) for rb in y_inds_unique])
 
     rmsd = np.sum(np.abs(x_f - y_f))
     return rmsd
@@ -240,7 +241,8 @@ class SmoothReflections:
         x_inds = np.digitize(x, sample_grid)
 
         # Get the bin averages
-        x_f = np.array([np.mean(x[x_inds == rb]) for rb in np.arange(sample_grid.size)])
+        populated_bins = np.unique(x_inds)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins])
 
         # knn_x = neighbors.RadiusNeighborsRegressor(0.01)
         # knn_x.fit(r.reshape(-1, 1),
@@ -265,9 +267,11 @@ class SmoothReflections:
         # y_neighbours = knn_y.radius_neighbors(sample_grid[:, np.newaxis])
 
         # Optimise the scale factor
+
         begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
         min_scale = optimize.minimize(
-            lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+            lambda _scale: rmsd(_scale, y, r, y_inds, populated_bins, x_f),
             bounds=(-15.0,15.0)
         ).x
 
