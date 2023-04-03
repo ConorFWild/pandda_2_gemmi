@@ -233,7 +233,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
         # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
 
-        return points_within_radius, positions_within_radius
+        return point_arrays, position_arrays
 
     @staticmethod
     def get_grid_points_around_protein(st: StructureInterface, grid, radius):
