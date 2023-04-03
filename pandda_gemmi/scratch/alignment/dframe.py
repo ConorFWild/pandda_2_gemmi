@@ -452,8 +452,8 @@ class PointPositionArray(PointPositionArrayInterface):
         return unique_points, unique_positions
 
     @classmethod
-    def from_structure(cls, st: StructureInterface, grid, radius: float = 6.0):
-        point_array, position_array = PointPositionArray.get_grid_points_around_protein(st, grid, radius)
+    def from_structure(cls, st: StructureInterface, grid, processor, radius: float = 6.0):
+        point_array, position_array = PointPositionArray.get_grid_points_around_protein(st, grid, radius, processor)
         return PointPositionArray(point_array, position_array)
 
 
@@ -538,7 +538,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the point array
         begin = time.time()
-        point_position_array = PointPositionArray.from_structure(dataset.structure, grid, )
+        point_position_array = PointPositionArray.from_structure(dataset.structure, grid, processor)
         finish = time.time()
         print(f"\t\t\tGot point position array : {finish - begin}")
 
