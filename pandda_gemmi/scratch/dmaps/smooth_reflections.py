@@ -272,6 +272,7 @@ class SmoothReflections:
         # y_inds_unique = np.unique(y_inds)
         min_scale = optimize.minimize(
             lambda _scale: rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+            0.0,
             bounds=(-15.0,15.0)
         ).x
 
