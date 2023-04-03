@@ -10,6 +10,7 @@ import pandas as pd
 import gemmi
 from sklearn import neighbors
 from scipy import optimize
+from matplotlib import pyplot as plt
 
 def get_rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
     y_s = y * np.exp(scale * r)
@@ -233,6 +234,13 @@ class SmoothReflections:
         y = dtag_f_array
 
         r = reference_resolution_array
+
+        plt.scatter()
+        plt.scatter(r, x)
+        plt.scatter(r, x)
+        plt.savefig(f"{dataset.structure.path.parent.name}.png")
+        plt.clf()
+
 
         ####################### NEW #########################
 
