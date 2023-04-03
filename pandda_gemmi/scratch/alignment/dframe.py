@@ -45,8 +45,8 @@ class PointPositionArray(PointPositionArrayInterface):
         return orthogonal_array
 
     @staticmethod
-    def fractionalize_orthogonal_array(fractional_array, fractionalization_matrix):
-        fractional_array = np.matmul(fractionalization_matrix, fractional_array.T).T
+    def fractionalize_orthogonal_array(orthogonal_array, fractionalization_matrix):
+        fractional_array = np.matmul(fractionalization_matrix, orthogonal_array.T).T
 
         return fractional_array
 
