@@ -148,11 +148,32 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"All positions shape: {all_positions_array.shape}")
 
         begin=time.time()
-        unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
-        finish = time.time()
-        print(f"\t\t\t\tGot unique points in: {finish-begin}")
+        # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
+        all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2], )
+        shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
+        point_3d_array = np.zeroes((shape[0], shape[1], shape[2]), dtype=bool)
+        point_3d_array[all_point_indexes] = True
+        unique_points = np.argwhere(point_3d_array)
+        unique_points_indexes = (unique_points[:, 0], unique_points[:, 1], unique_points[:, 2], )
+        pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
+        pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
+        pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
 
-        unique_positions = all_positions_array[indexes, :]
+        pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
+        pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
+        pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
+        unique_positions = np.hstack(
+            [
+                pos_3d_arr_x[unique_points_indexes],
+                pos_3d_arr_y[unique_points_indexes],
+                pos_3d_arr_z[unique_points_indexes],
+            ]
+        )
+
+        finish = time.time()
+        print(f"\t\t\t\tGot unique points in: {finish-begin} with point shape {unique_points.shape} and pos shape {unique_positions.shape}")
+
+        # unique_positions = all_positions_array[indexes, :]
         # print(f"Unique points shape: {unique_points.shape}")
         # print(f"Unique positions shape: {unique_positions.shape}")
 
