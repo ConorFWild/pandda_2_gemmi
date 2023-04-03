@@ -392,28 +392,28 @@ class PointPositionArray(PointPositionArrayInterface):
         for atom in st.protein_atoms():
             pos = atom.pos
             positions.append([pos.x, pos.y, pos.z])
-            point_array, position_array = PointPositionArray.get_nearby_grid_points(
-                grid,
-                atom.pos,
-                radius
-            )
-            point_arrays.append(point_array)
-            position_arrays.append(position_array)
+            # point_array, position_array = PointPositionArray.get_nearby_grid_points(
+            #     grid,
+            #     atom.pos,
+            #     radius
+            # )
+            # point_arrays.append(point_array)
+            # position_arrays.append(position_array)
 
-        # atom_positions = np.array(positions)
+        atom_positions = np.array(positions)
         #
-        # point_position_arrays = processor(
-        #     [
-        #         Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
-        #             [grid.nu, grid.nv, grid.nw],
-        #             np.array(grid.unit_cell.fractionalization_matrix.tolist()),
-        #             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-        #             atom_positions[j, :],
-        #             radius)
-        #         for j
-        #         in range(atom_positions.shape[0])
-        #     ]
-        # )
+        point_position_arrays = processor(
+            [
+                Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
+                    [grid.nu, grid.nv, grid.nw],
+                    np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+                    np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+                    atom_positions[j, :],
+                    radius)
+                for j
+                in range(atom_positions.shape[0])
+            ]
+        )
 
         # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
         # for j in range(atom_positions.shape[0]):
