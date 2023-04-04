@@ -273,7 +273,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     for predicted_class in np.unique(predicted):
         cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
         mean = dpgmm.means_[predicted_class, :].flatten()
-        distance = np.cbrt(spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv))
+        distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
         print(f"\t\tDistance: {predicted_class} {distance}")
         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
