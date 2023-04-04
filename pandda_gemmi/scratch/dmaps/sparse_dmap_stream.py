@@ -103,9 +103,9 @@ class SparseDMapStream:
         #         com_reference,
         #     )
         begin_listing = time.time()
-        points_list = [dframe.partitioning.partitions[residue_id].points for residue_id in
+        points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
                        dframe.partitioning.partitions]
-        positions_list = [dframe.partitioning.partitions[residue_id].positions for residue_id in
+        positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
                           dframe.partitioning.partitions]
         transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
                           dframe.partitioning.partitions]
