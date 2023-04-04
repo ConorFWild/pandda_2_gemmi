@@ -222,6 +222,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean = clf.means_[predicted_class, :].flatten()
             distance = np.cbrt(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv))
             print(f"\t\tDistance: {predicted_class} {distance}")
+            print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
 
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
