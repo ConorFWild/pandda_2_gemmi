@@ -228,30 +228,30 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
     # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
     # distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
-    for j in range(20):
-        print(f"######### {j} ############")
-
-        time_begin = time.time()
-        clf = mixture.GaussianMixture(n_components=j+1, covariance_type="diag")
-        predicted = clf.fit_predict(transformed)
-        time_finish = time.time()
-        predicted_classes, counts = np.unique(predicted, return_counts=True)
-        print(f"\tFit-predicted in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-        print(f"\tCounts are {counts}")
-
-        time_begin = time.time()
-        bic = clf.bic(transformed)
-        time_finish = time.time()
-        print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
-        # print(np.max(clf.predict_proba(transformed), axis=1))
-
-        print(f"Predicted: {predicted[0]}")
-        for predicted_class in np.unique(predicted):
-            cov_iv = np.diag(clf.precisions_[predicted_class, :].flatten())
-            mean = clf.means_[predicted_class, :].flatten()
-            distance = np.cbrt(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv))
-            print(f"\t\tDistance: {predicted_class} {distance}")
-            # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
+    # for j in range(20):
+    #     print(f"######### {j} ############")
+    #
+    #     time_begin = time.time()
+    #     clf = mixture.GaussianMixture(n_components=j+1, covariance_type="diag")
+    #     predicted = clf.fit_predict(transformed)
+    #     time_finish = time.time()
+    #     predicted_classes, counts = np.unique(predicted, return_counts=True)
+    #     print(f"\tFit-predicted in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    #     print(f"\tCounts are {counts}")
+    #
+    #     time_begin = time.time()
+    #     bic = clf.bic(transformed)
+    #     time_finish = time.time()
+    #     print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
+    #     # print(np.max(clf.predict_proba(transformed), axis=1))
+    #
+    #     print(f"Predicted: {predicted[0]}")
+    #     for predicted_class in np.unique(predicted):
+    #         cov_iv = np.diag(clf.precisions_[predicted_class, :].flatten())
+    #         mean = clf.means_[predicted_class, :].flatten()
+    #         distance = np.cbrt(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv))
+    #         print(f"\t\tDistance: {predicted_class} {distance}")
+    #         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
 
 
 
@@ -269,28 +269,36 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     print(f"\tBayesian counts are {counts}")
 
-    time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
-    predicted = dpgmm.fit_predict(transformed)
-    time_finish = time.time()
-    print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-    predicted_classes, counts = np.unique(predicted, return_counts=True)
-    for dtag, prediction in zip(datasets, predicted):
-        print(f"\t\t{dtag} {prediction}")
-
-    print(f"\tBayesian counts are {counts}")
-
-    time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="tied")
-    predicted = dpgmm.fit_predict(transformed)
-    time_finish = time.time()
-    print(f"\tFit-predicted bayesian tied in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-    predicted_classes, counts = np.unique(predicted, return_counts=True)
-    for dtag, prediction in zip(datasets, predicted):
-        print(f"\t\t{dtag} {prediction}")
-
-    print(f"\tBayesian counts are {counts}")
-    print(np.max(dpgmm.predict_proba(transformed), axis=1))
+    print(f"Predicted: {predicted[0]}")
+    for predicted_class in np.unique(predicted):
+        cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+        mean = dpgmm.means_[predicted_class, :].flatten()
+        distance = np.cbrt(spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv))
+        print(f"\t\tDistance: {predicted_class} {distance}")
+        # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
+    #
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="tied")
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian tied in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    # print(np.max(dpgmm.predict_proba(transformed), axis=1))
 
 
 if __name__ == "__main__":
