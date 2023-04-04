@@ -231,7 +231,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
     predicted = dpgmm.fit_predict(transformed)
     time_finish = time.time()
-    print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
     predicted_classes, counts = np.unique(predicted, return_counts=True)
     for dtag, prediction in zip(datasets, predicted):
         print(f"\t\t{dtag} {prediction}")
@@ -242,7 +242,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="tied")
     predicted = dpgmm.fit_predict(transformed)
     time_finish = time.time()
-    print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    print(f"\tFit-predicted bayesian tied in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
     predicted_classes, counts = np.unique(predicted, return_counts=True)
     for dtag, prediction in zip(datasets, predicted):
         print(f"\t\t{dtag} {prediction}")
