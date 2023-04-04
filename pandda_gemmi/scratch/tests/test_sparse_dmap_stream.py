@@ -365,6 +365,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean = dpgmm.means_[predicted_class, :].flatten()
         distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
         print(f"\t\tDistance: {predicted_class} {distance}")
+    print(f"Predicted: {predicted[1]}")
+    for predicted_class in np.unique(predicted):
+        # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+        cov_iv = dpgmm.precisions_[predicted_class,]
+        mean = dpgmm.means_[predicted_class, :].flatten()
+        distance = spatial.distance.mahalanobis(transformed[1, :].flatten(), mean, cov_iv)
+        print(f"\t\tDistance: {predicted_class} {distance}")
         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
     # time_begin = time.time()
