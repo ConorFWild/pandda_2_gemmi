@@ -222,6 +222,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
     predicted_classes, counts = np.unique(predicted, return_counts=True)
+    for dtag, prediction in zip(datasets, predicted):
+        print(f"\t\t{dtag} {prediction}")
+
     print(f"\tBayesian counts are {counts}")
 
 
