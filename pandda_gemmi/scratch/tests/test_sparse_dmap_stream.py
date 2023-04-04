@@ -216,9 +216,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         time_finish = time.time()
         print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
 
-
-
-
+    time_begin = time.time()
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
+    predicted = dpgmm.fit_predict(transformed)
+    time_finish = time.time()
+    print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
 
 if __name__ == "__main__":
     fire.Fire(test_sparse_dmap_stream)
