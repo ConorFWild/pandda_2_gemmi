@@ -218,9 +218,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(np.max(clf.predict_proba(transformed), axis=1))
 
         for predicted_class in np.unique(predicted):
-            cov = np.diag(clf.covariances_[predicted_class, :].flatten())
+            cov_iv = np.diag(clf.precisions_[predicted_class, :].flatten())
             mean = clf.means_[predicted_class, :].flatten()
-            distance = np.power(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov), -mean.size)
+            distance = np.power(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv), -mean.size)
             print(f"\t\tDistance: {predicted_class} {distance}")
 
     time_begin = time.time()
