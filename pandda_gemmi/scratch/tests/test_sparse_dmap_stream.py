@@ -182,6 +182,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
     time_finish = time.time()
     print(f"Parallel loaded xmaps in {round(time_finish - time_begin, 1)} into dict of length {len(dmaps_dict)}")
+    array = np.vstack([dmap.data.reshape((1,-1) ) for dtag, dmap in dmaps_dict.items() ])
 
     print(f"##### Masking dmaps #####")
     # sparse_dmaps_inner = {}
