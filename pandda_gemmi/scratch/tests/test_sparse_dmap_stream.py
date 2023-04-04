@@ -227,6 +227,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
 
 
+
+
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
     predicted = dpgmm.fit_predict(transformed)
