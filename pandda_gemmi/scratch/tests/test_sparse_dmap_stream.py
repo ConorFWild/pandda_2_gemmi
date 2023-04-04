@@ -245,6 +245,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
         # print(np.max(clf.predict_proba(transformed), axis=1))
 
+        print(f"Predicted: {predicted[0]}")
         for predicted_class in np.unique(predicted):
             cov_iv = np.diag(clf.precisions_[predicted_class, :].flatten())
             mean = clf.means_[predicted_class, :].flatten()
