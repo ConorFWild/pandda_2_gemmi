@@ -169,6 +169,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
 
+
     print(f"##### Pairwise distances #####")
     # sparse_dmaps_inner = {}
     # for dtag in datasets:
