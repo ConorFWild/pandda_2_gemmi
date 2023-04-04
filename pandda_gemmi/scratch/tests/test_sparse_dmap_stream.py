@@ -248,6 +248,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"\t\t{dtag} {prediction}")
 
     print(f"\tBayesian counts are {counts}")
+    print(dpgmm.predict_proba(transformed))
 
 
 if __name__ == "__main__":
