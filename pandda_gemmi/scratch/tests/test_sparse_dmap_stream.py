@@ -217,6 +217,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
         print(np.max(clf.predict_proba(transformed), axis=1))
 
+        for predicted_class in np.unique(predicted):
+            cov = np.diag(clf.covariances_[predicted_class, :].flatten())
+            mean = clf.means_[predicted_class, :].flatten()
+            distance = spatial.distance.mahalanobis(transformed[0,:].flatten(),mean, cov)
+            print(f"\t\tDistance: {distance}")
+
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
     predicted = dpgmm.fit_predict(transformed)
