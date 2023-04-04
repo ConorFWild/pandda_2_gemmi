@@ -49,6 +49,7 @@ class ProcessLocalRay(ProcessorInterface):
 
         return {key: result for key, result in zip(funcs, results)}
 
+
     def reset(self):
         ray.shutdown()
         ray.init(num_cpus=self.local_cpus)
