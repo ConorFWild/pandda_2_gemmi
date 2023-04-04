@@ -215,6 +215,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         bic = clf.bic(transformed)
         time_finish = time.time()
         print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
+        print(np.max(clf.predict_proba(transformed), axis=1))
 
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
