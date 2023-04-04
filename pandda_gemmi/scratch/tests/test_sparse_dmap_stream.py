@@ -207,12 +207,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         clf = mixture.GaussianMixture(n_components=j+1, covariance_type="diag")
         predicted = clf.fit_predict(transformed)
         time_finish = time.time()
+        predicted_classes, counts = np.unique(predicted, return_counts=True)
         print(f"\tFit-predicted in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+        print(f"\tCounts are {counts}")
 
         time_begin = time.time()
         bic = clf.bic(transformed)
         time_finish = time.time()
         print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
+
+
 
 
 
