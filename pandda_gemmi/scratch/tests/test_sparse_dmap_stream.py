@@ -220,7 +220,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         for predicted_class in np.unique(predicted):
             cov_iv = np.diag(clf.precisions_[predicted_class, :].flatten())
             mean = clf.means_[predicted_class, :].flatten()
-            distance = spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv)
+            distance = np.cbrt(spatial.distance.mahalanobis(transformed[0,:].flatten(), mean, cov_iv))
             print(f"\t\tDistance: {predicted_class} {distance}")
 
     time_begin = time.time()
