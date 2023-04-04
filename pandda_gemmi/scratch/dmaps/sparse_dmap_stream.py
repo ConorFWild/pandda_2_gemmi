@@ -96,7 +96,7 @@ class SparseDMapStream:
         print(f"\tListing: {finish_listing-begin_listing}")
 
         begin_interpolate = time.time()
-        gemmi.interpolate_points_multiple_parallel(
+        gemmi.interpolate_points_multiple(
             xmap,
             aligned_xmap,
             points_list,
