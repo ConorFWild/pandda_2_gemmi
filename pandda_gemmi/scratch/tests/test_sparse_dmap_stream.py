@@ -191,7 +191,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_begin = time.time()
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
     # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
-    distances = spatial.distance.pdist(transformed)
+    distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
     time_finish = time.time()
     print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
 
