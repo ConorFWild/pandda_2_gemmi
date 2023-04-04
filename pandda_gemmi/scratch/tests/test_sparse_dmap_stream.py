@@ -156,7 +156,30 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     array = dmaps.array_load()
     time_finish = time.time()
     print(f"Loaded xmaps in {round(time_finish - time_begin, 1)} into shape {array.shape}")
-    #
+
+    print(f"##### Loading DMaps #####")
+    # time_begin = time.time()
+    # sparse_dmaps = {}
+    # for dtag in datasets:
+    #     print(f"##### {dtag} #####")
+    #     sparse_dmaps[dtag] = dmaps.load(dtag)
+    #     # save_dmap(
+    #     #         reference_frame.unmask(dmap_sparse),
+    #     #         Path(out_dir) / f"{dtag}.ccp4"
+    #     #     )
+    # time_finish = time.time()
+    # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
+    time_begin = time.time()
+    dmaps_dict = processor.process_dict(
+        {_dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
+            datasets[_dtag], alignments[dtag], dmaps.transforms, reference_frame
+        )
+            for _dtag
+            in datasets}
+    )
+    time_finish = time.time()
+    print(f"Parallel loaded xmaps in {round(time_finish - time_begin, 1)} into dict of length {len(dmaps_dict)}")
+
     print(f"##### Masking dmaps #####")
     # sparse_dmaps_inner = {}
     # for dtag in datasets:

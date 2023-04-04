@@ -42,6 +42,26 @@ class SparseDMapStream:
 
         return aligned_xmap
 
+    @staticmethod
+    def parallel_load(dataset, alignment, transforms, dframe):
+        dataset = dataset
+        alignment = alignment
+
+        begin_transform = time.time()
+        for transform in transforms:
+            dataset = transform(dataset)
+        finish_transform = time.time()
+        print(f"\tTransform: {finish_transform - begin_transform}")
+
+        begin_fft = time.time()
+        xmap = dataset.reflections.transform_f_phi_to_map()
+        finish_fft = time.time()
+        print(f"\tFFT: {finish_fft - begin_fft}")
+
+        aligned_xmap = SparseDMapStream.align_xmap(xmap, dframe, alignment)
+
+        return aligned_xmap
+
     def array_load(self, ):
         # Get the shape to load datasets into
         shape = (len(self.datasets), self.dframe.mask.indicies[0].size)
