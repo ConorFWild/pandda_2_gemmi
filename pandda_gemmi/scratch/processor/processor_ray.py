@@ -43,6 +43,7 @@ class ProcessLocalRay(ProcessorInterface):
 
 
 
+
     def process_dict(self, funcs):
         assert ray.is_initialized() == True
         tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
