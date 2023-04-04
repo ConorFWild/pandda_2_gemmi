@@ -227,6 +227,17 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     print(f"\tBayesian counts are {counts}")
 
+    time_begin = time.time()
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
+    predicted = dpgmm.fit_predict(transformed)
+    time_finish = time.time()
+    print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    predicted_classes, counts = np.unique(predicted, return_counts=True)
+    for dtag, prediction in zip(datasets, predicted):
+        print(f"\t\t{dtag} {prediction}")
+
+    print(f"\tBayesian counts are {counts}")
+
 
 if __name__ == "__main__":
     fire.Fire(test_sparse_dmap_stream)
