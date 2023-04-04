@@ -195,6 +195,25 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
 
+    from sklearn import mixture
+
+    # distances = spatial.distance.pdist(sparse_dmap_inner_array)
+    # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+    # distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
+    for j in range(20):
+        print(f"######### {j} ############")
+
+        time_begin = time.time()
+        clf = mixture.GaussianMixture(n_components=j+1, covariance_type="diag")
+        predicted = clf.fit_predict(transformed)
+        time_finish = time.time()
+        print(f"\tFit-predicted in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+
+        time_begin = time.time()
+        bic = clf.bic(transformed)
+        time_finish = time.time()
+        print(f"\tBic in {round(time_finish - time_begin, 1)} with bic {bic}")
+
 
 
 if __name__ == "__main__":
