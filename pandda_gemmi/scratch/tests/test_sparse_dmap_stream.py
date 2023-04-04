@@ -224,6 +224,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             print(f"\t\tDistance: {predicted_class} {distance}")
             print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
 
+
+
+
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
     predicted = dpgmm.fit_predict(transformed)
