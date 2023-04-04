@@ -259,7 +259,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
 
     time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag", weight_concentration_prior=1000.0)
     predicted = dpgmm.fit_predict(transformed)
     time_finish = time.time()
     print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
