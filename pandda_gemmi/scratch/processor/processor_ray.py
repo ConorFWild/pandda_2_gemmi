@@ -21,6 +21,9 @@ class ProcessLocalRay(ProcessorInterface):
         ray.init(num_cpus=local_cpus)
         self.tag: Literal["not_async"] = "not_async"
 
+    def put(self, object):
+        return ray.put(object)
+
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         assert ray.is_initialized() == True
         # actors = [RayWrapper.remote() for f in funcs]

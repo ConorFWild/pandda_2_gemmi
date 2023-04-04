@@ -152,10 +152,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #     #     )
     # time_finish = time.time()
     # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
-    time_begin = time.time()
-    array = dmaps.array_load()
-    time_finish = time.time()
-    print(f"Loaded xmaps in {round(time_finish - time_begin, 1)} into shape {array.shape}")
+    # time_begin = time.time()
+    # array = dmaps.array_load()
+    # time_finish = time.time()
+    # print(f"Loaded xmaps in {round(time_finish - time_begin, 1)} into shape {array.shape}")
 
     print(f"##### Loading DMaps parallel #####")
     # time_begin = time.time()
@@ -170,10 +170,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # time_finish = time.time()
     # print(f"Saved xmaps in {round(time_finish - time_begin, 1)}")
     time_begin = time.time()
+    transforms_ref = processor.put(dmaps.transforms)
+    reference_frame_ref = processor.put(reference_frame)
     dmaps_dict = processor.process_dict(
         {
             _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-            datasets[_dtag], alignments[dtag], dmaps.transforms, reference_frame
+            datasets[_dtag], alignments[dtag], transforms_ref, reference_frame_ref
         )
             for _dtag
             in datasets}
