@@ -82,8 +82,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     for resid in dataset_test.structure.protein_residue_ids():
 
         print(f"Alignment 277: {resid.chain} {resid.number}")
-        print(f"\tAlignment 277: {alignment.transforms[resid].com_reference}")
-        print(f"\tAlignment 277: {alignment.transforms[resid].com_moving}")
+        print(f"\tReference: {alignment.transforms[resid].com_reference}")
+        print(f"\tMoving: {alignment.transforms[resid].com_moving}")
 
 
     # Get the reference frame
