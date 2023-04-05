@@ -76,15 +76,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
 
-    dataset_test: DatasetInterface = datasets_resolution["TbTR-x0277"]
-    alignment = alignments["TbTR-x0277"]
-    # resid = ResidueID("0")
-    for resid in dataset_test.structure.protein_residue_ids():
-        print(f"Alignment 277: {resid.chain} {resid.number}")
-        print(f"\tReference: {alignment.transforms[resid].com_reference}")
-        print(f"\tMoving: {alignment.transforms[resid].com_moving}")
-
-
     # Get the reference frame
     print(f"##### Getting reference frame #####")
     begin_get_frame = time.time()
