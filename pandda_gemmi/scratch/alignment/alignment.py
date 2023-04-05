@@ -88,28 +88,28 @@ class Transform:
         return [pos[0], pos[1], pos[2]]
 
     @staticmethod
-    def from_atoms(dataset_selection,
+    def from_atoms(moving_selection,
                    reference_selection,
-                   com_dataset,
+                   com_moving,
                    com_reference,
                    ):
 
-        mean = com_dataset
+        mean_mov = com_moving
         mean_ref = com_reference
 
         # vec = mean_ref - mean
         vec = np.array([0.0, 0.0, 0.0])
 
-        de_meaned = dataset_selection - mean
+        de_meaned_mov = moving_selection - mean_mov
         de_meaned_ref = reference_selection - mean_ref
 
-        rotation, rmsd = spatial.transform.Rotation.align_vectors(de_meaned, de_meaned_ref)
+        rotation, rmsd = spatial.transform.Rotation.align_vectors(de_meaned_mov, de_meaned_ref)
 
         com_reference = mean_ref
 
-        com_moving = mean
+        com_moving = mean_mov
 
-        return Transform.from_translation_rotation(vec, rotation, com_reference, com_moving)
+        return Transform.from_translation_rotation(vec, rotation, com_reference=com_reference, com_moving=com_moving)
 
     # def __getstate__(self):
     #     transform_python = TransformPython.from_gemmi(self.transform)
@@ -132,7 +132,7 @@ class Alignment:
             marker_atom_search_radius=10.0,
     ):
 
-        dataset_pos_list = []
+        moving_pos_list = []
         reference_pos_list = []
 
         # Iterate protein atoms, then pull out their atoms, and search them
@@ -145,33 +145,33 @@ class Alignment:
                 ref_res = ref_res_span[0]
 
                 # Get corresponding reses
-                dataset_res_span = moving_dataset.structure[res_id]
-                dataset_res = dataset_res_span[0]
+                mov_res_span = moving_dataset.structure[res_id]
+                mov_res = dataset_res_span[0]
 
                 # Get the CAs
                 atom_ref = ref_res["CA"][0]
-                atom_dataset = dataset_res["CA"][0]
+                atom_mov = mov_res["CA"][0]
 
                 # Get the shared atoms
                 reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
-                dataset_pos_list.append([atom_dataset.pos.x, atom_dataset.pos.y, atom_dataset.pos.z, ])
+                moving_pos_list.append([atom_mov.pos.x, atom_mov.pos.y, atom_mov.pos.z, ])
 
             except Exception as e:
                 print(
                     f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
                 continue
 
-        dataset_atom_array = np.array(dataset_pos_list)
+        moving_atom_array = np.array(moving_pos_list)
         reference_atom_array = np.array(reference_pos_list)
 
-        if (reference_atom_array.shape[0] == 0) or (dataset_atom_array.shape[0] == 0):
+        if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
             # raise ExceptionNoCommonAtoms()
             raise Exception()
 
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
 
-        if reference_atom_array.size != dataset_atom_array.size:
+        if reference_atom_array.size != moving_atom_array.size:
             # raise AlignmentUnmatchedAtomsError(reference_atom_array,
             #                                    dataset_atom_array,
             #                                    )
@@ -194,16 +194,16 @@ class Alignment:
                 marker_atom_search_radius,
             )
             reference_selection = reference_atom_array[reference_indexes]
-            dataset_selection = dataset_atom_array[reference_indexes]
+            moving_selection = moving_atom_array[reference_indexes]
 
-            if dataset_selection.shape[0] == 0:
+            if moving_selection.shape[0] == 0:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
                 raise Exception()
 
             transforms[res_id] = Transform.from_atoms(
-                dataset_selection,
+                moving_selection,
                 reference_selection,
-                com_dataset=np.mean(dataset_selection, axis=0),
+                com_moving=np.mean(moving_selection, axis=0),
                 com_reference=np.mean(reference_selection, axis=0),
 
             )
