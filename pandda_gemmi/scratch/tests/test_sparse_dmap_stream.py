@@ -395,7 +395,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{dtag}_std.ccp4"
         )
 
-        masked_mean = mean[reference_frame.mask.indicies_sparse_inner]
+        masked_mean = mean[reference_frame.mask.indicies_sparse_inner_atomic]
         print(f"Masked mean shape: {masked_mean.shape}")
         median = np.median(masked_mean)
         print(f"Median: {median}")
