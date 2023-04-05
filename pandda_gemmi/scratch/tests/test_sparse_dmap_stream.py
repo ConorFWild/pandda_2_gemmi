@@ -303,7 +303,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_smoothed_grid = SmoothReflections(dataset_masked)(mean_dataset_masked).reflections.transform_f_phi_to_map()
         save_dmap(
             mean_smoothed_grid,
-            Path(out_dir) / f"{dtag}_mean.ccp4"
+            Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
 
 
