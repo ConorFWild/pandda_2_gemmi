@@ -320,12 +320,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             return np.linalg.norm((dataset_array - gaussian_filter(mean_array, sigma=sigma)).flatten())
 
         default = filter_gauss(np.array([0.0,0.0,0.0]))
-        bounds = [(-3,3), (-3,3), (-3,3)]
+        bounds = [(-15,15), (-15,15), (-15,15)]
         res = shgo(filter_gauss, bounds)
         print(res.x)
         print([res.fun, default])
 
-        mean_smoothed_array = filter_gauss(res.x)
+        mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
         save_dmap(
             reference_frame.unmask(SparseDMap(mean_smoothed_array[reference_frame.mask.indicies])),
             Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
