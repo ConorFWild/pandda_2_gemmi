@@ -302,6 +302,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                                                  res
                                                  )
         mean_grid = mean_reflections.transform_f_phi_to_map(exact_size=reference_frame.spacing)
+        dataset_array = np.array(reference_frame.unmask(SparseDMap(array[0,:].flatten())), copy=False)
+        mean_array =         np.array(reference_frame.unmask(SparseDMap(mean.flatten())), copy=False)
+
         print(f"After undoing from grid shape {np.array(mean_grid).shape}")
         dataset_masked = XRayDataset(dataset.structure, dataset_reflections, dataset.ligand_files)
         mean_dataset_masked = XRayDataset(dataset.structure, mean_reflections, dataset.ligand_files)
@@ -311,7 +314,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_smoothed_grid,
             Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
+        from scipy.ndimage import gaussian_filter
+        from scipy.optimize import shgo
+        def filter_gauss(sigma):
+            return np.linalg.norm((dataset_array - gaussian_filter(mean_array, sigma=sigma)).flatten())
 
+        default = filter_gauss(np.array([0.0,0.0,0.0]))
+        bounds = [(-3,3), (-3,3), (-3,3)]
+        res = shgo(filter_gauss)
+        print(res.x)
+        print([res.fun, default])
 
         std = np.std(masked_array, axis=0)
         z = (array[0,:]-mean / std)
