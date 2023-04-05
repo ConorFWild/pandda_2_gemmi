@@ -387,6 +387,35 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         distance = spatial.distance.mahalanobis(transformed[3, :].flatten(), mean, cov_iv)
         print(f"\t\tDistance: {predicted_class} {distance}")
 
+
+    for predicted_class, count in zip(predicted_classes, counts):
+        if count < 20:
+            continue
+
+        masked_array = array[predicted_classes == predicted_class, :]
+        mean = np.mean(masked_array, axis=0)
+        std = np.std(masked_array, axis=0)
+        z = (array[0,:]-mean / std)
+        normalized_z = z / np.std(z)
+
+        z_grid = reference_frame.unmask(SparseDMap(z))
+
+        save_dmap(
+            z_grid,
+            Path(out_dir) / f"{predicted_class}_z.ccp4"
+        )
+
+        normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z_grid))
+
+        save_dmap(
+            z_grid,
+            Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
+        )
+
+
+
+
+
         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
     # time_begin = time.time()
