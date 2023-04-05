@@ -236,11 +236,11 @@ class Reflections(ReflectionsInterface):
         return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
 
     @classmethod
-    def from_grid(cls, grid, dataset: DatasetInterface):
+    def from_grid(cls, grid, dataset: DatasetInterface, dmin):
         original_reflections = dataset.reflections.reflections
 
         sf = gemmi.transform_map_to_f_phi(grid)
-        data = sf.prepare_asu_data()
+        data = sf.prepare_asu_data(dmin)
 
         mtz = gemmi.Mtz(with_base=False)
         mtz.title = original_reflections.title
