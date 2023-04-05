@@ -292,7 +292,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
-        dataset_reflections= Reflections.from_grid(reference_frame.unmask(SparseDMap(masked_array.flatten())),
+        dataset_reflections= Reflections.from_grid(reference_frame.unmask(SparseDMap(array[0,:].flatten())),
                                                    dataset,
                                                    )
         mean_reflections = Reflections.from_grid(reference_frame.unmask(SparseDMap(mean.flatten())),
