@@ -395,7 +395,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{dtag}_std.ccp4"
         )
 
-        median_grid = reference_frame.unmask(SparseDMap((array[0,:]-mean) / (0.1*np.median(mean[reference_frame.mask.indicies_sparse_inner]))))
+        masked_mean = mean[reference_frame.mask.indicies_sparse_inner]
+        print(f"Masked mean shape: {masked_mean.shape}")
+        median = np.median(masked_mean)
+        print(f"Median: {}")
+
+        median_grid = reference_frame.unmask(SparseDMap((array[0,:]-mean) / (0.1*median)))
         save_dmap(
             median_grid,
             Path(out_dir) / f"{dtag}_median_diff.ccp4"
