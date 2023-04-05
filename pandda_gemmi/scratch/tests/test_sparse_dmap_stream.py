@@ -321,7 +321,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_smoothed_grid,
             Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
-
+        import matplotlib
+        matplotlib.use('png')
         import matplotlib.pyplot as plt
         plt.scatter(
             x=np.sort(SparseDMap(array[0,:].flatten()), axis=None),
