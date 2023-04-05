@@ -393,7 +393,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             continue
 
         masked_array = array[predicted == predicted_class, :]
-        mean = np.mean(masked_array, axis=0)
+        mean = np.median(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
         z = (array[0,:]-mean / std)
         normalized_z = z / np.std(z)
