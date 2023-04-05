@@ -118,7 +118,7 @@ class SparseDMapStream:
         ]
         finish_listing = time.time()
         print(f"\tListing: {finish_listing-begin_listing}")
-        print(com_reference_list)
+        # print(com_reference_list)
 
         begin_interpolate = time.time()
         gemmi.interpolate_points_multiple(

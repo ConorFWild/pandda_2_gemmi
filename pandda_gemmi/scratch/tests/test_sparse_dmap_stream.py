@@ -195,7 +195,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dmaps_dict = processor.process_dict(
         {
             _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-            datasets_resolution[_dtag], alignments[dtag], transforms_ref, reference_frame_ref
+            datasets_resolution[_dtag], alignments[_dtag], transforms_ref, reference_frame_ref
         )
             for _dtag
             in datasets_resolution}
