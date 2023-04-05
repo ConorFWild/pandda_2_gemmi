@@ -276,7 +276,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     max_dists = np.max(distances, axis=1)
     ordered_indexes = np.argsort(max_dists)
     for index in ordered_indexes:
-        dtag = used_dtags[index]
+        dtag = dtag_array[index]
         neighbour_indexes = neighbours[index, :]
         num_used_indexes = np.sum(used_dtags[neighbour_indexes])
 
