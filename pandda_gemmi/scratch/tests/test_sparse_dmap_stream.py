@@ -265,16 +265,50 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     print(f"##### Kneighbours #####")
     time_begin = time.time()
-    kdt = NearestNeighbors(n_neighbors=45, n_jobs=-1).fit(transformed)
+    kdt = NearestNeighbors(n_neighbors=31, n_jobs=-1).fit(transformed)
     distances, neighbours = kdt.kneighbors(transformed)
     time_finish = time.time()
     print(f"Got k nearest neighbours in {round(time_finish - time_begin, 1)}")
 
     dtag_array = np.array([_dtag for _dtag in datasets_resolution])
+    used_dtags = np.zeros(dtag_array.shape)
+    max_dists = np.max(distances, axis=1)
+    ordered_indexes = np.argsort(max_dists)
+    for index in ordered_indexes:
+        dtag = used_dtags[index]
+        neighbour_indexes = neighbours[index, :]
+        num_used_indexes = np.sum(used_dtags[neighbour_indexes])
 
-    for dtag, neighbour_indexes, dtag_dists in zip(datasets_resolution, neighbours, distances):
-        neighbour_dtags = dtag_array[neighbour_indexes.flatten()]
-        print(f"\t{dtag} : {neighbour_dtags[:3]} : {np.max(dtag_dists)}")
+        if num_used_indexes != 0:
+            print(f"\t\tAlready used dtags, skipping!")
+            continue
+        else:
+            print(f"\t\tModel based on dtag: {dtag}!")
+
+        used_dtags[neighbour_indexes] = 1
+
+        masked_array = array[neighbour_indexes, :]
+        mean = np.median(masked_array, axis=0)
+        std = np.std(masked_array, axis=0)
+        z = (array[0,:]-mean / std)
+        normalized_z = z / np.std(z)
+
+        normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
+
+        save_dmap(
+            normalized_z_grid,
+            Path(out_dir) / f"{dtag}_normalized_z.ccp4"
+        )
+
+        mean_grid = reference_frame.unmask(SparseDMap(mean))
+        save_dmap(
+            mean_grid,
+            Path(out_dir) / f"{dtag}_mean.ccp4"
+        )
+
+    # for dtag, neighbour_indexes, dtag_dists in zip(datasets_resolution, neighbours, distances):
+    #     neighbour_dtags = dtag_array[neighbour_indexes.flatten()]
+    #     print(f"\t{dtag} : {neighbour_dtags[:3]} : {np.max(dtag_dists)}")
 
     print(f"##### Z maps #####")
     # for predicted_class, count in zip(predicted_classes, counts):
