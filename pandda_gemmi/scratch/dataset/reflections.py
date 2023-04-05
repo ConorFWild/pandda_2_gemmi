@@ -243,8 +243,8 @@ class Reflections(ReflectionsInterface):
         data = sf.prepare_asu_data()
 
         mtz = gemmi.Mtz(with_base=False)
-        mtz.title = original_reflections.mtz_title
-        mtz.history = original_reflections.mtz_history
+        mtz.title = original_reflections.title
+        mtz.history = original_reflections.history
         mtz.spacegroup = sf.spacegroup
         mtz.set_cell_for_all(sf.unit_cell)
 
