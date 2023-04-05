@@ -265,7 +265,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"##### Kneighbours #####")
     time_begin = time.time()
     kdt = NearestNeighbors(n_neighbors=45, n_jobs=-1).fit(transformed)
-    neighbours, distances = kdt.query(transformed)
+    neighbours, distances = kdt.kneighbors(transformed)
     time_finish = time.time()
     print(f"Got k nearest neighbours in {round(time_finish - time_begin, 1)}")
 
