@@ -322,8 +322,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         default = filter_gauss(np.array([0.0,0.0,0.0]))
         blurred_10 = filter_gauss(np.array([10.0,10.0,10.0]))
-        blurred_1 = filter_gauss(np.array([10.0,10.0,10.0]))
-        blurred_01 = filter_gauss(np.array([10.0,10.0,10.0]))
+        blurred_1 = filter_gauss(np.array([1.0,1.0,1.0]))
+        blurred_01 = filter_gauss(np.array([0.1,0.1,0.1]))
         bounds = [(0.001,100), (0.001,100), (0.001,100)]
         # res = shgo(filter_gauss, bounds)
         # print(res.x)
