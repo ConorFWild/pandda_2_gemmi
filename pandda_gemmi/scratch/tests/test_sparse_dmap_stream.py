@@ -412,6 +412,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
         )
 
+        mean_grid = reference_frame.unmask(SparseDMap(mean))
+        save_dmap(
+            mean_grid,
+            Path(out_dir) / f"{predicted_class}_mean.ccp4"
+        )
+
 
 
 
