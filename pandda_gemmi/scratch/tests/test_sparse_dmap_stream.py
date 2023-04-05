@@ -325,8 +325,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         plt.scatter(
-            x=np.sort(SparseDMap(array[0,:].flatten()), axis=None),
-            y=np.sort(SparseDMap(mean.flatten()), axis=None),
+            x=np.sort(array[0,:].flatten(), axis=None),
+            y=np.sort(mean.flatten(), axis=None),
         )
         plt.savefig(str(Path(out_dir) / "quantiles.png"))
         # from scipy.ndimage import gaussian_filter
