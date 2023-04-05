@@ -248,12 +248,12 @@ class Reflections(ReflectionsInterface):
         mtz.spacegroup = sf.spacegroup
         mtz.set_cell_for_all(sf.unit_cell)
 
-        for dataset in original_reflections.datasets:
-            mtz.add_dataset(dataset.dataset_name)
-            ds = mtz.dataset(dataset.id)
-            ds.project_name = dataset.project_name
-            ds.crystal_name = dataset.crystal_name
-            ds.wavelength = dataset.wavelength
+        for reflections_dataset in original_reflections.datasets:
+            mtz.add_dataset(reflections_dataset.dataset_name)
+            ds = mtz.dataset(reflections_dataset.id)
+            ds.project_name = reflections_dataset.project_name
+            ds.crystal_name = reflections_dataset.crystal_name
+            ds.wavelength = reflections_dataset.wavelength
 
         for column in original_reflections.columns:
             mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
