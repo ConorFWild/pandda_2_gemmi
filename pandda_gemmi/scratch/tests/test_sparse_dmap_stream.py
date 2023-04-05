@@ -8,6 +8,8 @@ import gemmi
 import numpy as np
 from scipy import spatial
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
+
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
@@ -105,15 +107,20 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     # exit()
     # Get the dmaps
+
+    print(f"##### Getting datasets in resolution #####")
+    res = dataset.reflections.reflections() + 0.1
+    datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
+
     print(f"##### Getting sparse dmap loader #####")
     dmaps: SparseDMapStream = SparseDMapStream(
-        datasets,
+        datasets_resolution,
         reference_frame,
         alignments,
         [
             TruncateReflections(
-                datasets,
-                dataset.reflections.resolution(),
+                datasets_resolution,
+                res,
             ),
             SmoothReflections(dataset)
         ],
@@ -175,10 +182,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dmaps_dict = processor.process_dict(
         {
             _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-            datasets[_dtag], alignments[dtag], transforms_ref, reference_frame_ref
+            datasets_resolution[_dtag], alignments[dtag], transforms_ref, reference_frame_ref
         )
             for _dtag
-            in datasets}
+            in datasets_resolution}
     )
     time_finish = time.time()
     print(f"Parallel loaded xmaps in {round(time_finish - time_begin, 1)} into dict of length {len(dmaps_dict)}")
@@ -253,8 +260,18 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #         print(f"\t\tDistance: {predicted_class} {distance}")
     #         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
 
+    print(f"##### Kneighbours #####")
+    time_begin = time.time()
+    kdt = NearestNeighbors(n_neighbors=45, n_jobs=-1).fit(transformed)
+    neighbours, distances = kdt.query(transformed)
+    time_finish = time.time()
+    print(f"Got k nearest neighbours in {round(time_finish - time_begin, 1)}")
 
+    dtag_array = np.array([_dtag for _dtag in datasets_resolution])
 
+    for dtag, neighbour_indexes in zip(datasets_resolution, neighbours):
+        neighbour_dtags = dtag_array[neighbour_indexes.flatten()]
+        print(f"\t{dtag} : {neighbour_dtags[:6]}")
 
 
 
@@ -347,76 +364,77 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # ##############################
 
 
-    time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=30, covariance_type="diag",)
-    predicted = dpgmm.fit_predict(transformed)
-    time_finish = time.time()
-    print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-    predicted_classes, counts = np.unique(predicted, return_counts=True)
-    for dtag, prediction in zip(datasets, predicted):
-        print(f"\t\t{dtag} {prediction}")
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=30, covariance_type="diag",)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class, ]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[1]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[1, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[2]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[2, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[3]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[3, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    #
+    # for predicted_class, count in zip(predicted_classes, counts):
+    #     if count < 20:
+    #         continue
+    #
+    #     masked_array = array[predicted == predicted_class, :]
+    #     mean = np.median(masked_array, axis=0)
+    #     std = np.std(masked_array, axis=0)
+    #     z = (array[0,:]-mean / std)
+    #     normalized_z = z / np.std(z)
+    #
+    #     z_grid = reference_frame.unmask(SparseDMap(z))
+    #
+    #     save_dmap(
+    #         z_grid,
+    #         Path(out_dir) / f"{predicted_class}_z.ccp4"
+    #     )
+    #
+    #     normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
+    #
+    #     save_dmap(
+    #         normalized_z_grid,
+    #         Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
+    #     )
+    #
+    #     mean_grid = reference_frame.unmask(SparseDMap(mean))
+    #     save_dmap(
+    #         mean_grid,
+    #         Path(out_dir) / f"{predicted_class}_mean.ccp4"
+    #     )
 
-    print(f"\tBayesian counts are {counts}")
-
-    print(f"Predicted: {predicted[0]}")
-    for predicted_class in np.unique(predicted):
-        # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
-        cov_iv = dpgmm.precisions_[predicted_class, ]
-        mean = dpgmm.means_[predicted_class, :].flatten()
-        distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
-        print(f"\t\tDistance: {predicted_class} {distance}")
-    print(f"Predicted: {predicted[1]}")
-    for predicted_class in np.unique(predicted):
-        # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
-        cov_iv = dpgmm.precisions_[predicted_class,]
-        mean = dpgmm.means_[predicted_class, :].flatten()
-        distance = spatial.distance.mahalanobis(transformed[1, :].flatten(), mean, cov_iv)
-        print(f"\t\tDistance: {predicted_class} {distance}")
-    print(f"Predicted: {predicted[2]}")
-    for predicted_class in np.unique(predicted):
-        # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
-        cov_iv = dpgmm.precisions_[predicted_class,]
-        mean = dpgmm.means_[predicted_class, :].flatten()
-        distance = spatial.distance.mahalanobis(transformed[2, :].flatten(), mean, cov_iv)
-        print(f"\t\tDistance: {predicted_class} {distance}")
-    print(f"Predicted: {predicted[3]}")
-    for predicted_class in np.unique(predicted):
-        # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
-        cov_iv = dpgmm.precisions_[predicted_class,]
-        mean = dpgmm.means_[predicted_class, :].flatten()
-        distance = spatial.distance.mahalanobis(transformed[3, :].flatten(), mean, cov_iv)
-        print(f"\t\tDistance: {predicted_class} {distance}")
-
-
-    for predicted_class, count in zip(predicted_classes, counts):
-        if count < 20:
-            continue
-
-        masked_array = array[predicted == predicted_class, :]
-        mean = np.median(masked_array, axis=0)
-        std = np.std(masked_array, axis=0)
-        z = (array[0,:]-mean / std)
-        normalized_z = z / np.std(z)
-
-        z_grid = reference_frame.unmask(SparseDMap(z))
-
-        save_dmap(
-            z_grid,
-            Path(out_dir) / f"{predicted_class}_z.ccp4"
-        )
-
-        normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
-
-        save_dmap(
-            normalized_z_grid,
-            Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
-        )
-
-        mean_grid = reference_frame.unmask(SparseDMap(mean))
-        save_dmap(
-            mean_grid,
-            Path(out_dir) / f"{predicted_class}_mean.ccp4"
-        )
 
 
 
