@@ -321,6 +321,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_smoothed_grid,
             Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
+
+        import matplotlib.pyplot as plt
+        plt.scatter(np.sort(SparseDMap(array[0,:].flatten())), np.sort(SparseDMap(mean.flatten())))
+        plt.savefig(str(Path(out_dir) / "quantiles.png"))
         # from scipy.ndimage import gaussian_filter
         # from scipy.optimize import shgo
         #
