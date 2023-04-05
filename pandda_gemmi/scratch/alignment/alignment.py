@@ -146,7 +146,7 @@ class Alignment:
 
                 # Get corresponding reses
                 mov_res_span = moving_dataset.structure[res_id]
-                mov_res = dataset_res_span[0]
+                mov_res = mov_res_span[0]
 
                 # Get the CAs
                 atom_ref = ref_res["CA"][0]
