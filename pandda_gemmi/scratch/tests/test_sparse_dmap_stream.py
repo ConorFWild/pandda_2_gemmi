@@ -305,6 +305,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{dtag}_z.ccp4"
         )
 
+        low_z = np.zeros(z.shape)
+        low_z[z < 2.0] = 1.0
+        low_z_grid = reference_frame.unmask(SparseDMap(low_z))
+        save_dmap(
+            low_z_grid,
+            Path(out_dir) / f"{dtag}_low_z.ccp4"
+        )
+
         mean_grid = reference_frame.unmask(SparseDMap(mean))
         save_dmap(
             mean_grid,
