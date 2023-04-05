@@ -325,10 +325,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         blurred_1 = filter_gauss(np.array([1.0,1.0,1.0]))
         blurred_01 = filter_gauss(np.array([0.1,0.1,0.1]))
         bounds = [(0.001,100), (0.001,100), (0.001,100)]
-        # res = shgo(filter_gauss, bounds)
-        # print(res.x)
+        res = shgo(filter_gauss, bounds)
+        print(res.x)
         # print([res.fun, default, blurred])
-        print([default, blurred_01, blurred_1, blurred_10])
+        print([default, blurred_01, blurred_1, blurred_10, res.fun])
 
         # mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
         save_dmap(
