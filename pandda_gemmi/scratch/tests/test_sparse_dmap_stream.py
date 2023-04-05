@@ -300,6 +300,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                                                  dataset,
                                                  res
                                                  )
+        mean_grid = mean_reflections.reflections.transform_f_phi_to_map()
+        print(f"After undoing from grid shape {np.array(mean_grid).shape}")
         dataset_masked = XRayDataset(dataset.structure, dataset_reflections, dataset.ligand_files)
         mean_dataset_masked = XRayDataset(dataset.structure, mean_reflections, dataset.ligand_files)
         mean_smoothed_grid = SmoothReflections(dataset_masked)(mean_dataset_masked).reflections.transform_f_phi_to_map()
