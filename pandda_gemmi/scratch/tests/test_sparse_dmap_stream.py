@@ -296,10 +296,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         z = (array[0,:]-mean / std)
         normalized_z = z / np.std(z)
 
+        z_grid = reference_frame.unmask(SparseDMap(z))
+
         normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
 
         save_dmap(
-            z,
+            z_grid,
             Path(out_dir) / f"{dtag}_z.ccp4"
         )
 
