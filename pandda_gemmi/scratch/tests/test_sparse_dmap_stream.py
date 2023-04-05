@@ -302,8 +302,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                                                  res
                                                  )
         mean_grid = mean_reflections.transform_f_phi_to_map(exact_size=reference_frame.spacing)
+
         dataset_array = np.array(reference_frame.unmask(SparseDMap(array[0,:].flatten())), copy=False)
-        mean_array =         np.array(reference_frame.unmask(SparseDMap(mean.flatten())), copy=False)
+        mean_array = np.array(reference_frame.unmask(SparseDMap(mean.flatten())), copy=False)
 
         print(f"After undoing from grid shape {np.array(mean_grid).shape}")
         dataset_masked = XRayDataset(dataset.structure, dataset_reflections, dataset.ligand_files)
@@ -320,14 +321,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             return np.linalg.norm((dataset_array - gaussian_filter(mean_array, sigma=sigma)).flatten())
 
         default = filter_gauss(np.array([0.0,0.0,0.0]))
-        blurred = filter_gauss(np.array([10.0,10.0,10.0]))
-
+        blurred_10 = filter_gauss(np.array([10.0,10.0,10.0]))
+        blurred_1 = filter_gauss(np.array([10.0,10.0,10.0]))
+        blurred_01 = filter_gauss(np.array([10.0,10.0,10.0]))
         bounds = [(-100,100), (-100,100), (-100,100)]
-        res = shgo(filter_gauss, bounds)
-        print(res.x)
-        print([res.fun, default, blurred])
+        # res = shgo(filter_gauss, bounds)
+        # print(res.x)
+        # print([res.fun, default, blurred])
+        print([default, blurred_01, blurred_1, blurred_10])
 
-        mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
+        # mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
         save_dmap(
             reference_frame.unmask(SparseDMap(mean_smoothed_array[reference_frame.mask.indicies])),
             Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
