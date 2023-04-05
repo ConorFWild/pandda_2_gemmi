@@ -272,11 +272,40 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     dtag_array = np.array([_dtag for _dtag in datasets_resolution])
 
-    for dtag, neighbour_indexes in zip(datasets_resolution, neighbours):
+    for dtag, neighbour_indexes, dtag_dists in zip(datasets_resolution, neighbours, distances):
         neighbour_dtags = dtag_array[neighbour_indexes.flatten()]
-        print(f"\t{dtag} : {neighbour_dtags[:6]}")
+        print(f"\t{dtag} : {neighbour_dtags[:3]} : {np.max(dtag_dists)}")
 
-
+    print(f"##### Z maps #####")
+    # for predicted_class, count in zip(predicted_classes, counts):
+    #     if count < 20:
+    #         continue
+    #
+    #     masked_array = array[predicted == predicted_class, :]
+    #     mean = np.median(masked_array, axis=0)
+    #     std = np.std(masked_array, axis=0)
+    #     z = (array[0,:]-mean / std)
+    #     normalized_z = z / np.std(z)
+    #
+    #     z_grid = reference_frame.unmask(SparseDMap(z))
+    #
+    #     save_dmap(
+    #         z_grid,
+    #         Path(out_dir) / f"{predicted_class}_z.ccp4"
+    #     )
+    #
+    #     normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
+    #
+    #     save_dmap(
+    #         normalized_z_grid,
+    #         Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
+    #     )
+    #
+    #     mean_grid = reference_frame.unmask(SparseDMap(mean))
+    #     save_dmap(
+    #         mean_grid,
+    #         Path(out_dir) / f"{predicted_class}_mean.ccp4"
+    #     )
 
     # time_begin = time.time()
     # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag", weight_concentration_prior=100000.0)
