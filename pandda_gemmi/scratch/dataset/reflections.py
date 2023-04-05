@@ -256,6 +256,8 @@ class Reflections(ReflectionsInterface):
             ds.wavelength = reflections_dataset.wavelength
 
         for column in original_reflections.columns:
+            if column.label not in ["H", "K", "L", dataset.reflections.f, dataset.reflections.phi]:
+                continue
             mtz.add_column(column.label, column.type, dataset_id=column.dataset_id)
 
         reflection_columns = [col.label for col in mtz.columns]
