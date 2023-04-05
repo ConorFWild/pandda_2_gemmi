@@ -295,7 +295,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_max()
-        dataset_reflections= Reflections.from_grid(,
+        dataset_reflections= Reflections.from_grid(dataset_grid,
                                                    dataset,
                                                    res
                                                    )
