@@ -232,8 +232,12 @@ class Reflections(ReflectionsInterface):
 
         return None, None
 
-    def transform_f_phi_to_map(self, sample_rate: float = 3.0):
-        return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
+    def transform_f_phi_to_map(self, sample_rate: float = 3.0, exact_size=None):
+        if not exact_size:
+            return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
+        else:
+            return self.reflections.transform_f_phi_to_map(self.f, self.phi, exact_size=exact_size)
+
 
     @classmethod
     def from_grid(cls, grid, dataset: DatasetInterface, dmin):
@@ -241,7 +245,7 @@ class Reflections(ReflectionsInterface):
 
         sf = gemmi.transform_map_to_f_phi(grid)
         print(sf)
-        data = sf.prepare_asu_data(dmin=dmin)
+        data = sf.prepare_asu_data()
 
         mtz = gemmi.Mtz(with_base=False)
         mtz.title = original_reflections.title

@@ -292,6 +292,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
+
         dataset_reflections= Reflections.from_grid(reference_frame.unmask(SparseDMap(array[0,:].flatten())),
                                                    dataset,
                                                    res
@@ -300,11 +301,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                                                  dataset,
                                                  res
                                                  )
-        mean_grid = mean_reflections.transform_f_phi_to_map()
+        mean_grid = mean_reflections.transform_f_phi_to_map(exact_size=reference_frame.spacing)
         print(f"After undoing from grid shape {np.array(mean_grid).shape}")
         dataset_masked = XRayDataset(dataset.structure, dataset_reflections, dataset.ligand_files)
         mean_dataset_masked = XRayDataset(dataset.structure, mean_reflections, dataset.ligand_files)
-        mean_smoothed_grid = SmoothReflections(dataset_masked)(mean_dataset_masked).reflections.transform_f_phi_to_map()
+        mean_smoothed_grid = SmoothReflections(dataset_masked)(mean_dataset_masked).reflections.transform_f_phi_to_map(exact_size=reference_frame.spacing)
         print(f"Mean smoothed shape: {np.array(mean_smoothed_grid).shape} vs original {np.array(reference_frame.unmask(SparseDMap(array[0,:].flatten()))).shape}")
         save_dmap(
             mean_smoothed_grid,
