@@ -270,6 +270,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"Got k nearest neighbours in {round(time_finish - time_begin, 1)}")
 
+    print(f"##### Z maps #####")
     dtag_array = np.array([_dtag for _dtag in datasets_resolution])
     used_dtags = np.zeros(dtag_array.shape)
     max_dists = np.max(distances, axis=1)
