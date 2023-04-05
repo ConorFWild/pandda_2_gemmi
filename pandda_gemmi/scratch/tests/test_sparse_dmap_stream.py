@@ -293,15 +293,20 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
 
-        dataset_reflections= Reflections.from_grid(reference_frame.unmask(SparseDMap(array[0,:].flatten())),
+        dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
+        dataset_grid.symmetrize_max()
+        dataset_reflections= Reflections.from_grid(,
                                                    dataset,
                                                    res
                                                    )
-        mean_reflections = Reflections.from_grid(reference_frame.unmask(SparseDMap(mean.flatten())),
+        mean_grid = reference_frame.unmask(SparseDMap(mean.flatten()))
+        mean_grid.symmetrize_max()
+        mean_reflections = Reflections.from_grid(mean_grid,
                                                  dataset,
                                                  res
                                                  )
         mean_grid = mean_reflections.transform_f_phi_to_map(exact_size=reference_frame.spacing)
+        # mean_grid.symmetrize_abs_max()
 
         dataset_array = np.array(reference_frame.unmask(SparseDMap(array[0,:].flatten())), copy=False)
         mean_array = np.array(reference_frame.unmask(SparseDMap(mean.flatten())), copy=False)
@@ -315,26 +320,32 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_smoothed_grid,
             Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
-        from scipy.ndimage import gaussian_filter
-        from scipy.optimize import shgo
-        def filter_gauss(sigma):
-            return np.linalg.norm((dataset_array - gaussian_filter(mean_array, sigma=sigma)).flatten())
-
-        default = filter_gauss(np.array([0.0,0.0,0.0]))
-        blurred_10 = filter_gauss(np.array([10.0,10.0,10.0]))
-        blurred_1 = filter_gauss(np.array([1.0,1.0,1.0]))
-        blurred_01 = filter_gauss(np.array([0.1,0.1,0.1]))
-        bounds = [(0.00000001,100), (0.00000001,100), (0.00000001,100)]
-        res = shgo(filter_gauss, bounds)
-        print(res.x)
-        # print([res.fun, default, blurred])
-        print([default, blurred_01, blurred_1, blurred_10, res.fun])
-
-        # mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
-        save_dmap(
-            reference_frame.unmask(SparseDMap(mean_smoothed_array[reference_frame.mask.indicies])),
-            Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
-        )
+        # from scipy.ndimage import gaussian_filter
+        # from scipy.optimize import shgo
+        #
+        # from scipy.signal import convolve
+        # def filter_gauss(sigma):
+        #     return np.linalg.norm((dataset_array - gaussian_filter(mean_array, sigma=sigma)).flatten())
+        #
+        # def convolve_gauss(sigma):
+        #
+        #     np.linalg.norm((dataset_array - convolve(mean_array, vals.reshape((3,3,3)))).flatten())
+        #
+        # default = filter_gauss(np.array([0.0,0.0,0.0]))
+        # blurred_10 = filter_gauss(np.array([10.0,10.0,10.0]))
+        # blurred_1 = filter_gauss(np.array([1.0,1.0,1.0]))
+        # blurred_01 = filter_gauss(np.array([0.1,0.1,0.1]))
+        # bounds = [(0.00000001,100), (0.00000001,100), (0.00000001,100)]
+        # res = shgo(filter_gauss, bounds)
+        # print(res.x)
+        # # print([res.fun, default, blurred])
+        # print([default, blurred_01, blurred_1, blurred_10, res.fun])
+        #
+        # # mean_smoothed_array = gaussian_filter(mean_array, sigma=res.x)
+        # save_dmap(
+        #     reference_frame.unmask(SparseDMap(mean_smoothed_array[reference_frame.mask.indicies])),
+        #     Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
+        # )
         std = np.std(masked_array, axis=0)
         z = (array[0,:]-mean / std)
         normalized_z = z / np.std(z)
