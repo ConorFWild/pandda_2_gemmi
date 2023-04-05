@@ -285,6 +285,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             continue
         else:
             print(f"\t\tModel based on dtag: {dtag}!")
+            print(f"\t\tModel using dtags: {dtag_array[neighbour_indexes]}!")
 
         used_dtags[neighbour_indexes] = 1
 
