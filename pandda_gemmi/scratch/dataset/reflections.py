@@ -256,7 +256,7 @@ class Reflections(ReflectionsInterface):
             ds.wavelength = reflections_dataset.wavelength
 
         for column in original_reflections.columns:
-            mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
+            mtz.add_column(column.label, column.type, dataset_id=column.dataset_id)
 
         mtz.set_data(data)
 
