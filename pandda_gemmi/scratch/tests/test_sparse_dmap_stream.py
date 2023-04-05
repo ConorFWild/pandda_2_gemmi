@@ -58,12 +58,18 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
 
+
+    print(f"##### Getting datasets in resolution #####")
+    res = dataset.reflections.resolution() + 0.1
+    datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
+
+
     # Get the alignments
     print(f"##### Getting alignments #####")
     begin_align = time.time()
     # alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
     alignments: Dict[str, Alignment] = processor.process_dict(
-        {_dtag: Partial(Alignment).paramaterise(datasets[_dtag], dataset) for _dtag in datasets}
+        {_dtag: Partial(Alignment).paramaterise(datasets[_dtag], dataset) for _dtag in datasets_resolution}
     )
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
@@ -107,10 +113,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     # exit()
     # Get the dmaps
-
-    print(f"##### Getting datasets in resolution #####")
-    res = dataset.reflections.reflections() + 0.1
-    datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
 
     print(f"##### Getting sparse dmap loader #####")
     dmaps: SparseDMapStream = SparseDMapStream(
