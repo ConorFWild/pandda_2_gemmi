@@ -240,6 +240,7 @@ class Reflections(ReflectionsInterface):
         original_reflections = dataset.reflections.reflections
 
         sf = gemmi.transform_map_to_f_phi(grid)
+        print(sf)
         data = sf.prepare_asu_data(dmin=dmin)
 
         mtz = gemmi.Mtz(with_base=False)
