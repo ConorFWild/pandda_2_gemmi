@@ -44,8 +44,6 @@ class SparseDMapStream:
 
     @staticmethod
     def parallel_load(dataset, alignment, transforms, dframe):
-        dataset = dataset
-        alignment = alignment
 
         begin_transform = time.time()
         for transform in transforms:
@@ -109,11 +107,18 @@ class SparseDMapStream:
                           dframe.partitioning.partitions]
         transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
                           dframe.partitioning.partitions]
-        com_moving_list = [alignment.transforms[residue_id].com_moving for residue_id in dframe.partitioning.partitions]
-        com_reference_list = [alignment.transforms[residue_id].com_reference for residue_id in
-                              dframe.partitioning.partitions]
+        com_moving_list = [
+            alignment.transforms[residue_id].com_moving
+            for residue_id
+            in dframe.partitioning.partitions
+        ]
+        com_reference_list = [
+            alignment.transforms[residue_id].com_reference
+            for residue_id in dframe.partitioning.partitions
+        ]
         finish_listing = time.time()
         print(f"\tListing: {finish_listing-begin_listing}")
+        print(com_reference_list)
 
         begin_interpolate = time.time()
         gemmi.interpolate_points_multiple(
