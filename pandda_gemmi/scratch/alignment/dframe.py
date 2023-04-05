@@ -661,7 +661,7 @@ class DFrame:
         grid_array[self.mask.indicies_inner] = sparse_dmap.data
         return grid
 
-    def mask(self, grid):
+    def mask_grid(self, grid):
         grid_array = np.array(grid, copy=False)
         data = grid_array[self.mask.indicies]
         return SparseDMap(data)

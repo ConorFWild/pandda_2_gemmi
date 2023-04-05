@@ -395,6 +395,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{dtag}_std.ccp4"
         )
 
+        median_grid = reference_frame.unmask(SparseDMap((array[0,:]-mean) / (0.1*np.median(mean[reference_frame.mask.indicies_sparse_inner]))))
+        save_dmap(
+            std_grid,
+            Path(out_dir) / f"{dtag}_std.ccp4"
+        )
+
     # for dtag, neighbour_indexes, dtag_dists in zip(datasets_resolution, neighbours, distances):
     #     neighbour_dtags = dtag_array[neighbour_indexes.flatten()]
     #     print(f"\t{dtag} : {neighbour_dtags[:3]} : {np.max(dtag_dists)}")
