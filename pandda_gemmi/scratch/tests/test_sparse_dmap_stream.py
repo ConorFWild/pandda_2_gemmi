@@ -313,7 +313,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"{dtag}_low_z.ccp4"
         )
         neg_z = np.zeros(z.shape)
-        neg_z[z < -1.0] = 1.0
+        neg_z[z < -2.0] = 1.0
         neg_z_grid = reference_frame.unmask(SparseDMap(neg_z))
         save_dmap(
             neg_z_grid,
