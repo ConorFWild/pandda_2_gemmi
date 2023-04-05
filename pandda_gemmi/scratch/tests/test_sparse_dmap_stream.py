@@ -60,7 +60,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
 
     print(f"##### Getting datasets in resolution #####")
-    res = dataset.reflections.resolution() + 0.1
+    res = dataset.reflections.resolution() + 1.0
     datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
     print(f"\tGot {len(datasets_resolution)} of dataset res {res} or higher!")
 
