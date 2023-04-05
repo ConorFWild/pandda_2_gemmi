@@ -259,7 +259,7 @@ class Reflections(ReflectionsInterface):
             mtz.add_column(column.label, column.type, dataset_id=column.dataset_id)
 
         reflection_columns = [col.label for col in mtz.columns]
-        print(f"Columns: {mtz.reflection_columns}")
+        print(f"Columns: {reflection_columns}")
         original_reflection_columns = [col.label for col in original_reflections.columns]
         print(f"Original reflection columns: {original_reflection_columns}")
         print(f"Data shape: {data.shape}")
