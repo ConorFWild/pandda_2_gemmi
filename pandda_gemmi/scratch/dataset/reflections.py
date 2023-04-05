@@ -235,6 +235,40 @@ class Reflections(ReflectionsInterface):
     def transform_f_phi_to_map(self, sample_rate: float = 3.0):
         return self.reflections.transform_f_phi_to_map(self.f, self.phi, sample_rate=sample_rate)
 
+    @classmethod
+    def from_grid(cls, grid, dataset: DatasetInterface):
+        original_reflections = dataset.reflections.reflections
+
+        sf = gemmi.transform_map_to_f_phi(grid)
+        data = sf.prepare_asu_data()
+
+        mtz = gemmi.Mtz(with_base=False)
+        mtz.title = original_reflections.mtz_title
+        mtz.history = original_reflections.mtz_history
+        mtz.spacegroup = sf.spacegroup
+        mtz.set_cell_for_all(sf.unit_cell)
+
+        for dataset in original_reflections.datasets:
+            mtz.add_dataset(dataset.dataset_name)
+            ds = mtz.dataset(dataset.id)
+            ds.project_name = dataset.project_name
+            ds.crystal_name = dataset.crystal_name
+            ds.wavelength = dataset.wavelength
+
+        for column in original_reflections.columns:
+            mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
+
+        mtz.set_data(data)
+
+        mtz.update_reso()
+
+        return cls(
+            dataset.reflections.path,
+            dataset.reflections.f,
+            dataset.reflections.phi,
+            mtz,
+        )
+
     def __getstate__(self):
         return (MtzPython.from_gemmi(self.reflections), self.path, self.f, self.phi)
 

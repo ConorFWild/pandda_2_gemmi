@@ -13,7 +13,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
-from pandda_gemmi.scratch.dataset import XRayDataset
+from pandda_gemmi.scratch.dataset import XRayDataset, Reflections
 from pandda_gemmi.scratch.dmaps import DMap, SparseDMap, SparseDMapStream, TruncateReflections, SmoothReflections
 from pandda_gemmi.scratch.alignment import Alignment, DFrame
 from pandda_gemmi.scratch.processor import ProcessLocalRay, Partial
@@ -292,6 +292,21 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
+        dataset_reflections= Reflections.from_grid(reference_frame.unmask(SparseDMap(masked_array.flatten())),
+                                                   dataset,
+                                                   )
+        mean_reflections = Reflections.from_grid(reference_frame.unmask(SparseDMap(mean.flatten())),
+                                                 dataset,
+                                                 )
+        dataset_masked = XRayDataset(dataset.structure, dataset_reflections, dataset.ligand_files)
+        mean_dataset_masked = XRayDataset(dataset.structure, mean_reflections, dataset.ligand_files)
+        mean_smoothed_grid = SmoothReflections(dataset_masked)(mean_dataset_masked).reflections.transform_f_phi_to_map()
+        save_dmap(
+            mean_smoothed_grid,
+            Path(out_dir) / f"{dtag}_mean.ccp4"
+        )
+
+
         std = np.std(masked_array, axis=0)
         z = (array[0,:]-mean / std)
         normalized_z = z / np.std(z)
