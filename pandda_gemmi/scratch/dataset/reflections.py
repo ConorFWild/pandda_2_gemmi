@@ -245,7 +245,7 @@ class Reflections(ReflectionsInterface):
 
         sf = gemmi.transform_map_to_f_phi(grid)
         print(sf)
-        data = sf.prepare_asu_data()
+        data = sf.prepare_asu_data(dmin=dmin)
 
         mtz = gemmi.Mtz(with_base=False)
         mtz.title = original_reflections.title
