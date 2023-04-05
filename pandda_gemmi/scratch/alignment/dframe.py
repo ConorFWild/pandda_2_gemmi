@@ -613,6 +613,22 @@ class GridMask(GridMaskInterface):
         self.indicies_inner = np.nonzero(mask_array)
         self.indicies_sparse_inner = mask_array[self.indicies] == 1.0
 
+        mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
+        mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        mask.set_unit_cell(grid.unit_cell)
+        for atom in dataset.structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(
+                pos,
+                radius=0.5,
+                value=1,
+            )
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        self.indicies_inner_atomic = np.nonzero(mask_array)
+        self.indicies_sparse_inner_atomic = mask_array[self.indicies] == 1.0
+
+
+
 
 def get_grid_from_dataset(dataset: DatasetInterface):
     return dataset.reflections.transform_f_phi_to_map()
