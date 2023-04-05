@@ -321,10 +321,15 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         default = filter_gauss(np.array([0.0,0.0,0.0]))
         bounds = [(-3,3), (-3,3), (-3,3)]
-        res = shgo(filter_gauss)
+        res = shgo(filter_gauss, bounds)
         print(res.x)
         print([res.fun, default])
 
+        mean_smoothed_array = filter_gauss(res.x)
+        save_dmap(
+            reference_frame.unmask(SparseDMap(mean_smoothed_array[reference_frame.mask.indicies])),
+            Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
+        )
         std = np.std(masked_array, axis=0)
         z = (array[0,:]-mean / std)
         normalized_z = z / np.std(z)
