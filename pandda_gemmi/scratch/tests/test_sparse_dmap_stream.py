@@ -17,6 +17,7 @@ from pandda_gemmi.scratch.dataset import XRayDataset
 from pandda_gemmi.scratch.dmaps import DMap, SparseDMap, SparseDMapStream, TruncateReflections, SmoothReflections
 from pandda_gemmi.scratch.alignment import Alignment, DFrame
 from pandda_gemmi.scratch.processor import ProcessLocalRay, Partial
+from pandda_gemmi.scratch.dataset import ResidueID
 
 def save_dmap(dmap, path):
     ccp4 = gemmi.Ccp4Map()
@@ -74,6 +75,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
+
+    dataset_test: DatasetInterface = datasets_resolution["TbTR-x0277"]
+    alignment = alignments["TbTR-x0277"]
+    # resid = ResidueID("0")
+    for resid in dataset_test.structure.protein_residue_ids():
+
+        print(f"Alignment 277: {resid.chain} {resid.number}")
+        print(f"\tAlignment 277: {alignment.transforms[resid].com_reference}")
+        print(f"\tAlignment 277: {alignment.transforms[resid].com_moving}")
+
 
     # Get the reference frame
     print(f"##### Getting reference frame #####")
