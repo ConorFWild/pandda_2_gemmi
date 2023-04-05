@@ -408,7 +408,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
 
         save_dmap(
-            z_grid,
+            normalized_z_grid,
             Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
         )
 
