@@ -675,7 +675,6 @@ class SmoothReflections:
                                                   columns=reference_reflections.column_labels(),
                                                   )
         f_array = original_reflections_table[dataset.reflections.f]
-
         r = original_reflections.make_1_d2_array()
 
         begin_solve = time.time()

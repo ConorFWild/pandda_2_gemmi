@@ -459,14 +459,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"Mean at position low is: {sample}")
 
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
-        dataset_grid.symmetrize_abs_max()
+        # dataset_grid.symmetrize_abs_max()
         dataset_reflections= Reflections.from_grid(dataset_grid,
                                                    dataset,
                                                    res
                                                    )
 
         mean_grid = reference_frame.unmask(SparseDMap(mean.flatten()))
-        mean_grid.symmetrize_abs_max()
+        # mean_grid.symmetrize_abs_max()
         mean_reflections = Reflections.from_grid(mean_grid,
                                                  dataset,
                                                  res
