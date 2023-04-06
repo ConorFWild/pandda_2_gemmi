@@ -68,7 +68,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
         original_reflections.path,
         original_reflections.f,
         original_reflections.phi,
-        original_reflections_table.to_numpy()
+        new_reflections
     )
 
     new_grid = new_reflections_obj.transform_f_phi_to_map(exact_size=exact_size)
