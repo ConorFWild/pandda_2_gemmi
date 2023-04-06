@@ -908,7 +908,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         cluster_nums, counts = np.unique(clusters, return_counts=True)
 
         for cluster_num, count in zip(cluster_nums, counts):
-            volume = count * z_grid.unit_cell.volume
+            volume = count * (z_grid.unit_cell.volume / grid.point_count)
             print(f"\tCluster: {cluster_num} : {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
 
