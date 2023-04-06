@@ -74,7 +74,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
     masked_new_grid_values = new_grid_array[grid_mask]
 
 
-    _rmsd = np.linalg.norm(reference_values.flatten() - masked_new_grid_values.flatten())
+    _rmsd = np.sum(np.abs(reference_values.flatten() - masked_new_grid_values.flatten()))
     print(f"\t\tScale: {scale} : RMSD: {_rmsd}")
     return _rmsd
 
