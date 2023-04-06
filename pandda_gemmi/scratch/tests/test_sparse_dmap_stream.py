@@ -371,9 +371,51 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         output_path = str(Path(out_dir) / "samples_high.png")
         print(f"Saving to: {output_path}")
         plt.savefig(output_path)
+        plt.clf()
+
         grid = reference_frame.unmask(SparseDMap(std.flatten()))
         sample  = grid.interpolate_value(gemmi.Position(*sample_point))
         print(f"STD at position high is: {sample}")
+
+        # Sample mean at med point
+        sample_point = [0.9,-36.23, -59.64]
+        samples = []
+        for j in range(array.shape[0]):
+            grid = reference_frame.unmask(SparseDMap(array[j, :].flatten()))
+            sample = grid.interpolate_value(gemmi.Position(*sample_point))
+            samples.append(sample)
+
+        sample_array = np.array(samples)
+        mean_samples_mask = np.zeros(dtag_array.size)
+        mean_samples_mask[neighbour_indexes] = 1.0
+        mean_samples = sample_array[mean_samples_mask == 1.0]
+        other_samples = sample_array[mean_samples_mask == 0.0]
+        sample_native = sample_array[0]
+
+        plt.scatter(
+            x=(np.zeros(mean_samples.size) + 1.0).flatten(),
+            y=mean_samples,
+            c='#1f77b4'
+        )
+        plt.scatter(
+            x=(np.zeros(other_samples.size) + 2.0).flatten(),
+            y=other_samples,
+            c='#bcbd22'
+        )
+        plt.scatter(
+            x=(np.zeros(sample_native.size) + 3.0).flatten(),
+            y=sample_native,
+            c='#d62728'
+        )
+        output_path = str(Path(out_dir) / "samples_med.png")
+        print(f"Saving to: {output_path}")
+        plt.savefig(output_path)
+        plt.clf()
+
+        grid = reference_frame.unmask(SparseDMap(std.flatten()))
+        sample = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"STD at position high is: {sample}")
+
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_abs_max()
         dataset_reflections= Reflections.from_grid(dataset_grid,
