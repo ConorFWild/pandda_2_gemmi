@@ -93,9 +93,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"##### Getting test dataset #####")
     dtag_array = np.array(list(datasets.keys()))
     dtag = "JMJD2D-x427"
-    for _j, _dtag in dtag_array:
+    for _j, _dtag in enumerate(dtag_array):
         if _dtag == dtag:
-            dtag_index=_j
+            dtag_index =_j
     dtag = list(datasets.keys())[dtag_index]
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
