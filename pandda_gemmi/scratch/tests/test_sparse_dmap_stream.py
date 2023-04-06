@@ -32,7 +32,40 @@ def save_dmap(dmap, path):
     ccp4.update_ccp4_header(2, True)
     ccp4.write_ccp4_map(str(path))
 
+def sample_to_png(sample_point, array, reference_frame, dtag_array, mean_indexes, out_path):
+    # sample_point = [0.9, -36.23, -59.64]
+    samples = []
+    for j in range(array.shape[0]):
+        grid = reference_frame.unmask(SparseDMap(array[j, :].flatten()))
+        sample = grid.interpolate_value(gemmi.Position(*sample_point))
+        samples.append(sample)
 
+    sample_array = np.array(samples)
+    mean_samples_mask = np.zeros(dtag_array.size)
+    mean_samples_mask[mean_indexes] = 1.0
+    mean_samples = sample_array[mean_samples_mask == 1.0]
+    other_samples = sample_array[mean_samples_mask == 0.0]
+    sample_native = sample_array[0]
+
+    plt.scatter(
+        x=(np.zeros(mean_samples.size) + 1.0).flatten(),
+        y=mean_samples,
+        c='#1f77b4'
+    )
+    plt.scatter(
+        x=(np.zeros(other_samples.size) + 2.0).flatten(),
+        y=other_samples,
+        c='#bcbd22'
+    )
+    plt.scatter(
+        x=(np.zeros(sample_native.size) + 3.0).flatten(),
+        y=sample_native,
+        c='#d62728'
+    )
+    output_path = str(out_path)
+    print(f"Saving to: {output_path}")
+    plt.savefig(output_path)
+    plt.clf()
 def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Data dir is {data_dir} and output dir is {out_dir}")
 
@@ -739,16 +772,38 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
-    # time_begin = time.time()
-    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
-    # predicted = dpgmm.fit_predict(transformed)
-    # time_finish = time.time()
-    # print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-    # predicted_classes, counts = np.unique(predicted, return_counts=True)
-    # for dtag, prediction in zip(datasets, predicted):
-    #     print(f"\t\t{dtag} {prediction}")
-    #
-    # print(f"\tBayesian counts are {counts}")
+    time_begin = time.time()
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
+    predicted = dpgmm.fit_predict(transformed)
+    time_finish = time.time()
+    print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    predicted_classes, counts = np.unique(predicted, return_counts=True)
+    for dtag, prediction in zip(datasets, predicted):
+        print(f"\t\t{dtag} {prediction}")
+
+    print(f"\tBayesian counts are {counts}")
+    for predicted_class, count in zip(predicted_classes, counts):
+        if count < 20:
+            continue
+
+        masked_array = array[predicted == predicted_class, :]
+        mean = np.median(masked_array, axis=0)
+        std = np.std(masked_array, axis=0)
+
+        sample_point = [1.12,-41.6,-53.83]
+        out_path = Path(out_dir) / f"{predicted_class}_low.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
+        sample_point = [1.11, -37.88, -58.43]
+        out_path = Path(out_dir) / f"{predicted_class}_high.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
+        sample_point = [0.9, -36.23, -59.64]
+        out_path = Path(out_dir) / f"{predicted_class}_med.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
+
+
     #
     # time_begin = time.time()
     # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="tied")
