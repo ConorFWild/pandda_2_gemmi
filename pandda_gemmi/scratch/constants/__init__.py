@@ -65,12 +65,12 @@ ARGS_OUT_DIR_HELP = "The path to the directory in which to store the results of 
 
 ARGS_PDB_REGEX = "--pdb_regex"
 ARGS_PDB_REGEX_HELP = "A grep pattern matching the name of the model of the crystal data in each crystal directory in the directory given by --data_dirs."
-ARGS_PDB_REGEX_DEFAULT = "dimple.pdb"
+ARGS_PDB_REGEX_DEFAULT = "*dimple.pdb"
 
 ARGS_MTZ_REGEX = "--mtz_regex"
 ARGS_MTZ_REGEX_HELP = "A grep pattern matching the name of the reflections of each crystal in each crystal directory " \
                       "in the directory given by --data_dirs. "
-ARGS_MTZ_REGEX_DEFAULT = "dimple.mtz"
+ARGS_MTZ_REGEX_DEFAULT = "*dimple.mtz"
 
 ARGS_LIGAND_CIF_REGEX = "--ligand_cif_regex"
 ARGS_LIGAND_CIF_REGEX_HELP = "A grep pattern matching the restraints associated with each ligand that might be bound " \
