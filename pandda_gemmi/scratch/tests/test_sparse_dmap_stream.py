@@ -888,6 +888,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"Got high z poss in {round(finish-begin, 1)}")
         print(high_z_pos_array)
         print(high_z_pos_array.shape)
+        print([np.min(high_z_pos_array, axis=0), np.max(high_z_pos_array, axis=0)])
+
 
         print(high_z_point_array)
         print(high_z_point_array.shape)
@@ -899,6 +901,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         #     high_z_indexes[1].reshape(-1, 1),
         #     high_z_indexes[2].reshape(-1, 1),
         # ])
+
+        from sklearn.cluster import DBSCAN
+        clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
+
+        for cluster in np.unique(clusters):
+            print(f"\tCluster: {cluster}: mean: {np.mean(high_z_pos_array[clusters == cluster, :], axis=0)}")
 
 
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
