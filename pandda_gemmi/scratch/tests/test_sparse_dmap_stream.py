@@ -493,6 +493,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             c='#1f77b4'
         )
         plt.savefig(str(Path(out_dir) / "quantiles.png"))
+        plt.clf()
         # from scipy.ndimage import gaussian_filter
         # from scipy.optimize import shgo
         #
