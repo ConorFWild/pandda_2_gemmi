@@ -692,6 +692,7 @@ class SmoothReflections:
             ),
             # 0.0,
             bounds=((-15.0, 15.0),),
+            sampling_method='sobol'
             # tol=0.1
         ).x
 
