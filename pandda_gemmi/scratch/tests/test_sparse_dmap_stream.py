@@ -810,6 +810,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         std = np.std(masked_array, axis=0)
         z = ((array[dtag_index,:]-mean) / std)
 
+
         z_grid = reference_frame.unmask(SparseDMap(z))
         save_dmap(
             z_grid,
@@ -849,7 +850,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
         pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
 
-        high_z_indexes = np.nonzero(z > 2.0)
+        z_unmasked_array = np.array(z_grid, copy=False)
+
+        high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
         high_z_x = pos_3d_arr_x[high_z_indexes]
         high_z_y = pos_3d_arr_y[high_z_indexes]
         high_z_z = pos_3d_arr_z[high_z_indexes]
@@ -858,7 +861,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             high_z_x.reshape((-1,1)),
             high_z_y.reshape((-1, 1)),
             high_z_z.reshape((-1, 1))
-
         ])
         finish = time.time()
         print(f"Got high z poss in {round(finish-begin, 1)}")
