@@ -822,9 +822,57 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
         )
 
+        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions])
+        position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions])
+
+        _all_points_array = point_array
+        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
+        all_positions_array = position_array
+
+        # print(f"All points shape: {all_points_array.shape}")
+        # print(f"All positions shape: {all_positions_array.shape}")
+
+        begin = time.time()
+        # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
+        all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
+        shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
+        point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
+        point_3d_array[all_point_indexes] = True
+        # initial_unique_points = np.argwhere(point_3d_array)
+        # unique_points = initial_unique_points + np.min(_all_points_array, axis=0).reshape((1, 3))
+        # unique_points_indexes = (initial_unique_points[:, 0], initial_unique_points[:, 1], initial_unique_points[:, 2],)
+        pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
+        pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
+        pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
+
+        pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
+        pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
+        pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
+
+        high_z_indexes = np.nonzero(z > 2.0)
+        high_z_x = pos_3d_arr_x[high_z_indexes]
+        high_z_y = pos_3d_arr_y[high_z_indexes]
+        high_z_z = pos_3d_arr_z[high_z_indexes]
+
+        high_z_pos_array = np.hstack([
+            high_z_x.reshape((-1,1)),
+            high_z_y.reshape((-1, 1)),
+            high_z_z.reshape((-1, 1))
+
+        ])
+        print(high_z_pos_array)
+
+        # high_z_points = np.hstack([
+        #     high_z_indexes[0].reshape(-1,1),
+        #     high_z_indexes[1].reshape(-1, 1),
+        #     high_z_indexes[2].reshape(-1, 1),
+        # ])
+
+
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
             event_array = (dtag_array - (bdc*mean)) / (1-bdc)
             event_grid = reference_frame.unmask(SparseDMap(event_array))
+
             save_dmap(
                 event_grid,
                 Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc,1)}.ccp4"
