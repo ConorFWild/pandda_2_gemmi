@@ -343,7 +343,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             c='#1f77b4'
         )
         plt.scatter(
-            x=(np.zeros(mean_samples.size) + 2.0).flatten(),
+            x=(np.zeros(other_samples.size) + 2.0).flatten(),
             y=other_samples,
             c='#bcbd22'
         )
