@@ -905,8 +905,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         from sklearn.cluster import DBSCAN
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
 
-        for cluster, count in np.unique(clusters, return_counts=True):
-            print(f"\tCluster: {cluster} : mean: {np.mean(high_z_pos_array[clusters == cluster, :], axis=0)} : size: {count}")
+        cluster_nums, counts = np.unique(clusters, return_counts=True)
+
+        for cluster_num, count in zip(cluster_nums, counts):
+            print(f"\tCluster: {cluster_num} : mean: {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}")
 
 
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
