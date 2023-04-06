@@ -790,7 +790,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         masked_array = array[predicted == predicted_class, :]
         mean = np.mean(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
-        z = (array[0,:]-mean / std)
+        z = ((array[0,:]-mean) / std)
 
         z_grid = reference_frame.unmask(SparseDMap(z))
         save_dmap(
