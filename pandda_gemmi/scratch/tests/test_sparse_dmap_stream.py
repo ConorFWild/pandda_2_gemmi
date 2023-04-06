@@ -9,7 +9,10 @@ import numpy as np
 from scipy import spatial
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
+import matplotlib
 
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
@@ -293,6 +296,58 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
 
+        # Sample datasets at low point
+        sample_point = [1.12,-41.6,-53.83]
+        samples = []
+        for j in array.shape[0]:
+            grid = reference_frame.unmask(SparseDMap(array[j,:].flatten()))
+            sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+            samples.append(sample)
+
+        sample_array = np.array(samples)
+        mean_samples_mask = np.zeros(neighbour_indexes.size)
+        mean_samples_mask[neighbour_indexes] = 1.0
+        mean_samples = sample_array[mean_samples_mask == 1.0]
+        other_samples = sample_array[mean_samples_mask == 0.0]
+
+        plt.scatter(
+            x=(np.zeros(mean_samples.size) + 1.0).flatten(),
+            y=mean_samples,
+            c='#1f77b4'
+        )
+        plt.scatter(
+            x=(np.zeros(mean_samples.size) + 2.0).flatten(),
+            y=other_samples,
+            c='#bcbd22'
+        )
+        plt.savefig(str(Path(out_dir) / "samples_low.png"))
+
+        # Sample mean at high point
+        sample_point = [1.11, -37.88, -58.43]
+        samples = []
+        for j in array.shape[0]:
+            grid = reference_frame.unmask(SparseDMap(array[j, :].flatten()))
+            sample = grid.interpolate_value(gemmi.Position(*sample_point))
+            samples.append(sample)
+
+        sample_array = np.array(samples)
+        mean_samples_mask = np.zeros(neighbour_indexes.size)
+        mean_samples_mask[neighbour_indexes] = 1.0
+        mean_samples = sample_array[mean_samples_mask == 1.0]
+        other_samples = sample_array[mean_samples_mask == 0.0]
+
+        plt.scatter(
+            x=(np.zeros(mean_samples.size) + 1.0).flatten(),
+            y=mean_samples,
+            c='#1f77b4'
+        )
+        plt.scatter(
+            x=(np.zeros(mean_samples.size) + 2.0).flatten(),
+            y=other_samples,
+            c='#bcbd22'
+        )
+        plt.savefig(str(Path(out_dir) / "samples_high.png"))
+
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_abs_max()
         dataset_reflections= Reflections.from_grid(dataset_grid,
@@ -321,12 +376,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_smoothed_grid,
             Path(out_dir) / f"{dtag}_mean_smoothed.ccp4"
         )
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
+
         plt.scatter(
             x=np.sort(array[0,:].flatten(), axis=None),
             y=np.sort(mean.flatten(), axis=None),
+            c='#1f77b4'
         )
         plt.savefig(str(Path(out_dir) / "quantiles.png"))
         # from scipy.ndimage import gaussian_filter
