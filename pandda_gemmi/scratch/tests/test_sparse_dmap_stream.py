@@ -822,6 +822,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
         )
 
+        begin = time.time()
         point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions.items()])
         position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions.items()])
 
@@ -832,7 +833,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(f"All points shape: {all_points_array.shape}")
         # print(f"All positions shape: {all_positions_array.shape}")
 
-        begin = time.time()
         # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
         all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
         shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
@@ -860,6 +860,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             high_z_z.reshape((-1, 1))
 
         ])
+        finish = time.time()
+        print(f"Got high z poss in {round(finish-begin, 1)}")
         print(high_z_pos_array)
 
         # high_z_points = np.hstack([
