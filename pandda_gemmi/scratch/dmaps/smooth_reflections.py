@@ -692,7 +692,7 @@ class SmoothReflections:
             ),
             0.0,
             bounds=((-15.0, 15.0),),
-            tol=0.1
+            # tol=0.1
         ).x
 
         # min_scale = optimize.fsolve(
