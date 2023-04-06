@@ -103,6 +103,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
     shutil.copy(dataset.structure.path, Path(out_dir) / "reference.pdb")
+    shutil.copy(dataset.reflections.path, Path(out_dir) / "reference.mtz")
+
 
     print(f"##### Getting datasets in resolution #####")
     dataset_res = dataset.reflections.resolution() + 0.1
