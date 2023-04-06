@@ -839,8 +839,16 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
         # shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
         shape = reference_frame.spacing
-        point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
-        point_3d_array[all_point_indexes] = True
+        point_3d_array_x = np.zeros((shape[0], shape[1], shape[2]),)
+        point_3d_array_y = np.zeros((shape[0], shape[1], shape[2]),)
+        point_3d_array_z = np.zeros((shape[0], shape[1], shape[2]),)
+
+        point_3d_array_x[all_point_indexes] = all_points_array[:, 0]
+        point_3d_array_y[all_point_indexes] = all_points_array[:, 1]
+        point_3d_array_z[all_point_indexes] = all_points_array[:, 2]
+
+
+        # point_3d_array[all_point_indexes] = True
         # initial_unique_points = np.argwhere(point_3d_array)
         # unique_points = initial_unique_points + np.min(_all_points_array, axis=0).reshape((1, 3))
         # unique_points_indexes = (initial_unique_points[:, 0], initial_unique_points[:, 1], initial_unique_points[:, 2],)
@@ -855,18 +863,31 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         z_unmasked_array = np.array(z_grid, copy=False)
 
         high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
-        high_z_x = pos_3d_arr_x[high_z_indexes]
-        high_z_y = pos_3d_arr_y[high_z_indexes]
-        high_z_z = pos_3d_arr_z[high_z_indexes]
+        high_z_pos_x = pos_3d_arr_x[high_z_indexes]
+        high_z_pos_y = pos_3d_arr_y[high_z_indexes]
+        high_z_pos_z = pos_3d_arr_z[high_z_indexes]
 
         high_z_pos_array = np.hstack([
-            high_z_x.reshape((-1,1)),
-            high_z_y.reshape((-1, 1)),
-            high_z_z.reshape((-1, 1))
+            high_z_pos_x.reshape((-1,1)),
+            high_z_pos_y.reshape((-1, 1)),
+            high_z_pos_z.reshape((-1, 1))
         ])
+
+        high_z_point_x = pos_3d_arr_x[high_z_indexes]
+        high_z_point_y = pos_3d_arr_y[high_z_indexes]
+        high_z_point_z = pos_3d_arr_z[high_z_indexes]
+
+        high_z_point_array = np.hstack([
+            high_z_point_x.reshape((-1,1)),
+            high_z_point_y.reshape((-1, 1)),
+            high_z_point_z.reshape((-1, 1))
+        ])
+
+
         finish = time.time()
         print(f"Got high z poss in {round(finish-begin, 1)}")
         print(high_z_pos_array)
+        print(high_z_point_array)
 
         # high_z_points = np.hstack([
         #     high_z_indexes[0].reshape(-1,1),
