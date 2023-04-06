@@ -29,6 +29,56 @@ def get_rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
     _rmsd = np.sum(np.abs(x_f - y_f))
     return _rmsd
 
+def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, reflections_template, original_reflections, exact_size):
+    original_reflections_array = np.array(original_reflections,
+                                          copy=True,
+                                          )
+
+    original_reflections_table = pd.DataFrame(original_reflections_array,
+                                              columns=original_reflections.column_labels(),
+                                              )
+
+    # f_array = original_reflections_table[original_r eflections.f]
+
+    original_reflections_table[original_reflections.f] = y * np.exp(scale * r)
+
+
+
+    # New reflections
+    new_reflections = gemmi.Mtz(with_base=False)
+
+    # Set dataset properties
+    new_reflections.spacegroup = original_reflections.spacegroup
+    new_reflections.set_cell_for_all(original_reflections.cell)
+
+    # Add dataset
+    new_reflections.add_dataset("scaled")
+
+    # Add columns
+    for column in original_reflections.columns:
+        new_reflections.add_column(column.label, column.type)
+
+    # Update
+    new_reflections.set_data(original_reflections_table.to_numpy())
+
+    # Update resolution
+    new_reflections.update_reso()
+
+    new_reflections_obj = Reflections(
+        reflections_template.path,
+        reflections_template.f,
+        reflections_template.phi,
+        original_reflections_table.to_numpy()
+    )
+
+    new_grid = new_reflections_obj.transform_f_phi_to_map(exact_size=exact_size)
+    new_grid_array = np.array(new_grid, copy=False)
+    masked_new_grid_values = new_grid_array[grid_mask]
+
+
+    _rmsd = np.linalg.norm(reference_values - masked_new_grid_values)
+    return _rmsd
+
 class SmoothReflections:
     def __init__(self, dataset: DatasetInterface):
         self.reference_dataset = dataset
@@ -486,6 +536,163 @@ class SmoothReflections:
         #
         # finish_solve = time.time()
         # print(f"\t\t\tSolve OLD: {finish_solve - begin_solve} with scale: {min_scale}")
+
+        # Get the original reflections
+        begin_dataset = time.time()
+        original_reflections = dataset.reflections.reflections
+
+        original_reflections_array = np.array(original_reflections,
+                                              copy=True,
+                                              )
+
+        original_reflections_table = pd.DataFrame(original_reflections_array,
+                                                  columns=reference_reflections.column_labels(),
+                                                  )
+
+        f_array = original_reflections_table[dataset.reflections.f]
+
+        f_scaled_array = f_array * np.exp(min_scale * original_reflections.make_1_d2_array())
+
+        original_reflections_table[dataset.reflections.f] = f_scaled_array
+
+        # New reflections
+        new_reflections = gemmi.Mtz(with_base=False)
+
+        # Set dataset properties
+        new_reflections.spacegroup = original_reflections.spacegroup
+        new_reflections.set_cell_for_all(original_reflections.cell)
+
+        # Add dataset
+        new_reflections.add_dataset("scaled")
+
+        # Add columns
+        for column in original_reflections.columns:
+            new_reflections.add_column(column.label, column.type)
+
+        # Update
+        new_reflections.set_data(original_reflections_table.to_numpy())
+
+        # Update resolution
+        new_reflections.update_reso()
+
+
+        # Create new dataset
+        smoothed_dataset = XRayDataset(
+            dataset.structure,
+            Reflections(dataset.reflections.path,
+                        dataset.reflections.f,
+                        dataset.reflections.phi,
+                        new_reflections),
+            dataset.ligand_files
+            # smoothing_factor=float(min_scale)
+        )
+        finish_dataset = time.time()
+        print(f"\t\t\tMake dataset: {finish_dataset-begin_dataset}")
+
+        finish_smooth_reflections = time.time()
+        print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
+
+        return smoothed_dataset
+
+    def real_space_smooth(self, dataset: DatasetInterface, grid_mask, exact_size):
+
+        begin_smooth_reflections = time.time()
+
+        # # Get common set of reflections
+        begin_common = time.time()
+        common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
+        finish_common = time.time()
+        print(f"\t\t\tCommon: {finish_common-begin_common} with shape {common_reflections_set.shape}")
+
+        # # Truncate
+        begin_truncate = time.time()
+        reference_reflections = truncate_reflections(
+            self.reference_dataset.reflections.reflections, common_reflections_set)
+        dtag_reflections = truncate_reflections(
+            dataset.reflections.reflections, common_reflections_set)
+        finish_truncate = time.time()
+        print(f"\t\t\tTruncate: {finish_truncate-begin_truncate}")
+
+        # Refference array
+        # reference_reflections = truncated_reference.reflections.reflections
+        begin_preprocess = time.time()
+        reference_reflections_array = np.array(reference_reflections,
+                                               copy=True,
+                                               )
+        reference_reflections_table = pd.DataFrame(reference_reflections_array,
+                                                   columns=reference_reflections.column_labels(),
+                                                   )
+        reference_f_array = reference_reflections_table[self.reference_dataset.reflections.f].to_numpy()
+
+
+        # Dtag array
+        # dtag_reflections = truncated_dataset.reflections.reflections
+        dtag_reflections_array = np.array(dtag_reflections,
+                                          copy=True,
+                                          )
+        dtag_reflections_table = pd.DataFrame(dtag_reflections_array,
+                                              columns=dtag_reflections.column_labels(),
+                                              )
+        dtag_f_array = dtag_reflections_table[dataset.reflections.f].to_numpy()
+        print(f"\t\t\tReference f array size: {reference_f_array.shape} and dtag f array size: {dtag_f_array.shape}")
+
+        # Resolution array
+        reference_resolution_array = reference_reflections.make_1_d2_array()
+        dtag_resolution_array = dtag_reflections.make_1_d2_array()
+
+        # Prepare optimisation
+        x = reference_f_array
+        y = dtag_f_array
+
+        r = reference_resolution_array
+
+        # Get the resolution bins
+        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+
+        # Get the array that maps x values to bins
+        x_inds = np.digitize(reference_resolution_array, sample_grid)
+
+        # Get the bin averages
+        populated_bins, counts = np.unique(x_inds, return_counts=True)
+        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # print(f"\t\t\tsample NEW: {x_f}")
+        # print(f"\t\t\txf NEW: {x_f}")
+
+        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+
+        finish_preprocess = time.time()
+        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+
+        # Optimise the scale factor
+
+        reference_grid = self.reference_dataset.reflections.transform_f_phi_to_map(exact_size=exact_size)
+        reference_array = np.array(reference_grid, copy=False)
+        reference_values = reference_array[grid_mask]
+
+        begin_solve = time.time()
+        # y_inds_unique = np.unique(y_inds)
+        min_scale = optimize.minimize(
+            lambda _scale: get_rmsd_real_space(
+                _scale,
+                reference_values,
+                y,
+                r,
+                grid_mask,
+                dataset.reflections,
+                original_reflections,
+                exact_size,
+            ),
+            0.0,
+            bounds=((-15.0, 15.0),),
+            tol=0.1
+        ).x
+
+        # min_scale = optimize.fsolve(
+        #     lambda _scale: rmsd(_scale, y, r, y_inds, sample_grid, x_f),
+        #     0.0
+        # )
+        finish_solve = time.time()
+        print(f"\t\t\tSolve NEW BOUNDED 20: {finish_solve - begin_solve} with scale: {min_scale}")
 
         # Get the original reflections
         begin_dataset = time.time()

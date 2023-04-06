@@ -125,7 +125,7 @@ class ReflectionsInterface(Protocol):
     def get_resolution(self) -> float:
         ...
 
-    def transform_f_phi_to_map(self, sample_rate: float = 3.0) -> CrystallographicGridInterface:
+    def transform_f_phi_to_map(self, sample_rate: float = 3.0, exact_size: Optional[Tuple[int,int,int]] = None) -> CrystallographicGridInterface:
         ...
 
     def resolution(self) -> float:
