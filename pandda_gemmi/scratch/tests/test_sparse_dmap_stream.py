@@ -773,7 +773,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
     time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full")
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
     predicted = dpgmm.fit_predict(transformed)
     time_finish = time.time()
     print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
