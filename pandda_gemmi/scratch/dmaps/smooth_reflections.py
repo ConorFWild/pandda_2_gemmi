@@ -680,7 +680,7 @@ class SmoothReflections:
 
         begin_solve = time.time()
         # y_inds_unique = np.unique(y_inds)
-        min_scale = optimize.minimize(
+        min_scale = optimize.shgo(
             lambda _scale: get_rmsd_real_space(
                 _scale,
                 reference_values,
@@ -690,7 +690,7 @@ class SmoothReflections:
                 dataset.reflections,
                 exact_size,
             ),
-            0.0,
+            # 0.0,
             bounds=((-15.0, 15.0),),
             # tol=0.1
         ).x
