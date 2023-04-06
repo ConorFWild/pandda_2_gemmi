@@ -887,7 +887,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         finish = time.time()
         print(f"Got high z poss in {round(finish-begin, 1)}")
         print(high_z_pos_array)
+        print(high_z_pos_array.shape)
+
         print(high_z_point_array)
+        print(high_z_point_array.shape)
 
         # high_z_points = np.hstack([
         #     high_z_indexes[0].reshape(-1,1),
