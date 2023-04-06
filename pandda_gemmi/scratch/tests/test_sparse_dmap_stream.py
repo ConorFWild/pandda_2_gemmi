@@ -521,7 +521,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         #     Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
         # )
         std = np.std(masked_array, axis=0)
-        z = (array[0,:]-mean / std)
+        z = ((array[0,:]-mean) / std)
         normalized_z = z / np.std(z)
 
         z_grid = reference_frame.unmask(SparseDMap(z))
