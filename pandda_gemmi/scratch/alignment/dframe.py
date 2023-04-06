@@ -209,6 +209,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
         # Get the grid points
+        time_begin_itertools = time.time()
         grid_point_array = np.array(
             [
                 xyz_tuple
@@ -220,10 +221,14 @@ class PointPositionArray(PointPositionArrayInterface):
             )
             ]
         )
+        time_finish_itertools = time.time()
+        print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools-time_begin_itertools, 1)}")
+
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the point positions
+        time_begin_pointpos = time.time()
         position_array = PointPositionArray.orthogonalize_fractional_array_mat(
             PointPositionArray.fractionalize_grid_point_array_mat(
                 grid_point_array,
@@ -231,6 +236,8 @@ class PointPositionArray(PointPositionArrayInterface):
             ),
             orthogonalization_matrix,
         )
+        time_finish_pointpos = time.time()
+        print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)}")
         # print(f"")
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
