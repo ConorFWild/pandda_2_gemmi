@@ -95,8 +95,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dtag = "JMJD2D-x427"
     for _j, _dtag in dtag_array:
         if _dtag == dtag:
-            j=_j
-    dtag = list(datasets.keys())[j]
+            dtag_index=_j
+    dtag = list(datasets.keys())[dtag_index]
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
 
@@ -124,7 +124,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     finish_get_frame = time.time()
     print(f"Got reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
     for resid, partition in reference_frame.partitioning.partitions.items():
-        print(f"\tResid: {resid} : {partition.points.shape} {partition.positions[0,:]}")
+        print(f"\tResid: {resid} : {partition.points.shape} {partition.positions[dtag_index,:]}")
 
     #
     grid = reference_frame.get_grid()
@@ -494,7 +494,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         )
 
         plt.scatter(
-            x=np.sort(array[0,:].flatten(), axis=None),
+            x=np.sort(array[dtag_index,:].flatten(), axis=None),
             y=np.sort(mean.flatten(), axis=None),
             c='#1f77b4'
         )
@@ -527,7 +527,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         #     Path(out_dir) / f"{dtag}_mean_smoothed_gauss.ccp4"
         # )
         std = np.std(masked_array, axis=0)
-        z = ((array[0,:]-mean) / std)
+        z = ((array[dtag_index,:]-mean) / std)
         normalized_z = z / np.std(z)
 
         z_grid = reference_frame.unmask(SparseDMap(z))
@@ -571,7 +571,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         median = np.median(masked_mean)
         print(f"Median: {median}")
 
-        median_grid = reference_frame.unmask(SparseDMap((array[0,:]-mean) / (0.1*median)))
+        median_grid = reference_frame.unmask(SparseDMap((array[dtag_index,:]-mean) / (0.1*median)))
         save_dmap(
             median_grid,
             Path(out_dir) / f"{dtag}_median_diff.ccp4"
@@ -796,7 +796,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         masked_array = array[predicted == predicted_class, :]
         mean = np.mean(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
-        z = ((array[0,:]-mean) / std)
+        z = ((array[dtag_index,:]-mean) / std)
 
         z_grid = reference_frame.unmask(SparseDMap(z))
         save_dmap(
