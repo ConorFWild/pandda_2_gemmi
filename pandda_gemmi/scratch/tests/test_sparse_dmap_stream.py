@@ -803,6 +803,228 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         out_path = Path(out_dir) / f"{predicted_class}_med.png"
         sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
 
+    print(f"##### Z maps #####")
+    # for predicted_class, count in zip(predicted_classes, counts):
+    #     if count < 20:
+    #         continue
+    #
+    #     masked_array = array[predicted == predicted_class, :]
+    #     mean = np.median(masked_array, axis=0)
+    #     std = np.std(masked_array, axis=0)
+    #     z = (array[0,:]-mean / std)
+    #     normalized_z = z / np.std(z)
+    #
+    #     z_grid = reference_frame.unmask(SparseDMap(z))
+    #
+    #     save_dmap(
+    #         z_grid,
+    #         Path(out_dir) / f"{predicted_class}_z.ccp4"
+    #     )
+    #
+    #     normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
+    #
+    #     save_dmap(
+    #         normalized_z_grid,
+    #         Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
+    #     )
+    #
+    #     mean_grid = reference_frame.unmask(SparseDMap(mean))
+    #     save_dmap(
+    #         mean_grid,
+    #         Path(out_dir) / f"{predicted_class}_mean.ccp4"
+    #     )
+
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag", weight_concentration_prior=100000.0)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    # ##############################
+    #
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag",
+    #                                         weight_concentration_prior=1/100000.0)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    # ##############################
+    #
+    #
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full",
+    #                                         weight_concentration_prior=100000.0)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class, ]
+    #
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    # ##############################
+    #
+    #
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="full",
+    #                                         weight_concentration_prior=1 / 100000.0)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class, ]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    # ##############################
+
+    # time_begin = time.time()
+    # dpgmm = mixture.BayesianGaussianMixture(n_components=30, covariance_type="diag",)
+    # predicted = dpgmm.fit_predict(transformed)
+    # time_finish = time.time()
+    # print(f"\tFit-predicted bayesian in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    # predicted_classes, counts = np.unique(predicted, return_counts=True)
+    # for dtag, prediction in zip(datasets, predicted):
+    #     print(f"\t\t{dtag} {prediction}")
+    #
+    # print(f"\tBayesian counts are {counts}")
+    #
+    # print(f"Predicted: {predicted[0]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class, ]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[0, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[1]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[1, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[2]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[2, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    # print(f"Predicted: {predicted[3]}")
+    # for predicted_class in np.unique(predicted):
+    #     # cov_iv = np.diag(dpgmm.precisions_[predicted_class, :].flatten())
+    #     cov_iv = dpgmm.precisions_[predicted_class,]
+    #     mean = dpgmm.means_[predicted_class, :].flatten()
+    #     distance = spatial.distance.mahalanobis(transformed[3, :].flatten(), mean, cov_iv)
+    #     print(f"\t\tDistance: {predicted_class} {distance}")
+    #
+    #
+    # for predicted_class, count in zip(predicted_classes, counts):
+    #     if count < 20:
+    #         continue
+    #
+    #     masked_array = array[predicted == predicted_class, :]
+    #     mean = np.median(masked_array, axis=0)
+    #     std = np.std(masked_array, axis=0)
+    #     z = (array[0,:]-mean / std)
+    #     normalized_z = z / np.std(z)
+    #
+    #     z_grid = reference_frame.unmask(SparseDMap(z))
+    #
+    #     save_dmap(
+    #         z_grid,
+    #         Path(out_dir) / f"{predicted_class}_z.ccp4"
+    #     )
+    #
+    #     normalized_z_grid = reference_frame.unmask(SparseDMap(normalized_z))
+    #
+    #     save_dmap(
+    #         normalized_z_grid,
+    #         Path(out_dir) / f"{predicted_class}_normalized_z.ccp4"
+    #     )
+    #
+    #     mean_grid = reference_frame.unmask(SparseDMap(mean))
+    #     save_dmap(
+    #         mean_grid,
+    #         Path(out_dir) / f"{predicted_class}_mean.ccp4"
+    #     )
+
+    # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
+    #
+    time_begin = time.time()
+    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
+    predicted = dpgmm.fit_predict(sparse_dmap_inner_array)
+    time_finish = time.time()
+    print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
+    predicted_classes, counts = np.unique(predicted, return_counts=True)
+    for dtag, prediction in zip(datasets, predicted):
+        print(f"\t\t{dtag} {prediction}")
+
+    print(f"\tBayesian counts are {counts}")
+    for predicted_class, count in zip(predicted_classes, counts):
+        if count < 20:
+            continue
+
+        masked_array = array[predicted == predicted_class, :]
+        mean = np.median(masked_array, axis=0)
+        std = np.std(masked_array, axis=0)
+
+        sample_point = [1.12, -41.6, -53.83]
+        out_path = Path(out_dir) / f"{predicted_class}_low_inner.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
+        sample_point = [1.11, -37.88, -58.43]
+        out_path = Path(out_dir) / f"{predicted_class}_high_inner.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
+        sample_point = [0.9, -36.23, -59.64]
+        out_path = Path(out_dir) / f"{predicted_class}_med_inner.png"
+        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+
 
 
     #
