@@ -790,17 +790,30 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         masked_array = array[predicted == predicted_class, :]
         mean = np.median(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
+        z = (array[0,:]-mean / std)
+
+        z_grid = reference_frame.unmask(SparseDMap(z))
+        save_dmap(
+            z_grid,
+            Path(out_dir) / f"bayes_{predicted_class}_{dtag}_z.ccp4"
+        )
+
+        mean_grid = reference_frame.unmask(SparseDMap(mean))
+        save_dmap(
+            mean_grid,
+            Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
+        )
 
         sample_point = [1.12,-41.6,-53.83]
-        out_path = Path(out_dir) / f"{predicted_class}_low.png"
+        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_low.png"
         sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
 
         sample_point = [1.11, -37.88, -58.43]
-        out_path = Path(out_dir) / f"{predicted_class}_high.png"
+        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_high.png"
         sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
 
         sample_point = [0.9, -36.23, -59.64]
-        out_path = Path(out_dir) / f"{predicted_class}_med.png"
+        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_med.png"
         sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
 
     print(f"##### Z maps #####")
@@ -995,37 +1008,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
-    time_begin = time.time()
-    dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
-    predicted = dpgmm.fit_predict(sparse_dmap_inner_array)
-    time_finish = time.time()
-    print(f"\tFit-predicted bayesian full in {round(time_finish - time_begin, 1)} with shape {predicted.shape}")
-    predicted_classes, counts = np.unique(predicted, return_counts=True)
-    for dtag, prediction in zip(datasets, predicted):
-        print(f"\t\t{dtag} {prediction}")
-
-    print(f"\tBayesian counts are {counts}")
-    for predicted_class, count in zip(predicted_classes, counts):
-        if count < 20:
-            continue
-
-        masked_array = array[predicted == predicted_class, :]
-        mean = np.median(masked_array, axis=0)
-        std = np.std(masked_array, axis=0)
-
-        sample_point = [1.12, -41.6, -53.83]
-        out_path = Path(out_dir) / f"{predicted_class}_low_inner.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-
-        sample_point = [1.11, -37.88, -58.43]
-        out_path = Path(out_dir) / f"{predicted_class}_high_inner.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-
-        sample_point = [0.9, -36.23, -59.64]
-        out_path = Path(out_dir) / f"{predicted_class}_med_inner.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-
-
 
     #
     # time_begin = time.time()
