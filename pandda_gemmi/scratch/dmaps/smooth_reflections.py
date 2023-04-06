@@ -38,7 +38,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
                                               columns=original_reflections.reflections.column_labels(),
                                               )
 
-    # f_array = original_reflections_table[original_r eflections.f]
+    # f_array = original_reflections_table[original_reflections.f]
 
     original_reflections_table[original_reflections.f] = y * np.exp(scale * r)
 
@@ -644,7 +644,7 @@ class SmoothReflections:
         x = reference_f_array
         y = dtag_f_array
 
-        r = reference_resolution_array
+        r = dtag_resolution_array
 
         # Get the resolution bins
         sample_grid = np.linspace(np.min(r), np.max(r), 20)
@@ -669,6 +669,15 @@ class SmoothReflections:
         reference_array = np.array(reference_grid, copy=False)
         reference_values = reference_array[grid_mask]
 
+        original_reflections = dataset.reflections.reflections
+        original_reflections_array = np.array(original_reflections,
+                                              copy=True,
+                                              )
+        original_reflections_table = pd.DataFrame(original_reflections_array,
+                                                  columns=reference_reflections.column_labels(),
+                                                  )
+        f_array = original_reflections_table[dataset.reflections.f]
+
 
         begin_solve = time.time()
         # y_inds_unique = np.unique(y_inds)
@@ -676,7 +685,7 @@ class SmoothReflections:
             lambda _scale: get_rmsd_real_space(
                 _scale,
                 reference_values,
-                y,
+                f_array,
                 r,
                 grid_mask,
                 dataset.reflections,
