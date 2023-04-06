@@ -336,6 +336,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         grid = reference_frame.unmask(SparseDMap(std.flatten()))
         sample  = grid.interpolate_value(gemmi.Position(*sample_point))
         print(f"STD at position low is: {sample}")
+        grid = reference_frame.unmask(SparseDMap(mean.flatten()))
+        sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"Mean at position low is: {sample}")
 
 
         # Sample mean at high point
@@ -376,6 +379,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         grid = reference_frame.unmask(SparseDMap(std.flatten()))
         sample  = grid.interpolate_value(gemmi.Position(*sample_point))
         print(f"STD at position high is: {sample}")
+        grid = reference_frame.unmask(SparseDMap(mean.flatten()))
+        sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"Mean at position low is: {sample}")
 
         # Sample mean at med point
         sample_point = [0.9,-36.23, -59.64]
@@ -415,6 +421,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         grid = reference_frame.unmask(SparseDMap(std.flatten()))
         sample = grid.interpolate_value(gemmi.Position(*sample_point))
         print(f"STD at position high is: {sample}")
+        grid = reference_frame.unmask(SparseDMap(mean.flatten()))
+        sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"Mean at position low is: {sample}")
 
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_abs_max()
