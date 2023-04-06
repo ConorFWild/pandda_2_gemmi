@@ -210,17 +210,19 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Get the grid points
         time_begin_itertools = time.time()
-        grid_point_array = np.array(
-            [
-                xyz_tuple
-                for xyz_tuple
-                in itertools.product(
-                np.arange(u0, u1 + 1),
-                np.arange(v0, v1 + 1),
-                np.arange(w0, w1 + 1),
-            )
-            ]
-        )
+        # grid_point_array = np.array(
+        #     [
+        #         xyz_tuple
+        #         for xyz_tuple
+        #         in itertools.product(
+        #         np.arange(u0, u1 + 1),
+        #         np.arange(v0, v1 + 1),
+        #         np.arange(w0, w1 + 1),
+        #     )
+        #     ]
+        # )
+        grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1]
+        grid_point_array = np.hstack([grid[_j].reshape((-1,1)) for _j in (0,1,2)])
         time_finish_itertools = time.time()
         print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools-time_begin_itertools, 1)}")
 
