@@ -42,8 +42,6 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
 
     original_reflections_table[original_reflections.f] = y * np.exp(scale * r)
 
-
-
     # New reflections
     new_reflections = gemmi.Mtz(with_base=False)
 
@@ -76,7 +74,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
     masked_new_grid_values = new_grid_array[grid_mask]
 
 
-    _rmsd = np.linalg.norm(reference_values - masked_new_grid_values)
+    _rmsd = np.linalg.norm(reference_values.flatten() - masked_new_grid_values.flatten())
     return _rmsd
 
 class SmoothReflections:
