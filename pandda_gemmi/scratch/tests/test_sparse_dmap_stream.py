@@ -320,7 +320,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             y=other_samples,
             c='#bcbd22'
         )
-        plt.savefig(str(Path(out_dir) / "samples_low.png"))
+        output_path = str(Path(out_dir) / "samples_low.png")
+        print(f"Saving to: {output_path}")
+        plt.savefig(output_path)
         plt.clf()
 
         # Sample mean at high point
@@ -347,7 +349,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             y=other_samples,
             c='#bcbd22'
         )
-        plt.savefig(str(Path(out_dir) / "samples_high.png"))
+        output_path = str(Path(out_dir) / "samples_high.png")
+        print(f"Saving to: {output_path}")
+        plt.savefig(output_path)
 
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_abs_max()
