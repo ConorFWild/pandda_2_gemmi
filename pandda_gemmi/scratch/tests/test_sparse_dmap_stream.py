@@ -822,8 +822,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
         )
 
-        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions])
-        position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions])
+        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions.items()])
+        position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions.items()])
 
         _all_points_array = point_array
         all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
