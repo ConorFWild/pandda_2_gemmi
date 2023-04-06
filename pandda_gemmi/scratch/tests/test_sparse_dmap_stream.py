@@ -309,6 +309,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_samples_mask[neighbour_indexes] = 1.0
         mean_samples = sample_array[mean_samples_mask == 1.0]
         other_samples = sample_array[mean_samples_mask == 0.0]
+        sample_native = sample_array[0]
 
         plt.scatter(
             x=(np.zeros(mean_samples.size) + 1.0).flatten(),
@@ -320,9 +321,15 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             y=other_samples,
             c='#bcbd22'
         )
+        plt.scatter(
+            x=(np.zeros(sample_native.size) + 3.0).flatten(),
+            y=sample_native,
+            c='#d62728'
+        )
         output_path = str(Path(out_dir) / "samples_low.png")
         print(f"Saving to: {output_path}")
         plt.savefig(output_path)
+
         plt.clf()
 
         # Sample mean at high point
@@ -338,6 +345,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_samples_mask[neighbour_indexes] = 1.0
         mean_samples = sample_array[mean_samples_mask == 1.0]
         other_samples = sample_array[mean_samples_mask == 0.0]
+        sample_native = sample_array[0]
 
         plt.scatter(
             x=(np.zeros(mean_samples.size) + 1.0).flatten(),
@@ -348,6 +356,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             x=(np.zeros(other_samples.size) + 2.0).flatten(),
             y=other_samples,
             c='#bcbd22'
+        )
+        plt.scatter(
+            x=(np.zeros(sample_native.size) + 3.0).flatten(),
+            y=sample_native,
+            c='#d62728'
         )
         output_path = str(Path(out_dir) / "samples_high.png")
         print(f"Saving to: {output_path}")
