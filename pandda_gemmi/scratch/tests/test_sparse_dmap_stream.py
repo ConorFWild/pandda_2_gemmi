@@ -305,7 +305,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             samples.append(sample)
 
         sample_array = np.array(samples)
-        mean_samples_mask = np.zeros(neighbour_indexes.size)
+        mean_samples_mask = np.zeros(dtag_array.size)
         mean_samples_mask[neighbour_indexes] = 1.0
         mean_samples = sample_array[mean_samples_mask == 1.0]
         other_samples = sample_array[mean_samples_mask == 0.0]
@@ -332,7 +332,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             samples.append(sample)
 
         sample_array = np.array(samples)
-        mean_samples_mask = np.zeros(neighbour_indexes.size)
+        mean_samples_mask = np.zeros(dtag_array.size)
         mean_samples_mask[neighbour_indexes] = 1.0
         mean_samples = sample_array[mean_samples_mask == 1.0]
         other_samples = sample_array[mean_samples_mask == 0.0]
