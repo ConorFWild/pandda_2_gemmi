@@ -110,6 +110,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
     print(f"\tGot {len(datasets_resolution)} of dataset res {res} or higher!")
 
+    dtag_array = np.array(list(datasets_resolution.keys()))
+    for _j, _dtag in enumerate(dtag_array):
+        print(_dtag)
+        if _dtag == dtag:
+            dtag_index =_j
+
     # Get the alignments
     print(f"##### Getting alignments #####")
     begin_align = time.time()
