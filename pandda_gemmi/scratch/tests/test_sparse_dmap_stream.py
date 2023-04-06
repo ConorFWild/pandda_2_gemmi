@@ -299,7 +299,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # Sample datasets at low point
         sample_point = [1.12,-41.6,-53.83]
         samples = []
-        for j in array.shape[0]:
+        for j in range(array.shape[0]):
             grid = reference_frame.unmask(SparseDMap(array[j,:].flatten()))
             sample  = grid.interpolate_value(gemmi.Position(*sample_point))
             samples.append(sample)
@@ -325,7 +325,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # Sample mean at high point
         sample_point = [1.11, -37.88, -58.43]
         samples = []
-        for j in array.shape[0]:
+        for j in range(array.shape[0]):
             grid = reference_frame.unmask(SparseDMap(array[j, :].flatten()))
             sample = grid.interpolate_value(gemmi.Position(*sample_point))
             samples.append(sample)
