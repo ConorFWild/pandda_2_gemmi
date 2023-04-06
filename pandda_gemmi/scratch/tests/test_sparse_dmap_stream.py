@@ -873,9 +873,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             high_z_pos_z.reshape((-1, 1))
         ])
 
-        high_z_point_x = pos_3d_arr_x[high_z_indexes]
-        high_z_point_y = pos_3d_arr_y[high_z_indexes]
-        high_z_point_z = pos_3d_arr_z[high_z_indexes]
+        high_z_point_x = point_3d_array_x[high_z_indexes]
+        high_z_point_y = point_3d_array_y[high_z_indexes]
+        high_z_point_z = point_3d_array_z[high_z_indexes]
 
         high_z_point_array = np.hstack([
             high_z_point_x.reshape((-1,1)),
