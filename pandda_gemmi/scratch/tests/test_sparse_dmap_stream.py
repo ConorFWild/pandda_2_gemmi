@@ -891,6 +891,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         print(high_z_point_array)
         print(high_z_point_array.shape)
+        print([np.min(high_z_point_array, axis=0), np.max(high_z_point_array, axis=0)])
+        print([np.min(point_array, axis=0), np.max(point_array, axis=0)])
 
         # high_z_points = np.hstack([
         #     high_z_indexes[0].reshape(-1,1),
