@@ -820,25 +820,27 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             mean_grid,
             Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
         )
-        grid = reference_frame.unmask(SparseDMap(std.flatten()))
 
-        sample_point = [1.12,-41.6,-53.83]
-        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_low.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-        sample = grid.interpolate_value(gemmi.Position(*sample_point))
-        print(f"STD at position low is: {sample}")
 
-        sample_point = [1.11, -37.88, -58.43]
-        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_high.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-        sample = grid.interpolate_value(gemmi.Position(*sample_point))
-        print(f"STD at position high is: {sample}")
+        # grid = reference_frame.unmask(SparseDMap(std.flatten()))
 
-        sample_point = [0.9, -36.23, -59.64]
-        out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_med.png"
-        sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
-        sample = grid.interpolate_value(gemmi.Position(*sample_point))
-        print(f"STD at position med is: {sample}")
+        # sample_point = [1.12,-41.6,-53.83]
+        # out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_low.png"
+        # sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+        # sample = grid.interpolate_value(gemmi.Position(*sample_point))
+        # print(f"STD at position low is: {sample}")
+        #
+        # sample_point = [1.11, -37.88, -58.43]
+        # out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_high.png"
+        # sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+        # sample = grid.interpolate_value(gemmi.Position(*sample_point))
+        # print(f"STD at position high is: {sample}")
+        #
+        # sample_point = [0.9, -36.23, -59.64]
+        # out_path = Path(out_dir) / f"bayes_fig_{predicted_class}_med.png"
+        # sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
+        # sample = grid.interpolate_value(gemmi.Position(*sample_point))
+        # print(f"STD at position med is: {sample}")
 
     print(f"##### Z maps #####")
     # for predicted_class, count in zip(predicted_classes, counts):
