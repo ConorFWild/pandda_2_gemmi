@@ -1,3 +1,5 @@
+import shutil
+
 import fire
 
 from typing import Dict, List
@@ -100,7 +102,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dtag = list(datasets.keys())[dtag_index]
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
-
+    shutil.copy(dataset.structure.path, Path(out_dir) / "reference.pdb")
 
     print(f"##### Getting datasets in resolution #####")
     dataset_res = dataset.reflections.resolution() + 0.1
