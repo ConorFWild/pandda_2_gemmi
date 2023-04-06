@@ -164,7 +164,7 @@ class PointPositionArray(PointPositionArrayInterface):
     ):
         # Get the fractional position
         # print(f"##########")
-
+        time_begin = time.time()
         x, y, z = position[0], position[1], position[2]
 
         corners = []
@@ -261,6 +261,9 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Point bounding box max: {point_bounds_max}")
         # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
         # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
+
+        time_finish = time.time()
+        print(f"\t\t\t\t\tGot pos array of shape {positions_within_radius.shape} in {round(time_finish-time_begin, 1)}")
 
         return points_within_radius.astype(int), positions_within_radius
 
