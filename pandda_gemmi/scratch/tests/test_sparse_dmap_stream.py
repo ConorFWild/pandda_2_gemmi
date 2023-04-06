@@ -804,6 +804,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         if count < 20:
             continue
 
+        dtag_array = array[dtag_index,:]
         masked_array = array[predicted == predicted_class, :]
         mean = np.mean(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
@@ -821,6 +822,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             Path(out_dir) / f"bayes_{predicted_class}_{dtag}_mean.ccp4"
         )
 
+        for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
+            event_array = (dtag_array - (bdc*mean)) / (1-bdc)
+            event_grid = reference_frame.unmask(SparseDMap(event_array))
+            save_dmap(
+                event_grid,
+                Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc,1)}.ccp4"
+            )
 
         # grid = reference_frame.unmask(SparseDMap(std.flatten()))
 
