@@ -295,6 +295,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         masked_array = array[neighbour_indexes, :]
         mean = np.mean(masked_array, axis=0)
+        std = np.std(masked_array, axis=0)
+
 
         # Sample datasets at low point
         sample_point = [1.12,-41.6,-53.83]
@@ -331,6 +333,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         plt.savefig(output_path)
 
         plt.clf()
+        grid = reference_frame.unmask(SparseDMap(std.flatten()))
+        sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"STD at position low is: {sample}")
+
 
         # Sample mean at high point
         sample_point = [1.11, -37.88, -58.43]
@@ -365,7 +371,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         output_path = str(Path(out_dir) / "samples_high.png")
         print(f"Saving to: {output_path}")
         plt.savefig(output_path)
-
+        grid = reference_frame.unmask(SparseDMap(std.flatten()))
+        sample  = grid.interpolate_value(gemmi.Position(*sample_point))
+        print(f"STD at position high is: {sample}")
         dataset_grid = reference_frame.unmask(SparseDMap(array[0,:].flatten()))
         dataset_grid.symmetrize_abs_max()
         dataset_reflections= Reflections.from_grid(dataset_grid,
