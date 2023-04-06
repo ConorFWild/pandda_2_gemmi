@@ -824,11 +824,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         )
 
         begin = time.time()
-        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions.items()])
+        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions.items()]) % np.array(reference_frame.spacing)
         position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions.items()])
 
         _all_points_array = point_array
-        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
+        # all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
+        all_points_array = point_array
         all_positions_array = position_array
 
         # print(f"All points shape: {all_points_array.shape}")
@@ -836,7 +837,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
         all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
-        shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
+        # shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
+        shape = reference_frame.spacing
         point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
         point_3d_array[all_point_indexes] = True
         # initial_unique_points = np.argwhere(point_3d_array)
