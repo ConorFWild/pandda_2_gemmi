@@ -321,6 +321,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             c='#bcbd22'
         )
         plt.savefig(str(Path(out_dir) / "samples_low.png"))
+        plt.clf()
 
         # Sample mean at high point
         sample_point = [1.11, -37.88, -58.43]
