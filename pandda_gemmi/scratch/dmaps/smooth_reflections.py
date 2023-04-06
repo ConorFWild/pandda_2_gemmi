@@ -75,6 +75,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
 
 
     _rmsd = np.linalg.norm(reference_values.flatten() - masked_new_grid_values.flatten())
+    print(f"\t\tScale: {scale} : RMSD: {_rmsd}")
     return _rmsd
 
 class SmoothReflections:
@@ -635,28 +636,28 @@ class SmoothReflections:
         print(f"\t\t\tReference f array size: {reference_f_array.shape} and dtag f array size: {dtag_f_array.shape}")
 
         # Resolution array
-        reference_resolution_array = reference_reflections.make_1_d2_array()
-        dtag_resolution_array = dtag_reflections.make_1_d2_array()
+        # reference_resolution_array = reference_reflections.make_1_d2_array()
+        # dtag_resolution_array = dtag_reflections.make_1_d2_array()
 
         # Prepare optimisation
-        x = reference_f_array
-        y = dtag_f_array
+        # x = reference_f_array
+        # y = dtag_f_array
 
-        r = dtag_resolution_array
+        # r = dtag_resolution_array
 
         # Get the resolution bins
-        sample_grid = np.linspace(np.min(r), np.max(r), 20)
+        # sample_grid = np.linspace(np.min(r), np.max(r), 20)
 
         # Get the array that maps x values to bins
-        x_inds = np.digitize(reference_resolution_array, sample_grid)
+        # x_inds = np.digitize(reference_resolution_array, sample_grid)
 
         # Get the bin averages
-        populated_bins, counts = np.unique(x_inds, return_counts=True)
-        x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
+        # populated_bins, counts = np.unique(x_inds, return_counts=True)
+        # x_f = np.array([np.mean(x[x_inds == rb]) for rb in populated_bins[1:-2]])
         # print(f"\t\t\tsample NEW: {x_f}")
         # print(f"\t\t\txf NEW: {x_f}")
 
-        y_inds = np.digitize(dtag_resolution_array, sample_grid)
+        # y_inds = np.digitize(dtag_resolution_array, sample_grid)
 
         finish_preprocess = time.time()
         print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
