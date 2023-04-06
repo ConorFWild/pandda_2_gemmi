@@ -409,7 +409,8 @@ class PointPositionArray(PointPositionArrayInterface):
                     np.array(grid.unit_cell.fractionalization_matrix.tolist()),
                     np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
                     atom_positions[j, :],
-                    radius)
+                    radius,
+                )
                 for j
                 in range(atom_positions.shape[0])
             ]
@@ -432,7 +433,7 @@ class PointPositionArray(PointPositionArrayInterface):
         print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
 
         _all_points_array = np.concatenate(point_arrays, axis=0)
-        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1,3))
+        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
         all_positions_array = np.concatenate(position_arrays, axis=0)
 
         # print(f"All points shape: {all_points_array.shape}")
@@ -445,7 +446,7 @@ class PointPositionArray(PointPositionArrayInterface):
         point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
         point_3d_array[all_point_indexes] = True
         initial_unique_points = np.argwhere(point_3d_array)
-        unique_points = initial_unique_points+ np.min(_all_points_array, axis=0).reshape((1,3))
+        unique_points = initial_unique_points + np.min(_all_points_array, axis=0).reshape((1, 3))
         unique_points_indexes = (initial_unique_points[:, 0], initial_unique_points[:, 1], initial_unique_points[:, 2],)
         pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
@@ -626,8 +627,6 @@ class GridMask(GridMaskInterface):
         mask_array = np.array(mask, copy=False, dtype=np.int8)
         self.indicies_inner_atomic = np.nonzero(mask_array)
         self.indicies_sparse_inner_atomic = mask_array[self.indicies] == 1.0
-
-
 
 
 def get_grid_from_dataset(dataset: DatasetInterface):
