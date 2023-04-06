@@ -29,13 +29,13 @@ def get_rmsd(scale, y, r, y_inds, y_inds_unique, x_f):
     _rmsd = np.sum(np.abs(x_f - y_f))
     return _rmsd
 
-def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, reflections_template, original_reflections, exact_size):
-    original_reflections_array = np.array(original_reflections,
+def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_reflections, exact_size):
+    original_reflections_array = np.array(original_reflections.reflections,
                                           copy=True,
                                           )
 
     original_reflections_table = pd.DataFrame(original_reflections_array,
-                                              columns=original_reflections.column_labels(),
+                                              columns=original_reflections.reflections.column_labels(),
                                               )
 
     # f_array = original_reflections_table[original_r eflections.f]
@@ -48,14 +48,14 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, reflections_te
     new_reflections = gemmi.Mtz(with_base=False)
 
     # Set dataset properties
-    new_reflections.spacegroup = original_reflections.spacegroup
-    new_reflections.set_cell_for_all(original_reflections.cell)
+    new_reflections.spacegroup = original_reflections.reflections.spacegroup
+    new_reflections.set_cell_for_all(original_reflections.reflections.cell)
 
     # Add dataset
     new_reflections.add_dataset("scaled")
 
     # Add columns
-    for column in original_reflections.columns:
+    for column in original_reflections.reflections.columns:
         new_reflections.add_column(column.label, column.type)
 
     # Update
@@ -65,9 +65,9 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, reflections_te
     new_reflections.update_reso()
 
     new_reflections_obj = Reflections(
-        reflections_template.path,
-        reflections_template.f,
-        reflections_template.phi,
+        original_reflections.path,
+        original_reflections.f,
+        original_reflections.phi,
         original_reflections_table.to_numpy()
     )
 
@@ -669,6 +669,7 @@ class SmoothReflections:
         reference_array = np.array(reference_grid, copy=False)
         reference_values = reference_array[grid_mask]
 
+
         begin_solve = time.time()
         # y_inds_unique = np.unique(y_inds)
         min_scale = optimize.minimize(
@@ -679,7 +680,6 @@ class SmoothReflections:
                 r,
                 grid_mask,
                 dataset.reflections,
-                original_reflections,
                 exact_size,
             ),
             0.0,
