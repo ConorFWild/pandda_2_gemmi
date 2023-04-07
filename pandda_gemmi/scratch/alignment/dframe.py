@@ -164,7 +164,7 @@ class PointPositionArray(PointPositionArrayInterface):
     ):
         # Get the fractional position
         # print(f"##########")
-        # time_begin = time.time()
+        time_begin = time.time()
         x, y, z = position[0], position[1], position[2]
 
         corners = []
@@ -209,7 +209,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
         # Get the grid points
-        # time_begin_itertools = time.time()
+        time_begin_itertools = time.time()
         # grid_point_array = np.array(
         #     [
         #         xyz_tuple
@@ -223,14 +223,14 @@ class PointPositionArray(PointPositionArrayInterface):
         # )
         grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1]
         grid_point_array = np.hstack([grid[_j].reshape((-1,1)) for _j in (0,1,2)])
-        # time_finish_itertools = time.time()
-        # print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools-time_begin_itertools, 1)}")
+        time_finish_itertools = time.time()
+        print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools-time_begin_itertools, 1)}")
 
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the point positions
-        # time_begin_pointpos = time.time()
+        time_begin_pointpos = time.time()
         position_array = PointPositionArray.orthogonalize_fractional_array_mat(
             PointPositionArray.fractionalize_grid_point_array_mat(
                 grid_point_array,
@@ -238,8 +238,8 @@ class PointPositionArray(PointPositionArrayInterface):
             ),
             orthogonalization_matrix,
         )
-        # time_finish_pointpos = time.time()
-        # print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)}")
+        time_finish_pointpos = time.time()
+        print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)}")
         # print(f"")
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
@@ -271,8 +271,8 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"First point pos pair: {points_within_radius[0, :]} {positions_within_radius[0, :]}")
         # print(f"Last point pos pair: {points_within_radius[-1, :]} {positions_within_radius[-1, :]}")
 
-        # time_finish = time.time()
-        # print(f"\t\t\t\t\tGot pos array of shape {positions_within_radius.shape} in {round(time_finish-time_begin, 1)}")
+        time_finish = time.time()
+        print(f"\t\t\t\t\tGot pos array of shape {positions_within_radius.shape} in {round(time_finish-time_begin, 1)}")
 
         return points_within_radius.astype(int), positions_within_radius
 
