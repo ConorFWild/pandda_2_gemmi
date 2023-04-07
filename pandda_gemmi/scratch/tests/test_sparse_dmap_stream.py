@@ -909,7 +909,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         for cluster_num, count in zip(cluster_nums, counts):
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
-            print(f"\tCluster: {cluster_num} : {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
+            if volume > 5.0:
+                print(f"\tCluster: {cluster_num} : {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
 
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
