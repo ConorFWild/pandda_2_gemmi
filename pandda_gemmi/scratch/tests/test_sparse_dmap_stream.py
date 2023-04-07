@@ -1085,7 +1085,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
                 image_model = np.stack([model_sample for _j in range(20)])
 
-                image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
+                image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1).astype(np.double)
                 print([image.shape, image.dtype])
 
                 # Transfer to tensor
