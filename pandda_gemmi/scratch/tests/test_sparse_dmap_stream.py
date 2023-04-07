@@ -16,6 +16,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+import os
+import inspect
+
+import torch
+
+from pandda_gemmi.cnn import resnet
+from pandda_gemmi.cnn import resnet18
+
 from pandda_gemmi.scratch.interfaces import *
 from pandda_gemmi.scratch.fs import PanDDAFS
 from pandda_gemmi.scratch.dataset import XRayDataset, Reflections
@@ -169,6 +177,8 @@ def sample_to_png(sample_point, array, reference_frame, dtag_array, mean_indexes
     print(f"Saving to: {output_path}")
     plt.savefig(output_path)
     plt.clf()
+
+
 def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Data dir is {data_dir} and output dir is {out_dir}")
 
@@ -1008,15 +1018,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         cluster_nums, counts = np.unique(clusters, return_counts=True)
 
-        import os
-        import inspect
 
-        import torch
-        import numpy as np
-        import gemmi
-
-        from pandda_gemmi.cnn import resnet
-        from pandda_gemmi.cnn import resnet18
 
         if torch.cuda.is_available():
             dev = "cuda:0"
