@@ -1024,6 +1024,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             dev = "cuda:0"
         else:
             dev = "cpu"
+        print(f"Device: {dev}")
 
         # Load the model
         cnn = resnet18(num_classes=2, num_input=4)
@@ -1033,6 +1034,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # Add model to device
         cnn.to(dev)
         cnn.eval()
+        cnn = cnn.float()
 
         # Annotate the events
         event_scores = {}
@@ -1096,7 +1098,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 image_c = image_t.to(dev)
 
                 # Run model
-                model_annotation = cnn(image_c)
+                model_annotation = cnn(image_c.float())
 
                 # Track score
                 model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
