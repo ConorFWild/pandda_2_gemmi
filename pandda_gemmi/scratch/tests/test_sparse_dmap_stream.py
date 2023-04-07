@@ -1058,7 +1058,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 )
                 sample_array = np.zeros((n, n, n), dtype=np.float32)
 
-                bdcs = np.linspace(0.0,0.95,20).reshape((20,1,1))
+                bdcs = np.linspace(0.0,0.95,20).reshape((20,1,1,1))
                 xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
                 mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
