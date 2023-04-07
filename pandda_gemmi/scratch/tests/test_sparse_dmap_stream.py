@@ -1049,7 +1049,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 centroid = np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)
 
                 n = 30
-                sample_array = np.zeros((n, n, n), dtype=np.float32)
+                # sample_array = np.zeros((n, n, n), dtype=np.float32)
                 sample_transform = get_sample_transform_from_event(
                     centroid,
                     0.5,
