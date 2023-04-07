@@ -1065,6 +1065,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
                 image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1-bdcs)
+                print(f"Image evnets: {image_events.shape}")
 
 
                 # event_map = get_event_map(dataset_xmap.xmap, event, model)
@@ -1085,9 +1086,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 image_model = np.stack([model_sample for _j in range(20)])
 
                 image = np.stack([image_events, image_raw, image_zmap, image_model])
+                print(image.shape)
 
                 # Transfer to tensor
-                image_t = torch.unsqueeze(torch.from_numpy(image), 0)
+                # image_t = torch.unsqueeze(torch.from_numpy(image), 0)
+                image_t = torch.from_numpy(image)
 
                 # Move tensors to device
                 image_c = image_t.to(dev)
