@@ -1105,7 +1105,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 for _j in range(20):
                     bdc = bdcs.flatten()[_j]
                     annotation = model_annotations[_j, 1]
-                    print(f"\t\t{bdc} {annotation}")
+                    print(f"\t\t{np.round(bdc, 2)} {np.round(annotation, 2)}")
 
 
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
