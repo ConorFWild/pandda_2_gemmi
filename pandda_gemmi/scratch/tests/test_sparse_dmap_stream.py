@@ -70,7 +70,7 @@ def get_sample_transform_from_event(centroid,
 
     transform = gemmi.Transform()
     transform.vec.fromlist([
-        event.cluster.centroid[j] - sample_grid_centroid[j]
+        centroid[j] - sample_grid_centroid[j]
         for j
         in [0,1,2]
     ])
@@ -85,7 +85,7 @@ def get_sample_transform_from_event(centroid,
     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
     average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
-    event_centroid = event.cluster.centroid
+    event_centroid = centroid
     # logger.debug(f"Centroid: {event_centroid}")
     # logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
     # logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
