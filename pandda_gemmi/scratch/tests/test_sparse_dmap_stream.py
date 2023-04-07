@@ -1042,6 +1042,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_grid = reference_frame.unmask(SparseDMap(mean))
 
         for cluster_num, count in zip(cluster_nums, counts):
+            if cluster_num == -1:
+                continue
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
             if volume > 5.0:
                 print(f"\tCluster: {cluster_num} : {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
@@ -1078,7 +1080,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 image_zmap = np.stack([zmap_sample for _j in range(20)])
 
                 sample_array_model = np.copy(sample_array)
-                model_map = get_model_map(dataset.structure.structure, grid_array)
+                model_map = get_model_map(dataset.structure.structure, xmap_grid)
                 model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
                 image_model = np.stack([model_sample for _j in range(20)])
 
