@@ -11,6 +11,7 @@ from pandda_gemmi.cnn import resnet18
 from pandda_gemmi.event.event_scoring_inbuilt import EventScoringResult, LigandFittingResult, ConfomerID, ConformerFittingResult, Conformers
 
 
+
 def sample_xmap(xmap, transform, sample_array):
     xmap.interpolate_values(sample_array, transform)
     return sample_array

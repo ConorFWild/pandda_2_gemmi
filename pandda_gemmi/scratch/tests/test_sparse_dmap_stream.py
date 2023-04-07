@@ -1086,7 +1086,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 image_model = np.stack([model_sample for _j in range(20)])
 
                 image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
-                print(image.shape)
+                print([image.shape, image.dtype])
 
                 # Transfer to tensor
                 # image_t = torch.unsqueeze(torch.from_numpy(image), 0)
