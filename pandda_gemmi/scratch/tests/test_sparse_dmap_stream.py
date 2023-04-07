@@ -1098,7 +1098,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 # Track score
                 model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
                 for _j in range(20):
-                    bdc = bdcs[_j]
+                    bdc = bdcs.flatten()[_j]
                     annotation = model_annotations[_j, 1]
                     print(f"\t\t{bdc} {annotation}")
 
