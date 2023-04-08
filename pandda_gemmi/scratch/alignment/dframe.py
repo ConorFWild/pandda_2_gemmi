@@ -347,7 +347,7 @@ class PointPositionArray(PointPositionArrayInterface):
         grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1].astype(int)
         grid_point_array = np.hstack([grid[_j].reshape((-1, 1)) for _j in (0, 1, 2)])
         time_finish_itertools = time.time()
-        print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)}")
+        print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {grid_point_array.shape}")
 
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
