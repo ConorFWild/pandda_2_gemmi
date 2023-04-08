@@ -208,6 +208,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # dtag = "JMJD2DA-x390"
     dtag = "JMJD2DA-x427"
 
+    time_begin_process_dataset = time.time()
+
     for _j, _dtag in enumerate(dtag_array):
         print(_dtag)
         if _dtag == dtag:
@@ -1138,6 +1140,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
         # sample = grid.interpolate_value(gemmi.Position(*sample_point))
         # print(f"STD at position med is: {sample}")
+
+    time_finish_process_dataset = time.time()
+    print(f"Processed dataset in: {round(time_finish_process_dataset-time_begin_process_dataset, 1)}")
 
     print(f"##### Z maps #####")
     # for predicted_class, count in zip(predicted_classes, counts):
