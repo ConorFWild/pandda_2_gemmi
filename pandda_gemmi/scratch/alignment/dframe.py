@@ -357,6 +357,8 @@ class PointPositionArray(PointPositionArrayInterface):
         mod_point_array = np.mod(grid_point_array, spacing)
         mod_point_indexes = (mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
         position_array = np.zeros(grid_point_array.shape)
+        print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
+
         position_array[:, 0] = pos_array[0][mod_point_indexes]
         position_array[:, 1] = pos_array[1][mod_point_indexes]
         position_array[:, 2] = pos_array[2][mod_point_indexes]
@@ -528,7 +530,7 @@ class PointPositionArray(PointPositionArrayInterface):
         pos_array_3d = np.zeros((3, grid.nu, grid.nv, grid.nw))
         print(np.max(pos_array_3d))
 
-        np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+        # np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
         point_orthogonalization_matrix = np.matmul(
             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
             np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
