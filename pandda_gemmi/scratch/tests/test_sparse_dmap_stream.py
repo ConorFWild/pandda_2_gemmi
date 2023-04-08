@@ -205,8 +205,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # Get the test dataset
     print(f"##### Getting test dataset #####")
     dtag_array = np.array(list(datasets.keys()))
-    # dtag = "JMJD2DA-x390"
-    dtag = "JMJD2DA-x427"
+    dtag = "JMJD2DA-x390"
+    # dtag = "JMJD2DA-x427"
 
     time_begin_process_dataset = time.time()
 
