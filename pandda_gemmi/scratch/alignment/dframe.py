@@ -656,6 +656,8 @@ class PointPositionArray(PointPositionArrayInterface):
         print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array-time_begin_make_array,1)}")
         print(f"\t\t\t\t\t With shapes {unique_points.shape} {unique_positions.shape}")
         print(f"\t\t\t\t\t Vs mask size {indicies[0].shape}")
+        print(unique_points)
+        print(unique_positions)
 
         return unique_points, unique_positions
 
