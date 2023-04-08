@@ -585,9 +585,9 @@ class PointPositionArray(PointPositionArrayInterface):
                 np.array([x, y, z]).reshape((1, 3)),
                 fractionalization_matrix,
             )
-            corners.append(corner.flatten())
+            corners.append(corner)
 
-        corner_array = np.array(corners)
+        corner_array = np.vstack(corners)
         print(f"Corner shape is: {corner_array.shape}")
         print(f"Spacing shape is: {spacing}"
               )
