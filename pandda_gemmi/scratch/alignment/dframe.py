@@ -519,6 +519,8 @@ class PointPositionArray(PointPositionArrayInterface):
 
         time_begin_orth = time.time()
         pos_array_3d = np.zeros((3, grid.nu, grid.nv, grid.nw))
+        print(np.max(pos_array_3d))
+
         np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
         point_orthogonalization_matrix = np.matmul(
             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
@@ -530,10 +532,10 @@ class PointPositionArray(PointPositionArrayInterface):
         pos_array = np.matmul(point_orthogonalization_matrix, indicies_point_array)
         print(f"\t\t\t\t\tPos array shape: {pos_array.shape}")
         print(pos_array_3d[0][indicies].shape)
-        pos_array_3d[indicies] = pos_array[0, :]
-        pos_array_3d[indicies] = pos_array[1, :]
-        pos_array_3d[indicies] = pos_array[2, :]
-
+        pos_array_3d[0][indicies] = pos_array[0, :]
+        pos_array_3d[1][indicies] = pos_array[1, :]
+        pos_array_3d[2][indicies] = pos_array[2, :]
+        print(np.max(pos_array_3d))
         #
         pos_array_3d_ref = processor.put(pos_array_3d)
         time_finish_orth = time.time()
