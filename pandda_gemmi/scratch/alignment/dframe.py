@@ -588,6 +588,9 @@ class PointPositionArray(PointPositionArrayInterface):
             corners.append(corner)
 
         corner_array = np.array(corners)
+        print(f"Corner shape is: {corner_array.shape}")
+        print(f"Spacing shape is: {spacing}"
+              )
 
 
         fractional_min = np.min(corner_array, axis=0)
@@ -644,7 +647,11 @@ class PointPositionArray(PointPositionArrayInterface):
         # indicies_point_array = np.vstack(indicies)
 
         unique_points = grid_point_array.T
+
+        time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
+        time_finish_mult = time.time()
+        print(f"\t\t\t\t\t\t Points to positions in : {round(time_finish_mult-time_begin_mult, 1)}")
 
         time_finish_make_array = time.time()
 
