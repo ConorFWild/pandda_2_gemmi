@@ -357,7 +357,7 @@ class PointPositionArray(PointPositionArrayInterface):
         mod_point_array = np.mod(grid_point_array, spacing, )
         position_array = pos_array[:, mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten(), ]
         time_finish_pointpos = time.time()
-        print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)}")
+        print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)} to shape {position_array.shape}")
         # print(f"")
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
