@@ -529,9 +529,9 @@ class PointPositionArray(PointPositionArrayInterface):
 
         pos_array = np.matmul(point_orthogonalization_matrix, indicies_point_array)
         print(f"\t\t\t\t\tPos array shape: {pos_array.shape}")
-        pos_array_3d[0, indicies] = pos_array[0, :]
-        pos_array_3d[1, indicies] = pos_array[1, :]
-        pos_array_3d[1, indicies] = pos_array[2, :]
+        pos_array_3d[indicies] = pos_array[0, :]
+        pos_array_3d[indicies] = pos_array[1, :]
+        pos_array_3d[indicies] = pos_array[2, :]
 
         #
         pos_array_3d_ref = processor.put(pos_array_3d)
