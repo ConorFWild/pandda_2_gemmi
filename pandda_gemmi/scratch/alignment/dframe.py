@@ -655,6 +655,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array-time_begin_make_array,1)}")
         print(f"\t\t\t\t\t With shapes {unique_points.shape} {unique_positions.shape}")
+        print(f"\t\t\t\t\t Vs mask size {indicies[0].shape}")
 
         # all_point_array = grid
 
@@ -662,8 +663,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # Get the point positions
         time_begin_pointpos = time.time()
         mod_point_array = np.mod(grid_point_array, spacing)
-        mod_point_indexes = (
-        mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
+        mod_point_indexes = (mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
         position_array = np.zeros(grid_point_array.shape)
         print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
 
