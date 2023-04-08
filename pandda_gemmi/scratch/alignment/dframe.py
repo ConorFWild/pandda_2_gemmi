@@ -625,7 +625,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         time_finish_itertools = time.time()
         print(
-            f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {grid_point_array.shape}")
+            f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {grid.shape}")
 
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
