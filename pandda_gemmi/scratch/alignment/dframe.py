@@ -344,7 +344,7 @@ class PointPositionArray(PointPositionArrayInterface):
         #     )
         #     ]
         # )
-        grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1]
+        grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1].astype(int)
         grid_point_array = np.hstack([grid[_j].reshape((-1, 1)) for _j in (0, 1, 2)])
         time_finish_itertools = time.time()
         print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)}")
@@ -354,7 +354,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Get the point positions
         time_begin_pointpos = time.time()
-        mod_point_array = np.mod(grid_point_array, spacing, dtype=np.int)
+        mod_point_array = np.mod(grid_point_array, spacing)
         position_array = pos_array[:, mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten(), ]
 
         time_finish_pointpos = time.time()
