@@ -525,10 +525,13 @@ class PointPositionArray(PointPositionArrayInterface):
             np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
         )
         indicies_point_array = np.vstack(indicies)
+        print(f"\t\t\t\t\tindicies_point_array shape: {indicies_point_array.shape}")
+
         pos_array = np.matmul(point_orthogonalization_matrix, indicies_point_array)
-        pos_array_3d[0, indicies] = pos_array[:, 0]
-        pos_array_3d[1, indicies] = pos_array[:, 1]
-        pos_array_3d[1, indicies] = pos_array[:, 2]
+        print(f"\t\t\t\t\tPos array shape: {pos_array.shape}")
+        pos_array_3d[0, indicies] = pos_array[0, :]
+        pos_array_3d[1, indicies] = pos_array[1, :]
+        pos_array_3d[1, indicies] = pos_array[2, :]
 
         #
         pos_array_3d_ref = processor.put(pos_array_3d)
