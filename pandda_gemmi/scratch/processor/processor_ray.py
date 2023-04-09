@@ -13,6 +13,10 @@ class RayWrapper(Generic[P, V]):
 def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
     return func(*args, **kwargs)
 
+@ray.remote
+def ray_batch_wrapper(funcs):
+    return [f() for f in funcs]
+
 
 class ProcessLocalRay(ProcessorInterface):
 
@@ -47,14 +51,41 @@ class ProcessLocalRay(ProcessorInterface):
 
 
 
-    def process_dict(self, funcs):
+    # def process_dict(self, funcs):
+    #     assert ray.is_initialized() == True
+    #     tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
+    #     # print(tasks)
+    #
+    #     results = ray.get(tasks)
+    #
+    #     return {key: result for key, result in zip(funcs, results)}
+
+    def process_dict(self, funcs, num_cpus):
         assert ray.is_initialized() == True
-        tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
+        key_list = list(funcs.keys())
+        func_list = list(funcs.values())
+        num_keys = len(key_list)
+
+        batch_size = int(len(funcs) / self.local_cpus) + 1
+
+        tasks = []
+        for j in range(num_cpus):
+            tasks.append(
+                ray_batch_wrapper.remote(func_list[j*batch_size: min(num_keys, (j+1)*batch_size)])
+            )
+
+        # tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
         # print(tasks)
+
         results = ray.get(tasks)
+        result_dict = {}
+        j = 0
+        for result in results:
+            for r in result:
+                result_dict[j] = r
 
-        return {key: result for key, result in zip(funcs, results)}
-
+        return result_dict
+        # return {key: result for key, result in zip(funcs, results)}
 
     def reset(self):
         ray.shutdown()
