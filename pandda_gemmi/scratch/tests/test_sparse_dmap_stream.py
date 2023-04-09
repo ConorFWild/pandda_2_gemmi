@@ -226,7 +226,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     shutil.copy(dataset.structure.path, Path(out_dir) / "reference.pdb")
     shutil.copy(dataset.reflections.path, Path(out_dir) / "reference.mtz")
 
-
     print(f"##### Getting datasets in resolution #####")
     dataset_res = dataset.reflections.resolution() + 0.1
     res = max(dataset_res, list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[60]+0.1)
