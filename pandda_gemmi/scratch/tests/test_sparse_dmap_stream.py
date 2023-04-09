@@ -12,6 +12,7 @@ from scipy import spatial
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import DBSCAN
+from sklearn import mixture
 
 import matplotlib
 
@@ -365,6 +366,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
     time_finish = time.time()
     print(f"Parallel loaded xmaps in {round(time_finish - time_begin, 1)} into dict of length {len(dmaps_dict)}")
+    time_load_dmap = time_finish-time_begin
     array = np.vstack([dmap.data.reshape((1,-1) ) for dtag, dmap in dmaps_dict.items() ])
 
     print(f"##### Masking dmaps #####")
@@ -391,6 +393,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
     transformed = pca.fit_transform(sparse_dmap_inner_array)
     time_finish = time.time()
+    time_pca = time_finish-time_begin
+
     print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {transformed.shape}")
 
     print(f"##### Pairwise distances #####")
@@ -406,7 +410,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
 
-    from sklearn import mixture
 
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
     # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
@@ -1163,11 +1166,15 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     time_finish_process_dataset = time.time()
     print(f"Processed dataset in: {round(time_finish_process_dataset-time_begin_process_dataset, 1)}")
-    print(f"\tGot {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
     print(f"\tGot reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
+    print(f"\tGot {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
+    print(f"\tGot {len(alignments)} dmaps in {round(time_load_dmap, 1)}")
+    print(f"\tGot pca in: {time_pca}")
     print(f"\tGot high zs in times: {times_get_high_z}")
     print(f"\tGot dbscans in times: {times_dbscan}")
     print(f"\tGot event scores in times: {times_score_events}")
+    accounted_runtume = (finish_align-begin_align) + (finish_get_frame-begin_get_frame) + time_load_dmap + time_pca + sum(times_get_high_z) + sum(times_dbscan) + sum(times_score_events)
+    print(f"Runtime accounted for: {accounted_runtume}")
 
     print(f"##### Z maps #####")
     # for predicted_class, count in zip(predicted_classes, counts):
