@@ -16,9 +16,9 @@ def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
     return func(*args, **kwargs)
 
 @ray.remote
-def ray_batch_wrapper(funcs):
+def ray_batch_wrapper(funcs, args, kwargs):
     begin = time.time()
-    result = [f() for f in funcs]
+    result = [f(*args, **kwargs) for f, args, kwargs in zip(funcs, args, kwargs)]
     finish = time.time()
     print(f"Processed {len(result)} in {round(finish-begin,2)}")
     return result
@@ -76,8 +76,13 @@ class ProcessLocalRay(ProcessorInterface):
 
         tasks = []
         for j in range(self.local_cpus):
+            funcs = func_list[j*batch_size: min(num_keys, (j+1)*batch_size)]
             tasks.append(
-                ray_batch_wrapper.remote(func_list[j*batch_size: min(num_keys, (j+1)*batch_size)])
+                ray_batch_wrapper.remote(
+                [f.f for f in funcs],
+                [f.args for f in funcs],
+                [f.kwargs for f in funcs]
+            )
             )
 
         # tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
