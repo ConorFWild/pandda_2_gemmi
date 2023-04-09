@@ -45,6 +45,8 @@ class SparseDMapStream:
     @staticmethod
     def parallel_load(dataset, alignment, transforms, dframe):
 
+        begin = time.time()
+
         begin_transform = time.time()
         for transform in transforms:
             dataset = transform(dataset)
@@ -57,6 +59,9 @@ class SparseDMapStream:
         print(f"\tFFT: {finish_fft - begin_fft}")
 
         aligned_xmap = SparseDMapStream.align_xmap(xmap, dframe, alignment)
+
+        finish = time.time()
+        print(f"Aligned xmap in: {finish-begin}")
 
         return aligned_xmap
 
