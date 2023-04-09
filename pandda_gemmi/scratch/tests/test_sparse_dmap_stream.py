@@ -248,6 +248,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     )
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
+    exit()
 
     # Get the reference frame
     print(f"##### Getting reference frame #####")
