@@ -1045,8 +1045,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         event_scores = {}
         # for event_id, event in events.events.items():
 
+        time_event_scoring_begin = time.time()
+
         xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
         mean_grid = reference_frame.unmask(SparseDMap(mean))
+
+
 
         for cluster_num, count in zip(cluster_nums, counts):
             if cluster_num == -1:
@@ -1110,17 +1114,19 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 for _j in range(20):
                     bdc = bdcs.flatten()[_j]
                     annotation = model_annotations[_j, 1]
-                    print(f"\t\t{np.round(bdc, 2)} {np.round(annotation, 2)}")
+                    print(f"\t\t{np.round(bdc, 2)} {np.round(float(annotation), 2)}")
 
+        time_event_scoring_finish = time.time()
+        print(f"Scored events in: {round(time_event_scoring_finish-time_event_scoring_begin, 1)}")
 
-        for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
-            event_array = (dtag_array - (bdc*mean)) / (1-bdc)
-            event_grid = reference_frame.unmask(SparseDMap(event_array))
-
-            save_dmap(
-                event_grid,
-                Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc,1)}.ccp4"
-            )
+        # for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
+        #     event_array = (dtag_array - (bdc*mean)) / (1-bdc)
+        #     event_grid = reference_frame.unmask(SparseDMap(event_array))
+        #
+        #     save_dmap(
+        #         event_grid,
+        #         Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc,1)}.ccp4"
+        #     )
 
         # grid = reference_frame.unmask(SparseDMap(std.flatten()))
 
