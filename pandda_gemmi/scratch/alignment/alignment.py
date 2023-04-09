@@ -180,7 +180,7 @@ class Alignment:
             raise Exception()
 
         transforms = {}
-
+        time_ball_query = 0
         # Start searching
         for res_id in reference_dataset.structure.protein_residue_ids():
             # Get reference residue
@@ -191,10 +191,13 @@ class Alignment:
             reference_ca_pos = ref_res["CA"][0].pos
 
             # other selection
+            time_begin_ball = time.time()
             reference_indexes = reference_tree.query_ball_point(
                 [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
                 marker_atom_search_radius,
             )
+            time_finish_ball = time.time()
+            time_ball_query = time_ball_query + (time_finish_ball-time_begin_ball)
             reference_selection = reference_atom_array[reference_indexes]
             moving_selection = moving_atom_array[reference_indexes]
 
@@ -213,3 +216,4 @@ class Alignment:
         self.transforms = transforms
 
         time_finish = time.time()
+        print(f"\t\tAligned in: {round(time_finish-time_begin, 1)} of which {round(time_ball_query,1)} in ball query")
