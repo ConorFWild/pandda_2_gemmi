@@ -644,7 +644,7 @@ class PointPositionArray(PointPositionArrayInterface):
         )
         # indicies_point_array = np.vstack(indicies)
 
-        unique_points = np.hstack([shifted_grid_point_indicies[_j][indicies_mask] for _j in (0,1,2)]).astype(np.int)
+        unique_points = np.hstack([shifted_grid_point_indicies[_j][indicies_mask].reshape((-1, 1)) for _j in (0,1,2)]).astype(np.int)
 
         time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
