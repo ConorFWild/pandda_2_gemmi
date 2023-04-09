@@ -128,8 +128,8 @@ class Transform:
 class Alignment:
     def __init__(
             self,
-            moving_dataset: DatasetInterface,
-            reference_dataset: DatasetInterface,
+            moving_structure: StructureInterface,
+            reference_structure: StructureInterface,
             marker_atom_search_radius=10.0,
     ):
 
@@ -139,16 +139,16 @@ class Alignment:
 
         # Iterate protein atoms, then pull out their atoms, and search them
         begin_get_span = time.time()
-        for res_id in reference_dataset.structure.protein_residue_ids():
+        for res_id in reference_structure.protein_residue_ids():
 
             # Get the matchable CAs
             try:
                 # Get reference residue
-                ref_res_span = reference_dataset.structure[res_id]
+                ref_res_span = reference_structure[res_id]
                 ref_res = ref_res_span[0]
 
                 # Get corresponding reses
-                mov_res_span = moving_dataset.structure[res_id]
+                mov_res_span = moving_structure[res_id]
                 mov_res = mov_res_span[0]
 
                 # Get the CAs
@@ -185,9 +185,9 @@ class Alignment:
         time_ball_query = 0
         time_super = 0
         # Start searching
-        for res_id in reference_dataset.structure.protein_residue_ids():
+        for res_id in reference_structure.protein_residue_ids():
             # Get reference residue
-            ref_res_span = reference_dataset.structure[res_id]
+            ref_res_span = reference_structure[res_id]
             ref_res = ref_res_span[0]
 
             # Get ca pos in reference model
