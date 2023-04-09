@@ -218,7 +218,13 @@ class Alignment:
             time_finish_super = time.time()
             time_super = time_super + (time_finish_super-time_begin_super)
 
-        self.transforms = transforms
+        # self.transforms = transforms
+        self.resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
+        self.vec = np.stack([transform.vec for transform in transforms.values()])
+        self.mat = np.stack([transform.mat for transform in transforms.values()])
+        self.com_reference = np.stack([transform.com_reference for transform in transforms.values()])
+        self.com_mov = np.stack([transform.com_moving for transform in transforms.values()])
+
 
         time_finish = time.time()
         print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
