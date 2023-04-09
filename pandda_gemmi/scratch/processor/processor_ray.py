@@ -60,7 +60,7 @@ class ProcessLocalRay(ProcessorInterface):
     #
     #     return {key: result for key, result in zip(funcs, results)}
 
-    def process_dict(self, funcs, num_cpus):
+    def process_dict(self, funcs, ):
         assert ray.is_initialized() == True
         key_list = list(funcs.keys())
         func_list = list(funcs.values())
@@ -69,7 +69,7 @@ class ProcessLocalRay(ProcessorInterface):
         batch_size = int(len(funcs) / self.local_cpus) + 1
 
         tasks = []
-        for j in range(num_cpus):
+        for j in range(self.local_cpus):
             tasks.append(
                 ray_batch_wrapper.remote(func_list[j*batch_size: min(num_keys, (j+1)*batch_size)])
             )
