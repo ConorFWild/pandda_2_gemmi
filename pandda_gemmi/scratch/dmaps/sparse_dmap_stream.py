@@ -61,7 +61,7 @@ class SparseDMapStream:
         aligned_xmap = SparseDMapStream.align_xmap(xmap, dframe, alignment)
 
         finish = time.time()
-        print(f"Aligned xmap in: {finish-begin}")
+        print(f"Aligned xmap in: {round(finish-begin, 2)}")
 
         return aligned_xmap
 
