@@ -1114,7 +1114,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 for _j in range(20):
                     bdc = bdcs.flatten()[_j]
                     annotation = model_annotations[_j, 1]
-                    print(f"\t\t{np.round(bdc, 2)} {np.round(float(annotation), 2)}")
+                    print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
         time_event_scoring_finish = time.time()
         print(f"Scored events in: {round(time_event_scoring_finish-time_event_scoring_begin, 1)}")
