@@ -59,10 +59,17 @@ class ProcessLocalRay(ProcessorInterface):
 
     def process_dict(self, funcs):
         assert ray.is_initialized() == True
+        begin = time.time()
         tasks = [ray_wrapper.remote(f.func, *f.args, **f.kwargs) for f in funcs.values()]
+        finish = time.time()
+        print(f"\tSubmitted in: {round(finish-begin,1 )}")
         # print(tasks)
 
+        begin = time.time()
+
         results = ray.get(tasks)
+        finish = time.time()
+        print(f"\tGet in: {round(finish-begin,1 )}")
 
         return {key: result for key, result in zip(funcs, results)}
 
