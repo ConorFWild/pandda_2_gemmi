@@ -233,6 +233,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
     print(f"\tGot {len(datasets_resolution)} of dataset res {res} or higher!")
 
+    time_begin_put_datasets = time.time()
+    dataset_refs = {_dtag: processor.put(datasets_resolution[_dtag]) for _dtag in datasets_resolution}
+    time_finish_put_datasets = time.time()
+
+    print(f"Put datasets in: {dataset_refs}")
+
     dtag_array = np.array(list(datasets_resolution.keys()))
     for _j, _dtag in enumerate(dtag_array):
         print(_dtag)
@@ -357,10 +363,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_begin = time.time()
     transforms_ref = processor.put(dmaps.transforms)
     reference_frame_ref = processor.put(reference_frame)
+    alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in datasets_resolution}
     dmaps_dict = processor.process_dict(
         {
             _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-            datasets_resolution[_dtag], alignments[_dtag], transforms_ref, reference_frame_ref
+            datasets_resolution[_dtag], alignment_refs[_dtag], transforms_ref, reference_frame_ref
         )
             for _dtag
             in datasets_resolution}
