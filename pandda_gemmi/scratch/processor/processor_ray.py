@@ -15,7 +15,8 @@ def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
 
 @ray.remote
 def ray_batch_wrapper(funcs):
-    return [f() for f in funcs]
+    result =  [f() for f in funcs]
+    return result
 
 
 class ProcessLocalRay(ProcessorInterface):
@@ -83,6 +84,7 @@ class ProcessLocalRay(ProcessorInterface):
         for result in results:
             for r in result:
                 result_dict[key_list[j]] = r
+                j = j + 1
 
         return result_dict
         # return {key: result for key, result in zip(funcs, results)}
