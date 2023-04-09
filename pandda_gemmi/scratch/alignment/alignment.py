@@ -138,6 +138,7 @@ class Alignment:
         reference_pos_list = []
 
         # Iterate protein atoms, then pull out their atoms, and search them
+        begin_get_span = time.time()
         for res_id in reference_dataset.structure.protein_residue_ids():
 
             # Get the matchable CAs
@@ -162,6 +163,7 @@ class Alignment:
                 print(
                     f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
                 continue
+        finish_get_span = time.time()
 
         moving_atom_array = np.array(moving_pos_list)
         reference_atom_array = np.array(reference_pos_list)
@@ -181,6 +183,7 @@ class Alignment:
 
         transforms = {}
         time_ball_query = 0
+        time_super = 0
         # Start searching
         for res_id in reference_dataset.structure.protein_residue_ids():
             # Get reference residue
@@ -204,7 +207,7 @@ class Alignment:
             if moving_selection.shape[0] == 0:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
                 raise Exception()
-
+            time_begin_super = time.time()
             transforms[res_id] = Transform.from_atoms(
                 moving_selection,
                 reference_selection,
@@ -212,8 +215,10 @@ class Alignment:
                 com_reference=np.mean(reference_selection, axis=0),
 
             )
+            time_finish_super = time.time()
+            time_super = time_super + (time_finish_super-time_begin_super)
 
         self.transforms = transforms
 
         time_finish = time.time()
-        print(f"\t\tAligned in: {round(time_finish-time_begin, 1)} of which {round(time_ball_query,1)} in ball query")
+        print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")

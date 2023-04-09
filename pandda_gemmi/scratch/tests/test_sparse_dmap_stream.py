@@ -11,6 +11,8 @@ import numpy as np
 from scipy import spatial
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import DBSCAN
+
 import matplotlib
 
 matplotlib.use('Agg')
@@ -917,6 +919,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     for _dtag, prediction in zip(datasets, predicted):
         print(f"\t\t{_dtag} {prediction}")
 
+    times_get_high_z = []
+    times_dbscan = []
+    times_score_events = []
+
     print(f"\tBayesian counts are {counts}")
     for predicted_class, count in zip(predicted_classes, counts):
         if count < 20:
@@ -1004,6 +1010,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         finish = time.time()
         print(f"Got high z poss in {round(finish-begin, 1)}")
+        times_get_high_z.append(round(finish-begin, 1))
+
         print(high_z_pos_array)
         print(high_z_pos_array.shape)
         print([np.min(high_z_pos_array, axis=0), np.max(high_z_pos_array, axis=0)])
@@ -1020,12 +1028,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         #     high_z_indexes[2].reshape(-1, 1),
         # ])
 
-        from sklearn.cluster import DBSCAN
+        time_begin_dbscan = time.time()
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
+        time_finish_dbscan = time.time()
+        times_dbscan.append(round(time_finish_dbscan-time_begin_dbscan, 1))
 
         cluster_nums, counts = np.unique(clusters, return_counts=True)
-
-
 
         if torch.cuda.is_available():
             dev = "cuda:0"
@@ -1051,7 +1059,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
         mean_grid = reference_frame.unmask(SparseDMap(mean))
-
 
 
         for cluster_num, count in zip(cluster_nums, counts):
@@ -1118,8 +1125,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                     annotation = model_annotations[_j, 1]
                     print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
+        # time_score_cluster_begin = time.time()
+
+
         time_event_scoring_finish = time.time()
         print(f"Scored events in: {round(time_event_scoring_finish-time_event_scoring_begin, 1)}")
+        times_score_events.append(round(time_event_scoring_finish-time_event_scoring_begin, 1))
 
         for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
             event_array = (dtag_array - (bdc*mean)) / (1-bdc)
@@ -1152,6 +1163,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     time_finish_process_dataset = time.time()
     print(f"Processed dataset in: {round(time_finish_process_dataset-time_begin_process_dataset, 1)}")
+    print(f"\tGot {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
+    print(f"\tGot reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
+    print(f"\tGot high zs in times: {times_get_high_z}")
+    print(f"\tGot dbscans in times: {times_dbscan}")
+    print(f"\tGot event scores in times: {times_score_events}")
 
     print(f"##### Z maps #####")
     # for predicted_class, count in zip(predicted_classes, counts):
