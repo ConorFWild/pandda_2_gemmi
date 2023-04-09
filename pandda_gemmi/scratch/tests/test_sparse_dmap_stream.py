@@ -237,7 +237,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dataset_refs = {_dtag: processor.put(datasets_resolution[_dtag]) for _dtag in datasets_resolution}
     time_finish_put_datasets = time.time()
 
-    print(f"Put datasets in: {dataset_refs}")
+    print(f"Put datasets in: {round(time_finish_put_datasets-time_begin_put_datasets, 2)}")
 
     dtag_array = np.array(list(datasets_resolution.keys()))
     for _j, _dtag in enumerate(dtag_array):
