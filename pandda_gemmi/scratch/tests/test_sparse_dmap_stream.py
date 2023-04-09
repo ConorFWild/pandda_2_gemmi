@@ -183,7 +183,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"Data dir is {data_dir} and output dir is {out_dir}")
 
     # Get processor
-    processor = ProcessLocalRay(24)
+    processor = ProcessLocalRay(36)
 
     # Parse the FS
     print(f"##### Loading filesystem #####")
