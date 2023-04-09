@@ -1,4 +1,5 @@
 import dataclasses
+import time
 
 import numpy as np
 import scipy
@@ -132,6 +133,7 @@ class Alignment:
             marker_atom_search_radius=10.0,
     ):
 
+        time_begin = time.time()
         moving_pos_list = []
         reference_pos_list = []
 
@@ -209,3 +211,5 @@ class Alignment:
             )
 
         self.transforms = transforms
+
+        time_finish = time.time()
