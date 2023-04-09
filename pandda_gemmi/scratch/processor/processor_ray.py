@@ -1,3 +1,5 @@
+import time
+
 import ray
 
 from ..interfaces import *
@@ -15,7 +17,10 @@ def ray_wrapper(func: Callable[P, V], *args: P.args, **kwargs: P.kwargs) -> V:
 
 @ray.remote
 def ray_batch_wrapper(funcs):
-    result =  [f() for f in funcs]
+    begin = time.time()
+    result = [f() for f in funcs]
+    finish = time.time()
+    print(f"Processed {len(result)} in {round(finish-begin,2)}")
     return result
 
 
