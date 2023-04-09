@@ -90,7 +90,7 @@ class ProcessLocalRay(ProcessorInterface):
             for r in result:
                 result_dict[key_list[j]] = r
                 j = j + 1
-
+        print(result_dict)
         return result_dict
         # return {key: result for key, result in zip(funcs, results)}
 
