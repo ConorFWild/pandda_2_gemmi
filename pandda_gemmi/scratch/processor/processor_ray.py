@@ -79,7 +79,7 @@ class ProcessLocalRay(ProcessorInterface):
             funcs = func_list[j*batch_size: min(num_keys, (j+1)*batch_size)]
             tasks.append(
                 ray_batch_wrapper.remote(
-                [f.f for f in funcs],
+                [f.func for f in funcs],
                 [f.args for f in funcs],
                 [f.kwargs for f in funcs]
             )
