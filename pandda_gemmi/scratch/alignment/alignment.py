@@ -317,22 +317,23 @@ class Alignment:
             #                                    )
             raise Exception()
 
-        transforms = {}
+        transforms = []
         time_ball_query = 0
         time_super = 0
         # Start searching
-        for res_id in reference_structure.protein_residue_ids():
-            # Get reference residue
-            ref_res_span = reference_structure[res_id]
-            ref_res = ref_res_span[0]
+        for _j in range(ref_ids.shape[0]):
+            # # Get reference residue
+            # ref_res_span = reference_structure[res_id]
+            # ref_res = ref_res_span[0]
+            #
+            # # Get ca pos in reference model
+            # reference_ca_pos = ref_res["CA"][0].pos
 
-            # Get ca pos in reference model
-            reference_ca_pos = ref_res["CA"][0].pos
 
             # other selection
             time_begin_ball = time.time()
             reference_indexes = reference_tree.query_ball_point(
-                [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+                reference_atom_array[_j,:].flatten(),
                 marker_atom_search_radius,
             )
             time_finish_ball = time.time()
@@ -344,22 +345,23 @@ class Alignment:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
                 raise Exception()
             time_begin_super = time.time()
-            transforms[res_id] = Transform.from_atoms(
+            transforms.append( Transform.from_atoms(
                 moving_selection,
                 reference_selection,
                 com_moving=np.mean(moving_selection, axis=0),
                 com_reference=np.mean(reference_selection, axis=0),
 
             )
+            )
             time_finish_super = time.time()
             time_super = time_super + (time_finish_super-time_begin_super)
 
         # self.transforms = transforms
-        resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
-        vec = np.stack([transform.vec for transform in transforms.values()])
-        mat = np.stack([transform.mat for transform in transforms.values()])
-        com_reference = np.stack([transform.com_reference for transform in transforms.values()])
-        com_mov = np.stack([transform.com_moving for transform in transforms.values()])
+        resid = ref_ids
+        vec = np.stack([transform.vec for transform in transforms])
+        mat = np.stack([transform.mat for transform in transforms])
+        com_reference = np.stack([transform.com_reference for transform in transforms])
+        com_mov = np.stack([transform.com_moving for transform in transforms])
 
 
         time_finish = time.time()
