@@ -313,7 +313,7 @@ class Alignment:
         ids=np.concatenate([ref_ids, mov_ids])
         print(f"\t\t\tIDs shape: {ids.shape}")
 
-        unique, indicies, counts = np.unique(ids, return_inverse=True, return_counts=True, )
+        unique, indicies, counts = np.unique(ids, return_inverse=True, return_counts=True, axis=0)
         count_array = counts[indicies]
         count_mask = count_array > 1  # Mask of ids by count > 1
         print(f"\t\t\tCount array shape: {count_array.shape} : Count mask shape: {count_mask.shape}")
