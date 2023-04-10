@@ -7,7 +7,7 @@ from scipy import spatial
 import gemmi
 
 from ..interfaces import *
-
+from ..dataset import contains
 @dataclasses.dataclass
 class TransformPython:
     transform: List
