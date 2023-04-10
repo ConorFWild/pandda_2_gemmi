@@ -7,7 +7,7 @@ from scipy import spatial
 import gemmi
 
 from ..interfaces import *
-from ..dataset import contains
+from ..dataset import contains, ResidueID
 @dataclasses.dataclass
 class TransformPython:
     transform: List
@@ -134,6 +134,27 @@ class Alignment:
         self.mat = mat
         self.com_reference = com_reference
         self.com_mov = com_mov
+
+    def get_transforms(self):
+        transforms = {}
+        com_ref = {}
+        com_mov = {}
+        for _j in range(self.resid.shape[0]):
+
+            residue_id = ResidueID(*self.resid)
+
+            transform = gemmi.Transform()
+            transform.vec.fromlist(self.vec[_j].tolist())
+            transform.mat.fromlist(self.mat[_j].tolist())
+            transforms[residue_id] = transform
+
+            com_ref[residue_id] = self.com_reference[_j]
+            com_mov[residue_id] = self.com_mov[_j]
+
+        return transforms, com_ref, com_mov
+
+
+
     # def __init__(
     #         self,
     #         moving_structure: StructureInterface,
@@ -279,14 +300,14 @@ class Alignment:
         begin_get_span = time.time()
         # reference_structure_cas
         ref_ids= np.hstack([
+            reference_structure_cas.models.reshape((-1,1)),
             reference_structure_cas.chains.reshape((-1,1)),
-            reference_structure_cas.seq_ids.reshape((-1,1)),
-            reference_structure_cas.insertions.reshape((-1,1))
+            reference_structure_cas.seq_ids.reshape((-1,1))
         ])
         mov_ids = np.hstack([
+            moving_structure_cas.models.reshape((-1,1)),
             moving_structure_cas.chains.reshape((-1,1)),
-            moving_structure_cas.seq_ids.reshape((-1,1)),
-            moving_structure_cas.insertions.reshape((-1,1))
+            moving_structure_cas.seq_ids.reshape((-1,1))
         ])
         print(f"\t\t\tReference id shape: {ref_ids.shape} : Moving structure shape: {mov_ids.shape}")
         ids=np.concat([ref_ids, mov_ids])
