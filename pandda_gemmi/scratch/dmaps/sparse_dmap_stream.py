@@ -126,6 +126,8 @@ class SparseDMapStream:
         transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions]
         com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions]
         com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions]
+        # print(f"\tListing: {finish_listing-begin_listing}")
+
 
         finish_listing = time.time()
         print(f"\tListing: {finish_listing-begin_listing}")
