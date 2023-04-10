@@ -322,8 +322,8 @@ class Alignment:
         mov_pos_mask = count_mask[ref_ids.shape[0]:]
         print(f"\t\t\tRef pos mask shape: {ref_pos_mask.shape} : Mov pos mask shape: {mov_pos_mask.shape}")
 
-        reference_atom_array = reference_structure.positions[ref_pos_mask]
-        moving_atom_array = moving_structure.positions[mov_pos_mask]
+        reference_atom_array = reference_structure_cas.positions[ref_pos_mask]
+        moving_atom_array = moving_structure_cas.positions[mov_pos_mask]
 
         finish_get_span = time.time()
 

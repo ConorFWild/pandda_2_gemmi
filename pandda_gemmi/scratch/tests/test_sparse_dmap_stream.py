@@ -247,12 +247,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     # Get the alignments
     print(f"##### Getting alignments #####")
+    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in datasets_resolution}
+
     begin_align = time.time()
     # alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
     alignments: Dict[str, Alignment] = processor.process_dict(
         {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
-            StructureArray.from_structure(datasets[_dtag].structure),
-            StructureArray.from_structure(dataset.structure),
+            structure_array_refs[_dtag],
+            structure_array_refs[dtag],
         ) for _dtag in datasets_resolution}
     )
     finish_align = time.time()
