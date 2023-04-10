@@ -80,6 +80,13 @@ class StructureInterface(Protocol):
     def __getitem__(self, item):
         ...
 
+class StructureArrayInterface(Protocol):
+    models: np.ndarray
+    chains : np.ndarray
+    seq_ids : np.ndarray
+    insertions : np.ndarray
+    atom_ids: np.ndarray
+    positions: np.ndarray
 
 class ResolutionInterface(Protocol):
     ...

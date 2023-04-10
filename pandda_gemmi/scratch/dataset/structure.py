@@ -4,7 +4,13 @@ import gemmi
 
 from ..interfaces import *
 from .. import constants
+import numpy as np
 
+def contains(string, pattern):
+    if pattern in string:
+        return True
+    else:
+        return False
 
 @dataclasses.dataclass()
 class StructurePython:
@@ -91,6 +97,7 @@ class Structure(StructureInterface):
                     resid = ResidueID.from_residue_chain(model, chain, residue)
                     yield resid
 
+
     def protein_atoms(self):
         for model in self.structure:
             for chain in model:
@@ -135,3 +142,46 @@ class Structure(StructureInterface):
         self.structure = structure_python.to_gemmi()
         self.structure.setup_entities()
         self.path = path
+
+
+class StructureArray(StructureArrayInterface):
+    def __init__(self, models, chains, seq_ids, insertions, atom_ids, positions):
+
+        self.models = np.array(models)
+        self.chains = np.array(chains)
+        self.seq_ids = np.array(seq_ids)
+        self.insertions = np.array(insertions)
+        self.atom_ids = np.array(atom_ids)
+        self.positions = np.array(positions)
+
+    @classmethod
+    def from_structure(cls, structure):
+        models = []
+        chains = []
+        seq_ids = []
+        insertions = []
+        atom_ids = []
+        positions = []
+        for model in structure.structure:
+            for chain in model:
+                for residue in chain.first_conformer():
+                    for atom in residue:
+                        models.append(model.name)
+                        chains.append(chain.name)
+                        seq_ids.append(str(residue.seqid.num))
+                        insertions.append(residue.seqid.icode)
+                        atom_ids.append(atom.name)
+                        pos = atom.pos
+                        positions.append([pos.x, pos.y, pos.z])
+
+        return cls(models, chains, seq_ids, insertions, atom_ids, positions)
+
+    def mask(self, mask):
+        return StructureArray(
+            self.models[mask],
+            self.chains[mask],
+            self.seq_ids[mask],
+            self.insertions[mask],
+            self.atom_ids[mask],
+            self.positions[mask, :]
+        )
