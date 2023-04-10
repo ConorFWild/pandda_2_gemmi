@@ -347,6 +347,7 @@ class Alignment:
         time_ball_query = 0
         time_super = 0
         # Start searching
+        masked_ref_ids = ref_ids[ref_pos_mask]
         for _j in range(ref_ids.shape[0]):
             # # Get reference residue
             # ref_res_span = reference_structure[res_id]
