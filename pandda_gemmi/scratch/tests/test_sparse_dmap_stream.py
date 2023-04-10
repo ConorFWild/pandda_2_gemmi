@@ -250,7 +250,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     begin_align = time.time()
     # alignments: Dict[str, Alignment] = {_dtag: Alignment(datasets[_dtag], dataset) for _dtag in datasets}
     alignments: Dict[str, Alignment] = processor.process_dict(
-        {_dtag: Partial(Alignment).paramaterise(datasets[_dtag].structure, dataset.structure) for _dtag in datasets_resolution}
+        {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(datasets[_dtag].structure, dataset.structure) for _dtag in datasets_resolution}
     )
     finish_align = time.time()
     print(f"Got {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
