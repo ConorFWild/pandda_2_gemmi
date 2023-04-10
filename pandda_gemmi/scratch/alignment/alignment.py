@@ -141,7 +141,7 @@ class Alignment:
         com_mov = {}
         for _j in range(self.resid.shape[0]):
 
-            residue_id = ResidueID(*self.resid)
+            residue_id = ResidueID(*self.resid[_j])
 
             transform = gemmi.Transform()
             transform.vec.fromlist(self.vec[_j].tolist())
