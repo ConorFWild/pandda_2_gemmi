@@ -249,10 +249,11 @@ class Alignment:
         moving_pos_list = []
         reference_pos_list = []
 
-        used_insertions = []
-        ca_mask = []
+
 
         #
+        used_insertions = []
+        ca_mask = []
         for j, atom_id in enumerate(moving_structure.atom_ids):
             key = (moving_structure.chains[j], moving_structure.seq_ids[j])
             if (key not in used_insertions) and contains(str(atom_id).upper(), "CA"):
@@ -263,6 +264,8 @@ class Alignment:
         moving_structure_cas = moving_structure.mask(np.array(ca_mask))
 
         #
+        used_insertions = []
+        ca_mask = []
         for j, atom_id in enumerate(reference_structure.atom_ids):
             key = (reference_structure.chains[j], reference_structure.seq_ids[j])
             if (key not in used_insertions) and contains(str(atom_id).upper(), "CA"):

@@ -110,6 +110,7 @@ class SparseDMapStream:
                        dframe.partitioning.partitions]
         positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
                           dframe.partitioning.partitions]
+
         transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
                           dframe.partitioning.partitions]
         com_moving_list = [
@@ -121,6 +122,7 @@ class SparseDMapStream:
             alignment.transforms[residue_id].com_reference.tolist()
             for residue_id in dframe.partitioning.partitions
         ]
+
         finish_listing = time.time()
         print(f"\tListing: {finish_listing-begin_listing}")
         # print(com_reference_list)
