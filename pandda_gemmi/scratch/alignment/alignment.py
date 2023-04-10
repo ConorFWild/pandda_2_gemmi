@@ -310,7 +310,7 @@ class Alignment:
             moving_structure_cas.seq_ids.reshape((-1,1))
         ])
         print(f"\t\t\tReference id shape: {ref_ids.shape} : Moving structure shape: {mov_ids.shape}")
-        ids=np.concat([ref_ids, mov_ids])
+        ids=np.concatenate([ref_ids, mov_ids])
         unique, indicies, counts = np.unique(ids, return_inverse=True, return_counts=True, )
         count_array = counts[indicies]
         count_mask = count_array > 1  # Mask of ids by count > 1
