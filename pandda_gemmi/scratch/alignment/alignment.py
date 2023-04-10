@@ -126,112 +126,120 @@ class Transform:
 
 
 class Alignment:
-    def __init__(
-            self,
-            moving_structure: StructureInterface,
-            reference_structure: StructureInterface,
-            marker_atom_search_radius=10.0,
-    ):
 
-        time_begin = time.time()
-        moving_pos_list = []
-        reference_pos_list = []
-
-        # Iterate protein atoms, then pull out their atoms, and search them
-        begin_get_span = time.time()
-        for res_id in reference_structure.protein_residue_ids():
-
-            # Get the matchable CAs
-            try:
-                # Get reference residue
-                ref_res_span = reference_structure[res_id]
-                ref_res = ref_res_span[0]
-
-                # Get corresponding reses
-                mov_res_span = moving_structure[res_id]
-                mov_res = mov_res_span[0]
-
-                # Get the CAs
-                atom_ref = ref_res["CA"][0]
-                atom_mov = mov_res["CA"][0]
-
-                # Get the shared atoms
-                reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
-                moving_pos_list.append([atom_mov.pos.x, atom_mov.pos.y, atom_mov.pos.z, ])
-
-            except Exception as e:
-                print(
-                    f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
-                continue
-        finish_get_span = time.time()
-
-        moving_atom_array = np.array(moving_pos_list)
-        reference_atom_array = np.array(reference_pos_list)
-
-        if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
-            # raise ExceptionNoCommonAtoms()
-            raise Exception()
-
-        # Other kdtree
-        reference_tree = spatial.KDTree(reference_atom_array)
-
-        if reference_atom_array.size != moving_atom_array.size:
-            # raise AlignmentUnmatchedAtomsError(reference_atom_array,
-            #                                    dataset_atom_array,
-            #                                    )
-            raise Exception()
-
-        transforms = {}
-        time_ball_query = 0
-        time_super = 0
-        # Start searching
-        for res_id in reference_structure.protein_residue_ids():
-            # Get reference residue
-            ref_res_span = reference_structure[res_id]
-            ref_res = ref_res_span[0]
-
-            # Get ca pos in reference model
-            reference_ca_pos = ref_res["CA"][0].pos
-
-            # other selection
-            time_begin_ball = time.time()
-            reference_indexes = reference_tree.query_ball_point(
-                [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
-                marker_atom_search_radius,
-            )
-            time_finish_ball = time.time()
-            time_ball_query = time_ball_query + (time_finish_ball-time_begin_ball)
-            reference_selection = reference_atom_array[reference_indexes]
-            moving_selection = moving_atom_array[reference_indexes]
-
-            if moving_selection.shape[0] == 0:
-                # raise ExceptionUnmatchedAlignmentMarker(res_id)
-                raise Exception()
-            time_begin_super = time.time()
-            transforms[res_id] = Transform.from_atoms(
-                moving_selection,
-                reference_selection,
-                com_moving=np.mean(moving_selection, axis=0),
-                com_reference=np.mean(reference_selection, axis=0),
-
-            )
-            time_finish_super = time.time()
-            time_super = time_super + (time_finish_super-time_begin_super)
-
-        # self.transforms = transforms
-        self.resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
-        self.vec = np.stack([transform.vec for transform in transforms.values()])
-        self.mat = np.stack([transform.mat for transform in transforms.values()])
-        self.com_reference = np.stack([transform.com_reference for transform in transforms.values()])
-        self.com_mov = np.stack([transform.com_moving for transform in transforms.values()])
-
-
-        time_finish = time.time()
-        print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
+    def __init__(self,
+                 resid, vec, mat, com_reference, com_mov):
+        self.resid = resid
+        self.vec = vec
+        self.mat = mat
+        self.com_reference = com_reference
+        self.com_mov = com_mov
+    # def __init__(
+    #         self,
+    #         moving_structure: StructureInterface,
+    #         reference_structure: StructureInterface,
+    #         marker_atom_search_radius=10.0,
+    # ):
+    #
+    #     time_begin = time.time()
+    #     moving_pos_list = []
+    #     reference_pos_list = []
+    #
+    #     # Iterate protein atoms, then pull out their atoms, and search them
+    #     begin_get_span = time.time()
+    #     for res_id in reference_structure.protein_residue_ids():
+    #
+    #         # Get the matchable CAs
+    #         try:
+    #             # Get reference residue
+    #             ref_res_span = reference_structure[res_id]
+    #             ref_res = ref_res_span[0]
+    #
+    #             # Get corresponding reses
+    #             mov_res_span = moving_structure[res_id]
+    #             mov_res = mov_res_span[0]
+    #
+    #             # Get the CAs
+    #             atom_ref = ref_res["CA"][0]
+    #             atom_mov = mov_res["CA"][0]
+    #
+    #             # Get the shared atoms
+    #             reference_pos_list.append([atom_ref.pos.x, atom_ref.pos.y, atom_ref.pos.z, ])
+    #             moving_pos_list.append([atom_mov.pos.x, atom_mov.pos.y, atom_mov.pos.z, ])
+    #
+    #         except Exception as e:
+    #             print(
+    #                 f"WARNING: An exception occured in matching residues for alignment at residue id: {res_id}: {e}")
+    #             continue
+    #     finish_get_span = time.time()
+    #
+    #     moving_atom_array = np.array(moving_pos_list)
+    #     reference_atom_array = np.array(reference_pos_list)
+    #
+    #     if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
+    #         # raise ExceptionNoCommonAtoms()
+    #         raise Exception()
+    #
+    #     # Other kdtree
+    #     reference_tree = spatial.KDTree(reference_atom_array)
+    #
+    #     if reference_atom_array.size != moving_atom_array.size:
+    #         # raise AlignmentUnmatchedAtomsError(reference_atom_array,
+    #         #                                    dataset_atom_array,
+    #         #                                    )
+    #         raise Exception()
+    #
+    #     transforms = {}
+    #     time_ball_query = 0
+    #     time_super = 0
+    #     # Start searching
+    #     for res_id in reference_structure.protein_residue_ids():
+    #         # Get reference residue
+    #         ref_res_span = reference_structure[res_id]
+    #         ref_res = ref_res_span[0]
+    #
+    #         # Get ca pos in reference model
+    #         reference_ca_pos = ref_res["CA"][0].pos
+    #
+    #         # other selection
+    #         time_begin_ball = time.time()
+    #         reference_indexes = reference_tree.query_ball_point(
+    #             [reference_ca_pos.x, reference_ca_pos.y, reference_ca_pos.z],
+    #             marker_atom_search_radius,
+    #         )
+    #         time_finish_ball = time.time()
+    #         time_ball_query = time_ball_query + (time_finish_ball-time_begin_ball)
+    #         reference_selection = reference_atom_array[reference_indexes]
+    #         moving_selection = moving_atom_array[reference_indexes]
+    #
+    #         if moving_selection.shape[0] == 0:
+    #             # raise ExceptionUnmatchedAlignmentMarker(res_id)
+    #             raise Exception()
+    #         time_begin_super = time.time()
+    #         transforms[res_id] = Transform.from_atoms(
+    #             moving_selection,
+    #             reference_selection,
+    #             com_moving=np.mean(moving_selection, axis=0),
+    #             com_reference=np.mean(reference_selection, axis=0),
+    #
+    #         )
+    #         time_finish_super = time.time()
+    #         time_super = time_super + (time_finish_super-time_begin_super)
+    #
+    #     # self.transforms = transforms
+    #     self.resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
+    #     self.vec = np.stack([transform.vec for transform in transforms.values()])
+    #     self.mat = np.stack([transform.mat for transform in transforms.values()])
+    #     self.com_reference = np.stack([transform.com_reference for transform in transforms.values()])
+    #     self.com_mov = np.stack([transform.com_moving for transform in transforms.values()])
+    #
+    #
+    #     time_finish = time.time()
+    #     print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
 
     @classmethod
     def from_structure_arrays(
-            self,
+            cls,
             moving_structure: StructureArrayInterface,
             reference_structure: StructureArrayInterface,
             marker_atom_search_radius=10.0,
@@ -347,12 +355,14 @@ class Alignment:
             time_super = time_super + (time_finish_super-time_begin_super)
 
         # self.transforms = transforms
-        self.resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
-        self.vec = np.stack([transform.vec for transform in transforms.values()])
-        self.mat = np.stack([transform.mat for transform in transforms.values()])
-        self.com_reference = np.stack([transform.com_reference for transform in transforms.values()])
-        self.com_mov = np.stack([transform.com_moving for transform in transforms.values()])
+        resid = np.stack([[resid.model, resid.chain, resid.number] for resid in transforms.keys()])
+        vec = np.stack([transform.vec for transform in transforms.values()])
+        mat = np.stack([transform.mat for transform in transforms.values()])
+        com_reference = np.stack([transform.com_reference for transform in transforms.values()])
+        com_mov = np.stack([transform.com_moving for transform in transforms.values()])
 
 
         time_finish = time.time()
         print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
+
+        return cls(resid, vec, mat, com_reference, com_mov)
