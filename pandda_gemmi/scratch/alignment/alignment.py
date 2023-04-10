@@ -347,7 +347,7 @@ class Alignment:
         time_ball_query = 0
         time_super = 0
         # Start searching
-        masked_ref_ids = ref_ids[ref_pos_mask]
+        # masked_ref_ids = ref_ids[ref_pos_mask]
         for _j in range(ref_ids.shape[0]):
             # # Get reference residue
             # ref_res_span = reference_structure[res_id]
@@ -360,7 +360,7 @@ class Alignment:
             # other selection
             time_begin_ball = time.time()
             reference_indexes = reference_tree.query_ball_point(
-                reference_atom_array[_j,:].flatten(),
+                reference_structure_cas.positions[_j,:].flatten(),
                 marker_atom_search_radius,
             )
             time_finish_ball = time.time()
@@ -372,12 +372,12 @@ class Alignment:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
                 raise Exception()
             time_begin_super = time.time()
-            transforms.append( Transform.from_atoms(
-                moving_selection,
-                reference_selection,
-                com_moving=np.mean(moving_selection, axis=0),
-                com_reference=np.mean(reference_selection, axis=0),
-
+            transforms.append(
+                Transform.from_atoms(
+                    moving_selection,
+                    reference_selection,
+                    com_moving=np.mean(moving_selection, axis=0),
+                    com_reference=np.mean(reference_selection, axis=0),
             )
             )
             time_finish_super = time.time()
