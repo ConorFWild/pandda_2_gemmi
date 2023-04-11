@@ -1137,7 +1137,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # if volume > 5.0:
         #     print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
-            centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
+            # centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
 
             print(f"##### Evaluating centroid at: {centroid} #####")
 
