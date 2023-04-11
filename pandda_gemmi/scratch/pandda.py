@@ -166,6 +166,7 @@ def pandda(args: PanDDAArgs):
 
             # Initial
             events = ClusterDensityDBSCAN()(z, reference_frame)
+            print(f"Initial num events: {len(events)}")
 
             # Filter the events pre-scoring
             for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
