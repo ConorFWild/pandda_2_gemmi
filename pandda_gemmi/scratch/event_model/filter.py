@@ -107,12 +107,12 @@ class FilterLocallyHighestScoring:
         new_events = {}
         for event_id in sorted(events, key=lambda _event_id: events[_event_id].score, reverse=True):
             if np.any(event_id_array[masked_ids] == event_id):
-                print(f"Within a radius {event_id}!")
+                # print(f"Within a radius {event_id}!")
                 continue
             event = events[event_id]
             centroid = np.mean(event.pos_array, axis=0)
             distances = np.linalg.norm(centroid_array - centroid, axis=1)
-            print(f"Distances shape: {distances.shape}")
+            # print(f"Distances shape: {distances.shape}")
 
             distance_mask = distances < self.radius
             masked_ids[distance_mask] = True
