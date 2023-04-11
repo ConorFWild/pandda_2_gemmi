@@ -1193,7 +1193,15 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
             flat_bdcs = bdcs.flatten()
             max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
-            event_scores[cluster_num] = (flat_bdcs[max_score_index], model_annotations[max_score_index, 1])
+            event_scores[cluster_num] = (
+                round(float(flat_bdcs[max_score_index]), 2),
+                round(float(model_annotations[max_score_index, 1]), 2),
+                [
+                    round(float(centroid[0]), 2),
+                    round(float(centroid[1]), 2),
+                    round(float(centroid[2]), 2),
+                ]
+            )
 
         # time_score_cluster_begin = time.time()
 
@@ -1232,7 +1240,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(event_scores)
         for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1]):
             print(
-                f"\t{cluster_num} : {round(float(event_scores[cluster_num][0]), 2)} : {round(float(event_scores[cluster_num][1]), 2)}")
+                f"\t{cluster_num} : {event_scores[cluster_num][0]} : {event_scores[cluster_num][1]} : {event_scores[cluster_num][2]}")
 
     time_finish_process_dataset = time.time()
     print(f"Processed dataset in: {round(time_finish_process_dataset - time_begin_process_dataset, 1)}")
