@@ -1139,6 +1139,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
             centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
 
+            print(f"##### Evaluating centroid at: {centroid} #####")
+
             n = 30
             # sample_array = np.zeros((n, n, n), dtype=np.float32)
             sample_transform = get_sample_transform_from_event(
