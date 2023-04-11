@@ -293,3 +293,6 @@ class Reflections(ReflectionsInterface):
         self.path = path
         self.f = data[2]
         self.phi = data[3]
+
+    def spacegroup(self):
+        return self.reflections.spacegroup.xhm()
