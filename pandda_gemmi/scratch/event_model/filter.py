@@ -99,7 +99,7 @@ class FilterLocallyHighestScoring:
         event_id_array = np.array([event_id for event_id in events.keys()])
         print(f"Event id array shape: {event_id_array.shape}")
 
-        masked_ids = np.array(event_id_array.shape)
+        masked_ids = np.zeros(event_id_array.shape, dtype=np.bool)
         j = 0
         new_events = {}
         for event_id in sorted(events, key=lambda _event_id: events[_event_id].score, reverse=True):
