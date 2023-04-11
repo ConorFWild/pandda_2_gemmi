@@ -1243,7 +1243,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # sample = grid.interpolate_value(gemmi.Position(*sample_point))
         # print(f"STD at position med is: {sample}")
 
-        for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1])
+        for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1]):
             print(f"\t{cluster_num} : {round(event_scores[cluster_num][0], 2)} : {round(event_scores[cluster_num][2], 2)}")
 
     time_finish_process_dataset = time.time()
