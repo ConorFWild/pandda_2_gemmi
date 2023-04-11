@@ -1089,7 +1089,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         large_cluster_cluster_centroids = []
         for cluster_num in unique_large_cluster_cluster:
-            centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num], axis=0)
+            centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
             large_cluster_cluster_centroids.append(centroid)
         large_cluster_cluster_centroid_array = np.array(large_cluster_cluster_centroids)
 
