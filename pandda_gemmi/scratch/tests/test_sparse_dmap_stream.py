@@ -1081,7 +1081,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
         large_cluster_clusters = fclusterdata(
             large_cluster_centroid_array,
-            t=4.0,
+            t=5.0,
             criterion="distance",
             method="centroid"
         )
