@@ -173,7 +173,6 @@ def pandda(args: PanDDAArgs):
             events = ClusterDensityDBSCAN()(z, reference_frame)
             print(f"Initial events: {len(events)}")
 
-
             # Filter the events pre-scoring
             for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
                 events = filter(events)
@@ -213,11 +212,13 @@ def pandda(args: PanDDAArgs):
         output_events(fs, model_events)
 
         # Output event maps and model maps
-        output_maps(fs, selected_events,
-                    dataset_dmap_array,
-        model_means[selected_model_num],
-        reference_frame,
-                    )
+        output_maps(
+            fs,
+            selected_events,
+            dataset_dmap_array,
+            model_means[selected_model_num],
+            reference_frame,
+        )
 
     # Autobuild
     autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
