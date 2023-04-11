@@ -101,6 +101,8 @@ class DatasetDir:
             ligand_pdb_regex,
         )
 
+        self.path = path
+
 
 class PanDDAInput:
     def __init__(
