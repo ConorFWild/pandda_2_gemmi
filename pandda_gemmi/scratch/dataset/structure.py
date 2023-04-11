@@ -142,6 +142,8 @@ class Structure(StructureInterface):
         self.structure = structure_python.to_gemmi()
         self.structure.setup_entities()
         self.path = path
+    def rfree(self):
+        return float(self.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0])
 
 
 class StructureArray(StructureArrayInterface):

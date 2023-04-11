@@ -5,9 +5,6 @@ from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.scratch.fs import PanDDAFS
 from pandda_gemmi.scratch.dataset import XRayDataset, StructureArray
 from pandda_gemmi.scratch.dmaps import (
-    DMap,
-    SparseDMap,
-    SparseDMapStream,
     SparseDMapStream,
     TruncateReflections,
     SmoothReflections,
@@ -75,7 +72,7 @@ def pandda(args: PanDDAArgs):
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
             datasets,
-            [FilterRFree, FilterSpaceGroup, FilterResolution]
+            [FilterRFree(0.4), FilterSpaceGroup(), FilterResolution(processing_res)]
         )
 
         # Get the alignments
@@ -126,7 +123,7 @@ def pandda(args: PanDDAArgs):
         # Get the models
         statistical_model = PointwiseNormal()
         cluster_density = ClusterDensityDBSCAN()
-        pre_score_filters = [FilterSize, FilterCluster, ]
+        pre_score_filters = [FilterSize(), FilterCluster(), ]
         scoring = ScoreCNN()
         post_score_filters = [FilterScore(0.1), ]
 
