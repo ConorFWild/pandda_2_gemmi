@@ -1077,7 +1077,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             large_cluster_centroid_array,
             t=4.0,
         criterion="distance",
-            method="complete"
+            method="centroid"
         )
         unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters, return_counts=True)
 
