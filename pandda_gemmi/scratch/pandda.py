@@ -72,7 +72,7 @@ def pandda(args: PanDDAArgs):
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
             datasets,
-            [FilterRFree(0.4), FilterSpaceGroup(), FilterResolution(processing_res)]
+            [FilterRFree(0.4), FilterSpaceGroup(dataset), FilterResolution(processing_res)]
         )
 
         # Get the alignments
