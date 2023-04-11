@@ -16,7 +16,7 @@ def save_dmap(dmap, path, centroid=None, reference_frame: DFrameInterface=None, 
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = dmap
     ccp4.update_ccp4_header(2, True)
-    if centroid:
+    if reference_frame:
         box = gemmi.FractionalBox()
         cart_max = centroid + radius
         cart_min = centroid - radius
