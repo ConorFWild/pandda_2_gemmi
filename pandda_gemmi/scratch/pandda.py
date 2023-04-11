@@ -185,13 +185,13 @@ def pandda(args: PanDDAArgs):
         pandda_events[dtag] = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
 
         # Output models
-        output_models(characterization_sets, selected_model_num)
+        output_models(fs, characterization_sets, selected_model_num)
 
         # Output events
-        output_events(model_events)
+        output_events(fs, model_events)
 
         # Output event maps and model maps
-        output_maps(selected_events)
+        output_maps(fs, selected_events)
 
     # Autobuild
     autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
