@@ -213,10 +213,12 @@ def pandda(args: PanDDAArgs):
 
         # Output event maps and model maps
         output_maps(
+            dtag,
             fs,
             selected_events,
             dataset_dmap_array,
             model_means[selected_model_num],
+            model_zs[selected_model_num],
             reference_frame,
         )
 
