@@ -61,5 +61,6 @@ class ClusterDensityDBSCAN:
             if cluster_num == -1:
                 continue
             events[j] = Event(high_z_pos_array[clusters == cluster_num, :], 0.0)
+            j +=1
 
         return events
