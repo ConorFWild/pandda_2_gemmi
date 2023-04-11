@@ -142,6 +142,7 @@ def pandda(args: PanDDAArgs):
             CharacterizationGaussianMixture(n_components=20, covariance_type="diag"),
         )
 
+        model_events = {}
         for model_number, characterization_set in characterization_sets.items():
 
 
@@ -152,7 +153,7 @@ def pandda(args: PanDDAArgs):
                     characterization_set_mask_list.append(True)
                 else:
                     characterization_set_mask_list.append(False)
-            characterization_set_mask = np.array([characterization_set_mask_list])
+            characterization_set_mask = np.array(characterization_set_mask_list)
             characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
 
             # Get the statical maps
@@ -177,12 +178,14 @@ def pandda(args: PanDDAArgs):
             for filter in [FilterScore(0.1), ]:
                 events = filter(events)
 
+            model_events[model_number] = events
+
         # Select a model
-        selected_model, selected_events = select_model(model_events)
+        selected_model_num, selected_events = select_model(model_events)
         pandda_events[dtag] = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
 
         # Output models
-        output_models(characterization_sets, selected_model)
+        output_models(characterization_sets, selected_model_num)
 
         # Output events
         output_events(model_events)
