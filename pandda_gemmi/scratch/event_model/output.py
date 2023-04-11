@@ -11,10 +11,19 @@ def output_events(fs, model_events):
     ...
 
 
-def save_dmap(dmap, path):
+def save_dmap(dmap, path, centroid, reference_frame: DFrameInterface, radius=15.0):
     ccp4 = gemmi.Ccp4Map()
     ccp4.grid = dmap
     ccp4.update_ccp4_header(2, True)
+    box = gemmi.FractionalBox()
+    cart_max = centroid + radius
+    cart_min = centroid - radius
+    unit_cell = reference_frame.get_grid().unit_cell
+    frac_max = unit_cell.fractionalize(gemmi.Position(*cart_max))
+    frac_min = unit_cell.fractionalize(gemmi.Position(*cart_min))
+    box.extend(frac_max)
+    box.extend(frac_min)
+    ccp4.set_extend(box)
     ccp4.write_ccp4_map(str(path))
 
 def output_maps(
@@ -39,5 +48,7 @@ selected_z,
                 dtag=event_id[0],
                 event_idx=event_id[1],
                 bdc=round(event.bdc, 2)
-            )
+            ),
+            np.mean(event.pos_array, axis=0),
+            reference_frame
         )
