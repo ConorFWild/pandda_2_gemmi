@@ -25,7 +25,7 @@ def save_dmap(dmap, path, centroid=None, reference_frame: DFrameInterface=None, 
         frac_min = unit_cell.fractionalize(gemmi.Position(*cart_min))
         box.extend(frac_max)
         box.extend(frac_min)
-        ccp4.set_extend(box)
+        ccp4.set_extent(box)
     ccp4.write_ccp4_map(str(path))
 
 def output_maps(
