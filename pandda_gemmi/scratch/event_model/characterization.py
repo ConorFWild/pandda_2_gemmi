@@ -25,7 +25,7 @@ def get_characterization_sets(
     # Get the clusters and their membership numbers
     unique_classes, counts = np.unique(classes, return_counts=True)
     j = 0
-    for unique_class, count in unique_classes:
+    for unique_class, count in zip(unique_classes, counts):
         if count >= min_size:
             class_dtags = dtag_array[classes == unique_class]
             characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
