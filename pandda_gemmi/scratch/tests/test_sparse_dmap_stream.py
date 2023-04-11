@@ -207,6 +207,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     cnn.eval()
     cnn = cnn.float()
 
+    cnn_ref = processor.put(cnn)
+
+    time_begin_get_cnn = time.time()
+    processor.get(cnn_ref)
+    time_finish_get_cnn = time.time()
+    print(f"Got CNN in: {round(time_finish_get_cnn-time_begin_get_cnn,2)}")
+
     # Parse the FS
     print(f"##### Loading filesystem #####")
     fs: PanDDAFSInterface = PanDDAFS(Path(data_dir), Path(out_dir))
@@ -443,12 +450,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #     # print(f"##### {dtag} #####")
     #     sparse_dmaps_inner[dtag] = reference_frame.mask_inner(reference_frame.unmask(sparse_dmaps[dtag]))
     # sparse_dmap_inner_array = np.vstack([sparse_dmap_inner.data for sparse_dmap_inner in sparse_dmaps_inner.values()])
-    time_begin = time.time()
-    # distances = spatial.distance.pdist(sparse_dmap_inner_array)
-    # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
-    distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
-    time_finish = time.time()
-    print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
+    # time_begin = time.time()
+    # # distances = spatial.distance.pdist(sparse_dmap_inner_array)
+    # # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+    # distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
+    # time_finish = time.time()
+    # print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
 
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
     # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")

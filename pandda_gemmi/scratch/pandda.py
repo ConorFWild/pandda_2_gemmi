@@ -31,48 +31,69 @@ def pandda():
 
     # Get the datasets
     datasets: Dict[str, Dataset]
+    dataset_refs = {_dtag: processor.put(datasets[_dtag]) for _dtag in datasets}
+    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
+                            datasets}
 
     # Get the
 
     # Process each dataset
-    dataset_events = {}
+    pandda_events = {}
     for dtag in datasets:
-        # Get the alignments
-        alignments: Alignment
+        # Get the dataset
+        dataset = datasets[dtag]
 
-        # Get the reference frame
-        reference_frame: DFrame
-
-        # Get the dmaps
-        dmaps: DMapStream
-
-        # Get comparators
-        comparators: Dict[int, List[str]] = GetComparators(
-            [FilterRFree, FilterSpaceGroup]
+        # Get the comparator datasets
+        comparator_datasets: Dict[str, DatasetInterface] = GetComparators(
+            [FilterRFree, FilterSpaceGroup, FilterResolution]
         )()
 
-        #
-        dataset, dmap, other_dmaps = datasets[dtag], dmaps[dtag], {_dtag: _dmap for _dtag, _dmap in dmaps.items() if
-                                                                   _dtag != dtag}
+        # Get the alignments
+        alignments: Dict[str, AlignmentInterface] = processor.process_dict(
+        {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
+            structure_array_refs[_dtag],
+            structure_array_refs[dtag],
+        ) for _dtag in comparator_datasets}
+    )
+
+        # Get the reference frame
+        reference_frame: DFrame = DFrame(dataset, processor)
+
+        # Get the dmaps
+        dmaps_dict = processor.process_dict(
+            {
+                _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
+                    dataset_refs[_dtag],
+                    alignment_refs[_dtag],
+                    transforms_ref,
+                    reference_frame_ref
+                )
+                for _dtag
+                in datasets_resolution}
+        )
+
+        # Get comparators
+        # comparator_sets: Dict[int, List[str]] =
 
         # Comparator sets
-        comparator_sets = SelectNN(dtag, datasets, dmaps)
+        comparator_sets = SelectGuassianMixture(dtag, datasets, dmaps)
 
         # Get the models
         event_model = EventModel(
-            SelectNN,
             PointwiseNormal,
-            ClusterDensityAgg,
+            ClusterDensityDBSCAN,
             ScoreCNN,
-            [FilterSize, FilterScore],
+            [FilterSize, FilterCluster],
+            processor
         )
-        models: Dict[int, EDModel] = get_event_models(dataset, dmap, other_dmaps, )
+        models: Dict[int, EDModel] = {event_model(char_set) for char_set in char_sets}
 
         # Evaluate the models against the dataset
-        events: Dict[int, List[Event]] = {model_num: model.evaluate() for model in models}
+        events: Dict[int, List[EventInterface]] = {model_num: model.evaluate() for model in models}
 
         # Select a model
-        selected_model, dataset_events[dtag] = select_model(events)
+        selected_model, selected_events = select_model(events)
+        pandda_events[dtag] = selected_events
 
         # Output models
         output_models()
@@ -83,11 +104,21 @@ def pandda():
         # Output event maps and model maps
         output_maps()
 
-        # Autobuild
-        autobuilds = Autobuild(
-            Rhofit,
-            MergeHighestRSCC
-        )
+
+    # Autobuild
+    autobuilds = Autobuild(
+        Rhofit,
+        MergeHighestRSCC
+    )
+    autobuilds = processor.process_dict(
+        {
+            _event_id: Partial(autobuild).paramaterise(
+
+            )
+            for _event_id
+            in pandda_events
+        }
+    )
 
     # Get the sites
     sites: Dict[int, Site] = SiteModel().evaluate()

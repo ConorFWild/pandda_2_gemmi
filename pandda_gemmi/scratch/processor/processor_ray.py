@@ -34,6 +34,9 @@ class ProcessLocalRay(ProcessorInterface):
     def put(self, object):
         return ray.put(object)
 
+    def get(self, ref):
+        return ray.get(ref)
+
     def __call__(self, funcs: Iterable[PartialInterface[P, V]]) -> List[V]:
         assert ray.is_initialized() == True
         # actors = [RayWrapper.remote() for f in funcs]
