@@ -7,6 +7,7 @@ from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.scratch.fs import PanDDAFS
 from pandda_gemmi.scratch.dataset import XRayDataset, StructureArray
 from pandda_gemmi.scratch.dmaps import (
+    SparseDMap,
     SparseDMapStream,
     TruncateReflections,
     SmoothReflections,
@@ -25,7 +26,7 @@ from pandda_gemmi.scratch.event_model.evaluate import evaluate_model
 from pandda_gemmi.scratch.event_model.characterization import get_characterization_sets, CharacterizationGaussianMixture
 from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
 from pandda_gemmi.scratch.event_model.cluster import ClusterDensityDBSCAN
-from pandda_gemmi.scratch.event_model.score import ScoreCNN
+from pandda_gemmi.scratch.event_model.score import ScoreCNN, get_model_map
 from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, FilterScore
 from pandda_gemmi.scratch.event_model.select import select_model
 from pandda_gemmi.scratch.event_model.output import output_models, output_events, output_maps
@@ -121,6 +122,17 @@ def pandda(args: PanDDAArgs):
         )
         dmaps = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
 
+        # Get the relevant dmaps
+        dtag_array = np.array([_dtag for _dtag in datasets])
+
+        # Get the dataset dmap
+        dtag_index = np.argwhere(dtag_array == dtag)
+        dataset_dmap_array = dmaps[dtag_index, :]
+        xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+
+        #
+        model_grid = get_model_map(dataset.structure.structure, xmap_grid)
+
         # Comparator sets
         characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
             dtag,
@@ -131,12 +143,7 @@ def pandda(args: PanDDAArgs):
         )
 
         for model_number, characterization_set in characterization_sets.items():
-            # Get the relevant dmaps
-            dtag_array = np.array([_dtag for _dtag in datasets])
 
-            # Get the dataset dmap
-            dtag_index = np.argwhere(dtag_array == dtag)
-            dataset_dmap_array = dmaps[dtag_index, :]
 
             # Get the characterization set dmaps
             characterization_set_mask_list = []
@@ -153,6 +160,8 @@ def pandda(args: PanDDAArgs):
                 dataset_dmap_array,
                 characterization_set_dmaps_array
             )
+            mean_grid = reference_frame.unmask(SparseDMap(mean))
+            z_grid = reference_frame.unmask(SparseDMap(z))
 
             # Initial
             events = ClusterDensityDBSCAN()(z, reference_frame)
@@ -162,7 +171,7 @@ def pandda(args: PanDDAArgs):
                 events = filter(events)
 
             # Score the events
-            events = score(events)
+            events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
 
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), ]:
