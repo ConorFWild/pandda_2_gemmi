@@ -192,7 +192,8 @@ class AlignmentInterface(Protocol):
     transforms: Dict[ResidueIDInterface, TransformInterface]
 
 class EventInterface(Protocol):
-    ...
+    pos_array: np.array
+    score: float
 
 class AutobuildInterface(Protocol):
     ...

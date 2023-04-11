@@ -48,6 +48,9 @@ def pandda(args: PanDDAArgs):
     # Get the FS
     fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir))
 
+    # Get the scoring method
+    score = ScoreCNN()
+
     # Get the datasets
     datasets: Dict[str, DatasetInterface] = {
         dataset_dir.dtag: XRayDataset.from_paths(
@@ -155,11 +158,11 @@ def pandda(args: PanDDAArgs):
             events = ClusterDensityDBSCAN()(z, reference_frame)
 
             # Filter the events pre-scoring
-            for filter in [FilterSize(), FilterCluster(), ]:
+            for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
                 events = filter(events)
 
             # Score the events
-            events = ScoreCNN()(events)
+            events = score(events)
 
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), ]:

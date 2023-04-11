@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn.cluster import DBSCAN
 
+from .event import Event
+
 from ..dmaps import SparseDMap
 
 
@@ -51,4 +53,13 @@ class ClusterDensityDBSCAN:
 
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
 
-        return clusters
+        cluster_nums, counts = np.unique(clusters, return_counts=True)
+
+        events = {}
+        j = 0
+        for cluster_num in cluster_nums:
+            if cluster_num == -1:
+                continue
+            events[j] = Event(high_z_pos_array[clusters == cluster_num, :], 0.0)
+
+        return events
