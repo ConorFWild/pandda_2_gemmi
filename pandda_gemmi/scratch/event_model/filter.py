@@ -115,5 +115,5 @@ class FilterLocallyHighestScoring:
             masked_ids[distance_mask] = True
             new_events[j] = event
 
-        return events
+        return new_events
 
