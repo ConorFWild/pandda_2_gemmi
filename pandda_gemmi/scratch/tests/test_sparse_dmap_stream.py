@@ -1126,6 +1126,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
         mean_grid = reference_frame.unmask(SparseDMap(mean))
 
+        time_begin_get_model_map = time.time()
+        model_map = get_model_map(dataset.structure.structure, xmap_grid)
+        time_begin_get_model_map = time.time()
+
         for cluster_num, centroid in enumerate(large_cluster_cluster_centroid_array):
             if cluster_num == -1:
                 continue
@@ -1175,9 +1179,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
             sample_array_model = np.copy(sample_array)
 
-            time_begin_get_model_map = time.time()
-            model_map = get_model_map(dataset.structure.structure, xmap_grid)
-            time_begin_get_model_map = time.time()
+
 
             model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
             image_model = np.stack([model_sample for _j in range(20)])
