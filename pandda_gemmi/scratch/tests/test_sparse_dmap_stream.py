@@ -1095,8 +1095,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         print(f"Number of combined large clusters is: {large_cluster_cluster_centroid_array.shape}")
         # print(f"Number of combined large clusters is: {unique_large_cluster_cluster.shape}")
 
-        for cluster_num in unique_large_cluster_cluster:
-            centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
+        for cluster_num, centroid in enumerate(large_cluster_cluster_centroid_array):
+            # centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
             print(f"\t{cluster_num}: {centroid}")
 
         # Event Scoring
