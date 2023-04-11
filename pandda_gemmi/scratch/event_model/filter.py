@@ -62,6 +62,7 @@ class FilterCluster:
                 np.concatenate([event.pos_array for event in cluster_events]),
                 0.0
             )
+
             new_events[j] = new_event
             j += 1
 
