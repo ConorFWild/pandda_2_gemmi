@@ -188,7 +188,9 @@ def truncate_resolution(reflections, resolution: float):
     data_truncated = data[data["res"] >= resolution]
 
     # Rem,ove res colum
-    data_dropped = data_truncated.drop(columns=["res", "columns"])
+    # data_dropped = data_truncated.drop("res", "columns")
+    data_dropped = data_truncated.drop(columns="res", )
+
 
     # To numpy
     data_dropped_array = data_dropped.to_numpy()
