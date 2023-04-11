@@ -1065,7 +1065,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # Cluster combining
         large_clusters = []
         for cluster_num, count in zip(cluster_nums, counts):
-
+            if cluster_num == -1:
+                continue
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
             if volume > 5.0:
                 large_clusters.append(np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0))
@@ -1083,9 +1084,17 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         )
         unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters, return_counts=True)
 
+        large_cluster_cluster_centroids = []
+        for cluster_num in unique_large_cluster_cluster:
+            centroid = np.mean(large_cluster_centroid_array[unique_large_cluster_cluster == cluster_num], axis=0)
+            large_cluster_cluster_centroids.append(centroid)
+        large_cluster_cluster_centroid_array = np.array(large_cluster_cluster_centroids)
+
         print(f"Original number of clusters was: {cluster_nums.shape}")
         print(f"Number of large clusters was: {large_cluster_centroid_array.shape}")
-        print(f"Number of combined large clusters is: {unique_large_cluster_cluster.shape}")
+        print(f"Number of combined large clusters is: {large_cluster_cluster_centroid_array.shape}")
+        # print(f"Number of combined large clusters is: {unique_large_cluster_cluster.shape}")
+
         for cluster_num in unique_large_cluster_cluster:
             centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
             print(f"\t{cluster_num}: {centroid}")
@@ -1118,69 +1127,69 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_grid = reference_frame.unmask(SparseDMap(mean))
 
 
-        for cluster_num, count in zip(unique_large_cluster_cluster, unique_large_cluster_counts):
+        for cluster_num, centroid in enumerate(large_cluster_cluster_centroid_array):
             if cluster_num == -1:
                 continue
-            volume = count * (z_grid.unit_cell.volume / grid.point_count)
-            if volume > 5.0:
-                print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
+            # volume = count * (z_grid.unit_cell.volume / grid.point_count)
+        # if volume > 5.0:
+        #     print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
-                centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
+            centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
 
-                n = 30
-                # sample_array = np.zeros((n, n, n), dtype=np.float32)
-                sample_transform = get_sample_transform_from_event(
-                    centroid,
-                    0.5,
-                    n,
-                    3.5
-                )
-                sample_array = np.zeros((n, n, n), dtype=np.float32)
+            n = 30
+            # sample_array = np.zeros((n, n, n), dtype=np.float32)
+            sample_transform = get_sample_transform_from_event(
+                centroid,
+                0.5,
+                n,
+                3.5
+            )
+            sample_array = np.zeros((n, n, n), dtype=np.float32)
 
-                bdcs = np.linspace(0.0,0.95,20).reshape((20,1,1,1))
-                xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
-                mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
+            bdcs = np.linspace(0.0,0.95,20).reshape((20,1,1,1))
+            xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
+            mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
-                image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1-bdcs)
-                print(f"Image evnets: {image_events.shape}")
+            image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1-bdcs)
+            print(f"Image evnets: {image_events.shape}")
 
 
-                # event_map = get_event_map(dataset_xmap.xmap, event, model)
-                # sample_array_event = np.copy(sample_array)
-                # image_event = sample_xmap(event_map, sample_transform, sample_array_event)
+            # event_map = get_event_map(dataset_xmap.xmap, event, model)
+            # sample_array_event = np.copy(sample_array)
+            # image_event = sample_xmap(event_map, sample_transform, sample_array_event)
 
-                # sample_array_raw = np.copy(sample_array)
-                # image_raw = sample_xmap(dataset_xmap.xmap, sample_transform, sample_array_raw)
-                image_raw = np.stack([xmap_sample for _j in range(20)])
+            # sample_array_raw = np.copy(sample_array)
+            # image_raw = sample_xmap(dataset_xmap.xmap, sample_transform, sample_array_raw)
+            image_raw = np.stack([xmap_sample for _j in range(20)])
 
-                sample_array_zmap = np.copy(sample_array)
-                zmap_sample = sample_xmap(z_grid, sample_transform, sample_array_zmap)
-                image_zmap = np.stack([zmap_sample for _j in range(20)])
+            sample_array_zmap = np.copy(sample_array)
+            zmap_sample = sample_xmap(z_grid, sample_transform, sample_array_zmap)
+            image_zmap = np.stack([zmap_sample for _j in range(20)])
 
-                sample_array_model = np.copy(sample_array)
-                model_map = get_model_map(dataset.structure.structure, xmap_grid)
-                model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
-                image_model = np.stack([model_sample for _j in range(20)])
+            sample_array_model = np.copy(sample_array)
+            model_map = get_model_map(dataset.structure.structure, xmap_grid)
+            model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
+            image_model = np.stack([model_sample for _j in range(20)])
 
-                image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
-                print([image.shape, image.dtype])
+            image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
+            print([image.shape, image.dtype])
 
-                # Transfer to tensor
-                # image_t = torch.unsqueeze(torch.from_numpy(image), 0)
-                image_t = torch.from_numpy(image)
+            # Transfer to tensor
+            # image_t = torch.unsqueeze(torch.from_numpy(image), 0)
+            image_t = torch.from_numpy(image)
 
-                # Move tensors to device
-                image_c = image_t.to(dev)
+            # Move tensors to device
+            image_c = image_t.to(dev)
 
-                # Run model
-                model_annotation = cnn(image_c.float())
+            # Run model
+            model_annotation = cnn(image_c.float())
 
-                # Track score
-                model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
-                for _j in range(20):
-                    bdc = bdcs.flatten()[_j]
-                    annotation = model_annotations[_j, 1]
-                    print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
+            # Track score
+            model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
+            for _j in range(20):
+                bdc = bdcs.flatten()[_j]
+                annotation = model_annotations[_j, 1]
+                print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
         # time_score_cluster_begin = time.time()
 
