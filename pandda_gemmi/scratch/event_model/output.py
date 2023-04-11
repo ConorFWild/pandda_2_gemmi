@@ -27,7 +27,7 @@ selected_z,
         reference_frame
 ):
     zmap_grid = reference_frame.unmask(SparseDMap(selected_z))
-    save_dmap(zmap_grid, fs.output.processed_datasets[event_id[0]] / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag))
+    save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag))
 
     for event_id, event in selected_events.items():
         event_array = (dtag_array - (event.bdc * selected_mean)) / (1 - event.bdc)
