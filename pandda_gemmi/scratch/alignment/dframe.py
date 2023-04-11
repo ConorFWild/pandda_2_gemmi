@@ -631,7 +631,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get the grid points in the mask
-        shifted_grid_point_indicies = [np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0,1,2)]
+        shifted_grid_point_indicies = (np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0,1,2))
         mask_array = np.zeros(spacing, dtype=np.bool)
         mask_array[indicies] = True
         indicies_mask = mask_array[shifted_grid_point_indicies]
