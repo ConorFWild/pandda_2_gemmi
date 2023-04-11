@@ -1196,6 +1196,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 annotation = model_annotations[_j, 1]
                 print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
+            max_score_index = np.argmax(model_annotations)
+            event_scores[cluster_num] = (bdcs[max_score_index], model_annotations[max_score_index])
+
         # time_score_cluster_begin = time.time()
 
 
@@ -1231,6 +1234,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # sample_to_png(sample_point, array, reference_frame, dtag_array, predicted == predicted_class, out_path)
         # sample = grid.interpolate_value(gemmi.Position(*sample_point))
         # print(f"STD at position med is: {sample}")
+
+    for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1])
+        print(f"\t{cluster_num} : {round(event_scores[cluster_num][0], 2)} : {round(event_scores[cluster_num][2], 2)}")
 
     time_finish_process_dataset = time.time()
     print(f"Processed dataset in: {round(time_finish_process_dataset-time_begin_process_dataset, 1)}")
