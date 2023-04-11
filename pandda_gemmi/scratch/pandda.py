@@ -183,9 +183,13 @@ def pandda(args: PanDDAArgs):
             if len(events) == 0:
                 continue
 
-            print(events)
+            print(f"Events: {events}")
 
             model_events[model_number] = events
+
+        model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
+        if len(model_events) == 0:
+            continue
 
         # Select a model
         selected_model_num, selected_events = select_model(model_events)
