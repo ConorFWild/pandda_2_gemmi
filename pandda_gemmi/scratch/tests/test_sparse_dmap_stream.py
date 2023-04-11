@@ -1232,7 +1232,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(event_scores)
         for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1]):
             print(
-                f"\t{cluster_num} : {round(float(event_scores[cluster_num][0]), 2)} : {round(float(event_scores[cluster_num][2]), 2)}")
+                f"\t{cluster_num} : {round(float(event_scores[cluster_num][0]), 2)} : {round(float(event_scores[cluster_num][1]), 2)}")
 
     time_finish_process_dataset = time.time()
     print(f"Processed dataset in: {round(time_finish_process_dataset - time_begin_process_dataset, 1)}")
