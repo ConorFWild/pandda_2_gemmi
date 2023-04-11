@@ -1072,11 +1072,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
 
         large_cluster_centroid_array = np.array(large_clusters)
+        print(f"Large cluster centroid array:")
+        print(large_cluster_centroid_array)
 
         large_cluster_clusters = fclusterdata(
             large_cluster_centroid_array,
             t=4.0,
-        criterion="distance",
+            criterion="distance",
             method="centroid"
         )
         unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters, return_counts=True)
@@ -1121,9 +1123,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 continue
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
             if volume > 5.0:
-                print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
+                print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
-                centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
+                centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
 
                 n = 30
                 # sample_array = np.zeros((n, n, n), dtype=np.float32)
