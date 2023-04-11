@@ -35,7 +35,7 @@ class FilterCluster:
     def __call__(self, events: Dict[int, EventInterface]):
         # Get the centroids of each event
         event_centroid_array = np.array(
-            [np.mean(event.pos_array, axis=0).reshape((1, -1)) for event in events.values()])
+            [np.mean(event.pos_array, axis=0).flatten() for event in events.values()])
 
         # Cluster the event centroids
         clusters = fclusterdata(
