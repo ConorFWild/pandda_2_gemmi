@@ -148,7 +148,7 @@ def pandda(args: PanDDAArgs):
 
             # Get the characterization set dmaps
             characterization_set_mask_list = []
-            for _dtag in datasets:
+            for _dtag in comparator_datasets:
                 if _dtag in characterization_set:
                     characterization_set_mask_list.append(True)
                 else:
