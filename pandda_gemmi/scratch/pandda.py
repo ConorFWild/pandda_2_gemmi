@@ -189,7 +189,7 @@ def pandda(args: PanDDAArgs):
             if len(events) == 0:
                 continue
 
-            print(f"Events: {[event.score for event in events.values()]}")
+            print(f"Events: {[round(x, 2) for x in [event.score for event in events.values()]]}")
 
             model_events[model_number] = events
 
