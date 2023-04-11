@@ -197,6 +197,7 @@ def pandda(args: PanDDAArgs):
     autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
         {
             _event_id: Partial(autobuild).paramaterise(
+                datasets[_event_id[0]],
                 pandda_events[_event_id],
                 Rhofit(),
             )
