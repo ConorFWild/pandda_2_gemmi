@@ -54,7 +54,7 @@ class FilterCluster:
         unique_clusters = np.unique(clusters, )
 
         # Merge the events based on the clustering
-        event_array = np.array(events.values())
+        event_array = np.array([event for event in events.values()])
         j = 0
         new_events = {}
         for cluster_num in unique_clusters:
