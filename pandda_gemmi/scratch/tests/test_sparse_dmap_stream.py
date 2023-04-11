@@ -1079,12 +1079,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         criterion="distance",
             method="complete"
         )
-        unique_large_cluster_cluster = np.unique(large_cluster_clusters)
+        unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters, return_counts=True)
 
         print(f"Original number of clusters was: {cluster_nums.shape}")
         print(f"Number of large clusters was: {large_cluster_centroid_array.shape}")
         print(f"Number of combined large clusters is: {unique_large_cluster_cluster.shape}")
-        exit()
+        for cluster_num in unique_large_cluster_cluster:
+            centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
+            print(f"\t{cluster_num}: {centroid}")
 
         # Event Scoring
 
@@ -1114,14 +1116,14 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         mean_grid = reference_frame.unmask(SparseDMap(mean))
 
 
-        for cluster_num, count in zip(cluster_nums, counts):
+        for cluster_num, count in zip(unique_large_cluster_cluster, unique_large_cluster_counts):
             if cluster_num == -1:
                 continue
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
             if volume > 5.0:
-                print(f"\tCluster: {cluster_num} : {np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
+                print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
-                centroid = np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0)
+                centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
 
                 n = 30
                 # sample_array = np.zeros((n, n, n), dtype=np.float32)
