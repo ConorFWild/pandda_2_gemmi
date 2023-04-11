@@ -1206,8 +1206,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 annotation = model_annotations[_j, 1]
                 print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
-            max_score_index = np.argmax([annotation[1] for annotation in model_annotations])
-            event_scores[cluster_num] = (bdcs[max_score_index], model_annotations[max_score_index])
+            max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
+            event_scores[cluster_num] = (bdcs[max_score_index], model_annotations[max_score_index, 1])
 
         # time_score_cluster_begin = time.time()
 
