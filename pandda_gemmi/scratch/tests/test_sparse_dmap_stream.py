@@ -9,6 +9,7 @@ from pathlib import Path
 import gemmi
 import numpy as np
 from scipy import spatial
+from scipy.cluster.hierarchy import fclusterdata
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import DBSCAN
@@ -1060,6 +1061,32 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         times_dbscan.append(round(time_finish_dbscan-time_begin_dbscan, 1))
 
         cluster_nums, counts = np.unique(clusters, return_counts=True)
+
+        # Cluster combining
+        large_clusters = []
+        for cluster_num, count in zip(cluster_nums, counts):
+
+            volume = count * (z_grid.unit_cell.volume / grid.point_count)
+            if volume > 5.0:
+                large_clusters.append(np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0))
+
+
+        large_cluster_centroid_array = np.array(large_clusters)
+
+        large_cluster_clusters = fclusterdata(
+            large_cluster_centroid_array,
+            t=4.0,
+        criterion="distance",
+            method="complete"
+        )
+        unique_large_cluster_cluster = np.unique(large_cluster_clusters)
+
+        print(f"Original number of clusters was: {cluster_nums.shape}")
+        print(f"Number of large clusters was: {large_cluster_centroid_array.shape}")
+        print(f"Number of combined large clusters is: {unique_large_cluster_cluster.shape}")
+        exit()
+
+        # Event Scoring
 
         if torch.cuda.is_available():
             dev = "cuda:0"
