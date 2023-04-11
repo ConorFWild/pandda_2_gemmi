@@ -123,7 +123,7 @@ def pandda(args: PanDDAArgs):
         dmaps = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
 
         # Get the relevant dmaps
-        dtag_array = np.array([_dtag for _dtag in datasets])
+        dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
         # Get the dataset dmap
         dtag_index = np.argwhere(dtag_array == dtag)

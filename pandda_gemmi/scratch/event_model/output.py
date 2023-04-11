@@ -1,8 +1,8 @@
-def output_models():
+def output_models(characterization_sets, selected_model_num):
     ...
 
-def output_events():
+def output_events(model_events):
     ...
 
-def output_maps():
+def output_maps(selected_events):
     ...
