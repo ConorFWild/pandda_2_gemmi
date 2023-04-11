@@ -21,6 +21,7 @@ class FilterSize:
         new_events = {}
         for event_id, event in events.items():
             event_volume = event.pos_array.shape[0] * volume_element
+            print(event_volume)
             if event_volume > self.min_size:
                 new_events[j] = event
                 j += 1

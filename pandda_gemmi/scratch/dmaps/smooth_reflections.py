@@ -75,7 +75,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
 
 
     _rmsd = np.sum(np.abs(reference_values.flatten() - masked_new_grid_values.flatten()))
-    print(f"\t\tScale: {scale} : RMSD: {_rmsd}")
+    # print(f"\t\tScale: {scale} : RMSD: {_rmsd}")
     return _rmsd
 
 class SmoothReflections:
@@ -226,7 +226,7 @@ class SmoothReflections:
         )
 
         finish_smooth_reflections = time.time()
-        print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
+        # print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
 
         return smoothed_dataset
 
@@ -238,7 +238,7 @@ class SmoothReflections:
         begin_common = time.time()
         common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
         finish_common = time.time()
-        print(f"\t\t\tCommon: {finish_common-begin_common} with shape {common_reflections_set.shape}")
+        # print(f"\t\t\tCommon: {finish_common-begin_common} with shape {common_reflections_set.shape}")
 
         # # Truncate
         begin_truncate = time.time()
@@ -247,7 +247,7 @@ class SmoothReflections:
         dtag_reflections = truncate_reflections(
             dataset.reflections.reflections, common_reflections_set)
         finish_truncate = time.time()
-        print(f"\t\t\tTruncate: {finish_truncate-begin_truncate}")
+        # print(f"\t\t\tTruncate: {finish_truncate-begin_truncate}")
 
         # Refference array
         # reference_reflections = truncated_reference.reflections.reflections
@@ -270,7 +270,7 @@ class SmoothReflections:
                                               columns=dtag_reflections.column_labels(),
                                               )
         dtag_f_array = dtag_reflections_table[dataset.reflections.f].to_numpy()
-        print(f"\t\t\tReference f array size: {reference_f_array.shape} and dtag f array size: {dtag_f_array.shape}")
+        # print(f"\t\t\tReference f array size: {reference_f_array.shape} and dtag f array size: {dtag_f_array.shape}")
 
 
 
@@ -373,7 +373,7 @@ class SmoothReflections:
         y_inds = np.digitize(dtag_resolution_array, sample_grid)
 
         finish_preprocess = time.time()
-        print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
+        # print(f"\t\t\tPreprocess: {finish_preprocess - begin_preprocess}")
 
         # Optimise the scale factor
 
@@ -391,7 +391,7 @@ class SmoothReflections:
         #     0.0
         # )
         finish_solve = time.time()
-        print(f"\t\t\tSolve NEW BOUNDED 20: {finish_solve - begin_solve} with scale: {min_scale}")
+        # print(f"\t\t\tSolve NEW BOUNDED 20: {finish_solve - begin_solve} with scale: {min_scale}")
 
         # ####################### NEW 100 bounded #########################
         #
@@ -586,10 +586,10 @@ class SmoothReflections:
             # smoothing_factor=float(min_scale)
         )
         finish_dataset = time.time()
-        print(f"\t\t\tMake dataset: {finish_dataset-begin_dataset}")
+        # print(f"\t\t\tMake dataset: {finish_dataset-begin_dataset}")
 
         finish_smooth_reflections = time.time()
-        print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
+        # print(f"\t\tSmooth: {finish_smooth_reflections-begin_smooth_reflections}")
 
         return smoothed_dataset
 
