@@ -114,6 +114,7 @@ class FilterLocallyHighestScoring:
             distance_mask = distances < self.radius
             masked_ids[distance_mask] = True
             new_events[j] = event
+            j = j+1
 
         return new_events
 
