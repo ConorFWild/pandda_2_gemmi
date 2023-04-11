@@ -309,18 +309,18 @@ class Alignment:
             moving_structure_cas.chains.reshape((-1,1)),
             moving_structure_cas.seq_ids.reshape((-1,1))
         ])
-        print(f"\t\t\tReference id shape: {ref_ids.shape} : Moving structure shape: {mov_ids.shape}")
+        # print(f"\t\t\tReference id shape: {ref_ids.shape} : Moving structure shape: {mov_ids.shape}")
         ids=np.concatenate([ref_ids, mov_ids])
-        print(f"\t\t\tIDs shape: {ids.shape}")
+        # print(f"\t\t\tIDs shape: {ids.shape}")
 
         unique, indicies, counts = np.unique(ids, return_inverse=True, return_counts=True, axis=0)
         count_array = counts[indicies]
         count_mask = count_array > 1  # Mask of ids by count > 1
-        print(f"\t\t\tCount array shape: {count_array.shape} : Count mask shape: {count_mask.shape}")
+        # print(f"\t\t\tCount array shape: {count_array.shape} : Count mask shape: {count_mask.shape}")
 
         ref_pos_mask = count_mask[:ref_ids.shape[0]]
         mov_pos_mask = count_mask[ref_ids.shape[0]:]
-        print(f"\t\t\tRef pos mask shape: {ref_pos_mask.shape} : Mov pos mask shape: {mov_pos_mask.shape}")
+        # print(f"\t\t\tRef pos mask shape: {ref_pos_mask.shape} : Mov pos mask shape: {mov_pos_mask.shape}")
 
         reference_atom_array = reference_structure_cas.positions[ref_pos_mask]
         moving_atom_array = moving_structure_cas.positions[mov_pos_mask]

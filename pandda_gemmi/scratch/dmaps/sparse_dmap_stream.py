@@ -51,17 +51,17 @@ class SparseDMapStream:
         for transform in transforms:
             dataset = transform(dataset)
         finish_transform = time.time()
-        print(f"\tTransform: {finish_transform - begin_transform}")
+        # print(f"\tTransform: {finish_transform - begin_transform}")
 
         begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
         finish_fft = time.time()
-        print(f"\tFFT: {finish_fft - begin_fft}")
+        # print(f"\tFFT: {finish_fft - begin_fft}")
 
         aligned_xmap = SparseDMapStream.align_xmap(xmap, dframe, alignment)
 
         finish = time.time()
-        print(f"Aligned xmap in: {round(finish-begin, 2)}")
+        # print(f"Aligned xmap in: {round(finish-begin, 2)}")
 
         return aligned_xmap
 
@@ -130,7 +130,7 @@ class SparseDMapStream:
 
 
         finish_listing = time.time()
-        print(f"\tListing: {finish_listing-begin_listing}")
+        # print(f"\tListing: {finish_listing-begin_listing}")
         # print(com_reference_list)
 
         begin_interpolate = time.time()
@@ -145,7 +145,7 @@ class SparseDMapStream:
             # 12
         )
         finish_interpolate = time.time()
-        print(f"\tInterpolation: {finish_interpolate-begin_interpolate}")
+        # print(f"\tInterpolation: {finish_interpolate-begin_interpolate}")
 
         return SparseDMap.from_xmap(aligned_xmap, dframe)
 
