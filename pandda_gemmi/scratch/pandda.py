@@ -145,7 +145,6 @@ def pandda(args: PanDDAArgs):
         model_events = {}
         for model_number, characterization_set in characterization_sets.items():
 
-
             # Get the characterization set dmaps
             characterization_set_mask_list = []
             for _dtag in comparator_datasets:
@@ -169,14 +168,24 @@ def pandda(args: PanDDAArgs):
 
             # Filter the events pre-scoring
             for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
+                if len(events) == 0:
+                    continue
                 events = filter(events)
+
+            if len(events) == 0:
+                continue
 
             # Score the events
             events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
 
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), ]:
+                if len(events) == 0:
+                    continue
                 events = filter(events)
+
+            if len(events) == 0:
+                continue
 
             print(events)
 
