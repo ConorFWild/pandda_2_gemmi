@@ -392,6 +392,6 @@ class Alignment:
 
 
         time_finish = time.time()
-        print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
+        # print(f"\t\tAligned in: {round(time_finish-time_begin, 2)} of which {round(time_ball_query,2)} in ball query, {round(finish_get_span-begin_get_span,2)} in getting span and {round(time_super, 2)} in superposition")
 
         return cls(resid, vec, mat, com_reference, com_mov)
