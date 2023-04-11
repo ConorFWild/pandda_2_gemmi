@@ -59,7 +59,7 @@ class FilterCluster:
         for cluster_num in unique_clusters:
             cluster_events = event_array[clusters == cluster_num]
             new_event = Event(
-                np.concat([event.pos_array for event in cluster_events]),
+                np.concatenate([event.pos_array for event in cluster_events]),
                 0.0
             )
             new_events[j] = new_event
