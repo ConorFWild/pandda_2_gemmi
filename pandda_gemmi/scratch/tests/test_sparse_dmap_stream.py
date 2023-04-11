@@ -36,6 +36,7 @@ from pandda_gemmi.scratch.alignment import Alignment, DFrame
 from pandda_gemmi.scratch.processor import ProcessLocalRay, Partial
 from pandda_gemmi.scratch.dataset import ResidueID
 
+
 def sample_xmap(xmap, transform, sample_array):
     xmap.interpolate_values(sample_array, transform)
     return sample_array
@@ -76,7 +77,7 @@ def get_sample_transform_from_event(centroid,
     transform.vec.fromlist([
         centroid[j] - sample_grid_centroid[j]
         for j
-        in [0,1,2]
+        in [0, 1, 2]
     ])
     transform.mat.fromlist(scale_matrix.tolist())
     corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
@@ -98,7 +99,6 @@ def get_sample_transform_from_event(centroid,
 
 
 def get_model_map(structure, xmap_event):
-
     # structure = reference.dataset.structure.structure
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
@@ -146,6 +146,7 @@ def save_dmap(dmap, path):
     #     ccp4.grid.symmetrize_max()
     ccp4.update_ccp4_header(2, True)
     ccp4.write_ccp4_map(str(path))
+
 
 def sample_to_png(sample_point, array, reference_frame, dtag_array, mean_indexes, out_path):
     # sample_point = [0.9, -36.23, -59.64]
@@ -226,13 +227,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_begin_put_datasets = time.time()
     dataset_refs = {_dtag: processor.put(datasets[_dtag]) for _dtag in datasets}
     time_finish_put_datasets = time.time()
-    print(f"Put datasets in: {round(time_finish_put_datasets-time_begin_put_datasets, 2)}")
+    print(f"Put datasets in: {round(time_finish_put_datasets - time_begin_put_datasets, 2)}")
 
     time_begin_put_tructure_arrays = time.time()
-    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in datasets}
+    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
+                            datasets}
     time_finish_put_structure_arrays = time.time()
-    print(f"Put structure arrays in: {round(time_finish_put_structure_arrays-time_begin_put_tructure_arrays, 2)}")
-
+    print(f"Put structure arrays in: {round(time_finish_put_structure_arrays - time_begin_put_tructure_arrays, 2)}")
 
     # Get the test dataset
     print(f"##### Getting test dataset #####")
@@ -244,14 +245,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # dtag = "PHIPA-x11117"
     # dtag = "Mpro-P3318"
 
-
     time_begin_process_dataset = time.time()
-
 
     for _j, _dtag in enumerate(dtag_array):
         print(_dtag)
         if _dtag == dtag:
-            dtag_index =_j
+            dtag_index = _j
     dtag = list(datasets.keys())[dtag_index]
     dataset = datasets[dtag]
     print(f"Test dataset is {dtag}")
@@ -260,18 +259,17 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
     print(f"##### Getting datasets in resolution #####")
     dataset_res = dataset.reflections.resolution() + 0.1
-    res = max(dataset_res, list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[60]+0.1)
-    datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if _dataset.reflections.resolution() < res}
+    res = max(dataset_res,
+              list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[60] + 0.1)
+    datasets_resolution = {_dtag: _dataset for _dtag, _dataset in datasets.items() if
+                           _dataset.reflections.resolution() < res}
     print(f"\tGot {len(datasets_resolution)} of dataset res {res} or higher!")
-
-
-
 
     dtag_array = np.array(list(datasets_resolution.keys()))
     for _j, _dtag in enumerate(dtag_array):
         print(_dtag)
         if _dtag == dtag:
-            dtag_index =_j
+            dtag_index = _j
 
     # Get the alignments
     print(f"##### Getting alignments #####")
@@ -295,7 +293,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     finish_get_frame = time.time()
     print(f"Got reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
     for resid, partition in reference_frame.partitioning.partitions.items():
-        print(f"\tResid: {resid} : {partition.points.shape} {partition.positions[0,:]}")
+        print(f"\tResid: {resid} : {partition.points.shape} {partition.positions[0, :]}")
 
     #
     grid = reference_frame.get_grid()
@@ -399,18 +397,18 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     dmaps_dict = processor.process_dict(
         {
             _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-            dataset_refs[_dtag],
+                dataset_refs[_dtag],
                 alignment_refs[_dtag],
                 transforms_ref,
                 reference_frame_ref
-        )
+            )
             for _dtag
             in datasets_resolution}
     )
     time_finish = time.time()
     print(f"Parallel loaded xmaps in {round(time_finish - time_begin, 1)} into dict of length {len(dmaps_dict)}")
-    time_load_dmap = time_finish-time_begin
-    array = np.vstack([dmap.data.reshape((1,-1) ) for dtag, dmap in dmaps_dict.items() ])
+    time_load_dmap = time_finish - time_begin
+    array = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
 
     print(f"##### Masking dmaps #####")
     # sparse_dmaps_inner = {}
@@ -424,7 +422,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     time_finish = time.time()
     print(f"Masked in {round(time_finish - time_begin, 1)} with shape {sparse_dmap_inner_array.shape}")
 
-
     print(f"##### Pairwise distances #####")
     # sparse_dmaps_inner = {}
     # for dtag in datasets:
@@ -436,7 +433,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
     transformed = pca.fit_transform(sparse_dmap_inner_array)
     time_finish = time.time()
-    time_pca = time_finish-time_begin
+    time_pca = time_finish - time_begin
 
     print(f"PCA'd in {round(time_finish - time_begin, 1)} with shape {transformed.shape}")
 
@@ -452,7 +449,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     distances = spatial.distance.squareform(spatial.distance.pdist(transformed))
     time_finish = time.time()
     print(f"Distance'd in {round(time_finish - time_begin, 1)} with shape {distances.shape}")
-
 
     # distances = spatial.distance.pdist(sparse_dmap_inner_array)
     # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
@@ -877,7 +873,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #
     # ##############################
 
-
     # time_begin = time.time()
     # dpgmm = mixture.BayesianGaussianMixture(n_components=30, covariance_type="diag",)
     # predicted = dpgmm.fit_predict(transformed)
@@ -949,12 +944,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     #         Path(out_dir) / f"{predicted_class}_mean.ccp4"
     #     )
 
-
-
-
-
-
-        # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
+    # print(f"\t\t{clf.predict_proba(transformed)[0,:].flatten()}")
     #
     time_begin = time.time()
     dpgmm = mixture.BayesianGaussianMixture(n_components=20, covariance_type="diag")
@@ -975,12 +965,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         if count < 20:
             continue
 
-        dtag_array = array[dtag_index,:]
+        dtag_array = array[dtag_index, :]
         masked_array = array[predicted == predicted_class, :]
         mean = np.mean(masked_array, axis=0)
         std = np.std(masked_array, axis=0)
-        z = ((array[dtag_index,:]-mean) / std)
-
+        z = ((array[dtag_index, :] - mean) / std)
 
         z_grid = reference_frame.unmask(SparseDMap(z))
         save_dmap(
@@ -995,8 +984,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         )
 
         begin = time.time()
-        point_array = np.vstack([partition.points for resid, partition in reference_frame.partitioning.partitions.items()]) % np.array(reference_frame.spacing)
-        position_array = np.vstack([partition.positions for resid, partition in reference_frame.partitioning.partitions.items()])
+        point_array = np.vstack(
+            [partition.points for resid, partition in reference_frame.partitioning.partitions.items()]) % np.array(
+            reference_frame.spacing)
+        position_array = np.vstack(
+            [partition.positions for resid, partition in reference_frame.partitioning.partitions.items()])
 
         _all_points_array = point_array
         # all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
@@ -1010,14 +1002,13 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
         # shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
         shape = reference_frame.spacing
-        point_3d_array_x = np.zeros((shape[0], shape[1], shape[2]),)
-        point_3d_array_y = np.zeros((shape[0], shape[1], shape[2]),)
-        point_3d_array_z = np.zeros((shape[0], shape[1], shape[2]),)
+        point_3d_array_x = np.zeros((shape[0], shape[1], shape[2]), )
+        point_3d_array_y = np.zeros((shape[0], shape[1], shape[2]), )
+        point_3d_array_z = np.zeros((shape[0], shape[1], shape[2]), )
 
         point_3d_array_x[all_point_indexes] = all_points_array[:, 0]
         point_3d_array_y[all_point_indexes] = all_points_array[:, 1]
         point_3d_array_z[all_point_indexes] = all_points_array[:, 2]
-
 
         # point_3d_array[all_point_indexes] = True
         # initial_unique_points = np.argwhere(point_3d_array)
@@ -1039,7 +1030,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         high_z_pos_z = pos_3d_arr_z[high_z_indexes]
 
         high_z_pos_array = np.hstack([
-            high_z_pos_x.reshape((-1,1)),
+            high_z_pos_x.reshape((-1, 1)),
             high_z_pos_y.reshape((-1, 1)),
             high_z_pos_z.reshape((-1, 1))
         ])
@@ -1049,20 +1040,18 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         high_z_point_z = point_3d_array_z[high_z_indexes]
 
         high_z_point_array = np.hstack([
-            high_z_point_x.reshape((-1,1)),
+            high_z_point_x.reshape((-1, 1)),
             high_z_point_y.reshape((-1, 1)),
             high_z_point_z.reshape((-1, 1))
         ])
 
-
         finish = time.time()
-        print(f"Got high z poss in {round(finish-begin, 1)}")
-        times_get_high_z.append(round(finish-begin, 1))
+        print(f"Got high z poss in {round(finish - begin, 1)}")
+        times_get_high_z.append(round(finish - begin, 1))
 
         print(high_z_pos_array)
         print(high_z_pos_array.shape)
         print([np.min(high_z_pos_array, axis=0), np.max(high_z_pos_array, axis=0)])
-
 
         print(high_z_point_array)
         print(high_z_point_array.shape)
@@ -1078,7 +1067,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         time_begin_dbscan = time.time()
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
         time_finish_dbscan = time.time()
-        times_dbscan.append(round(time_finish_dbscan-time_begin_dbscan, 1))
+        times_dbscan.append(round(time_finish_dbscan - time_begin_dbscan, 1))
 
         cluster_nums, counts = np.unique(clusters, return_counts=True)
 
@@ -1091,7 +1080,6 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             volume = count * (z_grid.unit_cell.volume / grid.point_count)
             if volume > 5.0:
                 large_clusters.append(np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0))
-
 
         large_cluster_centroid_array = np.array(large_clusters)
         print(f"Large cluster centroid array:")
@@ -1106,7 +1094,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             criterion="distance",
             method="centroid"
         )
-        unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters, return_counts=True)
+        unique_large_cluster_cluster, unique_large_cluster_counts = np.unique(large_cluster_clusters,
+                                                                              return_counts=True)
 
         large_cluster_cluster_centroids = []
         for cluster_num in unique_large_cluster_cluster:
@@ -1124,11 +1113,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             print(f"\t{cluster_num}: {centroid}")
 
         time_finish_combine_cluster = time.time()
-        times_combine_cluster.append(time_finish_combine_cluster-time_begin_combine_cluster)
+        times_combine_cluster.append(time_finish_combine_cluster - time_begin_combine_cluster)
 
         # Event Scoring
-
-
 
         # Annotate the events
         event_scores = {}
@@ -1139,13 +1126,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
         mean_grid = reference_frame.unmask(SparseDMap(mean))
 
-
         for cluster_num, centroid in enumerate(large_cluster_cluster_centroid_array):
             if cluster_num == -1:
                 continue
             # volume = count * (z_grid.unit_cell.volume / grid.point_count)
-        # if volume > 5.0:
-        #     print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
+            # if volume > 5.0:
+            #     print(f"\tCluster: {cluster_num} : {np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)} : size: {count}: vol {volume}")
 
             # centroid = np.mean(large_cluster_centroid_array[large_cluster_clusters == cluster_num, :], axis=0)
 
@@ -1161,13 +1147,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             )
             sample_array = np.zeros((n, n, n), dtype=np.float32)
 
-            bdcs = np.linspace(0.0,0.95,20).reshape((20,1,1,1))
+            bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
             xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
             mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
-            image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1-bdcs)
+            image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1 - bdcs)
             print(f"Image evnets: {image_events.shape}")
-
 
             # event_map = get_event_map(dataset_xmap.xmap, event, model)
             # sample_array_event = np.copy(sample_array)
@@ -1206,23 +1191,23 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 annotation = model_annotations[_j, 1]
                 print(f"\t\t{np.round(bdc, 2)} {round(float(annotation), 2)}")
 
+            flat_bdcs = bdcs.flatten()
             max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
-            event_scores[cluster_num] = (bdcs[max_score_index], model_annotations[max_score_index, 1])
+            event_scores[cluster_num] = (flat_bdcs[max_score_index], model_annotations[max_score_index, 1])
 
         # time_score_cluster_begin = time.time()
 
-
         time_event_scoring_finish = time.time()
-        print(f"Scored events in: {round(time_event_scoring_finish-time_event_scoring_begin, 1)}")
-        times_score_events.append(round(time_event_scoring_finish-time_event_scoring_begin, 1))
+        print(f"Scored events in: {round(time_event_scoring_finish - time_event_scoring_begin, 1)}")
+        times_score_events.append(round(time_event_scoring_finish - time_event_scoring_begin, 1))
 
-        for bdc in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
-            event_array = (dtag_array - (bdc*mean)) / (1-bdc)
+        for bdc in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+            event_array = (dtag_array - (bdc * mean)) / (1 - bdc)
             event_grid = reference_frame.unmask(SparseDMap(event_array))
 
             save_dmap(
                 event_grid,
-                Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc,1)}.ccp4"
+                Path(out_dir) / f"bayes_{predicted_class}_{dtag}_event_{round(bdc, 1)}.ccp4"
             )
 
         # grid = reference_frame.unmask(SparseDMap(std.flatten()))
@@ -1246,10 +1231,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         # print(f"STD at position med is: {sample}")
         print(event_scores)
         for cluster_num in sorted(event_scores, key=lambda _num: event_scores[_num][1]):
-            print(f"\t{cluster_num} : {round(float(event_scores[cluster_num][0]), 2)} : {round(float(event_scores[cluster_num][2]), 2)}")
+            print(
+                f"\t{cluster_num} : {round(float(event_scores[cluster_num][0]), 2)} : {round(float(event_scores[cluster_num][2]), 2)}")
 
     time_finish_process_dataset = time.time()
-    print(f"Processed dataset in: {round(time_finish_process_dataset-time_begin_process_dataset, 1)}")
+    print(f"Processed dataset in: {round(time_finish_process_dataset - time_begin_process_dataset, 1)}")
     print(f"\tGot reference frame in {round(finish_get_frame - begin_get_frame, 1)}")
     print(f"\tGot {len(alignments)} alignments in {round(finish_align - begin_align, 1)}")
     print(f"\tGot {len(alignments)} dmaps in {round(time_load_dmap, 1)}")
@@ -1258,7 +1244,9 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"\tGot dbscans in times: {times_dbscan}")
     print(f"\tGot event scores in times: {times_score_events}")
     print(f"\tGot combines clusters in times: {times_combine_cluster}")
-    accounted_runtume = (finish_align-begin_align) + (finish_get_frame-begin_get_frame) + time_load_dmap + time_pca + sum(times_get_high_z) + sum(times_dbscan) + sum(times_score_events) + sum(times_combine_cluster)
+    accounted_runtume = (finish_align - begin_align) + (
+                finish_get_frame - begin_get_frame) + time_load_dmap + time_pca + sum(times_get_high_z) + sum(
+        times_dbscan) + sum(times_score_events) + sum(times_combine_cluster)
     print(f"Runtime accounted for: {accounted_runtume}")
 
     print(f"##### Z maps #####")
