@@ -69,6 +69,7 @@ def pandda(args: PanDDAArgs):
     # Process each dataset
     pandda_events = {}
     for dtag in datasets:
+        print(f"##### {dtag} #####")
         # Get the dataset
         dataset = datasets[dtag]
 
