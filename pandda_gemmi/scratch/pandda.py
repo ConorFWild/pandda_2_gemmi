@@ -178,6 +178,8 @@ def pandda(args: PanDDAArgs):
             for filter in [FilterScore(0.1), ]:
                 events = filter(events)
 
+            print(events)
+
             model_events[model_number] = events
 
         # Select a model
