@@ -170,6 +170,8 @@ def pandda(args: PanDDAArgs):
             for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
                 events = filter(events)
 
+            print(f"After filer size and cluster: {len(events)}")
+
             if len(events) == 0:
                 continue
 
@@ -179,6 +181,7 @@ def pandda(args: PanDDAArgs):
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), ]:
                 events = filter(events)
+                print(f"After filter score: {len(events)}")
 
             if len(events) == 0:
                 continue
