@@ -86,7 +86,7 @@ class FilterScore:
 
         return new_events
 
-class LocallyHighestScoring:
+class FilterLocallyHighestScoring:
     def __init__(self, radius=8.0):
         self.radius=radius
 

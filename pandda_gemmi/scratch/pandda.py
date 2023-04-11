@@ -27,7 +27,7 @@ from pandda_gemmi.scratch.event_model.characterization import get_characterizati
 from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
 from pandda_gemmi.scratch.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.scratch.event_model.score import ScoreCNN, get_model_map
-from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, FilterScore
+from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, FilterScore, FilterLocallyHighestScoring
 from pandda_gemmi.scratch.event_model.select import select_model
 from pandda_gemmi.scratch.event_model.output import output_models, output_events, output_maps
 
@@ -186,7 +186,7 @@ def pandda(args: PanDDAArgs):
             events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
 
             # Filter the events post-scoring
-            for filter in [FilterScore(0.1), LocallyHighestScoring(8.0)]:
+            for filter in [FilterScore(0.1), FilterLocallyHighestScoring(8.0)]:
                 events = filter(events)
                 print(f"After filter score: {len(events)}")
 
