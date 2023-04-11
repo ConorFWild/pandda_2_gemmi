@@ -1159,13 +1159,17 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                 3.5
             )
             time_finish_get_sample_transform = time.time()
+            print(f"Got sample transform in: {time_finish_get_sample_transform-time_begin_get_sample_transform}")
 
             sample_array = np.zeros((n, n, n), dtype=np.float32)
 
             bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
+
             time_begin_get_xmap_sample = time.time()
             xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
-            time_finish_get_sample_transform = time.time()
+            time_finish_get_xmap_sample = time.time()
+            print(f"Got xmap sample in: {time_finish_get_xmap_sample-time_begin_get_xmap_sample}")
+
 
             mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
