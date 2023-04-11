@@ -12,6 +12,8 @@ class FilterSize:
         self.min_size = min_size
 
     def __call__(self, events: Dict[int, EventInterface]):
+        if len(events) == 0:
+            return {}
         grid = self.reference_frame.get_grid()
         volume_element = grid.unit_cell.volume / grid.point_count
 
@@ -33,6 +35,8 @@ class FilterCluster:
         self.t = t
 
     def __call__(self, events: Dict[int, EventInterface]):
+        if len(events) == 0:
+            return {}
         # Get the centroids of each event
         event_centroid_array = np.array(
             [np.mean(event.pos_array, axis=0).flatten() for event in events.values()])
@@ -69,6 +73,8 @@ class FilterScore:
         self.min_score = min_score
 
     def __call__(self, events: Dict[int, EventInterface]):
+        if len(events) == 0:
+            return {}
         j = 0
         new_events = {}
         for event_id, event in events.items():

@@ -168,8 +168,6 @@ def pandda(args: PanDDAArgs):
 
             # Filter the events pre-scoring
             for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
-                if len(events) == 0:
-                    continue
                 events = filter(events)
 
             if len(events) == 0:
@@ -180,8 +178,6 @@ def pandda(args: PanDDAArgs):
 
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), ]:
-                if len(events) == 0:
-                    continue
                 events = filter(events)
 
             if len(events) == 0:
