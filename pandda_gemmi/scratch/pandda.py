@@ -1,52 +1,25 @@
-from pandda.fs import FS
-from pandda.dataset import Dataset
-from pandda.dmaps import DMap, SparseDMap, SparseDMapStream
-from pandda.alignment import Alignment, DFrame
+from pandda_gemmi.scratch.interfaces import *
 
-from pandda.event_model.model import EventModel
-from pandda.event_model.select import SelectNN
-from pandda.event_model.outlier import PointwiseNormal
-from pandda.event_model.cluster import ClusterDensityAgg
-from pandda.event_model.score import ScoreCNN
-from pandda.event_model.filter import FilterSize, FilterScore
+from pandda_gemmi.scratch.fs import PanDDAFS
+from pandda_gemmi.scratch.dataset import Dataset
+from pandda_gemmi.scratch.dmaps import DMap, SparseDMap, SparseDMapStream
+from pandda_gemmi.scratch.alignment import Alignment, DFrame
+from pandda_gemmi.scratch.processor import ProcessLocalRay
 
-from pandda.site_model import SiteModel, ClusterSitesAgg, Site
+from pandda_gemmi.scratch.event_model.model import EventModel
+from pandda_gemmi.scratch.event_model.select import SelectNN
+from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
+from pandda_gemmi.scratch.event_model.cluster import ClusterDensityAgg
+from pandda_gemmi.scratch.event_model.score import ScoreCNN
+from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterScore
 
-from pandda.autobuild import Autobuild
-from pandda.autobuild.rhofit import Rhofit
-from pandda.autobuild.merge import MergeHighestRSCC
+from pandda_gemmi.scratch.site_model import SiteModel, ClusterSitesAgg, Site
 
-
-class InputFS:
-    ...
-
-
-class OutputFS:
-    ...
+from pandda_gemmi.scratch.autobuild import Autobuild
+from pandda_gemmi.scratch.autobuild.rhofit import Rhofit
+from pandda_gemmi.scratch.autobuild.merge import MergeHighestRSCC
 
 
-class FS:
-    ...
-
-
-class Dataset:
-    ...
-
-
-class EDModel:
-    ...
-
-
-class Alignment:
-    ...
-
-
-class DFrame:
-    ...
-
-
-class DMap:
-    ...
 
 
 def pandda():

@@ -1137,18 +1137,25 @@ def test_sparse_dmap_stream(data_dir, out_dir):
 
             print(f"##### Evaluating centroid at: {centroid} #####")
 
+            time_begin_process_cluster = time.time()
             n = 30
             # sample_array = np.zeros((n, n, n), dtype=np.float32)
+            time_begin_get_sample_transform = time.time()
             sample_transform = get_sample_transform_from_event(
                 centroid,
                 0.5,
                 n,
                 3.5
             )
+            time_finish_get_sample_transform = time.time()
+
             sample_array = np.zeros((n, n, n), dtype=np.float32)
 
             bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
+            time_begin_get_xmap_sample = time.time()
             xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
+            time_finish_get_sample_transform = time.time()
+
             mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
             image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1 - bdcs)
@@ -1167,7 +1174,11 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             image_zmap = np.stack([zmap_sample for _j in range(20)])
 
             sample_array_model = np.copy(sample_array)
+
+            time_begin_get_model_map = time.time()
             model_map = get_model_map(dataset.structure.structure, xmap_grid)
+            time_begin_get_model_map = time.time()
+
             model_sample = sample_xmap(model_map, sample_transform, sample_array_model)
             image_model = np.stack([model_sample for _j in range(20)])
 
@@ -1182,7 +1193,10 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             image_c = image_t.to(dev)
 
             # Run model
+            time_begin_run_model = time.time()
             model_annotation = cnn(image_c.float())
+            time_finish_run_model = time.time()
+            print(f"Model ran in: {time_finish_run_model-time_begin_run_model}")
 
             # Track score
             model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
@@ -1202,6 +1216,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
                     round(float(centroid[2]), 2),
                 ]
             )
+            time_finish_process_cluster = time.time()
+            print(f"Processed cluster in: {time_finish_process_cluster-time_begin_process_cluster}")
 
         # time_score_cluster_begin = time.time()
 
