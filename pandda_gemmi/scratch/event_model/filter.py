@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.cluster.hierarchy import fclusterdata
 
 from .event import Event
 
