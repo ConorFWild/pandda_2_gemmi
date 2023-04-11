@@ -190,3 +190,9 @@ class TransformInterface(Protocol):
 
 class AlignmentInterface(Protocol):
     transforms: Dict[ResidueIDInterface, TransformInterface]
+
+class EventInterface(Protocol):
+    ...
+
+class AutobuildInterface(Protocol):
+    ...
