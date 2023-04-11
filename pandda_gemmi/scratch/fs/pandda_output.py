@@ -18,6 +18,6 @@ class PanDDAOutput:
 
         self.processed_datasets = {}
         for dtag, dataset_dir in pandda_input.dataset_dirs.items():
-            processed_dataset_dir = dataset_dir.path / dtag
+            processed_dataset_dir = self.processed_datasets_dir / dtag
             try_make(processed_dataset_dir)
             self.processed_datasets[dtag] = processed_dataset_dir
