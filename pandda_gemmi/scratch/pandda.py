@@ -1,3 +1,5 @@
+import numpy as np
+
 from pandda_gemmi.scratch.interfaces import *
 
 from pandda_gemmi.args import PanDDAArgs
@@ -67,7 +69,10 @@ def pandda(args: PanDDAArgs):
         dataset = datasets[dtag]
 
         # Get the resolution to process at
-        processing_res = dataset.reflections.resolution() + 0.1
+        dataset_res = dataset.reflections.resolution() + 0.1
+        processing_res = max(dataset_res,
+                             list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[
+                                 60] + 0.1)
 
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
@@ -99,7 +104,7 @@ def pandda(args: PanDDAArgs):
         transforms_ref = processor.put(transforms)
 
         # Get the dmaps
-        dmaps = processor.process_dict(
+        dmaps_dict = processor.process_dict(
             {
                 _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
                     dataset_refs[_dtag],
@@ -111,35 +116,54 @@ def pandda(args: PanDDAArgs):
                 in comparator_datasets
             }
         )
+        dmaps = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
 
         # Comparator sets
         characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
             dtag,
-            datasets,
+            comparator_datasets,
             dmaps,
-            CharacterizationGaussianMixture(),
+            reference_frame,
+            CharacterizationGaussianMixture(n_components=20, covariance_type="diag"),
         )
 
-        # Get the models
-        statistical_model = PointwiseNormal()
-        cluster_density = ClusterDensityDBSCAN()
-        pre_score_filters = [FilterSize(), FilterCluster(), ]
-        scoring = ScoreCNN()
-        post_score_filters = [FilterScore(0.1), ]
+        for model_number, characterization_set in characterization_sets.items():
+            # Get the relevant dmaps
+            dtag_array = np.array([_dtag for _dtag in datasets])
 
-        # Evaluate the models against the dataset
-        model_events: Dict[int, Dict[int, EventInterface]] = {
-            model_number: evaluate_model(
-                characterization_set,
-                statistical_model,
-                cluster_density,
-                pre_score_filters,
-                scoring,
-                post_score_filters
+            # Get the dataset dmap
+            dtag_index = np.argwhere(dtag_array == dtag)
+            dataset_dmap_array = dmaps[dtag_index, :]
+
+            # Get the characterization set dmaps
+            characterization_set_mask_list = []
+            for _dtag in datasets:
+                if _dtag in characterization_set:
+                    characterization_set_mask_list.append(True)
+                else:
+                    characterization_set_mask_list.append(False)
+            characterization_set_mask = np.array([characterization_set_mask_list])
+            characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
+
+            # Get the statical maps
+            mean, std, z = PointwiseNormal()(
+                dataset_dmap_array,
+                characterization_set_dmaps_array
             )
-            for model_number, characterization_set
-            in characterization_sets.items()
-        }
+
+            # Initial
+            events = ClusterDensityDBSCAN()(z, reference_frame)
+
+            # Filter the events pre-scoring
+            for filter in [FilterSize(), FilterCluster(), ]:
+                events = filter(events)
+
+            # Score the events
+            events = ScoreCNN()(events)
+
+            # Filter the events post-scoring
+            for filter in [FilterScore(0.1), ]:
+                events = filter(events)
 
         # Select a model
         selected_model, selected_events = select_model(model_events)

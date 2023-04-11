@@ -1,5 +1,6 @@
 from ..interfaces import *
 
+
 class FilterResolution:
     def __init__(self, resolution_cutoff: float):
         self.resolution_cutoff = resolution_cutoff
