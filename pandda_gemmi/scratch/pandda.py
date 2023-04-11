@@ -186,7 +186,7 @@ def pandda(args: PanDDAArgs):
             events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
 
             # Filter the events post-scoring
-            for filter in [FilterScore(0.1), ]:
+            for filter in [FilterScore(0.1), LocallyHighestScoring(8.0)]:
                 events = filter(events)
                 print(f"After filter score: {len(events)}")
 
