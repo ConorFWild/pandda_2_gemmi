@@ -118,6 +118,8 @@ class FilterLocallyHighestScoring:
             masked_ids[distance_mask] = True
             new_events[j] = event
             j = j+1
+        for event_id, event in new_events.items():
+            print(f"\t{event_id} : {np.mean(event.pos_array, axis=0)}")
 
         return new_events
 
