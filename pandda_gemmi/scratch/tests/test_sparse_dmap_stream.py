@@ -189,6 +189,23 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     # Get processor
     processor = ProcessLocalRay(36)
 
+    # Get model
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
+    print(f"Device: {dev}")
+
+    # Load the model
+    cnn = resnet18(num_classes=2, num_input=4)
+    cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
+    cnn.load_state_dict(torch.load(cnn_path, map_location=dev))
+
+    # Add model to device
+    cnn.to(dev)
+    cnn.eval()
+    cnn = cnn.float()
+
     # Parse the FS
     print(f"##### Loading filesystem #####")
     fs: PanDDAFSInterface = PanDDAFS(Path(data_dir), Path(out_dir))
@@ -949,6 +966,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     times_get_high_z = []
     times_dbscan = []
     times_score_events = []
+    times_combine_cluster = []
 
     print(f"\tBayesian counts are {counts}")
     for predicted_class, count in zip(predicted_classes, counts):
@@ -1063,6 +1081,7 @@ def test_sparse_dmap_stream(data_dir, out_dir):
         cluster_nums, counts = np.unique(clusters, return_counts=True)
 
         # Cluster combining
+        time_begin_combine_cluster = time.time()
         large_clusters = []
         for cluster_num, count in zip(cluster_nums, counts):
             if cluster_num == -1:
@@ -1102,23 +1121,12 @@ def test_sparse_dmap_stream(data_dir, out_dir):
             # centroid = np.mean(large_cluster_centroid_array[clusters == cluster_num, :], axis=0)
             print(f"\t{cluster_num}: {centroid}")
 
+        time_finish_combine_cluster = time.time()
+        times_combine_cluster.append(time_finish_combine_cluster-time_begin_combine_cluster)
+
         # Event Scoring
 
-        if torch.cuda.is_available():
-            dev = "cuda:0"
-        else:
-            dev = "cpu"
-        print(f"Device: {dev}")
 
-        # Load the model
-        cnn = resnet18(num_classes=2, num_input=4)
-        cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
-        cnn.load_state_dict(torch.load(cnn_path, map_location=dev))
-
-        # Add model to device
-        cnn.to(dev)
-        cnn.eval()
-        cnn = cnn.float()
 
         # Annotate the events
         event_scores = {}
@@ -1247,7 +1255,8 @@ def test_sparse_dmap_stream(data_dir, out_dir):
     print(f"\tGot high zs in times: {times_get_high_z}")
     print(f"\tGot dbscans in times: {times_dbscan}")
     print(f"\tGot event scores in times: {times_score_events}")
-    accounted_runtume = (finish_align-begin_align) + (finish_get_frame-begin_get_frame) + time_load_dmap + time_pca + sum(times_get_high_z) + sum(times_dbscan) + sum(times_score_events)
+    print(f"\tGot combines clusters in times: {times_combine_cluster}")
+    accounted_runtume = (finish_align-begin_align) + (finish_get_frame-begin_get_frame) + time_load_dmap + time_pca + sum(times_get_high_z) + sum(times_dbscan) + sum(times_score_events) + sum(times_combine_cluster)
     print(f"Runtime accounted for: {accounted_runtume}")
 
     print(f"##### Z maps #####")
