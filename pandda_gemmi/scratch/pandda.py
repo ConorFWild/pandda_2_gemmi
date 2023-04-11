@@ -144,6 +144,8 @@ def pandda(args: PanDDAArgs):
         )
 
         model_events = {}
+        model_means = {}
+        model_zs = {}
         for model_number, characterization_set in characterization_sets.items():
 
             # Get the characterization set dmaps
@@ -161,6 +163,9 @@ def pandda(args: PanDDAArgs):
                 dataset_dmap_array,
                 characterization_set_dmaps_array
             )
+            model_means[model_number] = mean
+            model_zs[model_number] = z
+
             mean_grid = reference_frame.unmask(SparseDMap(mean))
             z_grid = reference_frame.unmask(SparseDMap(z))
 
@@ -208,7 +213,11 @@ def pandda(args: PanDDAArgs):
         output_events(fs, model_events)
 
         # Output event maps and model maps
-        output_maps(fs, selected_events)
+        output_maps(fs, selected_events,
+                    dataset_dmap_array,
+        model_means[selected_model_num],
+        reference_frame,
+                    )
 
     # Autobuild
     autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
