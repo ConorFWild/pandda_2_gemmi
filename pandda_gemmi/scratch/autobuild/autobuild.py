@@ -51,7 +51,7 @@ def autobuild(
     save_dmap(processed_dmap, processed_dmap_path)
 
     # Preprocess the structure
-    processed_structure = preprocess_structure(dataset.structure)
+    processed_structure = preprocess_structure(dataset.structure, event)
     processed_structure_path = autobuild_dir / constants.MASKED_PDB_FILE
     save_structure(processed_structure, processed_structure_path)
 

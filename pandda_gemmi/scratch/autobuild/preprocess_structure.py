@@ -8,6 +8,7 @@ class AutobuildPreprocessStructure:
 
     def __init__(self, radius=6.0):
         self.radius=radius
+
     def __call__(self, structure: StructureInterface, event: EventInterface):
         centroid = np.mean(event.pos_array, axis=0)
 
