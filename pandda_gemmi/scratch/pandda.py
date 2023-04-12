@@ -215,7 +215,7 @@ def pandda(args: PanDDAArgs):
         selected_model_num, selected_events = select_model(model_events)
         model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
         for event_id, event in model_events.items():
-            pandda_events[event_id] = events
+            pandda_events[event_id] = event
 
         # Output models
         output_models(fs, characterization_sets, selected_model_num)
