@@ -77,7 +77,7 @@ def merge_autobuilds(
         merge_build(
             dataset,
             selected_build_path,
-            model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag=dtag),
+            model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag),
         )
 
 
