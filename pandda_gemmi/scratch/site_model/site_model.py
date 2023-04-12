@@ -44,7 +44,7 @@ class HeirarchicalSiteModel:
         unique_clusters = np.unique(clusters, )
 
         # Merge the events based on the clustering
-        event_array = np.array([event for event in events.values()])
+        event_array = np.array([event_id for event_id in events.keys()])
         j = 0
         sites = {}
         for cluster_num in unique_clusters:
