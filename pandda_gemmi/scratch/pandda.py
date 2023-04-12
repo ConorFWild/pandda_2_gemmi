@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 from pandda_gemmi.scratch.interfaces import *
@@ -68,6 +70,7 @@ def pandda(args: PanDDAArgs):
 
     # Process each dataset
     pandda_events = {}
+    time_begin_process_datasets = time.time()
     for dtag in datasets:
         print(f"##### {dtag} #####")
         # Get the dataset
@@ -223,6 +226,9 @@ def pandda(args: PanDDAArgs):
             model_zs[selected_model_num],
             reference_frame,
         )
+
+    time_finish_process_datasets = time.time()
+    print(f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild
     autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
