@@ -270,7 +270,7 @@ def pandda(args: PanDDAArgs):
         if _event_id in best_event_autobuilds:
             autobuilds[_event_id] = best_event_autobuilds[_event_id]
         else:
-            autobuilds[_event_id] = AutobuildResult(None, None, None, None, None, None)
+            autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in datasets[_event_id].ligand_files}
     time_finish_autobuild = time.time()
     print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
 
