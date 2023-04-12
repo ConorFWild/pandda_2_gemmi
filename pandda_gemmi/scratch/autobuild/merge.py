@@ -39,13 +39,29 @@ def merge_build(dataset, selected_build_path, path):
     receptor.write_minimal_pdb(str(path))
 
 
-def merge_autobuilds(datasets, autobuilds, fs: PanDDAFSInterface, build_selection_method):
+def merge_autobuilds(datasets, events, autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]],
+                     fs: PanDDAFSInterface, build_selection_method):
     all_dtags = list(set([event_id[0] for event_id in autobuilds]))
 
     for dtag in all_dtags:
         dataset = datasets[dtag]
-        dtag_events = [event_id for event_id in autobuilds if event_id[0] == dtag]
-        selected_build_path = build_selection_method(dtag_events)
+        dtag_events = [event_id for event_id in events if event_id[0] == dtag]
+        dtag_autobuilds = [autobuilds[event_id] for event_id in dtag_events]
+
+        #
+        all_autobuilds = {}
+        for event_autobuilds in dtag_autobuilds:
+            for ligand_key in event_autobuilds:
+                autobuild_result = event_autobuilds[ligand_key]
+
+                for build_path, score in autobuild_result.log_result_dict.items():
+                    all_autobuilds[build_path] = score
+
+        if len(all_autobuilds) == 0:
+            continue
+
+        #
+        selected_build_path = build_selection_method(all_autobuilds)
         model_building_dir = fs.output.processed_datasets[dtag] / constants.PANDDA_MODELLED_STRUCTURES_DIR
         merge_build(
             dataset,
@@ -55,4 +71,5 @@ def merge_autobuilds(datasets, autobuilds, fs: PanDDAFSInterface, build_selectio
 
 
 class MergeHighestRSCC:
-    ...
+    def __call__(self, autobuilds: Dict[str, float]):
+        return max(autobuilds, key=lambda _path: autobuilds[_path])
