@@ -73,6 +73,8 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     for dtag in datasets:
         print(f"##### {dtag} #####")
+        time_begin_process_dataset = time.time()
+
         # Get the dataset
         dataset = datasets[dtag]
 
@@ -226,6 +228,8 @@ def pandda(args: PanDDAArgs):
             model_zs[selected_model_num],
             reference_frame,
         )
+        time_finish_process_dataset = time.time()
+        print(f"\tProcessed dataset in {round(time_finish_process_dataset-time_begin_process_dataset, 2)}")
 
     time_finish_process_datasets = time.time()
     print(f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
