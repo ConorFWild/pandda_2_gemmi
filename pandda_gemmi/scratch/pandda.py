@@ -258,6 +258,12 @@ def pandda(args: PanDDAArgs):
         }
     )
 
+    # Merge the autobuilds
+    merge_autobuilds(
+        autobuilds,
+        MergeHighestRSCC(),
+    )
+
     # Get the sites
     sites: Dict[int, Site] = get_sites(
         pandda_events,
@@ -268,7 +274,7 @@ def pandda(args: PanDDAArgs):
     ranking = rank_events(
         pandda_events,
         autobuilds,
-        RankHighScore,
+        RankHighScore(),
     )
 
     # Output tables

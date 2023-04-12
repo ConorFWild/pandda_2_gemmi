@@ -14,7 +14,7 @@ class Rhofit:
 
     def __call__(self, dmap_path, mtz_path, model_path, cif_path, out_dir):
         # Make rhofit commands
-        pandda_rhofit = Path(os.path.dirname(__file__)) / constants.PANDDA_RHOFIT_SCRIPT_FILE
+        pandda_rhofit = Path(os.path.dirname(__file__)).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE
 
         rhofit_command: str = constants.RHOFIT_COMMAND.format(
             pandda_rhofit=str(pandda_rhofit),
