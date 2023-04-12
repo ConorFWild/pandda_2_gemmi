@@ -298,7 +298,7 @@ def pandda(args: PanDDAArgs):
         print(f"{event_id} : {round(pandda_events[event_id].score, 2)} : {round(pandda_events[event_id].score, 2)}")
 
     # Output tables
-    output_tables(pandda_events, sites)
+    output_tables(pandda_events, sites, fs)
 
 
 if __name__ == '__main__':
