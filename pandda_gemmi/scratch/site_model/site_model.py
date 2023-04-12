@@ -48,11 +48,11 @@ class HeirarchicalSiteModel:
         j = 0
         sites = {}
         for cluster_num in unique_clusters:
-            site_events = event_array[clusters == cluster_num]
-            site_positions = np.concatenate([event.pos_array for event in site_events])
+            site_event_ids = event_array[clusters == cluster_num]
+            site_positions = np.concatenate([events[event_id].pos_array for event_id in site_event_ids])
 
             sites[j] = Site(
-                [event_id for event_id in site_events],
+                [event_id for event_id in site_event_ids],
                 np.mean(site_positions, axis=0),
             )
             j += 1
