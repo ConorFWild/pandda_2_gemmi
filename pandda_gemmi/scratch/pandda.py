@@ -197,7 +197,7 @@ def pandda(args: PanDDAArgs):
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
                 events = filter(events)
-                print(f"After filter score: {len(events)}")
+            print(f"After filter score: {len(events)}")
 
             if len(events) == 0:
                 continue
@@ -234,10 +234,11 @@ def pandda(args: PanDDAArgs):
         )
 
         time_finish_process_dataset = time.time()
-        print(f"\tProcessed dataset in {round(time_finish_process_dataset-time_begin_process_dataset, 2)}")
+        print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
 
     time_finish_process_datasets = time.time()
-    print(f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
+    print(
+        f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild the best scoring event for each dataset
     fs_ref = processor.put(fs)
@@ -270,9 +271,10 @@ def pandda(args: PanDDAArgs):
         if _event_id in best_event_autobuilds:
             autobuilds[_event_id] = best_event_autobuilds[_event_id]
         else:
-            autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in datasets[_event_id[0]].ligand_files}
+            autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
+                                     datasets[_event_id[0]].ligand_files}
     time_finish_autobuild = time.time()
-    print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
+    print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
 
     # Merge the autobuilds
     merge_autobuilds(
