@@ -272,7 +272,7 @@ def pandda(args: PanDDAArgs):
         else:
             autobuilds[_event_id] = AutobuildResult(None, None, None, None, None, None)
     time_finish_autobuild = time.time()
-    print(f"Autobuilt in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
+    print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
 
     # Merge the autobuilds
     # merge_autobuilds(
