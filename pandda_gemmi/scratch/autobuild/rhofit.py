@@ -40,7 +40,7 @@ class Rhofit:
         self.execute(rhofit_command)
 
         # Parse the log file
-        log_path = out_dir / constants.RHOFIT_OUTPUT_DIR / constants.RHOFIT_LOG_FILE
+        log_path = out_dir / constants.RHOFIT_OUTPUT_DIR / constants.RHOFIT_CORR_FILE
         if log_path.exists():
             with open(log_path, "r") as f:
                 log_info = f.read()
@@ -54,7 +54,7 @@ class Rhofit:
                 log_result_dict[str(file_path)] = rscc
 
             #
-            try_remove(out_dir /constants.RHOFIT_OUTPUT_DIR / constants.RHOFIT_REFINE_MTZ)
+            try_remove(out_dir / constants.RHOFIT_OUTPUT_DIR / constants.RHOFIT_REFINE_MTZ)
 
             return AutobuildResult(
                 log_result_dict,
