@@ -275,12 +275,12 @@ def pandda(args: PanDDAArgs):
     print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
 
     # Merge the autobuilds
-    # merge_autobuilds(
-    #     datasets,
-    #     autobuilds,
-    #     fs,
-    #     MergeHighestRSCC(),
-    # )
+    merge_autobuilds(
+        datasets,
+        autobuilds,
+        fs,
+        MergeHighestRSCC(),
+    )
 
     # Get the sites
     sites: Dict[int, Site] = get_sites(
