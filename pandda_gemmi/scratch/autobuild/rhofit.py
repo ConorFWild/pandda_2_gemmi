@@ -79,3 +79,5 @@ class Rhofit:
                              )
 
         stdout, stderr = p.communicate()
+        print(str(stdout))
+        print(str(stderr))
