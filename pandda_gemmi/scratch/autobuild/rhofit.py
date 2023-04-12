@@ -49,7 +49,7 @@ class Rhofit:
 
             log_result_dict = {}
             for log_result in log_results:
-                file_path = out_dir / log_result[0]
+                file_path = out_dir / constants.RHOFIT_OUTPUT_DIR / log_result[0]
                 rscc = log_result[1]
                 log_result_dict[str(file_path)] = rscc
 
