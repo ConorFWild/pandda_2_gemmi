@@ -32,7 +32,7 @@ class Rhofit:
             out_dir=str(out_dir),
             cut=self.cut,
         )
-        print(rhofit_command)
+        print(f"Command: {rhofit_command}")
 
         # Execute job script
         self.execute(rhofit_command)
