@@ -12,7 +12,7 @@ class SiteTableRecord:
     centroid: Tuple[float, float, float]
 
     @staticmethod
-    def from_site_id(site_id: SiteID, centroid: np.ndarray):
+    def from_site_id(site_id, centroid: np.ndarray):
         return SiteTableRecord(
             site_idx=site_id.site_id,
             centroid=(centroid[0], centroid[1], centroid[2],),
@@ -28,7 +28,7 @@ class SiteTable:
             yield record
 
     @staticmethod
-    def from_events(events: Events, cutoff: float):
+    def from_events(events, cutoff: float):
 
         dtag_clusters = {}
         for event_id in events:
@@ -69,7 +69,7 @@ class SiteTable:
         table.to_csv(str(path))
 
 
-def get_site_table_from_events(events: EventsInterface, initial_sites: SitesInterface, cutoff: float):
+def get_site_table_from_events(events, initial_sites, cutoff: float):
     dtag_clusters = {}
     for event_id in events:
         dtag = event_id.dtag

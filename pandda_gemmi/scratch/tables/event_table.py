@@ -35,7 +35,7 @@ class EventTableRecord:
     exclude_from_characterisation: bool
 
     @staticmethod
-    def from_event(event: Event):
+    def from_event(event):
         return EventTableRecord(
             dtag=event.event_id.dtag.dtag,
             event_idx=event.event_id.event_idx.event_idx,
@@ -70,7 +70,7 @@ class EventTable:
     records: List[EventTableRecord]
 
     @staticmethod
-    def from_events(events: Events):
+    def from_events(events):
         records = []
         for event_id in events:
             event_record = EventTableRecord.from_event(events[event_id])
@@ -122,10 +122,10 @@ def get_event_record_from_event_site(event: EventInterface, site_id: SiteIDInter
 
 
 def get_event_table_from_events(
-        events: EventsInterface,
-        sites: SitesInterface,
-        event_ranking: EventRankingInterface,
-) -> EventTableInterface:
+        events,
+        sites,
+        event_ranking,
+):
     records = []
     for event_id in event_ranking:
         event = events[event_id]
