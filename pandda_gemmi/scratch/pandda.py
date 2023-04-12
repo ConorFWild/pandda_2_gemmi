@@ -277,6 +277,7 @@ def pandda(args: PanDDAArgs):
     # Merge the autobuilds
     merge_autobuilds(
         datasets,
+        pandda_events,
         autobuilds,
         fs,
         MergeHighestRSCC(),
