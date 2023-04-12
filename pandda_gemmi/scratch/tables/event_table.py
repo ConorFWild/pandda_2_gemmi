@@ -88,7 +88,7 @@ class EventTable:
         table.to_csv(str(path))
 
 
-def get_event_record_from_event_site(event: EventInterface, site_id: SiteIDInterface) -> EventTableRecord:
+def get_event_record_from_event_site(event: EventInterface, site_id) -> EventTableRecord:
     return EventTableRecord(
         dtag=event.event_id.dtag.dtag,
         event_idx=event.event_id.event_idx.event_idx,
