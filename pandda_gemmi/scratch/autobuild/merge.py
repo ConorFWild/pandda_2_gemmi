@@ -66,10 +66,12 @@ def merge_autobuilds(
 
         #
         if len(all_autobuilds) == 0:
+            print(f"\t\tNo autobuilds generated for dataset: {dtag}")
             continue
 
         #
         selected_build_path = build_selection_method(all_autobuilds)
+        print(f"\tSlected build path: {selected_build_path}")
         model_building_dir = fs.output.processed_datasets[dtag] / constants.PANDDA_MODELLED_STRUCTURES_DIR
         merge_build(
             dataset,
