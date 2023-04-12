@@ -1,6 +1,3 @@
-
-
-
 from .. import constants
 
 from .site_table import SiteTable

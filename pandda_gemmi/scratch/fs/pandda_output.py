@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 
 from .pandda_input import PanDDAInput
@@ -9,6 +10,12 @@ def try_make(path):
     try:
         os.mkdir(path)
     except:
+        return
+
+def try_link(src, dst):
+    try:
+        os.symlink(src, dst)
+    except Exception as e:
         return
 
 class PanDDAOutput(PanDDAOutputInterface):
@@ -28,3 +35,5 @@ class PanDDAOutput(PanDDAOutputInterface):
             self.processed_datasets[dtag] = processed_dataset_dir
             model_building_dir = processed_dataset_dir / constants.PANDDA_MODELLED_STRUCTURES_DIR
             try_make(model_building_dir)
+            try_link(dataset_dir.input_pdb_file, processed_dataset_dir / constants.PANDDA_PDB_FILE.format(dtag=dtag))
+            try_link(dataset_dir.input_mtz_file, processed_dataset_dir / constants.PANDDA_MTZ_FILE.format(dtag=dtag))
