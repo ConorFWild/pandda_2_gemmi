@@ -19,12 +19,13 @@ class Rhofit:
 
     def __call__(self, dmap_path, mtz_path, model_path, cif_path, out_dir):
         # Make rhofit commands
-        pandda_rhofit = Path(
+        pandda_rhofit_script_file = Path(
             os.path.dirname(inspect.getfile(test_function))).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE
+        print(f"pandda_rhofit_script_file: {pandda_rhofit_script_file}")
         print(f"Pandda Rhofit path: {Path(os.path.dirname(__file__)).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE}")
 
         rhofit_command: str = constants.RHOFIT_COMMAND.format(
-            pandda_rhofit=str(pandda_rhofit),
+            pandda_rhofit=str(pandda_rhofit_script_file),
             event_map=str(dmap_path),
             mtz=str(mtz_path),
             pdb=str(model_path),
