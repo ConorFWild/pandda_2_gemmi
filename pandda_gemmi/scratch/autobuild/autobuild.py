@@ -35,12 +35,12 @@ def autobuild(
         fs: PanDDAFSInterface
 ):
     # Setup the output directory
-    autobuild_dir = fs.output.processed_dataset_dirs[event_id[0]] / f"autobuild_{event_id[1]}"
+    autobuild_dir = fs.output.processed_datasets[event_id[0]] / f"autobuild_{event_id[1]}"
     try_make(autobuild_dir)
 
     # Load the relevant event map for autobuilding and preprocessing
     dmap = load_dmap(
-        fs.output.processed_dataset_dirs[event_id[0]] / constants.PANDDA_EVENT_MAP_FILE.format(
+        fs.output.processed_datasets[event_id[0]] / constants.PANDDA_EVENT_MAP_FILE.format(
             dtag=event_id[0],
             event_idx=event_id[1],
             bdc=event.bdc

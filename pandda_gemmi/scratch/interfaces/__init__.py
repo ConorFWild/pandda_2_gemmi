@@ -61,7 +61,7 @@ class PanDDAInputInterface(Protocol):
     dataset_dirs: Dict[str, DatasetDirInterface]
 
 class PanDDAOutputInterface(Protocol):
-    ...
+    processed_datasets: Dict[str, Path]
 
 class PanDDAFSInterface(Protocol):
     input: PanDDAInputInterface
