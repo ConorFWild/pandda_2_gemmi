@@ -199,7 +199,7 @@ echo "done (`expr $t1 - $t0` sec)"
   cd $out && \
   printf " running Rhofit ... " && \
   t0=`date +%s` && \
-  rhofit -allclusters -m $mtz -l $cif -p $pdb -d rhofit -C ana_pdbmaps_cluster.lis > rhofit.lis 2>&1
+  rhofit -quick -allclusters -m $mtz -l $cif -p $pdb -d rhofit -C ana_pdbmaps_cluster.lis > rhofit.lis 2>&1
   [ $? -ne 0 ] && error "see $out/rhofit.lis"
   cd $cdir
   t1=`date +%s`
