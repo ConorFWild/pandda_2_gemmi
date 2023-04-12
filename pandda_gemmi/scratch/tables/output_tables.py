@@ -12,4 +12,4 @@ def output_tables(pandda_events, ranking, sites, fs):
     site_table.save(fs.output.analyses_dir / constants.PANDDA_ANALYSE_SITES_FILE)
 
     event_table = EventTable.from_events(pandda_events, ranking, sites)
-    event_table.save(fs.analyses_dir / constants.PANDDA_ANALYSE_EVENTS_FILE)
+    event_table.save(fs.output.analyses_dir / constants.PANDDA_ANALYSE_EVENTS_FILE)
