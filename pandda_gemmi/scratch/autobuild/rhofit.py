@@ -54,7 +54,7 @@ class Rhofit:
                 log_result_dict[str(file_path)] = rscc
 
             #
-            try_remove(out_dir / constants.RHOFIT_REFINE_MTZ)
+            try_remove(out_dir /constants.RHOFIT_OUTPUT_DIR / constants.RHOFIT_REFINE_MTZ)
 
             return AutobuildResult(
                 log_result_dict,

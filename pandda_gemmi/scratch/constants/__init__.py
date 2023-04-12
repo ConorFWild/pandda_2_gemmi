@@ -439,6 +439,7 @@ RHOFIT_CORR_FILE = "Hit_corr.log"
 # RHOFIT_LOG_REGEX = "(Hit[_0-9]+[(.)]pdb)[\s]+([a-zA-Z]+)[\s]+([0-9\.\+\-]+)[\s]+([0-9\.\+\-]+)"
 RHOFIT_LOG_REGEX = "(Hit[_0-9]+[(.)]pdb)[\s]+([0-9\.\+\-]+)"
 RHOFIT_REFINE_MTZ = "refine.mtz"
+RHOFIT_OUTPUT_DIR = "rhofit"
 
 ###################################################################
 # # Test constants
