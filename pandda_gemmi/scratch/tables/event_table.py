@@ -71,9 +71,9 @@ class EventTable:
     records: List[EventTableRecord]
 
     @staticmethod
-    def from_events(events: Dict[Tuple[str, int], EventInterface], sites):
+    def from_events(events: Dict[Tuple[str, int], EventInterface], ranking, sites):
         records = []
-        for event_id in events:
+        for event_id in ranking:
             for _site_id, site in sites.items():
                 if event_id in site.event_ids:
                     site_id = _site_id

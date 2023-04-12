@@ -14,7 +14,7 @@ class SiteTableRecord:
     @staticmethod
     def from_site_id(site_id, centroid: np.ndarray):
         return SiteTableRecord(
-            site_idx=site_id.site_id,
+            site_idx=site_id,
             centroid=(centroid[0], centroid[1], centroid[2],),
         )
 
