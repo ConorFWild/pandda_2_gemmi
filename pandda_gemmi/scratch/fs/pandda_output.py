@@ -6,17 +6,20 @@ from .pandda_input import PanDDAInput
 from .. import constants
 from ..interfaces import *
 
+
 def try_make(path):
     try:
         os.mkdir(path)
     except:
         return
 
+
 def try_link(src, dst):
     try:
         os.symlink(src, dst)
     except Exception as e:
         return
+
 
 class PanDDAOutput(PanDDAOutputInterface):
     def __init__(self, path: Path, pandda_input: PanDDAInput):
