@@ -64,11 +64,11 @@ def autobuild(
         try_make(ligand_autobuild_dir)
 
         autobuild_result = method(
-            processed_dmap_path,
-            dataset.reflections.path,
-            processed_structure_path,
-            ligand_cif_path,
-            ligand_autobuild_dir,
+            processed_dmap_path.resolve(),
+            dataset.reflections.path.resolve(),
+            processed_structure_path.resolve(),
+            ligand_cif_path.resolve(),
+            ligand_autobuild_dir.resolve(),
         )
         autobuild_results[ligand_key] = autobuild_result
 
