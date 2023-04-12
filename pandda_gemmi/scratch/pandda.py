@@ -242,6 +242,7 @@ def pandda(args: PanDDAArgs):
 
     # Autobuild
     fs_ref = processor.put(fs)
+    time_begin_autobuild = time.time()
     autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
         {
             _event_id: Partial(autobuild).paramaterise(
@@ -257,6 +258,8 @@ def pandda(args: PanDDAArgs):
             in pandda_events
         }
     )
+    time_finish_autobuild = time.time()
+    print(f"Autobuilt in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
 
     # Merge the autobuilds
     # merge_autobuilds(
