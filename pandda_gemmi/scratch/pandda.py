@@ -203,7 +203,9 @@ def pandda(args: PanDDAArgs):
 
         # Select a model
         selected_model_num, selected_events = select_model(model_events)
-        pandda_events[dtag] = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
+        model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
+        for event_id, event in model_events.items():
+            pandda_events[event_id] = events
 
         # Output models
         output_models(fs, characterization_sets, selected_model_num)
@@ -215,7 +217,7 @@ def pandda(args: PanDDAArgs):
         output_maps(
             dtag,
             fs,
-            pandda_events[dtag],
+            {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events},
             dataset_dmap_array,
             model_means[selected_model_num],
             model_zs[selected_model_num],
