@@ -259,10 +259,12 @@ def pandda(args: PanDDAArgs):
     )
 
     # Merge the autobuilds
-    merge_autobuilds(
-        autobuilds,
-        MergeHighestRSCC(),
-    )
+    # merge_autobuilds(
+    #     datasets,
+    #     autobuilds,
+    #     fs,
+    #     MergeHighestRSCC(),
+    # )
 
     # Get the sites
     sites: Dict[int, Site] = get_sites(
@@ -276,6 +278,8 @@ def pandda(args: PanDDAArgs):
         autobuilds,
         RankHighScore(),
     )
+    for event_id in ranking:
+        print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
 
     # Output tables
     output_tables(pandda_events, sites)
