@@ -39,8 +39,13 @@ def merge_build(dataset, selected_build_path, path):
     receptor.write_minimal_pdb(str(path))
 
 
-def merge_autobuilds(datasets, events, autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]],
-                     fs: PanDDAFSInterface, build_selection_method):
+def merge_autobuilds(
+        datasets,
+        events,
+        autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]],
+        fs: PanDDAFSInterface,
+        build_selection_method,
+):
     all_dtags = list(set([event_id[0] for event_id in autobuilds]))
 
     for dtag in all_dtags:
@@ -57,6 +62,7 @@ def merge_autobuilds(datasets, events, autobuilds: Dict[Tuple[str, int], Dict[st
                 for build_path, score in autobuild_result.log_result_dict.items():
                     all_autobuilds[build_path] = score
 
+        #
         if len(all_autobuilds) == 0:
             continue
 
