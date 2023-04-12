@@ -74,8 +74,8 @@ def pandda(args: PanDDAArgs):
     pandda_events = {}
     time_begin_process_datasets = time.time()
     for dtag in datasets:
-        if dtag != "JMJD2DA-x427":
-            continue
+        # if dtag != "JMJD2DA-x427":
+        #     continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
