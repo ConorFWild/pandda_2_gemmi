@@ -64,11 +64,11 @@ def autobuild(
         try_make(ligand_autobuild_dir)
 
         autobuild_result = method(
-            dmap=processed_dmap_path,
-            mtz=str(dataset.reflections.path),
-            pdb=str(processed_structure_path),
-            cif=str(ligand_cif_path),
-            out_dir=str(ligand_autobuild_dir),
+            processed_dmap_path,
+            str(dataset.reflections.path),
+            str(processed_structure_path),
+            str(ligand_cif_path),
+            str(ligand_autobuild_dir),
         )
         autobuild_results[ligand_key] = autobuild_result
 

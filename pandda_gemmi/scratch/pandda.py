@@ -272,7 +272,7 @@ def pandda(args: PanDDAArgs):
     )
 
     # Output tables
-    output_tables(pandda_events)
+    output_tables(pandda_events, sites)
 
 
 if __name__ == '__main__':
