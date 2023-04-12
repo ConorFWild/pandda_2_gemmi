@@ -27,6 +27,17 @@ class SiteTable:
         for record in self.site_record_list:
             yield record
 
+    @classmethod
+    def from_sites(cls, sites):
+        records = []
+        for site_id, site in sites.items():
+            # site = sites[site_id]
+            centroid = site.centroid
+            site_record = SiteTableRecord.from_site_id(site_id, centroid)
+            records.append(site_record)
+
+        return cls(records)
+
     @staticmethod
     def from_events(events, cutoff: float):
 

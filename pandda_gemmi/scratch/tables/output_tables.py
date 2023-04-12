@@ -1,12 +1,15 @@
 
 
 
-
+from .. import constants
 
 from .site_table import SiteTable
 from .event_table import EventTable
 
-def output_tables(pandda_events, sites):
+def output_tables(pandda_events, sites, fs):
 
+    site_table = SiteTable.from_sites(sites)
+    site_table.save(fs.analyses_dir / constants.PANDDA_ANALYSE_SITES_FILE)
 
-    ...
+    event_table = EventTable.from_events(pandda_events, sites)
+    event_table.save(fs.analyses_dir / constants.PANDDA_ANALYSE_EVENTS_FILE)
