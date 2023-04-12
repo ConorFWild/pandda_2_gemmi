@@ -295,7 +295,7 @@ def pandda(args: PanDDAArgs):
         RankHighScore(),
     )
     for event_id in ranking:
-        print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
+        print(f"{event_id} : {round(pandda_events[event_id].score, 2)} : {round(pandda_events[event_id].score, 2)}")
 
     # Output tables
     output_tables(pandda_events, sites)
