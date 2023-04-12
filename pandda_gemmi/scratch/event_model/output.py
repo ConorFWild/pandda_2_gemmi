@@ -35,7 +35,7 @@ def output_maps(
             Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
                 dtag=event_id[0],
                 event_idx=event_id[1],
-                bdc=round(event.bdc, 2)
+                bdc=round(1-event.bdc, 2)
             ),
             np.mean(event.pos_array, axis=0),
             reference_frame

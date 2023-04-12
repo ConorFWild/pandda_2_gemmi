@@ -43,7 +43,7 @@ def autobuild(
         fs.output.processed_datasets[event_id[0]] / constants.PANDDA_EVENT_MAP_FILE.format(
             dtag=event_id[0],
             event_idx=event_id[1],
-            bdc=event.bdc
+            bdc=round(1-event.bdc, 2)
         )
     )
     processed_dmap = preprocess_dmap(dmap)
