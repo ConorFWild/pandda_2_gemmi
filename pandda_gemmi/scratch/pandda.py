@@ -35,10 +35,9 @@ from pandda_gemmi.scratch.event_model.output import output_models, output_events
 
 from pandda_gemmi.scratch.site_model import HeirarchicalSiteModel, ClusterSites, Site, get_sites
 
-from pandda_gemmi.scratch.autobuild import autobuild
+from pandda_gemmi.scratch.autobuild import autobuild, AutobuildResult
 from pandda_gemmi.scratch.autobuild.rhofit import Rhofit
 from pandda_gemmi.scratch.autobuild.merge import merge_autobuilds, MergeHighestRSCC
-
 from pandda_gemmi.scratch.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
@@ -240,10 +239,16 @@ def pandda(args: PanDDAArgs):
     time_finish_process_datasets = time.time()
     print(f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
-    # Autobuild
+    # Autobuild the best scoring event for each dataset
     fs_ref = processor.put(fs)
     time_begin_autobuild = time.time()
-    autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+
+    best_events = {}
+    for dtag in datasets:
+        dtag_events = {_event_id: pandda_events[_event_id] for _event_id in pandda_events if _event_id[0] == dtag}
+        best_dtag_event_id = max(dtag_events, key=lambda _event_id: dtag_events[_event_id].score)
+        best_events[best_dtag_event_id] = pandda_events[best_dtag_event_id]
+    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
         {
             _event_id: Partial(autobuild).paramaterise(
                 _event_id,
@@ -255,9 +260,15 @@ def pandda(args: PanDDAArgs):
                 fs_ref
             )
             for _event_id
-            in pandda_events
+            in best_events
         }
     )
+    autobuilds = {}
+    for _event_id in pandda_events:
+        if _event_id in best_event_autobuilds:
+            autobuilds[_event_id] = best_event_autobuilds[_event_id]
+        else:
+            autobuilds[_event_id] = AutobuildResult(None, None, None, None, None, None)
     time_finish_autobuild = time.time()
     print(f"Autobuilt in: {round(time_finish_autobuild-time_begin_autobuild, 1)}")
 
