@@ -287,6 +287,8 @@ def pandda(args: PanDDAArgs):
         pandda_events,
         HeirarchicalSiteModel(t=8.0)
     )
+    for site_id, site in sites.items():
+        print(f"{site_id} : {site.event_ids}")
 
     # rank
     ranking = rank_events(
