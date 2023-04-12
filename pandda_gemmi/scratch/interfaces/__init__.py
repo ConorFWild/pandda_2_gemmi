@@ -60,9 +60,12 @@ class DatasetDirInterface(Protocol):
 class PanDDAInputInterface(Protocol):
     dataset_dirs: Dict[str, DatasetDirInterface]
 
+class PanDDAOutputInterface(Protocol):
+    ...
 
 class PanDDAFSInterface(Protocol):
     input: PanDDAInputInterface
+    output: PanDDAOutputInterface
 
 
 class StructureFactorsInterface(Protocol):

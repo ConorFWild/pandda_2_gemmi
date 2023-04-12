@@ -1,2 +1,2 @@
-class SiteModel:
+class HeirarchicalSiteModel:
     ...

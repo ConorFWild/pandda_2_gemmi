@@ -90,7 +90,7 @@ ARGS_DATA_QUALITY_FILTERS_DEFAULT = ("structure_factors", "resolution", "rfree")
 ARGS_REFERENCE_COMPARABILITY_FILTERS = "--reference_comparability_filters"
 ARGS_REFERENCE_COMPARABILITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include " \
                                             "\"dissimilar_models\", \"large_gaps\" and \"dissimilar_spacegroups\""
-ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT = ("dissimilar_models", "large_gaps", )
+ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT = ("dissimilar_models", "large_gaps",)
 
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
@@ -120,7 +120,6 @@ ARGS_JOB_PARAMS_FILE = "--job_params_file"
 ARGS_JOB_PARAMS_FILE_HELP = "DEPRECATED."
 ARGS_LOW_MEMORY = "--low_memory"
 ARGS_LOW_MEMORY_HELP = "DEPREACTED. "
-
 
 ARGS_RESCORE_EVENT_METHOD = "--rescore_event_method"
 ARGS_RESCORE_EVENT_METHOD_DEFAULT = "event_score"
@@ -428,6 +427,13 @@ LIGAND_CIF_FILE = "ligand.cif"
 LIGAND_PDB_FILE = "ligand.pdb"
 GRADE_COMMAND = "cd {out_dir}; grade -in {smiles_file} -ocif {prefix}.cif -opdb {prefix}.pdb -f; cd -"
 GRADE2_COMMAND = "cd {out_dir}; grade2 --in {smiles_file} -j -o {prefix} -f; mv {prefix}.restraints.cif {prefix}.cif; cd -"
+
+RHOFIT_MODEL_REGEX = "Hit_*.pdb"
+RHOFIT_LOG_FILE = "rhofit.lis"
+RHOFIT_CORR_FILE = "Hit_corr.log"
+# RHOFIT_LOG_REGEX = "(Hit[_0-9]+[(.)]pdb)[\s]+([a-zA-Z]+)[\s]+([0-9\.\+\-]+)[\s]+([0-9\.\+\-]+)"
+RHOFIT_LOG_REGEX = "(Hit[_0-9]+[(.)]pdb)[\s]+([0-9\.\+\-]+)"
+RHOFIT_REFINE_MTZ = "refine.mtz"
 
 ###################################################################
 # # Test constants

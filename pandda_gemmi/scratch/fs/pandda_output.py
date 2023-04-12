@@ -3,6 +3,7 @@ from pathlib import Path
 
 from .pandda_input import PanDDAInput
 from .. import constants
+from ..interfaces import *
 
 def try_make(path):
     try:
@@ -10,7 +11,7 @@ def try_make(path):
     except:
         return
 
-class PanDDAOutput:
+class PanDDAOutput(PanDDAOutputInterface):
     def __init__(self, path: Path, pandda_input: PanDDAInput):
         self.path = path
         self.processed_datasets_dir = path / constants.PANDDA_PROCESSED_DATASETS_DIR

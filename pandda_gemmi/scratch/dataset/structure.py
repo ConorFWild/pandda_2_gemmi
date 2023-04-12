@@ -6,11 +6,13 @@ from ..interfaces import *
 from .. import constants
 import numpy as np
 
+
 def contains(string, pattern):
     if pattern in string:
         return True
     else:
         return False
+
 
 @dataclasses.dataclass()
 class StructurePython:
@@ -97,7 +99,6 @@ class Structure(StructureInterface):
                     resid = ResidueID.from_residue_chain(model, chain, residue)
                     yield resid
 
-
     def protein_atoms(self):
         for model in self.structure:
             for chain in model:
@@ -142,6 +143,7 @@ class Structure(StructureInterface):
         self.structure = structure_python.to_gemmi()
         self.structure.setup_entities()
         self.path = path
+
     def rfree(self):
         return float(self.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0])
 
@@ -187,3 +189,7 @@ class StructureArray(StructureArrayInterface):
             self.atom_ids[mask],
             self.positions[mask, :]
         )
+
+
+def save_structure(structure, path):
+    structure.structure.write_minimal_pdb(str(path))

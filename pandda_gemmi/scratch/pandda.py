@@ -33,11 +33,14 @@ from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, F
 from pandda_gemmi.scratch.event_model.select import select_model
 from pandda_gemmi.scratch.event_model.output import output_models, output_events, output_maps
 
-from pandda_gemmi.scratch.site_model import SiteModel, ClusterSites, Site, get_sites
+from pandda_gemmi.scratch.site_model import HeirarchicalSiteModel, ClusterSites, Site, get_sites
 
 from pandda_gemmi.scratch.autobuild import autobuild
 from pandda_gemmi.scratch.autobuild.rhofit import Rhofit
 from pandda_gemmi.scratch.autobuild.merge import MergeHighestRSCC
+
+from pandda_gemmi.scratch.autobuild.preprocess_structure import AutobuildPreprocessStructure
+from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
 from pandda_gemmi.scratch.ranking import rank_events, RankHighScore
 
@@ -72,6 +75,8 @@ def pandda(args: PanDDAArgs):
     pandda_events = {}
     time_begin_process_datasets = time.time()
     for dtag in datasets:
+        if dtag != "JMJD2DA-x427":
+            continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
@@ -228,6 +233,7 @@ def pandda(args: PanDDAArgs):
             model_zs[selected_model_num],
             reference_frame,
         )
+
         time_finish_process_dataset = time.time()
         print(f"\tProcessed dataset in {round(time_finish_process_dataset-time_begin_process_dataset, 2)}")
 
@@ -235,12 +241,17 @@ def pandda(args: PanDDAArgs):
     print(f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild
-    autobuilds: Dict[Tuple[str, int], AutobuildInterface] = processor.process_dict(
+    fs_ref = processor.put(fs)
+    autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
         {
             _event_id: Partial(autobuild).paramaterise(
-                datasets[_event_id[0]],
+                _event_id,
+                dataset_refs[_event_id[0]],
                 pandda_events[_event_id],
+                AutobuildPreprocessStructure(),
+                AutobuildPreprocessDMap(),
                 Rhofit(),
+                fs_ref
             )
             for _event_id
             in pandda_events
@@ -250,7 +261,7 @@ def pandda(args: PanDDAArgs):
     # Get the sites
     sites: Dict[int, Site] = get_sites(
         pandda_events,
-        SiteModel()
+        HeirarchicalSiteModel(t=8.0)
     )
 
     # rank
