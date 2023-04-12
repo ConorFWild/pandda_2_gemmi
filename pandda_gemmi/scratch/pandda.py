@@ -251,7 +251,7 @@ def pandda(args: PanDDAArgs):
                 pandda_events[_event_id],
                 AutobuildPreprocessStructure(),
                 AutobuildPreprocessDMap(),
-                Rhofit(),
+                Rhofit(cut=1.0),
                 fs_ref
             )
             for _event_id
