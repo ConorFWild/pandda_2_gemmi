@@ -22,3 +22,5 @@ class PanDDAOutput(PanDDAOutputInterface):
             processed_dataset_dir = self.processed_datasets_dir / dtag
             try_make(processed_dataset_dir)
             self.processed_datasets[dtag] = processed_dataset_dir
+            model_building_dir = processed_dataset_dir / constants.PANDDA_MODELLED_STRUCTURES_DIR
+            try_make(model_building_dir)

@@ -37,7 +37,7 @@ from pandda_gemmi.scratch.site_model import HeirarchicalSiteModel, ClusterSites,
 
 from pandda_gemmi.scratch.autobuild import autobuild
 from pandda_gemmi.scratch.autobuild.rhofit import Rhofit
-from pandda_gemmi.scratch.autobuild.merge import MergeHighestRSCC
+from pandda_gemmi.scratch.autobuild.merge import merge_autobuilds, MergeHighestRSCC
 
 from pandda_gemmi.scratch.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDMap
