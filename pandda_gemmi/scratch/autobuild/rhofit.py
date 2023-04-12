@@ -7,8 +7,10 @@ from pathlib import Path
 from .. import constants
 from .autobuild import AutobuildResult
 
+
 def test_function():
     ...
+
 
 class Rhofit:
 
@@ -17,8 +19,9 @@ class Rhofit:
 
     def __call__(self, dmap_path, mtz_path, model_path, cif_path, out_dir):
         # Make rhofit commands
-        pandda_rhofit = Path(os.path.dirname(inspect.getfile(test_function))).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE
-        print(f"Pandda Rhofit path: {Path(os.path.dirname(__file__)).resolve()}")
+        pandda_rhofit = Path(
+            os.path.dirname(inspect.getfile(test_function))).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE
+        print(f"Pandda Rhofit path: {Path(os.path.dirname(__file__)).resolve() / constants.PANDDA_RHOFIT_SCRIPT_FILE}")
 
         rhofit_command: str = constants.RHOFIT_COMMAND.format(
             pandda_rhofit=str(pandda_rhofit),
@@ -72,7 +75,6 @@ class Rhofit:
 
         # # Parse the results
         # for model_path in out_dir.glob(constants.RHOFIT_MODEL_REGEX):
-
 
     def execute(self, command: str):
         p = subprocess.Popen(command,
