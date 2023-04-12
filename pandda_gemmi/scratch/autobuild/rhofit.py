@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .. import constants
 from .autobuild import AutobuildResult
+from ..fs import try_remove
 
 
 def test_function():
@@ -53,7 +54,7 @@ class Rhofit:
                 log_result_dict[str(file_path)] = rscc
 
             #
-            os.remove(out_dir / constants.RHOFIT_REFINE_MTZ)
+            try_remove(out_dir / constants.RHOFIT_REFINE_MTZ)
 
             return AutobuildResult(
                 log_result_dict,

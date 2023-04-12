@@ -10,3 +10,9 @@ def try_make(path):
         os.mkdir(path)
     except:
         return
+
+def try_remove(path):
+    try:
+        os.remove(path)
+    except:
+        return
