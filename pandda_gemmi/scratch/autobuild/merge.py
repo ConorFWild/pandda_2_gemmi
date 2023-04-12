@@ -59,6 +59,7 @@ def merge_autobuilds(
         for event_autobuilds in dtag_autobuilds:
             for ligand_key in event_autobuilds.keys():
                 autobuild_result = event_autobuilds[ligand_key]
+                print(f"\t\t\t{autobuild_result.log_result_dict}")
 
                 if autobuild_result.log_result_dict:
                     for build_path, score in autobuild_result.log_result_dict.items():
