@@ -93,6 +93,8 @@ def pandda(args: PanDDAArgs):
             datasets,
             [FilterRFree(0.4), FilterSpaceGroup(dataset), FilterResolution(processing_res)]
         )
+        if dtag not in comparator_datasets:
+            comparator_datasets[dtag] = dataset
 
         # Get the alignments
         alignments: Dict[str, AlignmentInterface] = processor.process_dict(
