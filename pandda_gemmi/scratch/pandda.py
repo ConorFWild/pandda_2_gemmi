@@ -246,6 +246,8 @@ def pandda(args: PanDDAArgs):
     best_events = {}
     for dtag in datasets:
         dtag_events = {_event_id: pandda_events[_event_id] for _event_id in pandda_events if _event_id[0] == dtag}
+        if len(dtag_events) == 0:
+            continue
         best_dtag_event_id = max(dtag_events, key=lambda _event_id: dtag_events[_event_id].score)
         best_events[best_dtag_event_id] = pandda_events[best_dtag_event_id]
     best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
