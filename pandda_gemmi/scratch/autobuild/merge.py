@@ -59,8 +59,9 @@ def merge_autobuilds(
             for ligand_key in event_autobuilds:
                 autobuild_result = event_autobuilds[ligand_key]
 
-                for build_path, score in autobuild_result.log_result_dict.items():
-                    all_autobuilds[build_path] = score
+                if autobuild_result.log_result_dict:
+                    for build_path, score in autobuild_result.log_result_dict.items():
+                        all_autobuilds[build_path] = score
 
         #
         if len(all_autobuilds) == 0:
