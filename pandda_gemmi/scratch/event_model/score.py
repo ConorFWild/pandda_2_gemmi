@@ -225,7 +225,7 @@ class ScoreCNN:
 
             bdc = get_bdc(event, xmap_grid, mean_grid, median)
             bdcs[event_id] = bdc
-            print(f"BDC: {bdc}")
+            # print(f"BDC: {bdc}")
 
             sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
 
