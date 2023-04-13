@@ -96,8 +96,8 @@ def get_model_map(structure, xmap_event):
 
 
 def get_bdc(event, xmap_grid, mean_grid, median):
-    xmap_array = np.array(xmap_grid)
-    mean_array = np.array(mean_grid)
+    xmap_array = np.array(xmap_grid, copy=False)
+    mean_array = np.array(mean_grid, copy=False)
     event_indicies = tuple(
         [
             event.point_array[:, 0].flatten(),
