@@ -58,7 +58,10 @@ def autobuild(
     # Autobuild for each cif
     autobuild_results = {}
     for ligand_key in dataset.ligand_files:
-        ligand_cif_path = dataset.ligand_files[ligand_key].ligand_cif
+        ligand_files = dataset.ligand_files[ligand_key]
+        if not ligand_files.ligand_cif:
+            continue
+        ligand_cif_path = ligand_files.ligand_cif
 
         ligand_autobuild_dir = autobuild_dir / ligand_key
         try_make(ligand_autobuild_dir)

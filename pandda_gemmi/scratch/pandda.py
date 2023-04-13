@@ -97,6 +97,7 @@ def pandda(args: PanDDAArgs):
             comparator_datasets[dtag] = dataset
 
         # Get the alignments
+        time_begin_get_alignments = time.time()
         alignments: Dict[str, AlignmentInterface] = processor.process_dict(
             {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
                 structure_array_refs[_dtag],
@@ -104,10 +105,15 @@ def pandda(args: PanDDAArgs):
             ) for _dtag in comparator_datasets}
         )
         alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
+        time_finish_get_alignments = time.time()
+        print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
         # Get the reference frame
+        time_begin_get_frame = time.time()
         reference_frame: DFrame = DFrame(dataset, processor)
         reference_frame_ref = processor.put(reference_frame)
+        time_finish_get_frame = time.time()
+        print(f"\t\tGot dmaps in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
         # Get the transforms
         transforms = [
@@ -120,6 +126,7 @@ def pandda(args: PanDDAArgs):
         transforms_ref = processor.put(transforms)
 
         # Get the dmaps
+        time_begin_get_dmaps = time.time()
         dmaps_dict = processor.process_dict(
             {
                 _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
@@ -133,6 +140,8 @@ def pandda(args: PanDDAArgs):
             }
         )
         dmaps = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
+        time_finish_get_dmaps = time.time()
+        print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
 
         # Get the relevant dmaps
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
@@ -146,6 +155,7 @@ def pandda(args: PanDDAArgs):
         model_grid = get_model_map(dataset.structure.structure, xmap_grid)
 
         # Comparator sets
+        time_begin_get_characterization_sets = time.time()
         characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
             dtag,
             comparator_datasets,
@@ -153,7 +163,10 @@ def pandda(args: PanDDAArgs):
             reference_frame,
             CharacterizationGaussianMixture(n_components=20, covariance_type="diag"),
         )
+        time_finish_get_characterization_sets = time.time()
+        print(f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
+        time_begin_process_models = time.time()
         model_events = {}
         model_means = {}
         model_zs = {}
@@ -194,7 +207,10 @@ def pandda(args: PanDDAArgs):
                 continue
 
             # Score the events
+            time_begin_score_events = time.time()
             events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
+            time_finish_score_events = time.time()
+            print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 
             # Filter the events post-scoring
             for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
@@ -207,6 +223,9 @@ def pandda(args: PanDDAArgs):
             print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
 
             model_events[model_number] = events
+
+        time_finish_process_models = time.time()
+        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
 
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
@@ -225,6 +244,7 @@ def pandda(args: PanDDAArgs):
         output_events(fs, model_events)
 
         # Output event maps and model maps
+        time_begin_output_maps = time.time()
         output_maps(
             dtag,
             fs,
@@ -234,6 +254,8 @@ def pandda(args: PanDDAArgs):
             model_zs[selected_model_num],
             reference_frame,
         )
+        time_finish_output_maps = time.time()
+        print(f"\t\tOutput maps in: {round(time_finish_output_maps-time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
         print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
