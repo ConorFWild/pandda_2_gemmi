@@ -46,6 +46,59 @@ from pandda_gemmi.scratch.ranking import rank_events, RankHighScore
 from pandda_gemmi.scratch.tables import output_tables
 
 
+def process_model(
+        dataset_dmap_array,
+        characterization_set_dmaps_array,
+        reference_frame,
+        model_map,
+        score
+):
+
+
+    # Get the statical maps
+    mean, std, z = PointwiseNormal()(
+        dataset_dmap_array,
+        characterization_set_dmaps_array
+    )
+
+    mean_grid = reference_frame.unmask(SparseDMap(mean))
+    z_grid = reference_frame.unmask(SparseDMap(z))
+    xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+    model_grid = reference_frame.unmask(SparseDMap(model_map))
+
+    # Initial
+    events = ClusterDensityDBSCAN()(z, reference_frame)
+    print(f"Initial events: {len(events)}")
+
+    # Filter the events pre-scoring
+    for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
+        events = filter(events)
+
+    print(f"After filer size and cluster: {len(events)}")
+
+    if len(events) == 0:
+        return None, None, None
+
+    # Score the events
+    time_begin_score_events = time.time()
+    events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
+    time_finish_score_events = time.time()
+    print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
+
+    # Filter the events post-scoring
+    for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
+        events = filter(events)
+    print(f"After filter score: {len(events)}")
+
+    if len(events) == 0:
+        return None, None, None
+
+    print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
+
+    # model_events[model_number] = events
+
+    return events, mean, z
+
 def pandda(args: PanDDAArgs):
     # Get the processor
     processor: ProcessorInterface = ProcessLocalRay(args.local_cpus)
@@ -55,6 +108,7 @@ def pandda(args: PanDDAArgs):
 
     # Get the scoring method
     score = ScoreCNN()
+    score_ref = processor.put(score)
 
     # Get the datasets
     datasets: Dict[str, DatasetInterface] = {
@@ -157,6 +211,7 @@ def pandda(args: PanDDAArgs):
 
         #
         model_grid = get_model_map(dataset.structure.structure, xmap_grid)
+        model_map_ref = processor.put(reference_frame.mask_grid(model_grid).data)
 
         # Comparator sets
         time_begin_get_characterization_sets = time.time()
@@ -174,6 +229,7 @@ def pandda(args: PanDDAArgs):
         model_events = {}
         model_means = {}
         model_zs = {}
+        characterization_set_masks = {}
         for model_number, characterization_set in characterization_sets.items():
 
             # Get the characterization set dmaps
@@ -184,49 +240,74 @@ def pandda(args: PanDDAArgs):
                 else:
                     characterization_set_mask_list.append(False)
             characterization_set_mask = np.array(characterization_set_mask_list)
-            characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
+            characterization_set_masks[model_number] = characterization_set_mask
+            # characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
+        # for model_number, characterization_set in characterization_sets.items():
+        #
+        #     # Get the characterization set dmaps
+        #     characterization_set_mask_list = []
+        #     for _dtag in comparator_datasets:
+        #         if _dtag in characterization_set:
+        #             characterization_set_mask_list.append(True)
+        #         else:
+        #             characterization_set_mask_list.append(False)
+        #     characterization_set_mask = np.array(characterization_set_mask_list)
+        #     characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
+        #
+        #     # Get the statical maps
+        #     mean, std, z = PointwiseNormal()(
+        #         dataset_dmap_array,
+        #         characterization_set_dmaps_array
+        #     )
+        #     model_means[model_number] = mean
+        #     model_zs[model_number] = z
+        #
+        #     mean_grid = reference_frame.unmask(SparseDMap(mean))
+        #     z_grid = reference_frame.unmask(SparseDMap(z))
+        #
+        #     # Initial
+        #     events = ClusterDensityDBSCAN()(z, reference_frame)
+        #     print(f"Initial events: {len(events)}")
+        #
+        #     # Filter the events pre-scoring
+        #     for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
+        #         events = filter(events)
+        #
+        #     print(f"After filer size and cluster: {len(events)}")
+        #
+        #     if len(events) == 0:
+        #         continue
+        #
+        #     # Score the events
+        #     time_begin_score_events = time.time()
+        #     events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
+        #     time_finish_score_events = time.time()
+        #     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
+        #
+        #     # Filter the events post-scoring
+        #     for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
+        #         events = filter(events)
+        #     print(f"After filter score: {len(events)}")
+        #
+        #     if len(events) == 0:
+        #         continue
+        #
+        #     print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
+        #
+        #     model_events[model_number] = events
 
-            # Get the statical maps
-            mean, std, z = PointwiseNormal()(
-                dataset_dmap_array,
-                characterization_set_dmaps_array
-            )
-            model_means[model_number] = mean
-            model_zs[model_number] = z
 
-            mean_grid = reference_frame.unmask(SparseDMap(mean))
-            z_grid = reference_frame.unmask(SparseDMap(z))
-
-            # Initial
-            events = ClusterDensityDBSCAN()(z, reference_frame)
-            print(f"Initial events: {len(events)}")
-
-            # Filter the events pre-scoring
-            for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
-                events = filter(events)
-
-            print(f"After filer size and cluster: {len(events)}")
-
-            if len(events) == 0:
-                continue
-
-            # Score the events
-            time_begin_score_events = time.time()
-            events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
-            time_finish_score_events = time.time()
-            print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
-
-            # Filter the events post-scoring
-            for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
-                events = filter(events)
-            print(f"After filter score: {len(events)}")
-
-            if len(events) == 0:
-                continue
-
-            print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
-
-            model_events[model_number] = events
+        processed_models = processor.process_dict(
+            {
+                model_number: Partial(process_model).paramaterise(
+                    dataset_dmap_array,
+                    dmaps[characterization_set_masks[model_number], :],
+                    reference_frame,
+                    model_map_ref,
+                    score_ref
+                )
+            }
+        )
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
