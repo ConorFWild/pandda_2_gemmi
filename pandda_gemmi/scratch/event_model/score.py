@@ -95,6 +95,26 @@ def get_model_map(structure, xmap_event):
     return new_xmap
 
 
+def get_bdc(event, xmap_grid, mean_grid, median):
+    xmap_array = np.array(xmap_grid)
+    mean_array = np.array(mean_grid)
+    event_indicies = tuple(
+        [
+            event.point_array[:, 0].flatten(),
+            event.point_array[:, 1].flatten(),
+            event.point_array[:, 2].flatten(),
+        ]
+    )
+    xmap_vals = xmap_array[event_indicies]
+    mean_map_vals = mean_array[event_indicies]
+    diffs = {}
+    for bdc in np.linspace(0.0, 0.95, 20):
+        new_median = (xmap_vals - (bdc * mean_map_vals)) / (1 - bdc)
+        diffs[round(float(bdc), 2)] = np.abs(median - new_median)
+
+    return min(diffs, key=lambda _bdc: diffs[_bdc])
+
+
 class ScoreCNN:
     def __init__(self, n=30):
         # Get model
@@ -115,11 +135,84 @@ class ScoreCNN:
 
         self.n = n
 
-    def __call__(self, events, xmap_grid, mean_grid, z_grid, model_grid):
+    # def __call__(self, events, xmap_grid, mean_grid, z_grid, model_grid):
+    #
+    #     scored_events = {}
+    #     time_begin_get_images = time.time()
+    #     images = {}
+    #     for event_id, event in events.items():
+    #         centroid = np.mean(event.pos_array, axis=0)
+    #
+    #         sample_transform = get_sample_transform_from_event(
+    #             centroid,
+    #             0.5,
+    #             self.n,
+    #             3.5
+    #         )
+    #
+    #         sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
+    #
+    #         bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
+    #
+    #         xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
+    #
+    #         mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
+    #
+    #         image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1 - bdcs)
+    #
+    #         image_raw = np.stack([xmap_sample for _j in range(20)])
+    #
+    #         sample_array_zmap = np.copy(sample_array)
+    #         zmap_sample = sample_xmap(z_grid, sample_transform, sample_array_zmap)
+    #         image_zmap = np.stack([zmap_sample for _j in range(20)])
+    #
+    #         sample_array_model = np.copy(sample_array)
+    #
+    #         model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
+    #         image_model = np.stack([model_sample for _j in range(20)])
+    #
+    #         image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
+    #         images[event_id] = image
+    #
+    #     time_finish_get_images = time.time()
+    #     print(f"\t\t\t\tGot images in: {round(time_finish_get_images-time_begin_get_images, 2)}")
+    #
+    #     for event_id, event in events.items():
+    #         image = images[event_id]
+    #
+    #         # Transfer to tensor
+    #         image_t = torch.from_numpy(image)
+    #
+    #         # Move tensors to device
+    #         image_c = image_t.to(self.dev)
+    #
+    #         # Run model
+    #         model_annotation = self.cnn(image_c.float())
+    #
+    #         # Track score
+    #         model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
+    #
+    #         flat_bdcs = bdcs.flatten()
+    #         max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
+    #         bdc = float(flat_bdcs[max_score_index])
+    #         score = float(model_annotations[max_score_index, 1])
+    #
+    #         scored_event = Event(
+    #             event.pos_array,
+    #             score,
+    #             bdc
+    #         )
+    #         scored_events[event_id] = scored_event
+    #
+    #
+    #     return scored_events
+
+    def __call__(self, events, xmap_grid, mean_grid, z_grid, model_grid, median):
 
         scored_events = {}
         time_begin_get_images = time.time()
         images = {}
+        bdcs = {}
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
 
@@ -130,32 +223,40 @@ class ScoreCNN:
                 3.5
             )
 
+            bdc = get_bdc(event, xmap_grid, mean_grid, median)
+            bdcs[event_id] = bdc
+            print(f"BDC: {bdc}")
+
             sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
 
-            bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
+            # bdcs = np.linspace(0.0, 0.95, 20).reshape((20, 1, 1, 1))
 
             xmap_sample = sample_xmap(xmap_grid, sample_transform, np.copy(sample_array))
 
             mean_map_sample = sample_xmap(mean_grid, sample_transform, np.copy(sample_array))
 
-            image_events = (xmap_sample[np.newaxis, :] - (bdcs * mean_map_sample[np.newaxis, :])) / (1 - bdcs)
+            sample_event = (xmap_sample - (bdc * mean_map_sample)) / (1 - bdc)
+            image_event = sample_event[np.newaxis, :]
+            image_raw = xmap_sample[np.newaxis, :]
 
-            image_raw = np.stack([xmap_sample for _j in range(20)])
+            # image_raw = np.stack([xmap_sample for _j in range(20)])
 
             sample_array_zmap = np.copy(sample_array)
             zmap_sample = sample_xmap(z_grid, sample_transform, sample_array_zmap)
-            image_zmap = np.stack([zmap_sample for _j in range(20)])
+            image_zmap = zmap_sample[np.newaxis, :]
+            # image_zmap = np.stack([zmap_sample for _j in range(20)])
 
             sample_array_model = np.copy(sample_array)
 
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
-            image_model = np.stack([model_sample for _j in range(20)])
+            image_model = model_sample[np.newaxis, :]
+            # image_model = np.stack([model_sample for _j in range(20)])
 
-            image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
+            image = np.stack([image_event, image_raw, image_zmap, image_model], axis=1)
             images[event_id] = image
 
         time_finish_get_images = time.time()
-        print(f"\t\t\t\tGot images in: {round(time_finish_get_images-time_begin_get_images, 2)}")
+        print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
 
         for event_id, event in events.items():
             image = images[event_id]
@@ -172,17 +273,17 @@ class ScoreCNN:
             # Track score
             model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
 
-            flat_bdcs = bdcs.flatten()
+            # flat_bdcs = bdcs.flatten()
             max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
-            bdc = float(flat_bdcs[max_score_index])
+            # bdc = float(flat_bdcs[max_score_index])
             score = float(model_annotations[max_score_index, 1])
 
             scored_event = Event(
                 event.pos_array,
+                event.point_array,
                 score,
-                bdc
+                bdcs[event_id]
             )
             scored_events[event_id] = scored_event
-
 
         return scored_events

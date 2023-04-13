@@ -51,7 +51,7 @@ def process_model(
         characterization_set_dmaps_array,
         reference_frame,
         model_map,
-        score
+        score,
 ):
 
 
@@ -64,6 +64,8 @@ def process_model(
     mean_grid = reference_frame.unmask(SparseDMap(mean))
     z_grid = reference_frame.unmask(SparseDMap(z))
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+    inner_mask_xmap = reference_frame.mask_inner(xmap_grid)
+    median = np.median(inner_mask_xmap)
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
     # Initial
@@ -81,7 +83,7 @@ def process_model(
 
     # Score the events
     time_begin_score_events = time.time()
-    events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
+    events = score(events, xmap_grid, mean_grid, z_grid, model_grid, median)
     time_finish_score_events = time.time()
     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 

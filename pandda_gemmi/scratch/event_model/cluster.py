@@ -53,6 +53,16 @@ class ClusterDensityDBSCAN:
 
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
 
+        high_z_point_x = point_3d_array_x[high_z_indexes]
+        high_z_point_y = point_3d_array_y[high_z_indexes]
+        high_z_point_z = point_3d_array_z[high_z_indexes]
+
+        high_z_point_array = np.hstack([
+            high_z_point_x.reshape((-1, 1)),
+            high_z_point_y.reshape((-1, 1)),
+            high_z_point_z.reshape((-1, 1))
+        ])
+
         cluster_nums, counts = np.unique(clusters, return_counts=True)
 
         events = {}
@@ -60,7 +70,11 @@ class ClusterDensityDBSCAN:
         for cluster_num in cluster_nums:
             if cluster_num == -1:
                 continue
-            events[j] = Event(high_z_pos_array[clusters == cluster_num, :], 0.0)
+            events[j] = Event(
+                high_z_pos_array[clusters == cluster_num, :],
+                high_z_point_array[clusters == cluster_num, :],
+                0.0,
+            )
             j +=1
 
         return events
