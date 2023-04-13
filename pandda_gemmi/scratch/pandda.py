@@ -201,7 +201,7 @@ def pandda(args: PanDDAArgs):
                 in comparator_datasets
             }
         )
-        dmaps = np.vstack([dmap.data.reshape((1, -1)) for dtag, dmap in dmaps_dict.items()])
+        dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
         print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
 
