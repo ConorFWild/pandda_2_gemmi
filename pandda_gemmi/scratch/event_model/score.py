@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import gemmi
 
@@ -116,6 +118,8 @@ class ScoreCNN:
     def __call__(self, events, xmap_grid, mean_grid, z_grid, model_grid):
 
         scored_events = {}
+        time_begin_get_images = time.time()
+        images = {}
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
 
@@ -148,6 +152,13 @@ class ScoreCNN:
             image_model = np.stack([model_sample for _j in range(20)])
 
             image = np.stack([image_events, image_raw, image_zmap, image_model], axis=1)
+            images[event_id] = image
+
+        time_finish_get_images = time.time()
+        print(f"\t\t\t\tGot images in: {round(time_finish_get_images-time_begin_get_images, 2)}")
+
+        for event_id, event in events.items():
+            image = images[event_id]
 
             # Transfer to tensor
             image_t = torch.from_numpy(image)
