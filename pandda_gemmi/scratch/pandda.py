@@ -210,7 +210,7 @@ def pandda(args: PanDDAArgs):
 
         # Get the dataset dmap
         dtag_index = np.argwhere(dtag_array == dtag)
-        print(dtag_index)
+        print(f"Dtag index: {dtag_index}")
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
 
