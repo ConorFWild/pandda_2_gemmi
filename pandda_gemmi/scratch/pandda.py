@@ -66,6 +66,7 @@ def process_model(
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
     inner_mask_xmap = reference_frame.mask_inner(xmap_grid)
     median = np.median(inner_mask_xmap.data)
+    print(f"Median is: {median}")
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
     # Initial
