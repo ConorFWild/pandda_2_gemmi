@@ -225,7 +225,7 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             dmaps,
             reference_frame,
-            CharacterizationGaussianMixture(n_components=20, covariance_type="full"),
+            CharacterizationGaussianMixture(n_components=max(20, int(len(comparator_datasets) / 25)), covariance_type="full"),
         )
         time_finish_get_characterization_sets = time.time()
         print(f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
