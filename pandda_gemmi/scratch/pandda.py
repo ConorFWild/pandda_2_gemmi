@@ -306,6 +306,8 @@ def pandda(args: PanDDAArgs):
                     model_map_ref,
                     score_ref
                 )
+                for model_number
+                in characterization_set_masks
             }
         )
         for model_number, result in processed_models.items():
