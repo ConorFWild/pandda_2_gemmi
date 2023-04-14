@@ -47,6 +47,7 @@ from pandda_gemmi.scratch.tables import output_tables
 
 
 def process_model(
+        model_number,
         dataset_dmap_array,
         characterization_set_dmaps_array,
         reference_frame,
@@ -69,6 +70,10 @@ def process_model(
     median = np.median(inner_mask_xmap)
     # print(f"Median is: {median}")
     model_grid = reference_frame.unmask(SparseDMap(model_map))
+
+    inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
+    percentage_z_2 = float(np.sum(inner_mask_zmap > π2)) / inner_mask_zmap.size
+    print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
 
     # Initial
     events = ClusterDensityDBSCAN()(z, reference_frame)
@@ -134,10 +139,10 @@ def pandda(args: PanDDAArgs):
     _k = 0
     for dtag in datasets:
         _k += 1
-        if _k >6:
-            continue
-        # if dtag != "JMJD2DA-x427":
+        # if _k >6:
         #     continue
+        if dtag != "JMJD2DA-x427":
+            continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
