@@ -329,7 +329,7 @@ def pandda(args: PanDDAArgs):
                 model_zs[model_number] = result[2]
 
             zmap_grid = reference_frame.unmask(SparseDMap(result[2]))
-            save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / f"{model_number}_z.ccp4"
+            save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / f"{model_number}_z.ccp4")
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
