@@ -140,7 +140,7 @@ def pandda(args: PanDDAArgs):
     _k = 0
     for dtag in datasets:
         _k += 1
-        if _k >10:
+        if _k >15:
             continue
         # if dtag != "JMJD2DA-x427":
         #     continue
