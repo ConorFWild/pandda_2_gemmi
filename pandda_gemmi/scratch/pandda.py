@@ -78,13 +78,13 @@ def process_model(
 
     # Initial
     events = ClusterDensityDBSCAN()(z, reference_frame)
-    print(f"Initial events: {len(events)}")
+    # print(f"Initial events: {len(events)}")
 
     # Filter the events pre-scoring
     for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
         events = filter(events)
 
-    print(f"After filer size and cluster: {len(events)}")
+    # print(f"After filer size and cluster: {len(events)}")
 
     if len(events) == 0:
         return None, None, None
@@ -98,12 +98,12 @@ def process_model(
     # Filter the events post-scoring
     for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
         events = filter(events)
-    print(f"After filter score: {len(events)}")
+    # print(f"After filter score: {len(events)}")
 
     if len(events) == 0:
         return None, None, None
 
-    print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
+    # print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
 
     # model_events[model_number] = events
 
@@ -333,7 +333,7 @@ def pandda(args: PanDDAArgs):
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
-        exit()
+        # exit()
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             continue

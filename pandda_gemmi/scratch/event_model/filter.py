@@ -45,7 +45,7 @@ class FilterCluster:
             [np.mean(event.pos_array, axis=0).flatten() for event in events.values()])
 
         # Cluster the event centroids
-        print(f"event_centroid_array shape: {event_centroid_array.shape}")
+        # print(f"event_centroid_array shape: {event_centroid_array.shape}")
         clusters = fclusterdata(
             event_centroid_array,
             t=self.t,
@@ -101,7 +101,7 @@ class FilterLocallyHighestScoring:
         centroid_array = np.array([np.mean(event.pos_array, axis=0) for event in events.values()])
 
         event_id_array = np.array([event_id for event_id in events.keys()])
-        print(f"Event id array shape: {event_id_array.shape}")
+        # print(f"Event id array shape: {event_id_array.shape}")
 
         masked_ids = np.zeros(event_id_array.shape, dtype=np.bool)
         j = 0
@@ -119,8 +119,8 @@ class FilterLocallyHighestScoring:
             masked_ids[distance_mask] = True
             new_events[j] = event
             j = j+1
-        for event_id, event in new_events.items():
-            print(f"\t{event_id} : {np.mean(event.pos_array, axis=0)}")
+        # for event_id, event in new_events.items():
+        #     print(f"\t{event_id} : {np.mean(event.pos_array, axis=0)}")
 
         return new_events
 

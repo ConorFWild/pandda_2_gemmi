@@ -256,7 +256,7 @@ class ScoreCNN:
             images[event_id] = image
 
         time_finish_get_images = time.time()
-        print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
+        # print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
 
         for event_id, event in events.items():
             image = images[event_id]
