@@ -23,7 +23,8 @@ from pandda_gemmi.scratch.comparators import (
     FilterSpaceGroup,
     FilterResolution,
 )
-
+from pandda_gemmi.scratch import constants
+from pandda_gemmi.scratch.dmaps import save_dmap
 from pandda_gemmi.scratch.event_model.evaluate import evaluate_model
 from pandda_gemmi.scratch.event_model.characterization import get_characterization_sets, CharacterizationGaussianMixture
 from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
@@ -327,6 +328,8 @@ def pandda(args: PanDDAArgs):
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
 
+            zmap_grid = reference_frame.unmask(SparseDMap(result[2]))
+            save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / f"{model_number}_z.ccp4"
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
