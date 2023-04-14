@@ -310,6 +310,7 @@ def pandda(args: PanDDAArgs):
         processed_models = processor.process_dict(
             {
                 model_number: Partial(process_model).paramaterise(
+                    model_number,
                     dataset_dmap_array,
                     dmaps[characterization_set_masks[model_number], :],
                     reference_frame,
@@ -326,9 +327,10 @@ def pandda(args: PanDDAArgs):
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
 
+
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
-
+        exit()
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             continue
