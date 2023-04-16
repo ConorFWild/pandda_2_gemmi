@@ -307,6 +307,37 @@ def pandda(args: PanDDAArgs):
         #
         #     model_events[model_number] = events
 
+        model_scores = {}
+        for model_number in characterization_set_masks:
+
+            characterization_set_dmaps_array = dmaps[characterization_set_masks[model_number], :]
+            mean, std, z = PointwiseNormal()(
+                dataset_dmap_array,
+                characterization_set_dmaps_array
+            )
+
+            mean_grid = reference_frame.unmask(SparseDMap(mean))
+            z_grid = reference_frame.unmask(SparseDMap(z))
+            xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+            # print([dataset_dmap_array.shape, reference_frame.mask.indicies_sparse_inner_atomic.shape])
+            inner_mask_xmap = dataset_dmap_array[reference_frame.mask.indicies_sparse_inner_atomic]
+            median = np.median(inner_mask_xmap)
+            # print(f"Median is: {median}")
+            model_map = reference_frame.mask_grid(model_grid).data
+            model_grid = reference_frame.unmask(SparseDMap(model_map))
+
+            inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
+            percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
+            print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
+            model_scores[model_number] = percentage_z_2
+
+        models_to_process = []
+        _l = 0
+        for model_number in sorted(model_scores, key=lambda _model_number: model_scores[_model_number]):
+            if (_l < 2) or (model_scores[model_number] < 0.2):
+                models_to_process.append(model_number)
+
+
 
         processed_models = processor.process_dict(
             {
@@ -319,7 +350,7 @@ def pandda(args: PanDDAArgs):
                     score_ref
                 )
                 for model_number
-                in characterization_set_masks
+                in models_to_process
             }
         )
         for model_number, result in processed_models.items():
