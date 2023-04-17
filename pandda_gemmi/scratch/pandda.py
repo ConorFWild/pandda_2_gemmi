@@ -347,7 +347,7 @@ def pandda(args: PanDDAArgs):
             signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
             save_dmap(
                 reference_frame.unmask(SparseDMap(signal_2_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
+                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_1.ccp4"
             )
 
             mean_grid = reference_frame.unmask(SparseDMap(mean))
