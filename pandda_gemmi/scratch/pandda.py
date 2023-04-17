@@ -55,8 +55,6 @@ def process_model(
         model_map,
         score,
 ):
-
-
     # Get the statical maps
     mean, std, z = PointwiseNormal()(
         dataset_dmap_array,
@@ -109,6 +107,7 @@ def process_model(
 
     return events, mean, z
 
+
 def pandda(args: PanDDAArgs):
     # Get the processor
     processor: ProcessorInterface = ProcessLocalRay(args.local_cpus)
@@ -140,7 +139,7 @@ def pandda(args: PanDDAArgs):
     _k = 0
     for dtag in datasets:
         _k += 1
-        if _k >15:
+        if _k > 15:
             continue
         # if dtag != "JMJD2DA-x427":
         #     continue
@@ -158,7 +157,8 @@ def pandda(args: PanDDAArgs):
         processing_res = max(dataset_res,
                              list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[
                                  60] + 0.1)
-        print(f"Dataset resolution is: {dataset.reflections.resolution()} and processing resolution is {processing_res}")
+        print(
+            f"Dataset resolution is: {dataset.reflections.resolution()} and processing resolution is {processing_res}")
         print(f"Dataset rfree is: {dataset.structure.rfree()}")
 
         # Get the comparator datasets
@@ -236,10 +236,12 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             dmaps,
             reference_frame,
-            CharacterizationGaussianMixture(n_components=min(20, int(len(comparator_datasets) / 25)), covariance_type="full"),
+            CharacterizationGaussianMixture(n_components=min(20, int(len(comparator_datasets) / 25)),
+                                            covariance_type="full"),
         )
         time_finish_get_characterization_sets = time.time()
-        print(f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
+        print(
+            f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
         time_begin_process_models = time.time()
         model_events = {}
@@ -314,7 +316,6 @@ def pandda(args: PanDDAArgs):
 
         model_scores = {}
         for model_number in characterization_set_masks:
-
             characterization_set_dmaps_array = dmaps[characterization_set_masks[model_number], :]
             mean, std, z = PointwiseNormal()(
                 dataset_dmap_array,
@@ -343,21 +344,34 @@ def pandda(args: PanDDAArgs):
                 models_to_process.append(model_number)
                 _l = _l + 1
 
+        # processed_models = processor.process_dict(
+        #     {
+        #         model_number: Partial(process_model).paramaterise(
+        #             model_number,
+        #             dataset_dmap_array,
+        #             dmaps[characterization_set_masks[model_number], :],
+        #             reference_frame,
+        #             model_map_ref,
+        #             score_ref
+        #         )
+        #         for model_number
+        #         in models_to_process
+        #     }
+        # )
 
-        processed_models = processor.process_dict(
-            {
-                model_number: Partial(process_model).paramaterise(
-                    model_number,
-                    dataset_dmap_array,
-                    dmaps[characterization_set_masks[model_number], :],
-                    reference_frame,
-                    model_map_ref,
-                    score_ref
-                )
-                for model_number
-                in models_to_process
-            }
-        )
+        processed_models = {
+            model_number: Partial(process_model).paramaterise(
+                model_number,
+                dataset_dmap_array,
+                dmaps[characterization_set_masks[model_number], :],
+                reference_frame,
+                model_map_ref,
+                score_ref
+            )()
+            for model_number
+            in models_to_process
+        }
+
         for model_number, result in processed_models.items():
             if result[0] is not None:
                 model_events[model_number] = result[0]
@@ -398,7 +412,7 @@ def pandda(args: PanDDAArgs):
             reference_frame,
         )
         time_finish_output_maps = time.time()
-        print(f"\t\tOutput maps in: {round(time_finish_output_maps-time_begin_output_maps, 2)}")
+        print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
         print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
