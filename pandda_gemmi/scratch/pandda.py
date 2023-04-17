@@ -338,6 +338,7 @@ def pandda(args: PanDDAArgs):
             transformed = transformer.fit_transform(mat_nonzero)
             print(f"NMF transformed shape: {transformed.shape}")
             print(transformed)
+            print(f"Fraction event: {transformed[1, 1] / transformed[0, 1]}")
 
             components = transformer.components_
 
