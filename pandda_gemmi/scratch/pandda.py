@@ -336,13 +336,17 @@ def pandda(args: PanDDAArgs):
             print(f"MIXING:")
             print(A_)
 
+            signal_1 = S_[:,0].flatten()
+            signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
             save_dmap(
-                reference_frame.unmask(SparseDMap(S_[:,0].flatten())),
+                reference_frame.unmask(SparseDMap(signal_1_scaled)),
                 fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
             )
 
+            signal_2 = S_[:,1].flatten()
+            signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
             save_dmap(
-                reference_frame.unmask(SparseDMap(S_[:, 1].flatten())),
+                reference_frame.unmask(SparseDMap(signal_2_scaled)),
                 fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
             )
 
