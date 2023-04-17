@@ -1,7 +1,7 @@
 import time
 
 import numpy as np
-from sklearn.decomposition import FastICA
+from sklearn.decomposition import FastICA, FactorAnalysis
 
 from pandda_gemmi.scratch.interfaces import *
 
@@ -324,6 +324,36 @@ def pandda(args: PanDDAArgs):
                 dataset_dmap_array,
                 characterization_set_dmaps_array
             )
+
+            mat = np.vstack(
+                [
+                    mean.reshape((1, -1)),
+                    dataset_dmap_array.reshape((1, -1))
+                ])
+
+
+
+            transformer = FactorAnalysis(n_components=2)
+            transformed = transformer.fit_transform(mat)
+            print(f"FA transformed shape: {transformed.shape}")
+            print(transformed)
+            components = transformer.components_
+
+            signal_1 = components[0, :].flatten()
+            signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
+            save_dmap(
+                reference_frame.unmask(SparseDMap(signal_1_scaled)),
+                fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_0.ccp4"
+            )
+
+            signal_2 = components[1, :].flatten()
+            signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
+            save_dmap(
+                reference_frame.unmask(SparseDMap(signal_2_scaled)),
+                fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_1.ccp4"
+            )
+
+
 
             ica = FastICA(n_components=2)
             S_ = ica.fit_transform(
