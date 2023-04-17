@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+from sklearn.decomposition import FastICA
 
 from pandda_gemmi.scratch.interfaces import *
 
@@ -70,6 +71,8 @@ def process_model(
     # print(f"Median is: {median}")
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
+
+
     inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
     percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
     print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
@@ -138,11 +141,11 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     _k = 0
     for dtag in datasets:
-        _k += 1
-        if _k > 15:
-            continue
-        # if dtag != "JMJD2DA-x427":
+        # _k += 1
+        # if _k > 15:
         #     continue
+        if dtag != "JMJD2DA-x427":
+            continue
 
         # if dtag != "JMJD2DA-x348":
         #     continue
@@ -320,6 +323,27 @@ def pandda(args: PanDDAArgs):
             mean, std, z = PointwiseNormal()(
                 dataset_dmap_array,
                 characterization_set_dmaps_array
+            )
+
+            ica = FastICA(n_components=3)
+            S_ = ica.fit_transform(
+                np.vstack(
+                    [
+                        mean.flatten().reshape((1, -1)),
+                        dataset_dmap_array.reshape((1, -1))
+                    ]))
+            A_ = ica.mixing_
+            print(f"MIXING:")
+            print(A_)
+
+            save_dmap(
+                reference_frame.unmask(SparseDMap(S_[0,:].flatten())),
+                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
+            )
+
+            save_dmap(
+                reference_frame.unmask(SparseDMap(S_[1, :].flatten())),
+                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
             )
 
             mean_grid = reference_frame.unmask(SparseDMap(mean))
