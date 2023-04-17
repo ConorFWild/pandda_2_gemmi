@@ -325,13 +325,13 @@ def pandda(args: PanDDAArgs):
                 characterization_set_dmaps_array
             )
 
-            ica = FastICA(n_components=3)
+            ica = FastICA(n_components=2)
             S_ = ica.fit_transform(
                 np.vstack(
                     [
-                        mean.flatten().reshape((1, -1)),
+                        mean.reshape((1, -1)),
                         dataset_dmap_array.reshape((1, -1))
-                    ]))
+                    ]).T)
             A_ = ica.mixing_
             print(f"MIXING:")
             print(A_)
