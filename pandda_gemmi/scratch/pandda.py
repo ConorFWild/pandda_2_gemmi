@@ -334,7 +334,7 @@ def pandda(args: PanDDAArgs):
             mat_nonzero = np.copy(mat)
             mat_nonzero[mat_nonzero<0] = 0.0
 
-            transformer = NMF(n_components=2)
+            transformer = NMF(n_components=2, max_iter=1000)
             transformed = transformer.fit_transform(mat_nonzero)
             print(f"NMF transformed shape: {transformed.shape}")
             print(transformed)
