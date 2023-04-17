@@ -337,12 +337,12 @@ def pandda(args: PanDDAArgs):
             print(A_)
 
             save_dmap(
-                reference_frame.unmask(SparseDMap(S_[0,:].flatten())),
+                reference_frame.unmask(SparseDMap(S_[:,0].flatten())),
                 fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
             )
 
             save_dmap(
-                reference_frame.unmask(SparseDMap(S_[1, :].flatten())),
+                reference_frame.unmask(SparseDMap(S_[:, 1].flatten())),
                 fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
             )
 
