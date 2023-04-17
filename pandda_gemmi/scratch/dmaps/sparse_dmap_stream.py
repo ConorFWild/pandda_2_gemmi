@@ -54,7 +54,6 @@ class SparseDMapStream:
         # print(f"\tTransform: {finish_transform - begin_transform}")
 
         begin_fft = time.time()
-        print(f"\t\tResolution: {dataset.reflections.resolution()}")
         xmap = dataset.reflections.transform_f_phi_to_map()
         finish_fft = time.time()
         # print(f"\tFFT: {finish_fft - begin_fft}")
