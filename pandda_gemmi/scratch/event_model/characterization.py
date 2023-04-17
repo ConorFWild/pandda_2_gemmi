@@ -11,7 +11,7 @@ def get_characterization_sets(
         dmaps: np.array,
         reference_frame: DFrameInterface,
         characterization_model,
-        min_size: int = 25
+        min_size: int = 15
 ):
     # Get the array of dataset dtags
     dtag_array = np.array([_dtag for _dtag in datasets])
