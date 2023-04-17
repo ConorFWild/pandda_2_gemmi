@@ -139,11 +139,14 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     _k = 0
     for dtag in datasets:
-        _k += 1
-        if _k >15:
-            continue
+        # _k += 1
+        # if _k >15:
+        #     continue
         # if dtag != "JMJD2DA-x427":
         #     continue
+
+        if dtag != "JMJD2DA-x348":
+            continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
@@ -155,6 +158,8 @@ def pandda(args: PanDDAArgs):
         processing_res = max(dataset_res,
                              list(sorted([_dataset.reflections.resolution() for _dataset in datasets.values()]))[
                                  60] + 0.1)
+        print(f"Dataset resolution is: {dataset.reflections.resolution()} and processing resolution is {processing_res}")
+        print(f"Dataset rfree is: {dataset.structure.rfree()}")
 
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
