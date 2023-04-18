@@ -43,6 +43,7 @@ def output_maps(
         centroid = np.mean(event.pos_array, axis=0)
         dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
         if dist < 5.0:
+            print(f"##### {event_id} #####")
             xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
             xmap_array = np.array(xmap_grid, copy=False)
             mean_array = np.array(mean_grid, copy=False)
