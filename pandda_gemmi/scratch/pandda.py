@@ -104,7 +104,10 @@ def process_model(
     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 
     # Filter the events post-scoring
-    for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
+    for filter in [
+        FilterScore(0.1),
+        FilterLocallyHighestScoring(10.0),
+    ]:
         events = filter(events)
     # print(f"After filter score: {len(events)}")
 
