@@ -332,7 +332,7 @@ class Alignment:
 
         if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
             # raise ExceptionNoCommonAtoms()
-            raise Exception()
+            raise Exception(f"Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
 
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
@@ -341,7 +341,7 @@ class Alignment:
             # raise AlignmentUnmatchedAtomsError(reference_atom_array,
             #                                    dataset_atom_array,
             #                                    )
-            raise Exception()
+            raise Exception(f"Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
 
         transforms = []
         time_ball_query = 0
@@ -370,7 +370,7 @@ class Alignment:
 
             if moving_selection.shape[0] == 0:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
-                raise Exception()
+                raise Exception(f"Moving selection shape: {moving_selection.shape[0]} Reference selection shape: {reference_selection.shape[0]}")
             time_begin_super = time.time()
             transforms.append(
                 Transform.from_atoms(
