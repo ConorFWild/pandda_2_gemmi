@@ -213,6 +213,7 @@ class ScoreCNN:
             max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
             bdc = float(flat_bdcs[max_score_index])
             score = float(model_annotations[max_score_index, 1])
+
             centroid = np.mean(event.pos_array, axis=0)
             dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
             if dist < 5.0:
