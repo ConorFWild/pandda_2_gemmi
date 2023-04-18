@@ -110,7 +110,9 @@ def get_bdc(event, xmap_grid, mean_grid, median):
     diffs = {}
     for bdc in np.linspace(0.0, 0.95, 20):
         new_median = np.median((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc))
-        diffs[round(float(bdc), 2)] = float(np.abs(median - new_median))
+        diff = float(np.abs(median - new_median))
+        diffs[round(float(bdc), 2)] = diff
+        print(f"\t\t{bdc} : {median} {new_median} {diff}")
 
     return min(diffs, key=lambda _bdc: diffs[_bdc])
 
