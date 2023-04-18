@@ -32,7 +32,8 @@ PANDDA_EVENT_MODEL = "{}-pandda-model.pdb"
 PANDDA_PROTEIN_MASK_FILE = "protein_mask.ccp4"
 PANDDA_SYMMETRY_MASK_FILE = "symmetry_mask.ccp4"
 PANDDA_TOTAL_MASK_FILE = "total_mask.ccp4"
-PANDDA_MEAN_MAP_FILE = "mean_{number}_{res}.ccp4"
+# PANDDA_MEAN_MAP_FILE = "mean_{number}_{res}.ccp4"
+PANDDA_MEAN_MAP_FILE = "{dtag}-ground-state-average-map.native.ccp4"
 PANDDA_SIGMA_S_M_FILE = "sigma_s_m_{number}_{res}.ccp4"
 
 ###################################################################
