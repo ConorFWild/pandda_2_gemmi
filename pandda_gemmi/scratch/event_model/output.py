@@ -57,7 +57,7 @@ def output_maps(
 
             xmap_vals = xmap_array[event_indicies]
             mean_map_vals = mean_array[event_indicies]
-            fig, axs = plt.subplots(20, 1)
+            fig, axs = plt.subplots(20, 1, figsize=(20, 2))
 
             for j, bdc in enumerate([x for x in np.linspace(0.0,0.95, 20)]):
                 bdc = round(float(bdc), 2)
