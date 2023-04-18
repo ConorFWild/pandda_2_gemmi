@@ -77,13 +77,13 @@ def process_model(
 
     # Initial
     events = ClusterDensityDBSCAN()(z, reference_frame)
-    # print(f"Initial events: {len(events)}")
+    print(f"Initial events: {len(events)}")
 
     # Filter the events pre-scoring
     for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
         events = filter(events)
 
-    # print(f"After filer size and cluster: {len(events)}")
+    print(f"After filer size and cluster: {len(events)}")
 
     if len(events) == 0:
         return None, None, None
