@@ -110,7 +110,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
     diffs = {}
     for bdc in np.linspace(0.0, 0.95, 20):
         # new_median = np.median((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc))
-        new_median = np.qunatile((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc), 0.05)
+        new_median = np.quanatile((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc), 0.05)
 
         diff = float(np.abs(median - new_median))
         diffs[round(float(bdc), 2)] = diff
