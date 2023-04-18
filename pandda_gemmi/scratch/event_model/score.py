@@ -216,6 +216,7 @@ class ScoreCNN:
 
             scored_event = Event(
                 event.pos_array,
+                event.point_array,
                 score,
                 bdc
             )
