@@ -115,7 +115,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         # new_median = np.median((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc))
         new_median = np.quantile(
             (xmap_vals - (bdc * mean_map_vals)) / (1 - bdc),
-            np.linspace(0.05, 0.95, 20)
+            np.linspace(0.05, 0.95, 10)
         )
 
         diff = np.abs(median - new_median)
@@ -124,7 +124,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         # print(f"\t\t{round(float(bdc), 2)} : {round(float(median), 2)} {round(float(new_median), 2)} {round(diff, 2)}")
         if dist < 5.0:
             print(f"\t\t{round(float(bdc), 2)} : {round(float(np.mean(median)), 2)} {round(float(np.mean(new_median)), 2)} {round(diff_sum, 2)}")
-            print(f"\t\t{diff}")
+            # print(f"\t\t{diff}")
     return min(diffs, key=lambda _bdc: diffs[_bdc])
 
 
