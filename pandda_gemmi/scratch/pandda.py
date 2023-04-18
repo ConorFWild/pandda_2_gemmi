@@ -71,7 +71,7 @@ def process_model(
     # median = np.quantile(inner_mask_xmap, 0.05)
     median = np.quantile(
         inner_mask_xmap,
-                         np.linspace(0.05, 0.95, 20)
+        np.linspace(0.05, 0.95, 20)
     )
 
     # print(f"Median is: {median}")

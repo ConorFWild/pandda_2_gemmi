@@ -117,7 +117,8 @@ def get_bdc(event, xmap_grid, mean_grid, median):
 
         diff = float(np.sum(np.abs(median - new_median)))
         diffs[round(float(bdc), 2)] = diff
-        print(f"\t\t{round(float(bdc), 2)} : {round(float(median), 2)} {round(float(new_median), 2)} {round(diff, 2)}")
+        # print(f"\t\t{round(float(bdc), 2)} : {round(float(median), 2)} {round(float(new_median), 2)} {round(diff, 2)}")
+        print(f"\t\t{round(float(bdc), 2)} : {round(float(np.mean(median)), 2)} {round(float(np.mean(new_median)), 2)} {round(diff, 2)}")
 
     return min(diffs, key=lambda _bdc: diffs[_bdc])
 
