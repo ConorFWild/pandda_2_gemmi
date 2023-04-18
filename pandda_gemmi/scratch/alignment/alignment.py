@@ -140,24 +140,24 @@ class Alignment:
         com_ref = {}
         com_mov = {}
 
-        if not self.vec:
+        if self.vec is not None:
             return {}, {}, {}
 
         for _j in range(self.resid.shape[0]):
 
             residue_id = ResidueID(*self.resid[_j])
-            if self.vec[_j] is not None:
-                transform = gemmi.Transform()
-                transform.vec.fromlist(self.vec[_j].tolist())
-                transform.mat.fromlist(self.mat[_j].tolist())
-                transforms[residue_id] = transform
+            # if self.vec[_j] is not None:
+            transform = gemmi.Transform()
+            transform.vec.fromlist(self.vec[_j].tolist())
+            transform.mat.fromlist(self.mat[_j].tolist())
+            transforms[residue_id] = transform
 
-                com_ref[residue_id] = self.com_reference[_j]
-                com_mov[residue_id] = self.com_mov[_j]
-            else:
-                transforms[residue_id] = None
-                com_ref[residue_id] = None
-                com_mov[residue_id] = None
+            com_ref[residue_id] = self.com_reference[_j]
+            com_mov[residue_id] = self.com_mov[_j]
+            # else:
+            #     transforms[residue_id] = None
+            #     com_ref[residue_id] = None
+            #     com_mov[residue_id] = None
 
         return transforms, com_ref, com_mov
 
