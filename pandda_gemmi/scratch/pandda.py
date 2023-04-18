@@ -67,8 +67,8 @@ def process_model(
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
     # print([dataset_dmap_array.shape, reference_frame.mask.indicies_sparse_inner_atomic.shape])
     inner_mask_xmap = dataset_dmap_array[reference_frame.mask.indicies_sparse_inner_atomic]
-    # median = np.median(inner_mask_xmap)
-    median = np.quantile(inner_mask_xmap, 0.05)
+    median = np.median(inner_mask_xmap)
+    # median = np.quantile(inner_mask_xmap, 0.05)
     # median = np.quantile(
     #     inner_mask_xmap,
     #     np.linspace(0.05, 0.95, 10)
@@ -100,7 +100,7 @@ def process_model(
     # Score the events
     time_begin_score_events = time.time()
     events = score(events, xmap_grid, mean_grid, z_grid, model_grid,
-                   # median,
+                   median,
                    )
     time_finish_score_events = time.time()
     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
