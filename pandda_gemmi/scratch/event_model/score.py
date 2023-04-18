@@ -228,7 +228,11 @@ class ScoreCNN:
         bdcs = {}
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
-
+            dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
+            if dist < 5.0:
+                print(f"##### {event_id} #####")
+                print(f"Centroid: {centroid}")
+                print(f"Distance: {dist}")
             sample_transform = get_sample_transform_from_event(
                 centroid,
                 0.5,
