@@ -99,7 +99,9 @@ def process_model(
 
     # Score the events
     time_begin_score_events = time.time()
-    events = score(events, xmap_grid, mean_grid, z_grid, model_grid, median)
+    events = score(events, xmap_grid, mean_grid, z_grid, model_grid,
+                   # median,
+                   )
     time_finish_score_events = time.time()
     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 
