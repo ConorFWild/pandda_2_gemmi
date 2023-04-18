@@ -487,15 +487,27 @@ def pandda(args: PanDDAArgs):
 
         # Select a model
         selected_model_num, selected_events = select_model(model_events)
-        model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
-        for event_id, event in model_events.items():
+        selected_model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
+        top_selected_model_events = {
+            event_id: selected_model_events[event_id]
+            for event_id
+            in list(
+                sorted(
+                    selected_model_events,
+                    key=lambda _event_id: selected_model_events[_event_id],
+                    reverse=True,
+                )
+            )[:10]
+        }
+
+        for event_id, event in top_selected_model_events.items():
             pandda_events[event_id] = event
 
         # Output models
         output_models(fs, characterization_sets, selected_model_num)
 
         # Output events
-        output_events(fs, model_events)
+        output_events(fs, top_selected_model_events)
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
