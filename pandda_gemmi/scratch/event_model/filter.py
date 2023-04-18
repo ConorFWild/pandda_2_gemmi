@@ -50,7 +50,9 @@ class FilterCluster:
             event_centroid_array,
             t=self.t,
             criterion="distance",
-            method="centroid"
+            # method="centroid"
+            method="complete"
+
         )
 
         # Get the event cluster membership array
