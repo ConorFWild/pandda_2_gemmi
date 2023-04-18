@@ -74,6 +74,7 @@ class ClusterDensityDBSCAN:
                 high_z_pos_array[clusters == cluster_num, :],
                 high_z_point_array[clusters == cluster_num, :].astype(np.int),
                 0.0,
+                0.0
             )
             j +=1
 

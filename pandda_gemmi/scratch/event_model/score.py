@@ -214,6 +214,9 @@ class ScoreCNN:
             bdc = float(flat_bdcs[max_score_index])
             score = float(model_annotations[max_score_index, 1])
 
+            for bdc, score in zip([x for x in flat_bdcs], [x for x in model_annotations[:, 1]]):
+                print(f"\t\t\t{round(float(bdc), 2)} : {round(float(score), 2)}")
+
             scored_event = Event(
                 event.pos_array,
                 event.point_array,
