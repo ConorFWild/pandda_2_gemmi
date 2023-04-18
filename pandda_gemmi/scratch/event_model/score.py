@@ -108,7 +108,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
     xmap_vals = xmap_array[event_indicies]
     mean_map_vals = mean_array[event_indicies]
     diffs = {}
-    for bdc in np.linspace(0.0, 0.95, 20):
+    for bdc in np.linspace(0.0, 0.95, 50):
         # new_median = np.median((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc))
         new_median = np.quantile((xmap_vals - (bdc * mean_map_vals)) / (1 - bdc), 0.05)
 
