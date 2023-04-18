@@ -106,10 +106,7 @@ class SparseDMapStream:
         #         com_reference,
         #     )
         begin_listing = time.time()
-        points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
-                       dframe.partitioning.partitions]
-        positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
-                          dframe.partitioning.partitions]
+
 
         # transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
         #                   dframe.partitioning.partitions]
@@ -122,10 +119,25 @@ class SparseDMapStream:
         #     alignment.transforms[residue_id].com_reference.tolist()
         #     for residue_id in dframe.partitioning.partitions
         # ]
+        # transforms, com_ref, com_mov = alignment.get_transforms()
+        # transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
+        # com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
+        # com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
+        #
+        # points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
+        #                dframe.partitioning.partitions]
+        # positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
+        #                   dframe.partitioning.partitions]
+
         transforms, com_ref, com_mov = alignment.get_transforms()
-        transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions if transforms[residue_id] is not None]
-        com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions if com_mov[residue_id] is not None]
-        com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions if com_ref[residue_id] is not None]
+        transform_list = [transforms[residue_id] for residue_id in transforms]
+        com_moving_list = [com_mov[residue_id].tolist() for residue_id in transforms]
+        com_reference_list = [com_ref[residue_id].tolist() for residue_id in transforms]
+
+        points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
+                       transforms]
+        positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
+                          transforms]
         # print(f"\tListing: {finish_listing-begin_listing}")
 
 
