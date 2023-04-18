@@ -446,7 +446,7 @@ def pandda(args: PanDDAArgs):
                 dataset_dmap_array,
                 dmaps[characterization_set_masks[model_number], :],
                 reference_frame,
-                model_grid,
+                reference_frame.mask_grid(model_grid).data,
                 score
             )()
             for model_number
