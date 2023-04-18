@@ -331,7 +331,7 @@ class ScoreCNN:
                 event.pos_array,
                 event.point_array,
                 score,
-                bdcs[event_id]
+                round(float(bdcs[event_id]), 2)
             )
             scored_events[event_id] = scored_event
 
