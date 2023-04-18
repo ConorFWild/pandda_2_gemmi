@@ -494,7 +494,7 @@ def pandda(args: PanDDAArgs):
             in list(
                 sorted(
                     selected_model_events,
-                    key=lambda _event_id: selected_model_events[_event_id],
+                    key=lambda _event_id: selected_model_events[_event_id].score,
                     reverse=True,
                 )
             )[:10]
