@@ -80,7 +80,10 @@ def process_model(
     print(f"Initial events: {len(events)}")
 
     # Filter the events pre-scoring
-    for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
+    for filter in [
+        FilterSize(reference_frame, min_size=5.0),
+        # FilterCluster(5.0),
+    ]:
         events = filter(events)
 
     print(f"After filer size and cluster: {len(events)}")
