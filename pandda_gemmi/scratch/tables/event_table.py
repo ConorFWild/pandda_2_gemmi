@@ -51,7 +51,7 @@ class EventTableRecord:
             y=centroid[1],
             z=centroid[2],
             z_mean=0.0,
-            z_peak=0.0,
+            z_peak=float(event.score),
             applied_b_factor_scaling=0.0,
             high_resolution=0.0,
             low_resolution=0.0,
