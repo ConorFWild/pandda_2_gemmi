@@ -67,7 +67,9 @@ def process_model(
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
     # print([dataset_dmap_array.shape, reference_frame.mask.indicies_sparse_inner_atomic.shape])
     inner_mask_xmap = dataset_dmap_array[reference_frame.mask.indicies_sparse_inner_atomic]
-    median = np.median(inner_mask_xmap)
+    # median = np.median(inner_mask_xmap)
+    median = np.quantile(inner_mask_xmap, 0.05)
+
     # print(f"Median is: {median}")
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
