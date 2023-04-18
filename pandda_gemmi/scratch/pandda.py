@@ -514,7 +514,7 @@ def pandda(args: PanDDAArgs):
         output_maps(
             dtag,
             fs,
-            {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events},
+            {(dtag, _event_idx): top_selected_model_events[_event_idx] for _event_idx in top_selected_model_events},
             dataset_dmap_array,
             model_means[selected_model_num],
             model_zs[selected_model_num],
