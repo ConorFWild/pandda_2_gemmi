@@ -141,7 +141,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         ),
         0.5,
         bounds=((0.0, 0.95),),
-        # tol=0.1
+        tol=0.1
     )
     time_finish_minimize = time.time()
     # print(res.x)
