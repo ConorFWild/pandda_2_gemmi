@@ -399,7 +399,7 @@ class Alignment:
                 time_super = time_super + (time_finish_super-time_begin_super)
 
         # self.transforms = transforms
-        resid = ref_ids[ref_ids_mask]
+        resid = ref_ids[np.array(ref_ids_mask)]
         vec = np.stack([transform.vec for transform in transforms])
         mat = np.stack([transform.mat for transform in transforms])
         com_reference = np.stack([transform.com_reference for transform in transforms])
