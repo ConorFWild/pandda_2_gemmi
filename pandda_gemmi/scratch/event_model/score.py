@@ -132,6 +132,7 @@ def get_bdc(event, xmap_grid, mean_grid, median):
     #         # print(f"\t\t{diff}")
     # return min(diffs, key=lambda _bdc: diffs[_bdc])
 
+    time_begin_minimize = time.time()
     res = optimize.minimize(
         lambda _bdc: np.abs(
             np.median(
@@ -142,9 +143,10 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         bounds=((0.0, 0.95),),
         # tol=0.1
     )
+    time_finish_minimize = time.time()
     # print(res.x)
     if dist < 5.0:
-        print(f"\t\t{round(float(res.x), 2)}")
+        print(f"\t\t{round(float(res.x), 2)} : {time_finish_minimize-time_begin_minimize}")
 
     return float(res.x)
 
