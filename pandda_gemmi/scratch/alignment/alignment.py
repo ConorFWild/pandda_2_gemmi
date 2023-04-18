@@ -139,17 +139,22 @@ class Alignment:
         transforms = {}
         com_ref = {}
         com_mov = {}
+
         for _j in range(self.resid.shape[0]):
 
             residue_id = ResidueID(*self.resid[_j])
+            if self.vec[_j] is not None:
+                transform = gemmi.Transform()
+                transform.vec.fromlist(self.vec[_j].tolist())
+                transform.mat.fromlist(self.mat[_j].tolist())
+                transforms[residue_id] = transform
 
-            transform = gemmi.Transform()
-            transform.vec.fromlist(self.vec[_j].tolist())
-            transform.mat.fromlist(self.mat[_j].tolist())
-            transforms[residue_id] = transform
-
-            com_ref[residue_id] = self.com_reference[_j]
-            com_mov[residue_id] = self.com_mov[_j]
+                com_ref[residue_id] = self.com_reference[_j]
+                com_mov[residue_id] = self.com_mov[_j]
+            else:
+                transforms[residue_id] = None
+                com_ref[residue_id] = None
+                com_mov[residue_id] = None
 
         return transforms, com_ref, com_mov
 
@@ -334,7 +339,7 @@ class Alignment:
         if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
             # raise ExceptionNoCommonAtoms()
             # raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
-            return cls(None, None, None, None, None)
+            return cls(ref_ids, None, None, None, None)
 
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
