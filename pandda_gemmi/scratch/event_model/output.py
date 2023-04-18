@@ -31,7 +31,7 @@ def output_maps(
         event_array = (dtag_array - (event.bdc * selected_mean)) / (1 - event.bdc)
         event_grid = reference_frame.unmask(SparseDMap(event_array))
 
-        event_grid_recip = event_grid.transform_map_to_f_phi(d_min=res)
+        event_grid_recip = gemmi.transform_map_to_f_phi(event_grid, d_min=res)
         event_grid_smoothed = event_grid_recip.transform_f_phi_to_map(sample_rate=4.0)
 
         save_dmap(
