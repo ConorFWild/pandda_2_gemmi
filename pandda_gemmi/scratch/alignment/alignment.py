@@ -333,22 +333,24 @@ class Alignment:
 
         if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
             # raise ExceptionNoCommonAtoms()
-            raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
+            # raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
+            return cls(None, None, None, None, None)
 
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
 
-        if reference_atom_array.size != moving_atom_array.size:
-            # raise AlignmentUnmatchedAtomsError(reference_atom_array,
-            #                                    dataset_atom_array,
-            #                                    )
-            raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
+        # if reference_atom_array.size != moving_atom_array.size:
+        #     # raise AlignmentUnmatchedAtomsError(reference_atom_array,
+        #     #                                    dataset_atom_array,
+        #     #                                    )
+        #     raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
 
         transforms = []
         time_ball_query = 0
         time_super = 0
         # Start searching
         # masked_ref_ids = ref_ids[ref_pos_mask]
+        ref_ids_mask = []
         for _j in range(ref_ids.shape[0]):
             # # Get reference residue
             # ref_res_span = reference_structure[res_id]
@@ -371,18 +373,22 @@ class Alignment:
 
             if moving_selection.shape[0] == 0:
                 # raise ExceptionUnmatchedAlignmentMarker(res_id)
-                raise Exception(f"{_dtag} Moving selection shape: {moving_selection.shape[0]} Reference selection shape: {reference_selection.shape[0]}")
-            time_begin_super = time.time()
-            transforms.append(
-                Transform.from_atoms(
-                    moving_selection,
-                    reference_selection,
-                    com_moving=np.mean(moving_selection, axis=0),
-                    com_reference=np.mean(reference_selection, axis=0),
-            )
-            )
-            time_finish_super = time.time()
-            time_super = time_super + (time_finish_super-time_begin_super)
+                transforms.append(None)
+                ref_ids_mask.append(False)
+                # raise Exception(f"{_dtag} Moving selection shape: {moving_selection.shape[0]} Reference selection shape: {reference_selection.shape[0]}")
+            else:
+                time_begin_super = time.time()
+                ref_ids_mask.append(True)
+                transforms.append(
+                    Transform.from_atoms(
+                        moving_selection,
+                        reference_selection,
+                        com_moving=np.mean(moving_selection, axis=0),
+                        com_reference=np.mean(reference_selection, axis=0),
+                )
+                )
+                time_finish_super = time.time()
+                time_super = time_super + (time_finish_super-time_begin_super)
 
         # self.transforms = transforms
         resid = ref_ids

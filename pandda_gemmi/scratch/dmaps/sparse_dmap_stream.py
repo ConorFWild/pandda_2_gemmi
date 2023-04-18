@@ -123,9 +123,9 @@ class SparseDMapStream:
         #     for residue_id in dframe.partitioning.partitions
         # ]
         transforms, com_ref, com_mov = alignment.get_transforms()
-        transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions]
-        com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions]
-        com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions]
+        transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions if transforms[residue_id] is not None]
+        com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions if com_mov[residue_id] is not None]
+        com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions if com_ref[residue_id] is not None]
         # print(f"\tListing: {finish_listing-begin_listing}")
 
 
