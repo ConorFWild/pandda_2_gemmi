@@ -51,6 +51,9 @@ class ClusterDensityDBSCAN:
             high_z_pos_z.reshape((-1, 1))
         ])
 
+        if high_z_pos_array.shape[0] == 0:
+            return {}
+
         clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
 
         high_z_point_x = point_3d_array_x[high_z_indexes]
