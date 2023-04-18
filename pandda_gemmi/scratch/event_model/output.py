@@ -75,7 +75,8 @@ def output_maps(
                 ])
 
                 # sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True, stat="density")
-                sns.kdeplot(data=table, x="val", hue="type", ax=axs[j])#, kde=True, stat="density")
+                sns.kdeplot(data=table, x="val", hue="type", ax=axs[j], common_norm=False)#, kde=True, stat="density")
+                # sns.kdeplot(data=table, x="val", hue="type", ax=axs[j])#, kde=True, stat="density")
 
             fig.savefig(
                 Path(fs.output.processed_datasets[event_id[0]]) / f"{event_id[1]}_dist.png"
