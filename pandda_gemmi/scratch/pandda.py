@@ -203,6 +203,7 @@ def pandda(args: PanDDAArgs):
         time_begin_get_alignments = time.time()
         alignments: Dict[str, AlignmentInterface] = processor.process_dict(
             {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
+                _dtag,
                 structure_array_refs[_dtag],
                 structure_array_refs[dtag],
             ) for _dtag in comparator_datasets}
