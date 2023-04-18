@@ -74,7 +74,7 @@ def output_maps(
                     in mean_inner_vals
                 ])
 
-                sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True)
+                sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True, stat="density")
 
             fig.savefig(
                 Path(fs.output.processed_datasets[event_id[0]]) / f"{event_id[1]}_dist.png"
