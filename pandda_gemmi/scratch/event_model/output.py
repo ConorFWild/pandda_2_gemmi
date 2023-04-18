@@ -1,4 +1,11 @@
 import numpy as np
+import pandas as pd
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 import gemmi
 
 from ..interfaces import *
@@ -30,25 +37,65 @@ def output_maps(
     mean_grid = reference_frame.unmask(SparseDMap(selected_mean))
     save_dmap(mean_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag))
 
+    mean_inner_vals = selected_mean[reference_frame.mask.indicies_sparse_inner_atomic]
+
     for event_id, event in selected_events.items():
         centroid = np.mean(event.pos_array, axis=0)
         dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
         if dist < 5.0:
-            for bdc in np.linspace(0.0,0.95, 20):
+            xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
+            xmap_array = np.array(xmap_grid, copy=False)
+            mean_array = np.array(mean_grid, copy=False)
+            event_indicies = tuple(
+                [
+                    event.point_array[:, 0].flatten(),
+                    event.point_array[:, 1].flatten(),
+                    event.point_array[:, 2].flatten(),
+                ]
+            )
+
+            xmap_vals = xmap_array[event_indicies]
+            mean_map_vals = mean_array[event_indicies]
+            fig, axs = plt.subplots(20, 1)
+
+            for j, bdc in enumerate([x for x in np.linspace(0.0,0.95, 20)]):
                 bdc = round(float(bdc), 2)
-                event_array = (dtag_array - (bdc * selected_mean)) / (1 - bdc)
-                event_grid = reference_frame.unmask(SparseDMap(event_array))
-                save_dmap(
-                    event_grid,
-                    # event_grid_smoothed,
-                    Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
-                        dtag=event_id[0],
-                        event_idx=event_id[1],
-                        bdc=round(1 - bdc, 2)
-                    ),
-                    np.mean(event.pos_array, axis=0),
-                    reference_frame
-                )
+                event_map_vals = (xmap_vals - (bdc * mean_map_vals)) / (1 - bdc)
+                table = pd.DataFrame([
+                    {"val": float(event_map_val),
+                     "type": "event"}
+                    for event_map_val
+                    in event_map_vals
+                ] + [
+                    {"val": float(mean_inner_val),
+                     "type": "inner"}
+                    for mean_inner_val
+                    in mean_inner_vals
+                ])
+
+                sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True)
+
+            fig.savefig(
+                Path(fs.output.processed_datasets[event_id[0]]) / f"{event_id[1]}_dist.png"
+            )
+            plt.clf()
+
+            # event_array = (dtag_array - (bdc * selected_mean)) / (1 - bdc)
+                #
+                # event_grid = reference_frame.unmask(SparseDMap(event_array))
+
+
+                # save_dmap(
+                #     event_grid,
+                #     # event_grid_smoothed,
+                #     Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
+                #         dtag=event_id[0],
+                #         event_idx=event_id[1],
+                #         bdc=round(1 - bdc, 2)
+                #     ),
+                #     np.mean(event.pos_array, axis=0),
+                #     reference_frame
+                # )
 
         event_array = (dtag_array - (event.bdc * selected_mean)) / (1 - event.bdc)
         event_grid = reference_frame.unmask(SparseDMap(event_array))
