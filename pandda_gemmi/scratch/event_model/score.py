@@ -105,6 +105,9 @@ def get_bdc(event, xmap_grid, mean_grid, median):
             event.point_array[:, 2].flatten(),
         ]
     )
+    centroid = np.mean(event.pos_array, axis=0)
+    dist = np.linalg.norm(centroid - [6.0,-4.0,25.0])
+
     xmap_vals = xmap_array[event_indicies]
     mean_map_vals = mean_array[event_indicies]
     diffs = {}
@@ -119,8 +122,9 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         diff_sum = float(np.sum(diff))
         diffs[round(float(bdc), 2)] = diff_sum
         # print(f"\t\t{round(float(bdc), 2)} : {round(float(median), 2)} {round(float(new_median), 2)} {round(diff, 2)}")
-        print(f"\t\t{round(float(bdc), 2)} : {round(float(np.mean(median)), 2)} {round(float(np.mean(new_median)), 2)} {round(diff_sum, 2)}")
-        print(f"\t\t{diff}")
+        if dist < 5.0:
+            print(f"\t\t{round(float(bdc), 2)} : {round(float(np.mean(median)), 2)} {round(float(np.mean(new_median)), 2)} {round(diff_sum, 2)}")
+            print(f"\t\t{diff}")
     return min(diffs, key=lambda _bdc: diffs[_bdc])
 
 
