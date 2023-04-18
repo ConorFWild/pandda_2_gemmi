@@ -21,7 +21,8 @@ def output_maps(
         dtag_array,
         selected_mean,
         selected_z,
-        reference_frame
+        reference_frame,
+        res
 ):
     zmap_grid = reference_frame.unmask(SparseDMap(selected_z))
     save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag))
@@ -30,8 +31,12 @@ def output_maps(
         event_array = (dtag_array - (event.bdc * selected_mean)) / (1 - event.bdc)
         event_grid = reference_frame.unmask(SparseDMap(event_array))
 
+        event_grid_recip = event_grid.transform_map_to_f_phi(d_min=res)
+        event_grid_smoothed = event_grid_recip.transform_f_phi_to_map(sample_rate=4.0)
+
         save_dmap(
-            event_grid,
+            # event_grid,
+            event_grid_smoothed,
             Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
                 dtag=event_id[0],
                 event_idx=event_id[1],

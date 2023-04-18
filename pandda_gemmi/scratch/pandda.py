@@ -325,83 +325,83 @@ def pandda(args: PanDDAArgs):
                 characterization_set_dmaps_array
             )
 
-            mat = np.vstack(
-                [
-                    mean.reshape((1, -1)),
-                    dataset_dmap_array.reshape((1, -1))
-                ])
-
-            mat_nonzero = np.copy(mat)
-            mat_nonzero[mat_nonzero<0] = 0.0
-
-            transformer = NMF(n_components=2, max_iter=1000)
-            transformed = transformer.fit_transform(mat_nonzero)
-            print(f"NMF transformed shape: {transformed.shape}")
-            print(transformed)
-            print(f"Fraction event: {transformed[1, 1] / transformed[0, 1]}")
-
-            components = transformer.components_
-
-            signal_1 = components[0, :].flatten()
-            signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_1_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_0.ccp4"
-            )
-
-            signal_2 = components[1, :].flatten()
-            signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_2_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_1.ccp4"
-            )
-
-            transformer = FactorAnalysis(n_components=2)
-            transformed = transformer.fit_transform(mat)
-            print(f"FA transformed shape: {transformed.shape}")
-            print(transformed)
-            components = transformer.components_
-
-            signal_1 = components[0, :].flatten()
-            signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_1_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_0.ccp4"
-            )
-
-            signal_2 = components[1, :].flatten()
-            signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_2_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_1.ccp4"
-            )
-
-
-
-            ica = FastICA(n_components=2)
-            S_ = ica.fit_transform(
-                np.vstack(
-                    [
-                        mean.reshape((1, -1)),
-                        dataset_dmap_array.reshape((1, -1))
-                    ]).T)
-            A_ = ica.mixing_
-            print(f"MIXING:")
-            print(A_)
-
-            signal_1 = S_[:,0].flatten()
-            signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_1_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
-            )
-
-            signal_2 = S_[:,1].flatten()
-            signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            save_dmap(
-                reference_frame.unmask(SparseDMap(signal_2_scaled)),
-                fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_1.ccp4"
-            )
+            # mat = np.vstack(
+            #     [
+            #         mean.reshape((1, -1)),
+            #         dataset_dmap_array.reshape((1, -1))
+            #     ])
+            #
+            # mat_nonzero = np.copy(mat)
+            # mat_nonzero[mat_nonzero<0] = 0.0
+            #
+            # transformer = NMF(n_components=2, max_iter=1000)
+            # transformed = transformer.fit_transform(mat_nonzero)
+            # print(f"NMF transformed shape: {transformed.shape}")
+            # print(transformed)
+            # print(f"Fraction event: {transformed[1, 1] / transformed[0, 1]}")
+            #
+            # components = transformer.components_
+            #
+            # signal_1 = components[0, :].flatten()
+            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_0.ccp4"
+            # )
+            #
+            # signal_2 = components[1, :].flatten()
+            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_1.ccp4"
+            # )
+            #
+            # transformer = FactorAnalysis(n_components=2)
+            # transformed = transformer.fit_transform(mat)
+            # print(f"FA transformed shape: {transformed.shape}")
+            # print(transformed)
+            # components = transformer.components_
+            #
+            # signal_1 = components[0, :].flatten()
+            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_0.ccp4"
+            # )
+            #
+            # signal_2 = components[1, :].flatten()
+            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_1.ccp4"
+            # )
+            #
+            #
+            #
+            # ica = FastICA(n_components=2)
+            # S_ = ica.fit_transform(
+            #     np.vstack(
+            #         [
+            #             mean.reshape((1, -1)),
+            #             dataset_dmap_array.reshape((1, -1))
+            #         ]).T)
+            # A_ = ica.mixing_
+            # print(f"MIXING:")
+            # print(A_)
+            #
+            # signal_1 = S_[:,0].flatten()
+            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
+            # )
+            #
+            # signal_2 = S_[:,1].flatten()
+            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
+            # save_dmap(
+            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
+            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_1.ccp4"
+            # )
 
             mean_grid = reference_frame.unmask(SparseDMap(mean))
             z_grid = reference_frame.unmask(SparseDMap(z))
@@ -491,6 +491,7 @@ def pandda(args: PanDDAArgs):
             model_means[selected_model_num],
             model_zs[selected_model_num],
             reference_frame,
+            processing_res
         )
         time_finish_output_maps = time.time()
         print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
