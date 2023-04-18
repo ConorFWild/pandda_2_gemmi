@@ -37,68 +37,68 @@ def output_maps(
     mean_grid = reference_frame.unmask(SparseDMap(selected_mean))
     save_dmap(mean_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag))
 
-    mean_inner_vals = selected_mean[reference_frame.mask.indicies_sparse_inner_atomic]
-    med = np.median(mean_inner_vals)
-    from scipy import optimize
+    # mean_inner_vals = selected_mean[reference_frame.mask.indicies_sparse_inner_atomic]
+    # med = np.median(mean_inner_vals)
+    # from scipy import optimize
 
     for event_id, event in selected_events.items():
-        centroid = np.mean(event.pos_array, axis=0)
-        dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
-        if dist < 5.0:
-            print(f"##### {event_id} #####")
-            print(centroid)
-            xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
-            xmap_array = np.array(xmap_grid, copy=False)
-            mean_array = np.array(mean_grid, copy=False)
-            event_indicies = tuple(
-                [
-                    event.point_array[:, 0].flatten(),
-                    event.point_array[:, 1].flatten(),
-                    event.point_array[:, 2].flatten(),
-                ]
-            )
-
-            xmap_vals = xmap_array[event_indicies]
-            mean_map_vals = mean_array[event_indicies]
-            fig, axs = plt.subplots(21, 1, figsize=(6, 21*2))
-
-
-
-            res = optimize.minimize(
-                lambda _bdc: np.abs(
-                    np.median(
-                        (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
-                    ) - med
-            ),
-                0.5,
-                bounds=((0.0, 0.95),),
-                # tol=0.1
-            )
-            print(res.x)
-
-            for j, bdc in enumerate([x for x in np.linspace(0.0,0.95, 20)] + [res.x,]):
-                bdc = round(float(bdc), 2)
-                event_map_vals = (xmap_vals - (bdc * mean_map_vals)) / (1 - bdc)
-                table = pd.DataFrame([
-                    {"val": float(event_map_val),
-                     "type": "event"}
-                    for event_map_val
-                    in event_map_vals
-                ] + [
-                    {"val": float(mean_inner_val),
-                     "type": "inner"}
-                    for mean_inner_val
-                    in mean_inner_vals
-                ])
-
-                # sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True, stat="density")
-                sns.kdeplot(data=table, x="val", hue="type", ax=axs[j], common_norm=False)#, kde=True, stat="density")
-                # sns.kdeplot(data=table, x="val", hue="type", ax=axs[j])#, kde=True, stat="density")
-
-            fig.savefig(
-                Path(fs.output.processed_datasets[event_id[0]]) / f"{event_id[1]}_dist.png"
-            )
-            plt.clf()
+        # centroid = np.mean(event.pos_array, axis=0)
+        # dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
+        # if dist < 5.0:
+        #     print(f"##### {event_id} #####")
+        #     print(centroid)
+        #     xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
+        #     xmap_array = np.array(xmap_grid, copy=False)
+        #     mean_array = np.array(mean_grid, copy=False)
+        #     event_indicies = tuple(
+        #         [
+        #             event.point_array[:, 0].flatten(),
+        #             event.point_array[:, 1].flatten(),
+        #             event.point_array[:, 2].flatten(),
+        #         ]
+        #     )
+        #
+        #     xmap_vals = xmap_array[event_indicies]
+        #     mean_map_vals = mean_array[event_indicies]
+        #     fig, axs = plt.subplots(21, 1, figsize=(6, 21*2))
+        #
+        #
+        #
+        #     res = optimize.minimize(
+        #         lambda _bdc: np.abs(
+        #             np.median(
+        #                 (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
+        #             ) - med
+        #     ),
+        #         0.5,
+        #         bounds=((0.0, 0.95),),
+        #         # tol=0.1
+        #     )
+        #     print(res.x)
+        #
+        #     for j, bdc in enumerate([x for x in np.linspace(0.0,0.95, 20)] + [res.x,]):
+        #         bdc = round(float(bdc), 2)
+        #         event_map_vals = (xmap_vals - (bdc * mean_map_vals)) / (1 - bdc)
+        #         table = pd.DataFrame([
+        #             {"val": float(event_map_val),
+        #              "type": "event"}
+        #             for event_map_val
+        #             in event_map_vals
+        #         ] + [
+        #             {"val": float(mean_inner_val),
+        #              "type": "inner"}
+        #             for mean_inner_val
+        #             in mean_inner_vals
+        #         ])
+        #
+        #         # sns.histplot(data=table, x="val", hue="type", ax=axs[j], kde=True, stat="density")
+        #         sns.kdeplot(data=table, x="val", hue="type", ax=axs[j], common_norm=False)#, kde=True, stat="density")
+        #         # sns.kdeplot(data=table, x="val", hue="type", ax=axs[j])#, kde=True, stat="density")
+        #
+        #     fig.savefig(
+        #         Path(fs.output.processed_datasets[event_id[0]]) / f"{event_id[1]}_dist.png"
+        #     )
+        #     plt.clf()
 
             # event_array = (dtag_array - (bdc * selected_mean)) / (1 - bdc)
                 #
