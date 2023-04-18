@@ -417,6 +417,8 @@ def pandda(args: PanDDAArgs):
             inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
             percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
             print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
+            print(f"Model number: {model_number}: {np.min(std)} {np.mean(std)}  {np.max(std)} {np.std(std)}")
+
             model_scores[model_number] = percentage_z_2
 
         models_to_process = []
