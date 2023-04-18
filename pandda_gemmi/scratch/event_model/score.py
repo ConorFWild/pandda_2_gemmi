@@ -216,6 +216,7 @@ class ScoreCNN:
             centroid = np.mean(event.pos_array, axis=0)
             dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
             if dist < 5.0:
+                print(f"##### {event_id} #####")
                 for bdc, score in zip([x for x in flat_bdcs], [x for x in model_annotations[:, 1]]):
                     print(f"\t\t\t{round(float(bdc), 2)} : {round(float(score), 2)}")
 
