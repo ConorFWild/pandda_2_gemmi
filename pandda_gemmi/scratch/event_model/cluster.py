@@ -163,7 +163,7 @@ class ClusterDensityDBSCAN:
                                          [-1.0,1.0],
                                          [-1.0,1.0],
                                          ):
-            frac = gemmi.Fractional(x, y, z)
+            frac = gemmi.Fractional(x/z_grid.nu, y/z_grid.nv, z/z_grid.nw)
             orth = z_grid.unit_cell.orthogonalize(frac)
             dist = orth.dist(initial_pos)
             dists.append(dist)
