@@ -194,7 +194,10 @@ def pandda(args: PanDDAArgs):
                 FilterCompatibleStructures(dataset),
                 FilterResolution(dataset_res, 30, 0.1)]
         )
-
+        processing_res = max(
+                    [_dataset.reflections.resolution() for _dataset in datasets.values()]
+            )
+        print(f"Processing res is: {processing_res}")
         print(f"Number of comparator datasets: {len(comparator_datasets)}")
         # if len(comparator_datasets) < 60:
         #     _h = 0
@@ -206,6 +209,7 @@ def pandda(args: PanDDAArgs):
 
         if len(comparator_datasets) < 30:
             print(f"NOT ENOUGH COMPARATOR DATASETS! SKIPPING!")
+        continue
 
         if dtag not in comparator_datasets:
             comparator_datasets[dtag] = dataset
