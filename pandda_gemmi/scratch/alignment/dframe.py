@@ -948,6 +948,7 @@ class GridPartitioning(GridPartitioningInterface):
             for index
             in np.unique(indexes)
         }
+        exit()
 
 
 class GridMask(GridMaskInterface):
