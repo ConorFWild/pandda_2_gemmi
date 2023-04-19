@@ -932,7 +932,8 @@ class GridPartitioning(GridPartitioningInterface):
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
         print(f"\t\t\tQueryed points in : {finish - begin}")
-        distance_mask = distances < 6.0
+        distance_mask = distances < 7.0
+        print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
         # Get partions
         self.partitions = {
@@ -941,8 +942,8 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
-                point_position_array.points[(indexes == index) & distance_mask],
-                point_position_array.positions[(indexes == index) & distance_mask]
+                point_position_array.points[indexes == index ],
+                point_position_array.positions[indexes == index]
             )
             for index
             in np.unique(indexes)
