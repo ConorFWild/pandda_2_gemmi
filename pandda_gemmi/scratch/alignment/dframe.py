@@ -754,12 +754,12 @@ class PointPositionArray(PointPositionArrayInterface):
         fractional_min = np.min(corner_array, axis=0)
         fractional_max = np.max(corner_array, axis=0)
 
-        u0 = np.floor(fractional_min[0] * spacing[0])
-        u1 = np.ceil(fractional_max[0] * spacing[0])
-        v0 = np.floor(fractional_min[1] * spacing[1])
-        v1 = np.ceil(fractional_max[1] * spacing[1])
-        w0 = np.floor(fractional_min[2] * spacing[2])
-        w1 = np.ceil(fractional_max[2] * spacing[2])
+        u0 = int(np.floor(fractional_min[0] * spacing[0]))
+        u1 = int(np.ceil(fractional_max[0] * spacing[0]))
+        v0 = int(np.floor(fractional_min[1] * spacing[1]))
+        v1 = int(np.ceil(fractional_max[1] * spacing[1]))
+        w0 = int(np.floor(fractional_min[2] * spacing[2]))
+        w1 = int(np.ceil(fractional_max[2] * spacing[2]))
 
         # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
@@ -815,7 +815,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # Get the grid points in the mask
         # shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0, 1, 2))
         shifted_grid_point_indicies = tuple(
-            grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j]
+            (grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j]).flatten()
             for _j
             in (0, 1, 2)
         )
@@ -826,15 +826,17 @@ class PointPositionArray(PointPositionArrayInterface):
         # mask_array = np.zeros(shape, dtype=np.bool)
         # mask_array[indicies] = True
         grid_point_indicies_mask = mask_array[shifted_grid_point_indicies]
+        print(f"\t\t\t\t\t\tGrid point Indicies mask shape: {grid_point_indicies_mask.shape}")
+
 
         grid_point_array = np.vstack(
             [
-                grid_point_indicies[_j][grid_point_indicies_mask]
+                grid_point_indicies[_j][grid_point_indicies_mask].flatten()
                 for _j
                 in (0, 1, 2)
             ]
         ).astype(np.int)
-
+        print(f"\t\t\t\t\t\tGrid point array shape: {grid_point_array.shape}")
 
         # indicies_point_array = np.vstack(indicies)
 
