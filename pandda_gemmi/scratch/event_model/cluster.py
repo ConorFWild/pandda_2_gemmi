@@ -1,5 +1,8 @@
+import itertools
+
 import numpy as np
 from sklearn.cluster import DBSCAN
+import gemmi
 
 from .event import Event
 
@@ -87,6 +90,7 @@ class ClusterDensityDBSCAN:
     #     return events
 
     def __call__(self, z, reference_frame):
+
         z_grid = reference_frame.unmask(SparseDMap(z))
 
         point_array = np.vstack(
@@ -153,7 +157,21 @@ class ClusterDensityDBSCAN:
         if high_z_pos_array.shape[0] == 0:
             return {}
 
-        clusters = DBSCAN(eps=1.0, min_samples=5).fit_predict(high_z_pos_array)
+        initial_pos = gemmi.Position(0.0,0.0,0.0)
+        dists = []
+        for x, y, z in itertools.product([-1.0,1.0],
+                                         [-1.0,1.0],
+                                         [-1.0,1.0],
+                                         ):
+            frac = gemmi.Fractional(x, y, z)
+            orth = z_grid.unit_cell.orthogonalize(frac)
+            dist = orth.dist(initial_pos)
+            dists.append(dist)
+
+        eps = max(dists)*1.5
+        print(f"Got an eps of: {eps}")
+
+        clusters = DBSCAN(eps=eps, min_samples=5).fit_predict(high_z_pos_array)
 
         high_z_point_x = point_3d_array_x[high_z_indexes]
         high_z_point_y = point_3d_array_y[high_z_indexes]
