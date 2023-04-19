@@ -931,24 +931,24 @@ class GridPartitioning(GridPartitioningInterface):
         begin = time.time()
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
-        print(f"\t\t\tQueryed points in : {finish - begin}")
+        # print(f"\t\t\tQueryed points in : {finish - begin}")
         distance_mask = distances < 7.0
-        print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
+        # print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
         uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
         multiple_point_unique_array_indicies = np.nonzero(counts > 1)
         discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
-        print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
+        # print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
         masked_distances = distances[distance_mask]
         for uniques_index in multiple_point_unique_array_indicies[0]:  # For each index of a point with a count > 1
-            print(uniques_index)
+            # print(uniques_index)
             # unique = uniques[uniques_index]
             inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
-            print(np.sum(inv_mask))
+            # print(np.sum(inv_mask))
             inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
-            print(inv_mask_indicies[0].size)
+            # print(inv_mask_indicies[0].size)
             unique_distances = masked_distances[inv_mask_indicies]  # Select the distances associated with that point
-            print(f"{unique_distances}")
+            # print(f"{unique_distances}")
             min_dist_index = inv_mask_indicies[0][np.argmin(unique_distances) ] # Get index in the selection the minimum
             inv_mask[min_dist_index] = False  # Remove the closest point from the mask
             discarded_multiple_mask[inv_mask] = True
@@ -986,7 +986,7 @@ class GridPartitioning(GridPartitioningInterface):
         }
         for resid, point_pos_array in self.partitions.items():
             print(f"{resid} : {point_pos_array.points.shape}")
-        exit()
+        # exit()
 
 
 class GridMask(GridMaskInterface):
