@@ -780,6 +780,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Get and mask a transformed structure
         offset_cart = -np.matmul(point_orthogonalization_matrix, np.array([u0, v0, w0]).reshape((3,1))).flatten()
+        print(f"\t\t\t\t\t\tOffset is: {offset_cart}")
         shape = mgrid[0].shape
         # new_grid = gemmi.FloatGrid(*shape)
         mask = gemmi.Int8Grid(*shape)
@@ -825,7 +826,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # mask_array = np.zeros(shape, dtype=np.bool)
         # mask_array[indicies] = True
-        grid_point_indicies_mask = mask_array[shifted_grid_point_indicies]
+        grid_point_indicies_mask = mask_array[shifted_grid_point_indicies] == 1
         print(f"\t\t\t\t\t\tGrid point Indicies mask shape: {grid_point_indicies_mask.shape}")
 
 
