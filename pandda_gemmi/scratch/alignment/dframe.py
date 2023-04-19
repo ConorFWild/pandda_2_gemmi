@@ -938,13 +938,13 @@ class GridPartitioning(GridPartitioningInterface):
         uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
         multiple_point_unique_array_indicies = np.nonzero(counts > 1)
         discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
-        print(f"Got {multiple_point_unique_array_indicies.size} multiple occupied points!")
+        print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
         for uniques_index in multiple_point_unique_array_indicies:  # For each index of a point with a count > 1
             # unique = uniques[uniques_index]
             inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
             inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
             unique_distances = distances[distance_mask][inv_mask_indicies]  # Select the distances associated with that point
-            min_dist_index = inv_mask_indicies[np.argmin(unique_distances) ] # Get index in the selection the minimum
+            min_dist_index = inv_mask_indicies[0][np.argmin(unique_distances) ] # Get index in the selection the minimum
             inv_mask[min_dist_index] = False  # Remove the closest point from the mask
             discarded_multiple_mask[inv_mask] = True
 
