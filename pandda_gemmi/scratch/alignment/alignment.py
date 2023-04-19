@@ -140,8 +140,8 @@ class Alignment:
         com_ref = {}
         com_mov = {}
 
-        if self.vec is not None:
-            return {}, {}, {}
+        # if self.vec is not None:
+        #     return {}, {}, {}
 
         for _j in range(self.resid.shape[0]):
 

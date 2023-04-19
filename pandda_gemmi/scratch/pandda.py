@@ -245,6 +245,7 @@ def pandda(args: PanDDAArgs):
         transforms_ref = processor.put(transforms)
 
         # Get the dmaps
+
         time_begin_get_dmaps = time.time()
         dmaps_dict = processor.process_dict(
             {
