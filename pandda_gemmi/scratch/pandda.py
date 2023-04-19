@@ -209,7 +209,7 @@ def pandda(args: PanDDAArgs):
 
         if len(comparator_datasets) < 30:
             print(f"NOT ENOUGH COMPARATOR DATASETS! SKIPPING!")
-        continue
+            continue
 
         if dtag not in comparator_datasets:
             comparator_datasets[dtag] = dataset
