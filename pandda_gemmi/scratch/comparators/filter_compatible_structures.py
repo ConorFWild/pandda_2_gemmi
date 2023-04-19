@@ -16,7 +16,7 @@ class FilterCompatibleStructures:
         mov_ent_names = [ent.name for ent in mov_ents]
 
         for ref_ent in ref_ents:
-            if ref_ent.name not in mov_ents:
+            if ref_ent.name not in mov_ent_names:
                 return False
             else:
                 ref_seq = [gemmi.Entity.first_mon(item) for item in ref_ent.full_sequence]
