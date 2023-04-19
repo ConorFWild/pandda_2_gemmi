@@ -23,7 +23,7 @@ class FilterCompatibleStructures:
                 return False
             else:
                 ref_seq = [gemmi.Entity.first_mon(item) for item in ref_ent.full_sequence]
-                mov_seq = [gemmi.Entity.first_mon(item) for item in dataset.structure.structre.get_entity(ref_ent.name).full_sequence]
+                mov_seq = [gemmi.Entity.first_mon(item) for item in dataset.structure.structure.get_entity(ref_ent.name).full_sequence]
                 result = gemmi.gemmi.align_string_sequences(
                     ref_seq,
                     mov_seq,
