@@ -27,7 +27,8 @@ class FilterCompatibleStructures:
                 result = gemmi.align_string_sequences(
                     ref_seq,
                     mov_seq,
-                    [], gemmi.blosum62,
+                    [], gemmi.prepare_blosum62_scoring()
+,
                 )
 
                 if not result.calculate_identity() >= self.similarity:
