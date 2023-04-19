@@ -644,7 +644,11 @@ class PointPositionArray(PointPositionArrayInterface):
         )
         # indicies_point_array = np.vstack(indicies)
 
-        unique_points = np.hstack([shifted_grid_point_indicies[_j][indicies_mask].reshape((-1, 1)) for _j in (0,1,2)]).astype(np.int)
+        unique_points = np.hstack(
+            [shifted_grid_point_indicies[_j][indicies_mask].reshape((-1, 1))
+             for _j
+             in (0,1,2)]
+        ).astype(np.int)
 
         time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
@@ -928,6 +932,7 @@ class GridPartitioning(GridPartitioningInterface):
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
         print(f"\t\t\tQueryed points in : {finish - begin}")
+        distance_mask = distances < 6.0
 
         # Get partions
         self.partitions = {
@@ -936,8 +941,8 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
-                point_position_array.points[indexes == index],
-                point_position_array.positions[indexes == index]
+                point_position_array.points[(indexes == index) & distance_mask],
+                point_position_array.positions[(indexes == index) & distance_maskπ]
             )
             for index
             in np.unique(indexes)
