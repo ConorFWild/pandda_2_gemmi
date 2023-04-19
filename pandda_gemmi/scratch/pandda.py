@@ -513,6 +513,7 @@ def pandda(args: PanDDAArgs):
         # exit()
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
+            print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
             continue
 
         # Select a model
