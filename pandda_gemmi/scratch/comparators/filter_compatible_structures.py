@@ -43,4 +43,6 @@ class FilterCompatibleStructures:
             if self.get_compatible(dataset):
                 new_datasets[_dtag] = dataset
 
+        print(f"New datasets {len(new_datasets)} vs old {len(datasets)}")
+
         return new_datasets
