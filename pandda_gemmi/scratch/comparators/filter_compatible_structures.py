@@ -33,7 +33,7 @@ class FilterCompatibleStructures:
                 )
 
                 identity = result.calculate_identity()
-                print(f"\t\t\t{ref_ent.name} : {identity}")
+                print(f"\t\t\t{ref_ent.name} : {identity} : {len(ref_seq)} : {len(mov_seq)}")
 
                 if not result.calculate_identity() >= self.similarity:
                     return False
