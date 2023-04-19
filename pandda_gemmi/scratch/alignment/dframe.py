@@ -940,7 +940,7 @@ class GridPartitioning(GridPartitioningInterface):
         discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
         print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
         masked_distances = distances[distance_mask]
-        for uniques_index in multiple_point_unique_array_indicies:  # For each index of a point with a count > 1
+        for uniques_index in multiple_point_unique_array_indicies[0]:  # For each index of a point with a count > 1
             print(uniques_index)
             # unique = uniques[uniques_index]
             inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
