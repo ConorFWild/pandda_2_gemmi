@@ -108,17 +108,17 @@ class SparseDMapStream:
         begin_listing = time.time()
 
 
-        transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
-                          dframe.partitioning.partitions]
-        com_moving_list = [
-            alignment.transforms[residue_id].com_moving.tolist()
-            for residue_id
-            in dframe.partitioning.partitions
-        ]
-        com_reference_list = [
-            alignment.transforms[residue_id].com_reference.tolist()
-            for residue_id in dframe.partitioning.partitions
-        ]
+        # transform_list = [alignment.transforms[residue_id].get_transform() for residue_id in
+        #                   dframe.partitioning.partitions]
+        # com_moving_list = [
+        #     alignment.transforms[residue_id].com_moving.tolist()
+        #     for residue_id
+        #     in dframe.partitioning.partitions
+        # ]
+        # com_reference_list = [
+        #     alignment.transforms[residue_id].com_reference.tolist()
+        #     for residue_id in dframe.partitioning.partitions
+        # ]
         transforms, com_ref, com_mov = alignment.get_transforms()
         transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
         com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
