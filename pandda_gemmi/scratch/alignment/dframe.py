@@ -839,7 +839,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # indicies_point_array = np.vstack(indicies)
 
         unique_points = np.hstack(
-            [grid_point_indicies[_j][indicies_mask].reshape((-1, 1))
+            [grid_point_indicies[_j][grid_point_indicies_mask].reshape((-1, 1))
              for _j
              in (0, 1, 2)]
         ).astype(np.int)
