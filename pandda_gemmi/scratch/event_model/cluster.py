@@ -111,6 +111,7 @@ class ClusterDensityDBSCAN:
             np.mod(all_points_array[:, 1], reference_frame.spacing[1]),
             np.mod(all_points_array[:, 2], reference_frame.spacing[2]),
         )
+
         shape = [(max_point[_j] - min_point[_j])+1 for _j in (0,1,2)]
         point_3d_array_x = np.zeros((shape[0], shape[1], shape[2]), )
         point_3d_array_y = np.zeros((shape[0], shape[1], shape[2]), )
