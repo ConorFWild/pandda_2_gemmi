@@ -37,4 +37,7 @@ class FilterResolution:
 
         # new_datasets = {dtag: datasets[dtag] for dtag in high_resolution_dtags}
 
+        print(f"Resolution Filter: New datasets {len(new_datasets)} vs old {len(datasets)}")
+
+
         return new_datasets
