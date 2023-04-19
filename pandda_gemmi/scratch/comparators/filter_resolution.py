@@ -28,7 +28,10 @@ class FilterResolution:
         # )
         new_datasets = {}
         _k = 0
-        for dtag in sorted(datasets, key= lambda _dtag: datasets[_dtag].reflections.resolution()):
+        for dtag in sorted(
+                datasets,
+                key= lambda _dtag: datasets[_dtag].reflections.resolution()
+        ):
             dataset = datasets[dtag]
             dataset_res = dataset.reflections.resolution()
             if (_k < self.min_num_datasets) or (dataset_res < (self.dataset_resolution + self.buffer)):

@@ -195,7 +195,7 @@ def pandda(args: PanDDAArgs):
                 FilterResolution(dataset_res, 60, 0.1)]
         )
         processing_res = max(
-                    [_dataset.reflections.resolution() for _dataset in datasets.values()]
+                    [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
             )
         print(f"Processing res is: {processing_res}")
         print(f"Number of comparator datasets: {len(comparator_datasets)}")
