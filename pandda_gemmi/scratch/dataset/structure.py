@@ -68,7 +68,10 @@ class Structure(StructureInterface):
 
     @classmethod
     def from_path(cls, path):
-        return cls(path, gemmi.read_structure(str(path)))
+        st =gemmi.read_structure(str(path))
+        st.setup_entities()
+        st.assign_label_seq_id()
+        return cls(path, st)
 
     def __getitem__(self, item: ResidueID):
         return self.structure[item.model][item.chain][item.number]
@@ -142,6 +145,8 @@ class Structure(StructureInterface):
         path = data[1]
         self.structure = structure_python.to_gemmi()
         self.structure.setup_entities()
+        self.structure.assign_label_seq_id()
+
         self.path = path
 
     def rfree(self):
