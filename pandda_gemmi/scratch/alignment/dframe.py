@@ -816,7 +816,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0, 1, 2))
         shifted_grid_point_indicies = tuple(grid_point_indicies[_j] - [u0, v0, w0][_j] for _j in (0, 1, 2))
 
-        mask_array = np.zeros(spacing, dtype=np.bool)
+        mask_array = np.zeros(shape, dtype=np.bool)
         mask_array[indicies] = True
         indicies_mask = mask_array[shifted_grid_point_indicies]
 
