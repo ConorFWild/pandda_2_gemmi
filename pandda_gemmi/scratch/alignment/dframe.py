@@ -831,6 +831,7 @@ class PointPositionArray(PointPositionArrayInterface):
              in (0, 1, 2)]
         ).astype(np.int)
 
+
         time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
         time_finish_mult = time.time()
