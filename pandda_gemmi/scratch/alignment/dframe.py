@@ -9,7 +9,42 @@ from ..interfaces import *
 from ..dataset import ResidueID, StructureArray, contains
 from ..dmaps import SparseDMap
 from ..processor import Partial
+from ..dataset import Structure
 
+
+def transform_structure_to_unit_cell(
+            structure,
+        unit_cell,
+        offset
+        ):
+    st = structure.structure.clone()
+    # structure_poss = []
+    # for model in st:
+    #     for chain in model:
+    #         for residue in chain:
+    #             for atom in residue:
+    #                 pos = atom.pos
+    #                 structure_poss.append([pos.x, pos.y, pos.z])
+    #
+    # pos_array = np.array(structure_poss)
+
+    transform = gemmi.Transform()
+    transform.vec.fromlist(offset.tolist())
+
+    for model in st:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    pos = atom.pos
+                    new_pos_vec = transform.apply(pos)
+                    new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
+                    atom.pos = new_pos
+
+
+    st.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    st.cell = unit_cell
+
+    return Structure(structure.path, st)
 
 class PointPositionArray(PointPositionArrayInterface):
     def __init__(self, points, positions):
@@ -521,38 +556,162 @@ class PointPositionArray(PointPositionArrayInterface):
 
         return point_arrays, position_arrays
 
+    # @staticmethod
+    # def get_grid_points_around_protein(st: StructureInterface, grid, indicies, radius, processor: ProcessorInterface):
+    #     # point_arrays = []
+    #     # position_arrays = []
+    #     #
+    #     # time_begin_orth = time.time()
+    #     # pos_array_3d = np.zeros((3, grid.nu, grid.nv, grid.nw))
+    #     # print(np.max(pos_array_3d))
+    #     #
+    #     # # np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+    #     # point_orthogonalization_matrix = np.matmul(
+    #     #     np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+    #     #     np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
+    #     # )
+    #     # indicies_point_array = np.vstack(indicies)
+    #     # print(f"\t\t\t\t\tindicies_point_array shape: {indicies_point_array.shape}")
+    #     #
+    #     # pos_array = np.matmul(point_orthogonalization_matrix, indicies_point_array)
+    #     # print(f"\t\t\t\t\tPos array shape: {pos_array.shape}")
+    #     # print(pos_array_3d[0][indicies].shape)
+    #     # pos_array_3d[0][indicies] = pos_array[0, :]
+    #     # pos_array_3d[1][indicies] = pos_array[1, :]
+    #     # pos_array_3d[2][indicies] = pos_array[2, :]
+    #     # print(np.max(pos_array_3d))
+    #     # #
+    #     # pos_array_3d_ref = processor.put(pos_array_3d)
+    #     # time_finish_orth = time.time()
+    #     # print(
+    #     #     f"\t\t\t\tOrthogonalized mask positions in {round(time_finish_orth - time_begin_orth, 1)} to shape {pos_array.shape}")
+    #
+    #     begin = time.time()
+    #     positions = []
+    #
+    #     for atom in st.protein_atoms():
+    #         pos = atom.pos
+    #         positions.append([pos.x, pos.y, pos.z])
+    #         # point_array, position_array = PointPositionArray.get_nearby_grid_points(
+    #         #     grid,
+    #         #     atom.pos,
+    #         #     radius
+    #         # )
+    #         # point_arrays.append(point_array)
+    #         # position_arrays.append(position_array)
+    #
+    #     pos_array = np.array(positions)
+    #
+    #     spacing = np.array([grid.nu, grid.nv, grid.nw])
+    #     fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
+    #
+    #     time_begin_make_array = time.time()
+    #     pos_max = np.max(pos_array, axis=0) + radius
+    #     pos_min = np.min(pos_array, axis=0) - radius
+    #
+    #     corners = []
+    #     for x, y, z in itertools.product(
+    #             [pos_min[0], pos_max[0]],
+    #             [pos_min[1], pos_max[1]],
+    #             [pos_min[2], pos_max[2]],
+    #
+    #     ):
+    #         corner = PointPositionArray.fractionalize_orthogonal_array_mat(
+    #             np.array([x, y, z]).reshape((1, 3)),
+    #             fractionalization_matrix,
+    #         )
+    #         corners.append(corner)
+    #
+    #     corner_array = np.vstack(corners)
+    #     print(f"Corner shape is: {corner_array.shape}")
+    #     print(f"Spacing shape is: {spacing}"
+    #           )
+    #
+    #
+    #     fractional_min = np.min(corner_array, axis=0)
+    #     fractional_max = np.max(corner_array, axis=0)
+    #
+    #     u0 = np.floor(fractional_min[0] * spacing[0])
+    #     u1 = np.ceil(fractional_max[0] * spacing[0])
+    #     v0 = np.floor(fractional_min[1] * spacing[1])
+    #     v1 = np.ceil(fractional_max[1] * spacing[1])
+    #     w0 = np.floor(fractional_min[2] * spacing[2])
+    #     w1 = np.ceil(fractional_max[2] * spacing[2])
+    #
+    #     # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
+    #
+    #     # Get the grid points
+    #     time_begin_itertools = time.time()
+    #     # grid_point_array = np.array(
+    #     #     [
+    #     #         xyz_tuple
+    #     #         for xyz_tuple
+    #     #         in itertools.product(
+    #     #         np.arange(u0, u1 + 1),
+    #     #         np.arange(v0, v1 + 1),
+    #     #         np.arange(w0, w1 + 1),
+    #     #     )
+    #     #     ]
+    #     # )
+    #     mgrid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1].astype(int)
+    #
+    #     # grid_point_array = np.hstack([grid[_j].reshape((-1, 1)) for _j in (0, 1, 2)])
+    #     grid_point_indicies = [mgrid[_j].reshape((-1, 1)) for _j in (0, 1, 2)]
+    #
+    #     time_finish_itertools = time.time()
+    #     print(
+    #         f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {mgrid.shape}")
+    #
+    #     # print(f"Grid point array shape: {grid_point_array.shape}")
+    #     # print(f"Grid point first element: {grid_point_array[0, :]}")
+    #
+    #     # Get the grid points in the mask
+    #     shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0,1,2))
+    #     mask_array = np.zeros(spacing, dtype=np.bool)
+    #     mask_array[indicies] = True
+    #     indicies_mask = mask_array[shifted_grid_point_indicies]
+    #
+    #     grid_point_array = np.vstack([grid_point_indicies[_j][indicies_mask] for _j in (0,1,2)]).astype(np.int)
+    #
+    #     point_orthogonalization_matrix = np.matmul(
+    #         np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+    #         np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
+    #     )
+    #     # indicies_point_array = np.vstack(indicies)
+    #
+    #     unique_points = np.hstack(
+    #         [shifted_grid_point_indicies[_j][indicies_mask].reshape((-1, 1))
+    #          for _j
+    #          in (0,1,2)]
+    #     ).astype(np.int)
+    #
+    #     time_begin_mult = time.time()
+    #     unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
+    #     time_finish_mult = time.time()
+    #     print(f"\t\t\t\t\t\t Points to positions in : {round(time_finish_mult-time_begin_mult, 1)}")
+    #
+    #     time_finish_make_array = time.time()
+    #
+    #     print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array-time_begin_make_array,1)}")
+    #     print(f"\t\t\t\t\t With shapes {unique_points.shape} {unique_positions.shape}")
+    #     print(f"\t\t\t\t\t Vs mask size {indicies[0].shape}")
+    #     print(unique_points)
+    #     print(unique_positions)
+    #
+    #     return unique_points, unique_positions
+
+        # all_point_array = grid
+
     @staticmethod
     def get_grid_points_around_protein(st: StructureInterface, grid, indicies, radius, processor: ProcessorInterface):
-        # point_arrays = []
-        # position_arrays = []
-        #
-        # time_begin_orth = time.time()
-        # pos_array_3d = np.zeros((3, grid.nu, grid.nv, grid.nw))
-        # print(np.max(pos_array_3d))
-        #
-        # # np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-        # point_orthogonalization_matrix = np.matmul(
-        #     np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-        #     np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
-        # )
-        # indicies_point_array = np.vstack(indicies)
-        # print(f"\t\t\t\t\tindicies_point_array shape: {indicies_point_array.shape}")
-        #
-        # pos_array = np.matmul(point_orthogonalization_matrix, indicies_point_array)
-        # print(f"\t\t\t\t\tPos array shape: {pos_array.shape}")
-        # print(pos_array_3d[0][indicies].shape)
-        # pos_array_3d[0][indicies] = pos_array[0, :]
-        # pos_array_3d[1][indicies] = pos_array[1, :]
-        # pos_array_3d[2][indicies] = pos_array[2, :]
-        # print(np.max(pos_array_3d))
-        # #
-        # pos_array_3d_ref = processor.put(pos_array_3d)
-        # time_finish_orth = time.time()
-        # print(
-        #     f"\t\t\t\tOrthogonalized mask positions in {round(time_finish_orth - time_begin_orth, 1)} to shape {pos_array.shape}")
 
         begin = time.time()
         positions = []
+
+        point_orthogonalization_matrix = np.matmul(
+            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+            np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
+        )
 
         for atom in st.protein_atoms():
             pos = atom.pos
@@ -592,7 +751,6 @@ class PointPositionArray(PointPositionArrayInterface):
         print(f"Spacing shape is: {spacing}"
               )
 
-
         fractional_min = np.min(corner_array, axis=0)
         fractional_max = np.max(corner_array, axis=0)
 
@@ -607,17 +765,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Get the grid points
         time_begin_itertools = time.time()
-        # grid_point_array = np.array(
-        #     [
-        #         xyz_tuple
-        #         for xyz_tuple
-        #         in itertools.product(
-        #         np.arange(u0, u1 + 1),
-        #         np.arange(v0, v1 + 1),
-        #         np.arange(w0, w1 + 1),
-        #     )
-        #     ]
-        # )
+
         mgrid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1].astype(int)
 
         # grid_point_array = np.hstack([grid[_j].reshape((-1, 1)) for _j in (0, 1, 2)])
@@ -630,34 +778,67 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
+        # Get and mask a transformed structure
+        offset_cart = -np.matmul(point_orthogonalization_matrix, np.array([u0, v0, w0]).reshape((3,1))).flatten()
+        shape = mgrid[0].shape
+        # new_grid = gemmi.FloatGrid(*shape)
+        mask = gemmi.Int8Grid(*shape)
+        mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        new_unit_cell = gemmi.UnitCell(
+            shape[0]*(grid.unit_cell.a/grid.nu),
+            shape[1]*(grid.unit_cell.a/grid.nv),
+            shape[2]*(grid.unit_cell.a/grid.nw),
+            grid.unit_cell.alpha,
+            grid.unit_cell.beta,
+            grid.unit_cell.gamma,
+        )
+        mask.set_unit_cell(
+            new_unit_cell
+        )
+        new_structure = transform_structure_to_unit_cell(
+            st,
+            new_unit_cell,
+            offset_cart
+        )
+        mask.set_unit_cell(grid.unit_cell)
+        for atom in new_structure.protein_atoms():
+            pos = atom.pos
+            mask.set_points_around(
+                pos,
+                radius=radius-2.0,
+                value=1,
+            )
+        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        indicies = np.nonzero(mask_array)
+
+
         # Get the grid points in the mask
-        shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0,1,2))
+        # shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0, 1, 2))
+        shifted_grid_point_indicies = tuple(grid_point_indicies[_j] - [u0, v0, w0][_j] for _j in (0, 1, 2))
+
         mask_array = np.zeros(spacing, dtype=np.bool)
         mask_array[indicies] = True
         indicies_mask = mask_array[shifted_grid_point_indicies]
 
-        grid_point_array = np.vstack([grid_point_indicies[_j][indicies_mask] for _j in (0,1,2)]).astype(np.int)
+        grid_point_array = np.vstack([grid_point_indicies[_j][indicies_mask] for _j in (0, 1, 2)]).astype(np.int)
 
-        point_orthogonalization_matrix = np.matmul(
-            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-            np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
-        )
+
         # indicies_point_array = np.vstack(indicies)
 
         unique_points = np.hstack(
-            [shifted_grid_point_indicies[_j][indicies_mask].reshape((-1, 1))
+            [grid_point_indicies[_j][indicies_mask].reshape((-1, 1))
              for _j
-             in (0,1,2)]
+             in (0, 1, 2)]
         ).astype(np.int)
 
         time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
         time_finish_mult = time.time()
-        print(f"\t\t\t\t\t\t Points to positions in : {round(time_finish_mult-time_begin_mult, 1)}")
+        print(f"\t\t\t\t\t\t Points to positions in : {round(time_finish_mult - time_begin_mult, 1)}")
 
         time_finish_make_array = time.time()
 
-        print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array-time_begin_make_array,1)}")
+        print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array - time_begin_make_array, 1)}")
         print(f"\t\t\t\t\t With shapes {unique_points.shape} {unique_positions.shape}")
         print(f"\t\t\t\t\t Vs mask size {indicies[0].shape}")
         print(unique_points)
@@ -665,103 +846,101 @@ class PointPositionArray(PointPositionArrayInterface):
 
         return unique_points, unique_positions
 
-        # all_point_array = grid
 
-
-        # Get the point positions
-        time_begin_pointpos = time.time()
-        mod_point_array = np.mod(grid_point_array, spacing)
-        mod_point_indexes = (mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
-        position_array = np.zeros(grid_point_array.shape)
-        print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
-
-        position_array[:, 0] = pos_array[0][mod_point_indexes]
-        position_array[:, 1] = pos_array[1][mod_point_indexes]
-        position_array[:, 2] = pos_array[2][mod_point_indexes]
-
-        # position_array = pos_array[:, , ].T
-
-        time_finish_pointpos = time.time()
-        print(
-            f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)} to shape {position_array.shape}")
-
-        time_finish = time.time()
-        print(
-            f"\t\t\t\t\tGot pos array of shape {positions_within_radius.shape} in {round(time_finish - time_begin, 1)}")
-
-        # point_position_arrays = processor(
+        # # Get the point positions
+        # time_begin_pointpos = time.time()
+        # mod_point_array = np.mod(grid_point_array, spacing)
+        # mod_point_indexes = (mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
+        # position_array = np.zeros(grid_point_array.shape)
+        # print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
+        #
+        # position_array[:, 0] = pos_array[0][mod_point_indexes]
+        # position_array[:, 1] = pos_array[1][mod_point_indexes]
+        # position_array[:, 2] = pos_array[2][mod_point_indexes]
+        #
+        # # position_array = pos_array[:, , ].T
+        #
+        # time_finish_pointpos = time.time()
+        # print(
+        #     f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)} to shape {position_array.shape}")
+        #
+        # time_finish = time.time()
+        # print(
+        #     f"\t\t\t\t\tGot pos array of shape {positions_within_radius.shape} in {round(time_finish - time_begin, 1)}")
+        #
+        # # point_position_arrays = processor(
+        # #     [
+        # #         Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
+        # #             [grid.nu, grid.nv, grid.nw],
+        # #             np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+        # #             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+        # #             pos_array_3d_ref,
+        # #             atom_positions[j, :],
+        # #             radius,
+        # #         )
+        # #         for j
+        # #         in range(atom_positions.shape[0])
+        # #     ]
+        # # )
+        #
+        #
+        #
+        # # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
+        # # for j in range(atom_positions.shape[0]):
+        # #     point_array, position_array = PointPositionArray.get_nearby_grid_points_parallel(
+        # #         [grid.nu, grid.nv, grid.nw],
+        # #         np.array(grid.unit_cell.fractionalization_matrix.tolist()),
+        # #         np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+        # #         atom_positions[j, :],
+        # #         radius
+        # #     )
+        # for point_position_array in point_position_arrays:
+        #     point_arrays.append(point_position_array[0])
+        #     position_arrays.append(point_position_array[1])
+        #
+        # finish = time.time()
+        # print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
+        #
+        # _all_points_array = np.concatenate(point_arrays, axis=0)
+        # all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
+        # all_positions_array = np.concatenate(position_arrays, axis=0)
+        #
+        # # print(f"All points shape: {all_points_array.shape}")
+        # # print(f"All positions shape: {all_positions_array.shape}")
+        #
+        # begin = time.time()
+        # # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
+        # all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
+        # shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
+        # point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
+        # point_3d_array[all_point_indexes] = True
+        # initial_unique_points = np.argwhere(point_3d_array)
+        # unique_points = initial_unique_points + np.min(_all_points_array, axis=0).reshape((1, 3))
+        # unique_points_indexes = (initial_unique_points[:, 0], initial_unique_points[:, 1], initial_unique_points[:, 2],)
+        # pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
+        # pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
+        # pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
+        #
+        # pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
+        # pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
+        # pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
+        # unique_positions = np.hstack(
         #     [
-        #         Partial(PointPositionArray.get_nearby_grid_points_parallel).paramaterise(
-        #             [grid.nu, grid.nv, grid.nw],
-        #             np.array(grid.unit_cell.fractionalization_matrix.tolist()),
-        #             np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-        #             pos_array_3d_ref,
-        #             atom_positions[j, :],
-        #             radius,
-        #         )
-        #         for j
-        #         in range(atom_positions.shape[0])
+        #         pos_3d_arr_x[unique_points_indexes].reshape((-1, 1)),
+        #         pos_3d_arr_y[unique_points_indexes].reshape((-1, 1)),
+        #         pos_3d_arr_z[unique_points_indexes].reshape((-1, 1)),
         #     ]
         # )
-
-
-
-        # point_arrays, position_arrays = PointPositionArray.get_nearby_grid_points_vectorized(grid, atom_positions, radius)
-        # for j in range(atom_positions.shape[0]):
-        #     point_array, position_array = PointPositionArray.get_nearby_grid_points_parallel(
-        #         [grid.nu, grid.nv, grid.nw],
-        #         np.array(grid.unit_cell.fractionalization_matrix.tolist()),
-        #         np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
-        #         atom_positions[j, :],
-        #         radius
-        #     )
-        for point_position_array in point_position_arrays:
-            point_arrays.append(point_position_array[0])
-            position_arrays.append(point_position_array[1])
-
-        finish = time.time()
-        print(f"\t\t\t\tGot nearby grid point position arrays in: {finish - begin}")
-
-        _all_points_array = np.concatenate(point_arrays, axis=0)
-        all_points_array = _all_points_array - np.min(_all_points_array, axis=0).reshape((1, 3))
-        all_positions_array = np.concatenate(position_arrays, axis=0)
-
-        # print(f"All points shape: {all_points_array.shape}")
-        # print(f"All positions shape: {all_positions_array.shape}")
-
-        begin = time.time()
-        # unique_points, indexes = np.unique(all_points_array, axis=0, return_index=True)
-        all_point_indexes = (all_points_array[:, 0], all_points_array[:, 1], all_points_array[:, 2],)
-        shape = (np.max(all_points_array, axis=0) - np.min(all_points_array, axis=0)) + 1
-        point_3d_array = np.zeros((shape[0], shape[1], shape[2]), dtype=bool)
-        point_3d_array[all_point_indexes] = True
-        initial_unique_points = np.argwhere(point_3d_array)
-        unique_points = initial_unique_points + np.min(_all_points_array, axis=0).reshape((1, 3))
-        unique_points_indexes = (initial_unique_points[:, 0], initial_unique_points[:, 1], initial_unique_points[:, 2],)
-        pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
-        pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
-        pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
-
-        pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
-        pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
-        pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
-        unique_positions = np.hstack(
-            [
-                pos_3d_arr_x[unique_points_indexes].reshape((-1, 1)),
-                pos_3d_arr_y[unique_points_indexes].reshape((-1, 1)),
-                pos_3d_arr_z[unique_points_indexes].reshape((-1, 1)),
-            ]
-        )
-
-        finish = time.time()
-        print(
-            f"\t\t\t\tGot unique points in: {finish - begin} with point shape {unique_points.shape} and pos shape {unique_positions.shape}")
-
-        # unique_positions = all_positions_array[indexes, :]
-        # print(f"Unique points shape: {unique_points.shape}")
-        # print(f"Unique positions shape: {unique_positions.shape}")
-
-        return unique_points, unique_positions
+        #
+        # finish = time.time()
+        # print(
+        #     f"\t\t\t\tGot unique points in: {finish - begin} with point shape {unique_points.shape} and pos shape {unique_positions.shape}")
+        #
+        # # unique_positions = all_positions_array[indexes, :]
+        # # print(f"Unique points shape: {unique_points.shape}")
+        # # print(f"Unique positions shape: {unique_positions.shape}")
+        #
+        # return unique_points, unique_positions
 
     # @staticmethod
     # def get_grid_points_around_protein(st: StructureInterface, grid, indicies, radius, processor: ProcessorInterface):
@@ -881,7 +1060,7 @@ class PointPositionArray(PointPositionArrayInterface):
     #     return unique_points, unique_positions
 
     @classmethod
-    def from_structure(cls, st: StructureInterface, grid, indicies, processor, radius: float = 6.0):
+    def from_structure(cls, st: StructureInterface, grid, indicies, processor, radius: float = 8.0):
         point_array, position_array = PointPositionArray.get_grid_points_around_protein(st, grid, indicies, radius, processor)
         return PointPositionArray(point_array, position_array)
 
@@ -932,31 +1111,31 @@ class GridPartitioning(GridPartitioningInterface):
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
         # print(f"\t\t\tQueryed points in : {finish - begin}")
-        distance_mask = distances < 7.0
+        # distance_mask = distances < 7.0
         # print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
-        uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
-        multiple_point_unique_array_indicies = np.nonzero(counts > 1)
-        discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
-        # print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
-        masked_distances = distances[distance_mask]
-        for uniques_index in multiple_point_unique_array_indicies[0]:  # For each index of a point with a count > 1
-            # print(uniques_index)
-            # unique = uniques[uniques_index]
-            inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
-            # print(np.sum(inv_mask))
-            inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
-            # print(inv_mask_indicies[0].size)
-            unique_distances = masked_distances[inv_mask_indicies]  # Select the distances associated with that point
-            # print(f"{unique_distances}")
-            min_dist_index = inv_mask_indicies[0][np.argmin(unique_distances) ] # Get index in the selection the minimum
-            inv_mask[min_dist_index] = False  # Remove the closest point from the mask
-            discarded_multiple_mask[inv_mask] = True
-
-        included_points_mask = ~discarded_multiple_mask
-
-        uniques, counts = np.unique(point_position_array.points[distance_mask][included_points_mask], axis=0,  return_counts=True)
-        assert np.all(counts == 1)
+        # uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
+        # multiple_point_unique_array_indicies = np.nonzero(counts > 1)
+        # discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
+        # # print(f"Got {multiple_point_unique_array_indicies[0].size} multiple occupied points!")
+        # masked_distances = distances[distance_mask]
+        # for uniques_index in multiple_point_unique_array_indicies[0]:  # For each index of a point with a count > 1
+        #     # print(uniques_index)
+        #     # unique = uniques[uniques_index]
+        #     inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
+        #     # print(np.sum(inv_mask))
+        #     inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
+        #     # print(inv_mask_indicies[0].size)
+        #     unique_distances = masked_distances[inv_mask_indicies]  # Select the distances associated with that point
+        #     # print(f"{unique_distances}")
+        #     min_dist_index = inv_mask_indicies[0][np.argmin(unique_distances) ] # Get index in the selection the minimum
+        #     inv_mask[min_dist_index] = False  # Remove the closest point from the mask
+        #     discarded_multiple_mask[inv_mask] = True
+        #
+        # included_points_mask = ~discarded_multiple_mask
+        #
+        # uniques, counts = np.unique(point_position_array.points[distance_mask][included_points_mask], axis=0,  return_counts=True)
+        # assert np.all(counts == 1)
 
         # uniques, counts = np.unique(point_position_array.points[ distance_mask], axis=0, return_counts=True)
         #
@@ -972,14 +1151,26 @@ class GridPartitioning(GridPartitioningInterface):
 
 
         # Get partions
+        # self.partitions = {
+        #     ResidueID(
+        #         ca_point_position_array.models[index],
+        #         ca_point_position_array.chains[index],
+        #         ca_point_position_array.seq_ids[index],
+        #     ): PointPositionArray(
+        #         point_position_array.points[distance_mask][(indexes[distance_mask] == index)  & included_points_mask],
+        #         point_position_array.positions[distance_mask][(indexes[distance_mask] == index) & included_points_mask]
+        #     )
+        #     for index
+        #     in np.unique(indexes)
+        # }
         self.partitions = {
             ResidueID(
                 ca_point_position_array.models[index],
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
-                point_position_array.points[distance_mask][(indexes[distance_mask] == index)  & included_points_mask],
-                point_position_array.positions[distance_mask][(indexes[distance_mask] == index) & included_points_mask]
+                point_position_array.points[indexes == index],
+                point_position_array.positions[indexes == index]
             )
             for index
             in np.unique(indexes)
