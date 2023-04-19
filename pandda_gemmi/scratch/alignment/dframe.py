@@ -935,10 +935,10 @@ class GridPartitioning(GridPartitioningInterface):
         distance_mask = distances < 7.0
         print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
-        uniques, counts = np.unique(point_position_array.positions[ distance_mask], axis=0)
+        uniques, counts = np.unique(point_position_array.positions[ distance_mask], axis=0, return_counts=True)
         assert np.all(counts == 1)
 
-        uniques, counts = np.unique(point_position_array.points[ distance_mask], axis=0)
+        uniques, counts = np.unique(point_position_array.points[ distance_mask], axis=0, return_counts=True)
 
         assert np.all(counts == 1)
 
