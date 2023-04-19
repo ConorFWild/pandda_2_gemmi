@@ -941,7 +941,7 @@ class GridPartitioning(GridPartitioningInterface):
             ca_point_position_array.chains[index],
             ca_point_position_array.seq_ids[index]])
             print(point_position_array.points[(indexes == index) & distance_mask].size)
-            print(point_position_array.positions[(indexes == index) & distance_mask])
+            print(point_position_array.positions[(indexes == index) & distance_mask].size)
 
 
         # Get partions
