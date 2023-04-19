@@ -935,13 +935,16 @@ class GridPartitioning(GridPartitioningInterface):
         distance_mask = distances < 7.0
         print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
+        uniques, counts = np.unique(point_position_array.points[(indexes == index) & distance_mask], axis=0)
 
-        for index in np.unique(indexes):
-            print([ca_point_position_array.models[index],
-            ca_point_position_array.chains[index],
-            ca_point_position_array.seq_ids[index]])
-            print(point_position_array.points[(indexes == index) & distance_mask].size)
-            print(point_position_array.positions[(indexes == index) & distance_mask].size)
+        assert np.all(counts < 2)
+
+        # for index in np.unique(indexes):
+        #     print([ca_point_position_array.models[index],
+        #     ca_point_position_array.chains[index],
+        #     ca_point_position_array.seq_ids[index]])
+        #     print(point_position_array.points[(indexes == index) & distance_mask].size)
+        #     print(point_position_array.positions[(indexes == index) & distance_mask].size)
 
 
         # Get partions
@@ -951,13 +954,13 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
-                point_position_array.points[indexes == index ],
-                point_position_array.positions[indexes == index]
+                point_position_array.points[(indexes == index) & distance_mask ],
+                point_position_array.positions[(indexes == index) & distance_mask]
             )
             for index
             in np.unique(indexes)
         }
-        exit()
+        # exit()
 
 
 class GridMask(GridMaskInterface):
