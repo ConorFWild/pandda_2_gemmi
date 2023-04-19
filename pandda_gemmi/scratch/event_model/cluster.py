@@ -104,8 +104,8 @@ class ClusterDensityDBSCAN:
 
         all_point_indexes = (
             all_points_array[:, 0] - min_point[0],
-            all_points_array[:, 1]- min_point[1],
-            all_points_array[:, 2]- min_point[2],)
+            all_points_array[:, 1] - min_point[1],
+            all_points_array[:, 2] - min_point[2],)
         all_point_indexes_mod = (
             np.mod(all_points_array[:, 0], reference_frame.spacing[0]),
             np.mod(all_points_array[:, 1], reference_frame.spacing[1]),
@@ -131,7 +131,13 @@ class ClusterDensityDBSCAN:
         z_unmasked_array = np.array(z_grid, copy=False)
 
         # high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
-        high_z_indexes = z_unmasked_array[all_point_indexes_mod] > 2.0
+        high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > 2.0
+        # high_z_indexes = z_unmasked_array[all_point_indexes_mod] > 2.0
+        high_z_indexes = (
+            all_point_indexes[0][high_z_all_points_mask],
+            all_point_indexes[1][high_z_all_points_mask],
+            all_point_indexes[2][high_z_all_points_mask],
+        )
         high_z_pos_x = pos_3d_arr_x[high_z_indexes]
         high_z_pos_y = pos_3d_arr_y[high_z_indexes]
         high_z_pos_z = pos_3d_arr_z[high_z_indexes]
