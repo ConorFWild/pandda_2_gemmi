@@ -121,7 +121,7 @@ class SparseDMapStream:
         # ]
         transforms, com_ref, com_mov = alignment.get_transforms()
         print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
-        print(f"Transforms: {[key for key in transforms}")
+        print(f"Transforms: {[key for key in transforms]}")
 
         transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
         com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
