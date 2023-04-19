@@ -20,6 +20,7 @@ class FilterCompatibleStructures:
                 print(f"Entity type is: {ref_ent.entity_type}")
                 continue
             if ref_ent.name not in mov_ent_names:
+                print(f"No matching mov ent to: {ref_ent.name}")
                 return False
             else:
                 ref_seq = [gemmi.Entity.first_mon(item) for item in ref_ent.full_sequence]
