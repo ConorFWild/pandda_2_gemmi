@@ -935,6 +935,15 @@ class GridPartitioning(GridPartitioningInterface):
         distance_mask = distances < 7.0
         print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
+
+        for index in np.unique(indexes):
+            print([ca_point_position_array.models[index],
+            ca_point_position_array.chains[index],
+            ca_point_position_array.seq_ids[index]])
+            print(point_position_array.points[(indexes == index) & distance_mask].size)
+            print(point_position_array.positions[(indexes == index) & distance_mask])
+
+
         # Get partions
         self.partitions = {
             ResidueID(
