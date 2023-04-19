@@ -984,8 +984,8 @@ class GridPartitioning(GridPartitioningInterface):
             for index
             in np.unique(indexes)
         }
-        for resid, point_pos_array in self.partitions.items():
-            print(f"{resid} : {point_pos_array.points.shape}")
+        # for resid, point_pos_array in self.partitions.items():
+        #     print(f"{resid} : {point_pos_array.points.shape}")
         # exit()
 
 
