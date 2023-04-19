@@ -786,8 +786,8 @@ class PointPositionArray(PointPositionArrayInterface):
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         new_unit_cell = gemmi.UnitCell(
             shape[0]*(grid.unit_cell.a/grid.nu),
-            shape[1]*(grid.unit_cell.a/grid.nv),
-            shape[2]*(grid.unit_cell.a/grid.nw),
+            shape[1]*(grid.unit_cell.b/grid.nv),
+            shape[2]*(grid.unit_cell.c/grid.nw),
             grid.unit_cell.alpha,
             grid.unit_cell.beta,
             grid.unit_cell.gamma,
@@ -809,18 +809,31 @@ class PointPositionArray(PointPositionArrayInterface):
                 value=1,
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
-        indicies = np.nonzero(mask_array)
+        # indicies = np.nonzero(mask_array)
 
 
         # Get the grid points in the mask
         # shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0, 1, 2))
-        shifted_grid_point_indicies = tuple(grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j] for _j in (0, 1, 2))
+        shifted_grid_point_indicies = tuple(
+            grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j]
+            for _j
+            in (0, 1, 2)
+        )
 
-        mask_array = np.zeros(shape, dtype=np.bool)
-        mask_array[indicies] = True
-        indicies_mask = mask_array[shifted_grid_point_indicies]
+        print(f"\t\t\t\t\t\tMask array shape: {mask_array.shape}")
+        print(f"\t\t\t\t\t\tRange: {[u0, v0, w0]} : {[u1, v1, w1]}")
 
-        grid_point_array = np.vstack([grid_point_indicies[_j][indicies_mask] for _j in (0, 1, 2)]).astype(np.int)
+        # mask_array = np.zeros(shape, dtype=np.bool)
+        # mask_array[indicies] = True
+        grid_point_indicies_mask = mask_array[shifted_grid_point_indicies]
+
+        grid_point_array = np.vstack(
+            [
+                grid_point_indicies[_j][grid_point_indicies_mask]
+                for _j
+                in (0, 1, 2)
+            ]
+        ).astype(np.int)
 
 
         # indicies_point_array = np.vstack(indicies)
