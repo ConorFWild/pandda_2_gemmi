@@ -942,7 +942,7 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
                 point_position_array.points[(indexes == index) & distance_mask],
-                point_position_array.positions[(indexes == index) & distance_maskπ]
+                point_position_array.positions[(indexes == index) & distance_mask]
             )
             for index
             in np.unique(indexes)
