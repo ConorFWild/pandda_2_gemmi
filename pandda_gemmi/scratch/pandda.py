@@ -192,7 +192,7 @@ def pandda(args: PanDDAArgs):
                 FilterRFree(0.4),
                 FilterSpaceGroup(dataset),
                 FilterCompatibleStructures(dataset),
-                FilterResolution(dataset_res, 30, 0.1)]
+                FilterResolution(dataset_res, 60, 0.1)]
         )
         processing_res = max(
                     [_dataset.reflections.resolution() for _dataset in datasets.values()]
