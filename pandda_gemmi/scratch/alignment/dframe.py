@@ -935,12 +935,28 @@ class GridPartitioning(GridPartitioningInterface):
         distance_mask = distances < 7.0
         print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
 
-        uniques, counts = np.unique(point_position_array.positions[ distance_mask], axis=0, return_counts=True)
+        uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
+        multiple_point_indicies = np.nonzero(counts > 1)
+        discarded_multiple_mask = np.zeros(indexes.shape, dtype=np.bool)
+        for uniques_index in multiple_point_indicies:  # For each index of a point with a count > 1
+            # unique = uniques[uniques_index]
+            inv_mask = inv == uniques_index  # Mask the points based on whether they are assigned to that unique
+            inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
+            unique_distances = distances[inv_mask_indicies]  # Select the distances associated with that point
+            min_dist_index = inv_mask_indicies[np.argmin(unique_distances) ] # Get index in the selection the minimum
+            inv_mask[min_dist_index] = False  # Remove the closest point from the mask
+            discarded_multiple_mask[inv_mask] = True
+
+        included_points_mask = ~discarded_multiple_mask
+
+
+        uniques, counts = np.unique(point_position_array.points[distance_mask][included_points_mask], axis=0,  return_counts=True)
         assert np.all(counts == 1)
 
-        uniques, counts = np.unique(point_position_array.points[ distance_mask], axis=0, return_counts=True)
+        # uniques, counts = np.unique(point_position_array.points[ distance_mask], axis=0, return_counts=True)
+        #
+        # assert np.all(counts == 1)
 
-        assert np.all(counts == 1)
 
         # for index in np.unique(indexes):
         #     print([ca_point_position_array.models[index],
@@ -957,13 +973,15 @@ class GridPartitioning(GridPartitioningInterface):
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
-                point_position_array.points[(indexes == index) & distance_mask ],
-                point_position_array.positions[(indexes == index) & distance_mask]
+                point_position_array.points[distance_mask][(indexes[distance_mask] == index)  & included_points_mask],
+                point_position_array.positions[distance_mask][(indexes[distance_mask] == index) & included_points_mask]
             )
             for index
             in np.unique(indexes)
         }
-        # exit()
+        for resid, point_pos_array in self.partitions.items():
+            print(f"{resid} : {point_pos_array.points.shape}")
+        exit()
 
 
 class GridMask(GridMaskInterface):
