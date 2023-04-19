@@ -23,6 +23,7 @@ from pandda_gemmi.scratch.comparators import (
     FilterRFree,
     FilterSpaceGroup,
     FilterResolution,
+    FilterCompatibleStructures
 )
 from pandda_gemmi.scratch import constants
 from pandda_gemmi.scratch.dmaps import save_dmap
@@ -173,31 +174,38 @@ def pandda(args: PanDDAArgs):
         dataset = datasets[dtag]
 
         # Get the resolution to process at
-        dataset_res = dataset.reflections.resolution() + 0.1
-        processing_res = max(dataset_res,
-                             list(
-                                 sorted(
-                                     [_dataset.reflections.resolution() for _dataset in datasets.values()]
-                                 )
-                             )[60] + 0.1)
+        dataset_res = dataset.reflections.resolution()
+        # processing_res = max(dataset_res,
+        #                      list(
+        #                          sorted(
+        #                              [_dataset.reflections.resolution() for _dataset in datasets.values()]
+        #                          )
+        #                      )[60] + 0.1)
         print(
-            f"Dataset resolution is: {dataset.reflections.resolution()} and processing resolution is {processing_res}")
-        print(f"Dataset rfree is: {dataset.structure.rfree()}")
+            f"Dataset resolution is: {dataset.reflections.resolution()}")
+        # print(f"Dataset rfree is: {dataset.structure.rfree()}")
 
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
             datasets,
-            [FilterRFree(0.4), FilterSpaceGroup(dataset), FilterResolution(processing_res)]
+            [
+                FilterRFree(0.4),
+                FilterSpaceGroup(dataset),
+                FilterCompatibleStructures(dataset),
+                FilterResolution(dataset_res, 30, 0.1)]
         )
 
 
-        if len(comparator_datasets) < 60:
-            _h = 0
-            for _dtag in sorted(datasets, key=lambda __dtag: datasets[__dtag].reflections.resolution()):
-                if _h >60:
-                    continue
-                comparator_datasets[_dtag] = datasets[_dtag]
-                _h = _h + 1
+        # if len(comparator_datasets) < 60:
+        #     _h = 0
+        #     for _dtag in sorted(datasets, key=lambda __dtag: datasets[__dtag].reflections.resolution()):
+        #         if _h >60:
+        #             continue
+        #         comparator_datasets[_dtag] = datasets[_dtag]
+        #         _h = _h + 1
+
+        if len(comparator_datasets) < 30:
+            print(f"NOT ENOUGH COMPARATOR DATASETS! SKIPPING!")
 
         if dtag not in comparator_datasets:
             comparator_datasets[dtag] = dataset
