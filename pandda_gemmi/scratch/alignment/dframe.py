@@ -948,7 +948,7 @@ class GridPartitioning(GridPartitioningInterface):
             inv_mask_indicies = np.nonzero(inv_mask)  # Get the array of indexes where
             print(inv_mask_indicies[0].size)
             unique_distances = masked_distances[inv_mask_indicies]  # Select the distances associated with that point
-            print(unique_distances.size)
+            print(f"{unique_distances}")
             min_dist_index = inv_mask_indicies[0][np.argmin(unique_distances) ] # Get index in the selection the minimum
             inv_mask[min_dist_index] = False  # Remove the closest point from the mask
             discarded_multiple_mask[inv_mask] = True
