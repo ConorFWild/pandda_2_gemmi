@@ -9,20 +9,22 @@ class FilterCompatibleStructures:
         self.similarity = similarity
 
     def get_compatible(self, dataset):
-        ref_mod = self.dataset.structure.structure[0]
-        ref_mod_sequence = ref_mod.full_sequence
+        ref_ents = self.dataset.structure.structure.entities
+        # ref_mod_sequence = ref_mod.full_sequence
 
-        mov_mod = dataset.structure.structre[0]
-        mov_mod_chains = [chain.name for chain in mov_mod]
+        mov_ents = dataset.structure.structre.entities
+        mov_ent_names = [ent.name for ent in mov_ents]
 
-        for chain in ref_mod:
-            if chain.name not in mov_mod_chains:
+        for ref_ent in ref_ents:
+            if ref_ent.name not in mov_ents:
                 return False
             else:
-                result = gemmi.align_sequence_to_polymer(
-                    ref_mod_sequence,
-                    chain.get_polymer(),
-                    gemmi.PolymerType.PeptideL,
+                ref_seq = [gemmi.Entity.first_mon(item) for item in ref_ent.full_sequence]
+                mov_seq = [gemmi.Entity.first_mon(item) for item in dataset.structure.structre.get_entity(ref_ent.name).full_sequence]
+                result = gemmi.gemmi.align_string_sequences(
+                    ref_seq,
+                    mov_seq,
+                    [], gemmi.blosum62,
                 )
 
                 if not result.calculate_identity() >= self.similarity:
