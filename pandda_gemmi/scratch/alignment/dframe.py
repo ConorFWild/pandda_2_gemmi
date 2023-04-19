@@ -937,7 +937,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         uniques, inv, counts = np.unique(point_position_array.points[distance_mask], axis=0,return_inverse=True, return_counts=True)
         multiple_point_unique_array_indicies = np.nonzero(counts > 1)
-        discarded_multiple_mask = np.zeros(indexes.shape, dtype=np.bool)
+        discarded_multiple_mask = np.zeros(indexes[distance_mask].shape, dtype=np.bool)
         print(f"Got {multiple_point_unique_array_indicies.size} multiple occupied points!")
         for uniques_index in multiple_point_unique_array_indicies:  # For each index of a point with a count > 1
             # unique = uniques[uniques_index]
@@ -949,7 +949,6 @@ class GridPartitioning(GridPartitioningInterface):
             discarded_multiple_mask[inv_mask] = True
 
         included_points_mask = ~discarded_multiple_mask
-
 
         uniques, counts = np.unique(point_position_array.points[distance_mask][included_points_mask], axis=0,  return_counts=True)
         assert np.all(counts == 1)
