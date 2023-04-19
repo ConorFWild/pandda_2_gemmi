@@ -124,6 +124,7 @@ class ClusterDensityDBSCAN:
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
 
+
         pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
         pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
         pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
