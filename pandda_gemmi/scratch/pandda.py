@@ -195,6 +195,7 @@ def pandda(args: PanDDAArgs):
                 FilterResolution(dataset_res, 30, 0.1)]
         )
 
+        print(f"Number of comparator datasets: {len(comparator_datasets)}")
         # if len(comparator_datasets) < 60:
         #     _h = 0
         #     for _dtag in sorted(datasets, key=lambda __dtag: datasets[__dtag].reflections.resolution()):
