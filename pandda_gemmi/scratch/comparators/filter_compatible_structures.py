@@ -4,7 +4,7 @@ from ..interfaces import *
 
 
 class FilterCompatibleStructures:
-    def __init__(self, dataset, similarity=0.9):
+    def __init__(self, dataset, similarity=100.0):
         self.dataset = dataset
         self.similarity = similarity
 
@@ -25,7 +25,7 @@ class FilterCompatibleStructures:
                     gemmi.PolymerType.PeptideL,
                 )
 
-                if not result.calculate_identity() > self.similarity:
+                if not result.calculate_identity() >= self.similarity:
                     return False
 
         return True
