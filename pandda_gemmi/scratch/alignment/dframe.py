@@ -806,7 +806,7 @@ class PointPositionArray(PointPositionArrayInterface):
             pos = atom.pos
             mask.set_points_around(
                 pos,
-                radius=radius-2.0,
+                radius=radius,
                 value=1,
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
