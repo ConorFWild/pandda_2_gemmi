@@ -12,7 +12,7 @@ class FilterCompatibleStructures:
         ref_ents = self.dataset.structure.structure.entities
         # ref_mod_sequence = ref_mod.full_sequence
 
-        mov_ents = dataset.structure.structre.entities
+        mov_ents = dataset.structure.structure.entities
         mov_ent_names = [ent.name for ent in mov_ents]
 
         for ref_ent in ref_ents:
