@@ -17,6 +17,7 @@ class FilterCompatibleStructures:
 
         for ref_ent in ref_ents:
             if not ref_ent.entity_type == gemmi.EntityType.Polymer:
+                print(f"Entity type is: {ref_ent.entity_type}")
                 continue
             if ref_ent.name not in mov_ent_names:
                 return False
