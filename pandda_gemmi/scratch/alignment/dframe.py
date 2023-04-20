@@ -31,18 +31,23 @@ def transform_structure_to_unit_cell(
     transform = gemmi.Transform()
     transform.vec.fromlist(offset.tolist())
 
+    old_poss = []
     new_poss = []
     for model in st:
         for chain in model:
             for residue in chain:
                 for atom in residue:
                     pos = atom.pos
+                    old_poss.append([pos.x, pos.y, pos.z])
                     new_pos_vec = transform.apply(pos)
                     new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
                     atom.pos = new_pos
                     new_poss.append([new_pos.x, new_pos.y, new_pos.z])
 
+    old_pos_array = np.array(old_poss)
     new_pos_array = np.array(new_poss)
+    print(f"\t\t\t\t\t\tNew structure min: {np.min(old_pos_array, axis=0)}")
+    print(f"\t\t\t\t\t\tNew structure max: {np.max(old_pos_array, axis=0)}")
     print(f"\t\t\t\t\t\tNew structure min: {np.min(new_pos_array, axis=0)}")
     print(f"\t\t\t\t\t\tNew structure max: {np.max(new_pos_array, axis=0)}")
 
