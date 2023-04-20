@@ -824,6 +824,18 @@ class PointPositionArray(PointPositionArrayInterface):
             np.mod(outer_indicies[1] + v0, grid.nv),
             np.mod(outer_indicies[2] + w0, grid.nw),
         )
+        indicies_min = [
+            np.min(outer_indicies_native[0]),
+            np.min(outer_indicies_native[1]),
+            np.min(outer_indicies_native[2]),
+        ]
+        indicies_max = [
+            np.max(outer_indicies_native[0]),
+            np.max(outer_indicies_native[1]),
+            np.max(outer_indicies_native[2]),
+        ]
+        print(f"\t\t\t\t\t\tOuter indicies native from {indicies_min} to {indicies_max}")
+
 
         inner_mask = gemmi.Int8Grid(*shape)
         inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -842,6 +854,18 @@ class PointPositionArray(PointPositionArrayInterface):
             np.mod(inner_indicies[1] + v0, grid.nv),
             np.mod(inner_indicies[2] + w0, grid.nw),
         )
+        indicies_min = [
+            np.min(inner_indicies_native[0]),
+            np.min(inner_indicies_native[1]),
+            np.min(inner_indicies_native[2]),
+        ]
+        indicies_max = [
+            np.max(inner_indicies_native[0]),
+            np.max(inner_indicies_native[1]),
+            np.max(inner_indicies_native[2]),
+        ]
+        print(f"\t\t\t\t\t\tInner indicies native from {indicies_min} to {indicies_max}")
+
         sparse_inner_indicies = inner_mask_array[outer_indicies] == 1
 
         inner_atomic_mask = gemmi.Int8Grid(*shape)
@@ -861,6 +885,18 @@ class PointPositionArray(PointPositionArrayInterface):
             np.mod(inner_atomic_indicies[1] + v0, grid.nv),
             np.mod(inner_atomic_indicies[2] + w0, grid.nw),
         )
+        indicies_min = [
+            np.min(inner_atomic_indicies_native[0]),
+            np.min(inner_atomic_indicies_native[1]),
+            np.min(inner_atomic_indicies_native[2]),
+        ]
+        indicies_max = [
+            np.max(inner_atomic_indicies_native[0]),
+            np.max(inner_atomic_indicies_native[1]),
+            np.max(inner_atomic_indicies_native[2]),
+        ]
+        print(f"\t\t\t\t\t\tInner atomic indicies native from {indicies_min} to {indicies_max}")
+
         sparse_inner_atomic_indicies = inner_atomic_mask_array[outer_indicies] == 1
         # indicies = np.nonzero(mask_array)
 
