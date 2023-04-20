@@ -159,9 +159,9 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     _k = 0
     for dtag in datasets:
-        _k += 1
-        if _k > 3:
-            continue
+        # _k += 1
+        # if _k > 3:
+        #     continue
         # if dtag != "JMJD2DA-x427":
         #     continue
 
@@ -197,6 +197,7 @@ def pandda(args: PanDDAArgs):
         if len(comparator_datasets) < 30:
             print(f"NOT ENOUGH COMPARATOR DATASETS! SKIPPING!")
             continue
+
         processing_res = max(
                     [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
             )
