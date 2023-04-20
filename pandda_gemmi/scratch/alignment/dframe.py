@@ -31,6 +31,7 @@ def transform_structure_to_unit_cell(
     transform = gemmi.Transform()
     transform.vec.fromlist(offset.tolist())
 
+    new_poss = []
     for model in st:
         for chain in model:
             for residue in chain:
@@ -39,6 +40,11 @@ def transform_structure_to_unit_cell(
                     new_pos_vec = transform.apply(pos)
                     new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
                     atom.pos = new_pos
+                    new_poss.append([new_pos.x, new_pos.y, new_pos.z])
+
+    new_pos_array = np.array(new_poss)
+    print(f"\t\t\t\t\t\tNew structure min: {np.min(new_pos_array, axis=0)}")
+    print(f"\t\t\t\t\t\tNew structure max: {np.max(new_pos_array, axis=0)}")
 
     st.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     st.cell = unit_cell
@@ -834,7 +840,7 @@ class PointPositionArray(PointPositionArrayInterface):
             np.max(outer_indicies_native[1]),
             np.max(outer_indicies_native[2]),
         ]
-        print(f"\t\t\t\t\t\tOuter indicies native from {indicies_min} to {indicies_max}")
+        print(f"\t\t\t\t\t\tOuter indicies native from {indicies_min} to {indicies_max} : num indicies : {outer_indicies_native[0].size}")
 
         inner_mask = gemmi.Int8Grid(*shape)
         inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -863,7 +869,7 @@ class PointPositionArray(PointPositionArrayInterface):
             np.max(inner_indicies_native[1]),
             np.max(inner_indicies_native[2]),
         ]
-        print(f"\t\t\t\t\t\tInner indicies native from {indicies_min} to {indicies_max}")
+        print(f"\t\t\t\t\t\tInner indicies native from {indicies_min} to {indicies_max} : num indicies : {inner_indicies_native[0].size}")
 
         sparse_inner_indicies = inner_mask_array[outer_indicies] == 1
 
@@ -894,7 +900,7 @@ class PointPositionArray(PointPositionArrayInterface):
             np.max(inner_atomic_indicies_native[1]),
             np.max(inner_atomic_indicies_native[2]),
         ]
-        print(f"\t\t\t\t\t\tInner atomic indicies native from {indicies_min} to {indicies_max}")
+        print(f"\t\t\t\t\t\tInner atomic indicies native from {indicies_min} to {indicies_max} : num indicies : {inner_atomic_indicies_native[0].size}")
 
         sparse_inner_atomic_indicies = inner_atomic_mask_array[outer_indicies] == 1
         # indicies = np.nonzero(mask_array)
@@ -916,7 +922,7 @@ class PointPositionArray(PointPositionArrayInterface):
         )
 
         print(f"\t\t\t\t\t\tMask array shape: {outer_mask_array.shape}")
-        print(f"\t\t\t\t\t\tRange: {[u0, v0, w0]} : {[u1, v1, w1]}")
+        print(f"\t\t\t\t\t\tGrid index Range: {[u0, v0, w0]} : {[u1, v1, w1]}")
 
         # mask_array = np.zeros(shape, dtype=np.bool)
         # mask_array[indicies] = True
