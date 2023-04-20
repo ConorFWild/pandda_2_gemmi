@@ -859,7 +859,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 radius=2.0,
                 value=1,
             )
-        inner_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        inner_mask_array = np.array(inner_mask, copy=False, dtype=np.int8)
         inner_indicies = np.nonzero(inner_mask_array)
         inner_indicies_native = (
             np.mod(inner_indicies[0] + u0, grid.nu),
@@ -890,7 +890,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 radius=0.5,
                 value=1,
             )
-        inner_atomic_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        inner_atomic_mask_array = np.array(inner_atomic_mask, copy=False, dtype=np.int8)
         inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
         inner_atomic_indicies_native = (
             np.mod(inner_atomic_indicies[0] + u0, grid.nu),
