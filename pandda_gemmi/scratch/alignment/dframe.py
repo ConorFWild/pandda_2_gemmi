@@ -820,7 +820,7 @@ class PointPositionArray(PointPositionArrayInterface):
             pos = atom.pos
             outer_mask.set_points_around(
                 pos,
-                radius=radius,
+                radius=6.0,
                 value=1,
             )
         outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
@@ -844,12 +844,12 @@ class PointPositionArray(PointPositionArrayInterface):
 
         inner_mask = gemmi.Int8Grid(*shape)
         inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        inner_mask.set_unit_cell(grid.unit_cell)
+        inner_mask.set_unit_cell(new_unit_cell)
         for atom in new_structure.protein_atoms():
             pos = atom.pos
             inner_mask.set_points_around(
                 pos,
-                radius=radius,
+                radius=2.0,
                 value=1,
             )
         inner_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
@@ -875,12 +875,12 @@ class PointPositionArray(PointPositionArrayInterface):
 
         inner_atomic_mask = gemmi.Int8Grid(*shape)
         inner_atomic_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        inner_atomic_mask.set_unit_cell(grid.unit_cell)
+        inner_atomic_mask.set_unit_cell(new_unit_cell)
         for atom in new_structure.protein_atoms():
             pos = atom.pos
             inner_atomic_mask.set_points_around(
                 pos,
-                radius=radius,
+                radius=0.5,
                 value=1,
             )
         inner_atomic_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
