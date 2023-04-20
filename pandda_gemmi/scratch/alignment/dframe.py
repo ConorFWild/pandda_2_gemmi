@@ -703,7 +703,7 @@ class PointPositionArray(PointPositionArrayInterface):
         # all_point_array = grid
 
     @staticmethod
-    def get_grid_points_around_protein(st: StructureInterface, grid, indicies, radius, processor: ProcessorInterface):
+    def get_grid_points_around_protein(st: StructureInterface, grid, radius, processor: ProcessorInterface):
 
         begin = time.time()
         positions = []
@@ -783,8 +783,7 @@ class PointPositionArray(PointPositionArrayInterface):
         print(f"\t\t\t\t\t\tOffset is: {offset_cart}")
         shape = mgrid[0].shape
         # new_grid = gemmi.FloatGrid(*shape)
-        mask = gemmi.Int8Grid(*shape)
-        mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+
         new_unit_cell = gemmi.UnitCell(
             shape[0]*(grid.unit_cell.a/grid.nu),
             shape[1]*(grid.unit_cell.b/grid.nv),
@@ -793,25 +792,82 @@ class PointPositionArray(PointPositionArrayInterface):
             grid.unit_cell.beta,
             grid.unit_cell.gamma,
         )
-        mask.set_unit_cell(
-            new_unit_cell
-        )
+
         new_structure = transform_structure_to_unit_cell(
             st,
             new_unit_cell,
             offset_cart
         )
-        mask.set_unit_cell(grid.unit_cell)
+
+        # Outer mask
+        outer_mask = gemmi.Int8Grid(*shape)
+        outer_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        outer_mask.set_unit_cell(
+            new_unit_cell
+        )
+
+        outer_mask.set_unit_cell(grid.unit_cell)
         for atom in new_structure.protein_atoms():
             pos = atom.pos
-            mask.set_points_around(
+            outer_mask.set_points_around(
                 pos,
                 radius=radius,
                 value=1,
             )
-        mask_array = np.array(mask, copy=False, dtype=np.int8)
+        outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        outer_indicies = np.nonzero(outer_mask_array)
+        outer_indicies_native = (
+            np.mod(outer_indicies[0] + u0, grid.nu),
+            np.mod(outer_indicies[1] + v0, grid.nv),
+            np.mod(outer_indicies[2] + w0, grid.nw),
+        )
+
+        inner_mask = gemmi.Int8Grid(*shape)
+        inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        inner_mask.set_unit_cell(grid.unit_cell)
+        for atom in new_structure.protein_atoms():
+            pos = atom.pos
+            inner_mask.set_points_around(
+                pos,
+                radius=radius,
+                value=1,
+            )
+        inner_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        inner_indicies = np.nonzero(inner_mask_array)
+        inner_indicies_native = (
+            np.mod(inner_indicies[0] + u0, grid.nu),
+            np.mod(inner_indicies[1] + v0, grid.nv),
+            np.mod(inner_indicies[2] + w0, grid.nw),
+        )
+        sparse_inner_indicies = inner_mask_array[outer_indicies] == 1
+
+        inner_atomic_mask = gemmi.Int8Grid(*shape)
+        inner_atomic_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        inner_atomic_mask.set_unit_cell(grid.unit_cell)
+        for atom in new_structure.protein_atoms():
+            pos = atom.pos
+            inner_atomic_mask.set_points_around(
+                pos,
+                radius=radius,
+                value=1,
+            )
+        inner_atomic_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
+        inner_atomic_indicies_native = (
+            np.mod(inner_atomic_indicies[0] + u0, grid.nu),
+            np.mod(inner_atomic_indicies[1] + v0, grid.nv),
+            np.mod(inner_atomic_indicies[2] + w0, grid.nw),
+        )
+        sparse_inner_atomic_indicies = inner_atomic_mask_array[outer_indicies] == 1
         # indicies = np.nonzero(mask_array)
 
+        all_indicies = {
+            "outer": outer_indicies_native,
+            "inner": inner_indicies_native,
+            "inner_sparse": sparse_inner_indicies,
+            "atomic": inner_atomic_indicies_native,
+            "atomic_sparse": sparse_inner_atomic_indicies
+        }
 
         # Get the grid points in the mask
         # shifted_grid_point_indicies = tuple(np.mod(grid_point_indicies[_j], spacing[_j]) for _j in (0, 1, 2))
@@ -821,12 +877,12 @@ class PointPositionArray(PointPositionArrayInterface):
             in (0, 1, 2)
         )
 
-        print(f"\t\t\t\t\t\tMask array shape: {mask_array.shape}")
+        print(f"\t\t\t\t\t\tMask array shape: {outer_mask_array.shape}")
         print(f"\t\t\t\t\t\tRange: {[u0, v0, w0]} : {[u1, v1, w1]}")
 
         # mask_array = np.zeros(shape, dtype=np.bool)
         # mask_array[indicies] = True
-        grid_point_indicies_mask = mask_array[shifted_grid_point_indicies] == 1
+        grid_point_indicies_mask = outer_mask_array[shifted_grid_point_indicies] == 1
         print(f"\t\t\t\t\t\tGrid point Indicies mask shape: {grid_point_indicies_mask.shape}")
 
 
@@ -862,7 +918,7 @@ class PointPositionArray(PointPositionArrayInterface):
         print(unique_points)
         print(unique_positions)
 
-        return unique_points, unique_positions
+        return unique_points, unique_positions, all_indicies
 
 
         # # Get the point positions
@@ -1078,9 +1134,9 @@ class PointPositionArray(PointPositionArrayInterface):
     #     return unique_points, unique_positions
 
     @classmethod
-    def from_structure(cls, st: StructureInterface, grid, indicies, processor, radius: float = 8.0):
-        point_array, position_array = PointPositionArray.get_grid_points_around_protein(st, grid, indicies, radius, processor)
-        return PointPositionArray(point_array, position_array)
+    def from_structure(cls, st: StructureInterface, grid, processor, radius: float = 6.0):
+        point_array, position_array, all_indicies = PointPositionArray.get_grid_points_around_protein(st, grid, radius, processor)
+        return PointPositionArray(point_array, position_array), all_indicies
 
 
 
@@ -1090,7 +1146,14 @@ class PointPositionArray(PointPositionArrayInterface):
 
 
 class GridPartitioning(GridPartitioningInterface):
-    def __init__(self, dataset, grid, indicies, processor):
+    def __init__(self, partitions):
+        self.partitions = partitions
+        # for resid, point_pos_array in self.partitions.items():
+        #     print(f"{resid} : {point_pos_array.points.shape}")
+        # exit()
+
+    @classmethod
+    def from_dataset(cls,dataset, grid, processor):
         # Get the structure array
         st_array = StructureArray.from_structure(dataset.structure)
         print(f"Structure array shape: {st_array.positions.shape}")
@@ -1120,7 +1183,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the point array
         begin = time.time()
-        point_position_array = PointPositionArray.from_structure(dataset.structure, grid, indicies, processor)
+        point_position_array, all_indicies = PointPositionArray.from_structure(dataset.structure, grid, processor)
         finish = time.time()
         print(f"\t\t\tGot point position array : {finish - begin}")
 
@@ -1128,6 +1191,21 @@ class GridPartitioning(GridPartitioningInterface):
         begin = time.time()
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
         finish = time.time()
+
+        partitions = {
+            ResidueID(
+                ca_point_position_array.models[index],
+                ca_point_position_array.chains[index],
+                ca_point_position_array.seq_ids[index],
+            ): PointPositionArray(
+                point_position_array.points[indexes == index],
+                point_position_array.positions[indexes == index]
+            )
+            for index
+            in np.unique(indexes)
+        }
+
+        return cls(partitions, ), all_indicies
         # print(f"\t\t\tQueryed points in : {finish - begin}")
         # distance_mask = distances < 7.0
         # print(f"\t\t\tDistance masked points: {np.sum(distance_mask)} vs {distance_mask.size}")
@@ -1181,25 +1259,13 @@ class GridPartitioning(GridPartitioningInterface):
         #     for index
         #     in np.unique(indexes)
         # }
-        self.partitions = {
-            ResidueID(
-                ca_point_position_array.models[index],
-                ca_point_position_array.chains[index],
-                ca_point_position_array.seq_ids[index],
-            ): PointPositionArray(
-                point_position_array.points[indexes == index],
-                point_position_array.positions[indexes == index]
-            )
-            for index
-            in np.unique(indexes)
-        }
-        # for resid, point_pos_array in self.partitions.items():
-        #     print(f"{resid} : {point_pos_array.points.shape}")
-        # exit()
-
 
 class GridMask(GridMaskInterface):
-    def __init__(self, dataset: DatasetInterface, grid, mask_radius=6.0, mask_radius_inner=2.0):
+    def __init__(self, indicies, indicies_inner, indicies_sparse_inner, indicies_inner_atomic, indicies_sparse_inner_atomic):
+
+
+    @classmethod
+    def from_dataset(cls, dataset: DatasetInterface, grid, mask_radius=6.0, mask_radius_inner=2.0):
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         mask.set_unit_cell(grid.unit_cell)
@@ -1211,7 +1277,7 @@ class GridMask(GridMaskInterface):
                 value=1,
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
-        self.indicies = np.nonzero(mask_array)
+        indicies = np.nonzero(mask_array)
 
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -1224,8 +1290,8 @@ class GridMask(GridMaskInterface):
                 value=1,
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
-        self.indicies_inner = np.nonzero(mask_array)
-        self.indicies_sparse_inner = mask_array[self.indicies] == 1.0
+        indicies_inner = np.nonzero(mask_array)
+        indicies_sparse_inner = mask_array[indicies] == 1.0
 
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -1238,9 +1304,20 @@ class GridMask(GridMaskInterface):
                 value=1,
             )
         mask_array = np.array(mask, copy=False, dtype=np.int8)
-        self.indicies_inner_atomic = np.nonzero(mask_array)
-        self.indicies_sparse_inner_atomic = mask_array[self.indicies] == 1.0
+        indicies_inner_atomic = np.nonzero(mask_array)
+        indicies_sparse_inner_atomic = mask_array[indicies] == 1.0
 
+        return cls(indicies, indicies_inner, indicies_sparse_inner, indicies_inner_atomic, indicies_sparse_inner_atomic)
+
+    @classmethod
+    def from_indicies(cls, all_indicies):
+        return cls(
+            all_indicies["outer"],
+            all_indicies["inner"],
+            all_indicies["inner_sparse"],
+            all_indicies["atomic"],
+            all_indicies["atomic_sparse"]
+        )
 
 def get_grid_from_dataset(dataset: DatasetInterface):
     return dataset.reflections.transform_f_phi_to_map()
@@ -1257,17 +1334,19 @@ class DFrame:
         self.spacegroup = gemmi.find_spacegroup_by_name("P 1").number
         self.spacing = (grid.nu, grid.nv, grid.nw)
 
-        # Get the mask
-        begin_mask = time.time()
-        self.mask = GridMask(dataset, grid)
-        finish_mask = time.time()
-        print(f"\tGot mask in {finish_mask - begin_mask}")
+
 
         # Get the grid partitioning
         begin_partition = time.time()
-        self.partitioning = GridPartitioning(dataset, grid, self.mask.indicies, processor)
+        self.partitioning, all_indicies = GridPartitioning.from_dataset(dataset, grid, processor)
         finish_partition = time.time()
         print(f"\tGot Partitions in {finish_partition - begin_partition}")
+
+        # Get the mask
+        begin_mask = time.time()
+        self.mask = GridMask.from_indicies(all_indicies)
+        finish_mask = time.time()
+        print(f"\tGot mask in {finish_mask - begin_mask}")
 
     def get_grid(self):
         grid = gemmi.FloatGrid(*self.spacing)
