@@ -13,10 +13,10 @@ from ..dataset import Structure
 
 
 def transform_structure_to_unit_cell(
-            structure,
+        structure,
         unit_cell,
         offset
-        ):
+):
     st = structure.structure.clone()
     # structure_poss = []
     # for model in st:
@@ -40,11 +40,11 @@ def transform_structure_to_unit_cell(
                     new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
                     atom.pos = new_pos
 
-
     st.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     st.cell = unit_cell
 
     return Structure(structure.path, st)
+
 
 class PointPositionArray(PointPositionArrayInterface):
     def __init__(self, points, positions):
@@ -382,7 +382,8 @@ class PointPositionArray(PointPositionArrayInterface):
         grid = np.mgrid[u0:u1 + 1, v0: v1 + 1, w0:w1 + 1].astype(int)
         grid_point_array = np.hstack([grid[_j].reshape((-1, 1)) for _j in (0, 1, 2)])
         time_finish_itertools = time.time()
-        print(f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {grid_point_array.shape}")
+        print(
+            f"\t\t\t\t\t\tGot grid array in {round(time_finish_itertools - time_begin_itertools, 1)} of shape {grid_point_array.shape}")
 
         # print(f"Grid point array shape: {grid_point_array.shape}")
         # print(f"Grid point first element: {grid_point_array[0, :]}")
@@ -390,7 +391,8 @@ class PointPositionArray(PointPositionArrayInterface):
         # Get the point positions
         time_begin_pointpos = time.time()
         mod_point_array = np.mod(grid_point_array, spacing)
-        mod_point_indexes = (mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
+        mod_point_indexes = (
+        mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
         position_array = np.zeros(grid_point_array.shape)
         print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
 
@@ -401,7 +403,8 @@ class PointPositionArray(PointPositionArrayInterface):
         # position_array = pos_array[:, , ].T
 
         time_finish_pointpos = time.time()
-        print(f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)} to shape {position_array.shape}")
+        print(
+            f"\t\t\t\t\t\tTransformed points to pos in {round(time_finish_pointpos - time_begin_pointpos, 1)} to shape {position_array.shape}")
         # print(f"")
         # print(f"Grid position array shape: {position_array.shape}")
         # print(f"Grid position first element: {position_array[0, :]}")
@@ -700,7 +703,7 @@ class PointPositionArray(PointPositionArrayInterface):
     #
     #     return unique_points, unique_positions
 
-        # all_point_array = grid
+    # all_point_array = grid
 
     @staticmethod
     def get_grid_points_around_protein(st: StructureInterface, grid, radius, processor: ProcessorInterface):
@@ -779,15 +782,15 @@ class PointPositionArray(PointPositionArrayInterface):
         # print(f"Grid point first element: {grid_point_array[0, :]}")
 
         # Get and mask a transformed structure
-        offset_cart = -np.matmul(point_orthogonalization_matrix, np.array([u0, v0, w0]).reshape((3,1))).flatten()
+        offset_cart = -np.matmul(point_orthogonalization_matrix, np.array([u0, v0, w0]).reshape((3, 1))).flatten()
         print(f"\t\t\t\t\t\tOffset is: {offset_cart}")
         shape = mgrid[0].shape
         # new_grid = gemmi.FloatGrid(*shape)
 
         new_unit_cell = gemmi.UnitCell(
-            shape[0]*(grid.unit_cell.a/grid.nu),
-            shape[1]*(grid.unit_cell.b/grid.nv),
-            shape[2]*(grid.unit_cell.c/grid.nw),
+            shape[0] * (grid.unit_cell.a / grid.nu),
+            shape[1] * (grid.unit_cell.b / grid.nv),
+            shape[2] * (grid.unit_cell.c / grid.nw),
             grid.unit_cell.alpha,
             grid.unit_cell.beta,
             grid.unit_cell.gamma,
@@ -885,7 +888,6 @@ class PointPositionArray(PointPositionArrayInterface):
         grid_point_indicies_mask = outer_mask_array[shifted_grid_point_indicies] == 1
         print(f"\t\t\t\t\t\tGrid point Indicies mask shape: {grid_point_indicies_mask.shape}")
 
-
         grid_point_array = np.vstack(
             [
                 grid_point_indicies[_j][grid_point_indicies_mask].flatten()
@@ -904,7 +906,6 @@ class PointPositionArray(PointPositionArrayInterface):
         # ).astype(np.int)
         unique_points = grid_point_array.T
 
-
         time_begin_mult = time.time()
         unique_positions = np.matmul(point_orthogonalization_matrix, grid_point_array).T
         time_finish_mult = time.time()
@@ -919,7 +920,6 @@ class PointPositionArray(PointPositionArrayInterface):
         print(unique_positions)
 
         return unique_points, unique_positions, all_indicies
-
 
         # # Get the point positions
         # time_begin_pointpos = time.time()
@@ -1135,14 +1135,9 @@ class PointPositionArray(PointPositionArrayInterface):
 
     @classmethod
     def from_structure(cls, st: StructureInterface, grid, processor, radius: float = 6.0):
-        point_array, position_array, all_indicies = PointPositionArray.get_grid_points_around_protein(st, grid, radius, processor)
+        point_array, position_array, all_indicies = PointPositionArray.get_grid_points_around_protein(st, grid, radius,
+                                                                                                      processor)
         return PointPositionArray(point_array, position_array), all_indicies
-
-
-
-
-
-
 
 
 class GridPartitioning(GridPartitioningInterface):
@@ -1153,7 +1148,7 @@ class GridPartitioning(GridPartitioningInterface):
         # exit()
 
     @classmethod
-    def from_dataset(cls,dataset, grid, processor):
+    def from_dataset(cls, dataset, grid, processor):
         # Get the structure array
         st_array = StructureArray.from_structure(dataset.structure)
         print(f"Structure array shape: {st_array.positions.shape}")
@@ -1237,14 +1232,12 @@ class GridPartitioning(GridPartitioningInterface):
         #
         # assert np.all(counts == 1)
 
-
         # for index in np.unique(indexes):
         #     print([ca_point_position_array.models[index],
         #     ca_point_position_array.chains[index],
         #     ca_point_position_array.seq_ids[index]])
         #     print(point_position_array.points[(indexes == index) & distance_mask].size)
         #     print(point_position_array.positions[(indexes == index) & distance_mask].size)
-
 
         # Get partions
         # self.partitions = {
@@ -1260,9 +1253,15 @@ class GridPartitioning(GridPartitioningInterface):
         #     in np.unique(indexes)
         # }
 
-class GridMask(GridMaskInterface):
-    def __init__(self, indicies, indicies_inner, indicies_sparse_inner, indicies_inner_atomic, indicies_sparse_inner_atomic):
 
+class GridMask(GridMaskInterface):
+    def __init__(self, indicies, indicies_inner, indicies_sparse_inner, indicies_inner_atomic,
+                 indicies_sparse_inner_atomic):
+        self.indicies = indicies
+        self.indicies_inner = indicies_inner
+        self.indicies_sparse_inner = indicies_sparse_inner
+        self.indicies_inner_atomic = indicies_inner_atomic
+        self.indicies_sparse_inner_atomic = indicies_sparse_inner_atomic
 
     @classmethod
     def from_dataset(cls, dataset: DatasetInterface, grid, mask_radius=6.0, mask_radius_inner=2.0):
@@ -1319,6 +1318,7 @@ class GridMask(GridMaskInterface):
             all_indicies["atomic_sparse"]
         )
 
+
 def get_grid_from_dataset(dataset: DatasetInterface):
     return dataset.reflections.transform_f_phi_to_map()
 
@@ -1333,8 +1333,6 @@ class DFrame:
         self.unit_cell = (uc.a, uc.b, uc.c, uc.alpha, uc.beta, uc.gamma)
         self.spacegroup = gemmi.find_spacegroup_by_name("P 1").number
         self.spacing = (grid.nu, grid.nv, grid.nw)
-
-
 
         # Get the grid partitioning
         begin_partition = time.time()
