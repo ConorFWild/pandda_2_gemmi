@@ -775,6 +775,8 @@ class PointPositionArray(PointPositionArrayInterface):
         w0 = int(np.floor(fractional_min[2] * spacing[2]))
         w1 = int(np.ceil(fractional_max[2] * spacing[2]))
 
+        print(f"\t\t\t\t\t\tu: {u0} - {u1} : v : {v0} - {v1} : w : {w0} - {w1}")
+
         # print(f"Fractional bounds are: u: {u0} {u1} : v: {v0} {v1} : w: {w0} {w1}")
 
         # Get the grid points
