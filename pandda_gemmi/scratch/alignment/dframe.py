@@ -392,7 +392,7 @@ class PointPositionArray(PointPositionArrayInterface):
         time_begin_pointpos = time.time()
         mod_point_array = np.mod(grid_point_array, spacing)
         mod_point_indexes = (
-        mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
+            mod_point_array[:, 0].flatten(), mod_point_array[:, 1].flatten(), mod_point_array[:, 2].flatten())
         position_array = np.zeros(grid_point_array.shape)
         print(f"\t\t\t\t\t\tInitial position array shape: {position_array.shape}")
 
@@ -836,7 +836,6 @@ class PointPositionArray(PointPositionArrayInterface):
         ]
         print(f"\t\t\t\t\t\tOuter indicies native from {indicies_min} to {indicies_max}")
 
-
         inner_mask = gemmi.Int8Grid(*shape)
         inner_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         inner_mask.set_unit_cell(grid.unit_cell)
@@ -951,7 +950,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         print(f"\t\t\t\t\t Got point and pos array in {np.round(time_finish_make_array - time_begin_make_array, 1)}")
         print(f"\t\t\t\t\t With shapes {unique_points.shape} {unique_positions.shape}")
-        print(f"\t\t\t\t\t Vs mask size {indicies[0].shape}")
+        print(f"\t\t\t\t\t Vs mask size {outer_indicies[0].shape}")
         print(unique_points)
         print(unique_positions)
 
