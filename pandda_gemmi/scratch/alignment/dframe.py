@@ -818,11 +818,8 @@ class PointPositionArray(PointPositionArrayInterface):
         # Outer mask
         outer_mask = gemmi.Int8Grid(*shape)
         outer_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        outer_mask.set_unit_cell(
-            new_unit_cell
-        )
+        outer_mask.set_unit_cell(new_unit_cell)
 
-        outer_mask.set_unit_cell(grid.unit_cell)
         for atom in new_structure.protein_atoms():
             pos = atom.pos
             outer_mask.set_points_around(
