@@ -294,7 +294,7 @@ class ScoreCNN:
 
             sample_array_zmap = np.copy(sample_array)
             zmap_sample = sample_xmap(z_grid, sample_transform, sample_array_zmap)
-            image_zmap = zmap_sample[np.newaxis, :]
+            image_zmap = (zmap_sample[np.newaxis, :] - np.mean())
             # image_zmap = np.stack([zmap_sample for _j in range(20)])
 
             sample_array_model = np.copy(sample_array)
@@ -474,11 +474,15 @@ class ScoreCNNLigand:
 
             sample_array_raw = np.copy(sample_array)
             xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
-            image_xmap = xmap_sample[np.newaxis, :]
+            xmap_mean = np.mean(xmap_sample)
+            xmap_std = np.std(xmap_sample)
+            image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
 
             sample_array_mean_map = np.copy(sample_array)
             mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
-            image_mean = mean_sample[np.newaxis, :]
+            mean_mean = np.mean(xmap_sample)
+            mean_std = np.std(xmap_sample)
+            image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
 
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
