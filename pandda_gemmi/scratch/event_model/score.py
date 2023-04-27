@@ -490,8 +490,8 @@ class ScoreCNNLigand:
 
             sample_array_mean_map = np.copy(sample_array)
             mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
-            mean_mean = np.mean(xmap_sample)
-            mean_std = np.std(xmap_sample)
+            mean_mean = np.mean(mean_sample)
+            mean_std = np.std(mean_sample)
             image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
 
             sample_array_model = np.copy(sample_array)
