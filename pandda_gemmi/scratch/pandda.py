@@ -50,6 +50,7 @@ from pandda_gemmi.scratch.tables import output_tables
 
 
 def process_model(
+        ligand_files,
         model_number,
         dataset_dmap_array,
         characterization_set_dmaps_array,
@@ -105,7 +106,7 @@ def process_model(
 
     # Score the events
     time_begin_score_events = time.time()
-    events = score(events, xmap_grid, mean_grid, z_grid, model_grid,
+    events = score(ligand_files, events, xmap_grid, mean_grid, z_grid, model_grid,
                    median,
                    )
     time_finish_score_events = time.time()
@@ -137,7 +138,7 @@ def pandda(args: PanDDAArgs):
     fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir))
 
     # Get the scoring method
-    score = ScoreCNN()
+    score = ScoreCNNLigand()
     score_ref = processor.put(score)
 
     # Get the datasets
@@ -490,6 +491,7 @@ def pandda(args: PanDDAArgs):
 
         processed_models = {
             model_number: Partial(process_model).paramaterise(
+                dataset.ligand_files,
                 model_number,
                 dataset_dmap_array,
                 dmaps[characterization_set_masks[model_number], :],

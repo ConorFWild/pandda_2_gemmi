@@ -336,3 +336,194 @@ class ScoreCNN:
             scored_events[event_id] = scored_event
 
         return scored_events
+
+
+
+def parse_pdb_file_for_ligand_array(path):
+    structure = gemmi.read_structure(str(path))
+    poss = []
+    for model in structure:
+        for chain in model:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    poss.append([pos.x, pos.y, pos.z])
+
+    return np.array(poss).T
+
+
+def get_ligand_map_from_path(path, n, step, translation):
+    # Get the ligand array
+    ligand_array = parse_pdb_file_for_ligand_array(path)
+    rotation_matrix = R.random().as_matrix()
+    rng = default_rng()
+    random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
+    ligand_mean_pos = np.mean(ligand_array, axis=1).reshape((3, 1))
+    centre_translation = np.array([step * n, step * n, step * n]).reshape((3, 1)) / 2
+    zero_centred_array = ligand_array - ligand_mean_pos
+    rotated_array = np.matmul(rotation_matrix, zero_centred_array)
+    grid_centred_array = rotated_array + centre_translation
+    augmented_array = (grid_centred_array + random_translation).T
+
+    # Get a dummy grid to place density on
+    dummy_grid = gemmi.FloatGrid(n, n, n)
+    unit_cell = gemmi.UnitCell(step * n, step * n, step * n, 90.0, 90.0, 90.0)
+    dummy_grid.set_unit_cell(unit_cell)
+
+    for pos_array in augmented_array:
+        assert pos_array.size == 3
+        if np.all(pos_array > 0):
+            if np.all(pos_array < (n * step)):
+                dummy_grid.set_points_around(
+                    gemmi.Position(*pos_array),
+                    radius=1.0,
+                    value=1.0,
+                )
+
+    return dummy_grid
+
+
+def get_ligand_map_from_dataset(
+        event,
+        n=30,
+        step=0.5,
+        translation=2.5,
+):
+    # Get the path to the ligand cif
+    dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
+    pdb_paths = [x for x in dataset_dir.glob("*.pdb") if x.exists()]
+    path = pdb_paths[0]
+
+    ligand_map = get_ligand_map_from_path(path, n, step, translation)
+
+    return ligand_map
+
+def get_ligand_map_from_ligand_files(
+        all_ligand_files,
+        n=30,
+        step=0.5,
+        translation=2.5,
+):
+    # Get the path to the ligand cif
+    # dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
+    # pdb_paths = [x for x in dataset_dir.glob("*.pdb") if x.exists()]
+    # path = pdb_paths[0]
+
+    for key, ligand_files in all_ligand_files.items():
+        if ligand_files.ligand_cif:
+            if ligand_files.ligand_pdb:
+
+                path = ligand_files.ligand_pdb
+                ligand_map = get_ligand_map_from_path(path, n, step, translation)
+
+                return ligand_map
+
+    print(f"Couldn't find ligand files!")
+    return None
+
+
+class ScoreCNNLigand:
+    def __init__(self, n=30):
+        # Get model
+        if torch.cuda.is_available():
+            self.dev = "cuda:0"
+        else:
+            self.dev = "cpu"
+
+        # Load the model
+        cnn = resnet18(num_classes=2, num_input=4)
+        cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
+        cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
+
+        # Add model to device
+        cnn.to(self.dev)
+        cnn.eval()
+        self.cnn = cnn.float()
+
+        self.n = n
+
+    def __call__(self, ligand_files, events, xmap_grid, mean_grid, z_grid, model_grid, median):
+
+        scored_events = {}
+        time_begin_get_images = time.time()
+        images = {}
+        bdcs = {}
+        for event_id, event in events.items():
+            centroid = np.mean(event.pos_array, axis=0)
+            dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
+            if dist < 5.0:
+                print(f"##### {event_id} #####")
+                print(f"Centroid: {centroid}")
+                print(f"Distance: {dist}")
+            sample_transform = get_sample_transform_from_event(
+                centroid,
+                0.5,
+                self.n,
+                3.5
+            )
+
+            bdc = get_bdc(event, xmap_grid, mean_grid, median)
+            bdcs[event_id] = bdc
+            # print(f"BDC: {bdc}")
+
+            sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
+
+            # Get images
+
+            sample_array_raw = np.copy(sample_array)
+            xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
+            image_xmap = xmap_sample[np.newaxis, :]
+
+            sample_array_mean_map = np.copy(sample_array)
+            mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
+            image_mean = mean_sample[np.newaxis, :]
+
+            sample_array_model = np.copy(sample_array)
+            model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
+            image_model = model_sample[np.newaxis, :]
+
+            # ligand_map_array = np.copy(sample_array)
+            ligand_map = get_ligand_map_from_ligand_files(ligand_files)
+            if ligand_map is not None:
+
+                image_ligand = np.array(ligand_map)[np.newaxis, :]
+            else:
+                image_ligand = np.copy(sample_array)[np.newaxis, :]
+
+            image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0)
+
+            # image = np.stack([image_event, image_raw, image_zmap, image_model], axis=1)
+            images[event_id] = image
+
+        time_finish_get_images = time.time()
+        # print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
+
+        for event_id, event in events.items():
+            image = images[event_id]
+
+            # Transfer to tensor
+            image_t = torch.from_numpy(image)
+
+            # Move tensors to device
+            image_c = image_t.to(self.dev)
+
+            # Run model
+            model_annotation = self.cnn(image_c.float())
+
+            # Track score
+            model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
+
+            # flat_bdcs = bdcs.flatten()
+            max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
+            # bdc = float(flat_bdcs[max_score_index])
+            score = float(model_annotations[max_score_index, 1])
+
+            scored_event = Event(
+                event.pos_array,
+                event.point_array,
+                score,
+                round(float(bdcs[event_id]), 2)
+            )
+            scored_events[event_id] = scored_event
+
+        return scored_events
