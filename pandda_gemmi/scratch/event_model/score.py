@@ -480,7 +480,6 @@ class ScoreCNNLigand:
             bdcs[event_id] = bdc
             # print(f"BDC: {bdc}")
 
-
             # Get images
 
             sample_array_raw = np.copy(sample_array)
@@ -509,6 +508,8 @@ class ScoreCNNLigand:
         time_finish_get_images = time.time()
         print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
 
+
+        cnn_times = []
         time_begin_score_images = time.time()
         for event_id, event in events.items():
             image = images[event_id]
@@ -517,10 +518,13 @@ class ScoreCNNLigand:
             image_t = torch.from_numpy(image)
 
             # Move tensors to device
-            image_c = image_t.to(self.dev)
+            image_c = image_t.to(self.dev).float()
 
             # Run model
-            model_annotation = self.cnn(image_c.float())
+            time_begin_cnn = time.time()
+            model_annotation = self.cnn(image_c)
+            time_finish_cnn = time.time()
+            cnn_times.append(time_finish_cnn-time_begin_cnn)
 
             # Track score
             model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
@@ -538,7 +542,7 @@ class ScoreCNNLigand:
             )
             scored_events[event_id] = scored_event
         time_finish_score_images = time.time()
-        print(f"\t\t\t\tGot images in: {round(time_finish_score_images - time_begin_score_images, 2)}")
+        print(f"\t\t\t\tScored images in: {round(time_finish_score_images - time_begin_score_images, 2)} of which {round(sum(cnn_times), 2)} was in cnn")
 
 
         return scored_events
