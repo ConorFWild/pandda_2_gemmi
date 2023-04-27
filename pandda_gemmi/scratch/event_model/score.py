@@ -432,7 +432,7 @@ class ScoreCNNLigand:
 
         # Load the model
         cnn = resnet18(num_classes=2, num_input=4)
-        cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
+        cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_ligand.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
 
         # Add model to device
