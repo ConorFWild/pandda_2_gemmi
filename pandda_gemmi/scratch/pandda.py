@@ -160,25 +160,25 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     _k = 0
     for dtag in datasets:
-        # _k += 1
-        # if _k > 3:
-        #     continue
+        _k += 1
+        if _k > 15:
+            continue
         # if dtag != "JMJD2DA-x427":
         #     continue
 
         # if dtag != "JMJD2DA-x348":
         #     continue
 
-        if dtag != "Zika_NS3A-A0340":
-            continue
+        # if dtag != "Zika_NS3A-A0340":
+        #     continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
         # Get the dataset
         dataset = datasets[dtag]
 
-        if dtag == "Zika_NS3A-A0340":
-            print(dataset.ligand_files)
+        # if dtag == "Zika_NS3A-A0340":
+        #     print(dataset.ligand_files)
 
         # Get the resolution to process at
         dataset_res = dataset.reflections.resolution()
