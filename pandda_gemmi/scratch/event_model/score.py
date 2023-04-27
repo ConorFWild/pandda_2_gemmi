@@ -496,7 +496,7 @@ class ScoreCNNLigand:
             else:
                 image_ligand = np.copy(sample_array)[np.newaxis, :]
 
-            image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0)
+            image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
 
             # image = np.stack([image_event, image_raw, image_zmap, image_model], axis=1)
             images[event_id] = image
