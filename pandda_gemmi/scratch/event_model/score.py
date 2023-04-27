@@ -460,6 +460,7 @@ class ScoreCNNLigand:
         else:
             image_ligand = np.copy(sample_array)[np.newaxis, :]
 
+
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
             # dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
@@ -499,15 +500,15 @@ class ScoreCNNLigand:
 
             # ligand_map_array = np.copy(sample_array)
 
-
             image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
 
             # image = np.stack([image_event, image_raw, image_zmap, image_model], axis=1)
             images[event_id] = image
 
         time_finish_get_images = time.time()
-        # print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
+        print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
 
+        time_begin_score_images = time.time()
         for event_id, event in events.items():
             image = images[event_id]
 
@@ -535,5 +536,8 @@ class ScoreCNNLigand:
                 round(float(bdcs[event_id]), 2)
             )
             scored_events[event_id] = scored_event
+        time_finish_score_images = time.time()
+        print(f"\t\t\t\tGot images in: {round(time_finish_score_images - time_begin_score_images, 2)}")
+
 
         return scored_events
