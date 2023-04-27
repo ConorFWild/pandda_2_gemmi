@@ -450,6 +450,16 @@ class ScoreCNNLigand:
         time_begin_get_images = time.time()
         images = {}
         bdcs = {}
+
+        sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
+
+        ligand_map = get_ligand_map_from_ligand_files(ligand_files)
+        if ligand_map is not None:
+
+            image_ligand = np.array(ligand_map)[np.newaxis, :]
+        else:
+            image_ligand = np.copy(sample_array)[np.newaxis, :]
+
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
             # dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
@@ -468,7 +478,6 @@ class ScoreCNNLigand:
             bdcs[event_id] = bdc
             # print(f"BDC: {bdc}")
 
-            sample_array = np.zeros((self.n, self.n, self.n), dtype=np.float32)
 
             # Get images
 
@@ -489,12 +498,7 @@ class ScoreCNNLigand:
             image_model = model_sample[np.newaxis, :]
 
             # ligand_map_array = np.copy(sample_array)
-            ligand_map = get_ligand_map_from_ligand_files(ligand_files)
-            if ligand_map is not None:
 
-                image_ligand = np.array(ligand_map)[np.newaxis, :]
-            else:
-                image_ligand = np.copy(sample_array)[np.newaxis, :]
 
             image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
 
