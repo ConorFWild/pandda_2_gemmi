@@ -177,6 +177,9 @@ def pandda(args: PanDDAArgs):
         # Get the dataset
         dataset = datasets[dtag]
 
+        if dtag == "Zika_NS3A-A0340":
+            print(dataset.ligand_files)
+
         # Get the resolution to process at
         dataset_res = dataset.reflections.resolution()
         # processing_res = max(dataset_res,
