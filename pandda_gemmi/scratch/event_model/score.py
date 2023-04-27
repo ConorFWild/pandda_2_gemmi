@@ -416,6 +416,7 @@ def get_ligand_map_from_ligand_files(
             if ligand_files.ligand_pdb:
 
                 path = ligand_files.ligand_pdb
+                print(f"Getting ligand map from file: {path}")
                 ligand_map = get_ligand_map_from_path(path, n, step, translation)
 
                 return ligand_map
