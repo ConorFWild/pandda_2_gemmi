@@ -118,7 +118,7 @@ def process_model(
         FilterLocallyHighestScoring(8.0),
     ]:
         events = filter(events)
-    # print(f"After filter score: {len(events)}")
+    print(f"After filter score: {len(events)}")
 
     if len(events) == 0:
         return None, None, None
