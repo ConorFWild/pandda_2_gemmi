@@ -307,6 +307,12 @@ ARGS_MAX_BDC_DEFAULT: float = 0.95
 ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 5.0
 
 ###################################################################
+# # Useful Regexes
+###################################################################
+
+LIGAND_IGNORE_REGEXES = ["merged", "LIG-[a-zA-Z]+-", "dimple", "refine"]
+
+###################################################################
 # # Console constants
 ###################################################################
 CONSOLE_START_DEPENDENCY_CHECK = "Checking dependencies..."

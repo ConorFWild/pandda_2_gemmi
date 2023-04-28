@@ -34,6 +34,11 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
     for file_path in path.glob("*"):
         name = file_path.name
         stem = file_path.stem
+
+        # Ignore some common names
+        if any([re.match(pattern, name) for pattern in constants.LIGAND_IGNORE_REGEXES]):
+            continue
+
         if re.match(ligand_cif_regex, name):
             if stem in ligand_keys:
                 ligand_keys[stem].ligand_cif = file_path
