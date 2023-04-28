@@ -169,8 +169,8 @@ def pandda(args: PanDDAArgs):
         # if dtag != "JMJD2DA-x348":
         #     continue
 
-        if dtag != "Zika_NS3A-A0340":
-            continue
+        # if dtag != "Zika_NS3A-A0340":
+        #     continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
