@@ -538,7 +538,7 @@ def pandda(args: PanDDAArgs):
                     key=lambda _event_id: selected_model_events[_event_id].score,
                     reverse=True,
                 )
-            )[:10]
+            )[:5]
         }
 
         for event_id, event in top_selected_model_events.items():
