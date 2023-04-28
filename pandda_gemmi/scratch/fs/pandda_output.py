@@ -49,5 +49,5 @@ class PanDDAOutput(PanDDAOutputInterface):
 
                 if ligand_files.ligand_pdb:
 
-                    ligand_pdb_path = compound_dir / ligand_files.ligand_cif.name
+                    ligand_pdb_path = compound_dir / ligand_files.ligand_pdb.name
                     try_link(ligand_files.ligand_pdb, ligand_pdb_path)
