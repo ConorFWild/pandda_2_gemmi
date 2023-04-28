@@ -310,7 +310,7 @@ ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 5.0
 # # Useful Regexes
 ###################################################################
 
-LIGAND_IGNORE_REGEXES = ["merged", "LIG-[a-zA-Z]+-", "dimple", "refine", "init", "pipedream"]
+LIGAND_IGNORE_REGEXES = ["merged", "LIG-[a-zA-Z]+-", "dimple", "refine", "init", "pipedream", "phenix"]
 
 ###################################################################
 # # Console constants
