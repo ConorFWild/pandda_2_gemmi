@@ -172,11 +172,11 @@ def pandda(args: PanDDAArgs):
         if dtag != "Zika_NS3A-A0340":
             continue
         print(f"##### {dtag} #####")
-        print(dataset.ligand_files)
         time_begin_process_dataset = time.time()
 
         # Get the dataset
         dataset = datasets[dtag]
+        print(dataset.ligand_files)
 
         # if dtag == "Zika_NS3A-A0340":
         #     print(dataset.ligand_files)
