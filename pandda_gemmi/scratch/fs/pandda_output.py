@@ -42,7 +42,7 @@ class PanDDAOutput(PanDDAOutputInterface):
             try_link(dataset_dir.input_mtz_file, processed_dataset_dir / constants.PANDDA_MTZ_FILE.format(dtag))
             compound_dir = processed_dataset_dir / constants.PANDDA_LIGAND_FILES_DIR
             try_make(compound_dir)
-            for ligand_key, ligand_files in dataset_dir.ligand_files.items():
+            for ligand_key, ligand_files in dataset_dir.input_ligands.items():
                 if ligand_files.ligand_cif:
                     ligand_path = compound_dir / ligand_files.ligand_cif.name
                     try_link(ligand_files.ligand_cif, ligand_path)
