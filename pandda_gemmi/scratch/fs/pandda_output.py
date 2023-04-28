@@ -24,6 +24,8 @@ def try_link(src, dst):
 class PanDDAOutput(PanDDAOutputInterface):
     def __init__(self, path: Path, pandda_input: PanDDAInput):
         self.path = path
+        try_make(path)
+
         self.processed_datasets_dir = path / constants.PANDDA_PROCESSED_DATASETS_DIR
         try_make(self.processed_datasets_dir)
 
