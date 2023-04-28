@@ -160,17 +160,17 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     _k = 0
     for dtag in datasets:
-        _k += 1
-        if _k > 10:
-            continue
+        # _k += 1
+        # if _k > 10:
+        #     continue
         # if dtag != "JMJD2DA-x427":
         #     continue
 
         # if dtag != "JMJD2DA-x348":
         #     continue
 
-        # if dtag != "Zika_NS3A-A0340":
-        #     continue
+        if dtag != "Zika_NS3A-A0340":
+            continue
         print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
