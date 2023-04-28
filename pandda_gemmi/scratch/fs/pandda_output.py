@@ -43,6 +43,9 @@ class PanDDAOutput(PanDDAOutputInterface):
             compound_dir = processed_dataset_dir / constants.PANDDA_LIGAND_FILES_DIR
             try_make(compound_dir)
             for ligand_key, ligand_files in dataset_dir.input_ligands.items():
-                if ligand_files.ligand_cif:
-                    ligand_path = compound_dir / ligand_files.ligand_cif.name
-                    try_link(ligand_files.ligand_cif, ligand_path)
+                if ligand_files.ligand_cif & ligand_files.ligand_pdb:
+                    ligand_cif_path = compound_dir / ligand_files.ligand_cif.name
+                    try_link(ligand_files.ligand_cif, ligand_cif_path)
+
+                    ligand_pdb_path = compound_dir / ligand_files.ligand_cif.name
+                    try_link(ligand_files.ligand_pdb, ligand_pdb_path)

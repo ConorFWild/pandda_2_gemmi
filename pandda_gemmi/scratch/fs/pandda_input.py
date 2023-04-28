@@ -67,7 +67,16 @@ def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smi
                 ligand_smiles_regex,
                 ligand_pdb_regex,
             )
-            path_ligands.update(ligand_dir_ligands)
+            # path_ligands.update(ligand_dir_ligands)
+            for ligand_key, ligand_files in ligand_dir_ligands.items():
+                # Only update if more complete
+                if ligand_key in path_ligands:
+                    if ligand_files.ligand_cif & ligand_files.ligand_pdb:
+                        path_ligands[ligand_key] = ligand_files
+
+                # Or entirely new
+                else:
+                    path_ligands[ligand_key] = ligand_files
 
     return path_ligands
 
