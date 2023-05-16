@@ -1,11 +1,9 @@
-from typing import List
 import dataclasses
 
 import numpy as np
 import gemmi
 import pandas as pd
 
-from pathlib import Path
 
 from ..interfaces import *
 from .. import constants
@@ -244,7 +242,6 @@ class Reflections(ReflectionsInterface):
         original_reflections = dataset.reflections.reflections
 
         sf = gemmi.transform_map_to_f_phi(grid)
-        print(sf)
         data = sf.prepare_asu_data(dmin=dmin)
 
         mtz = gemmi.Mtz(with_base=False)
@@ -264,12 +261,6 @@ class Reflections(ReflectionsInterface):
             if column.label not in ["H", "K", "L", dataset.reflections.f, dataset.reflections.phi]:
                 continue
             mtz.add_column(column.label, column.type, dataset_id=column.dataset_id)
-
-        reflection_columns = [col.label for col in mtz.columns]
-        print(f"Columns: {reflection_columns}")
-        original_reflection_columns = [col.label for col in original_reflections.columns]
-        print(f"Original reflection columns: {original_reflection_columns}")
-        print(f"Data shape: {data}")
 
         mtz.set_data(data)
 

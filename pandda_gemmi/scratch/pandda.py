@@ -67,18 +67,9 @@ def process_model(
     mean_grid = reference_frame.unmask(SparseDMap(mean))
     z_grid = reference_frame.unmask(SparseDMap(z))
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
-    # print([dataset_dmap_array.shape, reference_frame.mask.indicies_sparse_inner_atomic.shape])
-    inner_mask_xmap = dataset_dmap_array[reference_frame.mask.indicies_sparse_inner_atomic]
-    # median = np.median(inner_mask_xmap)
     median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
-    # median = np.quantile(inner_mask_xmap, 0.05)
-    # median = np.quantile(
-    #     inner_mask_xmap,
-    #     np.linspace(0.05, 0.95, 10)
-    # )
 
-    # print(f"Median is: {median}")
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
     inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
@@ -123,10 +114,6 @@ def process_model(
     if len(events) == 0:
         return None, None, None
 
-    # print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
-
-    # model_events[model_number] = events
-
     return events, mean, z
 
 
@@ -139,7 +126,6 @@ def pandda(args: PanDDAArgs):
 
     # Get the scoring method
     score = ScoreCNNLigand()
-    score_ref = processor.put(score)
 
     # Get the datasets
     datasets: Dict[str, DatasetInterface] = {
@@ -158,40 +144,16 @@ def pandda(args: PanDDAArgs):
     # Process each dataset
     pandda_events = {}
     time_begin_process_datasets = time.time()
-    _k = 0
     for dtag in datasets:
-        # _k += 1
-        # if _k > 10:
-        #     continue
-        # if dtag != "JMJD2DA-x427":
-        #     continue
 
-        # if dtag != "JMJD2DA-x348":
-        #     continue
-
-        # if dtag != "Zika_NS3A-A0340":
-        #     continue
-        print(f"##### {dtag} #####")
         time_begin_process_dataset = time.time()
 
         # Get the dataset
         dataset = datasets[dtag]
-        print(dataset.ligand_files)
 
-        # if dtag == "Zika_NS3A-A0340":
-        #     print(dataset.ligand_files)
-
-        # Get the resolution to process at
+        # Get the resolution of the dataset
         dataset_res = dataset.reflections.resolution()
-        # processing_res = max(dataset_res,
-        #                      list(
-        #                          sorted(
-        #                              [_dataset.reflections.resolution() for _dataset in datasets.values()]
-        #                          )
-        #                      )[60] + 0.1)
-        print(
-            f"Dataset resolution is: {dataset.reflections.resolution()}")
-        # print(f"Dataset rfree is: {dataset.structure.rfree()}")
+        print(f"Dataset resolution is: {dataset.reflections.resolution()}")
 
         # Get the comparator datasets
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
@@ -206,25 +168,19 @@ def pandda(args: PanDDAArgs):
             print(f"NOT ENOUGH COMPARATOR DATASETS! SKIPPING!")
             continue
 
+
+        # Get the resolution to process at
         processing_res = max(
                     [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
             )
         print(f"Processing res is: {processing_res}")
         print(f"Number of comparator datasets: {len(comparator_datasets)}")
-        # if len(comparator_datasets) < 60:
-        #     _h = 0
-        #     for _dtag in sorted(datasets, key=lambda __dtag: datasets[__dtag].reflections.resolution()):
-        #         if _h >60:
-        #             continue
-        #         comparator_datasets[_dtag] = datasets[_dtag]
-        #         _h = _h + 1
 
-
-
+        # Ensure the dataset itself is included in comparators
         if dtag not in comparator_datasets:
             comparator_datasets[dtag] = dataset
 
-        # Get the alignments
+        # Get the alignments, and save them to the object store
         time_begin_get_alignments = time.time()
         alignments: Dict[str, AlignmentInterface] = processor.process_dict(
             {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
@@ -237,14 +193,14 @@ def pandda(args: PanDDAArgs):
         time_finish_get_alignments = time.time()
         print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
-        # Get the reference frame
+        # Get the reference frame and save it to the object store
         time_begin_get_frame = time.time()
         reference_frame: DFrame = DFrame(dataset, processor)
         reference_frame_ref = processor.put(reference_frame)
         time_finish_get_frame = time.time()
         print(f"\t\tGot dmaps in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
-        # Get the transforms
+        # Get the transforms to apply to the dataset before locally aligning and save them to the object store
         transforms = [
             TruncateReflections(
                 comparator_datasets,
@@ -255,7 +211,6 @@ def pandda(args: PanDDAArgs):
         transforms_ref = processor.put(transforms)
 
         # Get the dmaps
-
         time_begin_get_dmaps = time.time()
         dmaps_dict = processor.process_dict(
             {
@@ -272,8 +227,6 @@ def pandda(args: PanDDAArgs):
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
         print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
-
-        # Get the relevant dmaps
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
         # Get the dataset dmap
@@ -282,11 +235,10 @@ def pandda(args: PanDDAArgs):
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
 
-        #
+        # Get the masked grid of the structure
         model_grid = get_model_map(dataset.structure.structure, xmap_grid)
-        model_map_ref = processor.put(reference_frame.mask_grid(model_grid).data)
 
-        # Comparator sets
+        # Get the Comparator sets that define the models to try
         time_begin_get_characterization_sets = time.time()
         characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
             dtag,
@@ -300,6 +252,9 @@ def pandda(args: PanDDAArgs):
         print(
             f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
+        # Filter the models which are clearly poor descriptions of the density
+        # In theory this step could result in the exclusion of a ground state model which provided good contrast
+        # for a ligand binding in one part of the protein but fit poorly to say a large disordered region
         time_begin_process_models = time.time()
         model_events = {}
         model_means = {}
@@ -316,60 +271,7 @@ def pandda(args: PanDDAArgs):
                     characterization_set_mask_list.append(False)
             characterization_set_mask = np.array(characterization_set_mask_list)
             characterization_set_masks[model_number] = characterization_set_mask
-            # characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
-        # for model_number, characterization_set in characterization_sets.items():
-        #
-        #     # Get the characterization set dmaps
-        #     characterization_set_mask_list = []
-        #     for _dtag in comparator_datasets:
-        #         if _dtag in characterization_set:
-        #             characterization_set_mask_list.append(True)
-        #         else:
-        #             characterization_set_mask_list.append(False)
-        #     characterization_set_mask = np.array(characterization_set_mask_list)
-        #     characterization_set_dmaps_array = dmaps[characterization_set_mask, :]
-        #
-        #     # Get the statical maps
-        #     mean, std, z = PointwiseNormal()(
-        #         dataset_dmap_array,
-        #         characterization_set_dmaps_array
-        #     )
-        #     model_means[model_number] = mean
-        #     model_zs[model_number] = z
-        #
-        #     mean_grid = reference_frame.unmask(SparseDMap(mean))
-        #     z_grid = reference_frame.unmask(SparseDMap(z))
-        #
-        #     # Initial
-        #     events = ClusterDensityDBSCAN()(z, reference_frame)
-        #     print(f"Initial events: {len(events)}")
-        #
-        #     # Filter the events pre-scoring
-        #     for filter in [FilterSize(reference_frame, min_size=5.0), FilterCluster(5.0), ]:
-        #         events = filter(events)
-        #
-        #     print(f"After filer size and cluster: {len(events)}")
-        #
-        #     if len(events) == 0:
-        #         continue
-        #
-        #     # Score the events
-        #     time_begin_score_events = time.time()
-        #     events = score(events, xmap_grid, mean_grid, z_grid, model_grid)
-        #     time_finish_score_events = time.time()
-        #     print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
-        #
-        #     # Filter the events post-scoring
-        #     for filter in [FilterScore(0.1), FilterLocallyHighestScoring(10.0)]:
-        #         events = filter(events)
-        #     print(f"After filter score: {len(events)}")
-        #
-        #     if len(events) == 0:
-        #         continue
-        #
-        #     print(f"Events: {[round(x, 2) for x in sorted([event.score for event in events.values()])]}")
-        #
-        #     model_events[model_number] = events
+
 
         model_scores = {}
         for model_number in characterization_set_masks:
@@ -378,95 +280,6 @@ def pandda(args: PanDDAArgs):
                 dataset_dmap_array,
                 characterization_set_dmaps_array
             )
-
-            # mat = np.vstack(
-            #     [
-            #         mean.reshape((1, -1)),
-            #         dataset_dmap_array.reshape((1, -1))
-            #     ])
-            #
-            # mat_nonzero = np.copy(mat)
-            # mat_nonzero[mat_nonzero<0] = 0.0
-            #
-            # transformer = NMF(n_components=2, max_iter=1000)
-            # transformed = transformer.fit_transform(mat_nonzero)
-            # print(f"NMF transformed shape: {transformed.shape}")
-            # print(transformed)
-            # print(f"Fraction event: {transformed[1, 1] / transformed[0, 1]}")
-            #
-            # components = transformer.components_
-            #
-            # signal_1 = components[0, :].flatten()
-            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_0.ccp4"
-            # )
-            #
-            # signal_2 = components[1, :].flatten()
-            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_NMF_1.ccp4"
-            # )
-            #
-            # transformer = FactorAnalysis(n_components=2)
-            # transformed = transformer.fit_transform(mat)
-            # print(f"FA transformed shape: {transformed.shape}")
-            # print(transformed)
-            # components = transformer.components_
-            #
-            # signal_1 = components[0, :].flatten()
-            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_0.ccp4"
-            # )
-            #
-            # signal_2 = components[1, :].flatten()
-            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_fa_1.ccp4"
-            # )
-            #
-            #
-            #
-            # ica = FastICA(n_components=2)
-            # S_ = ica.fit_transform(
-            #     np.vstack(
-            #         [
-            #             mean.reshape((1, -1)),
-            #             dataset_dmap_array.reshape((1, -1))
-            #         ]).T)
-            # A_ = ica.mixing_
-            # print(f"MIXING:")
-            # print(A_)
-            #
-            # signal_1 = S_[:,0].flatten()
-            # signal_1_scaled = (signal_1 - np.mean(signal_1)) / np.std(signal_1)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_1_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_0.ccp4"
-            # )
-            #
-            # signal_2 = S_[:,1].flatten()
-            # signal_2_scaled = (signal_2 - np.mean(signal_2)) / np.std(signal_2)
-            # save_dmap(
-            #     reference_frame.unmask(SparseDMap(signal_2_scaled)),
-            #     fs.output.processed_datasets[dtag] / f"model_{model_number}_ica_1.ccp4"
-            # )
-
-            mean_grid = reference_frame.unmask(SparseDMap(mean))
-            z_grid = reference_frame.unmask(SparseDMap(z))
-            xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
-            # print([dataset_dmap_array.shape, reference_frame.mask.indicies_sparse_inner_atomic.shape])
-            inner_mask_xmap = dataset_dmap_array[reference_frame.mask.indicies_sparse_inner_atomic]
-            median = np.median(inner_mask_xmap)
-            # print(f"Median is: {median}")
-            model_map = reference_frame.mask_grid(model_grid).data
-            model_grid = reference_frame.unmask(SparseDMap(model_map))
-
             inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
             percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
             print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
@@ -481,21 +294,9 @@ def pandda(args: PanDDAArgs):
                 models_to_process.append(model_number)
                 _l = _l + 1
 
-        # processed_models = processor.process_dict(
-        #     {
-        #         model_number: Partial(process_model).paramaterise(
-        #             model_number,
-        #             dataset_dmap_array,
-        #             dmaps[characterization_set_masks[model_number], :],
-        #             reference_frame,
-        #             model_map_ref,
-        #             score_ref
-        #         )
-        #         for model_number
-        #         in models_to_process
-        #     }
-        # )
 
+        # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
+        # filtering those events and returning those events and unpacking them
         processed_models = {
             model_number: Partial(process_model).paramaterise(
                 dataset.ligand_files,
@@ -516,18 +317,15 @@ def pandda(args: PanDDAArgs):
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
 
-            zmap_grid = reference_frame.unmask(SparseDMap(result[2]))
-            save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / f"{model_number}_z.ccp4")
-
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
-        # exit()
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
             continue
 
-        # Select a model
+        # Select a model and the events to output event maps for and to autobuild
+        # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
         selected_model_num, selected_events = select_model(model_events)
         selected_model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
         top_selected_model_events = {
@@ -557,7 +355,6 @@ def pandda(args: PanDDAArgs):
             dtag,
             fs,
             top_selected_model_events,
-            # {(dtag, _event_idx): top_selected_model_events[_event_idx] for _event_idx in top_selected_model_events},
             dataset_dmap_array,
             model_means[selected_model_num],
             model_zs[selected_model_num],

@@ -1,10 +1,9 @@
 import dataclasses
 
 import gemmi
+import numpy as np
 
 from ..interfaces import *
-from .. import constants
-import numpy as np
 
 
 def contains(string, pattern):
@@ -20,7 +19,6 @@ class StructurePython:
 
     @staticmethod
     def from_gemmi(structure: gemmi.Structure):
-        # json_str = structure.make_mmcif_document().as_json(mmjson=True)
         string = structure.make_minimal_pdb()
         return StructurePython(string)
 
@@ -80,22 +78,6 @@ class Structure(StructureInterface):
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer().first_conformer():
-                    # if residue.name.upper() not in constants.RESIDUE_NAMES:
-                    #     continue
-
-                    # try:
-                    #     # has_ca = residue["CA"][0]
-                    #     has_ca = None
-                    #     for atom in residue:
-                    #         if "CA" in atom.name:
-                    #             has_ca = atom
-                    #     if not has_ca:
-                    #         print(f"Missing residue {residue.name}")
-                    #         continue
-                    # except Exception as e:
-                    #     print(f"Missing residue {residue.name}")
-                    #
-                    #     continue
                     if not is_protein_residue(residue):
                         continue
 
@@ -106,9 +88,6 @@ class Structure(StructureInterface):
         for model in self.structure:
             for chain in model:
                 for residue in chain.get_polymer().first_conformer():
-
-                    # if residue.name.upper() not in constants.RESIDUE_NAMES:
-                    #     continue
 
                     if not is_protein_residue(residue):
                         continue
@@ -198,3 +177,6 @@ class StructureArray(StructureArrayInterface):
 
 def save_structure(structure, path):
     structure.structure.write_minimal_pdb(str(path))
+
+def load_structure(path):
+    return gemmi.read_structure(str(path))

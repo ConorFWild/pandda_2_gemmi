@@ -12,7 +12,5 @@ class FilterRFree:
 
         new_datasets = {dtag: datasets[dtag] for dtag in good_rfree_dtags}
 
-        print(f"RFree Filter: New datasets {len(new_datasets)} vs old {len(datasets)}")
-
 
         return new_datasets

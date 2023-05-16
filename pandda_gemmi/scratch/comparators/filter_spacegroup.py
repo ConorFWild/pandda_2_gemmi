@@ -14,7 +14,5 @@ class FilterSpaceGroup:
 
         new_datasets = {dtag: datasets[dtag] for dtag in same_spacegroup_datasets}
 
-        print(f"Same space group: New datasets {len(new_datasets)} vs old {len(datasets)}")
-
 
         return new_datasets
