@@ -418,7 +418,7 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
         self.console.print(printable)
 
-    def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
+    def summarise_autobuilds(self, autobuild_results):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Autobuild Scores"
         event_class_table.add_column("Dtag")
