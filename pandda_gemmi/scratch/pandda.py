@@ -158,6 +158,9 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
 
+        if dtag != "JMJD2DA-x427":
+            continue
+
         time_begin_process_dataset = time.time()
 
         # Get the dataset
