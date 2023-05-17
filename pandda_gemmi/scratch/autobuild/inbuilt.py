@@ -109,7 +109,7 @@ def get_conformers(
 
 
     else:
-        return None
+        return {}
 
 
 def get_structure_mean(structure):
@@ -430,6 +430,9 @@ class AutobuildInbuilt:
             # Generate conformers to score
             conformers = get_conformers(ligand_files)
 
+            if len(conformers) == 0:
+                continue
+
             # Score conformers against the grid
             conformer_scores = {}
             for conformer_id, conformer in conformers.items():
@@ -441,6 +444,17 @@ class AutobuildInbuilt:
                 conformer_scores[conformer_id] = [optimized_structure, score]
 
         # Choose the best ligand
+        if len(conformer_scores) == 0:
+            return AutobuildResult(
+                {},
+            dmap_path,
+            mtz_path,
+            model_path,
+            cif_path,
+            out_dir
+        )
+
+
         best_ligand_key = max(
             ligand_scoring_results,
             key=lambda _ligand_key: max(
