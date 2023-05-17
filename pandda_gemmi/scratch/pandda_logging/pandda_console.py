@@ -497,8 +497,8 @@ class PanDDAConsole:
         unit_cell_table.title = "Unit Cell Statistics"
         unit_cell_table.add_column("Parameter")
         unit_cell_table.add_column("Min")
-        unit_cell_table.add_column("Max")
         unit_cell_table.add_column("Mean")
+        unit_cell_table.add_column("Max")
 
         unit_cells = [dataset.structure.structure.cell for dataset in datasets_initial.values()]
 
