@@ -67,6 +67,8 @@ def autobuild(
         try_make(ligand_autobuild_dir)
 
         autobuild_result = method(
+            event,
+            dataset,
             processed_dmap_path.resolve(),
             dataset.reflections.path.resolve(),
             processed_structure_path.resolve(),
