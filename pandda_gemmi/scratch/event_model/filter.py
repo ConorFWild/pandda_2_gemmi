@@ -100,7 +100,13 @@ class FilterLocallyHighestScoring:
         if len(events) == 0:
             return {}
 
-        centroid_array = np.array([np.mean(event.pos_array, axis=0) for event in events.values()])
+        centroid_array = np.array(
+            [
+                np.mean(event.pos_array, axis=0)
+                for event
+                in events.values()
+            ]
+        )
 
         event_id_array = np.array([event_id for event_id in events.keys()])
         # print(f"Event id array shape: {event_id_array.shape}")

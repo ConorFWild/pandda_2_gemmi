@@ -171,7 +171,7 @@ class ClusterDensityDBSCAN:
         eps = max(dists)*1.5
         print(f"Got an eps of: {eps}")
 
-        clusters = DBSCAN(eps=eps, min_samples=5).fit_predict(high_z_pos_array)
+        clusters = DBSCAN(eps=eps, min_samples=15).fit_predict(high_z_pos_array)
 
         high_z_point_x = point_3d_array_x[high_z_indexes]
         high_z_point_y = point_3d_array_y[high_z_indexes]

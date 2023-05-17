@@ -308,7 +308,6 @@ def score_conformer(
         centroid_cart,
         conformer,
         zmap_grid,
-
         event_fit_num_trys=3,
 ):
     centered_structure = center_structure(
@@ -388,7 +387,7 @@ def get_score_grid(dmap, st):
     for atom in st.protein_atoms():
         pos = atom.pos
         inner_mask_grid.set_points_around(pos,
-                                          radius=1.25,
+                                          radius=1.5,
                                           value=1,
                                           )
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
