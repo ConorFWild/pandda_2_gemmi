@@ -47,7 +47,7 @@ from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDM
 from pandda_gemmi.scratch.ranking import rank_events, RankHighScore
 
 from pandda_gemmi.scratch.tables import output_tables
-
+from pandda_gemmi.scratch.logging import PanDDAConsole
 
 def process_model(
         ligand_files,
@@ -118,16 +118,26 @@ def process_model(
 
 
 def pandda(args: PanDDAArgs):
+    console = PanDDAConsole()
+    console.start_pandda()
+    console.start_parse_command_line_args()
+    console.summarise_arguments(args)
+
     # Get the processor
+    console.start_initialise_multiprocessor()
     processor: ProcessorInterface = ProcessLocalRay(args.local_cpus)
+    console.print_initialized_local_processor(args)
 
     # Get the FS
+    console.start_fs_model()
     fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir))
+    console.summarise_fs_model(fs)
 
     # Get the scoring method
     score = ScoreCNNLigand()
 
     # Get the datasets
+    console.start_load_datasets()
     datasets: Dict[str, DatasetInterface] = {
         dataset_dir.dtag: XRayDataset.from_paths(
             dataset_dir.input_pdb_file,
@@ -140,10 +150,12 @@ def pandda(args: PanDDAArgs):
     dataset_refs = {_dtag: processor.put(datasets[_dtag]) for _dtag in datasets}
     structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
                             datasets}
+    console.summarise_datasets(datasets, fs)
 
     # Process each dataset
     pandda_events = {}
     time_begin_process_datasets = time.time()
+    console.start_process_shells()
     for dtag in datasets:
 
         time_begin_process_dataset = time.time()
@@ -371,7 +383,11 @@ def pandda(args: PanDDAArgs):
     print(
         f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
+    # console.summarise_shells(shell_results, all_events, event_scores)
+
     # Autobuild the best scoring event for each dataset
+    console.start_autobuilding()
+
     fs_ref = processor.put(fs)
     time_begin_autobuild = time.time()
 
@@ -406,6 +422,7 @@ def pandda(args: PanDDAArgs):
                                      datasets[_event_id[0]].ligand_files}
     time_finish_autobuild = time.time()
     print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
+    console.summarise_autobuilding(autobuild_results)
 
     # Merge the autobuilds
     merge_autobuilds(

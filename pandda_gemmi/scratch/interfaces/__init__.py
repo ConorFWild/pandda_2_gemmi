@@ -74,6 +74,8 @@ class StructureFactorsInterface(Protocol):
 
 
 class StructureInterface(Protocol):
+    structure: Any
+
     def protein_atoms(self):
         ...
 
