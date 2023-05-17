@@ -159,7 +159,16 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
 
-        if dtag != "JMJD2DA-x427":
+        # if dtag != "JMJD2DA-x427":
+        #     continue
+
+        if dtag not in [
+            "JMJD2DA-x427",
+            "JMJD2DA-x379",
+            "JMJD2DA-x585",
+            "JMJD2DA-x533",
+            "JMJD2DA-x387"
+        ]:
             continue
 
         time_begin_process_dataset = time.time()
