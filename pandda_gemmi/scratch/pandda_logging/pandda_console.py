@@ -500,7 +500,7 @@ class PanDDAConsole:
         unit_cell_table.add_column("Max")
         unit_cell_table.add_column("Mean")
 
-        unit_cells = [dataset.structure.structure.unit_cell for dataset in datasets_initial.values()]
+        unit_cells = [dataset.structure.structure.cell for dataset in datasets_initial.values()]
 
         uca = [uc.a for uc in unit_cells]
         ucb = [uc.b for uc in unit_cells]
