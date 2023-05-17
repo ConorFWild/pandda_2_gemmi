@@ -381,9 +381,9 @@ def score_conformer(
 
 def get_score_grid(dmap, st):
     # Get a mask of the protein
-    inner_mask_grid = gemmi.Int8Grid(*dmap.spacing)
+    inner_mask_grid = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    inner_mask_grid.set_unit_cell(gemmi.UnitCell(*dmap.unit_cell))
+    inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
     for atom in st.protein_atoms():
         pos = atom.pos
