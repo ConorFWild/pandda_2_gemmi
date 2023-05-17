@@ -471,11 +471,11 @@ class AutobuildInbuilt:
         for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
             save_structure(
                 Structure(None, optimized_structure),
-                out_dir / str(conformer_id),
+                out_dir / f"{conformer_id}.pdb",
             )
 
         log_result_dict = {
-            str(out_dir / str(conformer_id)): score
+            str(out_dir / f"{conformer_id}.pdb"): score
             for conformer_id, (optimized_structure, score)
             in best_ligand_conformer_scores.items()
         }
