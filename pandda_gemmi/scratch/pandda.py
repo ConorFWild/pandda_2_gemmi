@@ -40,6 +40,7 @@ from pandda_gemmi.scratch.site_model import HeirarchicalSiteModel, ClusterSites,
 
 from pandda_gemmi.scratch.autobuild import autobuild, AutobuildResult
 from pandda_gemmi.scratch.autobuild.rhofit import Rhofit
+from pandda_gemmi.scratch.autobuild.inbuilt import AutobuildInbuilt
 from pandda_gemmi.scratch.autobuild.merge import merge_autobuilds, MergeHighestRSCC
 from pandda_gemmi.scratch.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDMap
@@ -409,7 +410,8 @@ def pandda(args: PanDDAArgs):
                 pandda_events[_event_id],
                 AutobuildPreprocessStructure(),
                 AutobuildPreprocessDMap(),
-                Rhofit(cut=1.0),
+                # Rhofit(cut=1.0),
+                AutobuildInbuilt(),
                 fs_ref
             )
             for _event_id
@@ -425,7 +427,7 @@ def pandda(args: PanDDAArgs):
                                      datasets[_event_id[0]].ligand_files}
     time_finish_autobuild = time.time()
     print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
-    console.summarise_autobuilding(autobuild_results)
+    # console.summarise_autobuilding(autobuild_results)
 
     # Merge the autobuilds
     merge_autobuilds(
