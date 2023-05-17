@@ -469,7 +469,7 @@ class AutobuildInbuilt:
 
         # Save the fit conformers
         for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
-            save_structure(optimized_structure, out_dir / str(conformer_id))
+            save_structure(Structure(None, optimized_structure), out_dir / str(conformer_id))
 
         log_result_dict = {
             out_dir / conformer_id: score
