@@ -442,6 +442,7 @@ class AutobuildInbuilt:
                     score_grid,
                 )
                 conformer_scores[conformer_id] = [optimized_structure, score]
+                print(f"Ligand: {ligand_key}: Conformer: {conformer_id}: Score: {score}")
 
             ligand_scoring_results[ligand_key] = conformer_scores
 
@@ -449,13 +450,12 @@ class AutobuildInbuilt:
         if len(conformer_scores) == 0:
             return AutobuildResult(
                 {},
-            dmap_path,
-            mtz_path,
-            model_path,
-            cif_path,
-            out_dir
-        )
-
+                dmap_path,
+                mtz_path,
+                model_path,
+                cif_path,
+                out_dir
+            )
 
         best_ligand_key = max(
             ligand_scoring_results,
