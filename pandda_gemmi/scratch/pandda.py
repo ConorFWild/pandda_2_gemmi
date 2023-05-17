@@ -48,7 +48,7 @@ from pandda_gemmi.scratch.autobuild.preprocess_dmap import AutobuildPreprocessDM
 from pandda_gemmi.scratch.ranking import rank_events, RankHighScore
 
 from pandda_gemmi.scratch.tables import output_tables
-from pandda_gemmi.scratch.logging import PanDDAConsole
+from pandda_gemmi.scratch.pandda_logging import PanDDAConsole
 
 def process_model(
         ligand_files,
