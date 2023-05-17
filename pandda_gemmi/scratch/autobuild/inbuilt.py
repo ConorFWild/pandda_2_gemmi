@@ -447,7 +447,7 @@ class AutobuildInbuilt:
             ligand_scoring_results[ligand_key] = conformer_scores
 
         # Choose the best ligand
-        if len(conformer_scores) == 0:
+        if len(ligand_scoring_results) == 0:
             return AutobuildResult(
                 {},
                 dmap_path,
