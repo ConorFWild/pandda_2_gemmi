@@ -442,7 +442,7 @@ class AutobuildInbuilt:
                     score_grid,
                 )
                 conformer_scores[conformer_id] = [optimized_structure, score]
-                print(f"Ligand: {ligand_key}: Conformer: {conformer_id}: Score: {score}")
+                print(f"\tLigand: {ligand_key}: Conformer: {conformer_id}: Score: {score}")
 
             ligand_scoring_results[ligand_key] = conformer_scores
 
