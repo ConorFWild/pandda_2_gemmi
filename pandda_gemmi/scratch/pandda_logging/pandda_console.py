@@ -582,7 +582,7 @@ class PanDDAConsole:
 
 
         # Rows
-        for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
+        for dtag in sorted(datasets_initial, key=lambda x: x):
             dataset = datasets_initial[dtag]
             has_smiles = False
             for ligand_key, ligand_files in dataset.ligand_files.items():
