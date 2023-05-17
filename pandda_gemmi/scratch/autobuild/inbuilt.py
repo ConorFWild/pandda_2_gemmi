@@ -425,7 +425,7 @@ class AutobuildInbuilt:
         score_grid = get_score_grid(dmap, st)
 
         ligand_scoring_results = {}
-        for ligand_key, ligand_files in dataset.ligand_files:
+        for ligand_key, ligand_files in dataset.ligand_files.items():
 
             # Generate conformers to score
             conformers = get_conformers(ligand_files)
