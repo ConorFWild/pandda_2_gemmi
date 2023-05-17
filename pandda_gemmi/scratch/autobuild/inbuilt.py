@@ -468,7 +468,7 @@ class AutobuildInbuilt:
         best_ligand_conformer_scores = ligand_scoring_results[best_ligand_key]
 
         # Save the fit conformers
-        for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores:
+        for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
             save_structure(optimized_structure, out_dir / conformer_id)
 
         log_result_dict = {
