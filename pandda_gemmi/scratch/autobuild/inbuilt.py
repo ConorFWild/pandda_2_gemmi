@@ -308,7 +308,7 @@ def score_conformer(
         centroid_cart,
         conformer,
         zmap_grid,
-        event_fit_num_trys=3,
+        event_fit_num_trys=10,
 ):
     centered_structure = center_structure(
         conformer,
