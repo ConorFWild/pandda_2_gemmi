@@ -411,11 +411,27 @@ def pandda(args: PanDDAArgs):
             continue
         best_dtag_event_id = max(dtag_events, key=lambda _event_id: dtag_events[_event_id].score)
         best_events[best_dtag_event_id] = pandda_events[best_dtag_event_id]
-    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-        {
-            _event_id: Partial(autobuild).paramaterise(
+    # best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+    #     {
+    #         _event_id: Partial(autobuild).paramaterise(
+    #             _event_id,
+    #             dataset_refs[_event_id[0]],
+    #             pandda_events[_event_id],
+    #             AutobuildPreprocessStructure(),
+    #             AutobuildPreprocessDMap(),
+    #             # Rhofit(cut=1.0),
+    #             AutobuildInbuilt(),
+    #             fs_ref
+    #         )
+    #         for _event_id
+    #         in best_events
+    #     }
+    # )
+
+    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {
+            _event_id: autobuild(
                 _event_id,
-                dataset_refs[_event_id[0]],
+                datasets[_event_id[0]],
                 pandda_events[_event_id],
                 AutobuildPreprocessStructure(),
                 AutobuildPreprocessDMap(),
@@ -426,7 +442,8 @@ def pandda(args: PanDDAArgs):
             for _event_id
             in best_events
         }
-    )
+
+
     autobuilds = {}
     for _event_id in pandda_events:
         if _event_id in best_event_autobuilds:
