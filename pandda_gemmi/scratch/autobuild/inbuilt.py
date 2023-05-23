@@ -488,7 +488,7 @@ class AutobuildInbuilt:
         #     for conformer_id, (optimized_structure, score)
         #     in best_ligand_conformer_scores.items()
         # }
-        for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
+        for conformer_id, (optimized_structure, score) in conformer_scores.items():
             save_structure(
                 Structure(None, optimized_structure),
                 out_dir / f"{conformer_id}.pdb",
@@ -497,7 +497,7 @@ class AutobuildInbuilt:
         log_result_dict = {
             str(out_dir / f"{conformer_id}.pdb"): score
             for conformer_id, (optimized_structure, score)
-            in best_ligand_conformer_scores.items()
+            in conformer_scores.items()
         }
 
         # Return results
@@ -506,6 +506,6 @@ class AutobuildInbuilt:
             dmap_path,
             mtz_path,
             model_path,
-            cif_path,
+            ligand_files.ligand_cif,
             out_dir
         )
