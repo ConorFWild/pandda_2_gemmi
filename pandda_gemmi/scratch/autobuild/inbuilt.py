@@ -412,7 +412,7 @@ class AutobuildInbuilt:
             dmap_path,
             mtz_path,
             model_path,
-            cif_path,
+            ligand_files,
             out_dir,
     ):
 
@@ -423,50 +423,71 @@ class AutobuildInbuilt:
         dmap = load_dmap(dmap_path)
         score_grid = get_score_grid(dmap, st)
 
-        ligand_scoring_results = {}
-        for ligand_key, ligand_files in dataset.ligand_files.items():
+        # ligand_scoring_results = {}
+        # for ligand_key, ligand_files in dataset.ligand_files.items():
 
-            # Generate conformers to score
-            conformers = get_conformers(ligand_files)
+        # Generate conformers to score
+        conformers = get_conformers(ligand_files)
 
-            if len(conformers) == 0:
-                continue
+        if len(conformers) == 0:
+            return
 
-            # Score conformers against the grid
-            conformer_scores = {}
-            for conformer_id, conformer in conformers.items():
-                optimized_structure, score = score_conformer(
-                    np.mean(event.pos_array, axis=0),
-                    conformer,
-                    score_grid,
-                )
-                conformer_scores[conformer_id] = [optimized_structure, score]
-                print(f"\tLigand: {ligand_key}: Conformer: {conformer_id}: Score: {score}")
+        # Score conformers against the grid
+        conformer_scores = {}
+        for conformer_id, conformer in conformers.items():
+            optimized_structure, score = score_conformer(
+                np.mean(event.pos_array, axis=0),
+                conformer,
+                score_grid,
+            )
+            conformer_scores[conformer_id] = [optimized_structure, score]
+            # print(f"\tLigand: {ligand_key}: Conformer: {conformer_id}: Score: {score}")
 
-            ligand_scoring_results[ligand_key] = conformer_scores
+        # ligand_scoring_results[ligand_key] = conformer_scores
 
-        # Choose the best ligand
-        if len(ligand_scoring_results) == 0:
+        if len(conformer_scores) == 0:
             return AutobuildResult(
                 {},
                 dmap_path,
                 mtz_path,
                 model_path,
-                cif_path,
+                ligand_files.ligand_cif,
                 out_dir
             )
 
-        best_ligand_key = max(
-            ligand_scoring_results,
-            key=lambda _ligand_key: max(
-                ligand_scoring_results[_ligand_key],
-                key=lambda _conformer_id: ligand_scoring_results[_ligand_key][_conformer_id][1],
-            )
-        )
+        # Choose the best ligand
+        # if len(ligand_scoring_results) == 0:
+        #     return AutobuildResult(
+        #         {},
+        #         dmap_path,
+        #         mtz_path,
+        #         model_path,
+        #         cif_path,
+        #         out_dir
+        #     )
 
-        best_ligand_conformer_scores = ligand_scoring_results[best_ligand_key]
+        # best_ligand_key = max(
+        #     ligand_scoring_results,
+        #     key=lambda _ligand_key: max(
+        #         ligand_scoring_results[_ligand_key],
+        #         key=lambda _conformer_id: ligand_scoring_results[_ligand_key][_conformer_id][1],
+        #     )
+        # )
+        #
+        # best_ligand_conformer_scores = ligand_scoring_results[best_ligand_key]
 
         # Save the fit conformers
+        # for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
+        #     save_structure(
+        #         Structure(None, optimized_structure),
+        #         out_dir / f"{conformer_id}.pdb",
+        #     )
+        #
+        # log_result_dict = {
+        #     str(out_dir / f"{conformer_id}.pdb"): score
+        #     for conformer_id, (optimized_structure, score)
+        #     in best_ligand_conformer_scores.items()
+        # }
         for conformer_id, (optimized_structure, score) in best_ligand_conformer_scores.items():
             save_structure(
                 Structure(None, optimized_structure),

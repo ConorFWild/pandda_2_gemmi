@@ -62,7 +62,17 @@ def autobuild(
         ligand_files = dataset.ligand_files[ligand_key]
         if not ligand_files.ligand_cif:
             continue
-        ligand_cif_path = ligand_files.ligand_cif
+        ligand_cif_path = ligand_files.ligand_cif.resolve()
+
+        if not ligand_files.ligand_pdb:
+            ligand_pdb_path = None
+        else:
+            ligand_pdb_path = ligand_files.ligand_pdb.resolve()
+
+        if not ligand_files.ligand_smiles:
+            ligand_smiles_path = None
+        else:
+            ligand_smiles_path = ligand_files.ligand_smiles.resolve()
 
         ligand_autobuild_dir = autobuild_dir / ligand_key
         try_make(ligand_autobuild_dir)
@@ -73,7 +83,10 @@ def autobuild(
             processed_dmap_path.resolve(),
             dataset.reflections.path.resolve(),
             processed_structure_path.resolve(),
-            ligand_cif_path.resolve(),
+            # ligand_cif_path,
+            # ligand_pdb_path,
+            # ligand_smiles_path,
+            ligand_files,
             ligand_autobuild_dir.resolve(),
         )
         autobuild_results[ligand_key] = autobuild_result
