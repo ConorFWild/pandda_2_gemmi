@@ -437,7 +437,7 @@ def pandda(args: PanDDAArgs):
                 AutobuildPreprocessDMap(),
                 # Rhofit(cut=1.0),
                 AutobuildInbuilt(),
-                fs_ref
+                fs
             )
             for _event_id
             in best_events
