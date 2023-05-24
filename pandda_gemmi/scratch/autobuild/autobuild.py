@@ -61,6 +61,7 @@ def autobuild(
         print(ligand_key)
         ligand_files = dataset.ligand_files[ligand_key]
         if not ligand_files.ligand_cif:
+            print(f"\tSkipping!")
             continue
         ligand_cif_path = ligand_files.ligand_cif.resolve()
 
