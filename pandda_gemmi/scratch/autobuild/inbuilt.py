@@ -337,7 +337,10 @@ def score_conformer(
     scores = []
     optimised_structures = []
 
+
     for j in range(event_fit_num_trys):
+        print(f"\t\t\t\tOptimizing round {j}")
+
         res = optimize.differential_evolution(
             lambda params: score_fit_nonquant_array(
                 structure_array,
