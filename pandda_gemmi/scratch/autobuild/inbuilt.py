@@ -258,7 +258,8 @@ def score_fit_nonquant_array(structure_array, grid, distance, params):
             ry * 360,
             rz * 360,
         ],
-        degrees=True)
+        degrees=True,
+    )
     rotation_matrix: np.ndarray = rotation.as_matrix()
 
     transformed_structure_array = transform_structure_array(
