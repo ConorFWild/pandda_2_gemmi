@@ -427,7 +427,9 @@ class AutobuildInbuilt:
         # for ligand_key, ligand_files in dataset.ligand_files.items():
 
         # Generate conformers to score
+        print(f"\tGetting conformermers!")
         conformers = get_conformers(ligand_files)
+        print(f"\t\tGot {len(conformers)} conformers!")
 
         if len(conformers) == 0:
             return
