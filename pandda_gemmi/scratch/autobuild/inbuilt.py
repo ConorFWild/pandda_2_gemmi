@@ -355,6 +355,8 @@ def score_conformer(
             ],
             # popsize=30,
         )
+        print(f"\t\t\t\t\tFinished Optimizing round {j}")
+
 
         scores.append(res.fun)
 
