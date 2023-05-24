@@ -31,6 +31,9 @@ class PartialInterface(Protocol[P, V]):
 class ProcessorInterface(Protocol):
     tag: Literal["not_async"]
 
+    def shutdown(self):
+        ...
+
     def __call__(self, funcs: Iterable[Callable[P, V]]) -> List[V]:
         ...
 

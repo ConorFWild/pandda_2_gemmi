@@ -428,6 +428,7 @@ def pandda(args: PanDDAArgs):
     #     }
     # )
 
+    processor.shutdown()
     best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {
             _event_id: autobuild(
                 _event_id,

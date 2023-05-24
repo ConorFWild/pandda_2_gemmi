@@ -59,5 +59,5 @@ class ProcessLocalRay(ProcessorInterface):
         ray.shutdown()
         ray.init(num_cpus=self.local_cpus)
 
-    def shutdow(self):
+    def shutdown(self):
         ray.shutdown()
