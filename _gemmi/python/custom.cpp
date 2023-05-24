@@ -371,7 +371,23 @@ void interpolate_points_multiple_parallel(
 //   return scores;
 
 // }
-
+void interpolate_pos_array(
+   const Grid<float>& grid,
+   py::array_t<float> pos_array,
+   py::array_t<float> vals_array
+)
+{
+  auto r_pos = pos_array.template mutable_unchecked<2>();
+  auto r_val = vals_array.template mutable_unchecked<1>();
+  for (int i=0; i<r_pos.shape(0); i++){
+    Position pos = Position(
+      r_pos(i, 0),
+      r_pos(i, 1),
+      r_pos(i, 2)
+      );
+    auto val = grid.interpolate_value(pos);
+    r_val(i) = val;
+}
 
 
 void add_custom(py::module& m) {
@@ -397,30 +413,35 @@ void add_custom(py::module& m) {
     //     py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
     //     "Interpolates an array of points."
     // );
-          m.def(
+//          m.def(
+//        "interpolate_pos_array",
+//        [](
+//          const Grid<float>& grid,
+//          py::array_t<float> pos_array,
+//          py::array_t<float> vals_array
+//        ){
+//          auto r_pos = pos_array.template mutable_unchecked<2>();
+//          auto r_val = vals_array.template mutable_unchecked<1>();
+//          // std::vector<float> vals_vec;
+//          for (int i=0; i<r_pos.shape(0); i++){
+//            Position pos = Position(
+//              r_pos(i, 0),
+//              r_pos(i, 1),
+//              r_pos(i, 2)
+//              );
+//            auto val = grid.interpolate_value(pos);
+//            // std::cout << val << "\n";
+//            r_val(i) = val;
+//            // vals_vec.push_back(val);
+//          }
+//        // return vals_vec;
+//        },
+//        py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
+//        "Interpolates an array of points."
+//    );
+        m.def(
         "interpolate_pos_array",
-        [](
-          const Grid<float>& grid,
-          py::array_t<float> pos_array,
-          py::array_t<float> vals_array
-        ){
-          auto r_pos = pos_array.template mutable_unchecked<2>();
-          auto r_val = vals_array.template mutable_unchecked<1>();
-          // std::vector<float> vals_vec;
-          for (int i=0; i<r_pos.shape(0); i++){
-            Position pos = Position(
-              r_pos(i, 0),
-              r_pos(i, 1),
-              r_pos(i, 2)
-              );
-            auto val = grid.interpolate_value(pos);
-            // std::cout << val << "\n";
-            r_val(i) = val;
-            // vals_vec.push_back(val);
-          }
-        // return vals_vec;
-        },
-        py::arg("grid"), py::arg("pos_array").noconvert(), py::arg("vals_array").noconvert(),
+        &interpolate_pos_array,
         "Interpolates an array of points."
     );
           m.def(
