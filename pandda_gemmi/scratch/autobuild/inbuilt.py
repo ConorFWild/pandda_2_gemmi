@@ -231,6 +231,7 @@ def get_interpolated_values_c(
 ):
     vals = np.zeros(n, dtype=np.float32)
 
+
     # vals_list = \
     gemmi.interpolate_pos_array(
         grid,
@@ -266,7 +267,7 @@ def score_fit_nonquant_array(structure_array, grid, distance, params):
         rotation_matrix
     )
 
-    n = structure_array.shape[0]
+    n = transformed_structure_array.shape[0]
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
 
