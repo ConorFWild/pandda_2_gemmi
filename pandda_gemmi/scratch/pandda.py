@@ -337,6 +337,7 @@ def pandda(args: PanDDAArgs):
             in models_to_process
         }
 
+
         for model_number, result in processed_models.items():
             if result[0] is not None:
                 model_events[model_number] = result[0]
@@ -402,7 +403,7 @@ def pandda(args: PanDDAArgs):
     # Autobuild the best scoring event for each dataset
     console.start_autobuilding()
 
-    fs_ref = processor.put(fs)
+    # fs_ref = processor.put(fs)
     time_begin_autobuild = time.time()
 
     best_events = {}
@@ -412,42 +413,50 @@ def pandda(args: PanDDAArgs):
             continue
         best_dtag_event_id = max(dtag_events, key=lambda _event_id: dtag_events[_event_id].score)
         best_events[best_dtag_event_id] = pandda_events[best_dtag_event_id]
-    # best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-    #     {
-    #         _event_id: Partial(autobuild).paramaterise(
-    #             _event_id,
-    #             dataset_refs[_event_id[0]],
-    #             pandda_events[_event_id],
-    #             AutobuildPreprocessStructure(),
-    #             AutobuildPreprocessDMap(),
-    #             # Rhofit(cut=1.0),
-    #             AutobuildInbuilt(),
-    #             fs_ref
-    #         )
-    #         for _event_id
-    #         in best_events
-    #     }
-    # )
 
     processor.shutdown()
-    time_autobuild_finish = time.time()
+    processor: ProcessorInterface = ProcessLocalRay(args.local_cpus)
+    dataset_refs = {_dtag: processor.put(datasets[_dtag]) for _dtag in datasets}
+    fs_ref = processor.put(fs)
 
-    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {
-            _event_id: autobuild(
+    time_autobuild_begin = time.time()
+
+    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+        {
+            _event_id: Partial(autobuild).paramaterise(
                 _event_id,
-                datasets[_event_id[0]],
+                dataset_refs[_event_id[0]],
                 pandda_events[_event_id],
                 AutobuildPreprocessStructure(),
                 AutobuildPreprocessDMap(),
                 # Rhofit(cut=1.0),
                 AutobuildInbuilt(),
-                fs
+                fs_ref
             )
             for _event_id
             in best_events
         }
+    )
+
+
+
+    # best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {
+    #         _event_id: autobuild(
+    #             _event_id,
+    #             datasets[_event_id[0]],
+    #             pandda_events[_event_id],
+    #             AutobuildPreprocessStructure(),
+    #             AutobuildPreprocessDMap(),
+    #             # Rhofit(cut=1.0),
+    #             AutobuildInbuilt(),
+    #             fs
+    #         )
+    #         for _event_id
+    #         in best_events
+    #     }
+
     time_autobuild_finish = time.time()
-    print(f"PanDDA ran in: {time_autobuild_finish-time_autobuild_finish}")
+    print(f"Autobuilt in: {time_autobuild_finish-time_autobuild_begin}")
 
     autobuilds = {}
     for _event_id in pandda_events:
