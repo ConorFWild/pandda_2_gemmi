@@ -9,6 +9,7 @@
 #include "gemmi/tostr.hpp"
 #include "gemmi/fourier.hpp"  // for get_f_phi_on_grid
 
+#include <cassert>
 #include <pybind11/pybind11.h>
 #include <pybind11/complex.h>
 #include <pybind11/stl.h>

@@ -119,6 +119,7 @@ def process_model(
 
 
 def pandda(args: PanDDAArgs):
+    time_pandda_begin = time.time()
     console = PanDDAConsole()
     console.start_pandda()
     console.start_parse_command_line_args()
@@ -429,6 +430,8 @@ def pandda(args: PanDDAArgs):
     # )
 
     processor.shutdown()
+    time_autobuild_finish = time.time()
+
     best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {
             _event_id: autobuild(
                 _event_id,
@@ -443,7 +446,8 @@ def pandda(args: PanDDAArgs):
             for _event_id
             in best_events
         }
-
+    time_autobuild_finish = time.time()
+    print(f"PanDDA ran in: {time_autobuild_finish-time_autobuild_finish}")
 
     autobuilds = {}
     for _event_id in pandda_events:
@@ -484,6 +488,8 @@ def pandda(args: PanDDAArgs):
 
     # Output tables
     output_tables(pandda_events, ranking, sites, fs)
+    time_pandda_finish = time.time()
+    print(f"PanDDA ran in: {time_pandda_finish-time_pandda_begin}")
 
 
 if __name__ == '__main__':
