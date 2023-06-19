@@ -28,7 +28,7 @@ from pandda_gemmi.scratch.comparators import (
 from pandda_gemmi.scratch import constants
 from pandda_gemmi.scratch.dmaps import save_dmap
 from pandda_gemmi.scratch.event_model.evaluate import evaluate_model
-from pandda_gemmi.scratch.event_model.characterization import get_characterization_sets, CharacterizationGaussianMixture
+from pandda_gemmi.scratch.event_model.characterization import get_characterization_sets, CharacterizationGaussianMixture, CharacterizationNN
 from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
 from pandda_gemmi.scratch.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.scratch.event_model.score import ScoreCNN, get_model_map, ScoreCNNLigand
@@ -273,8 +273,11 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             dmaps,
             reference_frame,
-            CharacterizationGaussianMixture(n_components=min(20, int(len(comparator_datasets) / 25)),
-                                            covariance_type="full"),
+            # CharacterizationGaussianMixture(
+            #     n_components=min(20, int(len(comparator_datasets) / 25)),
+            #     covariance_type="full",
+            # ),
+            CharacterizationNN()
         )
         time_finish_get_characterization_sets = time.time()
         print(

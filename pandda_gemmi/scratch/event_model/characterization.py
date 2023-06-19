@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn import mixture
+from sklearn.neighbors import NearestNeighbors
 
 from ..interfaces import *
 
@@ -51,5 +52,52 @@ class CharacterizationGaussianMixture:
         # Fit the Dirichlet Process Gaussian Mixture Model and predict component membership
         dpgmm = mixture.BayesianGaussianMixture(n_components=self.n_components, covariance_type=self.covariance_type)
         predicted = dpgmm.fit_predict(transformed)
+
+        return predicted
+
+class CharacterizationNN:
+    def __init__(self, n_neighbours=25, ):
+        self.n_neighbours = n_neighbours
+
+    def __call__(self, dmaps, reference_frame):
+        # Get the inner mask of the density
+        sparse_dmap_inner_array = dmaps[:, reference_frame.mask.indicies_sparse_inner]
+
+        # Transform the data to a reasonable size for a GMM
+        pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+        transformed = pca.fit_transform(sparse_dmap_inner_array)
+
+        # Fit the Dirichlet Process Gaussian Mixture Model and predict component membership
+        nbrs = NearestNeighbors(n_neighbors=self.n_neighbours).fit(transformed)
+        distances, indices = nbrs.kneighbors(transformed)
+
+        # Get neighbourhood radii
+        radii = {}
+        for j, row in enumerate(distances):
+            mean_distance = np.mean(row)
+            radii[j] = mean_distance
+
+        # Sort datasets by radii
+        radii_sorted = {index: radii[index] for index in sorted(radii, key=lambda _index: radii[_index])}
+
+        # Loop over datasets from narrowest to broadest, checking whether any of their neighbours have been claimed
+        # If so, skip to next
+        claimed = []
+        cluster_num = 0
+        # cluster_widths = {}
+        predicted = np.zeros(dmaps.shape[0], dtype=np.int)
+        for index in radii_sorted:
+            nearest_neighbour_indexes = indices[index, :]
+
+            if not any([(j in claimed) for j in nearest_neighbour_indexes]):
+                # CLaim indicies
+                for j in nearest_neighbour_indexes:
+                    claimed.append(j)
+
+                predicted[nearest_neighbour_indexes] = cluster_num
+
+                # cluster_widths[cluster_num] = radii_sorted[index]
+
+                cluster_num += 1
 
         return predicted
