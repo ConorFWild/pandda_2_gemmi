@@ -108,7 +108,7 @@ def process_model(
     for filter in [
         FilterScore(0.30),
         # FilterLocallyHighestScoring(8.0),
-        FilterLocallyHighestLargest(8.0),
+        FilterLocallyHighestLargest(5.0),
 
     ]:
         events = filter(events)
