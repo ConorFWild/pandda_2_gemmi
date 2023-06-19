@@ -83,7 +83,7 @@ class CharacterizationNN:
         # Loop over datasets from narrowest to broadest, checking whether any of their neighbours have been claimed
         # If so, skip to next
         claimed = []
-        cluster_num = 0
+        cluster_num = 1
         # cluster_widths = {}
         predicted = np.zeros(dmaps.shape[0], dtype=np.int)
         for index in radii_sorted:
