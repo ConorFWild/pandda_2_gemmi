@@ -1,4 +1,6 @@
-class Event:
+from ..interfaces import *
+
+class Event(EventInterface):
     def __init__(self, pos_array, point_array, score=0.0, bdc=0.0):
         self.pos_array = pos_array
         self.point_array = point_array

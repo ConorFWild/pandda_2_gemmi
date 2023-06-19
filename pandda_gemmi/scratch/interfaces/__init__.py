@@ -63,8 +63,10 @@ class DatasetDirInterface(Protocol):
 class PanDDAInputInterface(Protocol):
     dataset_dirs: Dict[str, DatasetDirInterface]
 
+
 class PanDDAOutputInterface(Protocol):
     processed_datasets: Dict[str, Path]
+
 
 class PanDDAFSInterface(Protocol):
     input: PanDDAInputInterface
@@ -88,13 +90,15 @@ class StructureInterface(Protocol):
     def __getitem__(self, item):
         ...
 
+
 class StructureArrayInterface(Protocol):
     models: np.ndarray
-    chains : np.ndarray
-    seq_ids : np.ndarray
-    insertions : np.ndarray
+    chains: np.ndarray
+    seq_ids: np.ndarray
+    insertions: np.ndarray
     atom_ids: np.ndarray
     positions: np.ndarray
+
 
 class ResolutionInterface(Protocol):
     ...
@@ -140,7 +144,8 @@ class ReflectionsInterface(Protocol):
     def get_resolution(self) -> float:
         ...
 
-    def transform_f_phi_to_map(self, sample_rate: float = 4.0, exact_size: Optional[Tuple[int,int,int]] = None) -> CrystallographicGridInterface:
+    def transform_f_phi_to_map(self, sample_rate: float = 4.0,
+                               exact_size: Optional[Tuple[int, int, int]] = None) -> CrystallographicGridInterface:
         ...
 
     def resolution(self) -> float:
@@ -199,9 +204,13 @@ class TransformInterface(Protocol):
 class AlignmentInterface(Protocol):
     transforms: Dict[ResidueIDInterface, TransformInterface]
 
+
 class EventInterface(Protocol):
     pos_array: np.array
+    point_array: np.array
     score: float
+    bdc: float
+
 
 class AutobuildInterface(Protocol):
     ...

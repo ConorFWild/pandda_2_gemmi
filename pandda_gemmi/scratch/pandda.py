@@ -32,7 +32,7 @@ from pandda_gemmi.scratch.event_model.characterization import get_characterizati
 from pandda_gemmi.scratch.event_model.outlier import PointwiseNormal
 from pandda_gemmi.scratch.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.scratch.event_model.score import ScoreCNN, get_model_map, ScoreCNNLigand
-from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, FilterScore, FilterLocallyHighestScoring
+from pandda_gemmi.scratch.event_model.filter import FilterSize, FilterCluster, FilterScore, FilterLocallyHighestScoring, FilterLocallyHighestLargest
 from pandda_gemmi.scratch.event_model.select import select_model
 from pandda_gemmi.scratch.event_model.output import output_models, output_events, output_maps
 
@@ -107,7 +107,9 @@ def process_model(
     # Filter the events post-scoring
     for filter in [
         FilterScore(0.30),
-        FilterLocallyHighestScoring(8.0),
+        # FilterLocallyHighestScoring(8.0),
+        FilterLocallyHighestLargest(8.0),
+
     ]:
         events = filter(events)
     print(f"After filter score: {len(events)}")
