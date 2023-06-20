@@ -173,6 +173,9 @@ def pandda(args: PanDDAArgs):
         # if dtag != "JMJD2DA-x427":
         #     continue
 
+        # if dtag != "JMJD2DA-x427":
+        #     continue
+
         # if dtag not in [
         #     "JMJD2DA-x427",
         #     "JMJD2DA-x379",
@@ -181,6 +184,12 @@ def pandda(args: PanDDAArgs):
         #     "JMJD2DA-x387"
         # ]:
         #     continue
+
+        if dtag not in [
+            "JMJD2DA-x427",
+            "JMJD2DA-x353"
+        ]:
+            continue
 
         time_begin_process_dataset = time.time()
 
