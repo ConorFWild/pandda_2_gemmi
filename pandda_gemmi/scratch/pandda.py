@@ -342,6 +342,8 @@ def pandda(args: PanDDAArgs):
                 models_to_process.append(model_number)
                 _l = _l + 1
 
+        print(f"Models to process: {models_to_process}")
+
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
@@ -376,6 +378,7 @@ def pandda(args: PanDDAArgs):
         # Select a model and the events to output event maps for and to autobuild
         # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
         selected_model_num, selected_events = select_model(model_events)
+        print(f"Selected model number: {selected_model_num}")
         selected_model_events = {(dtag, _event_idx): selected_events[_event_idx] for _event_idx in selected_events}
         top_selected_model_events = {
             event_id: selected_model_events[event_id]
