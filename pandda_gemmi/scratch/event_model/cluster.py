@@ -138,7 +138,7 @@ class ClusterDensityDBSCAN:
 
         # high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
         # high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > 2.0
-        cutoff = np.quantile(z, 0.9)
+        cutoff = np.quantile(z, 0.95)
         print(f"Cutoff is: {cutoff}")
         high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > cutoff
 

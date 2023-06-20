@@ -338,7 +338,7 @@ def pandda(args: PanDDAArgs):
         models_to_process = []
         _l = 0
         for model_number in sorted(model_scores, key=lambda _model_number: model_scores[_model_number]):
-            if (_l < 2) or (model_scores[model_number] < 0.2):
+            if (_l < 3) or (model_scores[model_number] < 0.2):
                 models_to_process.append(model_number)
                 _l = _l + 1
 
