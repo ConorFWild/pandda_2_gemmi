@@ -81,7 +81,7 @@ def process_model(
     events = ClusterDensityDBSCAN()(z, reference_frame)
     print(f"Initial events: {len(events)}")
     j = 0
-    for event in sorted(events.values(), key=lambda _event: _event.pos_array.size):
+    for event in sorted(events.values(), key=lambda _event: _event.pos_array.size, reverse=True):
         event_centroid_array = np.mean(event.pos_array, axis=0).flatten()
         print(f"\t\t\tEvent {j}: size: {event.pos_array.size}: centroid: {event_centroid_array[0]} {event_centroid_array[1]} {event_centroid_array[2]}")
         j += 1
