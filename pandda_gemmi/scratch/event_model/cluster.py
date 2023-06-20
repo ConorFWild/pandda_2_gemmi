@@ -137,7 +137,10 @@ class ClusterDensityDBSCAN:
         z_unmasked_array = np.array(z_grid, copy=False)
 
         # high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
-        high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > 2.0
+        # high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > 2.0
+        high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > np.quantile(z, 0.9)
+
+
         # high_z_indexes = z_unmasked_array[all_point_indexes_mod] > 2.0
         high_z_indexes = (
             all_point_indexes[0][high_z_all_points_mask],
