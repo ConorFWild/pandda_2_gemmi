@@ -80,6 +80,12 @@ def process_model(
     # Initial
     events = ClusterDensityDBSCAN()(z, reference_frame)
     print(f"Initial events: {len(events)}")
+    j = 0
+    for event in sorted(events.values(), key=lambda _event: _event.pos_array.size):
+        print(f"\t\t\tEvent {j}: size: {event.pos_array.size}")
+        j += 1
+        if j > 5:
+            break
 
     if len(events) == 0:
         return None, None, None
