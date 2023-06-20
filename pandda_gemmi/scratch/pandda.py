@@ -331,6 +331,7 @@ def pandda(args: PanDDAArgs):
             percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
             print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
             print(f"Model number: {model_number}: {np.min(std)} {np.mean(std)}  {np.max(std)} {np.std(std)}")
+            print(f"Model number: {np.quantile(z, (0.8, 0.85, 0.9, 0.95))}")
 
             model_scores[model_number] = percentage_z_2
 
