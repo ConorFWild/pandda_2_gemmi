@@ -273,6 +273,7 @@ def score_fit_nonquant_array(structure_array, grid, distance, params):
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
 
     vals[vals > 3.0] = 3.0
+    vals[vals < -3.0] = -3.0
 
     score = np.sum(vals)
 
