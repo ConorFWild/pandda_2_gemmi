@@ -151,7 +151,7 @@ def autobuild(
             ligand_files,
             ligand_autobuild_dir.resolve(),
         )
-        for path, score in autobuild_result.log_result_dict:
+        for path, score in autobuild_result.log_result_dict.items():
             rscc = calculate_rscc(
                 path,
                 dmap,
