@@ -38,7 +38,7 @@ from pandda_gemmi.site_model import HeirarchicalSiteModel, ClusterSites, Site, g
 
 from pandda_gemmi.autobuild import autobuild, AutobuildResult
 from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt
-from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestRSCC
+from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestRSCC, MergeHighestBuildScore
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
@@ -524,7 +524,8 @@ def pandda(args: PanDDAArgs):
         pandda_events,
         autobuilds,
         fs,
-        MergeHighestRSCC(),
+        # MergeHighestRSCC(),
+        MergeHighestBuildScore()
     )
 
     # Get the sites
