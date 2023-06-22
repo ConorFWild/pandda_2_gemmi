@@ -1,1 +1,18 @@
-from pandda_gemmi.fs.fs import PanDDAFSModel, ShellDirs, MeanMapFile, StdMapFile, ProcessedDataset, GetPanDDAFSModel, GetShellDirs, ShellResultFile, EventScoresFile, EventFile, ShellFile, DatasetFile
+import os
+
+from .pandda_fs import PanDDAFS
+from .pandda_input import PanDDAInput
+from .pandda_output import PanDDAOutput
+
+
+def try_make(path):
+    try:
+        os.mkdir(path)
+    except:
+        return
+
+def try_remove(path):
+    try:
+        os.remove(path)
+    except:
+        return

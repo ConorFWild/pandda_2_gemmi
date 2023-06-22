@@ -10,8 +10,8 @@ from rich.padding import Padding
 from rich.table import Table
 from rich.pretty import Pretty
 
-from pandda_gemmi.analyse_interface import *
-from pandda_gemmi import constants
+from pandda_gemmi.scratch.interfaces import *
+from pandda_gemmi.scratch import constants
 from pandda_gemmi.args import PanDDAArgs
 
 import subprocess
@@ -170,9 +170,9 @@ class PanDDAConsole:
             (0, 0, 0, indent)
         )
 
-    def summarise_fs_model(self, pandda_fs_model):
+    def summarise_fs_model(self, pandda_fs_model: PanDDAFSInterface):
         printable = self.indent_text(
-            f"Number of datasets found: {len(pandda_fs_model.processed_datasets.processed_datasets)}",
+            f"Number of datasets found: {len(pandda_fs_model.input.dataset_dirs)}",
         )
         self.console.print(printable)
 
@@ -184,50 +184,50 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_QUALITY_FILTERS)
         self.console.print(printable)
 
-    def start_reference_selection(self):
-        printable = self.wrap_title(constants.CONSOLE_START_REF_SELEC)
-        self.console.print(printable)
+    # def start_reference_selection(self):
+    #     printable = self.wrap_title(constants.CONSOLE_START_REF_SELEC)
+    #     self.console.print(printable)
+    #
+    # def summarise_reference(self, reference):
+    #     printable = self.indent_text(f"Reference dataset is: {str(reference.dtag)}")
+    #     self.console.print(printable)
+    #
+    #     st = reference.dataset.structure.structure.clone()
+    #     structure_poss = []
+    #     for model in st:
+    #         for chain in model:
+    #             for residue in chain:
+    #                 for atom in residue:
+    #                     pos = atom.pos
+    #                     structure_poss.append([pos.x, pos.y, pos.z])
+    #
+    #     pos_array = np.array(structure_poss)
+    #     min_pos = np.min(pos_array, axis=0)
+    #     max_pos = np.max(pos_array, axis=0)
+    #
+    #     printable = self.indent_text(f"Reference model min pos: {min_pos[0]} {min_pos[1]} {min_pos[2]}")
+    #     self.console.print(printable)
+    #
+    #     printable = self.indent_text(f"Reference model max pos: {max_pos[0]} {max_pos[1]} {max_pos[2]}")
+    #     self.console.print(printable)
 
-    def summarise_reference(self, reference):
-        printable = self.indent_text(f"Reference dataset is: {str(reference.dtag)}")
-        self.console.print(printable)
-
-        st = reference.dataset.structure.structure.clone()
-        structure_poss = []
-        for model in st:
-            for chain in model:
-                for residue in chain:
-                    for atom in residue:
-                        pos = atom.pos
-                        structure_poss.append([pos.x, pos.y, pos.z])
-
-        pos_array = np.array(structure_poss)
-        min_pos = np.min(pos_array, axis=0)
-        max_pos = np.max(pos_array, axis=0)
-
-        printable = self.indent_text(f"Reference model min pos: {min_pos[0]} {min_pos[1]} {min_pos[2]}")
-        self.console.print(printable)
-
-        printable = self.indent_text(f"Reference model max pos: {max_pos[0]} {max_pos[1]} {max_pos[2]}")
-        self.console.print(printable)
-
-    def start_b_factor_smoothing(self):
-        printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
-        self.console.print(printable)
-
-    def summarise_b_factor_smoothing(self, datasets: DatasetsInterface):
-        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-        event_class_table.title = "Smoothing Factors"
-        event_class_table.add_column("Dtag")
-        event_class_table.add_column("Smoothing Factor")
-
-        for dtag, dataset in datasets.items():
-            event_class_table.add_row(
-                str(dtag.dtag),
-                str(round(dataset.smoothing_factor, 2)),
-            )
-
-        self.console.print(event_class_table)
+    # def start_b_factor_smoothing(self):
+    #     printable = self.wrap_title(constants.CONSOLE_START_B_FACTOR_SMOOTHING)
+    #     self.console.print(printable)
+    #
+    # def summarise_b_factor_smoothing(self, datasets: Dict[str, DatasetInterface]):
+    #     event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+    #     event_class_table.title = "Smoothing Factors"
+    #     event_class_table.add_column("Dtag")
+    #     event_class_table.add_column("Smoothing Factor")
+    #
+    #     for dtag, dataset in datasets.items():
+    #         event_class_table.add_row(
+    #             str(dtag.dtag),
+    #             str(round(dataset.smoothing_factor, 2)),
+    #         )
+    #
+    #     self.console.print(event_class_table)
 
     def start_reference_comparability_filters(self):
         printable = self.wrap_title(constants.CONSOLE_START_REF_COMPAT_FILTERS)
@@ -237,7 +237,7 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_GET_GRID)
         self.console.print(printable)
 
-    def summarise_get_grid(self, grid: GridInterface):
+    def summarise_get_grid(self, grid):
         printable = self.indent_text(f"Got Grid. Paramaters are:")
         self.console.print(printable)
 
@@ -300,7 +300,7 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_PROCESS_SHELLS)
         self.console.print(printable)
 
-    def print_starting_process_shell(self, shell: ShellInterface):
+    def print_starting_process_shell(self, shell):
         printable = self.wrap_title("Processing Shell!")
         self.console.print(printable)
 
@@ -318,7 +318,7 @@ class PanDDAConsole:
         printable = self.wrap_title(f"Truncating shell datasets")
         self.console.print(printable)
 
-    def print_summarise_truncating_shells(self, shell_truncated_datasets: DatasetsInterface):
+    def print_summarise_truncating_shells(self, shell_truncated_datasets: Dict[str, DatasetInterface]):
         printable = self.indent_text(f"Truncated {len(shell_truncated_datasets)} datasets for processing...")
         self.console.print(printable)
 
@@ -326,7 +326,7 @@ class PanDDAConsole:
         printable = self.wrap_title(f"Loading xmaps")
         self.console.print(printable)
 
-    def print_summarise_loading_xmaps(self, xmaps: XmapsInterface, xmap_processing_time: float):
+    def print_summarise_loading_xmaps(self, xmaps, xmap_processing_time: float):
         printable = self.indent_text(f"Loaded {len(xmaps)} aligned XMaps in {xmap_processing_time}")
         self.console.print(printable)
 
@@ -334,7 +334,7 @@ class PanDDAConsole:
         printable = self.wrap_title(f"Getting models")
         self.console.print(printable)
 
-    def print_summarise_get_models(self, models: ModelsInterface, get_models_time: float):
+    def print_summarise_get_models(self, models, get_models_time: float):
         printable = self.indent_text(f"Got {len(models)} models in {get_models_time} seconds!")
         self.console.print(printable)
 
@@ -342,14 +342,14 @@ class PanDDAConsole:
         printable = self.wrap_title(f"Processing test datasets")
         self.console.print(printable)
 
-    def print_summarise_process_datasets(self, shell_result: ShellResultInterface):
+    def print_summarise_process_datasets(self, shell_result):
         print(f"\tProcessed test datasets!")
 
     def start_autobuilding(self):
         printable = self.wrap_title(constants.CONSOLE_START_AUTOBUILDING)
         self.console.print(printable)
 
-    def summarise_autobuilding(self, autobuild_results: AutobuildResultsInterface):
+    def summarise_autobuilding(self, autobuild_results):
         printable = self.indent_text(f"Autobuilt all event maps")
         self.console.print(printable)
 
@@ -418,7 +418,7 @@ class PanDDAConsole:
         printable = self.wrap_title(constants.CONSOLE_START_EVENT_CLASSIFICATION)
         self.console.print(printable)
 
-    def summarise_autobuilds(self, autobuild_results: AutobuildResultsInterface):
+    def summarise_autobuilds(self, autobuild_results):
         event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_class_table.title = "Autobuild Scores"
         event_class_table.add_column("Dtag")
@@ -450,42 +450,42 @@ class PanDDAConsole:
         printable = self.indent_text(f"Rescoring method is: {str(rescore_event_method)}")
         self.console.print(printable)
 
-    def summarise_rescoring(self, event_scores: EventScoresInterface):
-        printable = self.indent_text(f"Rescored events. Printing new event score table.")
-        self.console.print(printable)
+    # def summarise_rescoring(self, event_scores: EventScoresInterface):
+    #     printable = self.indent_text(f"Rescored events. Printing new event score table.")
+    #     self.console.print(printable)
+    #
+    #     event_table = Table(show_header=True, header_style="bold magenta", expand=True)
+    #     event_table.title = "Event Scores"
+    #     event_table.add_column("Dtag")
+    #     event_table.add_column("Event Number")
+    #     event_table.add_column("Event Score")
+    #
+    #     for event_id, event_score in event_scores.items():
+    #         event_table.add_row(
+    #             str(event_id.dtag.dtag),
+    #             str(event_id.event_idx.event_idx),
+    #             str(round(float(event_score), 2)),
+    #         )
+    #
+    #     self.console.print(event_table)
 
-        event_table = Table(show_header=True, header_style="bold magenta", expand=True)
-        event_table.title = "Event Scores"
-        event_table.add_column("Dtag")
-        event_table.add_column("Event Number")
-        event_table.add_column("Event Score")
+    # def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
+    #     event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
+    #     event_class_table.title = "Event Classifications"
+    #     event_class_table.add_column("Dtag")
+    #     event_class_table.add_column("Event Number")
+    #     event_class_table.add_column("Class")
+    #
+    #     for event_id, event_class in event_classifications.items():
+    #         event_class_table.add_row(
+    #             str(event_id.dtag.dtag),
+    #             str(event_id.event_idx.event_idx),
+    #             str(event_class),
+    #         )
+    #
+    #     self.console.print(event_class_table)
 
-        for event_id, event_score in event_scores.items():
-            event_table.add_row(
-                str(event_id.dtag.dtag),
-                str(event_id.event_idx.event_idx),
-                str(round(float(event_score), 2)),
-            )
-
-        self.console.print(event_table)
-
-    def summarise_event_classifications(self, event_classifications: EventClassificationsInterface):
-        event_class_table = Table(show_header=True, header_style="bold magenta", expand=True)
-        event_class_table.title = "Event Classifications"
-        event_class_table.add_column("Dtag")
-        event_class_table.add_column("Event Number")
-        event_class_table.add_column("Class")
-
-        for event_id, event_class in event_classifications.items():
-            event_class_table.add_row(
-                str(event_id.dtag.dtag),
-                str(event_id.event_idx.event_idx),
-                str(event_class),
-            )
-
-        self.console.print(event_class_table)
-
-    def summarise_datasets(self, datasets_initial, dataset_statistics, fs: PanDDAFSModelInterface):
+    def summarise_datasets(self, datasets_initial: Dict[str, DatasetInterface], fs: PanDDAFSInterface):
         # Statistics
         # printable = self.indent_text(
         #     f"Unit cell statistics"
@@ -497,15 +497,17 @@ class PanDDAConsole:
         unit_cell_table.title = "Unit Cell Statistics"
         unit_cell_table.add_column("Parameter")
         unit_cell_table.add_column("Min")
-        unit_cell_table.add_column("Max")
         unit_cell_table.add_column("Mean")
+        unit_cell_table.add_column("Max")
 
-        uca = dataset_statistics.unit_cells["a"]
-        ucb = dataset_statistics.unit_cells["b"]
-        ucc = dataset_statistics.unit_cells["c"]
-        ucalpha = dataset_statistics.unit_cells["alpha"]
-        ucbeta = dataset_statistics.unit_cells["beta"]
-        ucgamma = dataset_statistics.unit_cells["gamma"]
+        unit_cells = [dataset.structure.structure.cell for dataset in datasets_initial.values()]
+
+        uca = [uc.a for uc in unit_cells]
+        ucb = [uc.b for uc in unit_cells]
+        ucc = [uc.c for uc in unit_cells]
+        ucalpha = [uc.alpha for uc in unit_cells]
+        ucbeta = [uc.beta for uc in unit_cells]
+        ucgamma = [uc.gamma for uc in unit_cells]
         unit_cell_table.add_row("a", str(round(np.min(uca), 2)), str(round(np.mean(uca), 2)),
                                 str(round(np.max(uca), 2)))
         unit_cell_table.add_row("b", str(round(np.min(ucb), 2)), str(round(np.mean(ucb), 2)),
@@ -522,7 +524,7 @@ class PanDDAConsole:
         self.console.print(unit_cell_table)
 
         # Resolutions
-        ress = dataset_statistics.resolutions
+        ress = [dataset.reflections.resolution() for dataset in datasets_initial.values()]
 
         resolution_table = Table(show_header=True, header_style="bold magenta", expand=True)
         resolution_table.title = "Resolutions"
@@ -540,7 +542,10 @@ class PanDDAConsole:
         sgtable.title = "Spacegroups"
         sgtable.add_column("Spacegroup")
         sgtable.add_column("Count")
-        values, counts = np.unique(dataset_statistics.spacegroups, return_counts=True)
+
+        sgs = [dataset.structure.structure.spacegroup_hm for dataset in datasets_initial.values()]
+
+        values, counts = np.unique(sgs, return_counts=True)
         for sg, count in zip(values, counts):
             sgtable.add_row(sg, str(count))
 
@@ -551,7 +556,15 @@ class PanDDAConsole:
         chain_table.title = "Chains"
         chain_table.add_column("Chains")
         chain_table.add_column("Count")
-        values, counts = np.unique([" ".join(chains) for chains in dataset_statistics.chains], return_counts=True)
+
+        chains = []
+        for dataset in datasets_initial.values():
+            _chains = []
+            for model in dataset.structure.structure:
+                for chain in model:
+                    _chains.append(chain.name)
+
+        values, counts = np.unique([" ".join(chains) for chains in chains], return_counts=True)
         for chains, count in zip(values, counts):
             chain_table.add_row(chains, str(count))
         self.console.print(chain_table)
@@ -569,22 +582,31 @@ class PanDDAConsole:
 
 
         # Rows
-        for dtag in sorted(datasets_initial, key=lambda x: x.dtag):
+        for dtag in sorted(datasets_initial, key=lambda x: x):
             dataset = datasets_initial[dtag]
             has_smiles = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_smiles.exists():
-                has_smiles = True
+            for ligand_key, ligand_files in dataset.ligand_files.items():
+                if ligand_files.ligand_smiles:
+                    has_smiles = True
+            # if fs.processed_datasets.processed_datasets[dtag].input_ligand_smiles.exists():
+            #     has_smiles = True
 
             has_cif = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_cif.exists():
-                has_cif = True
+            for ligand_key, ligand_files in dataset.ligand_files.items():
+                if ligand_files.ligand_cif:
+                    has_cif = True
+            # if fs.processed_datasets.processed_datasets[dtag].input_ligand_cif.exists():
+            #     has_cif = True
 
             has_pdb = False
-            if fs.processed_datasets.processed_datasets[dtag].input_ligand_pdb.exists():
-                has_pdb = True
+            for ligand_key, ligand_files in dataset.ligand_files.items():
+                if ligand_files.ligand_pdb:
+                    has_pdb = True
+            # if fs.processed_datasets.processed_datasets[dtag].input_ligand_pdb.exists():
+            #     has_pdb = True
 
             table.add_row(
-                dtag.dtag,
+                dtag,
                 str(round(dataset.reflections.reflections.resolution_high(), 2)),
                 dataset.reflections.reflections.spacegroup.hm,
                 str(has_smiles),
@@ -609,9 +631,9 @@ class PanDDAConsole:
         self.console.print(printable)
 
     def summarise_shells(self,
-                         shell_results: ShellResultsInterface,
-                         events: EventsInterface,
-                         event_scores: EventScoresInterface,
+                         shell_results,
+                         events,
+                         event_scores,
                          ):
         event_table = Table(show_header=True, header_style="bold magenta", expand=True)
         event_table.title = "Shell Events"
@@ -660,7 +682,7 @@ class PanDDAConsole:
 
         self.console.print(event_class_table)
 
-    def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[DtagInterface]]):
+    def summarise_filtered_datasets(self, filtered_dtags: Dict[str, List[str]]):
         for filter_key, filtered in filtered_dtags.items():
             self.console.print(f"Filtered with {filter_key}: {filtered}")
 
