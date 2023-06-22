@@ -9,7 +9,7 @@ class RankHighBuildScore:
     ):
         highest_event_build_scores = {}
         for event_id in events:
-            if not event_id in autobuilds[event_id]:
+            if event_id not in autobuilds[event_id]:
                 highest_event_build_scores[event_id] = 0.0
                 continue
 
