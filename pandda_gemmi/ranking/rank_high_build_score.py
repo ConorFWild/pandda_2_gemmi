@@ -33,6 +33,8 @@ class RankHighBuildScore:
 
             highest_event_build_scores[event_id] = max(ligand_build_scores)
 
+
+
         sorted_event_ids = []
         for event_id in sorted(
                 highest_event_build_scores,
@@ -40,5 +42,6 @@ class RankHighBuildScore:
                 reverse=True,
         ):
             sorted_event_ids.append(event_id)
+            print(f"\t{event_id[0]} : {event_id[1]} : {highest_event_build_scores[event_id]}")
 
         return sorted_event_ids
