@@ -213,4 +213,5 @@ class EventInterface(Protocol):
 
 
 class AutobuildInterface(Protocol):
+    log_result_dict: Dict[str, float]
     ...

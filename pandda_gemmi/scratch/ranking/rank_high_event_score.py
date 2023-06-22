@@ -1,7 +1,7 @@
 from ..interfaces import *
 
 
-class RankHighScore:
+class RankHighEventScore:
     def __call__(
             self,
             events: Dict[Tuple[str, int], EventInterface],

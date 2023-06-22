@@ -48,6 +48,7 @@ def merge_autobuilds(
 ):
     all_dtags = list(set([event_id[0] for event_id in autobuilds]))
 
+    merged_build_scores = {}
     for dtag in all_dtags:
         dataset = datasets[dtag]
         dtag_events = [event_id for event_id in events if event_id[0] == dtag]
@@ -80,6 +81,9 @@ def merge_autobuilds(
             selected_build_path,
             model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag),
         )
+        merged_build_scores[dtag] = all_autobuilds[selected_build_path]
+
+    return merged_build_scores
 
 
 class MergeHighestRSCC:
