@@ -6,7 +6,7 @@ import pandas as pd
 
 
 from ..interfaces import *
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 
 
 @dataclasses.dataclass()

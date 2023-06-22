@@ -1,6 +1,6 @@
 import gemmi
 
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 from ..interfaces import *
 
 

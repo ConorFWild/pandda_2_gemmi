@@ -1,4 +1,4 @@
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 
 from .site_table import SiteTable
 from .event_table import EventTable

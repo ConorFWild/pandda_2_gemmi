@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 
 
 def get_input_pdb_file(path, pdb_regex):

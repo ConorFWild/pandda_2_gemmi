@@ -4,7 +4,7 @@ import subprocess
 import inspect
 from pathlib import Path
 
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 from .autobuild import AutobuildResult
 from ..fs import try_remove
 

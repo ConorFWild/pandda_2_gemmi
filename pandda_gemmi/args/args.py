@@ -5,7 +5,7 @@ from pathlib import Path
 from distutils.util import strtobool
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import *
+from pandda_gemmi.interfaces import *
 
 
 @dataclasses.dataclass()
@@ -91,7 +91,7 @@ class PanDDAArgs:
     cif_strategy: str = constants.ARGS_CIF_STRATEGY_DEFAULT
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
     rescore_event_method: str = constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT
-    debug: Debug = Debug.DEFAULT
+    # debug: Debug = Debug.DEFAULT
 
 
     @staticmethod
@@ -622,19 +622,19 @@ class PanDDAArgs:
         )
 
         # Debug
-        def debug_mapping(integer):
-            for debug_level in Debug:
-                if integer == debug_level:
-                    return debug_level
+        # def debug_mapping(integer):
+        #     for debug_level in Debug:
+        #         if integer == debug_level:
+        #             return debug_level
+        #
+        #     raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
 
-            raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
-
-        parser.add_argument(
-            constants.ARGS_DEBUG,
-            type=lambda x: debug_mapping(int(x)),
-            default=Debug.DEFAULT,
-            help=constants.ARGS_DEBUG_HELP,
-        )
+        # parser.add_argument(
+        #     constants.ARGS_DEBUG,
+        #     type=lambda x: debug_mapping(int(x)),
+        #     default=Debug.DEFAULT,
+        #     help=constants.ARGS_DEBUG_HELP,
+        # )
 
         args = parser.parse_args()
 
@@ -720,5 +720,5 @@ class PanDDAArgs:
             rhofit_coord=args.rhofit_coord,
             cif_strategy=args.cif_strategy,
             rank_method=args.rank_method,
-            debug=args.debug,
+            # debug=args.debug,
         )

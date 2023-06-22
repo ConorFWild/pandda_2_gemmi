@@ -1,6 +1,9 @@
 import os
 
-from pandda_gemmi.scratch import constants
+import gemmi
+import numpy as np
+
+from pandda_gemmi import constants
 from ..interfaces import *
 
 from ..fs import try_make
@@ -24,6 +27,64 @@ class AutobuildResult:
         self.cif_path = cif_path
         self.out_dir = out_dir
 
+def get_predicted_density(st, template_xmap, res):
+    st.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    st.cell = template_xmap.unit_cell
+    dencalc = gemmi.DensityCalculatorX()
+    dencalc.d_min = 0.5
+    dencalc.rate = 1
+    dencalc.set_grid_cell_and_spacegroup(st)
+    dencalc.put_model_density_on_grid(st[0])
+
+    # Get the SFs at the right res
+    sf = gemmi.transform_map_to_f_phi(dencalc.grid, half_l=True)
+    data = sf.prepare_asu_data(dmin=res)
+
+    # Get the grid oversampled to the right size
+    approximate_structure_map = data.transform_f_phi_to_map(exact_size=[template_xmap.nu, template_xmap.nv, template_xmap.nw])
+
+    return approximate_structure_map
+
+def calculate_rscc(
+        structure_path,
+        xmap,
+        res
+):
+    mask = gemmi.Int8Grid(xmap.nu, xmap.nv, xmap.nw)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(xmap.unit_cell)
+
+    # Get the mask
+    st = gemmi.read_stucture(structure_path)
+    for model in st:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    pos = atom.pos
+                    mask.set_points_around(
+                        pos,
+                        radius=1.5,
+                        value=1,
+                    )
+    mask_array = np.array(mask, copy=False)
+    mask_indicies = np.nonzero(mask_array)
+
+    # Get masked predicted ligand density
+    predicted_density = get_predicted_density(st, xmap, res)
+    predicted_density_array = np.array(predicted_density, copy=False)
+    masked_predicted_values = predicted_density_array[mask_indicies]
+
+    # Get masked xmap
+    xmap_array = np.array(xmap, copy=False,)
+    masked_xmap_values = xmap_array[mask_indicies]
+
+    xmap_mean = np.mean(masked_xmap_values)
+    predicted_mean = np.mean(masked_predicted_values)
+    cov = (np.sum((masked_xmap_values-xmap_mean)*(masked_predicted_values-predicted_mean)))*(1/masked_xmap_values.size)
+
+    rscc = cov / np.sqrt(np.var(masked_xmap_values)*np.var(masked_predicted_values))
+
+    return rscc
 
 def autobuild(
         event_id,
@@ -78,7 +139,7 @@ def autobuild(
         ligand_autobuild_dir = autobuild_dir / ligand_key
         try_make(ligand_autobuild_dir)
 
-        autobuild_result = method(
+        autobuild_result: AutobuildInterface = method(
             event,
             dataset,
             processed_dmap_path.resolve(),
@@ -90,6 +151,14 @@ def autobuild(
             ligand_files,
             ligand_autobuild_dir.resolve(),
         )
+        for path, score in autobuild_result.log_result_dict:
+            rscc = calculate_rscc(
+                path,
+                dmap,
+                dataset.reflections.resolution()
+            )
+            autobuild_result.log_result_dict[path] = rscc
+
         autobuild_results[ligand_key] = autobuild_result
 
     # Remove large temporaries

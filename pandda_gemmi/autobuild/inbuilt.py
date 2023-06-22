@@ -8,7 +8,7 @@ import joblib
 import scipy
 from scipy import spatial as spsp, optimize
 
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 from ..interfaces import *
 
 from ..fs import try_make
@@ -408,6 +408,7 @@ def get_score_grid(dmap, st):
     dmap_array[structure_mask_indicies] = 0.0
 
     return dmap
+
 
 
 class AutobuildInbuilt:

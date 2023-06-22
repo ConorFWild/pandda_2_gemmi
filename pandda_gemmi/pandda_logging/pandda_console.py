@@ -10,8 +10,8 @@ from rich.padding import Padding
 from rich.table import Table
 from rich.pretty import Pretty
 
-from pandda_gemmi.scratch.interfaces import *
-from pandda_gemmi.scratch import constants
+from pandda_gemmi.interfaces import *
+from pandda_gemmi import constants
 from pandda_gemmi.args import PanDDAArgs
 
 import subprocess

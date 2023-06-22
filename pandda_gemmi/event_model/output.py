@@ -9,7 +9,7 @@ import seaborn as sns
 import gemmi
 
 from ..interfaces import *
-from pandda_gemmi.scratch import constants
+from pandda_gemmi import constants
 from ..dmaps import SparseDMap, save_dmap
 
 
