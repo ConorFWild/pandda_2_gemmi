@@ -443,7 +443,24 @@ def pandda(args: PanDDAArgs):
 
     time_autobuild_begin = time.time()
 
-    best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+    # best_event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+    #     {
+    #         _event_id: Partial(autobuild).paramaterise(
+    #             _event_id,
+    #             dataset_refs[_event_id[0]],
+    #             pandda_events[_event_id],
+    #             AutobuildPreprocessStructure(),
+    #             AutobuildPreprocessDMap(),
+    #             # Rhofit(cut=1.0),
+    #             AutobuildInbuilt(),
+    #             fs_ref
+    #         )
+    #         for _event_id
+    #         in best_events
+    #     }
+    # )
+
+    event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
         {
             _event_id: Partial(autobuild).paramaterise(
                 _event_id,
@@ -456,7 +473,7 @@ def pandda(args: PanDDAArgs):
                 fs_ref
             )
             for _event_id
-            in best_events
+            in pandda_events
         }
     )
 
@@ -480,15 +497,25 @@ def pandda(args: PanDDAArgs):
     time_autobuild_finish = time.time()
     print(f"Autobuilt in: {time_autobuild_finish-time_autobuild_begin}")
 
+    # autobuilds = {}
+    # for _event_id in pandda_events:
+    #     if _event_id in best_event_autobuilds:
+    #         autobuilds[_event_id] = best_event_autobuilds[_event_id]
+    #     else:
+    #         autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
+    #                                  datasets[_event_id[0]].ligand_files}
+    # time_finish_autobuild = time.time()
+    # print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
+
     autobuilds = {}
     for _event_id in pandda_events:
-        if _event_id in best_event_autobuilds:
-            autobuilds[_event_id] = best_event_autobuilds[_event_id]
+        if _event_id in event_autobuilds:
+            autobuilds[_event_id] = event_autobuilds[_event_id]
         else:
             autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
                                      datasets[_event_id[0]].ligand_files}
     time_finish_autobuild = time.time()
-    print(f"Autobuilt {len(best_event_autobuilds)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
+    print(f"Autobuilt {len(pandda_events)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
     # console.summarise_autobuilding(autobuild_results)
 
     # Merge the autobuilds
