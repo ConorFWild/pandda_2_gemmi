@@ -55,7 +55,7 @@ def calculate_rscc(
     mask.set_unit_cell(xmap.unit_cell)
 
     # Get the mask
-    st = gemmi.read_stucture(structure_path)
+    st = gemmi.read_structure(structure_path)
     for model in st:
         for chain in model:
             for residue in chain:
