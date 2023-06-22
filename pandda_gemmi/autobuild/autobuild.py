@@ -152,16 +152,16 @@ def autobuild(
             ligand_files,
             ligand_autobuild_dir.resolve(),
         )
-        for path, score in autobuild_result.log_result_dict.items():
-            rscc = calculate_rscc(
-                path,
-                dmap,
-                dataset.reflections.resolution()
-            )
-            autobuild_result.log_result_dict[path] = rscc
-            print(f"{path}: {rscc}")
-
-        autobuild_results[ligand_key] = autobuild_result
+        # for path, score in autobuild_result.log_result_dict.items():
+        #     rscc = calculate_rscc(
+        #         path,
+        #         dmap,
+        #         dataset.reflections.resolution()
+        #     )
+        #     autobuild_result.log_result_dict[path] = rscc
+        #     print(f"{path}: {rscc}")
+        #
+        # autobuild_results[ligand_key] = autobuild_result
 
     # Remove large temporaries
     os.remove(processed_structure_path)

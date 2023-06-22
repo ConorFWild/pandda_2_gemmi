@@ -89,3 +89,7 @@ def merge_autobuilds(
 class MergeHighestRSCC:
     def __call__(self, autobuilds: Dict[str, float]):
         return max(autobuilds, key=lambda _path: autobuilds[_path])
+
+class MergeHighestBuildScore:
+    def __call__(self, autobuilds: Dict[str, float]):
+        return max(autobuilds, key=lambda _path: -autobuilds[_path])
