@@ -53,7 +53,7 @@ def merge_autobuilds(
         dataset = datasets[dtag]
         dtag_events = [event_id for event_id in events if event_id[0] == dtag]
         dtag_autobuilds = [autobuilds[event_id] for event_id in dtag_events]
-        print(dtag_autobuilds)
+        # print(dtag_autobuilds)
 
         #
         all_autobuilds = {}

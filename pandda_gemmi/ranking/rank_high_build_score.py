@@ -11,6 +11,8 @@ class RankHighBuildScore:
         for event_id in events:
             if event_id not in autobuilds[event_id]:
                 highest_event_build_scores[event_id] = 0.0
+                print(f"\t\tNo autobuild for {event_id}")
+
                 continue
 
             event_autobuilds = autobuilds[event_id]
@@ -29,6 +31,7 @@ class RankHighBuildScore:
 
             if len(ligand_build_scores) == 0:
                 highest_event_build_scores[event_id] = 0.0
+                print(f"\t\tNo ligand builds for {event_id}")
                 continue
 
             highest_event_build_scores[event_id] = max(ligand_build_scores)
