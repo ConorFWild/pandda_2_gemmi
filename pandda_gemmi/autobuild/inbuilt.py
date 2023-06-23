@@ -437,7 +437,8 @@ class AutobuildInbuilt:
     ):
 
         # Get the structure
-        st = Structure.from_path(model_path)
+        # st = Structure.from_path(model_path)
+        st = dataset.structure
 
         # Get the scoring grid
         dmap = load_dmap(dmap_path)
