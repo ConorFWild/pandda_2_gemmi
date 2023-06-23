@@ -395,7 +395,7 @@ def get_score_grid(dmap, st, event: EventInterface):
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
-    ns = gemmi.NeighborSearch(st[0], st.cell, 10).populate(include_h=False)
+    ns = gemmi.NeighborSearch(st.structure[0], st.cell, 10).populate(include_h=False)
 
     centroid = np.mean(event.pos_array, axis=0)
 
