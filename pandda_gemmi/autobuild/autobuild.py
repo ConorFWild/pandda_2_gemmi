@@ -161,7 +161,7 @@ def autobuild(
         #     autobuild_result.log_result_dict[path] = rscc
         #     print(f"{path}: {rscc}")
         #
-        # autobuild_results[ligand_key] = autobuild_result
+        autobuild_results[ligand_key] = autobuild_result
 
     # Remove large temporaries
     os.remove(processed_structure_path)
