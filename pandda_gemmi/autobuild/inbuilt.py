@@ -409,7 +409,7 @@ def get_score_grid(dmap, st):
     # non_zero_dmap_array = d
     # print(f"")
     structure_mask_indicies = np.nonzero(inner_mask_grid_array)
-    # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
+    print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
     dmap_array[structure_mask_indicies] = 0.0
 
     return dmap
