@@ -402,10 +402,14 @@ def get_score_grid(dmap, st):
                                           value=1,
                                           )
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+    # print(inner_mask_grid_array.size)
 
     # Zero out density overlapping the protein
     dmap_array = np.array(dmap, copy=False)
+    # non_zero_dmap_array = d
+    # print(f"")
     structure_mask_indicies = np.nonzero(inner_mask_grid_array)
+    # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
     dmap_array[structure_mask_indicies] = 0.0
 
     return dmap
@@ -434,6 +438,8 @@ class AutobuildInbuilt:
         # Get the scoring grid
         dmap = load_dmap(dmap_path)
         score_grid = get_score_grid(dmap, st)
+
+        save_dmap(score_grid, out_dir / "score_grid.ccp4")
 
         # ligand_scoring_results = {}
         # for ligand_key, ligand_files in dataset.ligand_files.items():
