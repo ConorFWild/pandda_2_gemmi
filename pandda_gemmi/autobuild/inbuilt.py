@@ -231,7 +231,6 @@ def get_interpolated_values_c(
 ):
     vals = np.zeros(n, dtype=np.float32)
 
-
     # vals_list = \
     gemmi.interpolate_pos_array(
         grid,
@@ -340,7 +339,6 @@ def score_conformer(
     scores = []
     optimised_structures = []
 
-
     for j in range(event_fit_num_trys):
         print(f"\t\t\t\tOptimizing round {j}")
 
@@ -358,7 +356,6 @@ def score_conformer(
             # popsize=30,
         )
         print(f"\t\t\t\t\tFinished Optimizing round {j}")
-
 
         scores.append(res.fun)
 
@@ -395,12 +392,12 @@ def get_score_grid(dmap, st, event: EventInterface):
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
-    ns = gemmi.NeighborSearch(st.structure[0], st.structure.cell, 10).populate(include_h=False)
+    ns = gemmi.NeighborSearch(st.structure[0], st.structure.cell, 12).populate(include_h=False)
 
     centroid = np.mean(event.pos_array, axis=0)
 
     centoid_pos = gemmi.Position(*centroid)
-    marks = ns.find_atoms(centoid_pos, '\0', radius=9)
+    marks = ns.find_atoms(centoid_pos, '\0', radius=11)
 
     for mark in marks:
         cra = mark.to_cra(st.structure[0])
@@ -409,10 +406,11 @@ def get_score_grid(dmap, st, event: EventInterface):
             # mark_pos = mark.pos
             # pos = gemmi.Position(mark_pos.x, mark_pos.y, mark_pos.z)
             pos = gemmi.Position(mark.x, mark.y, mark.z)
-            inner_mask_grid.set_points_around(pos,
-                                              radius=1.5,
-                                              value=1,
-                                              )
+            inner_mask_grid.set_points_around(
+                pos,
+                radius=1.5,
+                value=1,
+            )
     # #
     # for model in st.structure:
     #     for chain in model:
@@ -424,8 +422,6 @@ def get_score_grid(dmap, st, event: EventInterface):
     #                                                       radius=1.5,
     #                                                       value=1,
     #                                                       )
-
-
 
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
     # print(inner_mask_grid_array.size)
@@ -439,7 +435,6 @@ def get_score_grid(dmap, st, event: EventInterface):
     dmap_array[structure_mask_indicies] = 0.0
 
     return dmap
-
 
 
 class AutobuildInbuilt:
