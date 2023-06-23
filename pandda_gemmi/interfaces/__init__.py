@@ -80,6 +80,7 @@ class StructureFactorsInterface(Protocol):
 
 class StructureInterface(Protocol):
     structure: Any
+    path: Path
 
     def protein_atoms(self):
         ...
