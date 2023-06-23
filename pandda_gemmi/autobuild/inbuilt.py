@@ -389,22 +389,42 @@ def score_conformer(
     return best_optimised_structure, float(best_score_fit_score)
 
 
-def get_score_grid(dmap, st):
+def get_score_grid(dmap, st, event: EventInterface):
     # Get a mask of the protein
     inner_mask_grid = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
-    for model in st.structure:
-        for chain in model:
-            for residue in chain:
-                if residue.name in constants.RESIDUE_NAMES:
-                    for atom in residue:
-                        pos = atom.pos
-                        inner_mask_grid.set_points_around(pos,
-                                                          radius=1.5,
-                                                          value=1,
-                                                          )
+    ns = gemmi.NeighborSearch(st[0], st.cell, 10).populate(include_h=False)
+
+    centroid = np.mean(event.pos_array, axis=0)
+
+    centoid_pos = gemmi.Position(*centroid)
+    marks = ns.find_atoms(centoid_pos, '\0', radius=9)
+
+    for mark in marks:
+        cra = mark.to_cra(st[0])
+        residue = cra.residue
+        if residue.name in constants.RESIDUE_NAMES:
+            pos = mark.pos
+            inner_mask_grid.set_points_around(pos,
+                                              radius=1.5,
+                                              value=1,
+                                              )
+    # #
+    # for model in st.structure:
+    #     for chain in model:
+    #         for residue in chain:
+    #             if residue.name in constants.RESIDUE_NAMES:
+    #                 for atom in residue:
+    #                     pos = atom.pos
+    #                     inner_mask_grid.set_points_around(pos,
+    #                                                       radius=1.5,
+    #                                                       value=1,
+    #                                                       )
+
+
+
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
     # print(inner_mask_grid_array.size)
 
@@ -443,7 +463,7 @@ class AutobuildInbuilt:
 
         # Get the scoring grid
         dmap = load_dmap(dmap_path)
-        score_grid = get_score_grid(dmap, st)
+        score_grid = get_score_grid(dmap, st, event)
 
         save_dmap(score_grid, out_dir / "score_grid.ccp4")
 
