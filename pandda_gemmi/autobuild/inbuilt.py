@@ -395,12 +395,16 @@ def get_score_grid(dmap, st):
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
-    for atom in st.protein_atoms():
-        pos = atom.pos
-        inner_mask_grid.set_points_around(pos,
-                                          radius=1.5,
-                                          value=1,
-                                          )
+    for model in st.structure:
+        for chain in model:
+            for residue in chain:
+                if residue.name in constants.RESIDUE_NAMES:
+                    for atom in residue:
+                        pos = atom.pos
+                        inner_mask_grid.set_points_around(pos,
+                                                          radius=1.5,
+                                                          value=1,
+                                                          )
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
     # print(inner_mask_grid_array.size)
 
