@@ -406,7 +406,8 @@ def get_score_grid(dmap, st, event: EventInterface):
         cra = mark.to_cra(st.structure[0])
         residue = cra.residue
         if residue.name in constants.RESIDUE_NAMES:
-            pos = mark.pos
+            mark_pos = mark.pos
+            pos = gemmi.Position(mark_pos.x, mark_pos.y, mark_pos.z)
             inner_mask_grid.set_points_around(pos,
                                               radius=1.5,
                                               value=1,
