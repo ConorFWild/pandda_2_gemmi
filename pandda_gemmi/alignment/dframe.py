@@ -333,6 +333,14 @@ class PointPositionArray(PointPositionArrayInterface):
             offset_cart
         )
 
+        # Get the outer, inner and inner atomic masks
+
+        # TODO: Get the mask of non-unit cell translation symmetries (handled elsewhere) and subtract from all masks
+        # Get mask of symmetry points in native unit cell
+
+        # Shift to new unit cell
+
+
         # Outer mask
         outer_mask = gemmi.Int8Grid(*shape)
         outer_mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -346,6 +354,8 @@ class PointPositionArray(PointPositionArrayInterface):
                 value=1,
             )
         outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
+        # TODO: mask out non-translation symmetry points
+
         outer_indicies = np.nonzero(outer_mask_array)
         outer_indicies_native = (
             np.mod(outer_indicies[0] + u0, grid.nu),
@@ -374,6 +384,8 @@ class PointPositionArray(PointPositionArrayInterface):
                 value=1,
             )
         inner_mask_array = np.array(inner_mask, copy=False, dtype=np.int8)
+        # TODO: mask out non-translation symmetry points
+
         inner_indicies = np.nonzero(inner_mask_array)
         inner_indicies_native = (
             np.mod(inner_indicies[0] + u0, grid.nu),
@@ -404,6 +416,8 @@ class PointPositionArray(PointPositionArrayInterface):
                 value=1,
             )
         inner_atomic_mask_array = np.array(inner_atomic_mask, copy=False, dtype=np.int8)
+        # TODO: mask out non-translation symmetry points
+
         inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
         inner_atomic_indicies_native = (
             np.mod(inner_atomic_indicies[0] + u0, grid.nu),
@@ -431,13 +445,12 @@ class PointPositionArray(PointPositionArrayInterface):
             "atomic_sparse": sparse_inner_atomic_indicies
         }
 
-        # Get the grid points in the mask
+        # Get the grid points (real space, not modulus!) in the mask
         shifted_grid_point_indicies = tuple(
             (grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j]).flatten()
             for _j
             in (0, 1, 2)
         )
-
         grid_point_indicies_mask = outer_mask_array[shifted_grid_point_indicies] == 1
 
         grid_point_array = np.vstack(
@@ -486,12 +499,18 @@ class GridPartitioning(GridPartitioningInterface):
         # Get the tree
         kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
 
-        # Get the point array
+        # Get the pointposition array
         point_position_array, all_indicies = PointPositionArray.from_structure(dataset.structure, grid, processor)
 
         # Get the NN indexes
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
 
+        # Deal with unit cell translation symmetry duplicated indicies
+        # TODO: Get grid space duplicate indicies i.e. ones for which the unit cell modulus is the same
+        # TODO: and mask the one that is further from its respective CA
+
+
+        # Construct the partition
         partitions = {
             ResidueID(
                 ca_point_position_array.models[index],
@@ -519,6 +538,7 @@ class GridMask(GridMaskInterface):
 
     @classmethod
     def from_dataset(cls, dataset: DatasetInterface, grid, mask_radius=6.0, mask_radius_inner=2.0):
+
         mask = gemmi.Int8Grid(*[grid.nu, grid.nv, grid.nw])
         mask.spacegroup = gemmi.find_spacegroup_by_name("P 1")
         mask.set_unit_cell(grid.unit_cell)

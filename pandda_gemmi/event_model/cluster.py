@@ -93,6 +93,8 @@ class ClusterDensityDBSCAN:
 
         z_grid = reference_frame.unmask(SparseDMap(z))
 
+        # Get the points and their respective positions associated with each CA
+        # Points are in real space, i.e. not modulus
         point_array = np.vstack(
             [partition.points for resid, partition in reference_frame.partitioning.partitions.items()]) % np.array(
             reference_frame.spacing)
@@ -103,20 +105,27 @@ class ClusterDensityDBSCAN:
         all_points_array = point_array
         all_positions_array = position_array
 
+        # Get the minimum and maximum points
         min_point = np.min(all_points_array, axis=0).astype(np.int)
         max_point = np.max(all_points_array, axis=0).astype(np.int)
 
+        # Get the points relative to the minimum point
         all_point_indexes = (
             all_points_array[:, 0] - min_point[0],
             all_points_array[:, 1] - min_point[1],
             all_points_array[:, 2] - min_point[2],)
+
+        # Get the points modulused
         all_point_indexes_mod = (
             np.mod(all_points_array[:, 0], reference_frame.spacing[0]),
             np.mod(all_points_array[:, 1], reference_frame.spacing[1]),
             np.mod(all_points_array[:, 2], reference_frame.spacing[2]),
         )
 
+        # Get the shape of the box contiaining the points
         shape = [(max_point[_j] - min_point[_j])+1 for _j in (0,1,2)]
+
+        # Define three 3d arrays with the x, y and z of the point coordinates
         point_3d_array_x = np.zeros((shape[0], shape[1], shape[2]), )
         point_3d_array_y = np.zeros((shape[0], shape[1], shape[2]), )
         point_3d_array_z = np.zeros((shape[0], shape[1], shape[2]), )
@@ -125,17 +134,20 @@ class ClusterDensityDBSCAN:
         point_3d_array_y[all_point_indexes] = all_points_array[:, 1]
         point_3d_array_z[all_point_indexes] = all_points_array[:, 2]
 
+        # Same for positions
         pos_3d_arr_x = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_y = np.zeros((shape[0], shape[1], shape[2]))
         pos_3d_arr_z = np.zeros((shape[0], shape[1], shape[2]))
-
 
         pos_3d_arr_x[all_point_indexes] = all_positions_array[:, 0]
         pos_3d_arr_y[all_point_indexes] = all_positions_array[:, 1]
         pos_3d_arr_z[all_point_indexes] = all_positions_array[:, 2]
 
+        # Get the z grid as an array
         z_unmasked_array = np.array(z_grid, copy=False)
 
+
+        # Get the high z values mask
         # high_z_indexes = np.nonzero(z_unmasked_array > 2.0)
         # high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > 2.0
         # cutoff = max(np.quantile(z, 0.95), 2.0)
@@ -145,6 +157,7 @@ class ClusterDensityDBSCAN:
         high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > cutoff
 
 
+        # Get the indicies of high z values in real space i.e. not modulused
         # high_z_indexes = z_unmasked_array[all_point_indexes_mod] > 2.0
         high_z_indexes = (
             all_point_indexes[0][high_z_all_points_mask],
