@@ -528,6 +528,13 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
 
     # Get the array of symmetry positions and transform to homogenous coordinates
     st_array = structure_array.positions.T
+    st_array_homogeous = np.concatenate(
+        [
+            st_array,
+            np.zeros((st_array.shape[0], 1)) + 1
+        ],
+        axis=1
+    )
 
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
@@ -552,7 +559,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     symatoms_list = []
     for symop in symops:
         symatoms_list.append(
-            np.matmul(symop, st_array).T
+            np.matmul(symop, st_array_homogeous).T
         )
 
     # Concatenate the symmetry images
