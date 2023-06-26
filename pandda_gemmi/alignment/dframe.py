@@ -535,6 +535,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
         ],
         axis=1
     )
+    print(f"Structure array homogeous shape: {st_array_homogeous}")
 
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
@@ -554,6 +555,8 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
             # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
             # transmat =
             # ...
+
+    print(f"Symmatrix shape: {symops[0].shape}")
 
     # Generate each symmetry image of the structure array
     symatoms_list = []
