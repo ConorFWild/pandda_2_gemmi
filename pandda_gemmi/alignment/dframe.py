@@ -641,6 +641,9 @@ class GridPartitioning(GridPartitioningInterface):
         # Get the NN indexes
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
 
+
+
+        print(f"Got {indexes.shape} points associated with any atoms")
         print(f"Got {indexes[indexes >= ca_point_position_array.positions.shape[0]].shape} points associated with symmetry atoms")
 
         # Deal with unit cell translation symmetry duplicated indicies
@@ -650,13 +653,13 @@ class GridPartitioning(GridPartitioningInterface):
         ##
         all_indicies_updated = {}
 
-        all_indicies = {
-            "outer": outer_indicies_native,
-            "inner": inner_indicies_native,
-            "inner_sparse": sparse_inner_indicies,
-            "atomic": inner_atomic_indicies_native,
-            "atomic_sparse": sparse_inner_atomic_indicies
-        }
+        # all_indicies = {
+        #     "outer": outer_indicies_native,
+        #     "inner": inner_indicies_native,
+        #     "inner_sparse": sparse_inner_indicies,
+        #     "atomic": inner_atomic_indicies_native,
+        #     "atomic_sparse": sparse_inner_atomic_indicies
+        # }
         point_position_symmetry_mask = indexes >= ca_point_position_array.positions.shape[0]
         points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
         positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
