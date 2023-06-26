@@ -535,7 +535,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
         ],
         axis=0
     )
-    print(f"Structure array homogeous shape: {st_array_homogeous}")
+    print(f"Structure array homogeous shape: {st_array_homogeous.shape}")
 
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
