@@ -113,6 +113,7 @@ class MergeHighestBuildAndEventScore:
             in autobuilds.items()
             if highest_scoring_event[1] == score_and_event_id[1][1]
         }
+        print(highest_scoring_event_autobuilds)
         return max(
             highest_scoring_event_autobuilds,
             key=lambda _path: -highest_scoring_event_autobuilds[_path],
