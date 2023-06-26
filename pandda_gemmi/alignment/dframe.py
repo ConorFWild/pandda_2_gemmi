@@ -660,7 +660,7 @@ class GridPartitioning(GridPartitioningInterface):
             )
             for index
             in np.unique(indexes)
-            if index < point_position_array.positions.shape[0]
+            if index < ca_point_position_array.positions.shape[0]
         }
 
         return cls(partitions, ), all_indicies
