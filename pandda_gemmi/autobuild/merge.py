@@ -111,7 +111,7 @@ class MergeHighestBuildAndEventScore:
             _path: score_and_event_id[0]
             for _path, score_and_event_id
             in autobuilds.items()
-            if highest_scoring_event == score_and_event_id[1]
+            if highest_scoring_event[1] == score_and_event_id[1][1]
         }
         return max(
             highest_scoring_event_autobuilds,
