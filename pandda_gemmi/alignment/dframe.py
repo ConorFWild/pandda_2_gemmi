@@ -580,6 +580,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     print(f"Min and max of structure array: {pos_min} {pos_max}")
 
     mask = (symatoms > pos_min) & (symatoms < pos_max)
+    print(f"Mask shape: {mask.shape}")
 
     nearby_symatoms = symatoms[mask]
     print(f"Nearby symatoms shape: {nearby_symatoms.shape}")
