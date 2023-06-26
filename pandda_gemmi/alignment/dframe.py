@@ -337,6 +337,48 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # TODO: Get the mask of non-unit cell translation symmetries (handled elsewhere) and subtract from all masks
         # Get mask of symmetry points in native unit cell
+        sym_mask_native = gemmi.Int8Grid(*shape)
+        sym_mask_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        sym_mask_native.set_unit_cell(new_unit_cell)
+
+        ops = [op for op in st.structure.find_spacegroup().operations() if op.triplet() != "x,y,z"]
+
+        unit_cell = st.structure.cell
+        for atom in new_structure.protein_atoms():
+            for op in ops:
+                pos = atom.pos
+                pos_frac = unit_cell.fractionalize(pos)
+                pos_vec = op.apply_to_xyz([pos_frac.x, pos_frac.y, pos_frac.z])
+                sympos = gemmi.Position(unit_cell.orthogonalize(gemmi.Fractional(*pos_vec)))
+                sym_mask_native.set_points_around(
+                    sympos,
+                    radius=2.0,
+                    value=1,
+                )
+        sym_mask_native_array = np.array(sym_mask_native, copy=False, dtype=np.int8)
+        sym_mask_native_indicies = np.nonzero(sym_mask_native_array)
+        print(f"Number of masked unit cell symmetry positions: {sym_mask_native_indicies[0].size}")
+        sym_mask_shifted_indicies = (
+            sym_mask_native_indicies[0] - u0,
+            sym_mask_native_indicies[1] - v0,
+            sym_mask_native_indicies[2] - w0,
+        )
+        sym_mask_shifted_indicies_masks = (
+            (sym_mask_shifted_indicies[0] > -1) & (sym_mask_shifted_indicies[0] < shape[0]),
+            (sym_mask_shifted_indicies[1] > -1) & (sym_mask_shifted_indicies[1] < shape[1]),
+            (sym_mask_shifted_indicies[2] > -1) & (sym_mask_shifted_indicies[2] < shape[2]),
+        )
+        sym_mask_shifted_indicies_mask = sym_mask_shifted_indicies_masks[0] & sym_mask_shifted_indicies_masks[1] & sym_mask_shifted_indicies_masks[2]
+        sym_mask_shifted_indicies_masked = (
+            sym_mask_shifted_indicies[0][sym_mask_shifted_indicies_mask],
+            sym_mask_shifted_indicies[1][sym_mask_shifted_indicies_mask],
+            sym_mask_shifted_indicies[2][sym_mask_shifted_indicies_mask]
+        )
+
+        print(f"Symmetry mask bounded to protein cell min/max: ")
+        print(f"\t{np.min(sym_mask_shifted_indicies_masked[0])} {np.max(sym_mask_shifted_indicies_masked[0])}")
+        print(f"\t{np.min(sym_mask_shifted_indicies_masked[1])} {np.max(sym_mask_shifted_indicies_masked[1])}")
+        print(f"\t{np.min(sym_mask_shifted_indicies_masked[2])} {np.max(sym_mask_shifted_indicies_masked[2])}")
 
         # Shift to new unit cell
 
@@ -355,6 +397,10 @@ class PointPositionArray(PointPositionArrayInterface):
             )
         outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
+        print(f"Outer mask size before masking: {np.sum(outer_mask_array)}")
+        outer_mask_array[sym_mask_shifted_indicies_masked] = 0
+        print(f"Outer mask size after masking: {np.sum(outer_mask_array)}")
+
 
         outer_indicies = np.nonzero(outer_mask_array)
         outer_indicies_native = (
@@ -385,6 +431,7 @@ class PointPositionArray(PointPositionArrayInterface):
             )
         inner_mask_array = np.array(inner_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
+        inner_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_indicies = np.nonzero(inner_mask_array)
         inner_indicies_native = (
@@ -417,6 +464,7 @@ class PointPositionArray(PointPositionArrayInterface):
             )
         inner_atomic_mask_array = np.array(inner_atomic_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
+        inner_atomic_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
         inner_atomic_indicies_native = (
@@ -473,6 +521,63 @@ class PointPositionArray(PointPositionArrayInterface):
                                                                                                       processor)
         return PointPositionArray(point_array, position_array), all_indicies
 
+def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
+
+    # Get the unit cell
+    cell = structure.structure.cell
+
+    # Get the array of symmetry positions and transform to homogenous coordinates
+    st_array = structure_array.positions.T
+
+    # Get a list of transformation matricies for symmetry ops
+    ops = [op for op in structure.structure.find_spacegroup().operations() ]
+    symops = []
+    for dx, dy, dz in itertools.product([-1,0,1], [-1,0,1], [-1,0,1], ):
+
+        for op in ops:
+            if (dy == 0) & (dy == 0) & (dz == 0):
+                if op.triplet() == "x,y,z":
+                    continue
+
+            fractional_seitz = np.array(op.float_seitz())
+            fractional_seitz[0, -1] = (fractional_seitz[0,-1] + dx) * cell.a
+            fractional_seitz[1, -1] = (fractional_seitz[1, -1] + dy) * cell.b
+            fractional_seitz[2, -1] = (fractional_seitz[2, -1] + dz) * cell.c
+            symops.append(fractional_seitz)
+            # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
+            # transmat =
+            # ...
+
+    # Generate each symmetry image of the structure array
+    symatoms_list = []
+    for symop in symops:
+        symatoms_list.append(
+            np.matmul(symop, st_array).T
+        )
+
+    # Concatenate the symmetry images
+    symatoms_homogeous = np.concatenate(symatoms_list, axis=0)
+    print(f"Symatoms shape before dropping homogenising factor: {symatoms_homogeous.shape}")
+
+
+    # Go back to cartesian coordinates
+    symatoms = symatoms_homogeous[:, :-1]
+    print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
+
+    # Get those in a box bounding the structure + mask radius
+    pos_min = np.min(st_array, axis=0).reshape((1,-1))
+    pos_max = np.max(st_array, axis=0).reshape((1, -1))
+    print(f"Min and max of structure array: {pos_min} {pos_max}")
+
+    mask = (symatoms > pos_min) & (symatoms < pos_max)
+
+    nearby_symatoms = symatoms[mask]
+    print(f"Nearby symatoms shape: {nearby_symatoms.shape}")
+
+
+    return nearby_symatoms
+    #
+
 
 class GridPartitioning(GridPartitioningInterface):
     def __init__(self, partitions):
@@ -496,11 +601,31 @@ class GridPartitioning(GridPartitioningInterface):
 
         ca_point_position_array = st_array.mask(np.array(ca_mask))
 
+        # Get the nearby symmetry atoms
+        nearby_symmetry_atom_pos_array = get_nearby_symmetry_atoms_pos_array(dataset.structure, st_array)
+        print(f"Got nearby symmetry poss: {nearby_symmetry_atom_pos_array.shape}")
+
+        # Get the search atoms
+        search_atom_poss = np.concatenate(
+            [
+                ca_point_position_array.positions,
+                nearby_symmetry_atom_pos_array
+            ],
+            axis=0
+        )
+
         # Get the tree
-        kdtree = scipy.spatial.KDTree(ca_point_position_array.positions)
+        kdtree = scipy.spatial.KDTree(
+            # ca_point_position_array.positions
+            search_atom_poss
+        )
 
         # Get the pointposition array
-        point_position_array, all_indicies = PointPositionArray.from_structure(dataset.structure, grid, processor)
+        point_position_array, all_indicies = PointPositionArray.from_structure(
+            dataset.structure,
+            grid,
+            processor,
+        )
 
         # Get the NN indexes
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
@@ -508,6 +633,8 @@ class GridPartitioning(GridPartitioningInterface):
         # Deal with unit cell translation symmetry duplicated indicies
         # TODO: Get grid space duplicate indicies i.e. ones for which the unit cell modulus is the same
         # TODO: and mask the one that is further from its respective CA
+
+        ##
 
 
         # Construct the partition
@@ -522,6 +649,7 @@ class GridPartitioning(GridPartitioningInterface):
             )
             for index
             in np.unique(indexes)
+            if index < point_position_array.positions.shape[0]
         }
 
         return cls(partitions, ), all_indicies
