@@ -398,7 +398,7 @@ class PointPositionArray(PointPositionArrayInterface):
         outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
         print(f"Outer mask size before masking: {np.sum(outer_mask_array)}")
-        outer_mask_array[sym_mask_shifted_indicies_masked] = 0
+        # outer_mask_array[sym_mask_shifted_indicies_masked] = 0
         print(f"Outer mask size after masking: {np.sum(outer_mask_array)}")
 
 
@@ -431,7 +431,7 @@ class PointPositionArray(PointPositionArrayInterface):
             )
         inner_mask_array = np.array(inner_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
-        inner_mask_array[sym_mask_shifted_indicies_masked] = 0
+        # inner_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_indicies = np.nonzero(inner_mask_array)
         inner_indicies_native = (
@@ -464,7 +464,7 @@ class PointPositionArray(PointPositionArrayInterface):
             )
         inner_atomic_mask_array = np.array(inner_atomic_mask, copy=False, dtype=np.int8)
         # TODO: mask out non-translation symmetry points
-        inner_atomic_mask_array[sym_mask_shifted_indicies_masked] = 0
+        # inner_atomic_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
         inner_atomic_indicies_native = (
