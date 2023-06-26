@@ -524,8 +524,8 @@ def pandda(args: PanDDAArgs):
         pandda_events,
         autobuilds,
         fs,
-        # MergeHighestRSCC(),
-        MergeHighestBuildScore()
+        MergeHighestRSCC(),
+        # MergeHighestBuildScore()
     )
 
     # Get the sites
@@ -540,8 +540,8 @@ def pandda(args: PanDDAArgs):
     ranking = rank_events(
         pandda_events,
         autobuilds,
-        # RankHighEventScore(),
-        RankHighBuildScore()
+        RankHighEventScore(),
+        # RankHighBuildScore()
     )
     for event_id in ranking:
         print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
