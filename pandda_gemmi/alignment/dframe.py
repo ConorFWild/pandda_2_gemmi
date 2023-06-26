@@ -662,7 +662,7 @@ class GridPartitioning(GridPartitioningInterface):
         # }
         point_position_symmetry_mask = indexes >= ca_point_position_array.positions.shape[0]
         points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
-        positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
+        # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
         points_symmetry_masked_tuple = (
             points_symmetry_masked[:,0].flatten(),
             points_symmetry_masked[:, 1].flatten(),
