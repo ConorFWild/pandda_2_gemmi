@@ -575,8 +575,8 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
 
     # Get those in a box bounding the structure + mask radius
-    pos_min = np.min(st_array, axis=1).reshape((1, 3))
-    pos_max = np.max(st_array, axis=1).reshape((1, 3))
+    pos_min = np.min(st_array, axis=1).reshape((1, 3)) - np.array([6.0,6.0,6.0])
+    pos_max = np.max(st_array, axis=1).reshape((1, 3)) + np.array([6.0,6.0,6.0])
     print(f"Min and max of structure array: {pos_min} {pos_max}")
 
     mask = (symatoms > pos_min) & (symatoms < pos_max)
