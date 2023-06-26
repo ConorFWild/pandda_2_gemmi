@@ -524,8 +524,8 @@ def pandda(args: PanDDAArgs):
         pandda_events,
         autobuilds,
         fs,
-        MergeHighestRSCC(),
-        # MergeHighestBuildScore()
+        # MergeHighestRSCC(),
+        MergeHighestBuildScore()
     )
 
     # Get the sites
