@@ -641,6 +641,8 @@ class GridPartitioning(GridPartitioningInterface):
         # Get the NN indexes
         distances, indexes = kdtree.query(point_position_array.positions, workers=12)
 
+        print(f"Got {indexes[indexes >= ca_point_position_array.positions.shape[0]]} points associated with symmetry atoms")
+
         # Deal with unit cell translation symmetry duplicated indicies
         # TODO: Get grid space duplicate indicies i.e. ones for which the unit cell modulus is the same
         # TODO: and mask the one that is further from its respective CA
