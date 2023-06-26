@@ -531,9 +531,9 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     st_array_homogeous = np.concatenate(
         [
             st_array,
-            np.zeros((st_array.shape[0], 1)) + 1
+            np.zeros((1, st_array.shape[1])) + 1
         ],
-        axis=1
+        axis=0
     )
     print(f"Structure array homogeous shape: {st_array_homogeous}")
 
