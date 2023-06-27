@@ -334,6 +334,9 @@ def pandda(args: PanDDAArgs):
             mean_grid_array = np.array(mean_grid, copy=False)
             print(mean_grid_array.shape)
             print(np.nonzero(mean_grid_array == 0))
+            non_zero = np.nonzero(mean_grid_array == 0)
+            for j in range(non_zero[0].size):
+                print(f"{non_zero[0][j]} : {non_zero[1][j]} : {non_zero[2][j]}")
             # print(np.)
 
             model_scores[model_number] = percentage_z_2
