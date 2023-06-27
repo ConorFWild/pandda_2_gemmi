@@ -332,6 +332,7 @@ def pandda(args: PanDDAArgs):
 
             mean_grid = reference_frame.unmask(SparseDMap(mean))
             mean_grid_array = np.array(mean_grid, copy=False)
+            print(mean_grid_array.shape)
             print(np.nonzero(mean_grid_array == 0))
             # print(np.)
 
