@@ -732,9 +732,12 @@ class GridPartitioning(GridPartitioningInterface):
             np.mod(updated_outer_indicies[2] + min_pos[2], grid.nw),
         )
         print(f"Outer indicies ranges:")
-        print(f"U range: {np.min(all_indicies_updated['outer'][0])} : {np.max(all_indicies_updated['outer'][0])}")
-        print(f"V range: {np.min(all_indicies_updated['outer'][1])} : {np.max(all_indicies_updated['outer'][1])}")
-        print(f"W range: {np.min(all_indicies_updated['outer'][2])} : {np.max(all_indicies_updated['outer'][2])}")
+        # print(f"U range: {np.min(all_indicies_updated['outer'][0])} : {np.max(all_indicies_updated['outer'][0])}")
+        # print(f"V range: {np.min(all_indicies_updated['outer'][1])} : {np.max(all_indicies_updated['outer'][1])}")
+        # print(f"W range: {np.min(all_indicies_updated['outer'][2])} : {np.max(all_indicies_updated['outer'][2])}")
+        print(f"U range: {np.min(updated_outer_indicies[0] + min_pos[0])} : {np.max(updated_outer_indicies[0] + min_pos[0])}")
+        print(f"V range: {np.min(updated_outer_indicies[1] + min_pos[1])} : {np.max(updated_outer_indicies[1] + min_pos[1])}")
+        print(f"W range: {np.min(updated_outer_indicies[2] + min_pos[2])} : {np.max(updated_outer_indicies[2] + min_pos[2])}")
 
         # sym_mask_inner_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
         # sym_mask_inner_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
