@@ -702,7 +702,7 @@ class GridPartitioning(GridPartitioningInterface):
         max_pos = np.max(outer_incicies, axis=0)
         print(f"Outer indicies min/max: {min_pos} : {max_pos}")
 
-        print(f"All points shape: {ca_point_position_array.points}")
+        print(f"All points shape: {ca_point_position_array.points.shape}")
         print(f"All points min/max: {np.min(ca_point_position_array.points, axis=0)} : {np.max(ca_point_position_array.points, axis=0)}")
 
         # Construct a mask grid
