@@ -716,7 +716,7 @@ class GridPartitioning(GridPartitioningInterface):
                 (max_pos[1] - min_pos[1]) + 1,
                 (max_pos[2] - min_pos[2]) + 1,
             ),
-            dtype=np.int8
+            dtype=np.int16
         )
         sym_mask_outer_array[all_indicies["outer"]] = 1
         print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
@@ -739,7 +739,7 @@ class GridPartitioning(GridPartitioningInterface):
                 (max_pos[1] - min_pos[1]) + 1,
                 (max_pos[2] - min_pos[2]) + 1,
             ),
-            dtype=np.int8
+            dtype=np.int16
         )
         sym_mask_inner_array[all_indicies["inner"]] = 1
         print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
@@ -766,7 +766,7 @@ class GridPartitioning(GridPartitioningInterface):
                 (max_pos[1] - min_pos[1]) + 1,
                 (max_pos[2] - min_pos[2]) + 1,
             ),
-            dtype=np.int8
+            dtype=np.int16
         )
         sym_mask_atomic_array[all_indicies["atomic"]] = 1
         print(f"Number of atomic mask points including those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
