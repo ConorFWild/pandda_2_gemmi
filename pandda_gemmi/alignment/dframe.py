@@ -751,7 +751,8 @@ class GridPartitioning(GridPartitioningInterface):
         )
 
 
-        all_indicies_updated["inner_sparse"] = sym_mask_inner_array[all_indicies_updated["outer"]] == 1
+        # all_indicies_updated["inner_sparse"] = sym_mask_inner_array[all_indicies_updated["outer"]] == 1
+        all_indicies_updated["inner_sparse"] = sym_mask_inner_array[sym_mask_outer_array] == 1
 
         # sym_mask_atomic_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
         # sym_mask_atomic_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -774,7 +775,8 @@ class GridPartitioning(GridPartitioningInterface):
             np.mod(updated_atomic_indicies[1] + min_pos[0], grid.nv),
             np.mod(updated_atomic_indicies[2] + min_pos[0], grid.nw),
         )
-        all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[all_indicies_updated["outer"]] == 1
+        # all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[all_indicies_updated["outer"]] == 1
+        all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[sym_mask_outer_array] == 1
 
         # Construct the partition
         partitions = {
