@@ -695,7 +695,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the upper and lower bounds of the point array
         outer_incicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["outer"]], axis=1)
-        print(f"Outer indicies shape: {outer_incicies}")
+        print(f"Outer indicies shape: {outer_incicies.shape}")
         # min_pos = np.min(point_position_array.points, axis=0)
         # max_pos = np.max(point_position_array.points, axis=0)
         min_pos = np.min(outer_incicies, axis=0)
@@ -731,6 +731,10 @@ class GridPartitioning(GridPartitioningInterface):
             np.mod(updated_outer_indicies[1] + min_pos[1], grid.nv),
             np.mod(updated_outer_indicies[2] + min_pos[2], grid.nw),
         )
+        print(f"Outer indicies ranges:")
+        print(f"U range: {np.min(all_indicies_updated['outer'][0])} : {np.max(all_indicies_updated['outer'][0])}")
+        print(f"V range: {np.min(all_indicies_updated['outer'][1])} : {np.max(all_indicies_updated['outer'][1])}")
+        print(f"W range: {np.min(all_indicies_updated['outer'][2])} : {np.max(all_indicies_updated['outer'][2])}")
 
         # sym_mask_inner_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
         # sym_mask_inner_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
