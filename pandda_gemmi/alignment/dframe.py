@@ -688,7 +688,7 @@ class GridPartitioning(GridPartitioningInterface):
         points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
         # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
         points_symmetry_masked_tuple = (
-            points_symmetry_masked[:,0].flatten(),
+            points_symmetry_masked[:, 0].flatten(),
             points_symmetry_masked[:, 1].flatten(),
             points_symmetry_masked[:, 2].flatten(),
         )
@@ -701,6 +701,9 @@ class GridPartitioning(GridPartitioningInterface):
         min_pos = np.min(outer_incicies, axis=0)
         max_pos = np.max(outer_incicies, axis=0)
         print(f"Outer indicies min/max: {min_pos} : {max_pos}")
+
+        print(f"All points shape: {ca_point_position_array.points}")
+        print(f"All points min/max: {np.min(ca_point_position_array.points, axis=0)} : {np.max(ca_point_position_array.points, axis=0)}")
 
         # Construct a mask grid
 
