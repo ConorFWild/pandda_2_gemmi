@@ -485,11 +485,18 @@ class PointPositionArray(PointPositionArrayInterface):
 
         sparse_inner_atomic_indicies = inner_atomic_mask_array[outer_indicies] == 1
 
+        # all_indicies = {
+        #     "outer": outer_indicies_native,
+        #     "inner": inner_indicies_native,
+        #     "inner_sparse": sparse_inner_indicies,
+        #     "atomic": inner_atomic_indicies_native,
+        #     "atomic_sparse": sparse_inner_atomic_indicies
+        # }
         all_indicies = {
-            "outer": outer_indicies_native,
-            "inner": inner_indicies_native,
+            "outer": outer_indicies,
+            "inner": inner_indicies,
             "inner_sparse": sparse_inner_indicies,
-            "atomic": inner_atomic_indicies_native,
+            "atomic": inner_atomic_indicies,
             "atomic_sparse": sparse_inner_atomic_indicies
         }
 
@@ -660,46 +667,97 @@ class GridPartitioning(GridPartitioningInterface):
         #     "atomic": inner_atomic_indicies_native,
         #     "atomic_sparse": sparse_inner_atomic_indicies
         # }
+
+        # Get the points to be dropped
         point_position_symmetry_mask = indexes >= ca_point_position_array.positions.shape[0]
         points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
         # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
         points_symmetry_masked_tuple = (
-            np.mod(points_symmetry_masked[:,0].flatten(), grid.nu),
-            np.mod(points_symmetry_masked[:, 1].flatten(), grid.nv),
-            np.mod(points_symmetry_masked[:, 2].flatten(), grid.nw),
+            points_symmetry_masked[:,0].flatten(),
+            points_symmetry_masked[:, 1].flatten(),
+            points_symmetry_masked[:, 2].flatten(),
         )
 
-        sym_mask_outer_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
-        sym_mask_outer_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        sym_mask_outer_native.set_unit_cell(grid.unit_cell)
-        sym_mask_outer_native_array = np.array(sym_mask_outer_native, copy=False)
-        sym_mask_outer_native_array[all_indicies["outer"]] = 1
-        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_outer_native_array)}")
-        sym_mask_outer_native_array[points_symmetry_masked_tuple] = 0
-        print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_outer_native_array)}")
-        all_indicies_updated["outer"] = np.nonzero(sym_mask_outer_native_array)
+        # Get the upper and lower bounds of the point array
+        outer_incicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["outer"]], axis=1)
+        # min_pos = np.min(point_position_array.points, axis=0)
+        # max_pos = np.max(point_position_array.points, axis=0)
+        min_pos = np.min(outer_incicies, axis=0)
+        max_pos = np.max(outer_incicies, axis=0)
 
-        sym_mask_inner_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
-        sym_mask_inner_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        sym_mask_inner_native.set_unit_cell(grid.unit_cell)
-        sym_mask_inner_native_array = np.array(sym_mask_inner_native, copy=False)
-        sym_mask_inner_native_array[all_indicies["inner"]] = 1
-        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_inner_native_array)}")
-        sym_mask_inner_native_array[points_symmetry_masked_tuple] = 0
-        print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_native_array)}")
-        all_indicies_updated["inner"] = np.nonzero(sym_mask_inner_native_array)
-        all_indicies_updated["inner_sparse"] = sym_mask_inner_native_array[all_indicies_updated["outer"]] == 1
+        # Construct a mask grid
 
-        sym_mask_atomic_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
-        sym_mask_atomic_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        sym_mask_atomic_native.set_unit_cell(grid.unit_cell)
-        sym_mask_atomic_native_array = np.array(sym_mask_atomic_native, copy=False)
-        sym_mask_atomic_native_array[all_indicies["atomic"]] = 1
-        print(f"Number of atomic mask points including those closer to sym atoms: {np.sum(sym_mask_atomic_native_array)}")
-        sym_mask_atomic_native_array[points_symmetry_masked_tuple] = 0
-        print(f"Number of atomic mask points excluding those closer to sym atoms: {np.sum(sym_mask_atomic_native_array)}")
-        all_indicies_updated["atomic"] = np.nonzero(sym_mask_atomic_native_array)
-        all_indicies_updated["atomic_sparse"] = sym_mask_atomic_native_array[all_indicies_updated["outer"]] == 1
+
+
+        # sym_mask_outer_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
+        # sym_mask_outer_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        # sym_mask_outer_native.set_unit_cell(grid.unit_cell)
+        # sym_mask_outer_native_array = np.array(sym_mask_outer_native, copy=False)
+        sym_mask_outer_array = np.zeros(
+            (
+                (max_pos[0] - min_pos[0]) + 1,
+                (max_pos[1] - min_pos[1]) + 1,
+                (max_pos[2] - min_pos[2]) + 1,
+            )
+        )
+        sym_mask_outer_array[all_indicies["outer"]] = 1
+        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
+        sym_mask_outer_array[points_symmetry_masked_tuple] = 0
+        print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
+        updated_outer_indicies = np.nonzero(sym_mask_outer_array)
+        all_indicies_updated["outer"] = (
+            np.mod(updated_outer_indicies[0] + min_pos[0], grid.nu),
+            np.mod(updated_outer_indicies[1] + min_pos[0], grid.nv),
+            np.mod(updated_outer_indicies[2] + min_pos[0], grid.nw),
+        )
+
+        # sym_mask_inner_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
+        # sym_mask_inner_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        # sym_mask_inner_native.set_unit_cell(grid.unit_cell)
+        # sym_mask_inner_native_array = np.array(sym_mask_inner_native, copy=False)
+        sym_mask_inner_array = np.zeros(
+            (
+                (max_pos[0] - min_pos[0]) + 1,
+                (max_pos[1] - min_pos[1]) + 1,
+                (max_pos[2] - min_pos[2]) + 1,
+            )
+        )
+        sym_mask_inner_array[all_indicies["inner"]] = 1
+        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
+        sym_mask_inner_array[points_symmetry_masked_tuple] = 0
+        print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
+        updated_inner_indicies = np.nonzero(sym_mask_inner_array)
+        all_indicies_updated["inner"] = (
+            np.mod(updated_inner_indicies[0] + min_pos[0], grid.nu),
+            np.mod(updated_inner_indicies[1] + min_pos[0], grid.nv),
+            np.mod(updated_inner_indicies[2] + min_pos[0], grid.nw),
+        )
+
+
+        all_indicies_updated["inner_sparse"] = sym_mask_inner_array[all_indicies_updated["outer"]] == 1
+
+        # sym_mask_atomic_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
+        # sym_mask_atomic_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        # sym_mask_atomic_native.set_unit_cell(grid.unit_cell)
+        # sym_mask_atomic_native_array = np.array(sym_mask_atomic_native, copy=False)
+        sym_mask_atomic_array = np.zeros(
+            (
+                (max_pos[0] - min_pos[0]) + 1,
+                (max_pos[1] - min_pos[1]) + 1,
+                (max_pos[2] - min_pos[2]) + 1,
+            )
+        )
+        sym_mask_atomic_array[all_indicies["atomic"]] = 1
+        print(f"Number of atomic mask points including those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
+        sym_mask_atomic_array[points_symmetry_masked_tuple] = 0
+        print(f"Number of atomic mask points excluding those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
+        updated_atomic_indicies = np.nonzero(sym_mask_atomic_array)
+        all_indicies_updated["atomic"] = (
+            np.mod(updated_atomic_indicies[0] + min_pos[0], grid.nu),
+            np.mod(updated_atomic_indicies[1] + min_pos[0], grid.nv),
+            np.mod(updated_atomic_indicies[2] + min_pos[0], grid.nw),
+        )
+        all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[all_indicies_updated["outer"]] == 1
 
         # Construct the partition
         partitions = {
