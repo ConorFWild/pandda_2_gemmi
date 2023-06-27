@@ -403,10 +403,15 @@ class PointPositionArray(PointPositionArrayInterface):
 
 
         outer_indicies = np.nonzero(outer_mask_array)
+        # outer_indicies_native = (
+        #     np.mod(outer_indicies[0] + u0, grid.nu),
+        #     np.mod(outer_indicies[1] + v0, grid.nv),
+        #     np.mod(outer_indicies[2] + w0, grid.nw),
+        # )
         outer_indicies_native = (
-            np.mod(outer_indicies[0] + u0, grid.nu),
-            np.mod(outer_indicies[1] + v0, grid.nv),
-            np.mod(outer_indicies[2] + w0, grid.nw),
+            outer_indicies[0] + u0,
+            outer_indicies[1] + v0,
+            outer_indicies[2] + w0,
         )
         indicies_min = [
             np.min(outer_indicies_native[0]),
@@ -434,10 +439,15 @@ class PointPositionArray(PointPositionArrayInterface):
         # inner_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_indicies = np.nonzero(inner_mask_array)
+        # inner_indicies_native = (
+        #     np.mod(inner_indicies[0] + u0, grid.nu),
+        #     np.mod(inner_indicies[1] + v0, grid.nv),
+        #     np.mod(inner_indicies[2] + w0, grid.nw),
+        # )
         inner_indicies_native = (
-            np.mod(inner_indicies[0] + u0, grid.nu),
-            np.mod(inner_indicies[1] + v0, grid.nv),
-            np.mod(inner_indicies[2] + w0, grid.nw),
+            inner_indicies[0] + u0,
+            inner_indicies[1] + v0,
+            inner_indicies[2] + w0,
         )
         indicies_min = [
             np.min(inner_indicies_native[0]),
@@ -467,10 +477,15 @@ class PointPositionArray(PointPositionArrayInterface):
         # inner_atomic_mask_array[sym_mask_shifted_indicies_masked] = 0
 
         inner_atomic_indicies = np.nonzero(inner_atomic_mask_array)
+        # inner_atomic_indicies_native = (
+        #     np.mod(inner_atomic_indicies[0] + u0, grid.nu),
+        #     np.mod(inner_atomic_indicies[1] + v0, grid.nv),
+        #     np.mod(inner_atomic_indicies[2] + w0, grid.nw),
+        # )
         inner_atomic_indicies_native = (
-            np.mod(inner_atomic_indicies[0] + u0, grid.nu),
-            np.mod(inner_atomic_indicies[1] + v0, grid.nv),
-            np.mod(inner_atomic_indicies[2] + w0, grid.nw),
+            inner_atomic_indicies[0] + u0,
+            inner_atomic_indicies[1] + v0,
+            inner_atomic_indicies[2] + w0,
         )
         indicies_min = [
             np.min(inner_atomic_indicies_native[0]),
@@ -493,10 +508,10 @@ class PointPositionArray(PointPositionArrayInterface):
         #     "atomic_sparse": sparse_inner_atomic_indicies
         # }
         all_indicies = {
-            "outer": outer_indicies,
-            "inner": inner_indicies,
+            "outer": outer_indicies_native,
+            "inner": inner_indicies_native,
             "inner_sparse": sparse_inner_indicies,
-            "atomic": inner_atomic_indicies,
+            "atomic": inner_atomic_indicies_native,
             "atomic_sparse": sparse_inner_atomic_indicies
         }
 
@@ -680,10 +695,12 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the upper and lower bounds of the point array
         outer_incicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["outer"]], axis=1)
+        print(f"Outer indicies shape: {outer_incicies}")
         # min_pos = np.min(point_position_array.points, axis=0)
         # max_pos = np.max(point_position_array.points, axis=0)
         min_pos = np.min(outer_incicies, axis=0)
         max_pos = np.max(outer_incicies, axis=0)
+        print(f"Outer indicies min/max: {min_pos} : {max_pos}")
 
         # Construct a mask grid
 
