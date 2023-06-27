@@ -725,8 +725,8 @@ class GridPartitioning(GridPartitioningInterface):
         updated_outer_indicies = np.nonzero(sym_mask_outer_array)
         all_indicies_updated["outer"] = (
             np.mod(updated_outer_indicies[0] + min_pos[0], grid.nu),
-            np.mod(updated_outer_indicies[1] + min_pos[0], grid.nv),
-            np.mod(updated_outer_indicies[2] + min_pos[0], grid.nw),
+            np.mod(updated_outer_indicies[1] + min_pos[1], grid.nv),
+            np.mod(updated_outer_indicies[2] + min_pos[2], grid.nw),
         )
 
         # sym_mask_inner_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
@@ -742,14 +742,14 @@ class GridPartitioning(GridPartitioningInterface):
             dtype=np.int16
         )
         sym_mask_inner_array[all_indicies["inner"]] = 1
-        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
+        print(f"Number of inner mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         sym_mask_inner_array[points_symmetry_masked_tuple] = 0
-        print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
+        print(f"Number of inner mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         updated_inner_indicies = np.nonzero(sym_mask_inner_array)
         all_indicies_updated["inner"] = (
             np.mod(updated_inner_indicies[0] + min_pos[0], grid.nu),
-            np.mod(updated_inner_indicies[1] + min_pos[0], grid.nv),
-            np.mod(updated_inner_indicies[2] + min_pos[0], grid.nw),
+            np.mod(updated_inner_indicies[1] + min_pos[1], grid.nv),
+            np.mod(updated_inner_indicies[2] + min_pos[2], grid.nw),
         )
 
 
@@ -777,8 +777,8 @@ class GridPartitioning(GridPartitioningInterface):
         updated_atomic_indicies = np.nonzero(sym_mask_atomic_array)
         all_indicies_updated["atomic"] = (
             np.mod(updated_atomic_indicies[0] + min_pos[0], grid.nu),
-            np.mod(updated_atomic_indicies[1] + min_pos[0], grid.nv),
-            np.mod(updated_atomic_indicies[2] + min_pos[0], grid.nw),
+            np.mod(updated_atomic_indicies[1] + min_pos[1], grid.nv),
+            np.mod(updated_atomic_indicies[2] + min_pos[2], grid.nw),
         )
         # all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[all_indicies_updated["outer"]] == 1
         # all_indicies_updated["atomic_sparse"] = sym_mask_atomic_array[sym_mask_outer_array] == 1
