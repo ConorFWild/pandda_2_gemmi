@@ -329,6 +329,7 @@ def pandda(args: PanDDAArgs):
             print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
             print(f"Model number: {model_number}: {np.min(std)} {np.mean(std)}  {np.max(std)} {np.std(std)}")
             print(f"Model number: {np.quantile(z, (0.8, 0.85, 0.9, 0.95))}")
+            # print(np.)
 
             model_scores[model_number] = percentage_z_2
 
