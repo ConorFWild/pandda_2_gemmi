@@ -332,7 +332,7 @@ def pandda(args: PanDDAArgs):
 
             mean_grid = reference_frame.unmask(SparseDMap(mean))
             mean_grid_array = np.array(mean_grid, copy=False)
-            print(np.nonzero(mean_grid_array))
+            print(np.nonzero(mean_grid_array == 0))
             # print(np.)
 
             model_scores[model_number] = percentage_z_2
