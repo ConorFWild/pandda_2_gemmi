@@ -664,9 +664,9 @@ class GridPartitioning(GridPartitioningInterface):
         points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
         # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
         points_symmetry_masked_tuple = (
-            points_symmetry_masked[:,0].flatten(),
-            points_symmetry_masked[:, 1].flatten(),
-            points_symmetry_masked[:, 2].flatten(),
+            np.mod(points_symmetry_masked[:,0].flatten(), grid.nu),
+            np.mod(points_symmetry_masked[:, 1].flatten(), grid.nv),
+            np.mod(points_symmetry_masked[:, 2].flatten(), grid.nw),
         )
 
         sym_mask_outer_native = gemmi.Int8Grid(grid.nu, grid.nv, grid.nw)
