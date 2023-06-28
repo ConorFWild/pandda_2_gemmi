@@ -543,24 +543,27 @@ class PointPositionArray(PointPositionArrayInterface):
                                                                                                       processor)
         return PointPositionArray(point_array, position_array), all_indicies
 
-def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
+def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
     # Get the unit cell
     cell = structure.structure.cell
 
     # Get the array of symmetry positions and transform to homogenous coordinates
-    st_array = structure_array.positions.T
-    st_array_homogeous = np.concatenate(
+    st_array = structure_array.positions
+    fractional_st_array = PointPositionArray.fractionalize_orthogonal_array(st_array, grid).T
+    fractional_st_array_homogeous = np.concatenate(
         [
-            st_array,
+            # st_array,
+            fractional_st_array,
             np.zeros((1, st_array.shape[1])) + 1
         ],
         axis=0
     )
-    print(f"Structure array homogeous shape: {st_array_homogeous.shape}")
+    print(f"Structure array homogeous shape: {fractional_st_array_homogeous.shape}")
 
-    st_centroid = np.mean(structure_array.positions, axis=0).flatten()
+    # st_centroid = np.mean(structure_array.positions, axis=0).flatten()
     # st_centroid_pos = gemmi.Position(st_centroid)
+    st_centroid = np.mean(fractional_st_array, axis=1).flatten()
 
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
@@ -569,23 +572,32 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     # symops = []
     for op in ops:
         fractional_seitz = np.array(op.float_seitz())
-        fractional_seitz[0, -1] = (fractional_seitz[0, -1] ) * cell.a
-        fractional_seitz[1, -1] = (fractional_seitz[1, -1] ) * cell.b
-        fractional_seitz[2, -1] = (fractional_seitz[2, -1] ) * cell.c
+        # fractional_seitz[0, -1] = (fractional_seitz[0, -1] ) * cell.a
+        # fractional_seitz[1, -1] = (fractional_seitz[1, -1] ) * cell.b
+        # fractional_seitz[2, -1] = (fractional_seitz[2, -1] ) * cell.c
         # symops.append(fractional_seitz)
 
-        sympos = np.matmul(fractional_seitz, st_array_homogeous).T
+        # sympos = np.matmul(fractional_seitz, st_array_homogeous).T
+        sympos_fractional = np.matmul(fractional_seitz, fractional_st_array_homogeous).T
 
-        new_centroid = np.mean(sympos, axis=0)
+        # new_centroid = np.mean(sympos, axis=0)
+        new_centroid = np.mean(sympos_fractional, axis=0).flatten()
 
 
         # closest_image = cell.find_nearest_image(st_centroid_pos, new_centroid)
-        pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
+        # pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
+        pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten()
+
         pbc_difference_rounded = np.round(pbc_difference)
 
         # pbc_shift = closest_image.pbc_shift
         # pbc_shift_cart = np.array(pbc_shift[0]*cell.a, pbc_shift[0]*cell.b, pbc_shift[0]*cell.c)
-        closest_image_sympos = sympos + np.array(
+        # closest_image_sympos = sympos_fractional + np.array(
+        #     [
+        #         pbc_difference_rounded[0], pbc_difference_rounded[1], pbc_difference_rounded[2], 0
+        #     ]
+        # ).reshape((1,4))
+        closest_image_fractional_sympos = sympos_fractional + np.array(
             [
                 pbc_difference_rounded[0], pbc_difference_rounded[1], pbc_difference_rounded[2], 0
             ]
@@ -605,7 +617,10 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
             # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
             # transmat =
             # ...
-            symatoms_list.append(closest_image_sympos + np.array([dx*cell.a, dy*cell.b, dz*cell.c, 0]).reshape((1,4)))
+            # transformed_symatoms = closest_image_sympos + np.array([dx*cell.a, dy*cell.b, dz*cell.c, 0]).reshape((1,4))
+            transformed_fractional_symatoms = (closest_image_fractional_sympos + np.array([dx, dy, dz, 0]).reshape((1,4)))[:, :-1]
+
+            symatoms_list.append(PointPositionArray.fractionalize_orthogonal_array(transformed_fractional_symatoms, grid))
 
     # print(f"Symmatrix shape: {symops[0].shape}")
 
@@ -622,6 +637,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
 
 
     # Go back to cartesian coordinates
+    # symatoms = symatoms_homogeous[:, :-1]
     symatoms = symatoms_homogeous[:, :-1]
     print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
 
@@ -664,7 +680,7 @@ class GridPartitioning(GridPartitioningInterface):
         ca_point_position_array = st_array.mask(np.array(ca_mask))
 
         # Get the nearby symmetry atoms
-        nearby_symmetry_atom_pos_array = get_nearby_symmetry_atoms_pos_array(dataset.structure, st_array)
+        nearby_symmetry_atom_pos_array = get_nearby_symmetry_atoms_pos_array(dataset.structure, st_array, grid)
         print(f"Got nearby symmetry poss: {nearby_symmetry_atom_pos_array.shape}")
 
         # Get the search atoms
