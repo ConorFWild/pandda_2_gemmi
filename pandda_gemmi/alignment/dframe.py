@@ -684,26 +684,41 @@ class GridPartitioning(GridPartitioningInterface):
         # }
 
         # Get the points to be dropped
-        point_position_symmetry_mask = indexes >= ca_point_position_array.positions.shape[0]
-        points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
-        # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
-        points_symmetry_masked_tuple = (
-            points_symmetry_masked[:, 0].flatten(),
-            points_symmetry_masked[:, 1].flatten(),
-            points_symmetry_masked[:, 2].flatten(),
-        )
+        # point_position_symmetry_mask = indexes >= ca_point_position_array.positions.shape[0]
+        # points_symmetry_masked = point_position_array.points[point_position_symmetry_mask]
+        # # positions_symmetry_masked = point_position_array.positions[point_position_symmetry_mask]
+        # points_symmetry_masked_tuple = (
+        #     points_symmetry_masked[:, 0].flatten(),
+        #     points_symmetry_masked[:, 1].flatten(),
+        #     points_symmetry_masked[:, 2].flatten(),
+        # )
+
+
 
         # Get the upper and lower bounds of the point array
         outer_incicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["outer"]], axis=1)
         print(f"Outer indicies shape: {outer_incicies.shape}")
-        # min_pos = np.min(point_position_array.points, axis=0)
-        # max_pos = np.max(point_position_array.points, axis=0)
+        # # min_pos = np.min(point_position_array.points, axis=0)
+        # # max_pos = np.max(point_position_array.points, axis=0)
         min_pos = np.min(outer_incicies, axis=0)
         max_pos = np.max(outer_incicies, axis=0)
         print(f"Outer indicies min/max: {min_pos} : {max_pos}")
 
+        # print(f"Outer indicies shape: {points_nonsymmetry_masked.shape}")
+        # min_pos = np.min(points_nonsymmetry_masked, axis=0)
+        # max_pos = np.max(points_nonsymmetry_masked, axis=0)
+        # print(f"Outer indicies min/max: {min_pos} : {max_pos}")
+
         print(f"All points shape: {point_position_array.points.shape}")
         print(f"All points min/max: {np.min(point_position_array.points, axis=0)} : {np.max(point_position_array.points, axis=0)}")
+
+        point_position_nonsymmetry_mask = indexes < ca_point_position_array.positions.shape[0]
+        points_nonsymmetry_masked = point_position_array.points[point_position_nonsymmetry_mask]
+        points_nonsymmetry_masked_tuple = (
+            points_nonsymmetry_masked[:, 0].flatten() - min_pos[0],
+            points_nonsymmetry_masked[:, 1].flatten() - min_pos[1],
+            points_nonsymmetry_masked[:, 2].flatten() - min_pos[2],
+        )
 
         # Construct a mask grid
 
@@ -721,9 +736,10 @@ class GridPartitioning(GridPartitioningInterface):
             ),
             dtype=np.int16
         )
-        sym_mask_outer_array[all_indicies["outer"]] = 1
-        print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
-        sym_mask_outer_array[points_symmetry_masked_tuple] = 0
+        # sym_mask_outer_array[all_indicies["outer"]] = 1
+        # print(f"Number of outer mask points including those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
+        # sym_mask_outer_array[points_symmetry_masked_tuple] = 0
+        sym_mask_outer_array[points_nonsymmetry_masked_tuple] = 1
         print(f"Number of outer mask points excluding those closer to sym atoms: {np.sum(sym_mask_outer_array)}")
         updated_outer_indicies = np.nonzero(sym_mask_outer_array)
         all_indicies_updated["outer"] = (
@@ -753,9 +769,11 @@ class GridPartitioning(GridPartitioningInterface):
         )
         sym_mask_inner_array[all_indicies["inner"]] = 1
         print(f"Number of inner mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
-        sym_mask_inner_array[points_symmetry_masked_tuple] = 0
+        # sym_mask_inner_array[points_symmetry_masked_tuple] = 0
+        sym_mask_inner_array[points_nonsymmetry_masked_tuple] += 0
+
         print(f"Number of inner mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
-        updated_inner_indicies = np.nonzero(sym_mask_inner_array)
+        updated_inner_indicies = np.nonzero(sym_mask_inner_array == 2)
         all_indicies_updated["inner"] = (
             np.mod(updated_inner_indicies[0] + min_pos[0], grid.nu),
             np.mod(updated_inner_indicies[1] + min_pos[1], grid.nv),
@@ -782,9 +800,11 @@ class GridPartitioning(GridPartitioningInterface):
         )
         sym_mask_atomic_array[all_indicies["atomic"]] = 1
         print(f"Number of atomic mask points including those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
-        sym_mask_atomic_array[points_symmetry_masked_tuple] = 0
+        # sym_mask_atomic_array[points_symmetry_masked_tuple] = 0
+        sym_mask_atomic_array[points_nonsymmetry_masked_tuple] += 1
+
         print(f"Number of atomic mask points excluding those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
-        updated_atomic_indicies = np.nonzero(sym_mask_atomic_array)
+        updated_atomic_indicies = np.nonzero(sym_mask_atomic_array == 2)
         all_indicies_updated["atomic"] = (
             np.mod(updated_atomic_indicies[0] + min_pos[0], grid.nu),
             np.mod(updated_atomic_indicies[1] + min_pos[1], grid.nv),
