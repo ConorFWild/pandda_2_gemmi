@@ -180,11 +180,11 @@ def pandda(args: PanDDAArgs):
         #     "JMJD2DA-x387"
         # ]:
         #     continue
-        if dtag not in [
-            "SETDB1-x223",
-            "SETDB1-x218"
-        ]:
-            continue
+        # if dtag not in [
+        #     "SETDB1-x223",
+        #     "SETDB1-x218"
+        # ]:
+        #     continue
 
         # if dtag not in [
         #     "JMJD2DA-x427",
