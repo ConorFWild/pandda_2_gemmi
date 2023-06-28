@@ -566,7 +566,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
     symatoms_list = []
 
-    symops = []
+    # symops = []
     for op in ops:
         fractional_seitz = np.array(op.float_seitz())
         fractional_seitz[0, -1] = (fractional_seitz[0, -1] ) * cell.a
@@ -604,7 +604,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
             # ...
             symatoms_list.append(closest_image_sympos + np.array([dx, dy, dz, 0]).reshape((1,4)))
 
-    print(f"Symmatrix shape: {symops[0].shape}")
+    # print(f"Symmatrix shape: {symops[0].shape}")
 
     # Generate each symmetry image of the structure array
     # symatoms_list = []
