@@ -562,15 +562,15 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
     symops = []
-    for dx, dy, dz in itertools.product([-1,0,1], [-1,0,1], [-1,0,1], ):
+    for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
 
         for op in ops:
-            if (dy == 0) & (dy == 0) & (dz == 0):
+            if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
                     continue
 
             fractional_seitz = np.array(op.float_seitz())
-            fractional_seitz[0, -1] = (fractional_seitz[0,-1] + dx) * cell.a
+            fractional_seitz[0, -1] = (fractional_seitz[0, -1] + dx) * cell.a
             fractional_seitz[1, -1] = (fractional_seitz[1, -1] + dy) * cell.b
             fractional_seitz[2, -1] = (fractional_seitz[2, -1] + dz) * cell.c
             symops.append(fractional_seitz)
