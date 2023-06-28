@@ -559,33 +559,59 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     )
     print(f"Structure array homogeous shape: {st_array_homogeous.shape}")
 
+    st_centroid = np.mean(structure_array.positions, axis=0)
+    st_centroid_pos = gemmi.Position(st_centroid)
+
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
-    symops = []
-    for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
+    symatoms_list = []
 
-        for op in ops:
+    symops = []
+    for op in ops:
+        fractional_seitz = np.array(op.float_seitz())
+        fractional_seitz[0, -1] = (fractional_seitz[0, -1] ) * cell.a
+        fractional_seitz[1, -1] = (fractional_seitz[1, -1] ) * cell.b
+        fractional_seitz[2, -1] = (fractional_seitz[2, -1] ) * cell.c
+        # symops.append(fractional_seitz)
+
+        sympos = np.matmul(fractional_seitz, st_array_homogeous).T
+
+        new_centroid = np.mean(sympos, axis=0)
+
+
+        # closest_image = cell.find_nearest_image(st_centroid_pos, new_centroid)
+        pbc_difference = (st_centroid - new_centroid).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
+        pbc_difference_rounded = np.round(pbc_difference)
+
+        # pbc_shift = closest_image.pbc_shift
+        # pbc_shift_cart = np.array(pbc_shift[0]*cell.a, pbc_shift[0]*cell.b, pbc_shift[0]*cell.c)
+        closest_image_sympos = sympos + pbc_difference_rounded.reshape((1,3))
+
+
+        for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
+
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
                     continue
 
-            fractional_seitz = np.array(op.float_seitz())
-            fractional_seitz[0, -1] = (fractional_seitz[0, -1] + dx) * cell.a
-            fractional_seitz[1, -1] = (fractional_seitz[1, -1] + dy) * cell.b
-            fractional_seitz[2, -1] = (fractional_seitz[2, -1] + dz) * cell.c
-            symops.append(fractional_seitz)
+            # fractional_seitz = np.array(op.float_seitz())
+            # fractional_seitz[0, -1] = (fractional_seitz[0, -1] + dx) * cell.a
+            # fractional_seitz[1, -1] = (fractional_seitz[1, -1] + dy) * cell.b
+            # fractional_seitz[2, -1] = (fractional_seitz[2, -1] + dz) * cell.c
+            # symops.append(fractional_seitz)
             # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
             # transmat =
             # ...
+            symatoms_list.append(closest_image_sympos + np.array([dy, dy, dz]))
 
     print(f"Symmatrix shape: {symops[0].shape}")
 
     # Generate each symmetry image of the structure array
-    symatoms_list = []
-    for symop in symops:
-        symatoms_list.append(
-            np.matmul(symop, st_array_homogeous).T
-        )
+    # symatoms_list = []
+    # for symop in symops:
+    #     symatoms_list.append(
+    #         np.matmul(symop, st_array_homogeous).T
+    #     )
 
     # Concatenate the symmetry images
     symatoms_homogeous = np.concatenate(symatoms_list, axis=0)
