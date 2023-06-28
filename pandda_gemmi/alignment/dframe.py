@@ -555,7 +555,9 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
         [
             # st_array,
             fractional_st_array,
-            np.zeros((1, st_array.shape[1])) + 1
+            # np.zeros((1, st_array.shape[1])) + 1
+            np.zeros((1, fractional_st_array.shape[1])) + 1
+
         ],
         axis=0
     )
