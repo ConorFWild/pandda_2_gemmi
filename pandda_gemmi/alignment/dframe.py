@@ -767,6 +767,7 @@ class GridPartitioning(GridPartitioningInterface):
             ),
             dtype=np.int16
         )
+        print(sym_mask_inner_array.shape)
         inner_indicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["inner"]], axis=1)
         min_inner_pos = np.min(inner_indicies, axis=0)
         max_inner_pos = np.max(inner_indicies, axis=0)
