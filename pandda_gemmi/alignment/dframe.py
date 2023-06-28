@@ -392,7 +392,7 @@ class PointPositionArray(PointPositionArrayInterface):
             pos = atom.pos
             outer_mask.set_points_around(
                 pos,
-                radius=6.0,
+                radius=5.0,
                 value=1,
             )
         outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
