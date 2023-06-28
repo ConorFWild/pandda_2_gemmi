@@ -640,7 +640,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
     # Go back to cartesian coordinates
     # symatoms = symatoms_homogeous[:, :-1]
-    symatoms = symatoms_homogeous[:, :-1]
+    symatoms = symatoms_homogeous
     print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
 
     # Get those in a box bounding the structure + mask radius
