@@ -622,7 +622,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
             # transformed_symatoms = closest_image_sympos + np.array([dx*cell.a, dy*cell.b, dz*cell.c, 0]).reshape((1,4))
             transformed_fractional_symatoms = (closest_image_fractional_sympos + np.array([dx, dy, dz, 0]).reshape((1,4)))[:, :-1]
 
-            symatoms_list.append(PointPositionArray.fractionalize_orthogonal_array(transformed_fractional_symatoms, grid))
+            symatoms_list.append(PointPositionArray.orthogonalize_fractional_array(transformed_fractional_symatoms, grid))
 
     # print(f"Symmatrix shape: {symops[0].shape}")
 
