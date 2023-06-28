@@ -560,7 +560,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
     print(f"Structure array homogeous shape: {st_array_homogeous.shape}")
 
     st_centroid = np.mean(structure_array.positions, axis=0)
-    st_centroid_pos = gemmi.Position(st_centroid)
+    # st_centroid_pos = gemmi.Position(st_centroid)
 
     # Get a list of transformation matricies for symmetry ops
     ops = [op for op in structure.structure.find_spacegroup().operations() ]
