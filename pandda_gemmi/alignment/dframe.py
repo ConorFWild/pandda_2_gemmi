@@ -770,7 +770,7 @@ class GridPartitioning(GridPartitioningInterface):
         sym_mask_inner_array[all_indicies["inner"]] = 1
         print(f"Number of inner mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         # sym_mask_inner_array[points_symmetry_masked_tuple] = 0
-        sym_mask_inner_array[points_nonsymmetry_masked_tuple] += 0
+        sym_mask_inner_array[points_nonsymmetry_masked_tuple] += 1
 
         print(f"Number of inner mask points excluding those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         updated_inner_indicies = np.nonzero(sym_mask_inner_array == 2)
