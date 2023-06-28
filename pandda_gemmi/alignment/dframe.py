@@ -580,7 +580,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
 
 
         # closest_image = cell.find_nearest_image(st_centroid_pos, new_centroid)
-        pbc_difference = (st_centroid - new_centroid).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
+        pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
         pbc_difference_rounded = np.round(pbc_difference)
 
         # pbc_shift = closest_image.pbc_shift
