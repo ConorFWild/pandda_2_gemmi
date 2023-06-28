@@ -337,43 +337,43 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # TODO: Get the mask of non-unit cell translation symmetries (handled elsewhere) and subtract from all masks
         # Get mask of symmetry points in native unit cell
-        sym_mask_native = gemmi.Int8Grid(*shape)
-        sym_mask_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-        sym_mask_native.set_unit_cell(new_unit_cell)
-
-        ops = [op for op in st.structure.find_spacegroup().operations() if op.triplet() != "x,y,z"]
-
-        unit_cell = st.structure.cell
-        for atom in new_structure.protein_atoms():
-            for op in ops:
-                pos = atom.pos
-                pos_frac = unit_cell.fractionalize(pos)
-                pos_vec = op.apply_to_xyz([pos_frac.x, pos_frac.y, pos_frac.z])
-                sympos = gemmi.Position(unit_cell.orthogonalize(gemmi.Fractional(*pos_vec)))
-                sym_mask_native.set_points_around(
-                    sympos,
-                    radius=2.0,
-                    value=1,
-                )
-        sym_mask_native_array = np.array(sym_mask_native, copy=False, dtype=np.int8)
-        sym_mask_native_indicies = np.nonzero(sym_mask_native_array)
-        # print(f"Number of masked unit cell symmetry positions: {sym_mask_native_indicies[0].size}")
-        sym_mask_shifted_indicies = (
-            sym_mask_native_indicies[0] - u0,
-            sym_mask_native_indicies[1] - v0,
-            sym_mask_native_indicies[2] - w0,
-        )
-        sym_mask_shifted_indicies_masks = (
-            (sym_mask_shifted_indicies[0] > -1) & (sym_mask_shifted_indicies[0] < shape[0]),
-            (sym_mask_shifted_indicies[1] > -1) & (sym_mask_shifted_indicies[1] < shape[1]),
-            (sym_mask_shifted_indicies[2] > -1) & (sym_mask_shifted_indicies[2] < shape[2]),
-        )
-        sym_mask_shifted_indicies_mask = sym_mask_shifted_indicies_masks[0] & sym_mask_shifted_indicies_masks[1] & sym_mask_shifted_indicies_masks[2]
-        sym_mask_shifted_indicies_masked = (
-            sym_mask_shifted_indicies[0][sym_mask_shifted_indicies_mask],
-            sym_mask_shifted_indicies[1][sym_mask_shifted_indicies_mask],
-            sym_mask_shifted_indicies[2][sym_mask_shifted_indicies_mask]
-        )
+        # sym_mask_native = gemmi.Int8Grid(*shape)
+        # sym_mask_native.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+        # sym_mask_native.set_unit_cell(new_unit_cell)
+        #
+        # ops = [op for op in st.structure.find_spacegroup().operations() if op.triplet() != "x,y,z"]
+        #
+        # unit_cell = st.structure.cell
+        # for atom in new_structure.protein_atoms():
+        #     for op in ops:
+        #         pos = atom.pos
+        #         pos_frac = unit_cell.fractionalize(pos)
+        #         pos_vec = op.apply_to_xyz([pos_frac.x, pos_frac.y, pos_frac.z])
+        #         sympos = gemmi.Position(unit_cell.orthogonalize(gemmi.Fractional(*pos_vec)))
+        #         sym_mask_native.set_points_around(
+        #             sympos,
+        #             radius=2.0,
+        #             value=1,
+        #         )
+        # sym_mask_native_array = np.array(sym_mask_native, copy=False, dtype=np.int8)
+        # sym_mask_native_indicies = np.nonzero(sym_mask_native_array)
+        # # print(f"Number of masked unit cell symmetry positions: {sym_mask_native_indicies[0].size}")
+        # sym_mask_shifted_indicies = (
+        #     sym_mask_native_indicies[0] - u0,
+        #     sym_mask_native_indicies[1] - v0,
+        #     sym_mask_native_indicies[2] - w0,
+        # )
+        # sym_mask_shifted_indicies_masks = (
+        #     (sym_mask_shifted_indicies[0] > -1) & (sym_mask_shifted_indicies[0] < shape[0]),
+        #     (sym_mask_shifted_indicies[1] > -1) & (sym_mask_shifted_indicies[1] < shape[1]),
+        #     (sym_mask_shifted_indicies[2] > -1) & (sym_mask_shifted_indicies[2] < shape[2]),
+        # )
+        # sym_mask_shifted_indicies_mask = sym_mask_shifted_indicies_masks[0] & sym_mask_shifted_indicies_masks[1] & sym_mask_shifted_indicies_masks[2]
+        # sym_mask_shifted_indicies_masked = (
+        #     sym_mask_shifted_indicies[0][sym_mask_shifted_indicies_mask],
+        #     sym_mask_shifted_indicies[1][sym_mask_shifted_indicies_mask],
+        #     sym_mask_shifted_indicies[2][sym_mask_shifted_indicies_mask]
+        # )
 
         # print(f"Symmetry mask bounded to protein cell min/max: ")
         # print(f"\t{np.min(sym_mask_shifted_indicies_masked[0])} {np.max(sym_mask_shifted_indicies_masked[0])}")
@@ -772,7 +772,13 @@ class GridPartitioning(GridPartitioningInterface):
         min_inner_pos = np.min(inner_indicies, axis=0)
         max_inner_pos = np.max(inner_indicies, axis=0)
         print(f"Inner indicies min/max: {min_inner_pos} : {max_inner_pos}")
-        sym_mask_inner_array[all_indicies["inner"]] = 1
+        sym_mask_inner_array[
+            (
+                all_indicies["inner"][0]-min_pos[0],
+                all_indicies["inner"][1] - min_pos[1],
+                all_indicies["inner"][2] - min_pos[2],
+            )
+        ] = 1
         # print(f"Number of inner mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         # sym_mask_inner_array[points_symmetry_masked_tuple] = 0
         sym_mask_inner_array[points_nonsymmetry_masked_tuple] += 1
@@ -803,7 +809,14 @@ class GridPartitioning(GridPartitioningInterface):
             ),
             dtype=np.int16
         )
-        sym_mask_atomic_array[all_indicies["atomic"]] = 1
+        sym_mask_atomic_array[
+            (
+                all_indicies["atomic"][0] - min_pos[0],
+                all_indicies["atomic"][1] - min_pos[1],
+                all_indicies["atomic"][2] - min_pos[2],
+            )
+            # all_indicies["atomic"]
+        ] = 1
         # print(f"Number of atomic mask points including those closer to sym atoms: {np.sum(sym_mask_atomic_array)}")
         # sym_mask_atomic_array[points_symmetry_masked_tuple] = 0
         sym_mask_atomic_array[points_nonsymmetry_masked_tuple] += 1
