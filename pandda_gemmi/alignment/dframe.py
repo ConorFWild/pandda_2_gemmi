@@ -702,7 +702,7 @@ class GridPartitioning(GridPartitioningInterface):
         # # max_pos = np.max(point_position_array.points, axis=0)
         min_pos = np.min(outer_incicies, axis=0)
         max_pos = np.max(outer_incicies, axis=0)
-        # print(f"Outer indicies min/max: {min_pos} : {max_pos}")
+        print(f"Outer indicies min/max: {min_pos} : {max_pos}")
 
         # print(f"Outer indicies shape: {points_nonsymmetry_masked.shape}")
         # min_pos = np.min(points_nonsymmetry_masked, axis=0)
@@ -767,6 +767,10 @@ class GridPartitioning(GridPartitioningInterface):
             ),
             dtype=np.int16
         )
+        inner_indicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["inner"]], axis=1)
+        min_pos = np.min(inner_indicies, axis=0)
+        max_pos = np.max(inner_indicies, axis=0)
+        print(f"Inner indicies min/max: {min_pos} : {max_pos}")
         sym_mask_inner_array[all_indicies["inner"]] = 1
         # print(f"Number of inner mask points including those closer to sym atoms: {np.sum(sym_mask_inner_array)}")
         # sym_mask_inner_array[points_symmetry_masked_tuple] = 0
