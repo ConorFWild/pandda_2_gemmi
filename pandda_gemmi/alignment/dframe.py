@@ -585,11 +585,14 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
 
         # pbc_shift = closest_image.pbc_shift
         # pbc_shift_cart = np.array(pbc_shift[0]*cell.a, pbc_shift[0]*cell.b, pbc_shift[0]*cell.c)
-        closest_image_sympos = sympos + np.array([pbc_difference_rounded[0], pbc_difference_rounded[1], pbc_difference_rounded[2], 0]).reshape((1,4))
+        closest_image_sympos = sympos + np.array(
+            [
+                pbc_difference_rounded[0], pbc_difference_rounded[1], pbc_difference_rounded[2], 0
+            ]
+        ).reshape((1,4))
 
 
         for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
-
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
                     continue
@@ -602,7 +605,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
             # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
             # transmat =
             # ...
-            symatoms_list.append(closest_image_sympos + np.array([dx, dy, dz, 0]).reshape((1,4)))
+            symatoms_list.append(closest_image_sympos + np.array([dx*cell.a, dy*cell.b, dz*cell.c, 0]).reshape((1,4)))
 
     # print(f"Symmatrix shape: {symops[0].shape}")
 
