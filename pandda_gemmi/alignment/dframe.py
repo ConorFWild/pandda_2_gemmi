@@ -602,7 +602,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array):
             # rotmat = np.array(op.rot, dtype=np.float32) / 24.0
             # transmat =
             # ...
-            symatoms_list.append(closest_image_sympos + np.array([dy, dy, dz]))
+            symatoms_list.append(closest_image_sympos + np.array([dx, dy, dz]))
 
     print(f"Symmatrix shape: {symops[0].shape}")
 
