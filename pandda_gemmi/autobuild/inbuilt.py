@@ -462,7 +462,7 @@ class AutobuildInbuilt:
         dmap = load_dmap(dmap_path)
         score_grid = get_score_grid(dmap, st, event)
 
-        save_dmap(score_grid, out_dir / "score_grid.ccp4")
+        # save_dmap(score_grid, out_dir / "score_grid.ccp4")
 
         # ligand_scoring_results = {}
         # for ligand_key, ligand_files in dataset.ligand_files.items():
