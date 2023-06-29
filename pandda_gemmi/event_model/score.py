@@ -227,6 +227,10 @@ def parse_pdb_file_for_ligand_array(path):
 def get_ligand_map_from_path(path, n, step, translation):
     # Get the ligand array
     ligand_array = parse_pdb_file_for_ligand_array(path)
+
+    if ligand_array.shape[1] < 2:
+        return None
+
     rotation_matrix = R.random().as_matrix()
     rng = default_rng()
     random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
@@ -243,7 +247,7 @@ def get_ligand_map_from_path(path, n, step, translation):
     dummy_grid.set_unit_cell(unit_cell)
 
     for pos_array in augmented_array:
-        assert pos_array.size == 3
+        # assert pos_array.size == 3
         if np.all(pos_array > 0):
             if np.all(pos_array < (n * step)):
                 dummy_grid.set_points_around(
@@ -284,8 +288,8 @@ def get_ligand_map_from_ligand_files(
                 path = ligand_files.ligand_pdb
                 print(f"Getting ligand map from file: {path}")
                 ligand_map = get_ligand_map_from_path(path, n, step, translation)
-
-                return ligand_map
+                if ligand_map is not None:
+                    return ligand_map
 
     print(f"Couldn't find ligand files!")
     return None
