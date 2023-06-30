@@ -228,7 +228,7 @@ def get_ligand_map_from_path(path, n, step, translation):
     # Get the ligand array
     ligand_array = parse_pdb_file_for_ligand_array(path)
 
-    if ligand_array.shape[1] < 2:
+    if ligand_array.size < 6:
         return None
 
     rotation_matrix = R.random().as_matrix()
