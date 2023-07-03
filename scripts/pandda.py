@@ -192,6 +192,11 @@ def pandda(args: PanDDAArgs):
         # ]:
         #     continue
 
+        if dtag not in [
+            "Mpro-i0206"
+        ]:
+            continue
+
         time_begin_process_dataset = time.time()
 
         # Get the dataset

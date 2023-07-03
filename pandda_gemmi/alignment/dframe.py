@@ -590,7 +590,9 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
         # pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten() / np.array([cell.a, cell.b, cell.c]).flatten()
         pbc_difference = (st_centroid - np.array([new_centroid[0], new_centroid[1], new_centroid[2]])).flatten()
 
+
         pbc_difference_rounded = np.round(pbc_difference)
+        print(f"Op: {op.triplet()} : diff: {pbc_difference} : diff rounded: {pbc_difference_rounded} : st centroid: {st_centroid}")
 
         # pbc_shift = closest_image.pbc_shift
         # pbc_shift_cart = np.array(pbc_shift[0]*cell.a, pbc_shift[0]*cell.b, pbc_shift[0]*cell.c)
@@ -609,6 +611,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
         for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
+                    print(f"\t\tSkipping!")
                     continue
 
             # fractional_seitz = np.array(op.float_seitz())
