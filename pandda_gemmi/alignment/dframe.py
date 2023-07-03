@@ -609,6 +609,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
 
         for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
+            print(f"\t{dx} {dy} {dz}")
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
                     print(f"\t\tSkipping!")
