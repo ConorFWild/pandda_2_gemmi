@@ -126,7 +126,7 @@ def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smi
                 ligand_smiles_regex,
                 ligand_pdb_regex,
             )
-            print(f"Matched ligand dir with {len(ligand_dir_ligands)} ligands!!")
+            # print(f"Matched ligand dir with {len(ligand_dir_ligands)} ligands!!")
             # path_ligands.update(ligand_dir_ligands)
             for ligand_key, ligand_files in ligand_dir_ligands.items():
                 # Only update if more complete
