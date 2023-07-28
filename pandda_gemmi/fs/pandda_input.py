@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+import gemmi
 from pandda_gemmi import constants
 
 def check_pdb_file(path):
