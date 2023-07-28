@@ -15,7 +15,8 @@ def check_pdb_file(path):
 
         if num_atoms > 1:
             return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 
@@ -23,14 +24,16 @@ def check_mtz_file(path):
     try:
         mtz = gemmi.read_mtz_file(str(path))
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def check_cif_file(path):
     try:
         cif = gemmi.cif.read_file(str(path))
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def check_smiles_file(path):
@@ -39,7 +42,8 @@ def check_smiles_file(path):
             smiles = f.read()
         if len(smiles) > 1:
             return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def get_input_pdb_file(path, pdb_regex):
