@@ -100,7 +100,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                 else:
                     ligand_keys[stem] = LigandFiles(None, file_path, None)
         elif re.match(ligand_pdb_regex, name):
-            if check_pdb_file(ligand_pdb_regex):
+            if check_pdb_file(file_path):
                 if stem in ligand_keys:
                     ligand_keys[stem].ligand_pdb = file_path
                 else:
