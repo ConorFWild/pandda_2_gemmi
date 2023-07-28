@@ -117,7 +117,7 @@ def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smi
     path_ligands = {}
     for ligand_dir_path in path.glob("*"):
         print(f"Attempting match of {ligand_dir_path.name} to {ligand_dir_regex}")
-        match = re.match(str(ligand_dir_regex), str(path.name))
+        match = re.match(str(ligand_dir_regex), str(ligand_dir_path.name))
         print(f"Match: {match}")
         if match:
             ligand_dir_ligands = parse_dir_ligands(
