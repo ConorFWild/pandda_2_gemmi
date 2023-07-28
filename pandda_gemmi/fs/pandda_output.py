@@ -16,7 +16,7 @@ def try_make(path):
 
 def try_link(src, dst):
     try:
-        os.symlink(src, dst)
+        os.symlink(Path(src).resolve(), dst)
     except Exception as e:
         return
 

@@ -3,6 +3,44 @@ from pathlib import Path
 
 from pandda_gemmi import constants
 
+def check_pdb_file(path):
+    try:
+        st = gemmi.read_structure(str(path))
+        num_atoms = 0
+        for model in st:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        num_atoms += 1
+
+        if num_atoms > 1:
+            return True
+    except:
+        return False
+
+
+def check_mtz_file(path):
+    try:
+        mtz = gemmi.read_mtz_file(str(path))
+        return True
+    except:
+        return False
+
+def check_cif_file(path):
+    try:
+        cif = gemmi.cif.read_file(str(path))
+        return True
+    except:
+        return False
+
+def check_smiles_file(path):
+    try:
+        with open(path, 'r') as f:
+            smiles = f.read()
+        if len(smiles) > 1:
+            return True
+    except:
+        return False
 
 def get_input_pdb_file(path, pdb_regex):
     input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
@@ -10,6 +48,8 @@ def get_input_pdb_file(path, pdb_regex):
         input_pdb_file = None
     else:
         input_pdb_file: Path = input_pdb_files[0]
+        if not check_pdb_file(input_pdb_file):
+            input_pdb_file = None
     return input_pdb_file
 
 
@@ -19,6 +59,8 @@ def get_input_mtz_file(path, mtz_regex):
         input_mtz_file = None
     else:
         input_mtz_file: Path = input_mtz_files[0]
+        if not check_mtz_file(input_mtz_file):
+            input_mtz_file = None
     return input_mtz_file
 
 
@@ -40,21 +82,24 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
             continue
 
         if re.match(ligand_cif_regex, name):
-            if stem in ligand_keys:
-                ligand_keys[stem].ligand_cif = file_path
-            else:
-                ligand_keys[stem] = LigandFiles(file_path, None, None)
+            if check_cif_file(file_path):
+                if stem in ligand_keys:
+                    ligand_keys[stem].ligand_cif = file_path
+                else:
+                    ligand_keys[stem] = LigandFiles(file_path, None, None)
 
         elif re.match(ligand_smiles_regex, name):
-            if stem in ligand_keys:
-                ligand_keys[stem].ligand_smiles = file_path
-            else:
-                ligand_keys[stem] = LigandFiles(None, file_path, None)
+            if check_smiles_file(file_path):
+                if stem in ligand_keys:
+                    ligand_keys[stem].ligand_smiles = file_path
+                else:
+                    ligand_keys[stem] = LigandFiles(None, file_path, None)
         elif re.match(ligand_pdb_regex, name):
-            if stem in ligand_keys:
-                ligand_keys[stem].ligand_pdb = file_path
-            else:
-                ligand_keys[stem] = LigandFiles(None, None, file_path)
+            if check_pdb_file(ligand_pdb_regex):
+                if stem in ligand_keys:
+                    ligand_keys[stem].ligand_pdb = file_path
+                else:
+                    ligand_keys[stem] = LigandFiles(None, None, file_path)
 
         else:
             continue

@@ -167,6 +167,7 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
 
+
         # if dtag != "JMJD2DA-x427":
         #     continue
 
@@ -202,6 +203,11 @@ def pandda(args: PanDDAArgs):
 
         # Get the dataset
         dataset = datasets[dtag]
+
+        # Skip if no ligands
+        if len(dataset.ligand_files) == 0:
+            print(f"No ligand files for this dataset! Skipping!")
+            continue
 
         # Get the resolution of the dataset
         dataset_res = dataset.reflections.resolution()
