@@ -140,7 +140,7 @@ class SmoothReflections:
                                               )
 
         original_reflections_table = pd.DataFrame(original_reflections_array,
-                                                  columns=reference_reflections.column_labels(),
+                                                  columns=dtag_reflections.column_labels(),
                                                   )
 
         f_array = original_reflections_table[dataset.reflections.f]
