@@ -4,6 +4,8 @@ import numpy as np
 
 from pandda_gemmi.interfaces import *
 
+from pandda_gemmi import serialize
+
 from pandda_gemmi.args import PanDDAArgs
 
 from pandda_gemmi.fs import PanDDAFS
@@ -160,6 +162,10 @@ def pandda(args: PanDDAArgs):
     structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
                             datasets}
     console.summarise_datasets(datasets, fs)
+    # metadata.save_input_data_metadata()
+    serialize.input_data(
+        fs, datasets, fs.output.path / "input.yaml"
+    )
 
     # Process each dataset
     pandda_events = {}
@@ -334,7 +340,6 @@ def pandda(args: PanDDAArgs):
             characterization_set_mask = np.array(characterization_set_mask_list)
             characterization_set_masks[model_number] = characterization_set_mask
 
-
         model_scores = {}
         for model_number in characterization_set_masks:
             characterization_set_dmaps_array = dmaps[characterization_set_masks[model_number], :]
@@ -369,7 +374,7 @@ def pandda(args: PanDDAArgs):
                 _l = _l + 1
 
         print(f"Models to process: {models_to_process}")
-
+        # serialize.models()
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
@@ -386,7 +391,6 @@ def pandda(args: PanDDAArgs):
             for model_number
             in models_to_process
         }
-
 
         for model_number, result in processed_models.items():
             if result[0] is not None:
@@ -422,7 +426,9 @@ def pandda(args: PanDDAArgs):
             pandda_events[event_id] = event
 
         # Output models
-        output_models(fs, characterization_sets, selected_model_num)
+        # output_models(fs, characterization_sets, selected_model_num)
+        # serialize.processed_models()
+
 
         # Output events
         output_events(fs, top_selected_model_events)
@@ -444,10 +450,25 @@ def pandda(args: PanDDAArgs):
 
         time_finish_process_dataset = time.time()
         print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
+        serialize.processed_dataset(
+            comparator_datasets,
+            processing_res,
+            characterization_sets,
+            models_to_process,
+            processed_models,
+            selected_model_num,
+            selected_model_events,
+            reference_frame,
+            fs.output.processed_datasets[dtag] / f"processed_dataset.yaml"
+        )
+
+        # metadata.save_dataset_metadata()
 
     time_finish_process_datasets = time.time()
     print(
         f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
+
+
 
     # console.summarise_shells(shell_results, all_events, event_scores)
 
@@ -556,7 +577,12 @@ def pandda(args: PanDDAArgs):
         # MergeHighestRSCC(),
         # MergeHighestBuildScore()
         MergeHighestBuildAndEventScore()
-
+    )
+    # metadata.save_autobuilding_metadata()
+    serialize.processed_autobuilds(
+        datasets,
+        event_autobuilds,
+        fs.output.path / "autobuilds.yaml"
     )
 
     # Get the sites

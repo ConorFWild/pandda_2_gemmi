@@ -4,6 +4,7 @@ from pathlib import Path
 import gemmi
 from pandda_gemmi import constants
 
+
 def check_pdb_file(path):
     try:
         st = gemmi.read_structure(str(path))
@@ -29,6 +30,7 @@ def check_mtz_file(path):
         print(e)
         return False
 
+
 def check_cif_file(path):
     try:
         cif = gemmi.cif.read_file(str(path))
@@ -36,6 +38,7 @@ def check_cif_file(path):
     except Exception as e:
         print(e)
         return False
+
 
 def check_smiles_file(path):
     try:
@@ -46,6 +49,7 @@ def check_smiles_file(path):
     except Exception as e:
         print(e)
         return False
+
 
 def get_input_pdb_file(path, pdb_regex):
     input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
