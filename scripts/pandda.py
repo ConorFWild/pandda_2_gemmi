@@ -175,8 +175,8 @@ def pandda(args: PanDDAArgs):
         print(f"Processing dataset: {dtag}")
 
 
-        # if dtag != "JMJD2DA-x427":
-        #     continue
+        if dtag != "JMJD2DA-x427":
+            continue
 
         # if dtag != "JMJD2DA-x427":
         #     continue
