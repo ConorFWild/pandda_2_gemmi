@@ -153,7 +153,7 @@ class ClusterDensityDBSCAN:
         # cutoff = max(np.quantile(z, 0.95), 2.0)
         cutoff = max(np.quantile(z, 0.98), 2.0)
 
-        print(f"Cutoff is: {cutoff}")
+        # print(f"Cutoff is: {cutoff}")
         high_z_all_points_mask = z_unmasked_array[all_point_indexes_mod] > cutoff
 
 
@@ -189,7 +189,7 @@ class ClusterDensityDBSCAN:
             dists.append(dist)
 
         eps = max(dists)*1.5
-        print(f"Got an eps of: {eps}")
+        # print(f"Got an eps of: {eps}")
 
         clusters = DBSCAN(eps=eps, min_samples=15).fit_predict(high_z_pos_array)
 

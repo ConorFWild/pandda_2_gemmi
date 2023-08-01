@@ -103,7 +103,7 @@ def process_model(
     ]:
         events = filter(events)
 
-    print(f"After filer size and cluster: {len(events)}")
+    # print(f"After filer size and cluster: {len(events)}")
 
     # Return None if there are no events after pre-scoring filters
     if len(events) == 0:
@@ -115,7 +115,7 @@ def process_model(
                    median,
                    )
     time_finish_score_events = time.time()
-    print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
+    # print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 
     # Filter the events after scoring based on their score and keeping only the locally highest scoring event
     for filter in [
@@ -126,7 +126,7 @@ def process_model(
 
     ]:
         events = filter(events)
-    print(f"After filter score: {len(events)}")
+    # print(f"After filter score: {len(events)}")
 
     # Return None if there are no events after post-scoring filters
     if len(events) == 0:

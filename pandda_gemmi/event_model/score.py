@@ -141,10 +141,10 @@ class ScoreCNN:
         for event_id, event in events.items():
             centroid = np.mean(event.pos_array, axis=0)
             dist = np.linalg.norm(centroid - [6.0, -4.0, 25.0])
-            if dist < 5.0:
-                print(f"##### {event_id} #####")
-                print(f"Centroid: {centroid}")
-                print(f"Distance: {dist}")
+            # if dist < 5.0:
+            #     print(f"##### {event_id} #####")
+            #     print(f"Centroid: {centroid}")
+            #     print(f"Distance: {dist}")
             sample_transform = get_sample_transform_from_event(
                 centroid,
                 0.5,
@@ -286,12 +286,12 @@ def get_ligand_map_from_ligand_files(
             if ligand_files.ligand_pdb:
 
                 path = ligand_files.ligand_pdb
-                print(f"Getting ligand map from file: {path}")
+                # print(f"Getting ligand map from file: {path}")
                 ligand_map = get_ligand_map_from_path(path, n, step, translation)
                 if ligand_map is not None:
                     return ligand_map
 
-    print(f"Couldn't find ligand files!")
+    # print(f"Couldn't find ligand files!")
     return None
 
 
@@ -368,7 +368,7 @@ class ScoreCNNLigand:
             images[event_id] = image
 
         time_finish_get_images = time.time()
-        print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
+        # print(f"\t\t\t\tGot images in: {round(time_finish_get_images - time_begin_get_images, 2)}")
 
 
         # Score each event
@@ -403,7 +403,7 @@ class ScoreCNNLigand:
             )
             scored_events[event_id] = scored_event
         time_finish_score_images = time.time()
-        print(f"\t\t\t\tScored images in: {round(time_finish_score_images - time_begin_score_images, 2)} of which {round(sum(cnn_times), 2)} was in cnn")
+        # print(f"\t\t\t\tScored images in: {round(time_finish_score_images - time_begin_score_images, 2)} of which {round(sum(cnn_times), 2)} was in cnn")
 
 
         return scored_events
