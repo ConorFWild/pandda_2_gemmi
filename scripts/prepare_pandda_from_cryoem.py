@@ -4,8 +4,8 @@ import fire
 
 from pandda_gemmi.cryoem.mrc_to_mtz import mrc_to_mtz
 
-def prepare_pandda_from_cryoem(input_dir, output_dir, mrc_regex="*.mrc"):
 
+def prepare_pandda_from_cryoem(input_dir, output_dir, mrc_regex="*.mrc"):
     # Get the input and output dir
     input_dir, output_dir = Path(input_dir), Path(output_dir)
 

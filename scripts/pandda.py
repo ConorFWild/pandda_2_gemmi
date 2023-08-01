@@ -380,7 +380,6 @@ def pandda(args: PanDDAArgs):
         # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
         top_selected_model_events = filter_selected_events(dtag, selected_events)
 
-
         for event_id, event in top_selected_model_events.items():
             pandda_events[event_id] = event
 
