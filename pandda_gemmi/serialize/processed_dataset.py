@@ -58,6 +58,6 @@ def processed_dataset(
         }
 
     with open(path, 'w') as f:
-        yaml.dump(dic, f)
+        yaml.dump(dic, f, sort_keys=False)
 
     ...

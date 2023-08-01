@@ -44,5 +44,5 @@ def input_data(fs: PanDDAFSInterface, datasets: Dict[str, DatasetInterface], pat
         }
 
     with open(path, 'w') as f:
-        yaml.dump(dic, f)
+        yaml.dump(dic, f, sort_keys=False)
     ...
