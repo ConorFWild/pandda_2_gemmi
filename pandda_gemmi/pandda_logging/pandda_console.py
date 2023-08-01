@@ -647,6 +647,8 @@ class PanDDAConsole:
 
     def processed_dataset(
             self,
+            dtag: str,
+            dataset: DatasetInterface,
             comparator_datasets: Dict[str, DatasetInterface],
             processing_res: float,
             characterization_sets: Dict[int, Dict[str, DatasetInterface]],
@@ -655,6 +657,12 @@ class PanDDAConsole:
             selected_model_num: int,
             selected_model_events: Dict[int, EventInterface],
                           ):
+
+        for ligand_key, ligand_files in dataset.ligand_files.items():
+            self.console.print(self.indent_text(f"Ligand Key: {ligand_key}"))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_pdb}"))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_cif}"))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_smiles}"))
 
         self.console.print(self.indent_text(f"Processed Models: {models_to_process}"))
         self.console.print(self.indent_text(f"Selected model: {selected_model_num}"))
@@ -676,7 +684,6 @@ class PanDDAConsole:
             events, z, mean = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
             self.console.print(self.indent_text(f"Number of events: {events}"))
-
 
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")

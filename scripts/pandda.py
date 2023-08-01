@@ -416,6 +416,8 @@ def pandda(args: PanDDAArgs):
         )
 
         console.processed_dataset(
+            dtag,
+            dataset,
             comparator_datasets,
             processing_res,
             characterization_sets,
