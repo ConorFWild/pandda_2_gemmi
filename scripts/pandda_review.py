@@ -17,7 +17,11 @@ def __main__():
 
     st.write(pandda_inspect_events)
 
-    st.write(pd.read_csv(pandda_inspect_events))
+
+
+    table = pd.read_csv(pandda_inspect_events)
+    st.line_chart(data=table, x=None, y="z_peak")
+    st.write(table)
 
 
 if __name__ == "__main__":
