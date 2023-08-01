@@ -6,6 +6,10 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
+@st.cache_data
+def get_table(pandda_inspect_events):
+    return pd.read_csv(pandda_inspect_events)
+
 def __main__():
     parser = argparse.ArgumentParser()
     parser.add_argument("pandda_dir")
@@ -18,7 +22,7 @@ def __main__():
 
     st.write(pandda_inspect_events)
 
-    table = pd.read_csv(pandda_inspect_events)
+    table = get_table(pandda_inspect_events)
     st.line_chart(data=table, x=None, y="z_peak", )
 
     fig = plt.figure()
