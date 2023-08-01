@@ -80,6 +80,9 @@ class PanDDAConsole:
     def wrap_title(self, string):
         return Panel(Align.center(f"[bold]{string}"))
 
+    def wrap_subtitle(self, string):
+        return self.console.rule(string)
+
     def start_dependancy_check(self):
         printable = self.wrap_title(constants.CONSOLE_START_DEPENDENCY_CHECK)
         self.console.print(printable)
@@ -658,17 +661,19 @@ class PanDDAConsole:
             selected_model_events: Dict[int, EventInterface],
                           ):
 
+        self.wrap_subtitle("Ligand Files")
         for ligand_key, ligand_files in dataset.ligand_files.items():
             self.console.print(self.indent_text(f"Ligand Key: {ligand_key}"))
             self.console.print(self.indent_text(f"{ligand_files.ligand_pdb}", indent=8))
             self.console.print(self.indent_text(f"{ligand_files.ligand_cif}", indent=8))
             self.console.print(self.indent_text(f"{ligand_files.ligand_smiles}", indent=8))
 
+        self.wrap_subtitle("Model Information")
         self.console.print(self.indent_text(f"Processed Models: {models_to_process}"))
         self.console.print(self.indent_text(f"Selected model: {selected_model_num}"))
         self.console.print(self.indent_text(f"Got {len(comparator_datasets)} comparator datasets"))
 
-        self.console.print(self.indent_text(f"Dataset processed at resolution: {processing_res}"))
+        # self.console.print(self.indent_text(f"Dataset processed at resolution: {processing_res}"))
 
         self.console.print(self.indent_text(f"Model Information:"))
         for model_number, characterization_set in characterization_sets.items():
@@ -679,7 +684,8 @@ class PanDDAConsole:
                 self.console.print(self.indent_text(f"Processed: False"))
             self.console.print(self.indent_text(Columns(characterization_set), indent=8))
 
-        self.console.print(self.indent_text(f"Processed Model Results:"))
+        self.wrap_subtitle(f"Processed Model Results")
+        # self.console.print(self.indent_text(f"Processed Model Results:"))
         for model_number, processed_model in processed_models.items():
             events, z, mean = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
