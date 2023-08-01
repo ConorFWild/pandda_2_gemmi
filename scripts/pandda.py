@@ -196,6 +196,9 @@ def pandda(args: PanDDAArgs):
         # Print basic information of the dataset to be processed
         print(f"Processing dataset: {dtag}")
 
+        if dtag != "JMJD2DA-x427":
+            continue
+
         # Record the time that dataset processing begins
         time_begin_process_dataset = time.time()
 
