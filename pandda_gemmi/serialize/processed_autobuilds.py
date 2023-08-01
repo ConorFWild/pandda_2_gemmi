@@ -35,6 +35,7 @@ def processed_autobuilds(
                     }
                     for ligand_key, ligand_autobuild_results
                     in autobuild.items()
+                    if ligand_autobuild_results
                 }
 
             }
