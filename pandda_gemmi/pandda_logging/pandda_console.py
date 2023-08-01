@@ -637,6 +637,7 @@ class PanDDAConsole:
         printable = self.indent_text(f"Processing Resolution: {round(processing_res, 2)}")
         self.console.print(printable)
 
+        self.wrap_subtitle(f"Comparator Datasets")
         printable = self.indent_text(Columns([x for x in sorted(comparator_datasets)]))
         self.console.print(printable)
 
