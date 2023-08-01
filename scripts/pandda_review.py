@@ -16,7 +16,7 @@ def __main__():
 
     args = parser.parse_args()
 
-    pandda_inspect_events = Path(args.pandda_dir) / "analyses" / "pandda_inspect_events.csv"
+    pandda_inspect_events = Path(args.pandda_dir) / "analyses" / "pandda_analyse_events.csv"
 
     st.title("PanDDA Inspect Table")
 
