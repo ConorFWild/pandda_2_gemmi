@@ -13,6 +13,10 @@ def __main__():
 
     pandda_inspect_events = Path(args.pandda_dir) / "analyses" / "pandda_inspect_events.csv"
 
+    st.title("PanDDA Inspect Table")
+
+    st.write(pandda_inspect_events)
+
     st.write(pd.read_csv(pandda_inspect_events))
 
 
