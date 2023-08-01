@@ -196,7 +196,6 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
         # Print basic information of the dataset to be processed
-        # print(f"Processing dataset: {dtag}")
 
         if dtag != "JMJD2DA-x427":
             continue

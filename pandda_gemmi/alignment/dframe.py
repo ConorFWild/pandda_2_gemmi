@@ -612,7 +612,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
             # print(f"\t{dx} {dy} {dz}")
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
-                    print(f"\t\tSkipping!")
+                    # print(f"\t\tSkipping!")
                     continue
 
             # fractional_seitz = np.array(op.float_seitz())
