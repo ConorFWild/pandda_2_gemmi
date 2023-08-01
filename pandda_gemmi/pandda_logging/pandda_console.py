@@ -631,10 +631,10 @@ class PanDDAConsole:
         printable = self.indent_text(f"Resolution: {round(dataset_res, 2)}")
         self.console.print(printable)
 
-        printable = self.indent_text(f"Processing Resolution: {processing_res}")
+        printable = self.indent_text(f"Processing Resolution: {round(processing_res, 2)}")
         self.console.print(printable)
 
-        printable = self.indent_text(Pretty([x for x in comparator_datasets]))
+        printable = self.indent_text(Columns([x for x in sorted(comparator_datasets)]))
         self.console.print(printable)
 
     def insufficient_comparators(self, comparator_datasets):
