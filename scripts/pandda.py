@@ -406,6 +406,7 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             processing_res,
             characterization_sets,
+            model_scores,
             models_to_process,
             processed_models,
             selected_model_num,
