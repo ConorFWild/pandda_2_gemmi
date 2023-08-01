@@ -500,6 +500,9 @@ def pandda(args: PanDDAArgs):
     )
 
     #
+    console.processed_autobuilds(autobuilds)
+
+    #
     serialize.processed_autobuilds(
         datasets,
         event_autobuilds,

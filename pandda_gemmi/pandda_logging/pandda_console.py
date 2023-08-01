@@ -692,6 +692,30 @@ class PanDDAConsole:
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
             self.console.print(self.indent_text(f"Number of events: {len(events)}", indent=8))
 
+    def processed_autobuilds(self, autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]]):
+        nested_autobuilds = {}
+        for event_id, ligand_autobuild_results in autobuilds.items():
+            dtag, event_idx = event_id
+            if dtag not in nested_autobuilds:
+                nested_autobuilds[dtag] = {}
+
+            nested_autobuilds[dtag][event_idx] = {}
+
+            for ligand_key, autobuild_results in ligand_autobuild_results.items():
+                nested_autobuilds[dtag][event_idx][ligand_key] = autobuild_results
+
+        for dtag in sorted(nested_autobuilds):
+            self.wrap_subtitle(dtag)
+            dtag_events = nested_autobuilds[dtag]
+            for event_idx in sorted(dtag_events):
+                event_ligand_autobuilds: Dict[str, AutobuildInterface] = dtag_events[event_idx]
+                for ligand_key, autobuild_results in event_ligand_autobuilds.items():
+                    if autobuild_results:
+                        if len(autobuild_results.log_result_dict) > 0:
+                            max_score = max(autobuild_results.log_result_dict, key= lambda x: autobuild_results.log_result_dict[x])
+                            printable = self.indent_text(f"{max_score}: {autobuild_results.log_result_dict[max_score]}")
+                            self.console.print(printable)
+
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
         self.console.print(printable)
