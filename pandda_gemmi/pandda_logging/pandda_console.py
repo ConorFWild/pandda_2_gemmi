@@ -672,7 +672,7 @@ class PanDDAConsole:
         self.wrap_subtitle("Model Information")
         self.console.print(self.indent_text(f"Processed Models: {models_to_process}"))
         self.console.print(self.indent_text(f"Selected model: {selected_model_num}"))
-        self.console.print(self.indent_text(f"Got {len(comparator_datasets)} comparator datasets"))
+        # self.console.print(self.indent_text(f"Got {len(comparator_datasets)} comparator datasets"))
 
         # self.console.print(self.indent_text(f"Dataset processed at resolution: {processing_res}"))
 
