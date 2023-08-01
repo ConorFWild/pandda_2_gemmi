@@ -25,6 +25,7 @@ def __main__():
 
     fig = plt.figure()
     plt.scatter(x=table["z_peak"], y=table["cluster_size"], s=0.1)
+    plt.yscale("log")
     st.pyplot(fig)
 
     st.write(table)
