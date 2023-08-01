@@ -132,6 +132,8 @@ def process_model(
     if len(events) == 0:
         return None, None, None
 
+    events = {j+1: event for j, event in enumerate(events.values())}
+
     return events, mean, z
 
 
