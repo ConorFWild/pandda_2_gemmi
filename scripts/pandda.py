@@ -414,7 +414,7 @@ def pandda(args: PanDDAArgs):
             models_to_process,
             processed_models,
             selected_model_num,
-            selected_events,
+            top_selected_model_events,
             reference_frame,
             fs.output.processed_datasets[dtag] / f"processed_dataset.yaml"
         )
@@ -428,7 +428,7 @@ def pandda(args: PanDDAArgs):
             models_to_process,
             processed_models,
             selected_model_num,
-            selected_events,
+            top_selected_model_events,
         )
 
     time_finish_process_datasets = time.time()

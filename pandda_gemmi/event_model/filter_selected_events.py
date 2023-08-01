@@ -11,4 +11,6 @@ def filter_selected_events(dtag, selected_events, ):
             )
         )[:3]
     }
+
+    top_selected_model_events = {j+1: event for j, event in enumerate(top_selected_model_events.values())}
     return top_selected_model_events
