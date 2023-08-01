@@ -30,14 +30,15 @@ def __main__():
     plt.yscale("log")
     st.pyplot(fig)
 
-    event_ids = []
+    events = {}
     for _idx, _row in table.iterrows():
         dtag, event_idx = _row["dtag"], _row["event_idx"]
-        event_ids.append((dtag, event_idx))
-    option = st.selectbox("", event_ids)
+        events[(dtag, event_idx)] = _row
+    option = st.selectbox("", [x for x in events])
 
     if option is not None:
         st.write(f"{option[0]} : {option[1]}")
+        st.write(events[option])
 
     st.write(table)
 
