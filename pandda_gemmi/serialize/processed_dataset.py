@@ -12,7 +12,7 @@ def processed_dataset(
         models_to_process: List[int],
         processed_models: Dict[int, Tuple[Dict[Tuple[str, int], EventInterface], Any, Any]],
         selected_model_num: int,
-        selected_model_events: Dict[Tuple[str, int], EventInterface],
+        selected_model_events: Dict[ int, EventInterface],
         reference_frame: DFrameInterface,
         path
 ):

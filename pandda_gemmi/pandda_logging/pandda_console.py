@@ -9,6 +9,7 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.table import Table
 from rich.pretty import Pretty
+from rich.columns import Columns
 
 from pandda_gemmi.interfaces import *
 from pandda_gemmi import constants
@@ -615,6 +616,69 @@ class PanDDAConsole:
             )
 
         self.console.print(table)
+
+    def begin_dataset_processing(
+            self,
+            dtag: str,
+            dataset: DatasetInterface,
+            dataset_res: float,
+            comparator_datasets: Dict[str, DatasetInterface],
+            processing_res: float
+                                 ):
+        printable = self.wrap_title(dtag)
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Resolution: {round(dataset_res, 2)}")
+        self.console.print(printable)
+
+        printable = self.indent_text(f"Processing Resolution: {processing_res}")
+        self.console.print(printable)
+
+        printable = self.indent_text(Pretty([x for x in comparator_datasets]))
+        self.console.print(printable)
+
+    def insufficient_comparators(self, comparator_datasets):
+        printable = self.indent_text(f"NOT ENOUGH COMPARATOR DATASETS: {len(comparator_datasets)}! SKIPPING!")
+        self.console.print(printable)
+
+    def no_ligand_data(self):
+        printable = self.indent_text(f"No ligand files for this dataset! Skipping!")
+        self.console.print(printable)
+
+    def processed_dataset(
+            self,
+            comparator_datasets: Dict[str, DatasetInterface],
+            processing_res: float,
+            characterization_sets: Dict[int, Dict[str, DatasetInterface]],
+            models_to_process: List[int],
+            processed_models: Dict[int, Tuple[Dict[Tuple[str, int], EventInterface], Any, Any]],
+            selected_model_num: int,
+            selected_model_events: Dict[int, EventInterface],
+                          ):
+
+        self.console.print(self.indent_text(f"Processed Models: {models_to_process}"))
+        self.console.print(self.indent_text(f"Selected model: {selected_model_num}"))
+        self.console.print(self.indent_text(f"Got {len(comparator_datasets)} comparator datasets"))
+
+        self.console.print(self.indent_text(f"Dataset processed at resolution: {processing_res}"))
+
+        self.console.print(self.indent_text(f"Model Information:"))
+        for model_number, characterization_set in characterization_sets.items():
+            self.console.print(self.indent_text(f"Model Number: {model_number}"))
+            if model_number in models_to_process:
+                self.console.print(self.indent_text(f"Processed: True"))
+            else:
+                self.console.print(self.indent_text(f"Processed: False"))
+            self.console.print(self.indent_text(Columns(characterization_set)))
+
+        self.console.print(self.indent_text(f"Processed Model Results:"))
+        for model_number, processed_model in processed_models.items():
+            events, z, mean = processed_models[model_number]
+            self.console.print(self.indent_text(f"Model Number: {model_number}"))
+            self.console.print(self.indent_text(f"Number of events: {events}"))
+
+
+        ...
 
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
