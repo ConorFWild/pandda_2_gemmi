@@ -678,8 +678,6 @@ class PanDDAConsole:
             self.console.print(self.indent_text(f"Number of events: {events}"))
 
 
-        ...
-
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
         self.console.print(printable)
