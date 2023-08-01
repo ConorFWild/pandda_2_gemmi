@@ -675,14 +675,14 @@ class PanDDAConsole:
 
         # self.console.print(self.indent_text(f"Dataset processed at resolution: {processing_res}"))
 
-        self.console.print(self.indent_text(f"Model Information"))
+        # self.console.print(self.indent_text(f"Model Information"))
         for model_number, characterization_set in characterization_sets.items():
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
             if model_number in models_to_process:
                 self.console.print(self.indent_text(f"Processed: True"))
             else:
                 self.console.print(self.indent_text(f"Processed: False"))
-            self.console.print(self.indent_text(Columns(characterization_set), indent=8))
+            self.console.print(self.indent_text(Columns(sorted(characterization_set)), indent=8))
 
         self.wrap_subtitle(f"Processed Model Results")
         # self.console.print(self.indent_text(f"Processed Model Results:"))
