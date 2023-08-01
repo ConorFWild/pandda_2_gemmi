@@ -31,7 +31,7 @@ def input_data(fs: PanDDAFSInterface, datasets: Dict[str, DatasetInterface], pat
                 "Number of Chains": None
             },
             "Reflections": {
-                "Resolution": round(dataset.reflections.get_resolution(), 2),
+                "Resolution": round(dataset.reflections.resolution(), 2),
                 "Unit Cell": {
                     "a": round(dataset.structure.structure.cell.a, 2),
                     "b": round(dataset.structure.structure.cell.b, 2),
