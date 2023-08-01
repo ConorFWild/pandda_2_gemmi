@@ -194,7 +194,7 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
         # Print basic information of the dataset to be processed
-        print(f"Processing dataset: {dtag}")
+        # print(f"Processing dataset: {dtag}")
 
         if dtag != "JMJD2DA-x427":
             continue
@@ -207,7 +207,7 @@ def pandda(args: PanDDAArgs):
 
         # Get the resolution of the dataset
         dataset_res = dataset.reflections.resolution()
-        print(f"Dataset resolution is: {dataset.reflections.resolution()}")
+        # print(f"Dataset resolution is: {dataset.reflections.resolution()}")
 
         # Get the comparator datasets: these are filtered for reasonable data quality, space group compatability,
         # compatability of structural models and similar resolution
@@ -228,8 +228,8 @@ def pandda(args: PanDDAArgs):
         processing_res = max(
             [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
         )
-        print(f"Processing res is: {processing_res}")
-        print(f"Number of comparator datasets: {len(comparator_datasets)}")
+        # print(f"Processing res is: {processing_res}")
+        # print(f"Number of comparator datasets: {len(comparator_datasets)}")
 
         #
         console.begin_dataset_processing(
@@ -261,14 +261,14 @@ def pandda(args: PanDDAArgs):
         )
         alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
         time_finish_get_alignments = time.time()
-        print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
+        # print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
         # Get the reference frame and save it to the object store
         time_begin_get_frame = time.time()
         reference_frame: DFrame = DFrame(dataset, processor)
         reference_frame_ref = processor.put(reference_frame)
         time_finish_get_frame = time.time()
-        print(f"\t\tGot dmaps in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
+        # print(f"\t\tGot dmaps in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
         # Get the transforms to apply to the dataset before locally aligning and save them to the object store
         transforms = [
@@ -296,12 +296,12 @@ def pandda(args: PanDDAArgs):
         )
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
-        print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
+        # print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
         # Get the dataset dmap
         dtag_index = np.argwhere(dtag_array == dtag)
-        print(f"Dtag index: {dtag_index}")
+        # print(f"Dtag index: {dtag_index}")
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
 
@@ -322,8 +322,8 @@ def pandda(args: PanDDAArgs):
             CharacterizationNN()
         )
         time_finish_get_characterization_sets = time.time()
-        print(
-            f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
+        # print(
+        #     f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
         # Filter the models which are clearly poor descriptions of the density
         # In theory this step could result in the exclusion of a ground state model which provided good contrast
@@ -338,7 +338,7 @@ def pandda(args: PanDDAArgs):
             PointwiseNormal(),
         )
 
-        print(f"Models to process: {models_to_process}")
+        # print(f"Models to process: {models_to_process}")
         # serialize.models()
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
@@ -369,7 +369,7 @@ def pandda(args: PanDDAArgs):
                 model_zs[model_number] = result[2]
 
         time_finish_process_models = time.time()
-        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
+        # print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
@@ -377,7 +377,7 @@ def pandda(args: PanDDAArgs):
 
         # Select a model based on the events it produced and get the associated events
         selected_model_num, selected_events = select_model(model_events)
-        print(f"Selected model number: {selected_model_num}")
+        # print(f"Selected model number: {selected_model_num}")
 
         # Filter the events to select those to output event maps for and to autobuild
         # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
@@ -399,10 +399,10 @@ def pandda(args: PanDDAArgs):
             processing_res
         )
         time_finish_output_maps = time.time()
-        print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
+        # print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
-        print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
+        # print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
 
         # Serialize information on dataset processing to a human readable yaml file
         serialize.processed_dataset(
@@ -431,8 +431,8 @@ def pandda(args: PanDDAArgs):
         )
 
     time_finish_process_datasets = time.time()
-    print(
-        f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
+    # print(
+    #     f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild the best scoring event for each dataset
     console.start_autobuilding()

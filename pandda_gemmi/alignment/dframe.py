@@ -561,7 +561,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
         ],
         axis=0
     )
-    print(f"Structure array homogeous shape: {fractional_st_array_homogeous.shape}")
+    # print(f"Structure array homogeous shape: {fractional_st_array_homogeous.shape}")
 
     # st_centroid = np.mean(structure_array.positions, axis=0).flatten()
     # st_centroid_pos = gemmi.Position(st_centroid)
@@ -592,7 +592,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
 
         pbc_difference_rounded = np.round(pbc_difference)
-        print(f"Op: {op.triplet()} : diff: {pbc_difference} : diff rounded: {pbc_difference_rounded} : st centroid: {st_centroid}")
+        # print(f"Op: {op.triplet()} : diff: {pbc_difference} : diff rounded: {pbc_difference_rounded} : st centroid: {st_centroid}")
 
         # pbc_shift = closest_image.pbc_shift
         # pbc_shift_cart = np.array(pbc_shift[0]*cell.a, pbc_shift[0]*cell.b, pbc_shift[0]*cell.c)
@@ -609,7 +609,7 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
 
         for dx, dy, dz in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1], ):
-            print(f"\t{dx} {dy} {dz}")
+            # print(f"\t{dx} {dy} {dz}")
             if (dx == 0) & (dy == 0) & (dz == 0):
                 if op.triplet() == "x,y,z":
                     print(f"\t\tSkipping!")
@@ -639,24 +639,24 @@ def get_nearby_symmetry_atoms_pos_array(structure, structure_array, grid):
 
     # Concatenate the symmetry images
     symatoms_homogeous = np.concatenate(symatoms_list, axis=0)
-    print(f"Symatoms shape before dropping homogenising factor: {symatoms_homogeous.shape}")
+    # print(f"Symatoms shape before dropping homogenising factor: {symatoms_homogeous.shape}")
 
 
     # Go back to cartesian coordinates
     # symatoms = symatoms_homogeous[:, :-1]
     symatoms = symatoms_homogeous
-    print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
+    # print(f"Symatoms shape after dropping homogenising factor: {symatoms.shape}")
 
     # Get those in a box bounding the structure + mask radius
     pos_min = np.min(st_array, axis=0) - np.array([6.0,6.0,6.0])
     pos_max = np.max(st_array, axis=0) + np.array([6.0,6.0,6.0])
-    print(f"Min and max of structure array: {pos_min} {pos_max}")
+    # print(f"Min and max of structure array: {pos_min} {pos_max}")
 
     mask = (symatoms[:,0] > pos_min[0]) & (symatoms[:,0] < pos_max[0]) & (symatoms[:,1] > pos_min[1]) & (symatoms[:,1] < pos_max[1]) & (symatoms[:,2] > pos_min[2]) & (symatoms[:,2] < pos_max[2])
-    print(f"Mask shape: {mask.shape}")
+    # print(f"Mask shape: {mask.shape}")
 
     nearby_symatoms = symatoms[mask]
-    print(f"Nearby symatoms shape: {nearby_symatoms.shape}")
+    # print(f"Nearby symatoms shape: {nearby_symatoms.shape}")
 
 
     return nearby_symatoms
@@ -687,7 +687,7 @@ class GridPartitioning(GridPartitioningInterface):
 
         # Get the nearby symmetry atoms
         nearby_symmetry_atom_pos_array = get_nearby_symmetry_atoms_pos_array(dataset.structure, st_array, grid)
-        print(f"Got nearby symmetry poss: {nearby_symmetry_atom_pos_array.shape}")
+        # print(f"Got nearby symmetry poss: {nearby_symmetry_atom_pos_array.shape}")
 
         # Get the search atoms
         search_atom_poss = np.concatenate(
@@ -753,7 +753,7 @@ class GridPartitioning(GridPartitioningInterface):
         # # max_pos = np.max(point_position_array.points, axis=0)
         min_pos = np.min(outer_incicies, axis=0)
         max_pos = np.max(outer_incicies, axis=0)
-        print(f"Outer indicies min/max: {min_pos} : {max_pos}")
+        # print(f"Outer indicies min/max: {min_pos} : {max_pos}")
 
         # print(f"Outer indicies shape: {points_nonsymmetry_masked.shape}")
         # min_pos = np.min(points_nonsymmetry_masked, axis=0)
@@ -818,11 +818,11 @@ class GridPartitioning(GridPartitioningInterface):
             ),
             dtype=np.int16
         )
-        print(sym_mask_inner_array.shape)
+        # print(sym_mask_inner_array.shape)
         inner_indicies = np.concatenate([x.reshape((-1,1)) for x in all_indicies["inner"]], axis=1)
         min_inner_pos = np.min(inner_indicies, axis=0)
         max_inner_pos = np.max(inner_indicies, axis=0)
-        print(f"Inner indicies min/max: {min_inner_pos} : {max_inner_pos}")
+        # print(f"Inner indicies min/max: {min_inner_pos} : {max_inner_pos}")
         sym_mask_inner_array[
             (
                 all_indicies["inner"][0]-min_pos[0],
@@ -989,13 +989,13 @@ class DFrame:
         begin_partition = time.time()
         self.partitioning, all_indicies = GridPartitioning.from_dataset(dataset, grid, processor)
         finish_partition = time.time()
-        print(f"\tGot Partitions in {finish_partition - begin_partition}")
+        # print(f"\tGot Partitions in {finish_partition - begin_partition}")
 
         # Get the mask
         begin_mask = time.time()
         self.mask = GridMask.from_indicies(all_indicies)
         finish_mask = time.time()
-        print(f"\tGot mask in {finish_mask - begin_mask}")
+        # print(f"\tGot mask in {finish_mask - begin_mask}")
 
     def get_grid(self):
         grid = gemmi.FloatGrid(*self.spacing)

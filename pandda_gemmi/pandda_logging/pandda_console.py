@@ -660,9 +660,9 @@ class PanDDAConsole:
 
         for ligand_key, ligand_files in dataset.ligand_files.items():
             self.console.print(self.indent_text(f"Ligand Key: {ligand_key}"))
-            self.console.print(self.indent_text(f"{ligand_files.ligand_pdb}"))
-            self.console.print(self.indent_text(f"{ligand_files.ligand_cif}"))
-            self.console.print(self.indent_text(f"{ligand_files.ligand_smiles}"))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_pdb}", indent=8))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_cif}", indent=8))
+            self.console.print(self.indent_text(f"{ligand_files.ligand_smiles}", indent=8))
 
         self.console.print(self.indent_text(f"Processed Models: {models_to_process}"))
         self.console.print(self.indent_text(f"Selected model: {selected_model_num}"))
@@ -677,13 +677,13 @@ class PanDDAConsole:
                 self.console.print(self.indent_text(f"Processed: True"))
             else:
                 self.console.print(self.indent_text(f"Processed: False"))
-            self.console.print(self.indent_text(Columns(characterization_set)))
+            self.console.print(self.indent_text(Columns(characterization_set), indent=8))
 
         self.console.print(self.indent_text(f"Processed Model Results:"))
         for model_number, processed_model in processed_models.items():
             events, z, mean = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
-            self.console.print(self.indent_text(f"Number of events: {events}"))
+            self.console.print(self.indent_text(f"Number of events: {len(events)}"))
 
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
