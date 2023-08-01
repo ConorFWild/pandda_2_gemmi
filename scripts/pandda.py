@@ -475,7 +475,7 @@ def pandda(args: PanDDAArgs):
     )
 
     time_autobuild_finish = time.time()
-    print(f"Autobuilt in: {time_autobuild_finish - time_autobuild_begin}")
+    # print(f"Autobuilt in: {time_autobuild_finish - time_autobuild_begin}")
 
     autobuilds = {}
     for _event_id in pandda_events:
@@ -485,7 +485,7 @@ def pandda(args: PanDDAArgs):
             autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
                                      datasets[_event_id[0]].ligand_files}
     time_finish_autobuild = time.time()
-    print(f"Autobuilt {len(pandda_events)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
+    # print(f"Autobuilt {len(pandda_events)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
     # console.summarise_autobuilding(autobuild_results)
 
     # Merge the autobuilds into PanDDA output models

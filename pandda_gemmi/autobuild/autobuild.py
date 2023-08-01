@@ -120,10 +120,10 @@ def autobuild(
     # Autobuild for each cif
     autobuild_results = {}
     for ligand_key in dataset.ligand_files:
-        print(f"{event_id[0]} : {event_id[1]} : {ligand_key} ")
+        # print(f"{event_id[0]} : {event_id[1]} : {ligand_key} ")
         ligand_files = dataset.ligand_files[ligand_key]
         if not ligand_files.ligand_cif:
-            print(f"\tSkipping!")
+            # print(f"\tSkipping!")
             continue
         ligand_cif_path = ligand_files.ligand_cif.resolve()
 
