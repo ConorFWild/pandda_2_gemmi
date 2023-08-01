@@ -340,7 +340,7 @@ def score_conformer(
     optimised_structures = []
 
     for j in range(event_fit_num_trys):
-        print(f"\t\t\t\tOptimizing round {j}")
+        # print(f"\t\t\t\tOptimizing round {j}")
 
         res = optimize.differential_evolution(
             lambda params: score_fit_nonquant_array(
@@ -355,7 +355,7 @@ def score_conformer(
             ],
             # popsize=30,
         )
-        print(f"\t\t\t\t\tFinished Optimizing round {j}")
+        # print(f"\t\t\t\t\tFinished Optimizing round {j}")
 
         scores.append(res.fun)
 
@@ -431,7 +431,7 @@ def get_score_grid(dmap, st, event: EventInterface):
     # non_zero_dmap_array = d
     # print(f"")
     structure_mask_indicies = np.nonzero(inner_mask_grid_array)
-    print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
+    # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
     dmap_array[structure_mask_indicies] = 0.0
 
     return dmap
@@ -468,9 +468,9 @@ class AutobuildInbuilt:
         # for ligand_key, ligand_files in dataset.ligand_files.items():
 
         # Generate conformers to score
-        print(f"\tGetting conformermers!")
+        # print(f"\tGetting conformermers!")
         conformers = get_conformers(ligand_files)
-        print(f"\t\tGot {len(conformers)} conformers!")
+        # print(f"\t\tGot {len(conformers)} conformers!")
 
         if len(conformers) == 0:
             return

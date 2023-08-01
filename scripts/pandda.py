@@ -510,8 +510,8 @@ def pandda(args: PanDDAArgs):
         pandda_events,
         HeirarchicalSiteModel(t=8.0)
     )
-    for site_id, site in sites.items():
-        print(f"{site_id} : {site.centroid} : {site.event_ids}")
+    # for site_id, site in sites.items():
+    #     print(f"{site_id} : {site.centroid} : {site.event_ids}")
 
     # Rank the events for display in PanDDA inspect
     ranking = rank_events(
@@ -520,8 +520,8 @@ def pandda(args: PanDDAArgs):
         RankHighEventScore(),
         # RankHighBuildScore()
     )
-    for event_id in ranking:
-        print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
+    # for event_id in ranking:
+    #     print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
 
     # Output the event and site tables
     output_tables(pandda_events, ranking, sites, fs)
