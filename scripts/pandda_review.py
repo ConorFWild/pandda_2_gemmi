@@ -21,10 +21,10 @@ def __main__():
 
 
     table = pd.read_csv(pandda_inspect_events)
-    st.line_chart(data=table, x=None, y="z_peak", s=0.1)
+    st.line_chart(data=table, x=None, y="z_peak",)
 
     fig = plt.figure()
-    plt.scatter(x=table["z_peak"], y=table["cluster_size"])
+    plt.scatter(x=table["z_peak"], y=table["cluster_size"], s=0.1)
     st.pyplot(fig)
 
     st.write(table)
