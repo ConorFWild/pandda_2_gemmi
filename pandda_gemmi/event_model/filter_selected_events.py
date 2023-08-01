@@ -11,3 +11,4 @@ def filter_selected_events(dtag, selected_events, ):
             )
         )[:3]
     }
+    return top_selected_model_events
