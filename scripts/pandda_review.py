@@ -25,10 +25,10 @@ def __main__():
     table = get_table(pandda_inspect_events)
     st.line_chart(data=table, x=None, y="z_peak", )
 
-    fig = plt.figure()
-    plt.scatter(x=table["z_peak"], y=table["cluster_size"], s=0.1)
-    plt.yscale("log")
-    st.pyplot(fig)
+    # fig = plt.figure()
+    # plt.scatter(x=table["z_peak"], y=table["cluster_size"], s=0.1)
+    # plt.yscale("log")
+    # st.pyplot(fig)
 
     events = {}
     for _idx, _row in table.iterrows():
