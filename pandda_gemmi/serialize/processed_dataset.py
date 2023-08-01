@@ -33,6 +33,8 @@ def processed_dataset(
         if model_num in models_to_process:
             is_processed = True
             model_events, z, mean = processed_models[model_num]
+            if model_events is None:
+                model_events = {}
 
         else:
             is_processed = False
