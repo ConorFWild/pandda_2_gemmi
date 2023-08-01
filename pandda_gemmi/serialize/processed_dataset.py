@@ -19,9 +19,9 @@ def processed_dataset(
     dic = {}
     dic["Summary"] = {
         "Processing Resolution": round(processing_res, 2),
-        "Comparator Datasets": [x for x in comparator_datasets],
+        "Comparator Datasets": sorted([x for x in comparator_datasets]),
         "Selected Model": selected_model_num,
-        "Selected Model Events": [x for x in selected_model_events]
+        "Selected Model Events": sorted([x for x in selected_model_events])
     }
 
     dic["Models"] = {}
