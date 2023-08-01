@@ -680,9 +680,9 @@ class PanDDAConsole:
         for model_number, characterization_set in characterization_sets.items():
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
             if model_number in models_to_process:
-                self.console.print(self.indent_text(f"Processed: True"))
+                self.console.print(self.indent_text(f"Processed: True", indent=8))
             else:
-                self.console.print(self.indent_text(f"Processed: False"))
+                self.console.print(self.indent_text(f"Processed: False", indent=8))
             self.console.print(self.indent_text(Columns(sorted(characterization_set)), indent=8))
 
         self.wrap_subtitle(f"Processed Model Results")
@@ -690,7 +690,7 @@ class PanDDAConsole:
         for model_number, processed_model in processed_models.items():
             events, z, mean = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
-            self.console.print(self.indent_text(f"Number of events: {len(events)}"))
+            self.console.print(self.indent_text(f"Number of events: {len(events)}", indent=8))
 
     def start_identify_structure_factors(self, ):
         printable = self.wrap_title("Getting Structure Factors...")
