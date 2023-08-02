@@ -24,40 +24,6 @@ def sample_xmap(xmap, transform, sample_array):
     return sample_array
 
 
-# def get_sample_transform_from_event(centroid,
-#                                     sample_distance: float,
-#                                     n: int,):
-#     # Get basic sample grid transform
-#     initial_transform = gemmi.Transform()
-#     scale_matrix = np.eye(3) * sample_distance
-#     initial_transform.mat.fromlist(scale_matrix.tolist())
-#
-#     # Get sample grid centroid
-#     sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
-#
-#     # Get centre grid transform
-#     centre_grid_transform = gemmi.Transform()
-#     centre_grid_transform.vec.fromlist([
-#         -sample_grid_centroid[0],
-#         -sample_grid_centroid[1],
-#         -sample_grid_centroid[2],
-#     ])
-#
-#     # Event centre transform
-#     event_centre_transform = gemmi.Transform()
-#     event_centre_transform.vec.fromlist([x for x in centroid])
-#
-#     # Get the transform as a gemmi object
-#     transform = gemmi.Transform()
-#     transform.vec.fromlist([
-#         centroid[j] - sample_grid_centroid[j]
-#         for j
-#         in [0, 1, 2]
-#     ])
-#     transform.mat.fromlist(scale_matrix.tolist())
-#
-#     return transform
-
 def get_sample_transform_from_event(centroid,
                                     sample_distance: float,
                                     n: int,):
@@ -81,12 +47,14 @@ def get_sample_transform_from_event(centroid,
     event_centre_transform = gemmi.Transform()
     event_centre_transform.vec.fromlist([x for x in centroid])
 
-    # Apply random translation
-    transform = event_centre_transform.combine(
-        centre_grid_transform.combine(
-            initial_transform
-        )
-    )
+    # Get the transform as a gemmi object
+    transform = gemmi.Transform()
+    transform.vec.fromlist([
+        centroid[j] - sample_grid_centroid[j]
+        for j
+        in [0, 1, 2]
+    ])
+    transform.mat.fromlist(scale_matrix.tolist())
 
     corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
     corner_n_pos = transform.apply(gemmi.Position(
@@ -102,8 +70,54 @@ def get_sample_transform_from_event(centroid,
     print(f"Centroid: {event_centroid}")
     print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
 
+    return transform
 
-    return transform, np.zeros((n, n, n), dtype=np.float32)
+# def get_sample_transform_from_event(centroid,
+#                                     sample_distance: float,
+#                                     n: int,):
+#     # Get basic sample grid transform
+#     initial_transform = gemmi.Transform()
+#     scale_matrix = np.eye(3) * sample_distance
+#     initial_transform.mat.fromlist(scale_matrix.tolist())
+#
+#     # Get sample grid centroid
+#     sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
+#
+#     # Get centre grid transform
+#     centre_grid_transform = gemmi.Transform()
+#     centre_grid_transform.vec.fromlist([
+#         -sample_grid_centroid[0],
+#         -sample_grid_centroid[1],
+#         -sample_grid_centroid[2],
+#     ])
+#
+#     # Event centre transform
+#     event_centre_transform = gemmi.Transform()
+#     event_centre_transform.vec.fromlist([x for x in centroid])
+#
+#     # Apply random translation
+#     transform = event_centre_transform.combine(
+#         centre_grid_transform.combine(
+#             initial_transform
+#         )
+#     )
+#
+#     corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
+#     corner_n_pos = transform.apply(gemmi.Position(
+#         float(n),
+#         float(n),
+#         float(n),
+#     )
+#     )
+#     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
+#     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
+#     average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
+#     event_centroid = [x for x in centroid]
+#     print(f"Centroid: {event_centroid}")
+#     print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+#
+#
+#     return transform, np.zeros((n, n, n), dtype=np.float32)
 
 
 def get_model_map(structure, xmap_event):
