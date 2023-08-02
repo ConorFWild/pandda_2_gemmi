@@ -405,5 +405,4 @@ class ScoreCNNLigand:
         time_finish_score_images = time.time()
         # print(f"\t\t\t\tScored images in: {round(time_finish_score_images - time_begin_score_images, 2)} of which {round(sum(cnn_times), 2)} was in cnn")
 
-
         return scored_events
