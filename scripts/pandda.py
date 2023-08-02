@@ -78,8 +78,11 @@ def process_model(
 
 
     xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+
     raw_xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
     raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
+    raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
+    raw_xmap_grid_array[:,:,:] = dataset_dmap_array[:,:,:]
 
     median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
