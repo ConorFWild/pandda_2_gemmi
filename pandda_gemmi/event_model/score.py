@@ -334,6 +334,7 @@ class ScoreCNNLigand:
 
         # Get the image to Score for each event
         for event_id, event in events.items():
+            print(event_id)
             # Get the estimated bdc for the event (the fraction of the mean map to subtract)
             bdc = get_bdc(event, xmap_grid, mean_grid, median)
             bdcs[event_id] = bdc
@@ -352,16 +353,21 @@ class ScoreCNNLigand:
             xmap_mean = np.mean(xmap_sample)
             xmap_std = np.std(xmap_sample)
             image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
+            print([xmap_mean, xmap_std])
 
             sample_array_mean_map = np.copy(sample_array)
             mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
             mean_mean = np.mean(mean_sample)
             mean_std = np.std(mean_sample)
             image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
+            print([mean_mean, mean_std])
+
 
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
             image_model = model_sample[np.newaxis, :]
+            print(np.mean(image_model))
+            print(np.mean(image_ligand))
 
             # Generate the combined image for scoring
             image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
