@@ -76,8 +76,7 @@ def process_model(
     mean_grid = reference_frame.unmask(SparseDMap(mean))
     z_grid = reference_frame.unmask(SparseDMap(z))
 
-
-    xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+    xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
 
     raw_xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
     raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
