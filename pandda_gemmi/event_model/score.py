@@ -376,7 +376,7 @@ class ScoreCNNLigand:
 
         self.n = n
 
-    def __call__(self, ligand_files, events, xmap_grid, mean_grid, z_grid, model_grid, median):
+    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median):
 
         scored_events = {}
         time_begin_get_images = time.time()
@@ -397,7 +397,7 @@ class ScoreCNNLigand:
         for event_id, event in events.items():
             print(event_id)
             # Get the estimated bdc for the event (the fraction of the mean map to subtract)
-            bdc = get_bdc(event, xmap_grid, mean_grid, median)
+            bdc = get_bdc(event, homogenized_xmap_grid, mean_grid, median)
             bdcs[event_id] = bdc
 
             # Get the transform that will centre a sampling window on the event

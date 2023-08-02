@@ -77,9 +77,9 @@ def process_model(
     z_grid = reference_frame.unmask(SparseDMap(z))
 
 
-    # xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
-    xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
-    xmap_grid.set_unit_cell(z_grid.unit_cell)
+    xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+    raw_xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
+    raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
 
     median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
@@ -119,7 +119,7 @@ def process_model(
 
     # Score the events with some method such as the CNN
     time_begin_score_events = time.time()
-    events = score(ligand_files, events, xmap_grid, mean_grid, z_grid, model_grid,
+    events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
                    median,
                    )
     time_finish_score_events = time.time()
