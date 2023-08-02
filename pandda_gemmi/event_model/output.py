@@ -37,6 +37,9 @@ def output_maps(
     mean_grid = reference_frame.unmask(SparseDMap(selected_mean))
     save_dmap(mean_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag))
 
+    xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
+    save_dmap(xmap_grid, fs.output.processed_datasets[dtag] / "xmap.ccp4")
+
     # mean_inner_vals = selected_mean[reference_frame.mask.indicies_sparse_inner_atomic]
     # med = np.median(mean_inner_vals)
     # from scipy import optimize
