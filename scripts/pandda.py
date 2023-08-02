@@ -58,6 +58,7 @@ from pandda_gemmi.pandda_logging import PanDDAConsole
 def process_model(
         ligand_files,
         model_number,
+        homogenized_dataset_dmap_array,
         dataset_dmap_array,
         characterization_set_dmaps_array,
         reference_frame,
@@ -66,7 +67,8 @@ def process_model(
 ):
     # Get the statical maps
     mean, std, z = PointwiseNormal()(
-        dataset_dmap_array,
+        # dataset_dmap_array,
+        homogenized_dataset_dmap_array,
         characterization_set_dmaps_array
     )
 
@@ -310,6 +312,9 @@ def pandda(args: PanDDAArgs):
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
 
+        raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
+        raw_xmap_array = np.array(raw_xmap_grid, copy=True)
+
         # Get the masked grid of the structure
         model_grid = get_model_map(dataset.structure.structure, xmap_grid)
 
@@ -355,6 +360,7 @@ def pandda(args: PanDDAArgs):
                 dataset.ligand_files,
                 model_number,
                 dataset_dmap_array,
+                raw_xmap_array,
                 dmaps[characterization_set_masks[model_number], :],
                 reference_frame,
                 reference_frame.mask_grid(model_grid).data,
