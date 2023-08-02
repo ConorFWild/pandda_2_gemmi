@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+import gemmi
 
 from pandda_gemmi.interfaces import *
 
@@ -74,7 +75,12 @@ def process_model(
 
     mean_grid = reference_frame.unmask(SparseDMap(mean))
     z_grid = reference_frame.unmask(SparseDMap(z))
-    xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+
+
+    # xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+    xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
+    xmap_grid.set_unit_cell(z_grid.unit_cell)
+
     median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
     model_grid = reference_frame.unmask(SparseDMap(model_map))
