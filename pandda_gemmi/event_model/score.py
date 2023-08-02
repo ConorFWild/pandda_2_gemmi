@@ -67,8 +67,8 @@ def get_sample_transform_from_event(centroid,
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
     average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
     event_centroid = [x for x in centroid]
-    print(f"Centroid: {event_centroid}")
-    print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+    # print(f"Centroid: {event_centroid}")
+    # print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
 
     return transform
 
@@ -395,7 +395,7 @@ class ScoreCNNLigand:
 
         # Get the image to Score for each event
         for event_id, event in events.items():
-            print(event_id)
+            # print(event_id)
             # Get the estimated bdc for the event (the fraction of the mean map to subtract)
             bdc = get_bdc(event, homogenized_xmap_grid, mean_grid, median)
             bdcs[event_id] = bdc
@@ -414,20 +414,20 @@ class ScoreCNNLigand:
             xmap_mean = np.mean(xmap_sample)
             xmap_std = np.std(xmap_sample)
             image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
-            print(f"Xmap: {[xmap_mean, xmap_std]}")
+            # print(f"Xmap: {[xmap_mean, xmap_std]}")
 
             sample_array_mean_map = np.copy(sample_array)
             mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
             mean_mean = np.mean(mean_sample)
             mean_std = np.std(mean_sample)
             image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
-            print(f"Mean: {[mean_mean, mean_std]}")
+            # print(f"Mean: {[mean_mean, mean_std]}")
 
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
             image_model = model_sample[np.newaxis, :]
-            print(f"Model: {np.mean(image_model)}")
-            print(f"Ligand: {np.mean(image_ligand)}")
+            # print(f"Model: {np.mean(image_model)}")
+            # print(f"Ligand: {np.mean(image_ligand)}")
 
             # Generate the combined image for scoring
             image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
