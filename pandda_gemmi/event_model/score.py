@@ -311,7 +311,7 @@ class ScoreCNNLigand:
         # Add model to device
         cnn.to(self.dev)
         cnn.eval()
-        self.cnn = cnn.float()
+        self.cnn = cnn#.float()
 
         self.n = n
 
@@ -381,7 +381,7 @@ class ScoreCNNLigand:
             image_t = torch.from_numpy(image)
 
             # Move tensors to device
-            image_c = image_t.to(self.dev).float()
+            image_c = image_t.to(self.dev)#.float()
 
             # Run model
             time_begin_cnn = time.time()
