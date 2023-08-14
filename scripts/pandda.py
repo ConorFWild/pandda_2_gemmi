@@ -78,10 +78,10 @@ def process_model(
 
     xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
 
-    raw_xmap_grid =gemmi.FloatGrid(*dataset_dmap_array.shape)
+    raw_xmap_grid = gemmi.FloatGrid(*dataset_dmap_array.shape)
     raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
     raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
-    raw_xmap_grid_array[:,:,:] = dataset_dmap_array[:,:,:]
+    raw_xmap_grid_array[:, :, :] = dataset_dmap_array[:, :, :]
 
     median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
@@ -142,7 +142,7 @@ def process_model(
     if len(events) == 0:
         return None, None, None
 
-    events = {j+1: event for j, event in enumerate(events.values())}
+    events = {j + 1: event for j, event in enumerate(events.values())}
 
     return events, mean, z
 
@@ -216,6 +216,14 @@ def pandda(args: PanDDAArgs):
 
         # Record the time that dataset processing begins
         time_begin_process_dataset = time.time()
+
+        if (fs.output.processed_datasets[dtag] / f"events.yaml").exists():
+            pandda_events[dtag] = {
+                (dtag, event_idx): event
+                for event_idx, event
+                in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items()
+            }
+            continue
 
         # Get the dataset
         dataset = datasets[dtag]
@@ -435,6 +443,10 @@ def pandda(args: PanDDAArgs):
             top_selected_model_events,
             reference_frame,
             fs.output.processed_datasets[dtag] / f"processed_dataset.yaml"
+        )
+        serialize.serialize_events(
+            {event_id[1]: event for event_id, event in selected_events.items()},
+            fs.output.processed_datasets[dtag] / f"events.yaml"
         )
 
         console.processed_dataset(

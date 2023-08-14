@@ -11,9 +11,9 @@ def processed_dataset(
         characterization_sets: Dict[int, Dict[str, DatasetInterface]],
         model_scores: Dict[int, float],
         models_to_process: List[int],
-        processed_models: Dict[int, Tuple[Dict[Tuple[str, int], EventInterface], Any, Any]],
+        processed_models: Dict[int, Tuple[Dict[int, EventInterface], Any, Any]],
         selected_model_num: int,
-        selected_model_events: Dict[ int, EventInterface],
+        selected_model_events: Dict[ Tuple[str, int], EventInterface],
         reference_frame: DFrameInterface,
         path
 ):
@@ -22,7 +22,7 @@ def processed_dataset(
         "Processing Resolution": round(processing_res, 2),
         "Comparator Datasets": sorted([x for x in comparator_datasets]),
         "Selected Model": selected_model_num,
-        "Selected Model Events": sorted([x for x in selected_model_events])
+        "Selected Model Events": sorted([x[1] for x in selected_model_events])
     }
 
     dic["Models"] = {}
