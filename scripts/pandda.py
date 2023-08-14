@@ -445,7 +445,7 @@ def pandda(args: PanDDAArgs):
             fs.output.processed_datasets[dtag] / f"processed_dataset.yaml"
         )
         serialize.serialize_events(
-            {event_id[1]: event for event_id, event in selected_events.items()},
+            {event_id[1]: event for event_id, event in top_selected_model_events.items()},
             fs.output.processed_datasets[dtag] / f"events.yaml"
         )
 
