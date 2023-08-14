@@ -690,7 +690,10 @@ class PanDDAConsole:
         for model_number, processed_model in processed_models.items():
             events, z, mean = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
-            self.console.print(self.indent_text(f"Number of events: {len(events)}", indent=8))
+            if events:
+                self.console.print(self.indent_text(f"Number of events: {len(events)}", indent=8))
+            else:
+                self.console.print(self.indent_text(f"Number of events: 0", indent=8))
 
     def processed_autobuilds(self, autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]]):
         nested_autobuilds = {}
