@@ -28,6 +28,8 @@ def get_characterization_sets(
     # print(f"Unique classes : {unique_classes} : counts : {counts}")
     j = 0
     for unique_class, count in zip(unique_classes, counts):
+        if unique_class < 1:
+            continue
         if count >= min_size:
             class_dtags = dtag_array[classes == unique_class]
             characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
