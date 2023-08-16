@@ -51,6 +51,7 @@ def processed_dataset(
                 event_idx: {
                     "Score": model_events[event_idx].score,
                     "BDC": model_events[event_idx].bdc,
+                    "Centroid": [float(x) for x in np.mean(model_events[event_idx].pos_array, axis=0).flatten()]
                 }
                 for event_idx
                 in sorted(model_events)
