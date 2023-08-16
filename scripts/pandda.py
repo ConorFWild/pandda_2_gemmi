@@ -27,30 +27,25 @@ from pandda_gemmi.comparators import (
     FilterResolution,
     FilterCompatibleStructures
 )
-from pandda_gemmi.dmaps import save_dmap
-from pandda_gemmi.event_model.evaluate import evaluate_model
-from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationGaussianMixture, \
-    CharacterizationNN
+from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNN
 from pandda_gemmi.event_model.filter_characterization_sets import filter_characterization_sets
 from pandda_gemmi.event_model.outlier import PointwiseNormal
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
-from pandda_gemmi.event_model.score import ScoreCNN, get_model_map, ScoreCNNLigand
-from pandda_gemmi.event_model.filter import FilterSize, FilterCluster, FilterScore, FilterLocallyHighestScoring, \
-    FilterLocallyHighestLargest
+from pandda_gemmi.event_model.score import get_model_map, ScoreCNNLigand
+from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest
 from pandda_gemmi.event_model.select import select_model
-from pandda_gemmi.event_model.output import output_models, output_events, output_maps
+from pandda_gemmi.event_model.output import output_maps
 from pandda_gemmi.event_model.filter_selected_events import filter_selected_events
 
-from pandda_gemmi.site_model import HeirarchicalSiteModel, ClusterSites, Site, get_sites
+from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
 
 from pandda_gemmi.autobuild import autobuild, AutobuildResult
 from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt
-from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestRSCC, MergeHighestBuildScore, \
-    MergeHighestBuildAndEventScore
+from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
-from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighBuildScore
+from pandda_gemmi.ranking import rank_events, RankHighEventScore
 
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
@@ -58,7 +53,6 @@ from pandda_gemmi.pandda_logging import PanDDAConsole
 
 def process_model(
         ligand_files,
-        model_number,
         homogenized_dataset_dmap_array,
         dataset_dmap_array,
         characterization_set_dmaps_array,
@@ -68,7 +62,6 @@ def process_model(
 ):
     # Get the statical maps
     mean, std, z = PointwiseNormal()(
-        # dataset_dmap_array,
         homogenized_dataset_dmap_array,
         characterization_set_dmaps_array
     )
@@ -87,21 +80,8 @@ def process_model(
 
     model_grid = reference_frame.unmask(SparseDMap(model_map))
 
-    # inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
-    # percentage_z_2 = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
-    # print(f"Model number: {model_number}: z > 2: {percentage_z_2}")
-
     # Get the initial events from clustering the Z map
     events = ClusterDensityDBSCAN()(z, reference_frame)
-    # print(f"Initial events: {len(events)}")
-    # j = 0
-    # for event in sorted(events.values(), key=lambda _event: _event.pos_array.size, reverse=True):
-    #     event_centroid_array = np.mean(event.pos_array, axis=0).flatten()
-    #     print(
-    #         f"\t\t\tEvent {j}: size: {event.pos_array.size}: centroid: {event_centroid_array[0]} {event_centroid_array[1]} {event_centroid_array[2]}")
-    #     j += 1
-    #     if j > 5:
-    #         break
 
     if len(events) == 0:
         return None, None, None
@@ -109,11 +89,9 @@ def process_model(
     # Filter the events prior to scoring them based on their size
     for filter in [
         FilterSize(reference_frame, min_size=5.0),
-        # FilterCluster(5.0),
     ]:
         events = filter(events)
 
-    # print(f"After filer size and cluster: {len(events)}")
 
     # Return None if there are no events after pre-scoring filters
     if len(events) == 0:
@@ -125,7 +103,6 @@ def process_model(
                    median,
                    )
     time_finish_score_events = time.time()
-    # print(f"\t\t\tScored events in: {round(time_finish_score_events - time_begin_score_events, 2)}")
 
     # Filter the events after scoring based on their score and keeping only the locally highest scoring event
     for filter in [
@@ -284,14 +261,14 @@ def pandda(args: PanDDAArgs):
         )
         alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
         time_finish_get_alignments = time.time()
-        # print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
+        print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
         # Get the reference frame and save it to the object store
         time_begin_get_frame = time.time()
         reference_frame: DFrame = DFrame(dataset, processor)
         reference_frame_ref = processor.put(reference_frame)
         time_finish_get_frame = time.time()
-        # print(f"\t\tGot dmaps in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
+        print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
         # Get the transforms to apply to the dataset before locally aligning and save them to the object store
         transforms = [
@@ -319,7 +296,7 @@ def pandda(args: PanDDAArgs):
         )
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
-        # print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
+        print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
         # Get the dataset dmap
@@ -348,8 +325,8 @@ def pandda(args: PanDDAArgs):
             CharacterizationNN()
         )
         time_finish_get_characterization_sets = time.time()
-        # print(
-        #     f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
+        print(
+            f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
         # Filter the models which are clearly poor descriptions of the density
         # In theory this step could result in the exclusion of a ground state model which provided good contrast
@@ -374,7 +351,6 @@ def pandda(args: PanDDAArgs):
         processed_models = {
             model_number: Partial(process_model).paramaterise(
                 dataset.ligand_files,
-                model_number,
                 dataset_dmap_array,
                 raw_xmap_array,
                 dmaps[characterization_set_masks[model_number], :],
@@ -396,7 +372,7 @@ def pandda(args: PanDDAArgs):
                 model_zs[model_number] = result[2]
 
         time_finish_process_models = time.time()
-        # print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
+        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
@@ -426,10 +402,10 @@ def pandda(args: PanDDAArgs):
             processing_res
         )
         time_finish_output_maps = time.time()
-        # print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
+        print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
-        # print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
+        print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
 
         # Serialize information on dataset processing to a human readable yaml file
         serialize.processed_dataset(
@@ -462,8 +438,8 @@ def pandda(args: PanDDAArgs):
         )
 
     time_finish_process_datasets = time.time()
-    # print(
-    #     f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
+    print(
+        f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild the best scoring event for each dataset
     console.start_autobuilding()
