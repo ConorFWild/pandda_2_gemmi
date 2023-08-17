@@ -65,13 +65,18 @@ class CharacterizationNN:
         # Get the inner mask of the density
         sparse_dmap_inner_array = dmaps[:, reference_frame.mask.indicies_sparse_inner]
 
-        # Transform the data to a reasonable size for a GMM
-        pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
-        transformed = pca.fit_transform(sparse_dmap_inner_array)
+        # # Transform the data to a reasonable size for a GMM
+        # pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
+        # transformed = pca.fit_transform(sparse_dmap_inner_array)
+        #
+        # # Fit the Dirichlet Process Gaussian Mixture Model and predict component membership
+        # nbrs = NearestNeighbors(n_neighbors=self.n_neighbours).fit(transformed)
+        # distances, indices = nbrs.kneighbors(transformed)
+
 
         # Fit the Dirichlet Process Gaussian Mixture Model and predict component membership
-        nbrs = NearestNeighbors(n_neighbors=self.n_neighbours).fit(transformed)
-        distances, indices = nbrs.kneighbors(transformed)
+        nbrs = NearestNeighbors(n_neighbors=self.n_neighbours).fit(sparse_dmap_inner_array)
+        distances, indices = nbrs.kneighbors(sparse_dmap_inner_array)
 
         # Get neighbourhood radii
         radii = {}
