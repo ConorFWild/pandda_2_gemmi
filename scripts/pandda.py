@@ -51,7 +51,18 @@ from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 
 
-def process_model(
+class ProcessModel:
+    def __init__(self,
+                 minimum_z_cluster_size=5.0,
+                 minimum_event_score=0.17,
+                 local_highest_score_radius=5.0
+                 ):
+        self.minimum_z_cluster_size = minimum_z_cluster_size
+        self.minimum_event_score = minimum_event_score
+        self.local_highest_score_radius = local_highest_score_radius
+
+
+    def __call__(self, #*args, **kwargs
         ligand_files,
         homogenized_dataset_dmap_array,
         dataset_dmap_array,
@@ -60,68 +71,65 @@ def process_model(
         model_map,
         score,
 ):
-    # Get the statical maps
-    mean, std, z = PointwiseNormal()(
-        homogenized_dataset_dmap_array,
-        characterization_set_dmaps_array
-    )
+        # Get the statical maps
+        mean, std, z = PointwiseNormal()(
+            homogenized_dataset_dmap_array,
+            characterization_set_dmaps_array
+        )
 
-    mean_grid = reference_frame.unmask(SparseDMap(mean))
-    z_grid = reference_frame.unmask(SparseDMap(z))
+        mean_grid = reference_frame.unmask(SparseDMap(mean))
+        z_grid = reference_frame.unmask(SparseDMap(z))
 
-    xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
+        xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
 
-    raw_xmap_grid = gemmi.FloatGrid(*dataset_dmap_array.shape)
-    raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
-    raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
-    raw_xmap_grid_array[:, :, :] = dataset_dmap_array[:, :, :]
+        raw_xmap_grid = gemmi.FloatGrid(*dataset_dmap_array.shape)
+        raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
+        raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
+        raw_xmap_grid_array[:, :, :] = dataset_dmap_array[:, :, :]
 
-    median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
+        median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
-    model_grid = reference_frame.unmask(SparseDMap(model_map))
+        model_grid = reference_frame.unmask(SparseDMap(model_map))
 
-    # Get the initial events from clustering the Z map
-    events = ClusterDensityDBSCAN()(z, reference_frame)
+        # Get the initial events from clustering the Z map
+        events = ClusterDensityDBSCAN()(z, reference_frame)
 
-    if len(events) == 0:
-        return None, None, None
+        if len(events) == 0:
+            return None, None, None
 
-    # Filter the events prior to scoring them based on their size
-    for filter in [
-        FilterSize(reference_frame, min_size=5.0),
-    ]:
-        events = filter(events)
+        # Filter the events prior to scoring them based on their size
+        for filter in [
+            FilterSize(reference_frame, min_size=self.minimum_z_cluster_size),
+        ]:
+            events = filter(events)
 
 
-    # Return None if there are no events after pre-scoring filters
-    if len(events) == 0:
-        return None, None, None
+        # Return None if there are no events after pre-scoring filters
+        if len(events) == 0:
+            return None, None, None
 
-    # Score the events with some method such as the CNN
-    time_begin_score_events = time.time()
-    events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
-                   median,
-                   )
-    time_finish_score_events = time.time()
+        # Score the events with some method such as the CNN
+        time_begin_score_events = time.time()
+        events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
+                       median,
+                       )
+        time_finish_score_events = time.time()
 
-    # Filter the events after scoring based on their score and keeping only the locally highest scoring event
-    for filter in [
-        # FilterScore(0.30),
-        FilterScore(0.17),
-        # FilterLocallyHighestScoring(8.0),
-        FilterLocallyHighestLargest(5.0),
+        # Filter the events after scoring based on their score and keeping only the locally highest scoring event
+        for filter in [
+            FilterScore(self.minimum_event_score),  # Filter events based on their score
+            FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
+                                                                           # better scoring events
+        ]:
+            events = filter(events)
 
-    ]:
-        events = filter(events)
-    # print(f"After filter score: {len(events)}")
+        # Return None if there are no events after post-scoring filters
+        if len(events) == 0:
+            return None, None, None
 
-    # Return None if there are no events after post-scoring filters
-    if len(events) == 0:
-        return None, None, None
+        events = {j + 1: event for j, event in enumerate(events.values())}
 
-    events = {j + 1: event for j, event in enumerate(events.values())}
-
-    return events, mean, z
+        return events, mean, z
 
 
 def pandda(args: PanDDAArgs):
@@ -150,6 +158,9 @@ def pandda(args: PanDDAArgs):
     # Get the method for scoring events
     score = ScoreCNNLigand()
 
+    # Get the method for processing the statistical models
+    process_model = ProcessModel()
+
     # Load the structures and reflections from the datasets found in the file system, and create references to these
     # dataset objects and the arrays of their structures in the multiprocessing cache
     console.start_load_datasets()
@@ -169,7 +180,6 @@ def pandda(args: PanDDAArgs):
     # Summarise the datasets loaded from the file system and serialize the information on the input into a human
     # readable yaml file
     console.summarise_datasets(datasets, fs)
-    # metadata.save_input_data_metadata()
     serialize.input_data(
         fs, datasets, fs.output.path / "input.yaml"
     )
@@ -183,13 +193,6 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     for dtag in datasets:
         # Print basic information of the dataset to be processed
-
-        # if dtag != "JMJD2DA-x427":
-        #     continue
-
-        # if dtag != "mArh-x0655":
-        #     print(f"Skipping!")
-        #     continue
 
         # Record the time that dataset processing begins
         time_begin_process_dataset = time.time()
@@ -207,17 +210,16 @@ def pandda(args: PanDDAArgs):
 
         # Get the resolution of the dataset
         dataset_res = dataset.reflections.resolution()
-        # print(f"Dataset resolution is: {dataset.reflections.resolution()}")
 
         # Get the comparator datasets: these are filtered for reasonable data quality, space group compatability,
         # compatability of structural models and similar resolution
         comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
             datasets,
             [
-                FilterRFree(0.4),
+                FilterRFree(args.max_rfree),
                 FilterSpaceGroup(dataset),
                 FilterCompatibleStructures(dataset),
-                FilterResolution(dataset_res, 60, 0.1)]
+                FilterResolution(dataset_res, args.max_shell_datasets, args.high_res_buffer)]
         )
 
         # Ensure the dataset itself is included in comparators
@@ -228,10 +230,8 @@ def pandda(args: PanDDAArgs):
         processing_res = max(
             [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
         )
-        # print(f"Processing res is: {processing_res}")
-        # print(f"Number of comparator datasets: {len(comparator_datasets)}")
 
-        #
+        # Print basic information about the processing to be done of the dataset
         console.begin_dataset_processing(
             dtag,
             dataset,
@@ -241,7 +241,7 @@ def pandda(args: PanDDAArgs):
         )
 
         # Skip if there are insufficient comparators in order to characterize a statistical model
-        if len(comparator_datasets) < 30:
+        if len(comparator_datasets) < args.min_characterisation_datasets:
             console.insufficient_comparators(comparator_datasets)
             continue
 
@@ -518,7 +518,7 @@ def pandda(args: PanDDAArgs):
     # Get the sites
     sites: Dict[int, Site] = get_sites(
         pandda_events,
-        HeirarchicalSiteModel(t=8.0)
+        HeirarchicalSiteModel(t=args.max_site_distance_cutoff)
     )
     # for site_id, site in sites.items():
     #     print(f"{site_id} : {site.centroid} : {site.event_ids}")

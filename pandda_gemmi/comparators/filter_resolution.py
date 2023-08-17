@@ -11,6 +11,12 @@ class FilterResolution:
 
 
     def __call__(self, datasets: Dict[str, DatasetInterface], ):
+        """
+        Iterate through the datasets, from highest resolution to lowest, including them if either there are not already
+        enough, or they are still better resolution than the reference (possibly + a buffer)
+        :param datasets:
+        :return:
+        """
 
         new_datasets = {}
         _k = 0

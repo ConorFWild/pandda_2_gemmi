@@ -40,6 +40,8 @@ class ProcessorInterface(Protocol):
     def process_dict(self, funcs: Dict[Q, Callable[P, V]]) -> Dict[Q, V]:
         ...
 
+    def put(self, obj: Any):
+        ...
 
 class ResidueIDInterface(Protocol):
     model: str
@@ -65,6 +67,7 @@ class PanDDAInputInterface(Protocol):
 
 
 class PanDDAOutputInterface(Protocol):
+    path: Path
     processed_datasets: Dict[str, Path]
 
 

@@ -31,6 +31,7 @@ class PanDDAArgs:
     high_res_upper_limit: float = 1.0
     high_res_lower_limit: float = 4.0
     high_res_increment: float = 0.05
+    high_res_buffer: float = 0.0
     max_shell_datasets: int = 60
     min_characterisation_datasets: int = constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT
     structure_factors: Optional[Tuple[str, str]] = None
@@ -426,6 +427,12 @@ class PanDDAArgs:
             help=constants.ARGS_MAX_SHELL_DATASETS_HELP,
         )
         parser.add_argument(
+            constants.ARGS_HIGH_RES_BUFFER,
+            type=float,
+            default=0.0,
+            help=constants.ARGS_HIGH_RES_BUFFER_HELP,
+        )
+        parser.add_argument(
             constants.ARGS_MIN_CHARACTERISATION_DATASETS,
             type=int,
             default=constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT,
@@ -662,6 +669,7 @@ class PanDDAArgs:
             high_res_lower_limit=args.high_res_lower_limit,
             high_res_increment=args.high_res_increment,
             max_shell_datasets=args.max_shell_datasets,
+            high_res_buffer=args.high_res_buffer,
             min_characterisation_datasets=args.min_characterisation_datasets,
             structure_factors=args.structure_factors,
             all_data_are_valid_values=args.all_data_are_valid_values,

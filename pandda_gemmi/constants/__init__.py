@@ -216,6 +216,8 @@ ARGS_HIGH_RES_INCREMENT = "--high_res_increment"
 ARGS_HIGH_RES_INCREMENT_HELP = "A float which gives the maximum width of a resolution shell to process."
 ARGS_MAX_SHELL_DATASETS = "--max_shell_datasets"
 ARGS_MAX_SHELL_DATASETS_HELP = "An integer which gives that maximum number of datasets to process in one shell."
+ARGS_HIGH_RES_BUFFER = "--high_res_buffer"
+ARGS_HIGH_RES_BUFFER_HELP = "A float which gives "
 ARGS_MIN_CHARACTERISATION_DATASETS = "--min_characterisation_datasets"
 ARGS_MIN_CHARACTERISATION_DATASETS_HELP = "An integer which gives the minimum number of datasets to consider " \
                                           "processing in a shell."
@@ -304,7 +306,7 @@ ARGS_AUTOBUILD_DEFAULT: bool = True
 ARGS_RANK_METHOD_DEFAULT: str = "event_score"
 ARGS_MIN_BDC_DEFAULT: float = 0.0
 ARGS_MAX_BDC_DEFAULT: float = 0.95
-ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 5.0
+ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT: float = 8.0
 
 ###################################################################
 # # Useful Regexes

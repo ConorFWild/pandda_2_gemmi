@@ -82,28 +82,28 @@ def get_conformers(
 ):
     # Decide how to load
 
-    if ligand_files.ligand_smiles is not None:
-        # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_smiles}")
-        mol = get_fragment_mol_from_dataset_smiles_path(ligand_files.ligand_smiles)
+    # if ligand_files.ligand_smiles is not None:
+    #     # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_smiles}")
+    #     mol = get_fragment_mol_from_dataset_smiles_path(ligand_files.ligand_smiles)
+    #
+    #     # Generate conformers
+    #     mol: Chem.Mol = Chem.AddHs(mol)
+    #
+    #     # Generate conformers
+    #     cids = AllChem.EmbedMultipleConfs(
+    #         mol,
+    #         numConfs=num_pose_samples,
+    #         pruneRmsThresh=pruning_threshold)
+    #
+    #     # Translate to structures
+    #     fragment_structures = get_structures_from_mol(
+    #         mol,
+    #         max_conformers,
+    #     )
+    #
+    #     return fragment_structures
 
-        # Generate conformers
-        mol: Chem.Mol = Chem.AddHs(mol)
-
-        # Generate conformers
-        cids = AllChem.EmbedMultipleConfs(
-            mol,
-            numConfs=num_pose_samples,
-            pruneRmsThresh=pruning_threshold)
-
-        # Translate to structures
-        fragment_structures = get_structures_from_mol(
-            mol,
-            max_conformers,
-        )
-
-        return fragment_structures
-
-    elif ligand_files.ligand_pdb is not None:
+    if ligand_files.ligand_pdb is not None:
         # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_pdb}")
 
         fragment_structures = {0: load_structure(ligand_files.ligand_pdb), }
