@@ -101,11 +101,11 @@ class CharacterizationNN:
         # print(f"Nearest neighbours fit on ipca dimension in time: {time_finish_fit - time_begin_fit}")
 
         # Fit the Dirichlet Process Gaussian Mixture Model and predict component membership
-        time_begin_fit = time.time()
-        nbrs = NearestNeighbors(n_neighbors=self.n_neighbours, n_jobs=-1).fit(sparse_dmap_inner_array)
-        distances, indices = nbrs.kneighbors(sparse_dmap_inner_array)
-        time_finish_fit = time.time()
-        print(f"Nearest neighbours fit on full dimension in time: {time_finish_fit-time_begin_fit}")
+        # time_begin_fit = time.time()
+        # nbrs = NearestNeighbors(n_neighbors=self.n_neighbours, n_jobs=-1).fit(sparse_dmap_inner_array)
+        # distances, indices = nbrs.kneighbors(sparse_dmap_inner_array)
+        # time_finish_fit = time.time()
+        # print(f"Nearest neighbours fit on full dimension in time: {time_finish_fit-time_begin_fit}")
 
 
         # Get neighbourhood radii
