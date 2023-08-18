@@ -216,6 +216,8 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     console.start_process_shells()
     for dtag in datasets:
+        if dtag != "D68EV3CPROA-x0688":
+            continue
 
         # Print basic information of the dataset to be processed
 
