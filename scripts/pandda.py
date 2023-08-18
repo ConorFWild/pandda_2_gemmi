@@ -184,6 +184,10 @@ def pandda(args: PanDDAArgs):
         fs, datasets, fs.output.path / "input.yaml"
     )
 
+    # Get the datasets to process
+    dataset_to_process: List[str] = GetDatasetsToProcess()(datasets, fs)
+    console.summarize_datasets_to_process(dataset_to_process)
+
     # Process each dataset by identifying potential comparator datasets, constructing proposed statistical models,
     # calculating alignments of comparator datasets, locally aligning electron density, filtering statistical models
     # to the plausible set, evaluating those models for events, selecting a model to take forward based on those events

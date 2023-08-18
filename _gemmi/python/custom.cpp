@@ -389,7 +389,7 @@ void interpolate_pos_array(
     auto val = grid.interpolate_value(pos);
     r_val(i) = val;
 }
-
+}
 
 void add_custom(py::module& m) {
       m.def(
