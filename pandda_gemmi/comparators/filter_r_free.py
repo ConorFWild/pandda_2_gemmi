@@ -14,3 +14,6 @@ class FilterRFree:
 
 
         return new_datasets
+
+    def description(self):
+        return f"Filtered because rfree > {self.max_rfree}"

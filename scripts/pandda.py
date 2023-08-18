@@ -50,6 +50,26 @@ from pandda_gemmi.ranking import rank_events, RankHighEventScore
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 
+class GetDatasetsToProcess:
+    def __init__(self, filters=(FilterRFree(),)):
+        self.filters = filters
+
+    def __call__(self,
+                 #*args, **kwargs
+                 datasets: Dict[str, DatasetInterface],
+                 fs: PanDDAFSInterface
+                 ):
+        # datasets_to_process = {}
+        datasets_not_to_process = {}
+
+        remaining_datasets = {_dtag: _dataset for _dtag, _dataset in datasets.items()}
+        for _filter in self.filters:
+            remaining_datasets = _filter(remaining_datasets)
+            for dtag in datasets:
+                if (dtag not in datasets_not_to_process) and (dtag not in remaining_datasets):
+                    datasets_not_to_process[dtag] = _filter.description()
+
+        return remaining_datasets, datasets_not_to_process
 
 class ProcessModel:
     def __init__(self,
@@ -185,8 +205,8 @@ def pandda(args: PanDDAArgs):
     )
 
     # Get the datasets to process
-    dataset_to_process: List[str] = GetDatasetsToProcess()(datasets, fs)
-    console.summarize_datasets_to_process(dataset_to_process)
+    dataset_to_process, datasets_not_to_process = GetDatasetsToProcess([FilterRFree(args.max_rfree),])(datasets, fs)
+    console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)
 
     # Process each dataset by identifying potential comparator datasets, constructing proposed statistical models,
     # calculating alignments of comparator datasets, locally aligning electron density, filtering statistical models

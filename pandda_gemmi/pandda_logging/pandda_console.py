@@ -620,6 +620,17 @@ class PanDDAConsole:
 
         self.console.print(table)
 
+
+    def summarize_datasets_to_process(self, dataset_to_process, datasets_not_to_process):
+        self.wrap_subtitle(f"Datasets to Process")
+        self.console.print(self.indent_text(Columns(sorted(dataset_to_process)), indent=4))
+
+
+        self.wrap_subtitle(f"Datasets not to Process")
+        for dtag in sorted(datasets_not_to_process):
+            self.console.print(self.indent_text(f"{dtag} : {datasets_not_to_process[dtag]}"))
+
+
     def begin_dataset_processing(
             self,
             dtag: str,
