@@ -76,7 +76,7 @@ class CharacterizationNN:
         nbrs = NearestNeighbors(n_neighbors=self.n_neighbours).fit(transformed)
         distances, indices = nbrs.kneighbors(transformed)
         time_finish_fit = time.time()
-        print(f"Nearest neighbours fit on pca dimension in time: {time_finish_fit - time_begin_fit}")
+        # print(f"Nearest neighbours fit on pca dimension in time: {time_finish_fit - time_begin_fit}")
 
         # time_begin_fit = time.time()
         # # # Transform the data to a reasonable size for a GMM
