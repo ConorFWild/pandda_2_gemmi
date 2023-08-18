@@ -51,7 +51,7 @@ from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 
 class GetDatasetsToProcess:
-    def __init__(self, filters=(FilterRFree(),)):
+    def __init__(self, filters=[]):
         self.filters = filters
 
     def __call__(self,
