@@ -584,7 +584,6 @@ class PanDDAConsole:
         table.add_column("CIF?")
         table.add_column("PDB?")
 
-
         # Rows
         for dtag in sorted(datasets_initial, key=lambda x: x):
             dataset = datasets_initial[dtag]
@@ -620,16 +619,13 @@ class PanDDAConsole:
 
         self.console.print(table)
 
-
     def summarize_datasets_to_process(self, dataset_to_process, datasets_not_to_process):
         self.wrap_subtitle(f"Datasets to Process")
         self.console.print(self.indent_text(Columns(sorted(dataset_to_process)), indent=4))
 
-
         self.wrap_subtitle(f"Datasets not to Process")
         for dtag in sorted(datasets_not_to_process):
             self.console.print(self.indent_text(f"{dtag} : {datasets_not_to_process[dtag]}"))
-
 
     def begin_dataset_processing(
             self,
@@ -638,7 +634,7 @@ class PanDDAConsole:
             dataset_res: float,
             comparator_datasets: Dict[str, DatasetInterface],
             processing_res: float
-                                 ):
+    ):
         printable = self.wrap_title(dtag)
         self.console.print(printable)
 
@@ -671,7 +667,7 @@ class PanDDAConsole:
             processed_models: Dict[int, Tuple[Dict[Tuple[str, int], EventInterface], Any, Any]],
             selected_model_num: int,
             selected_model_events: Dict[int, EventInterface],
-                          ):
+    ):
 
         self.wrap_subtitle("Ligand Files")
         for ligand_key, ligand_files in dataset.ligand_files.items():
@@ -726,7 +722,8 @@ class PanDDAConsole:
                 for ligand_key, autobuild_results in event_ligand_autobuilds.items():
                     if autobuild_results:
                         if len(autobuild_results.log_result_dict) > 0:
-                            max_score = max(autobuild_results.log_result_dict, key= lambda x: autobuild_results.log_result_dict[x])
+                            max_score = max(autobuild_results.log_result_dict,
+                                            key=lambda x: autobuild_results.log_result_dict[x])
                             printable = self.indent_text(f"{max_score}: {autobuild_results.log_result_dict[max_score]}")
                             self.console.print(printable)
 
