@@ -75,7 +75,7 @@ class ProcessModel:
     def __init__(self,
                  minimum_z_cluster_size=5.0,
                  minimum_event_score=0.17,
-                 local_highest_score_radius=5.0
+                 local_highest_score_radius=8.0
                  ):
         self.minimum_z_cluster_size = minimum_z_cluster_size
         self.minimum_event_score = minimum_event_score
