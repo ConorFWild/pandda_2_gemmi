@@ -39,5 +39,5 @@ def unserialize_events(path):
             bdc=event["BDC"]
         )
         for event_idx, event
-        in dic
+        in dic.items()
     }
