@@ -215,7 +215,7 @@ def pandda(args: PanDDAArgs):
     pandda_events = {}
     time_begin_process_datasets = time.time()
     console.start_process_shells()
-    for dtag in datasets:
+    for dtag in dataset_to_process:
         # if dtag != "D68EV3CPROA-x0688":
         #     continue
 
