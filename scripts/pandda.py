@@ -492,58 +492,62 @@ def pandda(args: PanDDAArgs):
     fs_ref = processor.put(fs)
 
     time_autobuild_begin = time.time()
+    autobuild_yaml_path = fs.output.path / "autobuilds.yaml"
+    if autobuild_yaml_path.exists():
+        autobuilds = serialize.unserialize_autobuilds(autobuild_yaml_path)
 
-    event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-        {
-            _event_id: Partial(autobuild).paramaterise(
-                _event_id,
-                dataset_refs[_event_id[0]],
-                pandda_events[_event_id],
-                AutobuildPreprocessStructure(),
-                AutobuildPreprocessDMap(),
-                # Rhofit(cut=1.0),
-                AutobuildInbuilt(),
-                fs_ref
-            )
-            for _event_id
-            in pandda_events
-        }
-    )
+    else:
+        event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+            {
+                _event_id: Partial(autobuild).paramaterise(
+                    _event_id,
+                    dataset_refs[_event_id[0]],
+                    pandda_events[_event_id],
+                    AutobuildPreprocessStructure(),
+                    AutobuildPreprocessDMap(),
+                    # Rhofit(cut=1.0),
+                    AutobuildInbuilt(),
+                    fs_ref
+                )
+                for _event_id
+                in pandda_events
+            }
+        )
 
-    time_autobuild_finish = time.time()
-    # print(f"Autobuilt in: {time_autobuild_finish - time_autobuild_begin}")
+        time_autobuild_finish = time.time()
+        # print(f"Autobuilt in: {time_autobuild_finish - time_autobuild_begin}")
 
-    autobuilds = {}
-    for _event_id in pandda_events:
-        if _event_id in event_autobuilds:
-            autobuilds[_event_id] = event_autobuilds[_event_id]
-        else:
-            autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
-                                     datasets[_event_id[0]].ligand_files}
-    time_finish_autobuild = time.time()
-    # print(f"Autobuilt {len(pandda_events)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
-    # console.summarise_autobuilding(autobuild_results)
+        autobuilds = {}
+        for _event_id in pandda_events:
+            if _event_id in event_autobuilds:
+                autobuilds[_event_id] = event_autobuilds[_event_id]
+            else:
+                autobuilds[_event_id] = {ligand_key: AutobuildResult(None, None, None, None, None, None) for ligand_key in
+                                         datasets[_event_id[0]].ligand_files}
+        time_finish_autobuild = time.time()
+        # print(f"Autobuilt {len(pandda_events)} events in: {round(time_finish_autobuild - time_begin_autobuild, 1)}")
+        # console.summarise_autobuilding(autobuild_results)
 
-    # Merge the autobuilds into PanDDA output models
-    merged_build_scores = merge_autobuilds(
-        datasets,
-        pandda_events,
-        autobuilds,
-        fs,
-        # MergeHighestRSCC(),
-        # MergeHighestBuildScore()
-        MergeHighestBuildAndEventScore()
-    )
+        # Merge the autobuilds into PanDDA output models
+        merged_build_scores = merge_autobuilds(
+            datasets,
+            pandda_events,
+            autobuilds,
+            fs,
+            # MergeHighestRSCC(),
+            # MergeHighestBuildScore()
+            MergeHighestBuildAndEventScore()
+        )
 
-    #
-    console.processed_autobuilds(autobuilds)
+        #
+        console.processed_autobuilds(autobuilds)
 
-    #
-    serialize.processed_autobuilds(
-        datasets,
-        event_autobuilds,
-        fs.output.path / "autobuilds.yaml"
-    )
+        #
+        serialize.processed_autobuilds(
+            datasets,
+            event_autobuilds,
+            fs.output.path / "autobuilds.yaml"
+        )
 
     # Get the sites
     sites: Dict[int, Site] = get_sites(

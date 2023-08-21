@@ -1,5 +1,5 @@
 import yaml
-
+from pandda_gemmi.autobuild import AutobuildResult
 from pandda_gemmi.interfaces import *
 
 
@@ -42,3 +42,23 @@ def processed_autobuilds(
 
     with open(path, 'w') as f:
         yaml.dump(dic, f, sort_keys=False)
+
+def unserialize_autobuilds(path):
+    with open(path, 'r') as f:
+        dic = yaml.safe_load( f)
+
+    event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = {}
+
+    for dtag, dtag_results in dic.items():
+        for event_idx, event_results in dtag_results.items():
+            event_autobuilds[(dtag, int(event_idx))] ={}
+
+            for ligand_key, ligand_results in event_results["Ligand Autobuild Results"].items():
+                event_autobuilds[(dtag, int(event_idx))][ligand_key] = AutobuildResult(
+                    log_result_dict=ligand_results,
+                    dmap_path=None,
+                    mtz_path=None,
+                    model_path=None,
+                    cif_path=None,
+                    out_dir=None
+                )
