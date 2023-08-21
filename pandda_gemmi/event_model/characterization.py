@@ -3,7 +3,8 @@ import time
 import numpy as np
 
 
-from sklearn.decomposition import PCA, IncrementalPCA
+# from sklearn.decomposition import PCA, IncrementalPCA
+from sklearnex.decomposition import PCA
 from sklearn import mixture
 from sklearn.neighbors import NearestNeighbors
 
