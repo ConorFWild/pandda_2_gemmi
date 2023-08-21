@@ -225,6 +225,7 @@ def pandda(args: PanDDAArgs):
         time_begin_process_dataset = time.time()
 
         if (fs.output.processed_datasets[dtag] / f"events.yaml").exists():
+            print(f"Already have events for dataset! Skipping!")
             pandda_events[dtag] = {
                 (dtag, event_idx): event
                 for event_idx, event
