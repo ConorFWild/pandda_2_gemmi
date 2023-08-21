@@ -238,6 +238,11 @@ def pandda(args: PanDDAArgs):
         # Get the dataset
         dataset = datasets[dtag]
 
+        # Skip processing the dataset if there is no ligand data
+        if len(dataset.ligand_files) == 0:
+            console.no_ligand_data()
+            continue
+
         # Get the resolution of the dataset
         dataset_res = dataset.reflections.resolution()
 
@@ -275,10 +280,7 @@ def pandda(args: PanDDAArgs):
             console.insufficient_comparators(comparator_datasets)
             continue
 
-        # Skip processing the dataset if there is no ligand data
-        if len(dataset.ligand_files) == 0:
-            console.no_ligand_data()
-            continue
+
 
         # Get the alignments, and save them to the object store
         time_begin_get_alignments = time.time()
