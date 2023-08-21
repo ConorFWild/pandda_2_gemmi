@@ -1,8 +1,7 @@
 import time
 
 import numpy as np
-from sklearnex import patch_sklearn
-patch_sklearn()
+
 
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn import mixture
