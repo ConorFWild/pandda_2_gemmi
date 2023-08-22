@@ -2,7 +2,9 @@
 
 ## New in version 0.1.0
 
- - Improved README.md
+ - Improved event ranking using a Resnet trained on XChem data
+ - Improved hit detection using automated characterization set comparisons
+ - Improved README.md with clearer instructions and reccomendations
  - Phenix dependency removed
  - PanDDA defaults to using present cifs with no rebuilding
  - Cleaner logs
@@ -13,6 +15,9 @@
 ## Reporting Errors
 
 PanDDA 2 is still in development and feedback is always appreciated! 
+
+If you have a problem with installation, program errors or uncertainty about the correctness of results the best place to get advice (and raise the issue to the developer) is at the XChem bullitin board: XCHEMBB@JISCMAIL.AC.UK
+, which you can sign up for at https://www.jiscmail.ac.uk/cgi-bin/webadmin?A0=XCHEMBB.
 
 If you have a problem with installation, then it is most likely specific to your system and best to just email me.
 
@@ -51,36 +56,38 @@ PanDDA 2 supports the autobuilding of events and ranking them by autobuildabilit
 
 Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following: 
 
-```bash
-python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> <options>
+## Preparing Data for PanDDA 2
+
+The reccomended pipeline with which to prepare PanDDA 2 input is Dimple. 
+
+The input directory for PanDDA must have the following format:
+
+```commandline
+<datasets directory>/<dataset name>/<dataset name>.pdb 
+                                    <dataset name>.mtz
+                                    compound/<compound name>.pdb
+                                    compound/<compound name>.cif
 ```
 
+Or, to give a concrete example:
 
-### Minimal Run
-
-If you want to run the lightest possible PanDDA (no clustering of datasets, no autobuilding, ect: basically PanDDA 1), then a command like the following is appropriate:
-
-```bash
-python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --autobuild=False --rank_method="size" --comparison_strategy="high_res_first" <options>
+```commandline
+data_dirs
+├── BAZ2BA-x434
+    ├── BAZ2BA-x434.mtz
+    ├── BAZ2BA-x434.pdb
+    └── compound
+        ├── ligand.cif
+        └── ligand.pdb
+ ...
 ```
 
+### Reccomended Run
 
-### Running With Distributed Computing At Diamond
+The reccomended way to run PanDDA 2 is:
 
-It is strongly recommended that if you are qsub'ing a script that will run PanDDA 2 you set up your environment on the head node (by activating the anaconda environment in which PanDDA 2 is installed) and use the "-V" option on qsub to copy your current environment to the job.
-
-An example of how to run with distributed computing at Diamond Light Source is as follows:
 ```bash
-# Ensuring availability of Global Phasing code for autobuilding and phenix for building cifs
-module load ccp4
-module load buster
-
-# Put the following in the file submit.sh
-python /path/to/analyse.py --data_dirs=<data dirs> --out_dir=<output dirs> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --global_processing="distributed" <options>
-
-# Submitting
-chmod 777 submit.sh
-qsub -V -o submit.o -e submit.e -q medium.q -pe smp 12 -l m_mem_free=15G submit.sh
+python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
 ```
 
 ## PanDDA 2 Usage FAQ
@@ -88,6 +95,9 @@ qsub -V -o submit.o -e submit.e -q medium.q -pe smp 12 -l m_mem_free=15G submit.
 ### The event map doesn't resemble the protein
 
 This is to be expected if the event map's event does not is not a fragment or actual meaningful change: in such cases the event map is effectively random and should be ignored.
+
+![REPL](https://github.com/ConorFWild/pandda_2_gemmi/raw/master/imgs/low_ranking_event.png)
+
 
 If there is clearly a fragment present but the event map's quality seems low for the protein: this is typically due to a poorly characterized ground state model and such event maps can be used as normal.
 
