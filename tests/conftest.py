@@ -12,7 +12,7 @@ def test_data():
         return test_data_path
     else:
         # TODO: Get
-        ...
+        return None
 
 @pytest.fixture()
 def integration_test_out_dir():
