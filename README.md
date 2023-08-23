@@ -1,16 +1,26 @@
 # PanDDA 2
 
-## New in version 0.1.0
+## Acknowledgements
+
+
+## New in version 1.0.0
 
  - Improved event ranking using a Resnet trained on XChem data
  - Improved hit detection using automated characterization set comparisons
+ - Fragment autobuilding
  - Improved README.md with clearer instructions and reccomendations
  - Phenix dependency removed
  - PanDDA defaults to using present cifs with no rebuilding
  - Cleaner logs
  - Improved ranking for unbuildable events
  - Memory performance optimizations
- - Which filters to apply to datasets can be configured with --data_quality_filters and --reference_comparability_filters
+ - Which filters to apply to datasets can be configured with `--data_quality_filters` and `--reference_comparability_filters`
+
+## Planned for version 1.1.0
+
+- Improved handling of DNA/RNA
+- Support for cryoem maps
+- Sites defined by residues instead of event centroids
 
 ## Reporting Errors
 
@@ -26,9 +36,29 @@ If the program errors while it runs, it is most helpful if you include the comma
 If you uncertain about the correctness of the results, then a GitHub issue is appropriate if you can share information publicly, in particular screenshots of maps or ligand fits. If you cannot, then an email to me is the best way to raise the concerns. Either way, please include the program output, the json log and screenshots of the offending z maps/event maps/autobuilds.
 
 
-## Installation
 
-It is recommended that you install PanDDA 2 in its own python 3.8 anaconda environment. If you do not have an Anaconda enviroment you can install one by following the instructions at https://www.anaconda.com/products/distribution#linux. 
+
+
+
+## Running PanDDA 2
+
+PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit).
+
+
+Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following:
+
+1. Install ccp4/7.0.067 and PanDDA 2
+2. Prepare your data for PanDDA 2
+3. Run `pandda2.analyse` on your data to generate event maps
+4. Run `pandda.inspect` to identify and complete fragment bound models
+5. Decide which fragments to take forwards
+6. Run `pandda.export` to prepare your results for refinement
+
+## 1. Installation
+
+First of all you will need to install `ccp4/7.0.067`. This is in order to access the functionality of `pandda.inspect` and `pandda.export`, which do not function correctly in more recent versions.
+
+Once you have installed CCP4, it is recommended that you install PanDDA 2 in its own python 3.9 anaconda environment. If you do not have an Anaconda environment you can install one by following the instructions at https://www.anaconda.com/products/distribution#linux. 
 
 Then:
 
@@ -47,18 +77,9 @@ pip install numpy==1.21.0
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
 
+## 2. Preparing Data for PanDDA 2
 
-
-## Running PanDDA 2
-
-PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit).
-
-
-Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following: 
-
-## Preparing Data for PanDDA 2
-
-The reccomended pipeline with which to prepare PanDDA 2 input is Dimple. 
+The recommended pipeline with which to prepare PanDDA 2 input data is Dimple, which you can read more about at: https://ccp4.github.io/dimple/. The reccomended program for generating restraints is AceDRG (CCP4) or Grade (Global Phasing Ltd.).
 
 The input directory for PanDDA must have the following format:
 
@@ -82,24 +103,41 @@ data_dirs
  ...
 ```
 
-### Reccomended Run
+### 3. Running PanDDA 2
 
-The reccomended way to run PanDDA 2 is:
+The recommended way to run PanDDA 2 is:
 
 ```bash
+conda activate pandda2
 python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
 ```
 
+After PanDDA 2 has finished running, then results can be inspected with pandda.inspect as per PanDDA 1 (https://pandda.bitbucket.io/).
+
+### 4. Inspecting the results of PanDDA 2
+Refer to sections 8, 9 and 10 of the PanDDA tutorial. 
+
+One important difference is that PanDDA 2 returns events ranked by score rather than by score per site. This means that 
+
+### 5. Picking Fragment Hits
+
+### 6. Exporting Results for Refinement
+
+Refer to sections 11, 12 and 13 of the PanDDA tutorial.
+
 ## PanDDA 2 Usage FAQ
+
+### PanDDA 2 has returned an enourmous number of events
+This is working as intended: PanDDA 2 is designed re return significantly more events than PanDDA 1, but to rank them better. 
 
 ### The event map doesn't resemble the protein
 
-This is to be expected if the event map's event does not is not a fragment or actual meaningful change: in such cases the event map is effectively random and should be ignored.
+This is to be expected if the event map's event does not is not a fragment or actual meaningful change: in such cases the event map is effectively random and should be ignored. An example of this is shown below:
 
-![REPL](https://github.com/ConorFWild/pandda_2_gemmi/raw/master/imgs/low_ranking_event.png)
+![low_ranking_event](https://github.com/ConorFWild/pandda_2_gemmi/raw/0_1_0/imgs/low_ranking_event.png)
 
 
-If there is clearly a fragment present but the event map's quality seems low for the protein: this is typically due to a poorly characterized ground state model and such event maps can be used as normal.
+If there is clearly a fragment present but the event map's quality seems low for the protein: this is typically due to a poorly characterized ground state model and such event maps can be used as normal: i.e. can be built into. An example can be seen below:
 
 ### An event's density looks like the soaked fragment but it has not been autobuilt
 
@@ -117,11 +155,11 @@ Autobuilding PanDDA events is not perfect and the method can sometimes fail. If 
 
 ## How PanDDA 2 works
 
-PanDDA 2 differs from PanDDA 1 in two major methodological ways. 
+PanDDA 2 differs from PanDDA 1 in two major ways: 
 
-Firstly, it attempts to identify which sets of datasets should be used to produce a statistical model which has the optimal contrast (to each test dataset individually). This allows it to handle subtle heterogeneity between datasets. 
+1. Firstly, it attempts to identify which sets of datasets should be used to produce a statistical model which has the optimal contrast (to each test dataset individually). This allows it to handle subtle heterogeneity between datasets. 
 
-Secondly it attempts to autobuild the events returned, and then rank the events based on the quality of the model of the fragment that could be constructed. This allows improved rankings of events.
+2. Secondly it attempts to autobuild the events returned, and then rank the events based on the quality of the model of the fragment that could be constructed. This allows improved rankings of events.
 
 ### Statistical Model Dataset Selection
 
@@ -147,5 +185,8 @@ Current limitations with the interaction between pandda.inspect and PanDDA 2 mea
 Therefore, the highest scoring autobuild by RSCC from any event in each dataset is selected and included in the initial model pandda.inspect shows the user. 
 
 This has the effect that users may open apparently good hit density with no autobuild present, if another hit which is better fit by the autobuilding is present in the same dataset.
+
+# 
+
 
 
