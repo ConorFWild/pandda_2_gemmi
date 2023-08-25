@@ -578,4 +578,4 @@ def pandda(args: PanDDAArgs):
     # Output the event and site tables
     output_tables(pandda_events, ranking, sites, fs)
     time_pandda_finish = time.time()
-    print(f"PanDDA ran in: {time_pandda_finish - time_pandda_begin}")
+    print(f"PanDDA ran in: {round(time_pandda_finish - time_pandda_begin)} seconds!")
