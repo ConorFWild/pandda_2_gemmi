@@ -221,6 +221,9 @@ def pandda(args: PanDDAArgs):
     for dtag in dataset_to_process:
         # if dtag != "D68EV3CPROA-x0688":
         #     continue
+        if dtag != "D68EV3CPROA-x1247":
+            continue
+
 
         # Print basic information of the dataset to be processed
 
@@ -233,8 +236,6 @@ def pandda(args: PanDDAArgs):
             print(f"Already have events for dataset! Skipping!")
             for event_idx, event in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items():
                 pandda_events[(dtag, event_idx)] = event
-
-
             continue
 
         # Get the dataset
