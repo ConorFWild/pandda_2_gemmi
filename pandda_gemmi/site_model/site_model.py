@@ -70,7 +70,7 @@ def _get_closest_transform(unaligned_centroid, transforms, com_ref, com_mov):
         )
 
     min_dist_index = np.argmin(distances)
-    return transforms[min_dist_index], com_ref[min_dist_index, :], com_mov[min_dist_index, :]
+    return list(transforms.values())[min_dist_index], list(com_ref.values())[min_dist_index], list(com_mov.values())[min_dist_index]
 
 
 class HeirarchicalSiteModel:
