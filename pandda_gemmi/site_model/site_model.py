@@ -64,7 +64,7 @@ from .site import Site
 #         return sites
 def _get_closest_transform(unaligned_centroid, transforms, com_ref, com_mov):
     distances = []
-    for transform, com_ref_centroid, com_mov_centroid in zip(transforms, com_ref, com_mov):
+    for transform, com_ref_centroid, com_mov_centroid in zip(transforms.values(), com_ref.values(), com_mov.values()):
         distances.append(
             gemmi.Position(*com_mov_centroid).dist(gemmi.Position(*unaligned_centroid))
         )
