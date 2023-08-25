@@ -110,7 +110,8 @@ class HeirarchicalSiteModel:
 
         # Get the aligned centroids
         aligned_centroids = []
-        for (_dtag, _event_idx), event in events.items():
+        for event_id, event in events.items():
+            _dtag, _event_idx = event_id
             unaligned_centroid = np.mean(event.pos_array, axis=0)
             alignment = alignments[_dtag]
             transforms, com_ref, com_mov = alignment.get_transforms()
