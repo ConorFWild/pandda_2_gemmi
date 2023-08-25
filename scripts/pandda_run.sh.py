@@ -64,7 +64,7 @@ if submit:
 
             with open(submit_script_path, "w") as f:
                 f.write(
-                    "#!/bin/sh\\"
+                    "#!/bin/sh; "
                     f"python -u {pandda_script_path} --data_dirs={data_dir_path} --out_dir={out_dir_path} --local_cpus={num_cpus}"
 
                 )
