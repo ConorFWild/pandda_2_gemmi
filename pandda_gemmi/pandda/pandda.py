@@ -256,7 +256,7 @@ def pandda(args: PanDDAArgs):
                 FilterRFree(args.max_rfree),
                 FilterSpaceGroup(dataset),
                 FilterCompatibleStructures(dataset),
-                FilterResolution(dataset_res, args.max_shell_datasets, args.high_res_buffer)]
+                FilterResolution(dataset_res, args.max_shell_datasets, 100, args.high_res_buffer)]
         )
 
         # Ensure the dataset itself is included in comparators
