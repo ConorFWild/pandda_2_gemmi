@@ -72,7 +72,7 @@ if submit:
             error_path = out_dir_path / "submit.err"
 
             p = subprocess.Popen(
-                f"qsub -V -pe smp {num_cpus} -l m_mem_free={int(180 / int(num_cpus))}G -o {output_path} -e {error_path} {submit_script_path}",
+                f"chmod 777 {submit_script_path}; qsub -V -pe smp {num_cpus} -l m_mem_free={int(180 / int(num_cpus))}G -o {output_path} -e {error_path} {submit_script_path}",
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
