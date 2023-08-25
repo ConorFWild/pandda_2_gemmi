@@ -556,7 +556,10 @@ def pandda(args: PanDDAArgs):
 
     # Get the sites
     sites: Dict[int, Site] = get_sites(
+        datasets,
         pandda_events,
+        processor,
+        structure_array_refs,
         HeirarchicalSiteModel(t=args.max_site_distance_cutoff)
     )
     # for site_id, site in sites.items():
