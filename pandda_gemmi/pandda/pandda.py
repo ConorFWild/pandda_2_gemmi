@@ -555,6 +555,8 @@ def pandda(args: PanDDAArgs):
         )
 
     # Get the sites
+    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
+                            datasets}
     sites: Dict[int, Site] = get_sites(
         datasets,
         pandda_events,
