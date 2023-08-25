@@ -231,11 +231,10 @@ def pandda(args: PanDDAArgs):
         print(f"Checking for a event yaml at: {events_yaml_path}")
         if events_yaml_path.exists():
             print(f"Already have events for dataset! Skipping!")
-            pandda_events[dtag] = {
-                (dtag, event_idx): event
-                for event_idx, event
-                in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items()
-            }
+            for event_idx, event in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items()
+                pandda_events[(dtag, event_idx)] = event
+
+
             continue
 
         # Get the dataset
