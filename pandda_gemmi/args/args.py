@@ -31,7 +31,7 @@ class PanDDAArgs:
     high_res_upper_limit: float = 1.0
     high_res_lower_limit: float = 4.0
     high_res_increment: float = 0.05
-    high_res_buffer: float = 0.0
+    high_res_buffer: float = 0.1
     max_shell_datasets: int = 60
     min_characterisation_datasets: int = constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT
     structure_factors: Optional[Tuple[str, str]] = None
@@ -429,7 +429,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_HIGH_RES_BUFFER,
             type=float,
-            default=0.0,
+            default=0.1,
             help=constants.ARGS_HIGH_RES_BUFFER_HELP,
         )
         parser.add_argument(
