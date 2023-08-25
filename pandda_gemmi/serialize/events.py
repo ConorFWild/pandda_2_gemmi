@@ -33,8 +33,8 @@ def unserialize_events(path):
 
     return {
         event_idx: Event(
-            pos_array=event["Position Array"],
-            point_array=event["Point Array"],
+            pos_array=np.array(event["Position Array"]),
+            point_array=np.array(event["Point Array"]),
             score=event["Score"],
             bdc=event["BDC"]
         )
