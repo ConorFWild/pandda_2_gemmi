@@ -8,7 +8,7 @@ dependencies:
   - cython>=3.0
   - compilers
   - openblas
-  - nomkl
+#  - nomkl
   - setuptools=59.2.0
   - ninja
   - pkg-config
