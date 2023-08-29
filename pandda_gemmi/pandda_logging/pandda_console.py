@@ -633,9 +633,11 @@ class PanDDAConsole:
             dataset: DatasetInterface,
             dataset_res: float,
             comparator_datasets: Dict[str, DatasetInterface],
-            processing_res: float
+            processing_res: float,
+            j: int,
+            dataset_to_process: List
     ):
-        printable = self.wrap_title(dtag)
+        printable = self.wrap_title(f"{dtag} : {j+1} / {len(dataset_to_process)}")
         self.console.print(printable)
 
         printable = self.indent_text(f"Resolution: {round(dataset_res, 2)}")

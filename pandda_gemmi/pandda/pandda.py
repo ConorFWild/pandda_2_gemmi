@@ -218,7 +218,7 @@ def pandda(args: PanDDAArgs):
     pandda_events = {}
     time_begin_process_datasets = time.time()
     console.start_process_shells()
-    for dtag in dataset_to_process:
+    for j, dtag in enumerate(dataset_to_process):
         # if dtag != "D68EV3CPROA-x0688":
         #     continue
         # if dtag != "D68EV3CPROA-x1247":
@@ -275,7 +275,9 @@ def pandda(args: PanDDAArgs):
             dataset,
             dataset_res,
             comparator_datasets,
-            processing_res
+            processing_res,
+            j,
+            dataset_to_process
         )
 
         # Skip if there are insufficient comparators in order to characterize a statistical model
