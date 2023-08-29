@@ -277,7 +277,8 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             processing_res,
             j,
-            dataset_to_process
+            dataset_to_process,
+            time_begin_process_datasets
         )
 
         # Skip if there are insufficient comparators in order to characterize a statistical model

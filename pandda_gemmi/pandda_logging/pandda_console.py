@@ -1,5 +1,6 @@
 import inspect
 import os
+import time
 
 import numpy as np
 
@@ -635,7 +636,8 @@ class PanDDAConsole:
             comparator_datasets: Dict[str, DatasetInterface],
             processing_res: float,
             j: int,
-            dataset_to_process: List
+            dataset_to_process: List,
+            time_begin_process_datasets: float
     ):
         printable = self.wrap_title(f"{dtag} : {j+1} / {len(dataset_to_process)}")
         self.console.print(printable)
@@ -649,6 +651,10 @@ class PanDDAConsole:
         self.wrap_subtitle(f"Comparator Datasets")
         printable = self.indent_text(Columns([x for x in sorted(comparator_datasets)]))
         self.console.print(printable)
+
+        estimated_time_per_dataset = (time.time() - time_begin_process_datasets) / (j+1)
+        estimated_time_to_completion = (len(dataset_to_process) - (j+1)) * estimated_time_per_dataset
+        self.wrap_subtitle(f"Estimated time to completion: {round(estimated_time_to_completion, 2)} seconds!")
 
     def insufficient_comparators(self, comparator_datasets):
         printable = self.indent_text(f"NOT ENOUGH COMPARATOR DATASETS: {len(comparator_datasets)}! SKIPPING!")
