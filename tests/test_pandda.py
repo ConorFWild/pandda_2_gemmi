@@ -1,3 +1,5 @@
+import multiprocessing
+
 import pytest
 
 from pandda_gemmi.args import PanDDAArgs
@@ -8,7 +10,7 @@ def test_pandda(test_data, integration_test_out_dir):
     args= PanDDAArgs(
         test_data,
         integration_test_out_dir,
-        local_cpus=-1
+        local_cpus=multiprocessing.cpu_count()
     )
     pandda(args)
 
