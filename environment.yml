@@ -33,7 +33,7 @@ dependencies:
   - rdkit
   - openbabel
   - pytorch
-  - ]torchvision
+  - torchvision
   - torchaudio
   - pytorch-cuda=11.7
   # For testing
