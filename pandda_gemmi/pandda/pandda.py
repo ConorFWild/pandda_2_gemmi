@@ -30,7 +30,7 @@ from pandda_gemmi.comparators import (
     FilterResolution,
     FilterCompatibleStructures
 )
-from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNN
+from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNN, CharacterizationNNAndFirst
 from pandda_gemmi.event_model.filter_characterization_sets import filter_characterization_sets
 from pandda_gemmi.event_model.outlier import PointwiseNormal
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
@@ -357,7 +357,7 @@ def pandda(args: PanDDAArgs):
             #     n_components=min(20, int(len(comparator_datasets) / 25)),
             #     covariance_type="full",
             # ),
-            CharacterizationNN()
+            CharacterizationNNAndFirst()
         )
         time_finish_get_characterization_sets = time.time()
         print(

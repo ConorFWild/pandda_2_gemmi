@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 
-
 # from sklearn.decomposition import PCA, IncrementalPCA
 from sklearnex.decomposition import PCA
 from sklearn import mixture
@@ -62,6 +61,7 @@ class CharacterizationGaussianMixture:
 
         return predicted
 
+
 class CharacterizationNN:
     def __init__(self, n_neighbours=25, min_size=15):
         self.n_neighbours = n_neighbours
@@ -111,7 +111,6 @@ class CharacterizationNN:
         # time_finish_fit = time.time()
         # print(f"Nearest neighbours fit on full dimension in time: {time_finish_fit-time_begin_fit}")
 
-
         # Get neighbourhood radii
         radii = {}
         for j, row in enumerate(distances):
@@ -156,30 +155,29 @@ class CharacterizationNN:
                 characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
                 j = j + 1
 
-
         # return predicted
 
         return characterization_sets
+
 
 class CharacterizationFirst:
     def __init__(self, num_datasets=30):
         self.num_datasets = 30
 
     def __call__(self, dtag_array, dmaps, reference_frame):
-
         predicted = {
             1: [x for x in sorted(dtag_array, )][:self.num_datasets]
         }
         return predicted
+
 
 class CharacterizationNNAndFirst:
     def __init__(self, n_neighbours=25, ):
         self.characterize_nn = CharacterizationNN(n_neighbours=25)
         self.characterize_first = CharacterizationFirst()
 
-    def __call__(self,dtag_array, dmaps, reference_frame):
-
+    def __call__(self, dtag_array, dmaps, reference_frame):
         predicted_nn = self.characterize_nn(dtag_array, dmaps, reference_frame)
         predicted_first = self.characterize_first(dtag_array, dmaps, reference_frame)
-        predicted_nn[max(predicted_nn)+1] = predicted_first[1]
+        predicted_nn[max(predicted_nn) + 1] = predicted_first[1]
         return predicted_nn
