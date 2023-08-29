@@ -62,4 +62,5 @@ dependencies:
   - pytz
   # Pip
   - pip
-    - "git+https://github.com/ConorFWild/_gemmi.git"
+    - "https://github.com/ConorFWild/pandda_2_gemmi/archive/refs/heads/0_1_0.zip"
+#    - "git+https://github.com/ConorFWild/_gemmi.git"
