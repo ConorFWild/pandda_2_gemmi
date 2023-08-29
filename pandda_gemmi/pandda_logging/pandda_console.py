@@ -656,6 +656,7 @@ class PanDDAConsole:
         estimated_time_to_completion = (len(dataset_to_process) - (j+1)) * estimated_time_per_dataset
         self.wrap_subtitle(f"Estimated time to completion: {round(estimated_time_to_completion, 2)} seconds!")
 
+
     def insufficient_comparators(self, comparator_datasets):
         printable = self.indent_text(f"NOT ENOUGH COMPARATOR DATASETS: {len(comparator_datasets)}! SKIPPING!")
         self.console.print(printable)
