@@ -1,6 +1,8 @@
 name: numpy-dev
 channels:
   - conda-forge
+  - pytorch
+  - nvidia
 dependencies:
   - python=3.9 #need to pin to avoid issues with builds
   - cython>=3.0
@@ -30,6 +32,10 @@ dependencies:
   - seaborn
   - rdkit
   - openbabel
+  - pytorch
+  - ]torchvision
+  - torchaudio
+  - pytorch-cuda=11.7
   # For testing
   - pytest
   - pytest-cov
@@ -44,7 +50,6 @@ dependencies:
   - sphinx-design
   - numpydoc=1.4.0
   - ipython
-
   - pydata-sphinx-theme=0.13.3
   - doxygen
   # NOTE: breathe 4.33.0 collides with sphinx.ext.graphviz
