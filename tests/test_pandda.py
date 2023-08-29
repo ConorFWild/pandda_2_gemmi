@@ -8,4 +8,4 @@ def test_pandda(test_data, integration_test_out_dir):
         test_data,
         integration_test_out_dir
     )
-    pandda()
+    pandda(args)
