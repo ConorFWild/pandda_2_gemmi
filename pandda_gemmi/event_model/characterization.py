@@ -23,22 +23,22 @@ def get_characterization_sets(
     dtag_array = np.array([_dtag for _dtag in datasets])
 
     # Get the
-    classes = characterization_model(dmaps, reference_frame)
+    characterization_sets = characterization_model(dtag_array, dmaps, reference_frame)
 
     # Get the characterization sets from dmap mask
-    characterization_sets = {}
-
-    # Get the clusters and their membership numbers
-    unique_classes, counts = np.unique(classes, return_counts=True)
-    # print(f"Unique classes : {unique_classes} : counts : {counts}")
-    j = 0
-    for unique_class, count in zip(unique_classes, counts):
-        if unique_class < 1:
-            continue
-        if count >= min_size:
-            class_dtags = dtag_array[classes == unique_class]
-            characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
-            j = j + 1
+    # characterization_sets = {}
+    #
+    # # Get the clusters and their membership numbers
+    # unique_classes, counts = np.unique(classes, return_counts=True)
+    # # print(f"Unique classes : {unique_classes} : counts : {counts}")
+    # j = 0
+    # for unique_class, count in zip(unique_classes, counts):
+    #     if unique_class < 1:
+    #         continue
+    #     if count >= min_size:
+    #         class_dtags = dtag_array[classes == unique_class]
+    #         characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
+    #         j = j + 1
 
     return characterization_sets
 
@@ -63,10 +63,11 @@ class CharacterizationGaussianMixture:
         return predicted
 
 class CharacterizationNN:
-    def __init__(self, n_neighbours=25, ):
+    def __init__(self, n_neighbours=25, min_size=15):
         self.n_neighbours = n_neighbours
+        self.min_size = min_size
 
-    def __call__(self, dmaps, reference_frame):
+    def __call__(self, dtag_array, dmaps, reference_frame):
         # Get the inner mask of the density
         sparse_dmap_inner_array = dmaps[:, reference_frame.mask.indicies_sparse_inner]
 
@@ -140,4 +141,45 @@ class CharacterizationNN:
 
                 cluster_num += 1
 
+        # Get the characterization sets from dmap mask
+        characterization_sets = {}
+
+        # Get the clusters and their membership numbers
+        unique_classes, counts = np.unique(predicted, return_counts=True)
+        # print(f"Unique classes : {unique_classes} : counts : {counts}")
+        j = 1
+        for unique_class, count in zip(unique_classes, counts):
+            if unique_class < 1:
+                continue
+            if count >= self.min_size:
+                class_dtags = dtag_array[predicted == unique_class]
+                characterization_sets[j] = [str(_dtag) for _dtag in class_dtags]
+                j = j + 1
+
+
+        # return predicted
+
+        return characterization_sets
+
+class CharacterizationFirst:
+    def __init__(self, num_datasets=30):
+        self.num_datasets = 30
+
+    def __call__(self, dtag_array, dmaps, reference_frame):
+
+        predicted = {
+            1: [x for x in sorted(dtag_array, )][:self.num_datasets]
+        }
         return predicted
+
+class CharacterizationNNAndFirst:
+    def __init__(self, n_neighbours=25, ):
+        self.characterize_nn = CharacterizationNN(n_neighbours=25)
+        self.characterize_first = CharacterizationFirst()
+
+    def __call__(self,dtag_array, dmaps, reference_frame):
+
+        predicted_nn = self.characterize_nn(dtag_array, dmaps, reference_frame)
+        predicted_first = self.characterize_first(dtag_array, dmaps, reference_frame)
+        predicted_nn[max(predicted_nn)+1] = predicted_first[1]
+        return predicted_nn
