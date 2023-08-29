@@ -166,7 +166,7 @@ class CharacterizationFirst:
 
     def __call__(self, dtag_array, dmaps, reference_frame):
         predicted = {
-            1: [x for x in sorted(dtag_array, )][:self.num_datasets]
+            1: [str(x) for x in sorted(dtag_array, )][:self.num_datasets]
         }
         return predicted
 
