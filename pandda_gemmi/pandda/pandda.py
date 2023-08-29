@@ -221,8 +221,8 @@ def pandda(args: PanDDAArgs):
     for dtag in dataset_to_process:
         # if dtag != "D68EV3CPROA-x0688":
         #     continue
-        if dtag != "D68EV3CPROA-x1247":
-            continue
+        # if dtag != "D68EV3CPROA-x1247":
+        #     continue
 
 
         # Print basic information of the dataset to be processed
