@@ -162,7 +162,7 @@ class CharacterizationNN:
 
 class CharacterizationFirst:
     def __init__(self, num_datasets=30):
-        self.num_datasets = 30
+        self.num_datasets = num_datasets
 
     def __call__(self, dtag_array, dmaps, reference_frame):
         predicted = {
