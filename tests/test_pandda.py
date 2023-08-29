@@ -4,9 +4,11 @@ from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.pandda.pandda import pandda
 
 def test_pandda(test_data, integration_test_out_dir):
+
     args= PanDDAArgs(
         test_data,
-        integration_test_out_dir
+        integration_test_out_dir,
+        local_cpus=-1
     )
     pandda(args)
 
