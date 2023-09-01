@@ -171,6 +171,7 @@ class CharacterizationFirst:
         return predicted
 
 
+
 class CharacterizationNNAndFirst:
     def __init__(self, n_neighbours=25, ):
         self.characterize_nn = CharacterizationNN(n_neighbours=25)
