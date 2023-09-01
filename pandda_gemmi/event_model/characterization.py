@@ -181,3 +181,4 @@ class CharacterizationNNAndFirst:
         predicted_first = self.characterize_first(dtag_array, dmaps, reference_frame)
         predicted_nn[max(predicted_nn) + 1] = predicted_first[1]
         return predicted_nn
+
