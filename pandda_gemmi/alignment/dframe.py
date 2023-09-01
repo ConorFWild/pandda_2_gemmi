@@ -529,7 +529,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 for _j
                 in (0, 1, 2)
             ]
-        ).astype(np.int)
+        ).astype(int)
 
         unique_points = grid_point_array.T
 
