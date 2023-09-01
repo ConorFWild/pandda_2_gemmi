@@ -106,8 +106,8 @@ class ClusterDensityDBSCAN:
         all_positions_array = position_array
 
         # Get the minimum and maximum points
-        min_point = np.min(all_points_array, axis=0).astype(np.int)
-        max_point = np.max(all_points_array, axis=0).astype(np.int)
+        min_point = np.min(all_points_array, axis=0).astype(int)
+        max_point = np.max(all_points_array, axis=0).astype(int)
 
         # Get the points relative to the minimum point
         all_point_indexes = (
@@ -212,7 +212,7 @@ class ClusterDensityDBSCAN:
                 continue
             events[j] = Event(
                 high_z_pos_array[clusters == cluster_num, :],
-                high_z_point_array[clusters == cluster_num, :].astype(np.int),
+                high_z_point_array[clusters == cluster_num, :].astype(int),
                 0.0,
                 0.0
             )

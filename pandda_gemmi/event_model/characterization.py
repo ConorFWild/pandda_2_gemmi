@@ -125,7 +125,7 @@ class CharacterizationNN:
         claimed = []
         cluster_num = 1
         # cluster_widths = {}
-        predicted = np.zeros(dmaps.shape[0], dtype=np.int)
+        predicted = np.zeros(dmaps.shape[0], dtype=int)
         for index in radii_sorted:
             nearest_neighbour_indexes = indices[index, :]
 
