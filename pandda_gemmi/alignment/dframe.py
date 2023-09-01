@@ -517,7 +517,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
         # Get the grid points (real space, not modulus!) in the mask
         shifted_grid_point_indicies = tuple(
-            (grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(np.int)[_j]).flatten()
+            (grid_point_indicies[_j] - np.array([u0, v0, w0]).astype(int)[_j]).flatten()
             for _j
             in (0, 1, 2)
         )
