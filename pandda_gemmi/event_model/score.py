@@ -17,7 +17,7 @@ from .event import Event
 
 from pandda_gemmi.cnn import resnet
 from pandda_gemmi.cnn import resnet18
-
+from pandda_gemmi.dmaps import SparseDMap
 
 def sample_xmap(xmap, transform, sample_array):
     xmap.interpolate_values(sample_array, transform)
@@ -365,7 +365,9 @@ class ScoreCNNLigand:
             self.dev = "cpu"
 
         # Load the model
-        cnn = resnet18(num_classes=2, num_input=4)
+        # cnn = resnet18(num_classes=2, num_input=4)
+        cnn = resnet18(num_classes=2, num_input=3)
+
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_ligand.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
 
@@ -376,7 +378,7 @@ class ScoreCNNLigand:
 
         self.n = n
 
-    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median):
+    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median, reference_frame):
 
         scored_events = {}
         time_begin_get_images = time.time()
@@ -409,19 +411,29 @@ class ScoreCNNLigand:
             )
 
             # Get images of the 2Fo-Fc map, the ground state (mean) map and the structure map
-            sample_array_raw = np.copy(sample_array)
-            xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
-            xmap_mean = np.mean(xmap_sample)
-            xmap_std = np.std(xmap_sample)
-            image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
-            # print(f"Xmap: {[xmap_mean, xmap_std]}")
-
-            sample_array_mean_map = np.copy(sample_array)
-            mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
-            mean_mean = np.mean(mean_sample)
-            mean_std = np.std(mean_sample)
-            image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
+            # sample_array_raw = np.copy(sample_array)
+            # xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
+            # xmap_mean = np.mean(xmap_sample)
+            # xmap_std = np.std(xmap_sample)
+            # image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
+            # # print(f"Xmap: {[xmap_mean, xmap_std]}")
+            #
+            # sample_array_mean_map = np.copy(sample_array)
+            # mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
+            # mean_mean = np.mean(mean_sample)
+            # mean_std = np.std(mean_sample)
+            # image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
             # print(f"Mean: {[mean_mean, mean_std]}")
+
+            mean_grid_array = np.array(mean_grid, copy=False)
+            homogenized_xmap_grid_array = np.array(homogenized_xmap_grid, copy=False)
+            event_map_array = (homogenized_xmap_grid_array - (event.bdc * mean_grid_array)) / (1 - event.bdc)
+            event_map_grid = reference_frame.unmask(SparseDMap(event_map_array))
+            sample_array_event_map = np.copy(sample_array)
+            event_map_sample = sample_xmap(event_map_grid, sample_transform, sample_array_event_map)
+            event_map_mean = np.mean(event_map_sample)
+            event_map_std = np.std(event_map_sample)
+            image_event_map = (event_map_sample[np.newaxis, :] - event_map_mean) / event_map_std
 
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
@@ -430,7 +442,8 @@ class ScoreCNNLigand:
             # print(f"Ligand: {np.mean(image_ligand)}")
 
             # Generate the combined image for scoring
-            image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
+            # image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
+            image = np.stack([image_event_map, image_model, image_ligand, ], axis=1)
             images[event_id] = image
 
         time_finish_get_images = time.time()

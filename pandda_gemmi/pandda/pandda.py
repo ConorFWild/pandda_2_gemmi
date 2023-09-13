@@ -134,7 +134,7 @@ class ProcessModel:
         # Score the events with some method such as the CNN
         time_begin_score_events = time.time()
         events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
-                       median,
+                       median, reference_frame
                        )
         time_finish_score_events = time.time()
 
@@ -437,7 +437,9 @@ def pandda(args: PanDDAArgs):
             model_means[selected_model_num],
             model_zs[selected_model_num],
             reference_frame,
-            processing_res
+            processing_res,
+            model_events,
+            model_means
         )
         time_finish_output_maps = time.time()
         print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
