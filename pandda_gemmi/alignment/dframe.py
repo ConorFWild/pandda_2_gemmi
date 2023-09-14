@@ -538,7 +538,7 @@ class PointPositionArray(PointPositionArrayInterface):
         return unique_points, unique_positions, all_indicies
 
     @classmethod
-    def from_structure(cls, st: StructureInterface, grid, processor, radius: float = 6.0):
+    def from_structure(cls, st: StructureInterface, grid, processor, radius: float = 8.0):
         point_array, position_array, all_indicies = PointPositionArray.get_grid_points_around_protein(st, grid, radius,
                                                                                                       processor)
         return PointPositionArray(point_array, position_array), all_indicies
