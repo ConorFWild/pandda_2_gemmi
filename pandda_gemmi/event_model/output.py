@@ -147,7 +147,7 @@ def output_maps(
     if all_maps:
         all_maps_dir = Path(fs.output.processed_datasets[dtag]) / "all_maps"
         os.mkdir(all_maps_dir)
-        for model_number, model_events in all_events:
+        for model_number, model_events in all_events.items():
             model_maps_dir = all_maps_dir / str(model_number)
             model_mean = model_means[model_number]
             os.mkdir(model_maps_dir)
