@@ -223,7 +223,7 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag != "D68EV3CPROA-x1247":
         #     continue
-        if dtag != "BAZ2BA-x583":
+        if dtag not in ["BAZ2BA-x583", "BAZ2BA-x481"]:
             continue
 
 
