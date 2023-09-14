@@ -223,6 +223,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag != "D68EV3CPROA-x1247":
         #     continue
+        if dtag != "BAZ2BA-x583":
+            continue
 
 
         # Print basic information of the dataset to be processed
