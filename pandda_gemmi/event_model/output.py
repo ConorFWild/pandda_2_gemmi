@@ -144,26 +144,26 @@ def output_maps(
             reference_frame
         )
 
-    if all_maps:
-        all_maps_dir = Path(fs.output.processed_datasets[dtag]) / "all_maps"
-        os.mkdir(all_maps_dir)
-        for model_number, model_events in all_events.items():
-            model_maps_dir = all_maps_dir / str(model_number)
-            model_mean = model_means[model_number]
-            os.mkdir(model_maps_dir)
-            for event_id, event in model_events.items():
-                event_array = (dtag_array - (event.bdc * model_mean)) / (1 - event.bdc)
-                event_grid = reference_frame.unmask(SparseDMap(event_array))
-
-                save_dmap(
-                    event_grid,
-                    # event_grid_smoothed,
-                    Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
-                        dtag=event_id[0],
-                        event_idx=event_id[1],
-                        bdc=round(1 - event.bdc, 2)
-                    ),
-                    np.mean(event.pos_array, axis=0),
-                    reference_frame
-                )
+    # if all_maps:
+    #     all_maps_dir = Path(fs.output.processed_datasets[dtag]) / "all_maps"
+    #     os.mkdir(all_maps_dir)
+    #     for model_number, model_events in all_events.items():
+    #         model_maps_dir = all_maps_dir / str(model_number)
+    #         model_mean = model_means[model_number]
+    #         os.mkdir(model_maps_dir)
+    #         for event_id, event in model_events.items():
+    #             event_array = (dtag_array - (event.bdc * model_mean)) / (1 - event.bdc)
+    #             event_grid = reference_frame.unmask(SparseDMap(event_array))
+    #
+    #             save_dmap(
+    #                 event_grid,
+    #                 # event_grid_smoothed,
+    #                 Path(fs.output.processed_datasets[event_id[0]]) / constants.PANDDA_EVENT_MAP_FILE.format(
+    #                     dtag=event_id[0],
+    #                     event_idx=event_id[1],
+    #                     bdc=round(1 - event.bdc, 2)
+    #                 ),
+    #                 np.mean(event.pos_array, axis=0),
+    #                 reference_frame
+    #             )
 
