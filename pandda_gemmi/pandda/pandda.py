@@ -175,7 +175,7 @@ def pandda(args: PanDDAArgs):
 
     # Get the model of the input and output of the program on the file systems
     console.start_fs_model()
-    fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir))
+    fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir), args.pdb_regex, args.mtz_regex)
     console.summarise_fs_model(fs)
 
     # Get the method for scoring events
