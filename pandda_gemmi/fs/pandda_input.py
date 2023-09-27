@@ -55,10 +55,11 @@ def get_input_pdb_file(path, pdb_regex):
     input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
     if len(input_pdb_files) == 0:
         input_pdb_file = None
+        print(f"NO PDBS IN DIR: {path} WITH REGEX: {pdb_regex}")
     else:
         input_pdb_file: Path = input_pdb_files[0]
         if not check_pdb_file(input_pdb_file):
-            print(f"CHECK FAILURE: {path}")
+            print(f"CHECK FAILURE: {input_pdb_file}")
             input_pdb_file = None
     return input_pdb_file
 
@@ -67,10 +68,12 @@ def get_input_mtz_file(path, mtz_regex):
     input_mtz_files = [mtz_path for mtz_path in path.glob(mtz_regex)]
     if len(input_mtz_files) == 0:
         input_mtz_file = None
+        print(f"NO MTZS IN DIR: {path} WITH REGEX: {mtz_regex}")
+
     else:
         input_mtz_file: Path = input_mtz_files[0]
         if not check_mtz_file(input_mtz_file):
-            print(f"CHECK FAILURE: {path}")
+            print(f"CHECK FAILURE: {input_mtz_file}")
             input_mtz_file = None
     return input_mtz_file
 
