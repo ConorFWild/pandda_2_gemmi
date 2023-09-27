@@ -139,10 +139,12 @@ def truncate_reflections(reflections, index=None):
     #                      )
     data_hkl = data_array[:, 0:3].astype(int)
     con_coords = np.vstack([data_hkl, index])
-    size = (np.max(con_coords, axis=0)-np.min(con_coords,axis=0))+1
+    max_coord = np.max(con_coords, axis=0)
+    min_coord = np.min(con_coords,axis=0)
+    size = (max_coord-min_coord)+1
     data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=bool)
     try:
-        data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
+        data_array_3d[(index[:,0]-min_coord[0], index[:, 1]-min_coord[1], index[:, 2]-min_coord[2])] = True
     except:
         print(f"Common Reflections/index")
         print(index)
@@ -153,7 +155,7 @@ def truncate_reflections(reflections, index=None):
         print(f"size")
         print(size)
         raise Exception
-    mask = data_array_3d[(data_hkl[:,0], data_hkl[:, 1], data_hkl[:, 2])]
+    mask = data_array_3d[(data_hkl[:,0]-min_coord[0], data_hkl[:, 1]-min_coord[1], data_hkl[:, 2]-min_coord[2])]
 
 
     # structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
