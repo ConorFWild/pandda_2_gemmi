@@ -141,7 +141,17 @@ def truncate_reflections(reflections, index=None):
     con_coords = np.vstack([data_hkl, index])
     size = (np.max(con_coords, axis=0)-np.min(con_coords,axis=0))+1
     data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=bool)
-    data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
+    try:
+        data_array_3d[(index[:,0], index[:, 1], index[:, 2])] = True
+    except:
+        print(f"Common Reflections/index")
+        print(index)
+        print(f"Data HKL")
+        print(data_hkl)
+        print(f"Concatenated coords")
+        print(con_coords)
+        print(f"size")
+        print(size)
     mask = data_array_3d[(data_hkl[:,0], data_hkl[:, 1], data_hkl[:, 2])]
 
 

@@ -74,7 +74,10 @@ class SmoothReflections:
     def __call__(self, dataset: DatasetInterface):
 
         # # Get common set of reflections
-        common_reflections_set = common_reflections({"reference" : self.reference_dataset, "dtag": dataset})
+        common_reflections_set = common_reflections(
+            {"reference" : self.reference_dataset,
+             "dtag": dataset},
+        )
 
         # # Truncate
         reference_reflections = truncate_reflections(
