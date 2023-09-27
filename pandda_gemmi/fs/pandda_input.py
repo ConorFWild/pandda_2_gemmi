@@ -58,6 +58,7 @@ def get_input_pdb_file(path, pdb_regex):
     else:
         input_pdb_file: Path = input_pdb_files[0]
         if not check_pdb_file(input_pdb_file):
+            print(f"CHECK FAILURE: {path}")
             input_pdb_file = None
     return input_pdb_file
 
@@ -69,6 +70,7 @@ def get_input_mtz_file(path, mtz_regex):
     else:
         input_mtz_file: Path = input_mtz_files[0]
         if not check_mtz_file(input_mtz_file):
+            print(f"CHECK FAILURE: {path}")
             input_mtz_file = None
     return input_mtz_file
 
