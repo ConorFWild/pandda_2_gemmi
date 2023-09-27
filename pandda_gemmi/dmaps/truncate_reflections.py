@@ -316,7 +316,6 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
     for hkl_array in hkl_arrays:
         data_array_3d[(hkl_array[:, 0]-min_coord[0], hkl_array[:, 1]-min_coord[1], hkl_array[:, 2]-min_coord[2])] += 1
 
-
     # structured_data_array = rfn.unstructured_to_structured(hkls, dt)
 
     # unique_rows, counts = np.unique(structured_data_array, return_counts=True)
