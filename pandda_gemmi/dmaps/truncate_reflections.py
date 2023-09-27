@@ -152,6 +152,7 @@ def truncate_reflections(reflections, index=None):
         print(con_coords)
         print(f"size")
         print(size)
+        raise Exception
     mask = data_array_3d[(data_hkl[:,0], data_hkl[:, 1], data_hkl[:, 2])]
 
 
