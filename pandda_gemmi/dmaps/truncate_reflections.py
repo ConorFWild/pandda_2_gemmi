@@ -308,11 +308,13 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
     hkls = np.vstack(
         hkl_arrays
         )
-    size = (np.max(hkls, axis=0)-np.min(hkls,axis=0)) + 1
+    max_coord = np.max(hkls, axis=0)
+    min_coord = np.min(hkls,axis=0)
+    size = (max_coord-min_coord) + 1
     data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=int)
     # data_array_3d = np.zeros((x for x in np.max(hkls, axis=0)-np.min(hkls,axis=0)), dtype=np.bool)
     for hkl_array in hkl_arrays:
-        data_array_3d[(hkl_array[:, 0], hkl_array[:, 1], hkl_array[:, 2])] += 1
+        data_array_3d[(hkl_array[:, 0]-min_coord[0], hkl_array[:, 1]-min_coord[1], hkl_array[:, 2]-min_coord[2])] += 1
 
 
     # structured_data_array = rfn.unstructured_to_structured(hkls, dt)
