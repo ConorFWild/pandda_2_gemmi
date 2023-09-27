@@ -378,7 +378,9 @@ class ScoreCNNLigand:
 
         self.n = n
 
-    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median, reference_frame):
+    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median, reference_frame,
+                 dtag_array, mean
+                               ):
 
         scored_events = {}
         time_begin_get_images = time.time()
@@ -425,12 +427,16 @@ class ScoreCNNLigand:
             # image_mean = (mean_sample[np.newaxis, :] - mean_mean) / mean_std
             # print(f"Mean: {[mean_mean, mean_std]}")
 
-            mean_grid_array = np.array(mean_grid, copy=False)
-            homogenized_xmap_grid_array = np.array(homogenized_xmap_grid, copy=False)
-            event_map_array = (homogenized_xmap_grid_array - (event.bdc * mean_grid_array)) / (1 - event.bdc)
-            event_map_grid = reference_frame.get_grid()
-            event_map_grid_array = np.array(event_map_grid, copy=False)
-            event_map_grid_array[:,:,:] = event_map_array[:,:,:]
+            event_array = (dtag_array - (event.bdc * mean)) / (1 - event.bdc)
+            event_map_grid = reference_frame.unmask(SparseDMap(event_array))
+
+            # mean_grid_array = np.array(mean_grid, copy=False)
+            # homogenized_xmap_grid_array = np.array(homogenized_xmap_grid, copy=False)
+            # event_map_array = (homogenized_xmap_grid_array - (event.bdc * mean_grid_array)) / (1 - event.bdc)
+            #
+            # event_map_grid = reference_frame.get_grid()
+            # event_map_grid_array = np.array(event_map_grid, copy=False)
+            # event_map_grid_array[:,:,:] = event_map_array[:,:,:]
             # event_map_grid = reference_frame.unmask(SparseDMap(event_map_array))
             sample_array_event_map = np.copy(sample_array)
             event_map_sample = sample_xmap(event_map_grid, sample_transform, sample_array_event_map)

@@ -134,7 +134,7 @@ class ProcessModel:
         # Score the events with some method such as the CNN
         time_begin_score_events = time.time()
         events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
-                       median, reference_frame
+                       median, reference_frame, homogenized_dataset_dmap_array, mean
                        )
         time_finish_score_events = time.time()
 
