@@ -141,15 +141,15 @@ class SmoothReflections:
             ).x
         except Exception as e:
             print("######## Ref hkl")
-            data_array = np.array(reference_reflections, copy=False)
-            data_hkl = data_array[:, 0:3].astype(int)
-            print(data_hkl)
-            print(data_hkl.shape)
+            data_array_ref = np.array(reference_reflections, copy=False)
+            data_hkl_ref = data_array_ref[:, 0:3].astype(int)
+            print(data_hkl_ref)
+            print(data_hkl_ref.shape)
             print("######## dtag hkl")
-            data_array = np.array(dtag_reflections, copy=False)
-            data_hkl = data_array[:, 0:3].astype(int)
-            print(data_hkl)
-            print(data_hkl.shape)
+            data_array_dtag = np.array(dtag_reflections, copy=False)
+            data_hkl_dtag = data_array_dtag[:, 0:3].astype(int)
+            print(data_hkl_dtag)
+            print(data_hkl_dtag.shape)
             print("######## Ref mask non zero")
             print(ref_mask_non_zero)
             print("######## dtag mask non zero")
@@ -172,6 +172,11 @@ class SmoothReflections:
             print("######## x_f")
             print(x_f)
             print(x_f.size)
+            print(f"differing_rows")
+
+            unique_rows, count = np.unique(np.vstack([data_hkl_dtag, data_hkl_ref]), axis=0, return_counts=True)
+            differing_rows = unique_rows[count == 1]
+            print(differing_rows)
             raise Exception
 
 
