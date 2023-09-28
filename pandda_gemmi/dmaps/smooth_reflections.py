@@ -179,6 +179,15 @@ class SmoothReflections:
             print(differing_rows)
             print(f"Common Reflections")
             print(common_reflections_set)
+            print(f"dtag differing_rows with common set")
+            unique_rows, count = np.unique(np.vstack([data_hkl_dtag, common_reflections_set]), axis=0, return_counts=True)
+            differing_rows = unique_rows[count == 1]
+            print(differing_rows)
+            print(f"Reference differing_rows with common set")
+            unique_rows, count = np.unique(np.vstack([data_hkl_ref, common_reflections_set]), axis=0, return_counts=True)
+            differing_rows = unique_rows[count == 1]
+            print(differing_rows)
+
             raise Exception
 
 
