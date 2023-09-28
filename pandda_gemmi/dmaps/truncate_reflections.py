@@ -155,11 +155,9 @@ def truncate_reflections(reflections, index=None):
         print(f"size")
         print(size)
 
-
         raise Exception
     mask = data_array_3d[(data_hkl[:,0]-min_coord[0], data_hkl[:, 1]-min_coord[1], data_hkl[:, 2]-min_coord[2])]
     mask_non_zero = np.nonzero(mask)[0].size
-
 
     # structured_data_array = rfn.unstructured_to_structured(data_array[:, 0:3], dt)
     # new_data = data_array[np.in1d(structured_data_array, index)]

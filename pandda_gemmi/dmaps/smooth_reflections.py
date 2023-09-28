@@ -177,6 +177,8 @@ class SmoothReflections:
             unique_rows, count = np.unique(np.vstack([data_hkl_dtag, data_hkl_ref]), axis=0, return_counts=True)
             differing_rows = unique_rows[count == 1]
             print(differing_rows)
+            print(f"Common Reflections")
+            print(common_reflections_set)
             raise Exception
 
 
