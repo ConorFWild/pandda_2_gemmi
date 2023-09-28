@@ -80,10 +80,14 @@ class SmoothReflections:
         )
 
         # # Truncate
-        reference_reflections = truncate_reflections(
-            self.reference_dataset.reflections.reflections, common_reflections_set)
-        dtag_reflections = truncate_reflections(
-            dataset.reflections.reflections, common_reflections_set)
+        reference_reflections, ref_mask_non_zero = truncate_reflections(
+            self.reference_dataset.reflections.reflections,
+            common_reflections_set,
+        )
+        dtag_reflections, dtag_mask_non_zero = truncate_reflections(
+            dataset.reflections.reflections,
+            common_reflections_set,
+        )
 
         # Refference array
         reference_reflections_array = np.array(reference_reflections,
@@ -136,6 +140,20 @@ class SmoothReflections:
                 tol=0.1
             ).x
         except Exception as e:
+            print("######## Ref hkl")
+            data_array = np.array(reference_reflections, copy=False)
+            data_hkl = data_array[:, 0:3].astype(int)
+            print(data_hkl)
+            print(data_hkl.shape)
+            print("######## dtag hkl")
+            data_array = np.array(dtag_reflections, copy=False)
+            data_hkl = data_array[:, 0:3].astype(int)
+            print(data_hkl)
+            print(data_hkl.shape)
+            print("######## Ref mask non zero")
+            print(ref_mask_non_zero)
+            print("######## dtag mask non zero")
+            print(dtag_mask_non_zero)
             print("######## Reference f array / x")
             print(reference_f_array)
             print(reference_f_array.size)
