@@ -128,12 +128,26 @@ class SmoothReflections:
 
 
         # Optimise the scale factor
-        min_scale = optimize.minimize(
-            lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
-            0.0,
-            bounds=((-15.0, 15.0),),
-            tol=0.1
-        ).x
+        try:
+            min_scale = optimize.minimize(
+                lambda _scale: get_rmsd(_scale, y, r, y_inds, populated_bins, x_f),
+                0.0,
+                bounds=((-15.0, 15.0),),
+                tol=0.1
+            ).x
+        except Exception as e:
+            print("######## Reference f array / x")
+            print(reference_f_array)
+            print("######## dtag f array / y")
+            print(dtag_f_array)
+            print("######## reference_resolution_array / r")
+            print(reference_resolution_array)
+            print("######## Dtag resolution array")
+            print(dtag_resolution_array)
+            print("######## y inds")
+            print(y_inds)
+            print("######## x_f")
+            print(x_f)
 
 
         original_reflections = dataset.reflections.reflections
