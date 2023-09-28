@@ -138,16 +138,23 @@ class SmoothReflections:
         except Exception as e:
             print("######## Reference f array / x")
             print(reference_f_array)
+            print(reference_f_array.size)
             print("######## dtag f array / y")
             print(dtag_f_array)
+            print(dtag_f_array.size)
             print("######## reference_resolution_array / r")
             print(reference_resolution_array)
+            print(reference_resolution_array.size)
             print("######## Dtag resolution array")
             print(dtag_resolution_array)
+            print(dtag_resolution_array.size)
             print("######## y inds")
             print(y_inds)
+            print(y_inds.size)
             print("######## x_f")
             print(x_f)
+            print(x_f.size)
+            raise Exception
 
 
         original_reflections = dataset.reflections.reflections
