@@ -154,6 +154,11 @@ def truncate_reflections(reflections, index=None):
         print(con_coords)
         print(f"size")
         print(size)
+
+
+        unique_rows, count = np.unique(np.vstack([data_hkl, index]), axis=0, return_counts=True)
+        differing_rows = unique_rows[count == 1]
+        print(differing_rows)
         raise Exception
     mask = data_array_3d[(data_hkl[:,0]-min_coord[0], data_hkl[:, 1]-min_coord[1], data_hkl[:, 2]-min_coord[2])]
     mask_non_zero = np.nonzero(mask)[0].size
