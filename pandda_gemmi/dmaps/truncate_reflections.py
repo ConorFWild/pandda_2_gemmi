@@ -315,13 +315,16 @@ def common_reflections(datasets: Dict[str, DatasetInterface], tol=0.000001):
     data_array_3d = np.zeros((size[0], size[1], size[2]), dtype=int)
     # data_array_3d = np.zeros((x for x in np.max(hkls, axis=0)-np.min(hkls,axis=0)), dtype=np.bool)
     for hkl_array in hkl_arrays:
-        data_array_3d[(hkl_array[:, 0]-min_coord[0], hkl_array[:, 1]-min_coord[1], hkl_array[:, 2]-min_coord[2])] += 1
+        data_array_3d[
+            (hkl_array[:, 0]-min_coord[0],
+             hkl_array[:, 1]-min_coord[1],
+             hkl_array[:, 2]-min_coord[2])] += 1
 
     # structured_data_array = rfn.unstructured_to_structured(hkls, dt)
 
     # unique_rows, counts = np.unique(structured_data_array, return_counts=True)
     # common_rows = unique_rows[counts == len(datasets)]
-    common_rows = np.argwhere(data_array_3d == len(datasets))
+    common_rows = np.argwhere(data_array_3d == len(datasets)) + min_coord.reshape((1,3))
     return common_rows
 
     # for dtag in datasets:
