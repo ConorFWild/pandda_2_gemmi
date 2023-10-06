@@ -143,7 +143,7 @@ class ProcessModel:
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
             #                                                                # better scoring events
-            FilterLocallyHighestScoring(self.local_highest_score_radius)
+            # FilterLocallyHighestScoring(self.local_highest_score_radius)
         ]:
             events = filter(events)
 
