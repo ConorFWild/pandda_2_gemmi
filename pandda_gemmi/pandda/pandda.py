@@ -35,7 +35,7 @@ from pandda_gemmi.event_model.filter_characterization_sets import filter_charact
 from pandda_gemmi.event_model.outlier import PointwiseNormal
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.event_model.score import get_model_map, ScoreCNNLigand
-from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest
+from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest, FilterLocallyHighestScoring
 from pandda_gemmi.event_model.select import select_model
 from pandda_gemmi.event_model.output import output_maps
 from pandda_gemmi.event_model.filter_selected_events import filter_selected_events
@@ -141,8 +141,9 @@ class ProcessModel:
         # Filter the events after scoring based on their score and keeping only the locally highest scoring event
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
-            FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
-                                                                           # better scoring events
+            # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
+            #                                                                # better scoring events
+            FilterLocallyHighestScoring(self.local_highest_score_radius)
         ]:
             events = filter(events)
 
