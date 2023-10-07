@@ -48,7 +48,7 @@ from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndE
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
-from pandda_gemmi.ranking import rank_events, RankHighEventScore
+from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighBuildScore
 
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
@@ -581,8 +581,8 @@ def pandda(args: PanDDAArgs):
     ranking = rank_events(
         pandda_events,
         autobuilds,
-        RankHighEventScore(),
-        # RankHighBuildScore()
+        # RankHighEventScore(),
+        RankHighBuildScore()
     )
     # for event_id in ranking:
     #     print(f"{event_id} : {round(pandda_events[event_id].score, 2)}")
