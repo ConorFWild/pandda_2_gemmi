@@ -226,8 +226,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ["BAZ2BA-x583", "BAZ2BA-x481"]:
         #     continue
-        if dtag not in ["BAZ2BA-x529", ]:
-            continue
+        # if dtag not in ["BAZ2BA-x529", ]:
+        #     continue
 
 
         # Print basic information of the dataset to be processed
