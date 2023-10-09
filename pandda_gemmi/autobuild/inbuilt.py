@@ -129,7 +129,7 @@ def get_conformers(
     # Decide how to load
 
     if ligand_files.ligand_cif is not None:
-        mol = get_fragment_mol_from_dataset_cif_path(ligand_files.ligand_smiles)
+        mol = get_fragment_mol_from_dataset_cif_path(ligand_files.ligand_cif)
 
         # Generate conformers
         mol: Chem.Mol = Chem.AddHs(mol)
