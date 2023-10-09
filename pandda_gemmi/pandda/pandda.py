@@ -479,11 +479,7 @@ def pandda(args: PanDDAArgs):
             print(f"{event_id} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
             event.centroid = event.build.centroid
 
-        # Filter events by builds
-        for filter in [
-            FilterLocallyHighestBuildScoring(10.0)
-        ]:
-            events_to_process = filter(events_to_process)
+
 
         # Seperate by model number
         model_events = {}
@@ -491,6 +487,13 @@ def pandda(args: PanDDAArgs):
             if model_number not in model_events:
                 model_events[model_number] = {}
             model_events[model_number][event_number] = event
+
+        # Filter events by builds
+        for model_number in model_events:
+            for filter in [
+                FilterLocallyHighestBuildScoring(10.0)
+            ]:
+                model_events[model_number] = filter(model_events[model_number])
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
