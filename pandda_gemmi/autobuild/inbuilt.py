@@ -65,12 +65,17 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_2_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_2'))
     bond_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.type'))
 
+    print(atom_id_loop)
+    print(id_to_idx)
+    print(bond_1_id_loop)
+    print(bond_2_id_loop)
+
     # Iteratively add the relevant bonds
     for bond_atom_1, bond_atom_2, bond_type in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop):
         editable_mol.AddBond(
-        id_to_idx[bond_atom_1],
-        id_to_idx[bond_atom_2],
-        order=bond_type_cif_to_rdkit[bond_type]
+            id_to_idx[bond_atom_1],
+            id_to_idx[bond_atom_2],
+            order=bond_type_cif_to_rdkit[bond_type]
         )
 
     return editable_mol.GetMol()
