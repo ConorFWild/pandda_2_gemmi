@@ -143,9 +143,16 @@ class FilterLocallyHighestBuildScoring:
         if len(events) == 0:
             return {}
 
+        # centroid_array = np.array(
+        #     [
+        #         np.mean(event.pos_array, axis=0)
+        #         for event
+        #         in events.values()
+        #     ]
+        # )
         centroid_array = np.array(
             [
-                np.mean(event.pos_array, axis=0)
+                event.centroid
                 for event
                 in events.values()
             ]
