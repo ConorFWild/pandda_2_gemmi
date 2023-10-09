@@ -442,7 +442,7 @@ def pandda(args: PanDDAArgs):
                 _model_event_id: Partial(autobuild_model_event).paramaterise(
                     _model_event_id,
                     dataset_refs[dtag],
-                    pandda_events[events_to_process],
+                    events_to_process[_model_event_id],
                     dataset_dmap_array,
                     AutobuildPreprocessStructure(),
                     AutobuildPreprocessDMap(),
