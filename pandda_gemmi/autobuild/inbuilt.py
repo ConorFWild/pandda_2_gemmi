@@ -119,6 +119,7 @@ def get_conformers(
 
         return fragment_structures
 
+
     # if ligand_files.ligand_smiles is not None:
     #     # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_smiles}")
     #     mol = get_fragment_mol_from_dataset_smiles_path(ligand_files.ligand_smiles)
