@@ -30,11 +30,11 @@ def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
     return m
 
 bond_type_cif_to_rdkit = {
-    ...:     'single': Chem.rdchem.BondType.SINGLE,
-    ...:     'double': Chem.rdchem.BondType.DOUBLE,
-    ...:     'triple': Chem.rdchem.BondType.TRIPLE,
-    ...:     'aromatic': Chem.rdchem.BondType.AROMATIC
-    ...: }
+    'single': Chem.rdchem.BondType.SINGLE,
+    'double': Chem.rdchem.BondType.DOUBLE,
+    'triple': Chem.rdchem.BondType.TRIPLE,
+    'aromatic': Chem.rdchem.BondType.AROMATIC
+}
 
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
@@ -450,7 +450,7 @@ def score_conformer(
     best_score_fit_score = scores[best_score_index]
     best_optimised_structure = optimised_structures[best_score_index]
 
-    return best_optimised_structure, float(best_score_fit_score)
+    return best_optimised_structure, float(best_score_fit_score), get_structure_mean(best_optimised_structure)
 
 
 def get_score_grid(dmap, st, event: EventInterface):
@@ -545,7 +545,7 @@ class AutobuildInbuilt:
         # Score conformers against the grid
         conformer_scores = {}
         for conformer_id, conformer in conformers.items():
-            optimized_structure, score = score_conformer(
+            optimized_structure, score, centroid = score_conformer(
                 np.mean(event.pos_array, axis=0),
                 conformer,
                 score_grid,
@@ -657,12 +657,12 @@ class AutobuildModelEventInbuilt:
         # Score conformers against the grid
         conformer_scores = {}
         for conformer_id, conformer in conformers.items():
-            optimized_structure, score = score_conformer(
+            optimized_structure, score, centroid = score_conformer(
                 np.mean(event.pos_array, axis=0),
                 conformer,
                 score_grid,
             )
-            conformer_scores[conformer_id] = [optimized_structure, score]
+            conformer_scores[conformer_id] = [optimized_structure, score, centroid]
 
         if len(conformer_scores) == 0:
             return AutobuildResult(
@@ -675,15 +675,16 @@ class AutobuildModelEventInbuilt:
             )
 
         # Choose the best ligand
-        for conformer_id, (optimized_structure, score) in conformer_scores.items():
+        for conformer_id, (optimized_structure, score, centroid) in conformer_scores.items():
             save_structure(
                 Structure(None, optimized_structure),
                 out_dir / f"{conformer_id}.pdb",
             )
 
         log_result_dict = {
-            str(out_dir / f"{conformer_id}.pdb"): score
-            for conformer_id, (optimized_structure, score)
+            str(out_dir / f"{conformer_id}.pdb"): {'score': score,
+            'centroid': centroid,}
+            for conformer_id, (optimized_structure, score, centroid)
             in conformer_scores.items()
         }
 

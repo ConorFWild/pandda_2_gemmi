@@ -17,7 +17,8 @@ def serialize_events(
             "Score": selected_model_events[event_idx].score,
             "BDC": selected_model_events[event_idx].bdc,
             "Position Array": selected_model_events[event_idx].pos_array.tolist(),
-            "Point Array": selected_model_events[event_idx].point_array.tolist()
+            "Point Array": selected_model_events[event_idx].point_array.tolist(),
+            "Centroid": selected_model_events[event_idx].centroid,
         }
         for event_idx
         in sorted(selected_model_events)
@@ -35,6 +36,7 @@ def unserialize_events(path):
         event_idx: Event(
             pos_array=np.array(event["Position Array"]),
             point_array=np.array(event["Point Array"]),
+            centroid=np.array(event["Centroid"]),
             score=event["Score"],
             bdc=event["BDC"]
         )

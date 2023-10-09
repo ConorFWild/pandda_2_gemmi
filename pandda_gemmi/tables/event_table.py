@@ -36,7 +36,8 @@ class EventTableRecord:
 
     @staticmethod
     def from_event(event_id, event: EventInterface, site_id):
-        centroid = np.mean(event.pos_array, axis=0)
+        # centroid = np.mean(event.pos_array, axis=0)
+        centroid = event.centroid
         return EventTableRecord(
             dtag=event_id[0],
             event_idx=event_id[1],

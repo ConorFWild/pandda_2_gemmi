@@ -216,11 +216,12 @@ class EventBuildInterface(Protocol):
 class EventInterface(Protocol):
     pos_array: np.array
     point_array: np.array
+    centroid: np.array
     score: float
     bdc: float
     build: EventBuildInterface
 
 
 class AutobuildInterface(Protocol):
-    log_result_dict: Dict[str, float]
+    log_result_dict: Dict
     ...

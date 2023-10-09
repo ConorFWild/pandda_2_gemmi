@@ -30,6 +30,7 @@ from pandda_gemmi.comparators import (
     FilterResolution,
     FilterCompatibleStructures
 )
+from pandda_gemmi.event_model.event import EventBuild
 from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNN, CharacterizationNNAndFirst
 from pandda_gemmi.event_model.filter_characterization_sets import filter_characterization_sets
 from pandda_gemmi.event_model.outlier import PointwiseNormal
@@ -454,14 +455,30 @@ def pandda(args: PanDDAArgs):
             }
         )
 
+        # Select between autobuilds and update event for each event
+        for event_id, autobuild_results in event_autobuilds.items():
+            event = events_to_process[event_id]
+            builds = {}
+            for ligand_key, autobuild_result in autobuild_results.items():
+                for build_path, result in autobuild_result.log_result_dict.items():
+                    builds[(ligand_key, build_path)] = result['score']
+
+            selected_build_key = max(builds, key=lambda _key: -builds[_key])
+
+            event.build = EventBuild(
+                selected_build_key[1],
+                selected_build_key[0],
+                builds[selected_build_key],
+                event_autobuilds[event_id][selected_build_key[0]].log_result_dict[selected_build_key[1]]['centroid']
+            )
+
         # Update centroid from build
+        for event_id, event in events_to_process.items():
+            event.centroid = event.build.centroid
 
         # Filter events by builds
         for filter in [
-            # FilterScore(self.minimum_event_score),  # Filter events based on their score
-            # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
-            #                                                                # better scoring events
-            FilterLocallyHighestBuildScoring(self.local_highest_score_radius)
+            FilterLocallyHighestBuildScoring(local_highest_score_radius)
         ]:
             events = filter(events)
 

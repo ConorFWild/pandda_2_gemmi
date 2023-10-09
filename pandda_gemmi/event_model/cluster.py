@@ -213,6 +213,7 @@ class ClusterDensityDBSCAN:
             events[j] = Event(
                 high_z_pos_array[clusters == cluster_num, :],
                 high_z_point_array[clusters == cluster_num, :].astype(int),
+                np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0),
                 0.0,
                 0.0
             )

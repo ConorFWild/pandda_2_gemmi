@@ -64,9 +64,11 @@ class FilterCluster:
         new_events = {}
         for cluster_num in unique_clusters:
             cluster_events = event_array[clusters == cluster_num]
+            pos_array = np.concatenate([event.pos_array for event in cluster_events])
             new_event = Event(
-                np.concatenate([event.pos_array for event in cluster_events]),
+                np.concatenate(pos_array),
                 np.concatenate([event.point_array for event in cluster_events]),
+                np.mean(pos_array, axis=0),
                 0.0
             )
 
