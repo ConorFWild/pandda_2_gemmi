@@ -476,6 +476,7 @@ def pandda(args: PanDDAArgs):
 
         # Update centroid from build
         for event_id, event in events_to_process.items():
+            print(f"{event_id} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
             event.centroid = event.build.centroid
 
         # Filter events by builds
