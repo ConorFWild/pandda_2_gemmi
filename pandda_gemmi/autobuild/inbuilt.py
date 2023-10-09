@@ -52,7 +52,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Get the mapping
     id_to_idx = {}
     for j, atom_id in enumerate(atom_id_loop):
-        id_to_idx[atom_id] = j + 1
+        id_to_idx[atom_id] = j
 
     # Iteratively add the relveant atoms
 
