@@ -480,8 +480,6 @@ def pandda(args: PanDDAArgs):
             print(f"{event_id} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
             event.centroid = event.build.centroid
 
-
-
         # Seperate by model number
         model_events = {}
         for (model_number, event_number), event in events_to_process.items():
@@ -489,13 +487,14 @@ def pandda(args: PanDDAArgs):
                 model_events[model_number] = {}
             model_events[model_number][event_number] = event
 
-
         # Filter events by builds
         for model_number in model_events:
             for filter in [
                 FilterLocallyHighestBuildScoring(10.0)
             ]:
+                j_0 = len(model_events[model_number])
                 model_events[model_number] = filter(model_events[model_number])
+                print(f"\t\t\tModel {model_number} when from {j_0} to {len(model_events[model_number])} events of local filter")
 
         time_finish_autobuild = time.time()
         print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
