@@ -36,7 +36,7 @@ from pandda_gemmi.event_model.filter_characterization_sets import filter_charact
 from pandda_gemmi.event_model.outlier import PointwiseNormal
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.event_model.score import get_model_map, ScoreCNNLigand
-from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest, FilterLocallyHighestScoring
+from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest, FilterLocallyHighestScoring, FilterLocallyHighestBuildScoring
 from pandda_gemmi.event_model.select import select_model
 from pandda_gemmi.event_model.output import output_maps
 from pandda_gemmi.event_model.filter_selected_events import filter_selected_events
@@ -481,9 +481,16 @@ def pandda(args: PanDDAArgs):
 
         # Filter events by builds
         for filter in [
-            FilterLocallyHighestBuildScoring(local_highest_score_radius)
+            FilterLocallyHighestBuildScoring(10.0)
         ]:
-            events = filter(events)
+            events_to_process = filter(events_to_process)
+
+        # Seperate by model number
+        model_events = {}
+        for (model_number, event_number), event in events_to_process.items():
+            if model_number not in model_events:
+                model_events[model_number] = {}
+            model_events[model_number][event_number] = event
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
