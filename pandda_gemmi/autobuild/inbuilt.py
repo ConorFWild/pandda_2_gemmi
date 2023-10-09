@@ -85,7 +85,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     return editable_mol.GetMol()
 
 
-def get_structures_from_mol(mol: Chem.Mol, max_conformers):
+def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(dataset_cif_path))
 
