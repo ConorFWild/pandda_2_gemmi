@@ -42,8 +42,8 @@ from pandda_gemmi.event_model.filter_selected_events import filter_selected_even
 
 from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
 
-from pandda_gemmi.autobuild import autobuild, AutobuildResult
-from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt
+from pandda_gemmi.autobuild import autobuild, autobuild_model_event, AutobuildResult
+from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt, AutobuildModelEventInbuilt
 from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
@@ -147,6 +147,21 @@ class ProcessModel:
         ]:
             events = filter(events)
 
+        # # Build the events
+        #
+        # ...
+        # # Update centroid from build
+        #
+        # # Filter events by builds
+        # for filter in [
+        #     # FilterScore(self.minimum_event_score),  # Filter events based on their score
+        #     # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
+        #     #                                                                # better scoring events
+        #     FilterLocallyHighestBuildScoring(self.local_highest_score_radius)
+        # ]:
+        #     events = filter(events)
+
+
         # Return None if there are no events after post-scoring filters
         if len(events) == 0:
             return None, None, None
@@ -178,6 +193,7 @@ def pandda(args: PanDDAArgs):
     console.start_fs_model()
     fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir), args.pdb_regex, args.mtz_regex)
     console.summarise_fs_model(fs)
+    fs_ref = processor.put(fs)
 
     # Get the method for scoring events
     score = ScoreCNNLigand()
@@ -413,6 +429,41 @@ def pandda(args: PanDDAArgs):
                 model_events[model_number] = result[0]
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
+
+        # Build the events
+        events_to_process = {}
+        for model_number, model_events in model_events.items():
+            for event_number, event in model_events.items():
+                events_to_process[(model_number, event_number)] = event
+
+        event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+            {
+                _model_event_id: Partial(autobuild_model_event).paramaterise(
+                    _model_event_id,
+                    dataset_refs[dataset],
+                    pandda_events[events_to_process],
+                    dataset_dmap_array,
+                    AutobuildPreprocessStructure(),
+                    AutobuildPreprocessDMap(),
+                    # Rhofit(cut=1.0),
+                    AutobuildModelEventInbuilt(),
+                    fs_ref
+                )
+                for _model_event_id
+                in events_to_process
+            }
+        )
+
+        # Update centroid from build
+
+        # Filter events by builds
+        for filter in [
+            # FilterScore(self.minimum_event_score),  # Filter events based on their score
+            # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
+            #                                                                # better scoring events
+            FilterLocallyHighestBuildScoring(self.local_highest_score_radius)
+        ]:
+            events = filter(events)
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")

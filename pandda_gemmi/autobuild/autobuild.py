@@ -9,6 +9,7 @@ from ..interfaces import *
 from ..fs import try_make
 from ..dmaps import load_dmap, save_dmap
 from ..dataset.structure import save_structure
+from pandda_gemmi.dmaps import SparseDMap
 
 
 class AutobuildResult:
@@ -166,5 +167,48 @@ def autobuild(
     # Remove large temporaries
     os.remove(processed_structure_path)
     os.remove(processed_dmap_path)
+
+    return autobuild_results
+
+def autobuild_model_event(
+        event_id,
+        dataset: DatasetInterface,
+        event,
+        dmap_array,
+        reference_frame,
+        preprocess_structure,
+        preprocess_dmap,
+        method,
+        fs: PanDDAFSInterface
+):
+    # Setup the output directory
+    autobuild_dir = fs.output.processed_datasets[event_id[0]] / f"autobuild_{event_id[1]}"
+    try_make(autobuild_dir)
+
+    # Load the relevant event map for autobuilding and preprocessing
+    dmap = reference_frame.unmask(SparseDMap(dmap_array))
+    processed_dmap = preprocess_dmap(dmap)
+
+    # Preprocess the structure
+    processed_structure = preprocess_structure(dataset.structure, event)
+
+    # Autobuild for each cif
+    autobuild_results = {}
+    for ligand_key in dataset.ligand_files:
+        ligand_files = dataset.ligand_files[ligand_key]
+        ligand_autobuild_dir = autobuild_dir / ligand_key
+        try_make(ligand_autobuild_dir)
+
+        autobuild_result: AutobuildInterface = method(
+            event,
+            dataset,
+            processed_dmap,
+            dataset.reflections,
+            processed_structure,
+            ligand_files,
+            ligand_autobuild_dir.resolve(),
+        )
+
+        autobuild_results[ligand_key] = autobuild_result
 
     return autobuild_results

@@ -29,6 +29,23 @@ def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
 
     return m
 
+def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(dataset_cif_path))
+
+    # Create a blank rdkit mol
+    mol = Chem.Mol()
+
+    # Find the relevant atoms loop
+
+    # Iteratively add the relveant atoms
+
+    # Find the bonds loop
+
+    # Iteratively add the relevant bonds
+
+    return mol
+
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers):
     fragment_structures = {}
@@ -81,6 +98,26 @@ def get_conformers(
         max_conformers=10,
 ):
     # Decide how to load
+
+    if ligand_files.ligand_cif is not None:
+        mol = get_fragment_mol_from_dataset_cif_path(ligand_files.ligand_smiles)
+
+        # Generate conformers
+        mol: Chem.Mol = Chem.AddHs(mol)
+
+        # Generate conformers
+        cids = AllChem.EmbedMultipleConfs(
+            mol,
+            numConfs=num_pose_samples,
+            pruneRmsThresh=pruning_threshold)
+
+        # Translate to structures
+        fragment_structures = get_structures_from_mol(
+            mol,
+            max_conformers,
+        )
+
+        return fragment_structures
 
     # if ligand_files.ligand_smiles is not None:
     #     # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_smiles}")
@@ -549,6 +586,83 @@ class AutobuildInbuilt:
             dmap_path,
             mtz_path,
             model_path,
+            ligand_files.ligand_cif,
+            out_dir
+        )
+
+class AutobuildModelEventInbuilt:
+
+    def __init__(self, cut=2.0):
+        self.cut = cut
+
+    def __call__(
+            self,
+            event: EventInterface,
+            dataset: DatasetInterface,
+            dmap,
+            mtz,
+            model,
+            ligand_files,
+            out_dir,
+    ):
+
+        # Get the structure
+        st = Structure.from_path(str(dataset.structure.path))
+
+        # Get the scoring grid
+        score_grid = get_score_grid(dmap, st, event)
+
+        # Generate conformers to score
+        conformers = get_conformers(ligand_files)
+        if len(conformers) == 0:
+            return AutobuildResult(
+                {},
+                None,
+                None,
+                None,
+                ligand_files.ligand_cif,
+                out_dir
+            )
+
+        # Score conformers against the grid
+        conformer_scores = {}
+        for conformer_id, conformer in conformers.items():
+            optimized_structure, score = score_conformer(
+                np.mean(event.pos_array, axis=0),
+                conformer,
+                score_grid,
+            )
+            conformer_scores[conformer_id] = [optimized_structure, score]
+
+        if len(conformer_scores) == 0:
+            return AutobuildResult(
+                {},
+                None,
+                None,
+                None,
+                ligand_files.ligand_cif,
+                out_dir
+            )
+
+        # Choose the best ligand
+        for conformer_id, (optimized_structure, score) in conformer_scores.items():
+            save_structure(
+                Structure(None, optimized_structure),
+                out_dir / f"{conformer_id}.pdb",
+            )
+
+        log_result_dict = {
+            str(out_dir / f"{conformer_id}.pdb"): score
+            for conformer_id, (optimized_structure, score)
+            in conformer_scores.items()
+        }
+
+        # Return results
+        return AutobuildResult(
+            log_result_dict,
+            None,
+            None,
+            None,
             ligand_files.ligand_cif,
             out_dir
         )

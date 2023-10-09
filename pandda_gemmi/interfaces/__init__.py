@@ -208,12 +208,17 @@ class TransformInterface(Protocol):
 class AlignmentInterface(Protocol):
     transforms: Dict[ResidueIDInterface, TransformInterface]
 
+class EventBuildInterface(Protocol):
+    build_path: Path
+    score: float
+
 
 class EventInterface(Protocol):
     pos_array: np.array
     point_array: np.array
     score: float
     bdc: float
+    build: EventBuildInterface
 
 
 class AutobuildInterface(Protocol):

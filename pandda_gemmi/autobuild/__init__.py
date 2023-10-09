@@ -1,1 +1,1 @@
-from .autobuild import autobuild, AutobuildResult
+from .autobuild import autobuild, AutobuildResult, autobuild_model_event
