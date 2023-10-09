@@ -432,6 +432,7 @@ def pandda(args: PanDDAArgs):
                 model_zs[model_number] = result[2]
 
         # Build the events
+        time_begin_autobuild = time.time()
         events_to_process = {}
         for model_number, model_events in model_events.items():
             for event_number, event in model_events.items():
@@ -495,6 +496,9 @@ def pandda(args: PanDDAArgs):
                 FilterLocallyHighestBuildScoring(10.0)
             ]:
                 model_events[model_number] = filter(model_events[model_number])
+
+        time_finish_autobuild = time.time()
+        print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
 
         time_finish_process_models = time.time()
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
