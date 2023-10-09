@@ -86,6 +86,13 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(dataset_cif_path))
+
+    # Find the relevant atoms loop
+    atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
+
+
     fragment_structures = {}
     for i, conformer in enumerate(mol.GetConformers()):
 
@@ -110,7 +117,8 @@ def get_structures_from_mol(mol: Chem.Mol, max_conformers):
 
             # Get the
             gemmi_atom: gemmi.Atom = gemmi.Atom()
-            gemmi_atom.name = atom_symbol
+            # gemmi_atom.name = atom_symbol
+            gemmi_atom.name = atom_id_loop[j]
             gemmi_atom.pos = gemmi_pos
             gemmi_atom.element = gemmi_element
 
@@ -152,6 +160,7 @@ def get_conformers(
         # Translate to structures
         fragment_structures = get_structures_from_mol(
             mol,
+            dataset_cif_path,
             max_conformers,
         )
 
