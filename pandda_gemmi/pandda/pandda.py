@@ -444,6 +444,7 @@ def pandda(args: PanDDAArgs):
                     dataset_refs[dtag],
                     events_to_process[_model_event_id],
                     dataset_dmap_array,
+                    reference_frame_ref,
                     AutobuildPreprocessStructure(),
                     AutobuildPreprocessDMap(),
                     # Rhofit(cut=1.0),
