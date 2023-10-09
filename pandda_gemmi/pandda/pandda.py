@@ -440,6 +440,7 @@ def pandda(args: PanDDAArgs):
         event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
             {
                 _model_event_id: Partial(autobuild_model_event).paramaterise(
+                    dtag,
                     _model_event_id,
                     dataset_refs[dtag],
                     events_to_process[_model_event_id],

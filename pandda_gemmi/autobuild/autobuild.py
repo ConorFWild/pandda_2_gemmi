@@ -171,6 +171,7 @@ def autobuild(
     return autobuild_results
 
 def autobuild_model_event(
+        dtag,
         event_id,
         dataset: DatasetInterface,
         event,
@@ -182,7 +183,7 @@ def autobuild_model_event(
         fs: PanDDAFSInterface
 ):
     # Setup the output directory
-    autobuild_dir = fs.output.processed_datasets[event_id[0]] / f"autobuild_{event_id[1]}"
+    autobuild_dir = fs.output.processed_datasets[dtag] / f"autobuild_model_{event_id[0]}_event_{event_id[1]}"
     try_make(autobuild_dir)
 
     # Load the relevant event map for autobuilding and preprocessing
