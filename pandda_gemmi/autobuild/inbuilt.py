@@ -29,22 +29,51 @@ def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
 
     return m
 
+bond_type_cif_to_rdkit = {
+    ...:     'single': Chem.rdchem.BondType.SINGLE,
+    ...:     'double': Chem.rdchem.BondType.DOUBLE,
+    ...:     'triple': Chem.rdchem.BondType.TRIPLE,
+    ...:     'aromatic': Chem.rdchem.BondType.AROMATIC
+    ...: }
+
+
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(dataset_cif_path))
 
     # Create a blank rdkit mol
     mol = Chem.Mol()
+    editable_mol = Chem.EditableMol(mol)
 
     # Find the relevant atoms loop
+    atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.type_symbol'))
+
+    # Get the mapping
+    id_to_idx = {}
+    for j, atom_id in enumerate(atom_id_loop):
+        id_to_idx[atom_id] = j + 1
 
     # Iteratively add the relveant atoms
 
+    for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        atom = Chem.Atom(atom_type)
+        editable_mol.AddAtom(atom)
+
     # Find the bonds loop
+    bond_1_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_2'))
+    bond_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.type'))
 
     # Iteratively add the relevant bonds
+    for bond_atom_1, bond_atom_2 in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop):
+        editable_mol.AddBond(
+        id_to_idx[bond_atom_1],
+        id_to_idx[bond_atom_2],
+        order=bond_type_cif_to_rdkit[bond_type_loop]
+        )
 
-    return mol
+    return editable_mol.GetMol()
 
 
 def get_structures_from_mol(mol: Chem.Mol, max_conformers):
