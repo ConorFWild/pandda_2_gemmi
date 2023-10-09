@@ -109,6 +109,8 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
         for j, atom in enumerate(mol.GetAtoms()):
             # Get the atomic symbol
             atom_symbol: str = atom.GetSymbol()
+            if atom_symbol == "H":
+                continue
             gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
 
             # Get the position as a gemmi type
