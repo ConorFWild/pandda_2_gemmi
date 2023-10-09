@@ -160,7 +160,7 @@ def get_conformers(
         # Translate to structures
         fragment_structures = get_structures_from_mol(
             mol,
-            dataset_cif_path,
+            ligand_files.ligand_cif,
             max_conformers,
         )
 
