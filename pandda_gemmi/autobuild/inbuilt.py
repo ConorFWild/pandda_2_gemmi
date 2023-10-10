@@ -61,7 +61,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         if len(atom_type) > 1:
             atom_type = atom_type[0] + atom_type[1].lower()
         atom = Chem.Atom(atom_type)
-        atom.SetFormalCharge(int(atom_charge))
+        atom.SetFormalCharge(round(float(atom_charge)))
         editable_mol.AddAtom(atom)
 
     # Find the bonds loop
