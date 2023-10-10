@@ -560,7 +560,7 @@ def mask_dmap(dmap_array, st, reference_frame):
 
 
 
-    return SparseDMap.from_xmap(dmap, reference_frame)
+    return SparseDMap.from_xmap(dmap, reference_frame).data
 
 
 def get_event_grid(dmap, st, ):
