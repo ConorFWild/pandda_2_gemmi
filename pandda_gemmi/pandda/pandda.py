@@ -485,6 +485,7 @@ def pandda(args: PanDDAArgs):
             {
                 _model_event_id: Partial(autobuild_conformer).paramaterise(
                     model_events[_model_event_id[0]][_model_event_id[1]].centroid,
+                    model_events[_model_event_id[0]][_model_event_id[1]].bdc,
                     conformer_refs[_model_event_id[2]][_model_event_id[3]],
                     masked_dtag_array_ref,
                     masked_mean_array_refs[_model_event_id[0]],
