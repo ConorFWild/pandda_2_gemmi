@@ -561,7 +561,7 @@ def pandda(args: PanDDAArgs):
                 event.build = EventBuild(
                     selected_build_key[1],
                     selected_build_key[0],
-                    builds[selected_build_key],
+                    event_builds[selected_build_key],
                     builds[model_number][event_number][selected_build_key[0]][selected_build_key[1]]['centroid']
                 )
 
