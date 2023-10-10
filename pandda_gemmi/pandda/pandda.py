@@ -500,61 +500,86 @@ def pandda(args: PanDDAArgs):
         )
         time_finish_autobuild = time.time()
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
-        raise Exception
+        # raise Exception
 
-        events_to_process = {}
-        for model_number, model_events in model_events.items():
-            for event_number, event in model_events.items():
-                events_to_process[(model_number, event_number)] = event
-
-        event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-            {
-                _model_event_id: Partial(autobuild_model_event).paramaterise(
-                    dtag,
-                    _model_event_id,
-                    dataset_refs[dtag],
-                    events_to_process[_model_event_id],
-                    dataset_dmap_array,
-                    reference_frame_ref,
-                    AutobuildPreprocessStructure(),
-                    AutobuildPreprocessDMap(),
-                    # Rhofit(cut=1.0),
-                    AutobuildModelEventInbuilt(),
-                    fs_ref
-                )
-                for _model_event_id
-                in events_to_process
-            }
-        )
+        # events_to_process = {}
+        # for model_number, model_events in model_events.items():
+        #     for event_number, event in model_events.items():
+        #         events_to_process[(model_number, event_number)] = event
+        #
+        # event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+        #     {
+        #         _model_event_id: Partial(autobuild_model_event).paramaterise(
+        #             dtag,
+        #             _model_event_id,
+        #             dataset_refs[dtag],
+        #             events_to_process[_model_event_id],
+        #             dataset_dmap_array,
+        #             reference_frame_ref,
+        #             AutobuildPreprocessStructure(),
+        #             AutobuildPreprocessDMap(),
+        #             # Rhofit(cut=1.0),
+        #             AutobuildModelEventInbuilt(),
+        #             fs_ref
+        #         )
+        #         for _model_event_id
+        #         in events_to_process
+        #     }
+        # )
+        #
+        # # Select between autobuilds and update event for each event
+        # for event_id, autobuild_results in event_autobuilds.items():
+        #     event = events_to_process[event_id]
+        #     builds = {}
+        #     for ligand_key, autobuild_result in autobuild_results.items():
+        #         for build_path, result in autobuild_result.log_result_dict.items():
+        #             builds[(ligand_key, build_path)] = result['score']
+        #
+        #     selected_build_key = max(builds, key=lambda _key: -builds[_key])
+        #
+        #     event.build = EventBuild(
+        #         selected_build_key[1],
+        #         selected_build_key[0],
+        #         builds[selected_build_key],
+        #         event_autobuilds[event_id][selected_build_key[0]].log_result_dict[selected_build_key[1]]['centroid']
+        #     )
 
         # Select between autobuilds and update event for each event
-        for event_id, autobuild_results in event_autobuilds.items():
-            event = events_to_process[event_id]
-            builds = {}
-            for ligand_key, autobuild_result in autobuild_results.items():
-                for build_path, result in autobuild_result.log_result_dict.items():
-                    builds[(ligand_key, build_path)] = result['score']
+        for model_number, events in model_events.items():
+            # event = events_to_process[event_id]
+            for event_number, event in events.items():
 
-            selected_build_key = max(builds, key=lambda _key: -builds[_key])
+                event_builds = {}
+                for ligand_key, ligand_conformers in conformers.items():
+                    for conformer_number in ligand_conformers:
+                        build = builds[(model_number, event_number, ligand_key, conformer_number)]
+                        for build_path, result in build.items():
+                            event_builds[(ligand_key, build_path)] = build['score']
 
-            event.build = EventBuild(
-                selected_build_key[1],
-                selected_build_key[0],
-                builds[selected_build_key],
-                event_autobuilds[event_id][selected_build_key[0]].log_result_dict[selected_build_key[1]]['centroid']
-            )
+                selected_build_key = max(builds, key=lambda _key: -builds[_key])
+
+                event.build = EventBuild(
+                    selected_build_key[1],
+                    selected_build_key[0],
+                    builds[selected_build_key],
+                    builds[model_number][event_number][selected_build_key[0]][selected_build_key[1]]['centroid']
+                )
 
         # Update centroid from build
-        for event_id, event in events_to_process.items():
-            print(f"{event_id} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
-            event.centroid = event.build.centroid
+        # for event_id, event in events_to_process.items():
+        for model_number, events in model_events.items():
+            for event_number, event in events.items():
+                print(f"{event_number} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
+                event.centroid = event.build.centroid
 
         # Seperate by model number
         model_events = {}
-        for (model_number, event_number), event in events_to_process.items():
-            if model_number not in model_events:
-                model_events[model_number] = {}
-            model_events[model_number][event_number] = event
+        # for (model_number, event_number), event in events_to_process.items():
+        for model_number, events in model_events.items():
+            for event_number, event in model_events.items():
+                if model_number not in model_events:
+                    model_events[model_number] = {}
+                model_events[model_number][event_number] = event
 
         # Filter events by builds
         for model_number in model_events:
