@@ -92,7 +92,7 @@ class HeirarchicalSiteModel:
 
         if len(events) == 1:
             return {0: Site(
-                list(events.keys())[0],
+                [list(events.keys())[0], ],
                 list(events.values())[0].centroid
                 # np.mean(list(events.values())[0].pos_array, axis=1)
             )}
