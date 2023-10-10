@@ -57,8 +57,8 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Iteratively add the relveant atoms
 
     for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
-        if atom_type == "CL":
-            atom_type = "Cl"
+        if len(atom_type) > 1:
+            atom_type = atom_type[0] + atom_type[1].lower()
         atom = Chem.Atom(atom_type)
         editable_mol.AddAtom(atom)
 
@@ -66,8 +66,6 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_1_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_1'))
     bond_2_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_2'))
     bond_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.type'))
-
-
 
     try:
         # Iteratively add the relevant bonds
