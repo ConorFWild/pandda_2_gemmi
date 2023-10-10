@@ -48,6 +48,8 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Find the relevant atoms loop
     atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
     atom_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.type_symbol'))
+    atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.charge'))
+
 
     # Get the mapping
     id_to_idx = {}
@@ -55,11 +57,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         id_to_idx[atom_id] = j
 
     # Iteratively add the relveant atoms
-
-    for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+    for atom_id, atom_type, atom_charge in zip(atom_id_loop, atom_type_loop, atom_charge_loop):
         if len(atom_type) > 1:
             atom_type = atom_type[0] + atom_type[1].lower()
         atom = Chem.Atom(atom_type)
+        atom.SetFormalCharge(int(atom_charge))
         editable_mol.AddAtom(atom)
 
     # Find the bonds loop
