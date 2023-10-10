@@ -554,7 +554,7 @@ def pandda(args: PanDDAArgs):
                     for conformer_number in ligand_conformers:
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
                         for build_path, result in build.items():
-                            event_builds[(ligand_key, build_path)] = result['score']
+                            event_builds[(ligand_key, build_path, conformer_number)] = result['score']
 
                 selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
 
@@ -562,7 +562,7 @@ def pandda(args: PanDDAArgs):
                     selected_build_key[1],
                     selected_build_key[0],
                     event_builds[selected_build_key],
-                    builds[model_number][event_number][selected_build_key[0]][selected_build_key[1]]['centroid']
+                    builds[model_number][event_number][selected_build_key[0]][selected_build_key[2]]['centroid']
                 )
 
         # Update centroid from build
