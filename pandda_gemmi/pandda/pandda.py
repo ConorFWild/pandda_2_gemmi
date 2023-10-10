@@ -244,8 +244,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ["BAZ2BA-x583", "BAZ2BA-x481"]:
         #     continue
-        if dtag not in ["BAZ2BA-x529", ]:
-            continue
+        # if dtag not in ["BAZ2BA-x529", ]:
+        #     continue
         # if dtag not in ["BAZ2BA-x515", ]:
         #     continue
         # if dtag not in ["BAZ2BA-x536", ]:
@@ -463,7 +463,7 @@ def pandda(args: PanDDAArgs):
             conformers[ligand_key] = get_conformers(ligand_files)
             conformer_refs[ligand_key] = {}
             for conformer_number, conformer in conformers[ligand_key].items():
-                conformer_refs[ligand_key] = processor.put(Structure(None, conformer))
+                conformer_refs[ligand_key][conformer_number] = processor.put(Structure(None, conformer))
 
 
         # Define the builds to perform
