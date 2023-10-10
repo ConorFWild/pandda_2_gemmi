@@ -556,7 +556,7 @@ def pandda(args: PanDDAArgs):
                         for build_path, result in build.items():
                             event_builds[(ligand_key, build_path)] = result['score']
 
-                selected_build_key = max(event_builds, key=lambda _key: -builds[_key])
+                selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
 
                 event.build = EventBuild(
                     selected_build_key[1],
