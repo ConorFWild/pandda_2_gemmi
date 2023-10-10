@@ -698,11 +698,11 @@ def pandda(args: PanDDAArgs):
     # fs_ref = processor.put(fs)
 
     time_autobuild_begin = time.time()
-    # autobuild_yaml_path = fs.output.path / "autobuilds.yaml"
-    # if autobuild_yaml_path.exists():
-    #     autobuilds = serialize.unserialize_autobuilds(autobuild_yaml_path)
+    autobuild_yaml_path = fs.output.path / "autobuilds.yaml"
+    if autobuild_yaml_path.exists():
+        autobuilds = serialize.unserialize_autobuilds(autobuild_yaml_path)
     #
-    # else:
+    else:
     #     event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
     #         {
     #             _event_id: Partial(autobuild).paramaterise(
@@ -749,11 +749,11 @@ def pandda(args: PanDDAArgs):
         console.processed_autobuilds(autobuilds)
 
         #
-        serialize.processed_autobuilds(
-            datasets,
-            event_autobuilds,
-            fs.output.path / "autobuilds.yaml"
-        )
+        # serialize.processed_autobuilds(
+        #     datasets,
+        #     event_autobuilds,
+        #     fs.output.path / "autobuilds.yaml"
+        # )
 
     # Get the sites
     structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
