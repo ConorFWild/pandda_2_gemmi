@@ -57,6 +57,8 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Iteratively add the relveant atoms
 
     for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        if atom_type == "CL":
+            atom_type = "Cl"
         atom = Chem.Atom(atom_type)
         editable_mol.AddAtom(atom)
 
