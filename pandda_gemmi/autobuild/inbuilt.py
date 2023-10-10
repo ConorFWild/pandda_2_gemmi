@@ -536,7 +536,7 @@ def mask_dmap(dmap_array, st, reference_frame):
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(dmap.unit_cell)
 
-    for model in st.structure:
+    for model in st:
         for chain in model:
             for residue in chain:
                 if residue.name in constants.RESIDUE_NAMES:
