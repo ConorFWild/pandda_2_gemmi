@@ -530,7 +530,7 @@ def get_score_grid(dmap, st, event: EventInterface):
     return dmap
 
 def mask_dmap(dmap_array, st, reference_frame):
-    dmap = reference_frame.unamsk(SparseDMap(dmap_array))
+    dmap = reference_frame.unmask(SparseDMap(dmap_array))
     # Get a mask of the protein
     inner_mask_grid = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
