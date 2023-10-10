@@ -12,9 +12,10 @@ from pandda_gemmi import constants
 from ..interfaces import *
 
 from ..fs import try_make
-from ..dmaps import load_dmap, save_dmap
+from ..dmaps import load_dmap, save_dmap, SparseDMap
 from ..dataset.structure import save_structure, load_structure, Structure
 from .autobuild import AutobuildResult
+
 
 
 def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
@@ -528,6 +529,90 @@ def get_score_grid(dmap, st, event: EventInterface):
 
     return dmap
 
+def mask_dmap(dmap_array, st, reference_frame):
+    dmap = reference_frame.unamsk(SparseDMap(dmap_array))
+    # Get a mask of the protein
+    inner_mask_grid = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(dmap.unit_cell)
+
+    for model in st.structure:
+        for chain in model:
+            for residue in chain:
+                if residue.name in constants.RESIDUE_NAMES:
+                    for atom in residue:
+                        pos = atom.pos
+                        inner_mask_grid.set_points_around(pos,
+                                                          radius=1.5,
+                                                          value=1,
+                                                          )
+
+    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+    # print(inner_mask_grid_array.size)
+
+    # Zero out density overlapping the protein
+    dmap_array = np.array(dmap, copy=False)
+    # non_zero_dmap_array = d
+    # print(f"")
+    structure_mask_indicies = np.nonzero(inner_mask_grid_array)
+    # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
+    dmap_array[structure_mask_indicies] = 0.0
+
+
+
+    return SparseDMap.from_xmap(dmap, reference_frame)
+
+
+def get_event_grid(dmap, st, ):
+    # Get a mask of the protein
+    inner_mask_grid = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(dmap.unit_cell)
+
+    # ns = gemmi.NeighborSearch(st.structure[0], st.structure.cell, 12).populate(include_h=False)
+
+    # centroid = np.mean(event.pos_array, axis=0)
+    #
+    # centoid_pos = gemmi.Position(*centroid)
+    # marks = ns.find_atoms(centoid_pos, '\0', radius=11)
+
+    # for mark in marks:
+    #     cra = mark.to_cra(st.structure[0])
+    #     residue = cra.residue
+    #     if residue.name in constants.RESIDUE_NAMES:
+    #         # mark_pos = mark.pos
+    #         # pos = gemmi.Position(mark_pos.x, mark_pos.y, mark_pos.z)
+    #         pos = gemmi.Position(mark.x, mark.y, mark.z)
+    #         inner_mask_grid.set_points_around(
+    #             pos,
+    #             radius=1.5,
+    #             value=1,
+    #         )
+    #
+    for model in st.structure:
+        for chain in model:
+            for residue in chain:
+                if residue.name in constants.RESIDUE_NAMES:
+                    for atom in residue:
+                        pos = atom.pos
+                        inner_mask_grid.set_points_around(pos,
+                                                          radius=1.5,
+                                                          value=1,
+                                                          )
+
+    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+    # print(inner_mask_grid_array.size)
+
+    # Zero out density overlapping the protein
+    dmap_array = np.array(dmap, copy=False)
+    # non_zero_dmap_array = d
+    # print(f"")
+    structure_mask_indicies = np.nonzero(inner_mask_grid_array)
+    # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
+    dmap_array[structure_mask_indicies] = 0.0
+
+    return dmap
+
 
 class AutobuildInbuilt:
 
@@ -644,6 +729,37 @@ class AutobuildInbuilt:
             ligand_files.ligand_cif,
             out_dir
         )
+
+def autobuild_conformer(
+                    centroid,
+                    bdc,
+                    conformer,
+                    masked_dtag_array,
+                    masked_mean_array,
+                    reference_frame,
+        out_dir,
+                ):
+
+    event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
+
+    optimized_structure, score, centroid = score_conformer(
+        centroid,
+        conformer,
+        event_map_grid,
+    )
+
+    save_structure(
+        Structure(None, optimized_structure),
+        out_dir / f"{conformer_id}.pdb",
+    )
+
+    log_result_dict = {
+        str(out_dir / f"{conformer_id}.pdb"): {'score': score,
+                                               'centroid': centroid, }
+    }
+
+    # Return results
+    return log_result_dict
 
 class AutobuildModelEventInbuilt:
 

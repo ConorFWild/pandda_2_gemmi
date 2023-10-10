@@ -1,3 +1,4 @@
+import os
 import time
 
 from sklearnex import patch_sklearn
@@ -13,7 +14,7 @@ from pandda_gemmi import serialize
 from pandda_gemmi.args import PanDDAArgs
 
 from pandda_gemmi.fs import PanDDAFS
-from pandda_gemmi.dataset import XRayDataset, StructureArray
+from pandda_gemmi.dataset import XRayDataset, StructureArray, Structure
 from pandda_gemmi.dmaps import (
     SparseDMap,
     SparseDMapStream,
@@ -44,7 +45,7 @@ from pandda_gemmi.event_model.filter_selected_events import filter_selected_even
 from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
 
 from pandda_gemmi.autobuild import autobuild, autobuild_model_event, AutobuildResult
-from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt, AutobuildModelEventInbuilt
+from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt, AutobuildModelEventInbuilt, mask_dmap, get_conformers, autobuild_conformer
 from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
@@ -243,8 +244,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ["BAZ2BA-x583", "BAZ2BA-x481"]:
         #     continue
-        # if dtag not in ["BAZ2BA-x529", ]:
-        #     continue
+        if dtag not in ["BAZ2BA-x529", ]:
+            continue
         # if dtag not in ["BAZ2BA-x515", ]:
         #     continue
         # if dtag not in ["BAZ2BA-x536", ]:
@@ -439,6 +440,66 @@ def pandda(args: PanDDAArgs):
 
         # Build the events
         time_begin_autobuild = time.time()
+
+        # Masked dtag array
+        masked_dtag_array = mask_dmap(np.copy(dataset_dmap_array), dataset.structure.structure, reference_frame)
+        masked_dtag_array_ref = processor.put(masked_dtag_array)
+
+        # Get the scoring grid
+        masked_mean_arrays = {}
+        masked_mean_array_refs = {}
+        for model_number, model in model_events.items():
+            # for event_number, event in events.items():
+            masked_mean_array = mask_dmap(np.copy(model_means[model_number]), dataset.structure.structure, reference_frame)
+            masked_mean_arrays[model_number] = masked_mean_array
+            masked_mean_array_refs = processor.put(masked_mean_array)
+
+        # Generate conformers to score
+        conformers = {}
+        conformer_refs = {}
+        for ligand_key in dataset.ligand_files:
+            ligand_files = dataset.ligand_files[ligand_key]
+            conformers[ligand_key] = get_conformers(ligand_files)
+            conformer_refs[ligand_key] = {}
+            for conformer_number, conformer in conformers[ligand_key].items():
+                conformer_refs[ligand_key] = processor.put(Structure(None, conformer))
+
+
+        # Define the builds to perform
+        builds_to_perform = []
+        for model_number, events in model_events.items():
+            for event_number, event in events.items():
+                for ligand_key, ligand_conformers in conformers.items():
+                    for conformer_number, conformer in ligand_conformers.items():
+                        builds_to_perform.append(
+                            (model_number, event_number, ligand_key, conformer_number)
+                        )
+
+        print(builds_to_perform)
+
+        out_dir = fs.output.processed_datasets[dtag] / "autobuild"
+        if not out_dir.exists():
+            os.mkdir(out_dir)
+        builds = processor.process_dict(
+            {
+                _model_event_id: Partial(autobuild_conformer).paramaterise(
+                    model_events[_model_event_id[0]][_model_event_id[1]].centroid,
+                    conformer_refs[_model_event_id[2]][_model_event_id[3]],
+                    masked_dtag_array_ref,
+                    masked_mean_array_refs[_model_event_id[0]],
+                    reference_frame_ref,
+                    out_dir,
+                    f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}"
+                    # fs_ref,
+                )
+                for _model_event_id
+                in builds_to_perform
+            }
+        )
+        time_finish_autobuild = time.time()
+        print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
+        raise Exception
+
         events_to_process = {}
         for model_number, model_events in model_events.items():
             for event_number, event in model_events.items():
