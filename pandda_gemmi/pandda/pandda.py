@@ -579,10 +579,12 @@ def pandda(args: PanDDAArgs):
         model_events = {}
         # for (model_number, event_number), event in events_to_process.items():
         for model_number, events in model_events.items():
-            for event_number, event in model_events.items():
+            for event_number, event in events.items():
                 if model_number not in model_events:
                     model_events[model_number] = {}
                 model_events[model_number][event_number] = event
+        print(model_events)
+
 
         # Filter events by builds
         for model_number in model_events:
