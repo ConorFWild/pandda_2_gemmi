@@ -93,7 +93,8 @@ class HeirarchicalSiteModel:
         if len(events) == 1:
             return {0: Site(
                 list(events.keys())[0],
-                np.mean(list(events.values())[0].pos_array, axis=1)
+                list(events.values())[0].centroid
+                # np.mean(list(events.values())[0].pos_array, axis=1)
             )}
 
         # Choose a reference structure from highest res dataset
@@ -112,7 +113,8 @@ class HeirarchicalSiteModel:
         aligned_centroids = []
         for event_id, event in events.items():
             _dtag, _event_idx = event_id
-            unaligned_centroid = np.mean(event.pos_array, axis=0)
+            # unaligned_centroid = np.mean(event.pos_array, axis=0)
+            unaligned_centroid = event.centroid
             alignment = alignments[_dtag]
             transforms, com_ref, com_mov = alignment.get_transforms()
             transform, associated_com_ref, closest_com_mov = _get_closest_transform(

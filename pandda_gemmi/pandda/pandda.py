@@ -659,8 +659,8 @@ def pandda(args: PanDDAArgs):
         structure_array_refs,
         HeirarchicalSiteModel(t=args.max_site_distance_cutoff)
     )
-    # for site_id, site in sites.items():
-    #     print(f"{site_id} : {site.centroid} : {site.event_ids}")
+    for site_id, site in sites.items():
+        print(f"{site_id} : {site.centroid} : {site.event_ids}")
 
     # Rank the events for display in PanDDA inspect
     ranking = rank_events(
