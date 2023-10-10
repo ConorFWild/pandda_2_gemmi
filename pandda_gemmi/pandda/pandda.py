@@ -453,7 +453,7 @@ def pandda(args: PanDDAArgs):
             # for event_number, event in events.items():
             masked_mean_array = mask_dmap(np.copy(model_means[model_number]), dataset.structure.structure, reference_frame)
             masked_mean_arrays[model_number] = masked_mean_array
-            masked_mean_array_refs = processor.put(masked_mean_array)
+            masked_mean_array_refs[model_number] = processor.put(masked_mean_array)
 
         # Generate conformers to score
         conformers = {}
