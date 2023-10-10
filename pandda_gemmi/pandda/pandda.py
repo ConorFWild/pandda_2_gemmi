@@ -439,6 +439,9 @@ def pandda(args: PanDDAArgs):
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
 
+        time_finish_process_models = time.time()
+        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
+
         # Build the events
         time_begin_autobuild = time.time()
 
@@ -590,11 +593,10 @@ def pandda(args: PanDDAArgs):
                 model_events[model_number] = filter(model_events[model_number])
                 print(f"\t\t\tModel {model_number} when from {j_0} to {len(model_events[model_number])} events of local filter")
 
-        time_finish_autobuild = time.time()
-        print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
+        # time_finish_autobuild = time.time()
+        # print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
 
-        time_finish_process_models = time.time()
-        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
+
         model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
