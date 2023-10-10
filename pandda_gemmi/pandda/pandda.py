@@ -551,7 +551,7 @@ def pandda(args: PanDDAArgs):
 
                 event_builds = {}
                 for ligand_key, ligand_conformers in conformers.items():
-                    for conformer_number in ligand_conformers:
+                    for conformer_number, conformer in ligand_conformers.items():
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
                         for build_path, result in build.items():
                             event_builds[(ligand_key, build_path, conformer_number)] = result['score']
