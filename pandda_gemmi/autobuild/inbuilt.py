@@ -731,12 +731,12 @@ class AutobuildInbuilt:
         )
 
 def autobuild_conformer(
-                    centroid,
-                    bdc,
-                    conformer,
-                    masked_dtag_array,
-                    masked_mean_array,
-                    reference_frame,
+        centroid,
+        bdc,
+        conformer,
+        masked_dtag_array,
+        masked_mean_array,
+        reference_frame,
         out_dir,
         conformer_id
                 ):
@@ -745,7 +745,7 @@ def autobuild_conformer(
 
     optimized_structure, score, centroid = score_conformer(
         centroid,
-        conformer,
+        conformer.structure,
         event_map_grid,
     )
 
