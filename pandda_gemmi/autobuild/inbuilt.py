@@ -738,6 +738,7 @@ def autobuild_conformer(
                     masked_mean_array,
                     reference_frame,
         out_dir,
+        conformer_id
                 ):
 
     event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
