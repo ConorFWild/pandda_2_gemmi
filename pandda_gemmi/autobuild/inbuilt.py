@@ -739,6 +739,8 @@ class AutobuildInbuilt:
 
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
+
+    event_map_grid_array[event_map_grid_array > 2.0] = 2.0
     inner_mask_grid = gemmi.Int8Grid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
