@@ -66,7 +66,7 @@ def merge_autobuilds(
                         print(f"\t\t\t{autobuild_result.log_result_dict}")
 
                         for build_path, result in autobuild_result.log_result_dict.items():
-                            score = result
+                            score = result['score']
                             all_autobuilds[build_path] = [score, event_id]
 
         #
