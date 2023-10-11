@@ -579,8 +579,8 @@ def pandda(args: PanDDAArgs):
         # for (model_number, event_number), event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
-                if model_number not in model_events:
-                    model_events[model_number] = {}
+                if model_number not in update_model_events:
+                    update_model_events[model_number] = {}
                 update_model_events[model_number][event_number] = event
         print(f"Updated Model Events")
         print(update_model_events)
