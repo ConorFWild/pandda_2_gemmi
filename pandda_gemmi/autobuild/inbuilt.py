@@ -433,10 +433,11 @@ def score_conformer(
     scores = []
     optimised_structures = []
 
+    total_evolve_time = 0.0
     time_begin_score = time.time()
     for j in range(event_fit_num_trys):
         # print(f"\t\t\t\tOptimizing round {j}")
-
+        time_begin_evolve = time.time()
         res = optimize.differential_evolution(
             lambda params: score_fit_nonquant_array(
                 structure_array,
@@ -450,6 +451,8 @@ def score_conformer(
             ],
             # popsize=30,
         )
+        time_finish_evolve = time.time()
+        total_evolve_time += (time_finish_evolve-time_begin_evolve)
         # print(f"\t\t\t\t\tFinished Optimizing round {j}")
 
         scores.append(res.fun)
@@ -473,7 +476,7 @@ def score_conformer(
         )
         optimised_structures.append(optimised_structure)
     time_finish_score = time.time()
-    print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds!")
+    print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
     best_score_index = np.argmin(scores)
 
