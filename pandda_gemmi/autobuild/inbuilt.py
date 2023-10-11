@@ -737,6 +737,28 @@ class AutobuildInbuilt:
             out_dir
         )
 
+def get_local_signal(optimized_structure, event_map_grid):
+    event_map_grid_array = np.array(event_map_grid, copy=False)
+    inner_mask_grid = gemmi.Int8Grid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
+
+    for model in optimized_structure:
+        for chain in model:
+            for residue in chain:
+                # if residue.name in constants.RESIDUE_NAMES:
+                for atom in residue:
+                    pos = atom.pos
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=1,
+                                                      )
+
+    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+
+    vals = event_map_grid_array[np.nonzero(inner_mask_grid_array)]
+    return sum(vals)
+
 def autobuild_conformer(
         centroid,
         bdc,
@@ -763,7 +785,9 @@ def autobuild_conformer(
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {'score': score,
-                                               'centroid': centroid, }
+                                               'centroid': centroid,
+                                               'local_signal': get_local_signal(optimized_structure, event_map_grid)
+                                               }
     }
 
     # Return results

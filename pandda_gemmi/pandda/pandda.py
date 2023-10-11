@@ -556,7 +556,9 @@ def pandda(args: PanDDAArgs):
                     for conformer_number, conformer in ligand_conformers.items():
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
                         for build_path, result in build.items():
-                            event_builds[(ligand_key, build_path, conformer_number)] = result['score']
+                            # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
+                            event_builds[(ligand_key, build_path, conformer_number)] = result['local_signal']
+
 
                 selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
 
