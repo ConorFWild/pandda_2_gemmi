@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy as np
 import gemmi
@@ -432,6 +433,7 @@ def score_conformer(
     scores = []
     optimised_structures = []
 
+    time_begin_score = time.time()
     for j in range(event_fit_num_trys):
         # print(f"\t\t\t\tOptimizing round {j}")
 
@@ -470,6 +472,8 @@ def score_conformer(
             rotation_matrix
         )
         optimised_structures.append(optimised_structure)
+    time_finish_score = time.time()
+    print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds!")
 
     best_score_index = np.argmin(scores)
 
