@@ -571,34 +571,35 @@ def pandda(args: PanDDAArgs):
         # for event_id, event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
-                print(f"{event_number} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
+                print(f"{model_number} : {event_number} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
                 event.centroid = event.build.centroid
 
         # Seperate by model number
-        model_events = {}
+        update_model_events = {}
         # for (model_number, event_number), event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
                 if model_number not in model_events:
                     model_events[model_number] = {}
-                model_events[model_number][event_number] = event
-        print(model_events)
+                update_model_events[model_number][event_number] = event
+        print(f"Updated Model Events")
+        print(update_model_events)
 
 
         # Filter events by builds
-        for model_number in model_events:
+        for model_number in update_model_events:
             for filter in [
                 FilterLocallyHighestBuildScoring(10.0)
             ]:
-                j_0 = len(model_events[model_number])
-                model_events[model_number] = filter(model_events[model_number])
-                print(f"\t\t\tModel {model_number} when from {j_0} to {len(model_events[model_number])} events of local filter")
+                j_0 = len(update_model_events[model_number])
+                update_model_events[model_number] = filter(update_model_events[model_number])
+                print(f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of local filter")
 
         # time_finish_autobuild = time.time()
         # print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
 
 
-        model_events = {model_number: events for model_number, events in model_events.items() if len(events) > 0}
+        model_events = {model_number: events for model_number, events in update_model_events.items() if len(events) > 0}
         if len(model_events) == 0:
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
             continue
@@ -621,7 +622,6 @@ def pandda(args: PanDDAArgs):
                         None, None, None, None, None
                     )
                 }
-
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
@@ -765,6 +765,7 @@ def pandda(args: PanDDAArgs):
         structure_array_refs,
         HeirarchicalSiteModel(t=args.max_site_distance_cutoff)
     )
+    print("Sites")
     for site_id, site in sites.items():
         print(f"{site_id} : {site.centroid} : {site.event_ids}")
 
