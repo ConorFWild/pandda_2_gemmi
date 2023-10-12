@@ -200,7 +200,9 @@ class FilterSymmetryPosBuilds:
                         for atom in res:
                             atom_pos = atom.pos
                             marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
+                            print(f"\t\t\t{atom_pos.x} {atom_pos.y} {atom_pos.z}")
                             for mark in marks:
+                                print(f"\t\t\t\t{mark.x} {mark.y} {mark.z}")
                                 mark_pos = gemmi.Position(mark.x, mark.y, mark.z)
                                 cra = mark.to_cra(st[0])
                                 original_atom_pos = cra.atom.pos
