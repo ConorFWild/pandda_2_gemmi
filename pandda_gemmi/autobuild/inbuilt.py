@@ -476,7 +476,7 @@ def score_conformer(
         )
         optimised_structures.append(optimised_structure)
     time_finish_score = time.time()
-    print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
+    # print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
     best_score_index = np.argmin(scores)
 
