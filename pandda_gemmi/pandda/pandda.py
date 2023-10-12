@@ -778,9 +778,9 @@ def pandda(args: PanDDAArgs):
     ranking = rank_events(
         pandda_events,
         autobuilds,
-        # RankHighEventScore(),
+        RankHighEventScore(),
         # RankHighBuildScore()
-        RankHighEventBuildScore()
+        # RankHighEventBuildScore()
     )
     for event_id in ranking:
         print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")

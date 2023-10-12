@@ -8,7 +8,7 @@ class RankHighEventBuildScore:
             autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]],
     ):
         sorted_event_ids = []
-        for event_id in sorted(events, key=lambda _event_id: events[_event_id].build.score): #, reverse=True):
+        for event_id in sorted(events, key=lambda _event_id: events[_event_id].build.score, reverse=True):
             sorted_event_ids.append(event_id)
 
         return sorted_event_ids
