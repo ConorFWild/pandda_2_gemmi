@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 from scipy.cluster.hierarchy import fclusterdata
 import gemmi
@@ -190,25 +192,50 @@ class FilterSymmetryPosBuilds:
         new_events = {}
         for event_id, event in events.items():
             event_build, dataset = event.build, self.dataset
+            cell = dataset.reflections.reflections.cell
+            sg = dataset.reflections.reflections.spacegroup
             st = gemmi.read_structure(str(event_build.build_path))
-            ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, self.radius + 2.0).populate(include_h=False)
+            # ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, self.radius + 2.0).populate(include_h=False)
 
             dists = []
             for model in st:
                 for chain in model:
                     for res in chain:
-                        for atom in res:
-                            atom_pos = atom.pos
-                            marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
-                            print(f"\t\t\t{atom_pos.x} {atom_pos.y} {atom_pos.z}")
-                            for mark in marks:
-                                print(f"\t\t\t\t{mark.x} {mark.y} {mark.z} {mark.image_idx}")
-                                mark_pos = gemmi.Position(mark.x, mark.y, mark.z)
-                                cra = mark.to_cra(st[0])
-                                original_atom_pos = cra.atom.pos
-                                # Probably symmetry image, get distance to it
-                                if mark_pos.dist(original_atom_pos) > 0.0001:
-                                    dists.append(mark_pos.dist(atom_pos))
+                        for atom_1 in res:
+                            atom_1_pos = atom_1.pos
+                            atom_1_pos_frac = cell.fractionalize(atom_1_pos)
+                            for atom_2 in res:
+                                atom_2_pos = atom_2_pos.pos
+                                atom_2_pos_frac = cell.fractionalize(atom_2_pos)
+                                for x,y,z in itertools.product([-1,0,1],[-1,0,1],[-1,0,1]):
+
+                                    for op in sg.sg.operations():
+                                        if (x == 0) & (y == 0) & (z == 0) & (op.triplet() == 'x,y,z'):
+                                            continue
+
+                                        new_frac_pos = gemmi.Fractional(
+                                            *op.apply_to_xyz(
+                                                [
+                                                    atom_2_pos_frac.x + x,
+                                                    atom_2_pos_frac.y + y,
+                                                    atom_2_pos_frac.z + z
+                                                ]
+                                            )
+                                        )
+                                        new_pos_orth = cell.orthogonalize(new_frac_pos)
+                                        dist = new_pos_orth.dist(atom_1_pos)
+
+
+                            # marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
+                            # print(f"\t\t\t{atom_pos.x} {atom_pos.y} {atom_pos.z}")
+                            # for mark in marks:
+                            #     print(f"\t\t\t\t{mark.x} {mark.y} {mark.z} {mark.image_idx}")
+                            #     mark_pos = gemmi.Position(mark.x, mark.y, mark.z)
+                            #     cra = mark.to_cra(st[0])
+                            #     original_atom_pos = cra.atom.pos
+                            #     # Probably symmetry image, get distance to it
+                            #     if mark_pos.dist(original_atom_pos) > 0.0001:
+                            #         dists.append(mark_pos.dist(atom_pos))
 
             print(f"Distances: {dists}")
 
