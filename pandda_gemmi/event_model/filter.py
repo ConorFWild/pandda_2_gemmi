@@ -191,7 +191,7 @@ class FilterSymmetryPosBuilds:
         for event_id, event in events.items():
             event_build, dataset = event.build, self.dataset
             st = gemmi.read_structure(str(event_build.build_path))
-            ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, 5).populate(include_h=False)
+            ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, self.radius + 2.0).populate(include_h=False)
 
             dists = []
             for model in st:
