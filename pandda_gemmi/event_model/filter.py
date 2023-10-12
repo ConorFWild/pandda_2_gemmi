@@ -211,6 +211,7 @@ class FilterSymmetryPosBuilds:
             # Don't filter no sym atoms near
             if len(dists) == 0:
                 new_events[event_id] = event
+                continue
 
             # Filter if any sym atoms too close
             if min(dists) > self.radius:
