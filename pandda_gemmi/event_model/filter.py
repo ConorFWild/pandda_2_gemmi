@@ -238,7 +238,7 @@ class FilterSymmetryPosBuilds:
                             #     if mark_pos.dist(original_atom_pos) > 0.0001:
                             #         dists.append(mark_pos.dist(atom_pos))
 
-            print(f"Distances: {dists}")
+            # print(f"Distances: {dists}")
 
             # Don't filter no sym atoms near
             if len(dists) == 0:
