@@ -569,6 +569,7 @@ def pandda(args: PanDDAArgs):
                     event_builds[selected_build_key],
                     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid']
                 )
+                event.score = -event.build.score
 
         # Update centroid from build
         # for event_id, event in events_to_process.items():
