@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.cluster.hierarchy import fclusterdata
+import gemmi
 
 from .event import Event
 
@@ -177,6 +178,43 @@ class FilterLocallyHighestBuildScoring:
             j = j+1
 
         return new_events
+
+
+class FilterSymmetryPosBuilds:
+    def __init__(self, dataset, radius=2.0, ):
+        self.dataset = dataset
+        self.radius =radius
+
+    def __call__(self, events):
+
+        new_events = {}
+        for event_id, event in events.itemx():
+            event_build, dataset = event.build, self.dataset
+            st = gemmi.read_structure(str(event_build.build_path))
+            ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, 5).populate(include_h=False)
+
+            dists = []
+            for model in st:
+                for chain in model:
+                    for res in chain:
+                        for atom in res:
+                            atom_pos = atom.pos
+                            marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
+                            for mark in marks:
+                                mark_pos = gemmi.Position(mark.x, mark.y, mark.z)
+                                cra = mark.to_cra(st[0])
+                                original_atom_pos = cra.atom.pos
+                                # Probably symmetry image
+                                if mark_pos.dist(original_atom_pos) > 0.0001:
+                                    dists.append(mark_pos.dist(atom_pos))
+
+            # Filter if any sym atoms too close
+            if min(dists)> self.radius:
+                new_events[event_id] = event
+
+        return new_events
+
+
 
 
 class FilterLocallyHighestLargest:
