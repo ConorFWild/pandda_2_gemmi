@@ -208,6 +208,10 @@ class FilterSymmetryPosBuilds:
                                 if mark_pos.dist(original_atom_pos) > 0.0001:
                                     dists.append(mark_pos.dist(atom_pos))
 
+            # Don't filter no sym atoms near
+            if len(dists) == 0:
+                new_events[event_id] = event
+
             # Filter if any sym atoms too close
             if min(dists) > self.radius:
                 new_events[event_id] = event
