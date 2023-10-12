@@ -209,7 +209,7 @@ class FilterSymmetryPosBuilds:
                                 atom_2_pos_frac = cell.fractionalize(atom_2_pos)
                                 for x,y,z in itertools.product([-1,0,1],[-1,0,1],[-1,0,1]):
 
-                                    for op in sg.sg.operations():
+                                    for op in sg.operations():
                                         if (x == 0) & (y == 0) & (z == 0) & (op.triplet() == 'x,y,z'):
                                             continue
 
