@@ -255,6 +255,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ["BAZ2BA-x529", "BAZ2BA-x584"]:
         #     continue
+        if dtag not in ["JMJD2DA-x611", "JMJD2DA-x384", "JMJD2DA-x336"]:
+            continue
 
         # Print basic information of the dataset to be processed
 
@@ -559,7 +561,6 @@ def pandda(args: PanDDAArgs):
                             # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
                             event_builds[(ligand_key, build_path, conformer_number)] = -result['local_signal'] * event.score
 
-
                 selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
 
                 event.build = EventBuild(
@@ -591,7 +592,7 @@ def pandda(args: PanDDAArgs):
         # Filter events by builds
         for model_number in update_model_events:
             for filter in [
-                FilterSymmetryPosBuilds(2.0),
+                FilterSymmetryPosBuilds(dataset, 2.0),
                 FilterLocallyHighestBuildScoring(10.0)
             ]:
                 j_0 = len(update_model_events[model_number])

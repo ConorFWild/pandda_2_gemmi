@@ -204,12 +204,12 @@ class FilterSymmetryPosBuilds:
                                 mark_pos = gemmi.Position(mark.x, mark.y, mark.z)
                                 cra = mark.to_cra(st[0])
                                 original_atom_pos = cra.atom.pos
-                                # Probably symmetry image
+                                # Probably symmetry image, get distance to it
                                 if mark_pos.dist(original_atom_pos) > 0.0001:
                                     dists.append(mark_pos.dist(atom_pos))
 
             # Filter if any sym atoms too close
-            if min(dists)> self.radius:
+            if min(dists) > self.radius:
                 new_events[event_id] = event
 
         return new_events
