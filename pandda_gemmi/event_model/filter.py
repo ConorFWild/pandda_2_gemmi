@@ -224,6 +224,7 @@ class FilterSymmetryPosBuilds:
                                         )
                                         new_pos_orth = cell.orthogonalize(new_frac_pos)
                                         dist = new_pos_orth.dist(atom_1_pos)
+                                        dists.append(dist)
 
 
                             # marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
