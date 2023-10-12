@@ -52,7 +52,9 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     atom_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.type_symbol'))
     atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.charge'))
     if not atom_charge_loop:
-        atom_charge_loop = [0]*len(atom_id_loop)
+        atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.partial_charge'))
+        if not atom_charge_loop:
+            atom_charge_loop = [0]*len(atom_id_loop)
 
 
     # Get the mapping
