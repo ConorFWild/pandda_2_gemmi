@@ -203,9 +203,9 @@ class FilterSymmetryPosBuilds:
                     for res in chain:
                         for atom_1 in res:
                             atom_1_pos = atom_1.pos
-                            atom_1_pos_frac = cell.fractionalize(atom_1_pos)
+                            # atom_1_pos_frac = cell.fractionalize(atom_1_pos)
                             for atom_2 in res:
-                                atom_2_pos = atom_2_pos.pos
+                                atom_2_pos = atom_2.pos
                                 atom_2_pos_frac = cell.fractionalize(atom_2_pos)
                                 for x,y,z in itertools.product([-1,0,1],[-1,0,1],[-1,0,1]):
 
