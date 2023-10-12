@@ -197,34 +197,40 @@ class FilterSymmetryPosBuilds:
             st = gemmi.read_structure(str(event_build.build_path))
             # ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, self.radius + 2.0).populate(include_h=False)
 
+            symettry_poss = []
+            for model in st:
+                for chain in model:
+                    for res in chain:
+                        for atom_2 in res:
+                            atom_2_pos = atom_2.pos
+                            atom_2_pos_frac = cell.fractionalize(atom_2_pos)
+                            for x, y, z in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1]):
+
+                                for op in sg.operations():
+                                    if (x == 0) & (y == 0) & (z == 0) & (op.triplet() == 'x,y,z'):
+                                        continue
+
+                                    new_frac_pos = gemmi.Fractional(
+                                        *op.apply_to_xyz(
+                                            [
+                                                atom_2_pos_frac.x + x,
+                                                atom_2_pos_frac.y + y,
+                                                atom_2_pos_frac.z + z
+                                            ]
+                                        )
+                                    )
+                                    new_pos_orth = cell.orthogonalize(new_frac_pos)
+                                    symettry_poss.append(new_pos_orth)
+
             dists = []
             for model in st:
                 for chain in model:
                     for res in chain:
                         for atom_1 in res:
                             atom_1_pos = atom_1.pos
-                            # atom_1_pos_frac = cell.fractionalize(atom_1_pos)
-                            for atom_2 in res:
-                                atom_2_pos = atom_2.pos
-                                atom_2_pos_frac = cell.fractionalize(atom_2_pos)
-                                for x,y,z in itertools.product([-1,0,1],[-1,0,1],[-1,0,1]):
-
-                                    for op in sg.operations():
-                                        if (x == 0) & (y == 0) & (z == 0) & (op.triplet() == 'x,y,z'):
-                                            continue
-
-                                        new_frac_pos = gemmi.Fractional(
-                                            *op.apply_to_xyz(
-                                                [
-                                                    atom_2_pos_frac.x + x,
-                                                    atom_2_pos_frac.y + y,
-                                                    atom_2_pos_frac.z + z
-                                                ]
-                                            )
-                                        )
-                                        new_pos_orth = cell.orthogonalize(new_frac_pos)
-                                        dist = new_pos_orth.dist(atom_1_pos)
-                                        dists.append(dist)
+                            for atom_2_pos in symettry_poss:
+                                dist = atom_2_pos.dist(atom_1_pos)
+                                dists.append(dist)
 
 
                             # marks = ns.find_neighbors(atom, min_dist=0.0, max_dist=self.radius+1.0)
