@@ -188,7 +188,7 @@ class FilterSymmetryPosBuilds:
     def __call__(self, events):
 
         new_events = {}
-        for event_id, event in events.itemx():
+        for event_id, event in events.items():
             event_build, dataset = event.build, self.dataset
             st = gemmi.read_structure(str(event_build.build_path))
             ns = gemmi.NeighborSearch(st[0], dataset.reflections.reflections.cell, 5).populate(include_h=False)
