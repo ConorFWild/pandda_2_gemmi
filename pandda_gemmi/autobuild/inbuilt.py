@@ -132,18 +132,18 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
                     on += 1
                 elif on == 3:
                     sulfonates[sfn]["O3"] = atom_idx
-    print(matches)
+    print(f"Matches to sulfonates: {matches}")
 
     atoms_to_charge = [
         sulfonate["O3"] for sulfonate in sulfonates.values()
     ]
-    print(atoms_to_charge)
+    print(f"Atom idxs to charge: {atoms_to_charge}")
     bonds_to_double =[
         (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
     ] + [
         (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
     ]
-    print(bonds_to_double)
+    print(f"Bonds to double: {bonds_to_double}")
 
     # Replace the bonds and update O3's charge
     new_editable_mol = Chem.EditableMol(Chem.Mol())
