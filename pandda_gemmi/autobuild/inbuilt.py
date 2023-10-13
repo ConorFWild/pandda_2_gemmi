@@ -35,7 +35,11 @@ bond_type_cif_to_rdkit = {
     'single': Chem.rdchem.BondType.SINGLE,
     'double': Chem.rdchem.BondType.DOUBLE,
     'triple': Chem.rdchem.BondType.TRIPLE,
-    'aromatic': Chem.rdchem.BondType.AROMATIC
+    'SINGLE': Chem.rdchem.BondType.SINGLE,
+    'DOUBLE': Chem.rdchem.BondType.DOUBLE,
+    'TRIPLE': Chem.rdchem.BondType.TRIPLE,
+    'aromatic': Chem.rdchem.BondType.AROMATIC,
+    'deloc': Chem.rdchem.BondType.SINGLE
 }
 
 
@@ -55,6 +59,9 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
             atom_charge_loop = [0]*len(atom_id_loop)
+    aromatic_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.aromatic'))
+    if not aromatic_loop:
+        aromatic_loop = [None]*len(atom_id_loop)
 
 
     # Get the mapping
@@ -77,11 +84,16 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
 
     try:
         # Iteratively add the relevant bonds
-        for bond_atom_1, bond_atom_2, bond_type in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop):
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_loop):
+            bond_type = bond_type_cif_to_rdkit[bond_type]
+            if aromatic:
+                if aromatic == "y":
+                    bond_type = bond_type_cif_to_rdkit['aromatic']
+
             editable_mol.AddBond(
                 id_to_idx[bond_atom_1],
                 id_to_idx[bond_atom_2],
-                order=bond_type_cif_to_rdkit[bond_type]
+                order=bond_type
             )
     except Exception as e:
         print(e)
@@ -90,6 +102,9 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         print(bond_1_id_loop)
         print(bond_2_id_loop)
         raise Exception
+
+    # HANDLE SULFONATES
+
 
     return editable_mol.GetMol()
 
