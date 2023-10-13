@@ -259,8 +259,8 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ['D68EV3CPROA-x1773', ]:
         #     continue
-        if dtag not in ["JMJD2DA-x408", "JMJD2DA-x611"]:
-            continue
+        # if dtag not in ["JMJD2DA-x408", "JMJD2DA-x611"]:
+        #     continue
 
 
         # Print basic information of the dataset to be processed
