@@ -14,7 +14,12 @@ class HeirarchicalSiteModel:
     def __init__(self, t=8.0):
         self.t = t
 
-    def __call__(self, events: Dict[Tuple[str, int], EventInterface]):
+    def __call__(self,
+         datasets: Dict[str, DatasetInterface],
+         events: Dict[Tuple[str, int], EventInterface],
+         processor: ProcessorInterface,
+         structure_array_refs,
+                 ):
 
         #
         if len(events) == 0:
