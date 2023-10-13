@@ -103,10 +103,13 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         print(bond_2_id_loop)
         raise Exception
 
+    edited_mol = editable_mol.GetMol()
+
     # HANDLE SULFONATES
+    forward_mol = Chem.ReplaceSubstructs(edited_mol, Chem.MolFromSmiles('S(=O)(=O)(O)'), Chem.MolFromSmiles('S(O)(O)(O)'),
+                                         replaceAll=True)
 
-
-    return editable_mol.GetMol()
+    return forward_mol
 
 
 def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
