@@ -126,14 +126,19 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
             if atom.GetSymbol() == "S":
                 sulfonates[sfn]["S"] = atom_idx
             else:
-                if on == 1:
-                    sulfonates[sfn]["O1"] = atom_idx
-                    on += 1
-                elif on == 2:
-                    sulfonates[sfn]["O2"] = atom_idx
-                    on += 1
-                elif on == 3:
-                    sulfonates[sfn]["O3"] = atom_idx
+                atom_charge = atom.GetFormalCharge()
+
+                if atom_charge == -1:
+                    continue
+                else:
+                    if on == 1:
+                        sulfonates[sfn]["O1"] = atom_idx
+                        on += 1
+                    elif on == 2:
+                        sulfonates[sfn]["O2"] = atom_idx
+                        on += 1
+                # elif on == 3:
+                #     sulfonates[sfn]["O3"] = atom_idx
     print(f"Matches to sulfonates: {matches}")
 
     atoms_to_charge = [
