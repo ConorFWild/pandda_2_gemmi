@@ -165,7 +165,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     new_mol = new_editable_mol.GetMol()
     print(Chem.MolToMolBlock(new_mol))
 
-    return
+    return new_mol
 
 
 def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
