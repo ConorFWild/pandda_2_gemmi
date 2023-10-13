@@ -161,19 +161,22 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     for bond in edited_mol.GetBonds():
         bond_atom_1 = bond.GetBeginAtomIdx()
         bond_atom_2 = bond.GetEndAtomIdx()
+        double_bond = False
         for bond_idxs in bonds_to_double:
             if (bond_atom_1 in bond_idxs) & (bond_atom_2 in bond_idxs):
-                new_editable_mol.AddBond(
-                    bond_atom_1,
-                    bond_atom_2,
-                    order=bond_type_cif_to_rdkit['double']
-                    )
-            else:
-                new_editable_mol.AddBond(
-                    bond_atom_1,
-                    bond_atom_2,
-                    order=bond.GetBondType()
-                )
+                double_bond = True
+        if double_bond:
+            new_editable_mol.AddBond(
+                bond_atom_1,
+                bond_atom_2,
+                order=bond_type_cif_to_rdkit['double']
+            )
+        else:
+            new_editable_mol.AddBond(
+                bond_atom_1,
+                bond_atom_2,
+                order=bond.GetBondType()
+            )
     new_mol = new_editable_mol.GetMol()
     print(Chem.MolToMolBlock(new_mol))
 
