@@ -84,6 +84,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
                 order=bond_type_cif_to_rdkit[bond_type]
             )
     except Exception as e:
+        print(e)
         print(atom_id_loop)
         print(id_to_idx)
         print(bond_1_id_loop)
