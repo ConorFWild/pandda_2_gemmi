@@ -572,14 +572,15 @@ def pandda(args: PanDDAArgs):
                     event_builds[selected_build_key],
                     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid']
                 )
-                event.score = -event.build.score
 
         # Update centroid from build
         # for event_id, event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
-                print(f"{model_number} : {event_number} : {event.centroid} : {event.build.centroid} : {event.build.score} : {event.build.build_path}")
+                print(f"{model_number} : {event_number} : {event.centroid} : {event.build.centroid} : {event.score} : {event.build.score} : {event.build.build_path}")
                 event.centroid = event.build.centroid
+                event.score = -event.build.score
+
 
         # Seperate by model number
         update_model_events = {}
