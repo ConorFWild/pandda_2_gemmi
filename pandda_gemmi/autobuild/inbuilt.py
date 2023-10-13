@@ -156,7 +156,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         if atom_idx in atoms_to_charge:
             charge = -1
         new_atom.SetFormalCharge(charge)
-        new_editable_mol.AddAtom(atom)
+        new_editable_mol.AddAtom(new_atom)
 
     for bond in edited_mol.GetBonds():
         bond_atom_1 = bond.GetBeginAtomIdx()
