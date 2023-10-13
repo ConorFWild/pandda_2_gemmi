@@ -132,36 +132,40 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
                     on += 1
                 elif on == 3:
                     sulfonates[sfn]["O3"] = atom_idx
+    print(matches)
 
-        atom_to_charge = [
-            sulfonate["O3"] for sulfonate in sulfonates.values()
-        ]
-        bonds_to_double =[
-            (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
-        ] + [
-            (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
-        ]
+    atoms_to_charge = [
+        sulfonate["O3"] for sulfonate in sulfonates.values()
+    ]
+    print(atoms_to_charge)
+    bonds_to_double =[
+        (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
+    ] + [
+        (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
+    ]
+    print(bonds_to_double)
 
-        # Replace the bonds and update O3's charge
-        new_editable_mol = Chem.EditableMol(edited_mol)
-        for atom in edited_mol.GetAtoms():
-            atom_idx = atom.GetIdx()
-            if atom_idx in atom_to_charge:
-                atom.SetFormalCharge(-1)
-            new_editable_mol.AddAtom(atom)
-        for bond in edited_mol.GetBonds():
-            bond_atom_1 = bond.GetBeginAtomIdx()
-            bond_atom_2 = bond.GetEndAtomIdx()
-            for bond_idxs in bonds_to_double:
-                if (bond_atom_1 in bond_idxs) & (bond_atom_2 in bond_idxs):
-                    new_editable_mol.AddBond(
-                        bond_atom_1,
-                        bond_atom_2,
-                        order=bond_type_cif_to_rdkit['double']
+    # Replace the bonds and update O3's charge
+    new_editable_mol = Chem.EditableMol(edited_mol)
+    for atom in edited_mol.GetAtoms():
+        atom_idx = atom.GetIdx()
+        if atom_idx in atoms_to_charge:
+            atom.SetFormalCharge(-1)
+        new_editable_mol.AddAtom(atom)
+    for bond in edited_mol.GetBonds():
+        bond_atom_1 = bond.GetBeginAtomIdx()
+        bond_atom_2 = bond.GetEndAtomIdx()
+        for bond_idxs in bonds_to_double:
+            if (bond_atom_1 in bond_idxs) & (bond_atom_2 in bond_idxs):
+                new_editable_mol.AddBond(
+                    bond_atom_1,
+                    bond_atom_2,
+                    order=bond_type_cif_to_rdkit['double']
                     )
+    new_mol = new_editable_mol.GetMol()
+    print(Chem.MolToMolBlock(new_mol))
 
-
-    return new_editable_mol.GetMol()
+    return
 
 
 def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
