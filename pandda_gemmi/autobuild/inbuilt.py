@@ -146,7 +146,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     print(bonds_to_double)
 
     # Replace the bonds and update O3's charge
-    new_editable_mol = Chem.EditableMol(edited_mol)
+    new_editable_mol = Chem.EditableMol(Chem.Mol())
     for atom in edited_mol.GetAtoms():
         atom_idx = atom.GetIdx()
         if atom_idx in atoms_to_charge:
