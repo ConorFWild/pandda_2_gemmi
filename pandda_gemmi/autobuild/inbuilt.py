@@ -104,6 +104,8 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         raise Exception
 
     edited_mol = editable_mol.GetMol()
+    print(Chem.MolToMolBlock(edited_mol))
+
 
     # HANDLE SULFONATES
     # forward_mol = Chem.ReplaceSubstructs(
@@ -111,7 +113,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     Chem.MolFromSmiles('S(O)(O)(O)'),
     #     Chem.MolFromSmiles('S(=O)(=O)(O)'),
     #     replaceAll=True,)[0]
-    patt = Chem.MolFromSmarts('S(O)(O)(O)')
+    patt = Chem.MolFromSmarts('S(-O)(-O)(-O)')
     matches = edited_mol.GetSubstructMatches(patt)
 
     sulfonates = {}
@@ -149,9 +151,13 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     new_editable_mol = Chem.EditableMol(Chem.Mol())
     for atom in edited_mol.GetAtoms():
         atom_idx = atom.GetIdx()
+        new_atom = Chem.Atom(atom.GetSymbol())
+        charge = atom.GetFormalCharge()
         if atom_idx in atoms_to_charge:
-            atom.SetFormalCharge(-1)
+            charge = -1
+        new_atom.SetFormalCharge(charge)
         new_editable_mol.AddAtom(atom)
+
     for bond in edited_mol.GetBonds():
         bond_atom_1 = bond.GetBeginAtomIdx()
         bond_atom_2 = bond.GetEndAtomIdx()
