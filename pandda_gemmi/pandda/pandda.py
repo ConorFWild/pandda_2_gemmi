@@ -74,7 +74,7 @@ class GetDatasetsToProcess:
                 if (dtag not in datasets_not_to_process) and (dtag not in remaining_datasets):
                     datasets_not_to_process[dtag] = _filter.description()
 
-        return remaining_datasets, datasets_not_to_process
+        return {_k: remaining_datasets[_k] for _k in sorted(remaining_datasets)}, {_k: datasets_not_to_process[_k] for _k in sorted(datasets_not_to_process)}
 
 class ProcessModel:
     def __init__(self,
