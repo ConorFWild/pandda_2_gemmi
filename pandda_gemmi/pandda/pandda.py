@@ -279,7 +279,7 @@ def pandda(args: PanDDAArgs):
         dataset = datasets[dtag]
 
         # Skip processing the dataset if there is no ligand data
-        if len(dataset.ligand_files) == 0:
+        if len([_key for _key in dataset.ligand_files if dataset.ligand_files[_key].ligand_cif]) == 0:
             console.no_ligand_data()
             continue
 
