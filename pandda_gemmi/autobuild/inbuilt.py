@@ -862,7 +862,7 @@ def get_local_signal(optimized_structure, event_map_grid):
                     #                                   value=2,
                     #                                   )
                     inner_mask_grid.set_points_around(pos,
-                                                      radius=0.5,
+                                                      radius=1.0,
                                                       value=3,
                                                       )
 
