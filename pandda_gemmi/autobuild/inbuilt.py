@@ -860,12 +860,21 @@ def get_local_signal(optimized_structure, event_map_grid):
                                                       radius=1.0,
                                                       value=2,
                                                       )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=0.5,
+                                                      value=3,
+                                                      )
 
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
 
-    vals_pos = event_map_grid_array[np.nonzero(inner_mask_grid_array == 2)]
+    # vals_pos = event_map_grid_array[np.nonzero(inner_mask_grid_array == 2)]
     vals_neg = event_map_grid_array[np.nonzero(inner_mask_grid_array == 1)]
-    return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
+    background = np.mean(vals_neg)
+    core_points = event_map_grid_array[np.nonzero(inner_mask_grid_array == 3)]
+    score = np.sum(core_points > background)
+
+    # return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
+    return score
 
 def autobuild_conformer(
         centroid,
