@@ -849,13 +849,13 @@ def get_local_signal(optimized_structure, event_map_grid):
                 for atom in residue:
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
-                                                      radius=2.0,
+                                                      radius=3.0,
                                                       value=1,
                                                       )
-                    inner_mask_grid.set_points_around(pos,
-                                                      radius=1.5,
-                                                      value=0,
-                                                      )
+                    # inner_mask_grid.set_points_around(pos,
+                    #                                   radius=1.5,
+                    #                                   value=0,
+                    #                                   )
                     inner_mask_grid.set_points_around(pos,
                                                       radius=1.0,
                                                       value=2,
@@ -865,7 +865,7 @@ def get_local_signal(optimized_structure, event_map_grid):
 
     vals_pos = event_map_grid_array[np.nonzero(inner_mask_grid_array == 2)]
     vals_neg = event_map_grid_array[np.nonzero(inner_mask_grid_array == 1)]
-    return np.sum(vals_pos) - np.sum(vals_neg)
+    return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
 
 def autobuild_conformer(
         centroid,
