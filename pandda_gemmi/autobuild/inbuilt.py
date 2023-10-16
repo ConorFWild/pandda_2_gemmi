@@ -879,7 +879,7 @@ def get_local_signal(optimized_structure, event_map_grid):
     high_core = np.sum(core_points > background)
     low_core = np.sum(core_points <= background)
 
-    score = high_core-(high_non_core*(core_points.size / outer_mask.size))
+    score = high_core-((high_non_core*(core_points.size / outer_mask.size)) + low_core)
 
     # return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
     return score
