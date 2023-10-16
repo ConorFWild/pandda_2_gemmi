@@ -849,7 +849,7 @@ def get_local_signal(optimized_structure, event_map_grid):
                 for atom in residue:
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
-                                                      radius=3.0,
+                                                      radius=2.0,
                                                       value=1,
                                                       )
                     # inner_mask_grid.set_points_around(pos,
