@@ -515,7 +515,8 @@ def pandda(args: PanDDAArgs):
                     reference_frame_ref,
                     out_dir,
                     f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
-                    processing_res
+                    dataset_res
+                    # processing_res
                     # fs_ref,
                 )
                 for _model_event_id
