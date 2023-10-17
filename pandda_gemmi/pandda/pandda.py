@@ -261,22 +261,22 @@ def pandda(args: PanDDAArgs):
         #     continue
         # if dtag not in ["JMJD2DA-x408", "JMJD2DA-x611"]:
         #     continue
-        if dtag not in [
-            "A71EV2A-x0211",
-            "A71EV2A-x0278",
-            "A71EV2A-x0459",
-            "A71EV2A-x0517",
-            "A71EV2A-x0392",
-            "A71EV2A-x0229",
-            "A71EV2A-x0554",
-            "A71EV2A-x0582",
-            "A71EV2A-x0240",
-            "A71EV2A-x0485",
-            "A71EV2A-x0471",
-            "A71EV2A-x0415",
-            "A71EV2A-x0567",
-        ]:
-            continue
+        # if dtag not in [
+        #     "A71EV2A-x0211",
+        #     "A71EV2A-x0278",
+        #     "A71EV2A-x0459",
+        #     "A71EV2A-x0517",
+        #     "A71EV2A-x0392",
+        #     "A71EV2A-x0229",
+        #     "A71EV2A-x0554",
+        #     "A71EV2A-x0582", # BAD
+        #     "A71EV2A-x0240",
+        #     "A71EV2A-x0485",
+        #     "A71EV2A-x0471",
+        #     "A71EV2A-x0415",
+        #     "A71EV2A-x0567",
+        # ]:
+        #     continue
 
         # Print basic information of the dataset to be processed
 
