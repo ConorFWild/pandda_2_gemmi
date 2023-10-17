@@ -839,10 +839,15 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     optimized_structure.cell = event_map_grid.unit_cell
     optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
-    dencalc.d_min = res
-    dencalc.rate = 4.0
+    # dencalc.d_min = res
+    # dencalc.rate = 4.0
+    initial_dencalc_grid = gemmi.FloatGrid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
+    initial_dencalc_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    initial_dencalc_grid.set_unit_cell(event_map_grid.unit_cell)
+    dencalc.grid = initial_dencalc_grid
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    dencalc.put_model_density_on_grid(optimized_structure[0])
+    # dencalc.put_model_density_on_grid(optimized_structure[0])
+    dencalc.add_model_density_to_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
     print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
