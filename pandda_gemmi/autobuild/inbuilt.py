@@ -846,8 +846,8 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # initial_dencalc_grid.set_unit_cell(event_map_grid.unit_cell)
     # dencalc.grid = initial_dencalc_grid
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    # dencalc.put_model_density_on_grid(optimized_structure[0])
-    dencalc.add_model_density_to_grid(optimized_structure[0])
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    # dencalc.add_model_density_to_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
     print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
