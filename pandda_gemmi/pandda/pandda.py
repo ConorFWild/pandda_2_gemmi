@@ -265,16 +265,16 @@ def pandda(args: PanDDAArgs):
             "A71EV2A-x0211",
             "A71EV2A-x0278",
             "A71EV2A-x0459",
-            # "A71EV2A-x0517",
-            # "A71EV2A-x0392",
-            # "A71EV2A-x0229",
+            "A71EV2A-x0517",
+            "A71EV2A-x0392",
+            "A71EV2A-x0229",
             "A71EV2A-x0554",
             "A71EV2A-x0582",
             "A71EV2A-x0240",
             "A71EV2A-x0485",
-            # "A71EV2A-x0471",
-            # "A71EV2A-x0415",
-            # "A71EV2A-x0567",
+            "A71EV2A-x0471",
+            "A71EV2A-x0415",
+            "A71EV2A-x0567",
         ]:
             continue
 
