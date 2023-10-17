@@ -997,12 +997,12 @@ res
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {'score': score,
                                                'centroid': centroid,
-                                               'local_signal': get_local_signal(optimized_structure, event_map_grid)
-                                               # 'local_signal': get_local_signal_dencalc(
-                                               #     optimized_structure,
-                                               #     event_map_grid,
-                                               #     res,
-                                               # )
+                                               # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
+                                               'local_signal': get_local_signal_dencalc(
+                                                   optimized_structure,
+                                                   event_map_grid,
+                                                   res,
+                                               )
 
                                                }
     }
