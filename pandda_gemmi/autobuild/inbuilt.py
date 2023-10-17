@@ -834,6 +834,62 @@ class AutobuildInbuilt:
             out_dir
         )
 
+def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
+    # Get the electron density of the optimized structure
+    dencalc = gemmi.DensityCalculatorE()
+    dencalc.d_min = res
+    dencalc.rate = 4.0
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+    calc_grid_array = np.array(calc_grid, copy=False)
+
+    # Get the mask around the structure
+    inner_mask_grid = gemmi.Int8Grid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
+
+    for model in optimized_structure:
+        for chain in model:
+            for residue in chain:
+                # if residue.name in constants.RESIDUE_NAMES:
+                for atom in residue:
+                    pos = atom.pos
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.5,
+                                                      value=1,
+                                                      )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=2,
+                                                      )
+                    # inner_mask_grid.set_points_around(pos,
+                    #                                   radius=1.0,
+                    #                                   value=2,
+                    #                                   )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=0.75,
+                                                      value=3,
+                                                      )
+
+    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+
+    # Get the correlation with the event
+    event_map_grid_array = np.array(event_map_grid, copy=False)
+    masked_event_map_vals = event_map_grid_array[inner_mask_grid_array >= 2]
+    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
+    corr = np.corrcoef(
+        np.concatenate(
+            (
+                masked_event_map_vals.reshape(-1,1),
+                masked_calc_vals.reshape(-1, 1)
+            ),
+            axis=1,
+        )
+    )[0,1]
+
+    return corr
+
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
 
@@ -904,7 +960,8 @@ def autobuild_conformer(
         masked_mean_array,
         reference_frame,
         out_dir,
-        conformer_id
+        conformer_id,
+res
                 ):
 
     event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
@@ -923,7 +980,13 @@ def autobuild_conformer(
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {'score': score,
                                                'centroid': centroid,
-                                               'local_signal': get_local_signal(optimized_structure, event_map_grid)
+                                               # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
+                                               'local_signal': get_local_signal_dencalc(
+                                                   optimized_structure,
+                                                   event_map_grid,
+                                                   res,
+                                               )
+
                                                }
     }
 

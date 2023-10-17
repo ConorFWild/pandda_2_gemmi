@@ -262,19 +262,19 @@ def pandda(args: PanDDAArgs):
         # if dtag not in ["JMJD2DA-x408", "JMJD2DA-x611"]:
         #     continue
         if dtag not in [
-            "A71EV2A-x0211",
-            "A71EV2A-x0278",
-            "A71EV2A-x0459",
-            "A71EV2A-x0517",
-            "A71EV2A-x0392",
-            "A71EV2A-x0229",
+            # "A71EV2A-x0211",
+            # "A71EV2A-x0278",
+            # "A71EV2A-x0459",
+            # "A71EV2A-x0517",
+            # "A71EV2A-x0392",
+            # "A71EV2A-x0229",
             "A71EV2A-x0554",
-            "A71EV2A-x0582",
-            "A71EV2A-x0240",
-            "A71EV2A-x0485",
-            "A71EV2A-x0471",
-            "A71EV2A-x0415",
-            "A71EV2A-x0567",
+            # "A71EV2A-x0582",
+            # "A71EV2A-x0240",
+            # "A71EV2A-x0485",
+            # "A71EV2A-x0471",
+            # "A71EV2A-x0415",
+            # "A71EV2A-x0567",
         ]:
             continue
 
@@ -489,7 +489,6 @@ def pandda(args: PanDDAArgs):
             for conformer_number, conformer in conformers[ligand_key].items():
                 conformer_refs[ligand_key][conformer_number] = processor.put(Structure(None, conformer))
 
-
         # Define the builds to perform
         builds_to_perform = []
         for model_number, events in model_events.items():
@@ -515,7 +514,8 @@ def pandda(args: PanDDAArgs):
                     masked_mean_array_refs[_model_event_id[0]],
                     reference_frame_ref,
                     out_dir,
-                    f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}"
+                    f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
+                    processing_res
                     # fs_ref,
                 )
                 for _model_event_id
