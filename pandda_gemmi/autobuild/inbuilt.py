@@ -858,7 +858,8 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
             for residue in chain:
                 # if residue.name in constants.RESIDUE_NAMES:
                 for atom in residue:
-                    if atom.
+                    if atom.element.name=="H":
+                        continue
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
                                                       radius=1.5,
