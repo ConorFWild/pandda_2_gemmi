@@ -874,7 +874,10 @@ def get_local_signal(optimized_structure, event_map_grid):
     background = np.mean(full_mask)
 
     outer_mask = event_map_grid_array[np.nonzero(inner_mask_grid_array == 1)]
-    background = np.mean(outer_mask)
+    outer_mean = np.mean(outer_mask)
+    outer_std = np.std(outer_mean)
+    # background = np.mean(outer_mask)
+    background = outer_mean + (2*outer_std)
 
     # high_non_core = np.sum(outer_mask > background)
     # low_non_core = np.sum(outer_mask <= background)
