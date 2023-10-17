@@ -837,7 +837,7 @@ class AutobuildInbuilt:
 def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # Get the electron density of the optimized structure
     optimized_structure.cell = event_map_grid.unit_cell
-    optimized_structure.spacegroup_hm = event_map_grid.spacegroup.hm
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
     dencalc.d_min = res
     dencalc.rate = 4.0
@@ -845,6 +845,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     dencalc.put_model_density_on_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
+    print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
     print([calc_grid.nu, event_map_grid.nu])
 
     # Get the mask around the structure
@@ -895,7 +896,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
         )
     )[0,1]
 
-    num_atoms = np.log()
+    num_atoms = np.log(num_atoms)
 
     return corr * num_atoms
 
