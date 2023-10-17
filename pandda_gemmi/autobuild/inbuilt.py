@@ -836,7 +836,7 @@ class AutobuildInbuilt:
 
 def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # Get the electron density of the optimized structure
-    optimized_structure.cell = event_map_grid.cell
+    optimized_structure.cell = event_map_grid.unit_cell
     optimized_structure.spacegroup_hm = event_map_grid.spacegroup.hm
     dencalc = gemmi.DensityCalculatorE()
     dencalc.d_min = res
