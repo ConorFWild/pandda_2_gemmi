@@ -874,18 +874,21 @@ def get_local_signal(optimized_structure, event_map_grid):
     background = np.mean(full_mask)
 
     outer_mask = event_map_grid_array[np.nonzero(inner_mask_grid_array == 1)]
-    high_non_core = np.sum(outer_mask > background)
-    low_non_core = np.sum(outer_mask <= background)
+    background = np.mean(outer_mask)
+
+    # high_non_core = np.sum(outer_mask > background)
+    # low_non_core = np.sum(outer_mask <= background)
     # non_core_score = low_non_core-high_non_core
-    non_core_score = low_non_core * (low_non_core / outer_mask.size)
+    # non_core_score = low_non_core * (low_non_core / outer_mask.size)
 
     core_points = event_map_grid_array[np.nonzero(inner_mask_grid_array == 3)]
     high_core = np.sum(core_points > background)
-    low_core = np.sum(core_points <= background)
+    # low_core = np.sum(core_points <= background)
     # core_score = high_core-low_core
-    core_score = high_core * (high_core/core_points.size)
+    # core_score = high_core * (high_core/core_points.size)
 
-    score = core_score+(non_core_score*(core_points.size / outer_mask.size))
+    # score = core_score+(non_core_score*(core_points.size / outer_mask.size))
+    score = high_core
 
     # return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
     return score
