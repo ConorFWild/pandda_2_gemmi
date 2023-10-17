@@ -850,8 +850,8 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # dencalc.add_model_density_to_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
-    print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw])
-    print([calc_grid.nu, event_map_grid.nu])
+    print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw, calc_grid.nu, calc_grid.nv, calc_grid.nw])
+    # print([calc_grid.nu, event_map_grid.nu])
 
     # Get the mask around the structure
     inner_mask_grid = gemmi.Int8Grid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
