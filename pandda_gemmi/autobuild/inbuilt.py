@@ -852,11 +852,13 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
     inner_mask_grid.set_unit_cell(event_map_grid.unit_cell)
 
+    num_atoms = 0
     for model in optimized_structure:
         for chain in model:
             for residue in chain:
                 # if residue.name in constants.RESIDUE_NAMES:
                 for atom in residue:
+                    if atom.
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
                                                       radius=1.5,
@@ -874,6 +876,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
                                                       radius=0.75,
                                                       value=3,
                                                       )
+                    num_atoms += 1
 
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
 
@@ -891,7 +894,9 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
         )
     )[0,1]
 
-    return corr
+    num_atoms = np.log()
+
+    return corr * num_atoms
 
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
@@ -907,6 +912,8 @@ def get_local_signal(optimized_structure, event_map_grid):
             for residue in chain:
                 # if residue.name in constants.RESIDUE_NAMES:
                 for atom in residue:
+                    if atom.element.name == "H":
+                        continue
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
                                                       radius=1.5,
