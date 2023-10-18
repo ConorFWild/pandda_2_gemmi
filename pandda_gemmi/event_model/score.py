@@ -138,7 +138,28 @@ def get_model_map(structure, xmap_event):
     return new_xmap
 
 
-def get_bdc(event, xmap_grid, mean_grid, median):
+def get_correlation(arr1, arr2):
+    corr = np.corrcoef(
+        np.concatenate(
+            (
+                arr1.reshape(-1, 1),
+                arr2.reshape(-1, 1)
+            ),
+            axis=1,
+        )
+    )[0, 1]
+    return corr
+
+def get_contrast(bdc, xmap_event_vals, mean_map_event_vals, xmap_inner_vals, mean_map_inner_vals ):
+    event_map_event_vals = (xmap_event_vals-(bdc*mean_map_event_vals)) / (1-bdc)
+    event_map_inner_vals = (xmap_inner_vals-(bdc*mean_map_inner_vals)) / (1-bdc)
+
+    contrast = get_correlation(event_map_inner_vals, mean_map_inner_vals) - get_correlation(event_map_event_vals, mean_map_event_vals)
+
+    return contrast
+
+
+def get_bdc(event, xmap_grid, mean_grid, median, reference_frame: DFrameInterface):
     # Get arrays of the xmap and mean map
     xmap_array = np.array(xmap_grid, copy=False)
     mean_array = np.array(mean_grid, copy=False)
@@ -152,16 +173,27 @@ def get_bdc(event, xmap_grid, mean_grid, median):
         ]
     )
 
-    # Get the values of the 2Fo-Fc map and mean map
+    # Get the values of the 2Fo-Fc map and mean map for the event
     xmap_vals = xmap_array[event_indicies]
     mean_map_vals = mean_array[event_indicies]
 
+    # Get the inner mask indicies
+    xmap_inner_vals = reference_frame.mask_inner(xmap_grid).vals
+    mean_inner_vals = reference_frame.mask_inner(mean_grid).vals
+
     # Get the BDC by minimizing the difference between masked event map density and the median of protein density
     res = optimize.minimize(
-        lambda _bdc: np.abs(
-            np.median(
-                (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
-            ) - median
+        # lambda _bdc: np.abs(
+        #     np.median(
+        #         (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
+        #     ) - median
+        # ),
+        lambda _bdc: get_contrast(
+            _bdc,
+            xmap_vals,
+            mean_map_vals,
+            xmap_inner_vals,
+            mean_inner_vals
         ),
         0.5,
         bounds=((0.0, 0.95),),
@@ -402,7 +434,7 @@ class ScoreCNNLigand:
         for event_id, event in events.items():
             # print(event_id)
             # Get the estimated bdc for the event (the fraction of the mean map to subtract)
-            bdc = get_bdc(event, homogenized_xmap_grid, mean_grid, median)
+            bdc = get_bdc(event, homogenized_xmap_grid, mean_grid, median, reference_frame)
             bdcs[event_id] = bdc
 
             # Get the transform that will centre a sampling window on the event
