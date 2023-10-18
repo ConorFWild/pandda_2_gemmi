@@ -928,25 +928,16 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
     xmap_array = np.array(xmap, copy=False)
     mean_map_array = np.array(mean_map, copy=False)
 
-    #
-
     # Get the electron density of the optimized structure
     optimized_structure.cell = xmap.unit_cell
     optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
     dencalc.d_min = res#*2
     dencalc.rate = 2.0
-    # initial_dencalc_grid = gemmi.FloatGrid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
-    # initial_dencalc_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
-    # initial_dencalc_grid.set_unit_cell(event_map_grid.unit_cell)
-    # dencalc.grid = initial_dencalc_grid
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
     dencalc.put_model_density_on_grid(optimized_structure[0])
-    # dencalc.add_model_density_to_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
-    # print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw, calc_grid.nu, calc_grid.nv, calc_grid.nw])
-    # print([calc_grid.nu, event_map_grid.nu])
 
     # Get the mask around the structure
     inner_mask_grid = gemmi.Int8Grid(xmap.nu, xmap.nv, xmap.nw)
@@ -957,7 +948,6 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
     for model in optimized_structure:
         for chain in model:
             for residue in chain:
-                # if residue.name in constants.RESIDUE_NAMES:
                 for atom in residue:
                     if atom.element.name=="H":
                         continue

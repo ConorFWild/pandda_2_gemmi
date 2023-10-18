@@ -178,8 +178,8 @@ def get_bdc(event, xmap_grid, mean_grid, median, reference_frame: DFrameInterfac
     mean_map_vals = mean_array[event_indicies]
 
     # Get the inner mask indicies
-    xmap_inner_vals = reference_frame.mask_inner(xmap_grid).vals
-    mean_inner_vals = reference_frame.mask_inner(mean_grid).vals
+    # xmap_inner_vals = reference_frame.mask_inner(xmap_grid).vals
+    # mean_inner_vals = reference_frame.mask_inner(mean_grid).vals
 
     # Get the BDC by minimizing the difference between masked event map density and the median of protein density
     res = optimize.minimize(
