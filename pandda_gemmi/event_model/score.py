@@ -183,19 +183,19 @@ def get_bdc(event, xmap_grid, mean_grid, median, reference_frame: DFrameInterfac
 
     # Get the BDC by minimizing the difference between masked event map density and the median of protein density
     res = optimize.minimize(
-        # lambda _bdc: np.abs(
-        #     np.median(
-        #         (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
-        #     ) - median
-        # ),
-        lambda _bdc: get_contrast(
-            _bdc,
-            xmap_vals,
-            mean_map_vals,
-            xmap_inner_vals,
-            mean_inner_vals
+        lambda _bdc: np.abs(
+            np.median(
+                (xmap_vals - (_bdc * mean_map_vals)) / (1 - _bdc)
+            ) - median
         ),
-        0.5,
+        # lambda _bdc: -get_contrast(
+        #     _bdc,
+        #     xmap_vals,
+        #     mean_map_vals,
+        #     xmap_inner_vals,
+        #     mean_inner_vals
+        # ),
+        # 0.5,
         bounds=((0.0, 0.95),),
         tol=0.1
     )
