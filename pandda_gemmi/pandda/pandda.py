@@ -277,6 +277,14 @@ def pandda(args: PanDDAArgs):
         #     "A71EV2A-x0567",
         # ]:
         #     continue
+        if dtag not in [
+            "A71EV2A-x0194",
+            "A71EV2A-x0278",
+            "A71EV2A-x0554",
+            "A71EV2A-x0397", # BAD
+
+        ]:
+            continue
 
         # Print basic information of the dataset to be processed
 
