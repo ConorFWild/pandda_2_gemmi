@@ -921,7 +921,7 @@ def get_correlation(bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_val
     return 1-corr
 
 
-def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, dtag_vals, mean_vals, res, ):
+def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, dtag_vals, mean_vals, res, event_bdc):
     # Get the unmasked xmap and mean map
     xmap = reference_frame.unmask(dtag_vals)
     mean_map = reference_frame.unmask(mean_vals)
@@ -980,6 +980,7 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
     #
     res = optimize.minimize(
         lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
+        event_bdc,
         bounds=((0.0, 0.95),),
         tol=0.1
     )
@@ -1071,7 +1072,7 @@ def get_local_signal(optimized_structure, event_map_grid):
 
 def autobuild_conformer(
         centroid,
-        bdc,
+        event_bdc,
         conformer,
         masked_dtag_array,
         masked_mean_array,
@@ -1081,7 +1082,7 @@ def autobuild_conformer(
 res
                 ):
 
-    event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
+    event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
 
     optimized_structure, score, centroid = score_conformer(
         centroid,
@@ -1099,7 +1100,7 @@ res
         reference_frame,
         masked_dtag_array,
         masked_mean_array,
-        res
+        res, event_bdc
     )
 
     log_result_dict = {
