@@ -277,14 +277,14 @@ def pandda(args: PanDDAArgs):
         #     "A71EV2A-x0567",
         # ]:
         #     continue
-        if dtag not in [
-            "A71EV2A-x0194",
-            "A71EV2A-x0278",
-            "A71EV2A-x0554",
-            "A71EV2A-x0397", # BAD
-
-        ]:
-            continue
+        # if dtag not in [
+        #     "A71EV2A-x0194",
+        #     "A71EV2A-x0278",
+        #     "A71EV2A-x0554",
+        #     "A71EV2A-x0397", # BAD
+        #
+        # ]:
+        #     continue
 
         # Print basic information of the dataset to be processed
 
@@ -512,25 +512,25 @@ def pandda(args: PanDDAArgs):
         out_dir = fs.output.processed_datasets[dtag] / "autobuild"
         if not out_dir.exists():
             os.mkdir(out_dir)
-        builds = processor.process_dict(
-            {
-                _model_event_id: Partial(autobuild_conformer).paramaterise(
-                    model_events[_model_event_id[0]][_model_event_id[1]].centroid,
-                    model_events[_model_event_id[0]][_model_event_id[1]].bdc,
-                    conformer_refs[_model_event_id[2]][_model_event_id[3]],
-                    masked_dtag_array_ref,
-                    masked_mean_array_refs[_model_event_id[0]],
-                    reference_frame_ref,
-                    out_dir,
-                    f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
-                    dataset_res
-                    # processing_res
-                    # fs_ref,
-                )
-                for _model_event_id
-                in builds_to_perform
-            }
-        )
+        # builds = processor.process_dict(
+        #     {
+        #         _model_event_id: Partial(autobuild_conformer).paramaterise(
+        #             model_events[_model_event_id[0]][_model_event_id[1]].centroid,
+        #             model_events[_model_event_id[0]][_model_event_id[1]].bdc,
+        #             conformer_refs[_model_event_id[2]][_model_event_id[3]],
+        #             masked_dtag_array_ref,
+        #             masked_mean_array_refs[_model_event_id[0]],
+        #             reference_frame_ref,
+        #             out_dir,
+        #             f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
+        #             dataset_res
+        #             # processing_res
+        #             # fs_ref,
+        #         )
+        #         for _model_event_id
+        #         in builds_to_perform
+        #     }
+        # )
         time_finish_autobuild = time.time()
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
         # raise Exception
@@ -582,21 +582,27 @@ def pandda(args: PanDDAArgs):
             # event = events_to_process[event_id]
             for event_number, event in events.items():
 
-                event_builds = {}
-                for ligand_key, ligand_conformers in conformers.items():
-                    for conformer_number, conformer in ligand_conformers.items():
-                        build = builds[(model_number, event_number, ligand_key, conformer_number)]
-                        for build_path, result in build.items():
-                            # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
-                            event_builds[(ligand_key, build_path, conformer_number)] = result['local_signal'] * event.score
-
-                selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
-
+                # event_builds = {}
+                # for ligand_key, ligand_conformers in conformers.items():
+                #     for conformer_number, conformer in ligand_conformers.items():
+                #         build = builds[(model_number, event_number, ligand_key, conformer_number)]
+                #         for build_path, result in build.items():
+                #             # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
+                #             event_builds[(ligand_key, build_path, conformer_number)] = result['local_signal'] * event.score
+                #
+                # selected_build_key = max(event_builds, key=lambda _key: -event_builds[_key])
+                #
+                # event.build = EventBuild(
+                #     selected_build_key[1],
+                #     selected_build_key[0],
+                #     event_builds[selected_build_key],
+                #     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid']
+                # )
                 event.build = EventBuild(
-                    selected_build_key[1],
-                    selected_build_key[0],
-                    event_builds[selected_build_key],
-                    builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid']
+                    None,
+                    list(conformers.keys())[0],
+                    event.score,
+                    event.centroid
                 )
 
         # Update centroid from build
