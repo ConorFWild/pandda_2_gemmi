@@ -905,9 +905,9 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
     return corr #* num_atoms
 
-def get_correlation(bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
+def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
 
-    masked_event_map_vals = (masked_xmap_vals - (bdc*masked_mean_map_vals)) / (1-bdc)
+    masked_event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
 
     corr = np.corrcoef(
         np.concatenate(
@@ -978,11 +978,17 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
     masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
 
     #
-    res = optimize.minimize(
-        lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
-        event_bdc,
-        bounds=((0.0, 0.95),),
-        # tol=0.1
+    # res = optimize.minimize(
+    #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
+    #     event_bdc,
+    #     bounds=((0.0, 0.95),),
+    #     # tol=0.1
+    # )
+    res = optimize.differential_evolution(
+    lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
+
+    [(0.0, 0.95), ],
+        # popsize=30,
     )
 
     # # Get the correlation with the event
