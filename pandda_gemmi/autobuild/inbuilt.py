@@ -903,7 +903,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
     num_atoms = np.log(num_atoms)
 
-    return corr * num_atoms
+    return corr #* num_atoms
 
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
