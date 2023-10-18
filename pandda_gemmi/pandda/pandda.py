@@ -656,13 +656,13 @@ def pandda(args: PanDDAArgs):
         for event_id, event in top_selected_model_events.items():
             pandda_events[event_id] = event
 
-        for event_id, event in top_selected_model_events.items():
-            autobuilds[event_id] = {
-                    event.build.ligand_key: AutobuildResult(
-                        {event.build.build_path: {'score': event.build.score, 'centroid': event.build.centroid}},
-                        None, None, None, None, None
-                    )
-                }
+        # for event_id, event in top_selected_model_events.items():
+        #     autobuilds[event_id] = {
+        #             event.build.ligand_key: AutobuildResult(
+        #                 {event.build.build_path: {'score': event.build.score, 'centroid': event.build.centroid}},
+        #                 None, None, None, None, None
+        #             )
+        #         }
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
