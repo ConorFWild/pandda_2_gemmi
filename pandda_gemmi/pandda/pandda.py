@@ -596,7 +596,10 @@ def pandda(args: PanDDAArgs):
                     selected_build_key[1],
                     selected_build_key[0],
                     event_builds[selected_build_key],
-                    builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid']
+                    builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid'],
+                    builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][
+                        selected_build_key[1]]['bdc'],
+
                 )
                 # event.build = EventBuild(
                 #     None,
@@ -609,7 +612,11 @@ def pandda(args: PanDDAArgs):
         # for event_id, event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
-                print(f"{model_number} : {event_number} : {event.centroid} : {event.build.centroid} : {event.score} : {event.build.score} : {event.build.build_path}")
+                old_centroid = [round(x, 2) for x in event.centroid]
+                new_centroid = [round(x, 2) for x in event.build.centroid]
+                scores = [round(event.score, 2), round(event.build.score, 2)]
+                bdcs = [round(event.bdc, 2), round(event.build.bdc, 2)]
+                print(f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {event.build.build_path}")
                 event.centroid = event.build.centroid
                 event.score = -event.build.score
 
