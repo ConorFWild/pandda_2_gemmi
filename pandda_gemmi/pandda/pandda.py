@@ -535,30 +535,30 @@ def pandda(args: PanDDAArgs):
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
         # raise Exception
 
-        events_to_process = {}
-        for model_number, model_events in model_events.items():
-            for event_number, event in model_events.items():
-                events_to_process[(model_number, event_number)] = event
+        # events_to_process = {}
+        # for model_number, model_events in model_events.items():
+        #     for event_number, event in model_events.items():
+        #         events_to_process[(model_number, event_number)] = event
         #
-        event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-            {
-                _model_event_id: Partial(autobuild_model_event).paramaterise(
-                    dtag,
-                    _model_event_id,
-                    dataset_refs[dtag],
-                    events_to_process[_model_event_id],
-                    dataset_dmap_array,
-                    reference_frame_ref,
-                    AutobuildPreprocessStructure(),
-                    AutobuildPreprocessDMap(),
-                    # Rhofit(cut=1.0),
-                    AutobuildModelEventInbuilt(),
-                    fs_ref
-                )
-                for _model_event_id
-                in events_to_process
-            }
-        )
+        # event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
+        #     {
+        #         _model_event_id: Partial(autobuild_model_event).paramaterise(
+        #             dtag,
+        #             _model_event_id,
+        #             dataset_refs[dtag],
+        #             events_to_process[_model_event_id],
+        #             dataset_dmap_array,
+        #             reference_frame_ref,
+        #             AutobuildPreprocessStructure(),
+        #             AutobuildPreprocessDMap(),
+        #             # Rhofit(cut=1.0),
+        #             AutobuildModelEventInbuilt(),
+        #             fs_ref
+        #         )
+        #         for _model_event_id
+        #         in events_to_process
+        #     }
+        # )
         #
         # # Select between autobuilds and update event for each event
         # for event_id, autobuild_results in event_autobuilds.items():
