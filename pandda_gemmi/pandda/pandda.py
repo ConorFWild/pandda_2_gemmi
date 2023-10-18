@@ -619,6 +619,7 @@ def pandda(args: PanDDAArgs):
                 print(f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {event.build.build_path}")
                 event.centroid = event.build.centroid
                 event.score = -event.build.score
+                event.bdc = event.build.bdc
 
 
         # Seperate by model number
