@@ -921,7 +921,14 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     return 1-corr
 
 
-def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, dtag_vals, mean_vals, res, event_bdc):
+def get_local_signal_dencalc_optimize_bdc(
+        optimized_structure,
+        reference_frame,
+        dtag_vals,
+        mean_vals,
+        res,
+        event_bdc,
+):
     # Get the unmasked xmap and mean map
     xmap = reference_frame.unmask(dtag_vals)
     mean_map = reference_frame.unmask(mean_vals)
@@ -977,7 +984,6 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
     masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
     masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
 
-    #
     # res = optimize.minimize(
     #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
     #     event_bdc,
