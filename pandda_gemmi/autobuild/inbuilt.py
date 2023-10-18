@@ -982,7 +982,7 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
         lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
         event_bdc,
         bounds=((0.0, 0.95),),
-        tol=0.1
+        # tol=0.1
     )
 
     # # Get the correlation with the event
