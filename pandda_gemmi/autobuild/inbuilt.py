@@ -991,7 +991,6 @@ def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, 
             masked_mean_map_vals,
             masked_calc_vals,
         ),
-
         [(0.0, 0.95), ],
         # popsize=30,
     )
