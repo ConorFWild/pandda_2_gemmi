@@ -195,7 +195,7 @@ def get_bdc(event, xmap_grid, mean_grid, median, reference_frame: DFrameInterfac
         #     xmap_inner_vals,
         #     mean_inner_vals
         # ),
-        # 0.5,
+        0.5,
         bounds=((0.0, 0.95),),
         tol=0.1
     )
