@@ -512,25 +512,25 @@ def pandda(args: PanDDAArgs):
         out_dir = fs.output.processed_datasets[dtag] / "autobuild"
         if not out_dir.exists():
             os.mkdir(out_dir)
-        # builds = processor.process_dict(
-        #     {
-        #         _model_event_id: Partial(autobuild_conformer).paramaterise(
-        #             model_events[_model_event_id[0]][_model_event_id[1]].centroid,
-        #             model_events[_model_event_id[0]][_model_event_id[1]].bdc,
-        #             conformer_refs[_model_event_id[2]][_model_event_id[3]],
-        #             masked_dtag_array_ref,
-        #             masked_mean_array_refs[_model_event_id[0]],
-        #             reference_frame_ref,
-        #             out_dir,
-        #             f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
-        #             dataset_res
-        #             # processing_res
-        #             # fs_ref,
-        #         )
-        #         for _model_event_id
-        #         in builds_to_perform
-        #     }
-        # )
+        builds = processor.process_dict(
+            {
+                _model_event_id: Partial(autobuild_conformer).paramaterise(
+                    model_events[_model_event_id[0]][_model_event_id[1]].centroid,
+                    model_events[_model_event_id[0]][_model_event_id[1]].bdc,
+                    conformer_refs[_model_event_id[2]][_model_event_id[3]],
+                    masked_dtag_array_ref,
+                    masked_mean_array_refs[_model_event_id[0]],
+                    reference_frame_ref,
+                    out_dir,
+                    f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
+                    dataset_res
+                    # processing_res
+                    # fs_ref,
+                )
+                for _model_event_id
+                in builds_to_perform
+            }
+        )
         time_finish_autobuild = time.time()
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
         # raise Exception
