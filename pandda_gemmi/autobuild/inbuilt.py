@@ -905,6 +905,116 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
     return corr #* num_atoms
 
+def get_correlation(bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
+
+    masked_event_map_vals = (masked_xmap_vals - (bdc*masked_mean_map_vals)) / (1-bdc)
+
+    corr = np.corrcoef(
+        np.concatenate(
+            (
+                masked_event_map_vals.reshape(-1, 1),
+                masked_calc_vals.reshape(-1, 1)
+            ),
+            axis=1,
+        )
+    )[0, 1]
+    return 1-corr
+
+
+def get_local_signal_dencalc_optimize_bdc(optimized_structure, reference_frame, dtag_vals, mean_vals, res, ):
+    # Get the unmasked xmap and mean map
+    xmap = reference_frame.unmask(dtag_vals)
+    mean_map = reference_frame.unmask(mean_vals)
+    xmap_array = np.array(xmap, copy=False)
+    mean_map_array = np.array(mean_map, copy=False)
+
+    #
+
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = xmap.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    dencalc.d_min = res#*2
+    dencalc.rate = 2.0
+    # initial_dencalc_grid = gemmi.FloatGrid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
+    # initial_dencalc_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    # initial_dencalc_grid.set_unit_cell(event_map_grid.unit_cell)
+    # dencalc.grid = initial_dencalc_grid
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    # dencalc.add_model_density_to_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+    calc_grid_array = np.array(calc_grid, copy=False)
+    # print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw, calc_grid.nu, calc_grid.nv, calc_grid.nw])
+    # print([calc_grid.nu, event_map_grid.nu])
+
+    # Get the mask around the structure
+    inner_mask_grid = gemmi.Int8Grid(xmap.nu, xmap.nv, xmap.nw)
+    inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
+    inner_mask_grid.set_unit_cell(xmap.unit_cell)
+
+    num_atoms = 0
+    for model in optimized_structure:
+        for chain in model:
+            for residue in chain:
+                # if residue.name in constants.RESIDUE_NAMES:
+                for atom in residue:
+                    if atom.element.name=="H":
+                        continue
+                    pos = atom.pos
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.5,
+                                                      value=1,
+                                                      )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=1.0,
+                                                      value=2,
+                                                      )
+                    # inner_mask_grid.set_points_around(pos,
+                    #                                   radius=1.0,
+                    #                                   value=2,
+                    #                                   )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=0.75,
+                                                      value=3,
+                                                      )
+                    num_atoms += 1
+
+    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+
+    # Pull out the ligand masked xmap and mean map vals
+    masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
+    masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
+    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
+
+    #
+    res = optimize.minimize(
+        lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
+        bounds=((0.0, 0.95),),
+        tol=0.1
+    )
+
+    # # Get the correlation with the event
+    # event_map_grid_array = np.array(event_map_grid, copy=False)
+    # masked_event_map_vals = event_map_grid_array[inner_mask_grid_array >= 2]
+    # masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
+    # corr = np.corrcoef(
+    #     np.concatenate(
+    #         (
+    #             masked_event_map_vals.reshape(-1,1),
+    #             masked_calc_vals.reshape(-1, 1)
+    #         ),
+    #         axis=1,
+    #     )
+    # )[0,1]
+
+    num_atoms = np.log(num_atoms)
+    bdc = res.x
+    corr = 1-res.fun
+
+
+    return corr, bdc #* num_atoms
+
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
 
@@ -994,16 +1104,25 @@ res
         out_dir / f"{conformer_id}.pdb",
     )
 
+    corr, bdc = get_local_signal_dencalc_optimize_bdc(
+        optimized_structure,
+        reference_frame,
+        masked_dtag_array,
+        masked_mean_array,
+        res
+    )
+
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {'score': score,
                                                'centroid': centroid,
                                                # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
-                                               'local_signal': get_local_signal_dencalc(
-                                                   optimized_structure,
-                                                   event_map_grid,
-                                                   res,
-                                               )
-
+                                               # 'local_signal': get_local_signal_dencalc(
+                                               #     optimized_structure,
+                                               #     event_map_grid,
+                                               #     res,
+                                               # )
+                                                'local_signal': corr,
+                                               'new_bdc':bdc
                                                }
     }
 
