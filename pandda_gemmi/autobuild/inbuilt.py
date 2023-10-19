@@ -65,9 +65,10 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
             atom_charge_loop = [0]*len(atom_id_loop)
-    aromatic_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
-    if not aromatic_loop:
-        aromatic_loop = [None]*len(atom_id_loop)
+
+    aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
+    if not aromatic_atom_loop:
+        aromatic_atom_loop = [None]*len(atom_id_loop)
 
     # Get the mapping
     id_to_idx = {}
@@ -86,10 +87,13 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
     bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
     bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
+    aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
+    if not aromatic_bond_loop:
+        aromatic_bond_loop = [None]*len(bond_1_id_loop)
 
     try:
         # Iteratively add the relevant bonds
-        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_loop):
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_bond_loop):
             bond_type = bond_type_cif_to_rdkit[bond_type]
             if aromatic:
                 if aromatic == "y":
