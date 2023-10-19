@@ -1018,7 +1018,7 @@ def get_local_signal_dencalc_optimize_bdc(
     num_atoms = np.log(num_atoms)
     bdc = res.x
     corr = 1-res.fun
-
+    print(f"Refined to bdc: {bdc} and correlation: {corr}")
 
     return corr, bdc #* num_atoms
 
