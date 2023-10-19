@@ -1018,7 +1018,19 @@ def get_local_signal_dencalc_optimize_bdc(
     num_atoms = np.log(num_atoms)
     bdc = res.x
     corr = 1-res.fun
-    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
+
+    masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
+
+    full_corr = np.corrcoef(
+        np.concatenate(
+            (
+                masked_event_map_vals.reshape(-1, 1),
+                masked_calc_vals.reshape(-1, 1)
+            ),
+            axis=1,
+        )
+    )
+    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size} with full corr: {full_corr}")
 
     return corr, bdc #* num_atoms
 
