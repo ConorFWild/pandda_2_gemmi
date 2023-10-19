@@ -616,7 +616,7 @@ def pandda(args: PanDDAArgs):
                 bdcs = [round(float(event.bdc), 2), round(float(event.build.bdc), 2)]
                 print(f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {event.build.build_path}")
                 event.centroid = event.build.centroid
-                event.score = -event.build.score
+                event.score = event.build.score
                 event.bdc = event.build.bdc
 
 
