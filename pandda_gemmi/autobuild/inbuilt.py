@@ -116,7 +116,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     for bond in edited_mol.GetBonds():
         ba1 = bond.GetBeginAtomIdx()
         ba2 = bond.GetEndAtomIdx()
-        print(f"{bond.GetBondType()} : {ba1.GetSymbol()} : {ba2.GetSymbol()}")  #*}")
+        print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
     # print(Chem.MolToMolBlock(edited_mol))
 
 
