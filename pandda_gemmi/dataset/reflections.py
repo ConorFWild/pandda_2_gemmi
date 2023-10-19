@@ -218,6 +218,7 @@ class Reflections(ReflectionsInterface):
             reflections = drop_columns(reflections, f, phi)
         except Exception as e:
             print(f"Path: {path} : f: {f} : phi : {phi}")
+            raise Exception
 
         return cls(path, f, phi, reflections)
 
