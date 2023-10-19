@@ -123,6 +123,7 @@ def drop_columns(reflections, f, phi):
     data.set_index(["H", "K", "L"], inplace=True)
 
     # Truncate by columns
+    print(f"RFlag : {free_flag} : f : {f} : {phi}")
     data_indexed = data[[free_flag, f, phi]]
 
     # To numpy
