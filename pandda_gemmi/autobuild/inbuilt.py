@@ -104,7 +104,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         raise Exception
 
     edited_mol = editable_mol.GetMol()
-    print(Chem.MolToMolBlock(edited_mol))
+    # print(Chem.MolToMolBlock(edited_mol))
 
 
     # HANDLE SULFONATES
