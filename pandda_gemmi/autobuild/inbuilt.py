@@ -905,7 +905,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
     return corr #* num_atoms
 
-def fnlget_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
+def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
 
     masked_event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
 
