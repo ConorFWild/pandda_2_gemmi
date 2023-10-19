@@ -1035,7 +1035,7 @@ def get_local_signal_dencalc_optimize_bdc(
 
     # masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
 
-    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
+    # print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
 
     return corr, bdc #* num_atoms
 
