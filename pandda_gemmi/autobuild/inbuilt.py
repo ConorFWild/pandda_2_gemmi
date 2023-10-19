@@ -113,14 +113,14 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         raise Exception
 
     edited_mol = editable_mol.GetMol()
-    for atom in edited_mol.GetAtoms():
-        print(atom.GetSymbol())
-        for bond in atom.GetBonds():
-            print(f"\t\t{bond.GetBondType()}")
-    for bond in edited_mol.GetBonds():
-        ba1 = bond.GetBeginAtomIdx()
-        ba2 = bond.GetEndAtomIdx()
-        print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
+    # for atom in edited_mol.GetAtoms():
+    #     print(atom.GetSymbol())
+    #     for bond in atom.GetBonds():
+    #         print(f"\t\t{bond.GetBondType()}")
+    # for bond in edited_mol.GetBonds():
+    #     ba1 = bond.GetBeginAtomIdx()
+    #     ba2 = bond.GetEndAtomIdx()
+    #     print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
     # print(Chem.MolToMolBlock(edited_mol))
 
 
