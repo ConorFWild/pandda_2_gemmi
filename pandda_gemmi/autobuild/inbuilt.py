@@ -980,9 +980,9 @@ def get_local_signal_dencalc_optimize_bdc(
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
 
     # Pull out the ligand masked xmap and mean map vals
-    masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
-    masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
-    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
+    masked_xmap_vals = xmap_array[inner_mask_grid_array >= 1]
+    masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 1]
+    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 1]
 
     # res = optimize.minimize(
     #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
