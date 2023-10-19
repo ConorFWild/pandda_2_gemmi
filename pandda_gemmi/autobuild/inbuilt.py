@@ -909,16 +909,30 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
 
     masked_event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
 
-    corr = np.corrcoef(
-        np.concatenate(
-            (
-                masked_event_map_vals.reshape(-1, 1),
-                masked_calc_vals.reshape(-1, 1)
-            ),
-            axis=1,
-        )
-    )[0, 1]
+    # corr = np.corrcoef(
+    #     np.concatenate(
+    #         (
+    #             masked_event_map_vals.reshape(-1, 1),
+    #             masked_calc_vals.reshape(-1, 1)
+    #         ),
+    #         axis=1,
+    #     )
+    # )[0, 1]
+    # return 1-corr
+
+    event_map_mean = np.mean(masked_event_map_vals)
+    mean_map_mean = np.mean(masked_mean_map_vals)
+    delta_event_map = masked_event_map_vals - event_map_mean
+    delta_mean_map = masked_mean_map_vals-mean_map_mean
+    nominator = np.sum(delta_event_map*delta_mean_map)
+    denominator = np.sqrt(
+        np.sum(np.square(delta_event_map))*np.sum(np.square(delta_mean_map))
+    )
+
+    corr = nominator / denominator
+
     return 1-corr
+
 
 
 def get_local_signal_dencalc_optimize_bdc(
@@ -980,9 +994,9 @@ def get_local_signal_dencalc_optimize_bdc(
     inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
 
     # Pull out the ligand masked xmap and mean map vals
-    masked_xmap_vals = xmap_array[inner_mask_grid_array >= 1]
-    masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 1]
-    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 1]
+    masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
+    masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
+    masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
 
     # res = optimize.minimize(
     #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
@@ -1019,18 +1033,10 @@ def get_local_signal_dencalc_optimize_bdc(
     bdc = res.x
     corr = 1-res.fun
 
-    masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
+    # masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
 
-    full_corr = np.corrcoef(
-        np.concatenate(
-            (
-                masked_event_map_vals.reshape(-1, 1),
-                masked_calc_vals.reshape(-1, 1)
-            ),
-            axis=1,
-        )
-    )
-    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size} with full corr: {full_corr}")
+
+    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
 
     return corr, bdc #* num_atoms
 
