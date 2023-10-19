@@ -51,15 +51,21 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     mol = Chem.Mol()
     editable_mol = Chem.EditableMol(mol)
 
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        key = "data_comp_XXX"
+
     # Find the relevant atoms loop
-    atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
-    atom_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.type_symbol'))
-    atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.charge'))
+    atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+    atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.charge'))
     if not atom_charge_loop:
-        atom_charge_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.partial_charge'))
+        atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
             atom_charge_loop = [0]*len(atom_id_loop)
-    aromatic_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.aromatic'))
+    aromatic_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
     if not aromatic_loop:
         aromatic_loop = [None]*len(atom_id_loop)
 
@@ -77,9 +83,9 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         editable_mol.AddAtom(atom)
 
     # Find the bonds loop
-    bond_1_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_1'))
-    bond_2_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.atom_id_2'))
-    bond_type_loop = list(cif['comp_LIG'].find_loop('_chem_comp_bond.type'))
+    bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+    bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
 
     try:
         # Iteratively add the relevant bonds
