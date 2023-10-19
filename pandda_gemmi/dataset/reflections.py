@@ -123,7 +123,7 @@ def drop_columns(reflections, f, phi):
     data.set_index(["H", "K", "L"], inplace=True)
 
     # Truncate by columns
-    print(f"RFlag : {free_flag} : f : {f} : {phi}")
+    # print(f"RFlag : {free_flag} : f : {f} : {phi}")
     data_indexed = data[[free_flag, f, phi]]
 
     # To numpy
@@ -214,11 +214,11 @@ class Reflections(ReflectionsInterface):
     def from_path(cls, path: Path):
         reflections = gemmi.read_mtz_file(str(path))
         f, phi = cls.get_structure_factors(reflections)
-        try:
-            reflections = drop_columns(reflections, f, phi)
-        except Exception as e:
-            print(f"Path: {path} : f: {f} : phi : {phi}")
-            raise Exception
+        # try:
+        reflections = drop_columns(reflections, f, phi)
+        # except Exception as e:
+        #     print(f"Path: {path} : f: {f} : phi : {phi}")
+            # raise Exception
 
         return cls(path, f, phi, reflections)
 
