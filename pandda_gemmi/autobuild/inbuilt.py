@@ -905,7 +905,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
     return corr #* num_atoms
 
-def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
+def fnlget_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
 
     masked_event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
 
@@ -921,12 +921,12 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     # return 1-corr
 
     event_map_mean = np.mean(masked_event_map_vals)
-    mean_map_mean = np.mean(masked_mean_map_vals)
+    calc_map_mean = np.mean(masked_calc_vals)
     delta_event_map = masked_event_map_vals - event_map_mean
-    delta_mean_map = masked_mean_map_vals-mean_map_mean
-    nominator = np.sum(delta_event_map*delta_mean_map)
+    delta_calc_map = masked_calc_vals-calc_map_mean
+    nominator = np.sum(delta_event_map*delta_calc_map)
     denominator = np.sqrt(
-        np.sum(np.square(delta_event_map))*np.sum(np.square(delta_mean_map))
+        np.sum(np.square(delta_event_map))*np.sum(np.square(delta_calc_map))
     )
 
     corr = nominator / denominator
@@ -1034,7 +1034,6 @@ def get_local_signal_dencalc_optimize_bdc(
     corr = 1-res.fun
 
     # masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
-
 
     print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
 
