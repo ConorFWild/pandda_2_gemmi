@@ -1128,7 +1128,7 @@ res
                                                #     event_map_grid,
                                                #     res,
                                                # )
-                                                'local_signal': float(1-corr),
+                                                'local_signal': float(corr),
                                                'new_bdc': float(bdc)
                                                }
     }
