@@ -295,9 +295,17 @@ def pandda(args: PanDDAArgs):
         print(f"Checking for a event yaml at: {events_yaml_path}")
         if events_yaml_path.exists():
             print(f"Already have events for dataset! Skipping!")
-            for event_idx, event in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items():
+            _events = serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml")
+            for event_idx, event in _events.items():
                 pandda_events[(dtag, event_idx)] = event
             # print(pandda_events)
+            for event_idx, event in _events.items():
+                autobuilds[(dtag, event_idx)] = {
+                    event.build.ligand_key: AutobuildResult(
+                        {event.build.build_path: {'score': event.build.score, 'centroid': event.build.centroid}},
+                        None, None, None, None, None
+                    )
+                }
             continue
 
         # Get the dataset
