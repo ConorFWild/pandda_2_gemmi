@@ -971,10 +971,12 @@ def get_local_signal_dencalc_optimize_bdc(
     optimized_structure.cell = xmap.unit_cell
     optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
-    dencalc.d_min = res#*2
-    dencalc.rate = 2.0
+    # dencalc.d_min = res#*2
+    # dencalc.rate = 2.0
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    dencalc.put_model_density_on_grid(optimized_structure[0])
+    dencalc.initialize_grid_to_size(xmap.nu, xmap.nv, xmap.nw)
+    dencalc.add_model_density_to_grid(optimized_structure[0])
+    # dencalc.put_model_density_on_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
 
