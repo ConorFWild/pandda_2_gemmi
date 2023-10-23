@@ -297,6 +297,7 @@ def pandda(args: PanDDAArgs):
             print(f"Already have events for dataset! Skipping!")
             for event_idx, event in serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml").items():
                 pandda_events[(dtag, event_idx)] = event
+            # print(pandda_events)
             continue
 
         # Get the dataset
