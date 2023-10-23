@@ -42,6 +42,7 @@ void add_dencalc(py::module& m, const char* name) {
     .def("set_refmac_compatible_blur", &DenCalc::set_refmac_compatible_blur)
     .def("put_model_density_on_grid", &DenCalc::put_model_density_on_grid)
     .def("initialize_grid", &DenCalc::initialize_grid)
+    .def("initialize_grid_to_size", &DenCalc::initialize_grid_to_size)
     .def("add_model_density_to_grid", &DenCalc::add_model_density_to_grid)
     .def("add_atom_density_to_grid", &DenCalc::add_atom_density_to_grid)
     .def("add_c_contribution_to_grid", &DenCalc::add_c_contribution_to_grid)
