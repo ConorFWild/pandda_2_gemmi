@@ -23,7 +23,7 @@ class FilterRange:
         if not len(groups) == 2:
             raise Exception
 
-        return groups[0], groups[1]
+        return int(groups[0]), int(groups[1])
 
 
     @staticmethod
