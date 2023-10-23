@@ -210,7 +210,10 @@ class AlignmentInterface(Protocol):
 
 class EventBuildInterface(Protocol):
     build_path: Path
+    ligand_key: str
     score: float
+    centroid: np.array
+    bdc: float
 
 
 class EventInterface(Protocol):
