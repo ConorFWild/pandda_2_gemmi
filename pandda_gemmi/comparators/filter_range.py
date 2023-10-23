@@ -11,7 +11,20 @@ class FilterRange:
 
     @staticmethod
     def parse_range(dataset_range):
-        ...
+        match = re.match(
+            "([0-9]+)-([0-9]+)",
+            dataset_range
+        )
+        if not match:
+            raise Exception
+        groups = match.groups()
+        if not groups:
+            raise Exception
+        if not len(groups) == 2:
+            raise Exception
+
+        return groups[0], groups[1]
+
 
     @staticmethod
     def get_dtag_idx(dtag):

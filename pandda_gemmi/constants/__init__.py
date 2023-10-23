@@ -181,6 +181,8 @@ ARGS_MAX_RMSD_TO_REFERENCE_HELP = "A float giving the RMSD to the selected refer
                                   "exclude datasets from analysis."
 ARGS_MAX_RFREE = "--max_rfree"
 ARGS_MAX_RFREE_HELP = "A float giving the maximum rfree at which to exclude a dataset from analysis."
+ARGS_DATASET_RANGE = "--dataset_range"
+ARGS_DATASET_RANGE_HELP = "The range of datasets to process."
 ARGS_MAX_WILSON_PLOT_Z_SCORE = "--max_wilson_plot_z_score"
 ARGS_MAX_WILSON_PLOT_Z_SCORE_HELP = "NOT YET IMPLEMENTED."
 ARGS_SAME_SPACE_GROUP_ONLY = "--same_space_group_only"

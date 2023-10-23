@@ -27,6 +27,7 @@ from pandda_gemmi.processor import ProcessLocalRay, Partial
 from pandda_gemmi.comparators import (
     get_comparators,
     FilterRFree,
+    FilterRange,
     FilterSpaceGroup,
     FilterResolution,
     FilterCompatibleStructures
@@ -230,7 +231,7 @@ def pandda(args: PanDDAArgs):
     dataset_to_process, datasets_not_to_process = GetDatasetsToProcess(
         [
             FilterRFree(args.max_rfree),
-            FilterRange(args.range)
+            FilterRange(args.dataset_range)
         ]
     )(datasets, fs)
     console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)
