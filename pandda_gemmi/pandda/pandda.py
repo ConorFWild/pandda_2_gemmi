@@ -227,7 +227,12 @@ def pandda(args: PanDDAArgs):
     )
 
     # Get the datasets to process
-    dataset_to_process, datasets_not_to_process = GetDatasetsToProcess([FilterRFree(args.max_rfree),])(datasets, fs)
+    dataset_to_process, datasets_not_to_process = GetDatasetsToProcess(
+        [
+            FilterRFree(args.max_rfree),
+            FilterRange(args.range)
+        ]
+    )(datasets, fs)
     console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)
 
     # Process each dataset by identifying potential comparator datasets, constructing proposed statistical models,
