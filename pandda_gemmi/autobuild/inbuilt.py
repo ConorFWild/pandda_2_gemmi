@@ -202,7 +202,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     new_mol = new_editable_mol.GetMol()
     # print(Chem.MolToMolBlock(new_mol))
 
-    Chem.SanitizeMol(new_mol)
+    # Chem.SanitizeMol(new_mol)
     return Chem.AddHs(new_mol)
 
 
