@@ -212,6 +212,7 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
+    print(f"Atom ID loop: {atom_id_loop}")
 
 
     fragment_structures = {}
@@ -230,6 +231,8 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
         for j, atom in enumerate(mol.GetAtoms()):
             # Get the atomic symbol
             atom_symbol: str = atom.GetSymbol()
+            print(f"{j} : {atom_symbol}")
+
             # if atom_symbol == "H":
             #     continue
             gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
