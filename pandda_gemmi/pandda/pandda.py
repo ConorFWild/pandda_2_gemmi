@@ -28,6 +28,7 @@ from pandda_gemmi.comparators import (
     get_comparators,
     FilterRFree,
     FilterRange,
+    FilterExcludeFromAnalysis,
     FilterSpaceGroup,
     FilterResolution,
     FilterCompatibleStructures
@@ -231,7 +232,8 @@ def pandda(args: PanDDAArgs):
     dataset_to_process, datasets_not_to_process = GetDatasetsToProcess(
         [
             FilterRFree(args.max_rfree),
-            FilterRange(args.dataset_range)
+            FilterRange(args.dataset_range),
+            FilterExcludeFromAnalysis(args.exclude_from_z_map_analysis)
         ]
     )(datasets, fs)
     console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)

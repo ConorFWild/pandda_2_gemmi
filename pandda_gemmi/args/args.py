@@ -23,8 +23,8 @@ class PanDDAArgs:
     reference_comparability_filters: List[str] = constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT
     low_memory: bool = False
     ground_state_datasets: Optional[List[str]] = None
-    exclude_from_z_map_analysis: Optional[List[str]] = None
-    exclude_from_characterisation: Optional[List[str]] = None
+    exclude_from_z_map_analysis: Optional[str] = None
+    exclude_from_characterisation: Optional[str] = None
     only_datasets: Optional[List[str]] = None
     ignore_datasets: Optional[List[str]] = None
     dynamic_res_limits: bool = True
@@ -286,13 +286,13 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_EXCLUDE_FROM_Z_MAP_ANALYSIS,
-            type=list,
+            # type=list,
             default=None,
             help=constants.ARGS_EXCLUDE_FROM_Z_MAP_ANALYSIS_HELP,
         )
         parser.add_argument(
             constants.ARGS_EXCLUDE_FROM_CHARACTERISATION,
-            type=list,
+            # type=list,
             default=None,
             help=constants.ARGS_EXCLUDE_FROM_CHARACTERISATION_HELP,
         )
