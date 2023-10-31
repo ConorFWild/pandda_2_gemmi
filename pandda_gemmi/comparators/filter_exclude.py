@@ -5,7 +5,10 @@ from ..interfaces import *
 class FilterExcludeFromAnalysis:
     def __init__(self, exclude_string: str):
         self.exclude_string = exclude_string
-        self.datasets_to_exclude = [x for x in self.exclude_string.split(",")]
+        if exclude_string is not None:
+            self.datasets_to_exclude = [x for x in self.exclude_string.split(",")]
+        else:
+            self.datasets_to_exclude = []
 
     def exclude(self, dtag):
         if dtag in self.datasets_to_exclude:
