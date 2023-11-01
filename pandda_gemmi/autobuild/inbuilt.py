@@ -39,9 +39,57 @@ bond_type_cif_to_rdkit = {
     'DOUBLE': Chem.rdchem.BondType.DOUBLE,
     'TRIPLE': Chem.rdchem.BondType.TRIPLE,
     'aromatic': Chem.rdchem.BondType.AROMATIC,
+    # 'deloc': Chem.rdchem.BondType.OTHER
     'deloc': Chem.rdchem.BondType.SINGLE
+
 }
 
+# def handle_deloc(edited_mol):
+#
+#     new_editable_mol = Chem.EditableMol(Chem.Mol())
+#
+#
+#     for atom in edited_mol.GetAtoms():
+#         bonds = atom.GetBonds()
+#         num_deloc = 0
+#         for bond in bonds:
+#             if str(bond.GetBondType()) == "OTHER":
+#                 num_deloc += 1
+#
+#         # Decide what to do with neighbourhood if delocalized center
+#         if num_deloc > 1:
+#
+#
+#
+#     for atom in edited_mol.GetAtoms():
+#         atom_idx = atom.GetIdx()
+#         new_atom = Chem.Atom(atom.GetSymbol())
+#         charge = atom.GetFormalCharge()
+#         # if atom_idx in atoms_to_charge:
+#         #     charge = -1
+#         new_atom.SetFormalCharge(charge)
+#         new_editable_mol.AddAtom(new_atom)
+#
+#     for bond in edited_mol.GetBonds():
+#         bond_atom_1 = bond.GetBeginAtomIdx()
+#         bond_atom_2 = bond.GetEndAtomIdx()
+#         double_bond = False
+#         for bond_idxs in bonds_to_double:
+#             if (bond_atom_1 in bond_idxs) & (bond_atom_2 in bond_idxs):
+#                 double_bond = True
+#         if double_bond:
+#             new_editable_mol.AddBond(
+#                 bond_atom_1,
+#                 bond_atom_2,
+#                 order=bond_type_cif_to_rdkit['double']
+#             )
+#         else:
+#             new_editable_mol.AddBond(
+#                 bond_atom_1,
+#                 bond_atom_2,
+#                 order=bond.GetBondType()
+#             )
+#     new_mol = new_editable_mol.GetMol()
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Open the cif document with gemmi
@@ -130,7 +178,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     Chem.MolFromSmiles('S(O)(O)(O)'),
     #     Chem.MolFromSmiles('S(=O)(=O)(O)'),
     #     replaceAll=True,)[0]
-    patt = Chem.MolFromSmarts('S(-O)(-O)(-O)')
+    patt = Chem.MolFromSmarts('S($O)($O)($O)')
     matches = edited_mol.GetSubstructMatches(patt)
 
     sulfonates = {}
