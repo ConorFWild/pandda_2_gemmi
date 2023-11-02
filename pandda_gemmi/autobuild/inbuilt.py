@@ -178,7 +178,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     Chem.MolFromSmiles('S(O)(O)(O)'),
     #     Chem.MolFromSmiles('S(=O)(=O)(O)'),
     #     replaceAll=True,)[0]
-    patt = Chem.MolFromSmarts('S($O)($O)($O)')
+    patt = Chem.MolFromSmarts('S(-O)(-O)(-O)')
     matches = edited_mol.GetSubstructMatches(patt)
 
     sulfonates = {}
