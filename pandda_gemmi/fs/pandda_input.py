@@ -32,6 +32,8 @@ def check_mtz_file(path):
         return False
 
 
+
+
 def check_cif_file(path):
     try:
         # cif = gemmi.cif.read_file(str(path))
