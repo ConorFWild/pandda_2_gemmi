@@ -34,9 +34,10 @@ def check_mtz_file(path):
 def check_cif_file(path):
     try:
         cif = gemmi.cif.read_file(str(path))
+
         return True
     except Exception as e:
-        print(e)
+        print(f"FAILED TO LOAD CIF AT {path}. Error is:\n {e}")
         return False
 
 
