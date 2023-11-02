@@ -3,7 +3,7 @@ from pathlib import Path
 
 import gemmi
 from pandda_gemmi import constants
-from pandda_gemmi.autobuild.inbuilt import get_fragment_mol_from_dataset_cif_path
+from pandda_gemmi.dataset.small import get_fragment_mol_from_dataset_cif_path
 
 
 def check_pdb_file(path):
