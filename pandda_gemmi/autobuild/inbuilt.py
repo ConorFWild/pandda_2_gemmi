@@ -666,6 +666,7 @@ def score_conformer(
             [
                 (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
+            sampling_method='sobol'
             # popsize=30,
         )
         time_finish_evolve = time.time()
