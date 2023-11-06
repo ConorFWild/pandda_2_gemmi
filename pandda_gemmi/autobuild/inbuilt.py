@@ -643,7 +643,20 @@ def score_conformer(
     for j in range(event_fit_num_trys):
         # print(f"\t\t\t\tOptimizing round {j}")
         time_begin_evolve = time.time()
-        res = optimize.differential_evolution(
+        # res = optimize.differential_evolution(
+        #     lambda params: score_fit_nonquant_array(
+        #         structure_array,
+        #         zmap_grid,
+        #         1.0,
+        #         params
+        #     ),
+        #     [
+        #         (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+        #         (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+        #     ],
+        #     # popsize=30,
+        # )
+        res = optimize.shgo(
             lambda params: score_fit_nonquant_array(
                 structure_array,
                 zmap_grid,
@@ -651,8 +664,7 @@ def score_conformer(
                 params
             ),
             [
-                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
-                (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
             # popsize=30,
         )
