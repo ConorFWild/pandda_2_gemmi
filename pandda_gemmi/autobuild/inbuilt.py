@@ -668,10 +668,10 @@ def score_conformer(
             ],
             sampling_method='sobol',
             n=2000,
-            # iters=2
+            iters=2
             # popsize=30,
         )
-        print(res)
+        # print(res)
         time_finish_evolve = time.time()
         total_evolve_time += (time_finish_evolve-time_begin_evolve)
         # print(f"\t\t\t\t\tFinished Optimizing round {j}")
