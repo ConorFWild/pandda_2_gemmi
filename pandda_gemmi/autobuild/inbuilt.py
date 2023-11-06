@@ -1,3 +1,4 @@
+import itertools
 import os
 import time
 
@@ -412,7 +413,11 @@ def center_structure(structure, point):
     return structure
 
 
-def get_probe_structure(structure):
+def get_probe_structure(
+        structure,
+        bond_probes=False,
+        neighbourhood_probes=False
+):
     structure_clone = structure.clone()
     structure_clone.remove_hydrogens()
 
@@ -426,22 +431,60 @@ def get_probe_structure(structure):
                     if atom_1.element.name != "H":
                         verticies[j] = atom_1
                         j = j + 1
-    edges = {}
-    for atom_1_index in verticies:
-        for atom_2_index in verticies:
-            if atom_1_index == atom_2_index:
-                continue
-            atom_1 = verticies[atom_1_index]
-            atom_2 = verticies[atom_2_index]
-            pos_1 = atom_1.pos
-            pos_2 = atom_2.pos
-            distance = pos_1.dist(pos_2)
-            if distance < 2.0:
+    if bond_probes:
+        edges = {}
+        for atom_1_index in verticies:
+            for atom_2_index in verticies:
+                if atom_1_index == atom_2_index:
+                    continue
+                atom_1 = verticies[atom_1_index]
+                atom_2 = verticies[atom_2_index]
+                pos_1 = atom_1.pos
+                pos_2 = atom_2.pos
+                distance = pos_1.dist(pos_2)
+                if distance < 2.0:
+                    virtual_atom = gemmi.Atom()
+                    new_pos = gemmi.Position(
+                        (pos_1.x + pos_2.x) / 2,
+                        (pos_1.y + pos_2.y) / 2,
+                        (pos_1.z + pos_2.z) / 2,
+
+                    )
+                    atom_symbol: str = "C"
+                    virtual_atom.name = atom_symbol
+                    gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
+                    virtual_atom.element = gemmi_element
+                    virtual_atom.pos = new_pos
+
+                    if atom_1_index < atom_2_index:
+                        edges[(atom_1_index, atom_2_index)] = virtual_atom
+
+                    else:
+                        edges[(atom_2_index, atom_1_index)] = virtual_atom
+
+        for model in structure_clone:
+            for chain in model:
+                for residue in chain:
+                    for edge_index in edges:
+                        virtual_atom = edges[edge_index]
+                        residue.add_atom(virtual_atom)
+
+    if neighbourhood_probes:
+        neighbourhood_probe_atoms = []
+        for atom_index in verticies:
+
+            atom = verticies[atom_index]
+            pos = atom.pos
+            for dx, dy, dz in itertools.product(
+                [-0.4, 0.4],
+                [-0.4, 0.4],
+                [-0.4, 0.4],
+            ):
                 virtual_atom = gemmi.Atom()
                 new_pos = gemmi.Position(
-                    (pos_1.x + pos_2.x) / 2,
-                    (pos_1.y + pos_2.y) / 2,
-                    (pos_1.z + pos_2.z) / 2,
+                    pos.x + dx,
+                    pos.y + dy,
+                    pos.z + dz,
 
                 )
                 atom_symbol: str = "C"
@@ -449,20 +492,13 @@ def get_probe_structure(structure):
                 gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
                 virtual_atom.element = gemmi_element
                 virtual_atom.pos = new_pos
+                neighbourhood_probe_atoms.append(virtual_atom)
 
-                if atom_1_index < atom_2_index:
-                    edges[(atom_1_index, atom_2_index)] = virtual_atom
-
-                else:
-                    edges[(atom_2_index, atom_1_index)] = virtual_atom
-
-    for model in structure_clone:
-        for chain in model:
-            for residue in chain:
-                for edge_index in edges:
-                    virtual_atom = edges[edge_index]
-                    residue.add_atom(virtual_atom)
-
+        for model in structure_clone:
+            for chain in model:
+                for residue in chain:
+                    for virtual_atom in neighbourhood_probe_atoms:
+                        residue.add_atom(virtual_atom)
     # print(f"Number of real atoms: {len(verticies)}")
     # print(f"Number of virtual atoms: {len(edges)}")
     return structure_clone
@@ -581,7 +617,10 @@ def score_conformer(
     )
 
     # Get the probe structure
-    probe_structure = get_probe_structure(centered_structure)
+    probe_structure = get_probe_structure(
+        centered_structure,
+        neighbourhood_probes=True
+    )
 
     # Optimise
     structure_positions = []
