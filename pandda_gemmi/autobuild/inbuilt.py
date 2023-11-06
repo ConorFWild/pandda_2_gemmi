@@ -698,6 +698,7 @@ def score_conformer(
     time_finish_score = time.time()
     # print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
+    print(f"Scores: {scores}")
     best_score_index = np.argmin(scores)
 
     best_score_fit_score = scores[best_score_index]
