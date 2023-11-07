@@ -25,7 +25,7 @@ class PanDDAArgs:
     ground_state_datasets: Optional[List[str]] = None
     exclude_from_z_map_analysis: Optional[str] = None
     exclude_from_characterisation: Optional[str] = None
-    only_datasets: Optional[List[str]] = None
+    only_datasets: Optional[str] = None
     ignore_datasets: Optional[List[str]] = None
     dynamic_res_limits: bool = True
     high_res_upper_limit: float = 1.0
@@ -653,7 +653,7 @@ class PanDDAArgs:
 
         args = parser.parse_args()
 
-        only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
+        # only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
 
         return PanDDAArgs(
             data_dirs=args.data_dirs,
@@ -670,7 +670,7 @@ class PanDDAArgs:
             ground_state_datasets=args.ground_state_datasets,
             exclude_from_z_map_analysis=args.exclude_from_z_map_analysis,
             exclude_from_characterisation=args.exclude_from_characterisation,
-            only_datasets=only_datasets,
+            only_datasets=args.only_datasets,
             ignore_datasets=args.ignore_datasets,
             dynamic_res_limits=args.dynamic_res_limits,
             high_res_upper_limit=args.high_res_upper_limit,

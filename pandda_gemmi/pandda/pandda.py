@@ -233,7 +233,8 @@ def pandda(args: PanDDAArgs):
         [
             FilterRFree(args.max_rfree),
             FilterRange(args.dataset_range),
-            FilterExcludeFromAnalysis(args.exclude_from_z_map_analysis)
+            FilterExcludeFromAnalysis(args.exclude_from_z_map_analysis),
+            FilterOnlyDatasets(args.only_datasets)
         ]
     )(datasets, fs)
     console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)
