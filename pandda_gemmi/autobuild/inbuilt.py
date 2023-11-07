@@ -643,20 +643,7 @@ def score_conformer(
     for j in range(event_fit_num_trys):
         # print(f"\t\t\t\tOptimizing round {j}")
         time_begin_evolve = time.time()
-        # res = optimize.differential_evolution(
-        #     lambda params: score_fit_nonquant_array(
-        #         structure_array,
-        #         zmap_grid,
-        #         1.0,
-        #         params
-        #     ),
-        #     [
-        #         (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
-        #         (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
-        #     ],
-        #     # popsize=30,
-        # )
-        res = optimize.shgo(
+        res = optimize.differential_evolution(
             lambda params: score_fit_nonquant_array(
                 structure_array,
                 zmap_grid,
@@ -664,31 +651,44 @@ def score_conformer(
                 params
             ),
             [
-                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
+                (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
-            # sampling_method='sobol',
-            # n=10000,
-            iters=3
             # popsize=30,
         )
-        res = optimize.basinhopping(
-            lambda params: score_fit_nonquant_array(
-                structure_array,
-                zmap_grid,
-                1.0,
-                params
-            ),
-            [0.0,0.0,0.0,0.5,0.5,0.5],
-            stepsize=0.05,
-            niter=200
-            # [
-            #     (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
-            # ],
-            # sampling_method='sobol',
-            # n=10000,
-            # iters=3
-            # popsize=30,
-        )
+        # res = optimize.shgo(
+        #     lambda params: score_fit_nonquant_array(
+        #         structure_array,
+        #         zmap_grid,
+        #         1.0,
+        #         params
+        #     ),
+        #     [
+        #         (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+        #     ],
+        #     # sampling_method='sobol',
+        #     # n=10000,
+        #     iters=3
+        #     # popsize=30,
+        # )
+        # res = optimize.basinhopping(
+        #     lambda params: score_fit_nonquant_array(
+        #         structure_array,
+        #         zmap_grid,
+        #         1.0,
+        #         params
+        #     ),
+        #     [0.0,0.0,0.0,0.5,0.5,0.5],
+        #     stepsize=0.05,
+        #     niter=200
+        #     # [
+        #     #     (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+        #     # ],
+        #     # sampling_method='sobol',
+        #     # n=10000,
+        #     # iters=3
+        #     # popsize=30,
+        # )
         print(res)
         time_finish_evolve = time.time()
         total_evolve_time += (time_finish_evolve-time_begin_evolve)
