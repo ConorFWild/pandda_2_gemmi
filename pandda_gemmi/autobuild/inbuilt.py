@@ -654,7 +654,7 @@ def score_conformer(
                 (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0),
                 (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
-            popsize=30,
+            # popsize=30,
         )
         # res = optimize.shgo(
         #     lambda params: score_fit_nonquant_array(
