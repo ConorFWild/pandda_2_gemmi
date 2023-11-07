@@ -261,7 +261,7 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
-    print(f"Atom ID loop: {atom_id_loop}")
+    # print(f"Atom ID loop: {atom_id_loop}")
 
 
     fragment_structures = {}
@@ -280,7 +280,7 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
         for j, atom in enumerate(mol.GetAtoms()):
             # Get the atomic symbol
             atom_symbol: str = atom.GetSymbol()
-            print(f"{j} : {atom_symbol}")
+            # print(f"{j} : {atom_symbol}")
 
             # if atom_symbol == "H":
             #     continue
@@ -717,7 +717,7 @@ def score_conformer(
     time_finish_score = time.time()
     # print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
-    print(f"Scores: {scores}")
+    # print(f"Scores: {scores}")
     best_score_index = np.argmin(scores)
 
     best_score_fit_score = scores[best_score_index]
@@ -993,7 +993,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # dencalc.add_model_density_to_grid(optimized_structure[0])
     calc_grid = dencalc.grid
     calc_grid_array = np.array(calc_grid, copy=False)
-    print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw, calc_grid.nu, calc_grid.nv, calc_grid.nw])
+    # print([event_map_grid.nu, event_map_grid.nv, event_map_grid.nw, calc_grid.nu, calc_grid.nv, calc_grid.nw])
     # print([calc_grid.nu, event_map_grid.nu])
 
     # Get the mask around the structure
