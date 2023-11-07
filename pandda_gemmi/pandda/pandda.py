@@ -131,7 +131,6 @@ class ProcessModel:
         ]:
             events = filter(events)
 
-
         # Return None if there are no events after pre-scoring filters
         if len(events) == 0:
             return None, None, None
@@ -144,6 +143,7 @@ class ProcessModel:
         time_finish_score_events = time.time()
 
         # Filter the events after scoring based on their score and keeping only the locally highest scoring event
+        num_events = len(events)
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
@@ -151,6 +151,9 @@ class ProcessModel:
             # FilterLocallyHighestScoring(self.local_highest_score_radius)
         ]:
             events = filter(events)
+
+        print(f"Filtered {num_events} down to {len(events)}")
+
 
         # # Build the events
         #
@@ -249,52 +252,6 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     autobuilds = {}
     for j, dtag in enumerate(dataset_to_process):
-        # if dtag != "D68EV3CPROA-x0688":
-        #     continue
-        # if dtag != "D68EV3CPROA-x1247":
-        #     continue
-        # if dtag not in ["BAZ2BA-x583", "BAZ2BA-x481"]:
-        #     continue
-        # if dtag not in ["BAZ2BA-x529", ]:
-        #     continue
-        # if dtag not in ["BAZ2BA-x515", ]:
-        #     continue
-        # if dtag not in ["BAZ2BA-x536", ]:
-        #     continue
-        # if dtag not in ["BAZ2BA-x589", "BAZ2BA-x489",  "BAZ2BA-x583", "BAZ2BA-x603", "BAZ2BA-x480", "BAZ2BA-x583", "BAZ2BA-x481"]:
-        #     continue
-        # if dtag not in ["BAZ2BA-x529", "BAZ2BA-x584"]:
-        #     continue
-        # if dtag not in ["JMJD2DA-x611", "JMJD2DA-x384", "JMJD2DA-x336"]:
-        #     continue
-        # if dtag not in ['D68EV3CPROA-x1773', ]:
-        #     continue
-        # if dtag not in ["JMJD2DA-x408", "JMJD2DA-x611"]:
-        #     continue
-        # if dtag not in [
-        #     "A71EV2A-x0211",
-        #     "A71EV2A-x0278",
-        #     "A71EV2A-x0459",
-        #     "A71EV2A-x0517",
-        #     "A71EV2A-x0392",
-        #     "A71EV2A-x0229",
-        #     "A71EV2A-x0554",
-        #     "A71EV2A-x0582", # BAD
-        #     "A71EV2A-x0240",
-        #     "A71EV2A-x0485",
-        #     "A71EV2A-x0471",
-        #     "A71EV2A-x0415",
-        #     "A71EV2A-x0567",
-        # ]:
-        #     continue
-        # if dtag not in [
-        #     "A71EV2A-x0194",
-        #     "A71EV2A-x0278",
-        #     "A71EV2A-x0554",
-        #     "A71EV2A-x0397", # BAD
-        #
-        # ]:
-        #     continue
 
         # Print basic information of the dataset to be processed
 
