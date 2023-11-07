@@ -689,7 +689,7 @@ def score_conformer(
         #     # iters=3
         #     # popsize=30,
         # )
-        print(res)
+        # print(res)
         time_finish_evolve = time.time()
         total_evolve_time += (time_finish_evolve-time_begin_evolve)
         # print(f"\t\t\t\t\tFinished Optimizing round {j}")
