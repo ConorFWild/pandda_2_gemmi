@@ -29,6 +29,7 @@ from pandda_gemmi.comparators import (
     FilterRFree,
     FilterRange,
     FilterExcludeFromAnalysis,
+    FilterOnlyDatasets,
     FilterSpaceGroup,
     FilterResolution,
     FilterCompatibleStructures
