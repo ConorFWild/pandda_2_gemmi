@@ -666,9 +666,9 @@ def score_conformer(
             [
                 (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
             ],
-            sampling_method='sobol',
-            n=10000,
-            # iters=5
+            # sampling_method='sobol',
+            # n=10000,
+            iters=5
             # popsize=30,
         )
         print(res)
