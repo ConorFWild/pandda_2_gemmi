@@ -671,6 +671,21 @@ def score_conformer(
             iters=3
             # popsize=30,
         )
+        res = optimize.basinhopping(
+            lambda params: score_fit_nonquant_array(
+                structure_array,
+                zmap_grid,
+                1.0,
+                params
+            ),
+            [
+                (-6.0, 6.0), (-6, 6.0), (-6.0, 6.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)
+            ],
+            # sampling_method='sobol',
+            # n=10000,
+            # iters=3
+            # popsize=30,
+        )
         print(res)
         time_finish_evolve = time.time()
         total_evolve_time += (time_finish_evolve-time_begin_evolve)
