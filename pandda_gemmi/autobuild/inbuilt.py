@@ -324,7 +324,7 @@ def get_conformers(
         mol = get_fragment_mol_from_dataset_cif_path(ligand_files.ligand_cif)
 
         # Generate conformers
-        mol.CalcImplicitValence()
+        # mol.CalcImplicitValence()
         # mol: Chem.Mol = Chem.AddHs(mol)
 
         # Generate conformers
