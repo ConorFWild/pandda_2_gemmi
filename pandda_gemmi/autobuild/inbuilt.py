@@ -1426,7 +1426,7 @@ res,
         # 'signal': float(signal),
         'noise': float(optimal_noise),
         'signal': float(optimal_signal),
-            'num_contacts': int(num_contacts)
+        'num_contacts': int(num_contacts)
             # 'total_noise':
         }
     }
