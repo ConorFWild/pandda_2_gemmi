@@ -578,6 +578,7 @@ def pandda(args: PanDDAArgs):
                     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid'],
                     builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][selected_build_key[1]]['new_bdc'],
                     build_score=selected_build['score'],
+                    # rscc=,
                     noise=selected_build['noise'],
                     signal=selected_build['signal']
                 )
