@@ -324,7 +324,7 @@ def get_conformers(
         mol = get_fragment_mol_from_dataset_cif_path(ligand_files.ligand_cif)
 
         # Generate conformers
-        # mol.calcImplicitValence()
+        mol.calcImplicitValence()
         # mol: Chem.Mol = Chem.AddHs(mol)
 
         # Generate conformers
@@ -1076,35 +1076,10 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
 
     return 1-corr
 
-
-
-def get_local_signal_dencalc_optimize_bdc(
+def get_predicted_mask(
         optimized_structure,
-        reference_frame,
-        dtag_vals,
-        mean_vals,
-        res,
-        event_bdc,
+        xmap,
 ):
-    # Get the unmasked xmap and mean map
-    xmap = reference_frame.unmask(dtag_vals)
-    mean_map = reference_frame.unmask(mean_vals)
-    xmap_array = np.array(xmap, copy=False)
-    mean_map_array = np.array(mean_map, copy=False)
-
-    # Get the electron density of the optimized structure
-    optimized_structure.cell = xmap.unit_cell
-    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
-    dencalc = gemmi.DensityCalculatorE()
-    # dencalc.d_min = res#*2
-    # dencalc.rate = 2.0
-    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    dencalc.initialize_grid_to_size(xmap.nu, xmap.nv, xmap.nw)
-    dencalc.add_model_density_to_grid(optimized_structure[0])
-    # dencalc.put_model_density_on_grid(optimized_structure[0])
-    calc_grid = dencalc.grid
-    calc_grid_array = np.array(calc_grid, copy=False)
-
     # Get the mask around the structure
     inner_mask_grid = gemmi.Int8Grid(xmap.nu, xmap.nv, xmap.nw)
     inner_mask_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -1115,7 +1090,7 @@ def get_local_signal_dencalc_optimize_bdc(
         for chain in model:
             for residue in chain:
                 for atom in residue:
-                    if atom.element.name=="H":
+                    if atom.element.name == "H":
                         continue
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
@@ -1136,7 +1111,46 @@ def get_local_signal_dencalc_optimize_bdc(
                                                       )
                     num_atoms += 1
 
-    inner_mask_grid_array = np.array(inner_mask_grid, copy=False)
+    return inner_mask_grid
+
+def get_predicted_density(
+    optimized_structure,
+    xmap
+):
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = xmap.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    # dencalc.d_min = res#*2
+    # dencalc.rate = 2.0
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    dencalc.initialize_grid_to_size(xmap.nu, xmap.nv, xmap.nw)
+    dencalc.add_model_density_to_grid(optimized_structure[0])
+    # dencalc.put_model_density_on_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+    # calc_grid_array = np.array(calc_grid, copy=False)
+
+    return calc_grid
+
+def get_local_signal_dencalc_optimize_bdc(
+        optimized_structure,
+        calc_grid,
+        predicted_mask,
+        reference_frame,
+        dtag_vals,
+        mean_vals,
+        res,
+        event_bdc,
+):
+    # Get the unmasked xmap and mean map
+    xmap = reference_frame.unmask(dtag_vals)
+    mean_map = reference_frame.unmask(mean_vals)
+    xmap_array = np.array(xmap, copy=False)
+    mean_map_array = np.array(mean_map, copy=False)
+
+    calc_grid_array = np.array(calc_grid, copy=False)
+
+    inner_mask_grid_array = np.array(predicted_mask, copy=False)
 
     # Pull out the ligand masked xmap and mean map vals
     masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
@@ -1174,7 +1188,7 @@ def get_local_signal_dencalc_optimize_bdc(
     #     )
     # )[0,1]
 
-    num_atoms = np.log(num_atoms)
+    # num_atoms = np.log(num_atoms)
     bdc = res.x
     corr = 1-res.fun
 
@@ -1273,13 +1287,35 @@ res
         out_dir / f"{conformer_id}.pdb",
     )
 
+
+    xmap = reference_frame.unmask(masked_dtag_array)
+
+    predicted_mask = get_predicted_mask(
+        optimized_structure,
+        xmap
+    )
+
+    predicted_density = get_predicted_density(
+        optimized_structure,
+        xmap
+    )
+
     corr, bdc = get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
+        predicted_density,
         reference_frame,
         masked_dtag_array,
         masked_mean_array,
         res, event_bdc
     )
+
+
+
+    signal = ...
+    signal_z = ...
+
+    noise = ...
+    noise_z = ...
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {'score': score,

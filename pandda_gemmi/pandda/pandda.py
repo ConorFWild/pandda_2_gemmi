@@ -144,6 +144,7 @@ class ProcessModel:
 
         # Filter the events after scoring based on their score and keeping only the locally highest scoring event
         num_events = len(events)
+
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
@@ -152,7 +153,7 @@ class ProcessModel:
         ]:
             events = filter(events)
 
-        print(f"Filtered {num_events} down to {len(events)}")
+        print(f"CNN Filtered {num_events} down to {len(events)}")
 
 
         # # Build the events
