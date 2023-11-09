@@ -22,7 +22,7 @@ class RankHighBuildScore:
                     continue
                 build_scores = []
                 for build_path, result in autobuild_result.log_result_dict.items():
-                    build_scores.append(result['local_signal'])
+                    build_scores.append(result['score'])
 
                 if len(build_scores) == 0:
                     continue
@@ -35,8 +35,6 @@ class RankHighBuildScore:
                 continue
 
             highest_event_build_scores[event_id] = max(ligand_build_scores)
-
-
 
         sorted_event_ids = []
         for event_id in sorted(
