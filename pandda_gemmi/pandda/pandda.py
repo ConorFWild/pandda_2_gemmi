@@ -500,7 +500,8 @@ def pandda(args: PanDDAArgs):
                     reference_frame_ref,
                     out_dir,
                     f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
-                    dataset_res
+                    dataset_res,
+                    dataset.structure
                     # processing_res
                     # fs_ref,
                 )
@@ -580,7 +581,8 @@ def pandda(args: PanDDAArgs):
                     build_score=selected_build['score'],
                     # rscc=,
                     noise=selected_build['noise'],
-                    signal=selected_build['signal']
+                    signal=selected_build['signal'],
+                    num_contacts=selected_build['num_contacts']
                 )
                 # event.build = EventBuild(
                 #     None,

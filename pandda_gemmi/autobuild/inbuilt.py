@@ -1303,6 +1303,29 @@ def get_optimal_signal_contour(
 
     return max(diffs, key=lambda _key: diffs[_key])
 
+def get_contacts(
+        optimized_structure,
+        st
+    ):
+    ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
+
+    contacts = []
+    for model in optimized_structure:
+        for chain in model:
+            for res in chain:
+                for atom in res:
+                    # contacts = []
+                    marks = ns.find_atoms(atom.pos, '\0', radius=3.2)
+                    for mark in marks:
+                        cra = mark.to_cra(st[0])
+                        res = cra.residue
+                        if res.name in constants.RESIDUE_NAMES:
+                            contacts.append(res.seqid.num)
+    num_contacts = len(set(contacts))
+    return num_contacts
+    ...
+
+
 def autobuild_conformer(
         centroid,
         event_bdc,
@@ -1312,7 +1335,8 @@ def autobuild_conformer(
         reference_frame,
         out_dir,
         conformer_id,
-res
+res,
+        structure
                 ):
 
     event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
@@ -1381,6 +1405,11 @@ res
     optimal_noise = np.sum(noise_signal_vals > optimal_signal_contour)
     optimal_signal = np.sum(signal_vals > optimal_signal_contour)
 
+    num_contacts = get_contacts(
+        optimized_structure,
+        structure.structure
+    )
+
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
         'score': score,
@@ -1397,6 +1426,7 @@ res
         # 'signal': float(signal),
         'noise': float(optimal_noise),
         'signal': float(optimal_signal),
+            'num_contacts': int(num_contacts)
             # 'total_noise':
         }
     }

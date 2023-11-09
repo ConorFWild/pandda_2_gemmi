@@ -35,7 +35,8 @@ def serialize_events(
                 "BDC": float(selected_model_events[event_idx].build.bdc),
                 "Build Score" : float(selected_model_events[event_idx].build.build_score),
                 "Noise": float(selected_model_events[event_idx].build.noise),
-                "Signal": float(selected_model_events[event_idx].build.signal)
+                "Signal": float(selected_model_events[event_idx].build.signal),
+                "Num. Contacts": int(selected_model_events[event_idx].build.num_contacts)
             }
         }
         for event_idx
@@ -65,7 +66,8 @@ def unserialize_events(path):
                 bdc=event["Build"]["BDC"],
                 build_score=event["Build"]["Build Score"],
                 noise=event["Build"]["Noise"],
-                signal=event["Build"]["Signal"]
+                signal=event["Build"]["Signal"],
+                num_contacts=event["Build"]['Num. Contacts']
             )
         )
         for event_idx, event
