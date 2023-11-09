@@ -102,6 +102,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                     str(pattern),
                     str(name),
             ):
+                print(f"Skipping ligand file: {file_path}")
                 skip = True
         if skip:
             continue
