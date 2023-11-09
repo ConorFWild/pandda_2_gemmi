@@ -96,7 +96,14 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
         stem = file_path.stem
 
         # Ignore some common names
-        if any([re.match(pattern, stem) for pattern in constants.LIGAND_IGNORE_REGEXES]):
+        skip = False
+        for pattern in constants.LIGAND_IGNORE_REGEXES:
+            if re.match(
+                    str(pattern),
+                    str(name),
+            ):
+                skip = True
+        if skip:
             continue
 
         if re.match(ligand_cif_regex, name):
