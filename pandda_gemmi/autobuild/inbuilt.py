@@ -1396,8 +1396,8 @@ res
         'new_bdc': float(bdc),
         # 'noise': float(noise_signal),
         # 'signal': float(signal),
-            'noise': float(optimal_noise),
-            'signal': float(optimal_signal),
+        'noise': float(optimal_noise),
+        'signal': float(optimal_signal),
         }
     }
 
