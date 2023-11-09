@@ -1109,6 +1109,10 @@ def get_predicted_mask(
                                                       radius=0.75,
                                                       value=3,
                                                       )
+                    inner_mask_grid.set_points_around(pos,
+                                                      radius=0.5,
+                                                      value=4,
+                                                      )
                     num_atoms += 1
 
     return inner_mask_grid
