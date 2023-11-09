@@ -1295,7 +1295,8 @@ def get_optimal_signal_contour(
     diffs = {}
     for val in np.linspace(
         np.min(signal_vals),
-        np.max(signal_vals)
+        np.max(signal_vals),
+        num=100
     ):
         difference = int(np.sum(signal_vals > val) - np.sum(noise_signal_vals > val))
         diffs[float(val)] = difference
