@@ -1143,7 +1143,7 @@ def get_predicted_density_high_contour(
     predicted_density_array = np.array(predicted_density, copy=False)
     predicted_mask_array = np.array(predicted_mask, copy=False)
 
-    predicted_high_vals = predicted_density[predicted_mask_array >2]
+    predicted_high_vals = predicted_density[predicted_mask_array >3]
 
     contour = np.quantile(
         predicted_high_vals,
