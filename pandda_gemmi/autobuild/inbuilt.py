@@ -1286,8 +1286,21 @@ def get_signal(
         xmap_array,
         xmap_mask
 ):
-    return np.sum(xmap_array[xmap_mask])
+    return xmap_array[xmap_mask]
 
+def get_optimal_signal_contour(
+        signal_vals,
+        noise_signal_vals
+    ):
+    diffs = {}
+    for val in np.linspace(
+        np.min(signal_vals),
+        np.max(signal_vals)
+    ):
+        difference = int(np.sum(signal_vals > val) - np.sum(noise_signal_vals > val))
+        diffs[float(val)] = difference
+
+    return max(diffs, key=lambda _key: diffs[_key])
 
 def autobuild_conformer(
         centroid,
@@ -1347,17 +1360,26 @@ res
     corrected_event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
     corrected_event_map_array = np.array(corrected_event_map_grid, copy=False)
 
-    signal = get_signal(
+    signal_vals = get_signal(
         corrected_event_map_array,
         predicted_density_array > predicted_density_high_contour
     )
     # signal_z = ...
 
-    noise_signal = get_signal(
+    noise_signal_vals = get_signal(
         corrected_event_map_array,
         predicted_mask_array == 1
     )
     # noise_singal_z = ...
+
+    optimal_signal_contour = get_optimal_signal_contour(
+        signal_vals,
+        noise_signal_vals
+    )
+
+    optimal_noise = np.sum(noise_signal_vals > optimal_signal_contour)
+    optimal_signal = np.sum(signal_vals > optimal_signal_contour)
+
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
@@ -1371,8 +1393,10 @@ res
         # )
         'local_signal': float(corr),
         'new_bdc': float(bdc),
-        'noise': float(noise_signal),
-        'signal': float(signal),
+        # 'noise': float(noise_signal),
+        # 'signal': float(signal),
+            'noise': float(optimal_noise),
+            'signal': float(optimal_signal),
         }
     }
 
