@@ -1132,6 +1132,22 @@ def get_predicted_density(
 
     return calc_grid
 
+def get_predicted_density_high_contour(
+        predicted_density,
+        predicted_mask
+    ):
+    predicted_density_array = np.array(predicted_density, copy=False)
+    predicted_mask_array = np.array(predicted_mask, copy=False)
+
+    predicted_high_vals = predicted_density[predicted_mask_array >2]
+
+    contour = np.quantile(
+        predicted_high_vals,
+        0.05
+    )
+
+    return contour
+
 def get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
         calc_grid,
@@ -1300,16 +1316,20 @@ res
         xmap
     )
 
+    predicted_density_high_contour = get_predicted_density_high_contour(
+        predicted_density,
+        predicted_mask
+    )
+
     corr, bdc = get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
         predicted_density,
+        predicted_mask,
         reference_frame,
         masked_dtag_array,
         masked_mean_array,
         res, event_bdc
     )
-
-
 
     signal = ...
     signal_z = ...
