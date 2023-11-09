@@ -399,7 +399,7 @@ class ScoreCNNLigand:
 
         # Load the model
         # cnn = resnet18(num_classes=2, num_input=4)
-        cnn = resnet18(num_classes=2, num_input=3)
+        cnn = resnet18(num_classes=2, num_input=4)
 
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_ligand.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
@@ -411,7 +411,10 @@ class ScoreCNNLigand:
 
         self.n = n
 
-    def __call__(self, ligand_files, events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median, reference_frame,
+    def __call__(
+            self,
+            ligand_files,
+            events, homogenized_xmap_grid, xmap_grid, mean_grid, z_grid, model_grid, median, reference_frame,
                  dtag_array, mean
                                ):
 
@@ -446,12 +449,12 @@ class ScoreCNNLigand:
             )
 
             # Get images of the 2Fo-Fc map, the ground state (mean) map and the structure map
-            # sample_array_raw = np.copy(sample_array)
-            # xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
-            # xmap_mean = np.mean(xmap_sample)
-            # xmap_std = np.std(xmap_sample)
-            # image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
-            # # print(f"Xmap: {[xmap_mean, xmap_std]}")
+            sample_array_raw = np.copy(sample_array)
+            xmap_sample = sample_xmap(xmap_grid, sample_transform, sample_array_raw)
+            xmap_mean = np.mean(xmap_sample)
+            xmap_std = np.std(xmap_sample)
+            image_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
+            # print(f"Xmap: {[xmap_mean, xmap_std]}")
             #
             # sample_array_mean_map = np.copy(sample_array)
             # mean_sample = sample_xmap(mean_grid, sample_transform, sample_array_mean_map)
@@ -484,8 +487,9 @@ class ScoreCNNLigand:
             # print(f"Ligand: {np.mean(image_ligand)}")
 
             # Generate the combined image for scoring
+            image = np.stack([image_xmap, image_event_map, image_model, image_ligand, ], axis=1)
             # image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
-            image = np.stack([image_event_map, image_model, image_ligand, ], axis=1)
+            # image = np.stack([image_event_map, image_model, image_ligand, ], axis=1)
             images[event_id] = image
 
         time_finish_get_images = time.time()
