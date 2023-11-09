@@ -565,16 +565,21 @@ def pandda(args: PanDDAArgs):
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
                         for build_path, result in build.items():
                             # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
-                            event_builds[(ligand_key, build_path, conformer_number)] = result['local_signal'] #+ event.score #* event.score
+                            event_builds[(ligand_key, build_path, conformer_number)] = result #+ event.score #* event.score
 
-                selected_build_key = max(event_builds, key=lambda _key: event_builds[_key])
+                selected_build_key = max(event_builds, key=lambda _key: event_builds[_key]['local_signal'])
+
+                selected_build = event_builds[selected_build_key]
 
                 event.build = EventBuild(
                     selected_build_key[1],
                     selected_build_key[0],
-                    event_builds[selected_build_key],
+                    event_builds[selected_build_key]['local_signal'],
                     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid'],
                     builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][selected_build_key[1]]['new_bdc'],
+                    build_score=selected_build['score'],
+                    noise=selected_build['noise'],
+                    signal=selected_build['signal']
                 )
                 # event.build = EventBuild(
                 #     None,

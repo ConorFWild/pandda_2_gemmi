@@ -2,12 +2,15 @@ from ..interfaces import *
 
 
 class EventBuild(EventBuildInterface):
-    def __init__(self, build_path, ligand_key, score, centroid, bdc):
+    def __init__(self, build_path, ligand_key, score, centroid, bdc, build_score=0.0, noise=0.0, signal=0.0):
         self.build_path = build_path
         self.ligand_key = ligand_key
         self.score = score
         self.centroid = centroid
         self.bdc = bdc
+        self.build_score = build_score
+        self.noise = noise
+        self.signal = signal
 
 
 class Event(EventInterface):
