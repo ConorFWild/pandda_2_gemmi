@@ -167,7 +167,7 @@ class FilterLocallyHighestBuildScoring:
         masked_ids = np.zeros(event_id_array.shape, dtype=bool)
         j = 0
         new_events = {}
-        for event_id in sorted(events, key=lambda _event_id: events[_event_id].score, reverse=True):
+        for event_id in sorted(events, key=lambda _event_id: events[_event_id].build.score, reverse=True):
             if np.any(event_id_array[masked_ids] == event_id):
                 continue
             event = events[event_id]
