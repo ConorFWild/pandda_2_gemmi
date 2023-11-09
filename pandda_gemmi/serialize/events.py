@@ -35,7 +35,7 @@ def serialize_events(
                 "BDC": float(selected_model_events[event_idx].build.bdc),
                 "Build Score" : float(selected_model_events[event_idx].build.build_score),
                 "Noise": float(selected_model_events[event_idx].build.noise),
-                "Signal": float(selected_model_events[event_idx].build.Signal)
+                "Signal": float(selected_model_events[event_idx].build.signal)
             }
         }
         for event_idx
