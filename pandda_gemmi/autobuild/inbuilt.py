@@ -1282,6 +1282,13 @@ def get_local_signal(optimized_structure, event_map_grid):
     # return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
     return score
 
+def get_signal(
+        xmap_array,
+        xmap_mask
+):
+    return np.sum(xmap_array[xmap_mask])
+
+
 def autobuild_conformer(
         centroid,
         event_bdc,
@@ -1314,11 +1321,13 @@ res
         optimized_structure,
         xmap
     )
+    predicted_mask_array = np.array(predicted_mask, copy=False)
 
     predicted_density = get_predicted_density(
         optimized_structure,
         xmap
     )
+    predicted_density_array = np.array(predicted_density, copy=False)
 
     predicted_density_high_contour = get_predicted_density_high_contour(
         predicted_density,
@@ -1335,24 +1344,36 @@ res
         res, event_bdc
     )
 
-    signal = ...
-    signal_z = ...
+    corrected_event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
+    corrected_event_map_array = np.array(corrected_event_map_grid, copy=False)
 
-    noise = ...
-    noise_z = ...
+    signal = get_signal(
+        corrected_event_map_array,
+        predicted_density_array > predicted_density_high_contour
+    )
+    # signal_z = ...
+
+    noise_signal = get_signal(
+        corrected_event_map_array,
+        predicted_mask_array == 1
+    )
+    # noise_singal_z = ...
 
     log_result_dict = {
-        str(out_dir / f"{conformer_id}.pdb"): {'score': score,
-                                               'centroid': centroid,
-                                               # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
-                                               # 'local_signal': get_local_signal_dencalc(
-                                               #     optimized_structure,
-                                               #     event_map_grid,
-                                               #     res,
-                                               # )
-                                                'local_signal': float(corr),
-                                               'new_bdc': float(bdc)
-                                               }
+        str(out_dir / f"{conformer_id}.pdb"): {
+        'score': score,
+        'centroid': centroid,
+        # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
+        # 'local_signal': get_local_signal_dencalc(
+        #     optimized_structure,
+        #     event_map_grid,
+        #     res,
+        # )
+        'local_signal': float(corr),
+        'new_bdc': float(bdc),
+        'noise': float(noise_signal),
+        'signal': float(signal),
+        }
     }
 
     # Return results
