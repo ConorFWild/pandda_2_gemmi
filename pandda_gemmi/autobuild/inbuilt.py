@@ -1381,7 +1381,6 @@ res
     optimal_noise = np.sum(noise_signal_vals > optimal_signal_contour)
     optimal_signal = np.sum(signal_vals > optimal_signal_contour)
 
-
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
         'score': score,
@@ -1398,6 +1397,7 @@ res
         # 'signal': float(signal),
         'noise': float(optimal_noise),
         'signal': float(optimal_signal),
+            # 'total_noise':
         }
     }
 
