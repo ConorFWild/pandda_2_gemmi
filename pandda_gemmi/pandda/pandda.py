@@ -49,7 +49,7 @@ from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
 
 from pandda_gemmi.autobuild import autobuild, autobuild_model_event, AutobuildResult
 from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt, AutobuildModelEventInbuilt, mask_dmap, get_conformers, autobuild_conformer
-from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore
+from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore, MergeHighestBuildScore
 from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
 from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
 
@@ -778,8 +778,8 @@ def pandda(args: PanDDAArgs):
             autobuilds,
             fs,
             # MergeHighestRSCC(),
-            # MergeHighestBuildScore()
-            MergeHighestBuildAndEventScore()
+            MergeHighestBuildScore()
+            # MergeHighestBuildAndEventScore()
         )
 
         #
