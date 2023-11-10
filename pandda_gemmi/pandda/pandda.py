@@ -270,7 +270,7 @@ def pandda(args: PanDDAArgs):
             for event_idx, event in _events.items():
                 autobuilds[(dtag, event_idx)] = {
                     event.build.ligand_key: AutobuildResult(
-                        {event.build.build_path: {'score': event.build.score, 'centroid': event.build.centroid}},
+                        {event.build.build_path: {'score': event.build.signal, 'centroid': event.build.centroid}},
                         # event.build.log
                         None, None, None, None, None
                     )
