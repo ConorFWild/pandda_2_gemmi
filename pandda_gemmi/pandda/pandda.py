@@ -654,7 +654,7 @@ def pandda(args: PanDDAArgs):
         for event_id, event in top_selected_model_events.items():
             autobuilds[event_id] = {
                     event.build.ligand_key: AutobuildResult(
-                        {event.build.build_path: {'score': event.build.score, 'centroid': event.build.centroid}},
+                        {event.build.build_path: {'score': event.build.signal, 'centroid': event.build.centroid}},
                         # {event.build.build_path: event.build.},
                         None, None, None, None, None
                     )
