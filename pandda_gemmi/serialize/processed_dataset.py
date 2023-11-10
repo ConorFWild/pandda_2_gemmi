@@ -52,7 +52,7 @@ def processed_dataset(
                     "Score": model_events[event_idx].score,
                     "BDC": model_events[event_idx].bdc,
                     "Centroid": [float(x) for x in np.mean(model_events[event_idx].pos_array, axis=0).flatten()],
-                    "RSCC": model_events[event_idx].build.score,
+                    "score": model_events[event_idx].build.score,
                     "Build Score": model_events[event_idx].build.build_score,
                     "Noise": model_events[event_idx].build.noise,
                     "Signal": model_events[event_idx].build.signal,
