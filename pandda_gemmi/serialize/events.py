@@ -38,7 +38,8 @@ def serialize_events(
                 "Signal": float(selected_model_events[event_idx].build.signal),
                 "Num. Contacts": int(selected_model_events[event_idx].build.num_contacts),
                 "Num. Points": float(selected_model_events[event_idx].build.num_points),
-                'Optimal Contour': float(selected_model_events[event_idx].build.optimal_contour)
+                'Optimal Contour': float(selected_model_events[event_idx].build.optimal_contour),
+                'RSCC': float(selected_model_events[event_idx].build.rscc),
             }
         }
         for event_idx
@@ -71,7 +72,8 @@ def unserialize_events(path):
                 signal=event["Build"]["Signal"],
                 num_contacts=event["Build"]['Num. Contacts'],
                 num_points=event["Build"]['Num. Points'],
-                optimal_contour=event["Build"]['Optimal Contour']
+                optimal_contour=event["Build"]['Optimal Contour'],
+                rscc=event["Build"]['RSCC'],
             )
         )
         for event_idx, event
