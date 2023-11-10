@@ -1148,7 +1148,7 @@ def get_predicted_density_high_contour(
 
     contour = np.quantile(
         predicted_high_vals,
-        0.1
+        0.0
     )
 
     return contour
