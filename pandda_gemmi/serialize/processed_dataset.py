@@ -56,7 +56,9 @@ def processed_dataset(
                     "Build Score": model_events[event_idx].build.build_score,
                     "Noise": model_events[event_idx].build.noise,
                     "Signal": model_events[event_idx].build.signal,
-                    'Num. Contacts': model_events[event_idx].build.num_contacts
+                    'Num. Contacts': model_events[event_idx].build.num_contacts,
+                    "Num. Points": float(model_events[event_idx].build.num_points),
+                    'Optimal Contour': float(model_events[event_idx].build.optimal_contour)
                 }
                 for event_idx
                 in sorted(model_events)

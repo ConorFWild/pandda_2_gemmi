@@ -36,7 +36,9 @@ def serialize_events(
                 "Build Score" : float(selected_model_events[event_idx].build.build_score),
                 "Noise": float(selected_model_events[event_idx].build.noise),
                 "Signal": float(selected_model_events[event_idx].build.signal),
-                "Num. Contacts": int(selected_model_events[event_idx].build.num_contacts)
+                "Num. Contacts": int(selected_model_events[event_idx].build.num_contacts),
+                "Num. Points": float(selected_model_events[event_idx].build.num_points),
+                'Optimal Contour': float(selected_model_events[event_idx].build.optimal_contour)
             }
         }
         for event_idx
@@ -67,7 +69,9 @@ def unserialize_events(path):
                 build_score=event["Build"]["Build Score"],
                 noise=event["Build"]["Noise"],
                 signal=event["Build"]["Signal"],
-                num_contacts=event["Build"]['Num. Contacts']
+                num_contacts=event["Build"]['Num. Contacts'],
+                num_points=event["Build"]['Num. Points'],
+                optimal_contour=event["Build"]['Optimal Contour']
             )
         )
         for event_idx, event

@@ -1427,7 +1427,9 @@ res,
         # 'signal': float(signal),
         'noise': float(optimal_noise),
         'signal': float(optimal_signal),
-        'num_contacts': int(num_contacts)
+        'num_points': int(np.sum(predicted_density_array > predicted_density_high_contour)),
+            'optimal_contour': float(optimal_signal_contour),
+        'num_contacts': int(num_contacts),
             # 'total_noise':
         }
     }

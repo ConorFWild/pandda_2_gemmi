@@ -583,7 +583,9 @@ def pandda(args: PanDDAArgs):
                     # rscc=,
                     noise=selected_build['noise'],
                     signal=selected_build['signal'],
-                    num_contacts=selected_build['num_contacts']
+                    num_contacts=selected_build['num_contacts'],
+                    num_points=selected_build['num_points'],
+                    optimal_contour=selected_build['optimal_contour'],
                 )
                 # event.build = EventBuild(
                 #     None,
