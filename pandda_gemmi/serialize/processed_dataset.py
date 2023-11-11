@@ -59,7 +59,7 @@ def processed_dataset(
                     'Num. Contacts': model_events[event_idx].build.num_contacts,
                     "Num. Points": float(model_events[event_idx].build.num_points),
                     'Optimal Contour': float(model_events[event_idx].build.optimal_contour),
-                    "RSCC": float(model_events[event_idx].build.optimal_contour),
+                    "RSCC": float(model_events[event_idx].build.rscc),
                 }
                 for event_idx
                 in sorted(model_events)
