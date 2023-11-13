@@ -1411,6 +1411,11 @@ res,
         structure.structure
     )
 
+    noise_signal_vals[noise_signal_vals <0] = 0.0
+    noise_signal_vals[noise_signal_vals > 3] = 3.0
+    signal_vals[signal_vals < 0] = 0.0
+    signal_vals[signal_vals > 3] = 3.0
+
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
         'score': score,
