@@ -1380,8 +1380,8 @@ res,
         predicted_density,
         predicted_mask,
         reference_frame,
-        masked_dtag_array,
-        masked_mean_array,
+        unmasked_dtag_array,
+        unmasked_mean_array,
         res, event_bdc
     )
 
