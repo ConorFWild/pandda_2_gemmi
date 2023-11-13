@@ -1051,7 +1051,11 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
 
 def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
 
-    masked_event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
+    event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
+    masked_event_map_vals = event_map_vals[event_map_vals != 0]
+
+    if masked_event_map_vals.size == 0:
+        return 1.0
 
     # corr = np.corrcoef(
     #     np.concatenate(
