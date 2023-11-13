@@ -1337,7 +1337,9 @@ def autobuild_conformer(
         out_dir,
         conformer_id,
 res,
-        structure
+        structure,
+        unmasked_dtag_array,
+        unmasked_mean_array
                 ):
 
     event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
@@ -1383,7 +1385,7 @@ res,
         res, event_bdc
     )
 
-    corrected_event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (bdc*masked_mean_array)) / (1-bdc)))
+    corrected_event_map_grid = reference_frame.unmask(SparseDMap((unmasked_dtag_array - (bdc*unmasked_mean_array)) / (1-bdc)))
     corrected_event_map_array = np.array(corrected_event_map_grid, copy=False)
 
     signal_vals = get_signal(

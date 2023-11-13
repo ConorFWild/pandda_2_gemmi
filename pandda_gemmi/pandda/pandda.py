@@ -465,6 +465,14 @@ def pandda(args: PanDDAArgs):
             masked_mean_arrays[model_number] = masked_mean_array
             masked_mean_array_refs[model_number] = processor.put(masked_mean_array)
 
+        # Unmasked dtag array
+        unmasked_dtag_array_ref = processor.put(dataset_dmap_array)
+
+        # Unmasked mean array
+        unmasked_mean_array_refs = {}
+        for model_number, model in model_events.items():
+            unmasked_mean_array_refs[model_number] = processor.put(model_means[model_number])
+
         # Generate conformers to score
         conformers = {}
         conformer_refs = {}
@@ -502,7 +510,9 @@ def pandda(args: PanDDAArgs):
                     out_dir,
                     f"{_model_event_id[0]}_{_model_event_id[1]}_{_model_event_id[2]}_{_model_event_id[3]}",
                     dataset_res,
-                    dataset.structure
+                    dataset.structure,
+                    unmasked_dtag_array_ref,
+                    unmasked_mean_array_refs
                     # processing_res
                     # fs_ref,
                 )
