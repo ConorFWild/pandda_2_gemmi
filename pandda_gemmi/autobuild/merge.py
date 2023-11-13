@@ -85,7 +85,9 @@ def merge_autobuilds(
             dataset,
             selected_build_path,
             model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag),
+            # fs.output.processed_datasets[dtag] / constants.PANDDA_MERGED_MODEL.format(dtag),
         )
+
         merged_build_scores[dtag] = all_autobuilds[selected_build_path][0]
 
     return merged_build_scores
