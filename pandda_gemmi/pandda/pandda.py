@@ -580,7 +580,10 @@ def pandda(args: PanDDAArgs):
                             event_builds[(ligand_key, build_path, conformer_number)] = result #+ event.score #* event.score
 
                 # selected_build_key = max(event_builds, key=lambda _key: event_builds[_key]['local_signal'])
-                selected_build_key = max(event_builds, key=lambda _key: event_builds[_key]['signal'])
+                selected_build_key = max(
+                    event_builds,
+                    key=lambda _key: event_builds[_key]['signal'] / event_builds[_key]['noise'],
+                )
 
                 selected_build = event_builds[selected_build_key]
 
