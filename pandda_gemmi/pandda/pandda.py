@@ -512,7 +512,7 @@ def pandda(args: PanDDAArgs):
                     dataset_res,
                     dataset.structure,
                     unmasked_dtag_array_ref,
-                    unmasked_mean_array_refs
+                    unmasked_mean_array_refs[_model_event_id[0]]
                     # processing_res
                     # fs_ref,
                 )
