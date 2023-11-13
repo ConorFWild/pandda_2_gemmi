@@ -1053,6 +1053,7 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
 
     event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
     masked_event_map_vals = event_map_vals[event_map_vals != 0]
+    double_masked_calc_vals = masked_calc_vals[event_map_vals != 0]
 
     if masked_event_map_vals.size == 0:
         return 1.0
@@ -1069,9 +1070,9 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     # return 1-corr
 
     event_map_mean = np.mean(masked_event_map_vals)
-    calc_map_mean = np.mean(masked_calc_vals)
+    calc_map_mean = np.mean(double_masked_calc_vals)
     delta_event_map = masked_event_map_vals - event_map_mean
-    delta_calc_map = masked_calc_vals-calc_map_mean
+    delta_calc_map = double_masked_calc_vals-calc_map_mean
     nominator = np.sum(delta_event_map*delta_calc_map)
     denominator = np.sqrt(
         np.sum(np.square(delta_event_map))*np.sum(np.square(delta_calc_map))
