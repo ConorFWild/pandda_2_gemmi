@@ -6,7 +6,8 @@ def filter_selected_events(dtag, selected_events, ):
         in list(
             sorted(
                 selected_model_events,
-                key=lambda _event_id: selected_model_events[_event_id].build.score,
+                # key=lambda _event_id: selected_model_events[_event_id].build.score,
+                key=lambda _event_id: selected_model_events[_event_id].build.signal.local_strength * (selected_model_events[_event_id].build.signal / selected_model_events[_event_id].build.noise),
                 reverse=True,
             )
         )[:3]
