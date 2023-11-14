@@ -51,6 +51,7 @@ def processed_dataset(
                 event_idx: {
                     "Score": model_events[event_idx].score,
                     "BDC": model_events[event_idx].bdc,
+                    "Size": model_events[event_idx].size,
                     "Centroid": [float(x) for x in np.mean(model_events[event_idx].pos_array, axis=0).flatten()],
                     "score": model_events[event_idx].build.score,
                     "Build Score": model_events[event_idx].build.build_score,

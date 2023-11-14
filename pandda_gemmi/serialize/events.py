@@ -18,6 +18,7 @@ def serialize_events(
             "BDC": selected_model_events[event_idx].bdc,
             "Position Array": selected_model_events[event_idx].pos_array.tolist(),
             "Point Array": selected_model_events[event_idx].point_array.tolist(),
+            "Size": float(selected_model_events[event_idx].size),
             "Centroid": [
                     float(selected_model_events[event_idx].centroid[0]),
                     float(selected_model_events[event_idx].centroid[1]),
@@ -58,6 +59,7 @@ def unserialize_events(path):
         event_idx: Event(
             pos_array=np.array(event["Position Array"]),
             point_array=np.array(event["Point Array"]),
+            size=event['Size'],
             centroid=np.array(event["Centroid"]),
             score=event["Score"],
             bdc=event["BDC"],

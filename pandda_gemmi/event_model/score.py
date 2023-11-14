@@ -295,6 +295,7 @@ class ScoreCNN:
             scored_event = Event(
                 event.pos_array,
                 event.point_array,
+                event.size,
                 event.centroid,
                 score,
                 round(float(bdcs[event_id]), 2)
@@ -523,6 +524,7 @@ class ScoreCNNLigand:
             scored_event = Event(
                 event.pos_array,
                 event.point_array,
+                event.size,
                 event.centroid,
                 score,
                 round(float(bdcs[event_id]), 2)

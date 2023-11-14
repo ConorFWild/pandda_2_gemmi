@@ -22,9 +22,10 @@ class EventBuild(EventBuildInterface):
 
 
 class Event(EventInterface):
-    def __init__(self, pos_array, point_array, centroid, score=0.0, bdc=0.0, build=None):
+    def __init__(self, pos_array, point_array, size, centroid, score=0.0, bdc=0.0, build=None):
         self.pos_array = pos_array
         self.point_array = point_array
+        self.size = size
         self.centroid = centroid
         self.score = score
         self.bdc = bdc

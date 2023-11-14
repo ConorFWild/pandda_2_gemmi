@@ -71,6 +71,7 @@ class FilterCluster:
             new_event = Event(
                 np.concatenate(pos_array),
                 np.concatenate([event.point_array for event in cluster_events]),
+                sum([event.size for event in cluster_events]),
                 np.mean(pos_array, axis=0),
                 0.0
             )
