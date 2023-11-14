@@ -229,7 +229,7 @@ class ClusterDensityDBSCAN:
         events_array = np.array([event for event in events.values()])
         event_pos_array = np.array(event_pos_list)
 
-        for event_num, event in events:
+        for event_num, event in events.items():
             event_dist_array = np.linalg.norm(
                 event_pos_array-event.centroid.reshape(1,3),
                 axis=1
