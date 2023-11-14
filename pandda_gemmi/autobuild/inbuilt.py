@@ -1341,13 +1341,19 @@ def autobuild_conformer(
         reference_frame,
         out_dir,
         conformer_id,
-res,
+        res,
         structure,
         unmasked_dtag_array,
-        unmasked_mean_array
+        unmasked_mean_array,
+        z_array
                 ):
 
-    event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
+    # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
+    event_map_array = (masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)
+    normalize_event_map_array = (event_map_array-np.mean(event_map_array) / np.std(event_map_array))
+    normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
+    score_grid = normalize_z_array + normalize_event_map_array
+    event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
 
     optimized_structure, score, centroid = score_conformer(
         centroid,

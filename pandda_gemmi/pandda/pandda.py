@@ -473,6 +473,11 @@ def pandda(args: PanDDAArgs):
         for model_number, model in model_events.items():
             unmasked_mean_array_refs[model_number] = processor.put(model_means[model_number])
 
+        # Z arrays
+        z_arrays = {}
+        for model_number, model in model_events.items():
+            z_arrays[model_number] = processor.put(model_zs[model_number])
+
         # Generate conformers to score
         conformers = {}
         conformer_refs = {}
@@ -512,7 +517,8 @@ def pandda(args: PanDDAArgs):
                     dataset_res,
                     dataset.structure,
                     unmasked_dtag_array_ref,
-                    unmasked_mean_array_refs[_model_event_id[0]]
+                    unmasked_mean_array_refs[_model_event_id[0]],
+                    z_arrays[_model_event_id[0]]
                     # processing_res
                     # fs_ref,
                 )
