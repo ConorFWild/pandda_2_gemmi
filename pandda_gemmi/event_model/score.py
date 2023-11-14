@@ -298,7 +298,8 @@ class ScoreCNN:
                 event.size,
                 event.centroid,
                 score,
-                round(float(bdcs[event_id]), 2)
+                round(float(bdcs[event_id]), 2),
+                local_strength=event.local_strength
             )
             scored_events[event_id] = scored_event
 
@@ -527,7 +528,8 @@ class ScoreCNNLigand:
                 event.size,
                 event.centroid,
                 score,
-                round(float(bdcs[event_id]), 2)
+                round(float(bdcs[event_id]), 2),
+                local_strength=event.local_strength
             )
             scored_events[event_id] = scored_event
         time_finish_score_images = time.time()

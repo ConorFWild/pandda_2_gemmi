@@ -120,7 +120,7 @@ class ProcessModel:
         model_grid = reference_frame.unmask(SparseDMap(model_map))
 
         # Get the initial events from clustering the Z map
-        events = ClusterDensityDBSCAN()(z, reference_frame)
+        events, cutoff = ClusterDensityDBSCAN()(z, reference_frame)
 
         if len(events) == 0:
             return None, None, None

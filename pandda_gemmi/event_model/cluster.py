@@ -210,14 +210,32 @@ class ClusterDensityDBSCAN:
         for cluster_num in cluster_nums:
             if cluster_num == -1:
                 continue
+
             events[j] = Event(
                 high_z_pos_array[clusters == cluster_num, :],
                 high_z_point_array[clusters == cluster_num, :].astype(int),
                 high_z_point_array[clusters == cluster_num, :].shape[0] * (z_grid.unit_cell.volume / z_grid.point_count),
                 np.mean(high_z_pos_array[clusters == cluster_num, :], axis=0),
                 0.0,
-                0.0
+                0.0,
+                local_strength=0.0
             )
             j +=1
 
-        return events
+        event_pos_list = []
+        for event_idx, event in events.items():
+            event_pos_list.append(event.centroid)
+
+        events_array = np.array([event for event in events.values()])
+        event_pos_array = np.array(event_pos_list)
+
+        for event_num, event in events:
+            event_dist_array = np.linalg.norm(
+                event_pos_array-event.centroid.reshape(1,3),
+                axis=1
+            )
+            close_events = events_array[event_dist_array < 6.0]
+            event.local_strength = np.sum([close_event.size for close_event in close_events])
+
+
+        return events, cutoff

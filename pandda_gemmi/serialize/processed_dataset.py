@@ -54,6 +54,7 @@ def processed_dataset(
                     "Size": model_events[event_idx].size,
                     "Centroid": [float(x) for x in np.mean(model_events[event_idx].pos_array, axis=0).flatten()],
                     "score": model_events[event_idx].build.score,
+                    "Local Strength": float(model_events[event_idx].local_strength),
                     "Build Score": model_events[event_idx].build.build_score,
                     "Noise": model_events[event_idx].build.noise,
                     "Signal": model_events[event_idx].build.signal,

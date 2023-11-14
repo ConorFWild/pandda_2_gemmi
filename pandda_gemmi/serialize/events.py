@@ -24,6 +24,7 @@ def serialize_events(
                     float(selected_model_events[event_idx].centroid[1]),
                     float(selected_model_events[event_idx].centroid[2]),
                              ],
+            "Local Strength": float(selected_model_events[event_idx].local_strength),
             "Build": {
                 "Build Path": str(selected_model_events[event_idx].build.build_path),
                 "Ligand Key": selected_model_events[event_idx].build.ligand_key,
@@ -76,7 +77,8 @@ def unserialize_events(path):
                 num_points=event["Build"]['Num. Points'],
                 optimal_contour=event["Build"]['Optimal Contour'],
                 rscc=event["Build"]['RSCC'],
-            )
+            ),
+            local_strength=event['Local Strength']
         )
         for event_idx, event
         in dic.items()
