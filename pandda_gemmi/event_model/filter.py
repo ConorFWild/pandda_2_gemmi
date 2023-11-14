@@ -74,7 +74,7 @@ class FilterCluster:
                 sum([event.size for event in cluster_events]),
                 np.mean(pos_array, axis=0),
                 0.0,
-                local_strength=sum(float(event.local_strength) for event in cluster_events)
+                local_strength=sum([float(event.local_strength) for event in cluster_events])
             )
 
             new_events[j] = new_event

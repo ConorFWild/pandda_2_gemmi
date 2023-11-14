@@ -234,8 +234,11 @@ class ClusterDensityDBSCAN:
                 event_pos_array-event.centroid.reshape(1,3),
                 axis=1
             )
+            print(event_dist_array)
             close_events = events_array[event_dist_array < 6.0]
+            print(f"Close event: {close_events}")
             event.local_strength = np.sum([close_event.size for close_event in close_events])
+            print(f"Local strength: {}")
 
 
         return events, cutoff

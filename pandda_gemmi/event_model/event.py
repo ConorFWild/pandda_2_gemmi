@@ -30,4 +30,4 @@ class Event(EventInterface):
         self.score = score
         self.bdc = bdc
         self.build = build
-        self.local_strength = 0.0
+        self.local_strength = local_strength
