@@ -1,8 +1,12 @@
 import numpy as np
+from scipy import spatial
 from scipy.cluster.hierarchy import fclusterdata
 import gemmi
+import networkx as nx
+
 
 from ..interfaces import *
+from pandda_gemmi.dataset import StructureArray
 from pandda_gemmi.processor import Partial
 from pandda_gemmi.alignment import Alignment
 
@@ -166,3 +170,151 @@ def _get_closest_transform(unaligned_centroid, transforms, com_ref, com_mov):
 #             j += 1
 #
 #         return sites
+
+
+class ResidueSiteModel:
+
+    def get_event_environment(
+            self,
+            query_pos_array,
+            structure_array,
+            ns
+    ):
+        indexes = ns.query_ball_point(
+            query_pos_array,
+            5.0,
+        )
+
+        chains = structure_array.chains[indexes]
+        residues = structure_array.seq_ids[indexes]
+
+        res_ids = {}
+        for chain, res in zip(chains, residues):
+            res_ids[(str(chain), str(res))] = True
+
+        return [res_id for res_id in res_ids.keys()]
+
+
+    def get_event_environments(self, datasets, events):
+        # Get the environments for each event
+        event_evenvironments = {}
+        for dtag, dataset in datasets.items():
+            st_arr = StructureArray.from_structure(dataset.structure)
+            ns = spatial.KDTree(st_arr.positions)
+            dtag_events = {event_id: event for event_id, event in events.items() if event_id[0] == dtag}
+
+
+            for event_id, event in dtag_events.items():
+                event_evenvironments[event_id] = self.get_event_environment(
+                    event.pos_array,
+                    st_arr,
+                    ns,
+                )
+
+        return event_evenvironments
+
+    def get_overlap_graph(self, event_environments, min_overlap):
+        g = nx.Graph()
+
+        # Add the nodes
+        for event_id in event_environments:
+            g.add_node(event_id)
+
+        # Form the site overlap matrix
+        arr = np.zeros(
+            (
+                len(event_environments),
+                len(event_environments),
+            )
+        )
+
+        for j, event_1_id in enumerate(event_environments):
+            environment_1 = event_environments[event_1_id]
+            for k, event_2_id in enumerate(event_environments):
+                environment_2 = event_environments[event_2_id]
+                if event_1_id == event_2_id:
+                    continue
+                v = set(environment_1).intersection(set(environment_2))
+                if len(v) > min_overlap:
+                    arr[j, k] = 1
+
+        # Complete the graph
+        for idx, conn in np.ndenumerate(arr):
+            x, y = idx
+
+            if x == y:
+                continue
+            if conn:
+                g.add_edge(x, y)
+
+        return g
+
+
+    def get_centroids(self, cliques, event_environments, reference ):
+        centroids = {}
+        for j, clique in enumerate(cliques):
+            res_ids = set([res_id for _event_id in clique for res_id in event_environments[_event_id]])
+            poss = [
+                [atom.pos.x, atom.pos.y, atom.pos.z]
+                for model in reference.structure.structure
+                for chain in model
+                for res in chain
+                for atom in res
+                if (chain.name, res.seqid.num) in res_ids
+            ]
+            if len(poss) == 0:
+                centroid = [0.0,0.0,0.0]
+            else:
+                centroid = np.mean(
+                    poss,
+                    axis=1
+                )
+            centroids[j] = centroid
+
+        return centroids
+
+    def get_sites(self, event_environments, reference):
+        # Get the overlap graph
+        overlap_graph = self.get_overlap_graph(
+            event_environments,
+            3
+        )
+
+        # Get the disconnected Cliques
+        cliques = list(nx.connected_components(overlap_graph))
+
+        # Find the site centroids against the reference
+        centroids = self.get_centroids(
+            cliques,
+            event_environments,
+            reference,
+        )
+
+        # Construct the sites
+        sites = {}
+        for j, clique in enumerate(cliques):
+            sites[j] = Site(
+                [(str(event_id[0]), int(event_id[1])) for event_id in clique],
+                centroids[j],
+            )
+
+        return sites
+
+
+
+
+    def __call__(
+            self,
+            datasets: Dict[str, DatasetInterface],
+            events: Dict[Tuple[str, int], EventInterface],
+            ref_dataset
+                 ):
+        # Find the residue environment of each event (chain and residue number)
+        event_environments: Dict[Tuple[str, int], List[Tuple[str, str]]] = self.get_event_environments(datasets, events)
+
+        # Get the sites based on cliques of overlapping residues
+        sites: Dict[int, Site] = self.get_sites(event_environments, ref_dataset)
+
+        return sites
+
+        ...

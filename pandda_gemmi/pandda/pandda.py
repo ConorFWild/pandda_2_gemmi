@@ -814,14 +814,19 @@ def pandda(args: PanDDAArgs):
         # )
 
     # Get the sites
-    structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
-                            datasets}
+    # structure_arrays = {_dtag: StructureArray.from_structure(datasets[_dtag].structure) for _dtag in
+    #                         datasets}
+    # structure_array_refs = {_dtag: processor.put(StructureArray.from_structure(datasets[_dtag].structure)) for _dtag in
+    #                         datasets}
     sites: Dict[int, Site] = get_sites(
         datasets,
         pandda_events,
-        processor,
-        structure_array_refs,
-        HeirarchicalSiteModel(t=args.max_site_distance_cutoff)
+        min(dataset_to_process, key=lambda _dataset: _dataset.reflections.resolution()),
+        # processor,
+        # structure_arrays,
+        # structure_array_refs,
+        # HeirarchicalSiteModel(t=args.max_site_distance_cutoff),
+        ResidueSiteModel()
     )
     print("Sites")
     for site_id, site in sites.items():
