@@ -13,19 +13,149 @@ from pandda_gemmi.alignment import Alignment
 from .site import Site
 
 
+# class HeirarchicalSiteModel:
+#
+#     def __init__(self, t=8.0):
+#         self.t = t
+#
+#     def __call__(self,
+#          datasets: Dict[str, DatasetInterface],
+#          events: Dict[Tuple[str, int], EventInterface],
+#          processor: ProcessorInterface,
+#          structure_array_refs,
+#                  ):
+#
+#         #
+#         if len(events) == 0:
+#             return {}
+#
+#         if len(events) == 1:
+#             return {0: Site(
+#                 list(events.keys())[0],
+#                 np.mean(list(events.values())[0].pos_array, axis=1)
+#             )}
+#
+#         # Get the array of centroids
+#         centroid_array = np.array(
+#             [
+#                 np.mean(event.pos_array, axis=0)
+#                 for event
+#                 in events.values()
+#             ]
+#         )
+#
+#         #
+#         clusters = fclusterdata(
+#             centroid_array,
+#             t=self.t,
+#             criterion="distance",
+#             method="centroid"
+#         )
+#
+#         #
+#         unique_clusters = np.unique(clusters, )
+#
+#         # Merge the events based on the clustering
+#         event_array = np.array([event_id for event_id in events.keys()])
+#         j = 0
+#         sites = {}
+#         for cluster_num in unique_clusters:
+#             site_event_ids = event_array[clusters == cluster_num]
+#             # print([event_id for event_id in site_event_ids])
+#             site_positions = np.concatenate([events[(str(event_id[0]), int(event_id[1]))].pos_array for event_id in site_event_ids], axis=0)
+#
+#             sites[j] = Site(
+#                 [(str(event_id[0]), int(event_id[1])) for event_id in site_event_ids],
+#                 np.mean(site_positions, axis=0),
+#             )
+#             j += 1
+#
+#         return sites
+# def _get_closest_transform(unaligned_centroid, transforms, com_ref, com_mov):
+#     distances = []
+#     for transform, com_ref_centroid, com_mov_centroid in zip(transforms.values(), com_ref.values(), com_mov.values()):
+#         distances.append(
+#             gemmi.Position(*com_mov_centroid).dist(gemmi.Position(*unaligned_centroid))
+#         )
+#
+#     min_dist_index = np.argmin(distances)
+#     return list(transforms.values())[min_dist_index], list(com_ref.values())[min_dist_index], list(com_mov.values())[min_dist_index]
+
+
 class HeirarchicalSiteModel:
 
     def __init__(self, t=8.0):
         self.t = t
 
+    def get_event_environment(
+            self,
+            query_pos_array,
+            structure_array,
+            ns
+    ):
+        indexes = ns.query_ball_point(
+            query_pos_array,
+            5.0,
+        )
+
+        chains = structure_array.chains[indexes]
+        residues = structure_array.seq_ids[indexes]
+
+        res_ids = {}
+        for chain, res in zip(chains, residues):
+            res_ids[(str(chain), str(res))] = True
+
+        return [res_id for res_id in res_ids.keys()]
+
+
+    def get_event_environments(self, datasets, events):
+        # Get the environments for each event
+        event_evenvironments = {}
+        for dtag, dataset in datasets.items():
+            st_arr = StructureArray.from_structure(dataset.structure)
+            ns = spatial.KDTree(st_arr.positions)
+            dtag_events = {event_id: event for event_id, event in events.items() if event_id[0] == dtag}
+
+
+            for event_id, event in dtag_events.items():
+                event_evenvironments[event_id] = self.get_event_environment(
+                    event.pos_array,
+                    st_arr,
+                    ns,
+                )
+
+        return event_evenvironments
+
+    def get_centroids(self, event_environments, reference_dataset):
+        centroids = {}
+        for event_id, environment in event_environments.items():
+            # res_ids = set([res_id for _event_id in clique for res_id in event_environments[_event_id]])
+            poss = [
+                [atom.pos.x, atom.pos.y, atom.pos.z]
+                for model in reference_dataset.structure.structure
+                for chain in model
+                for res in chain
+                for atom in res
+                if (chain.name, res.seqid.num) in environment
+            ]
+            if len(poss) == 0:
+                centroid = [0.0,0.0,0.0]
+            else:
+                centroid = np.mean(
+                    poss,
+                    axis=1
+                )
+            centroids[event_id] = centroid
+
+        return centroids
+
     def __call__(self,
-         datasets: Dict[str, DatasetInterface],
-         events: Dict[Tuple[str, int], EventInterface],
-         processor: ProcessorInterface,
-         structure_array_refs,
+                 datasets: Dict[str, DatasetInterface],
+                 events: Dict[Tuple[str, int], EventInterface],
+                 ref_dataset
                  ):
 
-        #
+        # Handle edge cases
         if len(events) == 0:
             return {}
 
@@ -35,16 +165,22 @@ class HeirarchicalSiteModel:
                 np.mean(list(events.values())[0].pos_array, axis=1)
             )}
 
-        # Get the array of centroids
-        centroid_array = np.array(
-            [
-                np.mean(event.pos_array, axis=0)
-                for event
-                in events.values()
-            ]
+        # Find the residue environment of each event (chain and residue number)
+        event_environments: Dict[Tuple[str, int], List[Tuple[str, str]]] = self.get_event_environments(datasets, events)
+
+        # Find the site centroids against the reference
+        centroids = self.get_centroids(
+            event_environments,
+            ref_dataset,
         )
 
-        #
+        # Cluster the centroids
+        event_id_array = np.array(
+            [_event_id for _event_id in centroids.keys()]
+        )
+        centroid_array = np.array(
+            [centroid for centroid in centroids.values()]
+        )
         clusters = fclusterdata(
             centroid_array,
             t=self.t,
@@ -52,34 +188,18 @@ class HeirarchicalSiteModel:
             method="centroid"
         )
 
-        #
-        unique_clusters = np.unique(clusters, )
-
-        # Merge the events based on the clustering
-        event_array = np.array([event_id for event_id in events.keys()])
-        j = 0
+        # Construct the sites
         sites = {}
-        for cluster_num in unique_clusters:
-            site_event_ids = event_array[clusters == cluster_num]
-            # print([event_id for event_id in site_event_ids])
-            site_positions = np.concatenate([events[(str(event_id[0]), int(event_id[1]))].pos_array for event_id in site_event_ids], axis=0)
-
+        for j, cluster in enumerate(np.unique(clusters)):
+            cluster_event_id_array = event_id_array[clusters == cluster]
             sites[j] = Site(
-                [(str(event_id[0]), int(event_id[1])) for event_id in site_event_ids],
-                np.mean(site_positions, axis=0),
+                [(str(event_id[0]), int(event_id[1])) for event_id in cluster_event_id_array],
+                centroid_array[j, :].flatten(),
             )
-            j += 1
 
         return sites
-def _get_closest_transform(unaligned_centroid, transforms, com_ref, com_mov):
-    distances = []
-    for transform, com_ref_centroid, com_mov_centroid in zip(transforms.values(), com_ref.values(), com_mov.values()):
-        distances.append(
-            gemmi.Position(*com_mov_centroid).dist(gemmi.Position(*unaligned_centroid))
-        )
 
-    min_dist_index = np.argmin(distances)
-    return list(transforms.values())[min_dist_index], list(com_ref.values())[min_dist_index], list(com_mov.values())[min_dist_index]
+
 
 
 # class HeirarchicalSiteModel:

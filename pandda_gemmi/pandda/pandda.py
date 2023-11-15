@@ -821,12 +821,15 @@ def pandda(args: PanDDAArgs):
     sites: Dict[int, Site] = get_sites(
         datasets,
         pandda_events,
-        min(dataset_to_process, key=lambda _dataset: _dataset.reflections.resolution()),
+        min(
+            dataset_to_process,
+            key=lambda _dataset: _dataset.reflections.resolution()
+        ),
         # processor,
         # structure_arrays,
         # structure_array_refs,
-        # HeirarchicalSiteModel(t=args.max_site_distance_cutoff),
-        ResidueSiteModel()
+        HeirarchicalSiteModel(t=args.max_site_distance_cutoff),
+        # ResidueSiteModel()
     )
     print("Sites")
     for site_id, site in sites.items():
