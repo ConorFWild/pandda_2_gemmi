@@ -143,7 +143,7 @@ class HeirarchicalSiteModel:
                 centroid = [0.0,0.0,0.0]
             else:
                 centroid = np.mean(
-                    poss,
+                    np.array(poss),
                     axis=1
                 )
             centroids[event_id] = centroid
