@@ -572,7 +572,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_MAX_SITE_DISTANCE_CUTOFF,
             type=float,
-            default=1.732,
+            default=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
             help=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP,
         )
 
