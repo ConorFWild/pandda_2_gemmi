@@ -93,17 +93,18 @@ class HeirarchicalSiteModel:
             structure_array,
             ns
     ):
-        indexes = ns.query_ball_point(
+        indexess = ns.query_ball_point(
             query_pos_array,
             5.0,
         )
-
-        chains = structure_array.chains[indexes]
-        residues = structure_array.seq_ids[indexes]
-
         res_ids = {}
-        for chain, res in zip(chains, residues):
-            res_ids[(str(chain), str(res))] = True
+
+        for indexes in indexess:
+            chains = structure_array.chains[indexes]
+            residues = structure_array.seq_ids[indexes]
+
+            for chain, res in zip(chains, residues):
+                res_ids[(str(chain), str(res))] = True
 
         return [res_id for res_id in res_ids.keys()]
 
