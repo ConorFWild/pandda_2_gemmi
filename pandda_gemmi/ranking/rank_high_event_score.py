@@ -10,7 +10,7 @@ class RankHighEventScore:
         sorted_event_ids = []
         for event_id in sorted(
                 events,
-                key=lambda _event_id: (events[_event_id].build / events[_event_id].build.noise) * events[_event_id].local_strength,
+                key=lambda _event_id: (events[_event_id].build.signal / events[_event_id].build.noise) * events[_event_id].local_strength,
                 reverse=True,
         ):
             sorted_event_ids.append(event_id)
