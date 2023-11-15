@@ -202,7 +202,10 @@ class HeirarchicalSiteModel:
             cluster_event_id_array = event_id_array[clusters == cluster]
             sites[j] = Site(
                 [(str(event_id[0]), int(event_id[1])) for event_id in cluster_event_id_array],
-                centroid_array[j, :].flatten(),
+                np.mean(
+                    centroid_array[clusters==cluster, :],
+                    axis=0,
+                ).flatten(),
             )
 
         return sites
