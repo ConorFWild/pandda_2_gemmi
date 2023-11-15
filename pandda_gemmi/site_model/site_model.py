@@ -144,7 +144,7 @@ class HeirarchicalSiteModel:
             else:
                 centroid = np.mean(
                     np.array(poss),
-                    axis=1
+                    axis=0
                 )
             centroids[event_id] = centroid
 
@@ -180,7 +180,11 @@ class HeirarchicalSiteModel:
             [_event_id for _event_id in centroids.keys()]
         )
         centroid_array = np.array(
-            [centroid for centroid in centroids.values()]
+            [
+                centroid
+                for centroid
+                in centroids.values()
+            ]
         )
         print(centroid_array)
         clusters = fclusterdata(
