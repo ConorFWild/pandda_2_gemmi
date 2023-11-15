@@ -108,7 +108,7 @@ class MergeHighestBuildScore:
     ):
         highest_scoring_event_id = max(
             dtag_events,
-            key=lambda _event_id: dtag_events[_event_id].build.signal,
+            key=lambda _event_id: (dtag_events[_event_id].build.signal / dtag_events[_event_id].build.noise) * dtag_events[_event_id].local_strength,
         )
         # dtag_autobuilds = {
         #     event_idx: result

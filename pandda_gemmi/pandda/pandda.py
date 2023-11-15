@@ -831,8 +831,8 @@ def pandda(args: PanDDAArgs):
     ranking = rank_events(
         pandda_events,
         autobuilds,
-        # RankHighEventScore(),
-        RankHighBuildScore()
+        RankHighEventScore(),
+        # RankHighBuildScore()
         # RankHighEventBuildScore()
     )
     for event_id in ranking:
