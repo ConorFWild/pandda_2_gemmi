@@ -36,7 +36,10 @@ def output_maps(
         model_means,
         all_maps=True
 ):
-    zmap_grid = reference_frame.unmask(SparseDMap(selected_z))
+    zmap_raw_grid = reference_frame.unmask(SparseDMap(selected_z))
+    save_dmap(zmap_raw_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_RAW_MAP_FILE.format(dtag=dtag))
+
+    zmap_grid = reference_frame.unmask(SparseDMap((selected_z - np.mean(selected_z)) / np.std(selected_z)))
     save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag))
 
     mean_grid = reference_frame.unmask(SparseDMap(selected_mean))
