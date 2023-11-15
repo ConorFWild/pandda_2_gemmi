@@ -824,7 +824,7 @@ def pandda(args: PanDDAArgs):
         dataset_to_process[
             min(
                 dataset_to_process,
-                key=lambda _dataset: _dataset.reflections.resolution()
+                key=lambda _dtag: dataset_to_process[_dtag].reflections.resolution()
             )
         ],
         # processor,
