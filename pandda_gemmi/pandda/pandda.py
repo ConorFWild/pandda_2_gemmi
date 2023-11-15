@@ -821,10 +821,12 @@ def pandda(args: PanDDAArgs):
     sites: Dict[int, Site] = get_sites(
         datasets,
         pandda_events,
-        min(
-            dataset_to_process,
-            key=lambda _dataset: _dataset.reflections.resolution()
-        ),
+        dataset_to_process[
+            min(
+                dataset_to_process,
+                key=lambda _dataset: _dataset.reflections.resolution()
+            )
+        ],
         # processor,
         # structure_arrays,
         # structure_array_refs,
