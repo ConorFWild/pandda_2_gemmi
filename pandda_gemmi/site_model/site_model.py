@@ -182,6 +182,7 @@ class HeirarchicalSiteModel:
         centroid_array = np.array(
             [centroid for centroid in centroids.values()]
         )
+        print(centroid_array)
         clusters = fclusterdata(
             centroid_array,
             t=self.t,
