@@ -2,7 +2,7 @@ import numpy as np
 from scipy import spatial
 from scipy.cluster.hierarchy import fclusterdata
 import gemmi
-import networkx as nx
+# import networkx as nx
 
 
 from ..interfaces import *
