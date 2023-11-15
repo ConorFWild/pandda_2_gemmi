@@ -191,7 +191,9 @@ class HeirarchicalSiteModel:
             centroid_array,
             t=self.t,
             criterion="distance",
-            method="centroid"
+            # method="centroid"
+            method="complete"
+
         )
 
         # Construct the sites
