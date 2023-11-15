@@ -137,7 +137,7 @@ class HeirarchicalSiteModel:
                 for chain in model
                 for res in chain
                 for atom in res
-                if (chain.name, res.seqid.num) in environment
+                if (chain.name, str(res.seqid.num)) in environment
             ]
             if len(poss) == 0:
                 centroid = [0.0,0.0,0.0]
