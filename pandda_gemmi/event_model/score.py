@@ -401,7 +401,8 @@ class ScoreCNNLigand:
 
         # Load the model
         # cnn = resnet18(num_classes=2, num_input=4)
-        cnn = resnet18(num_classes=2, num_input=4)
+        # cnn = resnet18(num_classes=2, num_input=4)
+        cnn = resnet18(num_classes=2, num_input=2)
 
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_ligand.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
@@ -482,6 +483,12 @@ class ScoreCNNLigand:
             event_map_std = np.std(event_map_sample)
             image_event_map = (event_map_sample[np.newaxis, :] - event_map_mean) / event_map_std
 
+            sample_array_z_map = np.copy(sample_array)
+            z_map_sample = sample_xmap(z_grid, sample_transform, sample_array_z_map)
+            z_map_mean = np.mean(z_map_sample)
+            z_map_std = np.std(z_map_sample)
+            image_z_map = (event_map_sample[np.newaxis, :] - z_map_mean) / z_map_std
+
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
             image_model = model_sample[np.newaxis, :]
@@ -489,9 +496,11 @@ class ScoreCNNLigand:
             # print(f"Ligand: {np.mean(image_ligand)}")
 
             # Generate the combined image for scoring
-            image = np.stack([image_xmap, image_event_map, image_model, image_ligand, ], axis=1)
+            # image = np.stack([image_xmap, image_event_map, image_model, image_ligand, ], axis=1)
             # image = np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=1)
             # image = np.stack([image_event_map, image_model, image_ligand, ], axis=1)
+            image = np.stack([image_z_map, image_ligand, ], axis=1)
+
             images[event_id] = image
 
         time_finish_get_images = time.time()
