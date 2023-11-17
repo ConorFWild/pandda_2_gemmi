@@ -82,7 +82,8 @@ class GetDatasetsToProcess:
 class ProcessModel:
     def __init__(self,
                  minimum_z_cluster_size=5.0,
-                 minimum_event_score=0.17,
+                 # minimum_event_score=0.17,
+                 minimum_event_score=0.05,
                  local_highest_score_radius=8.0
                  ):
         self.minimum_z_cluster_size = minimum_z_cluster_size

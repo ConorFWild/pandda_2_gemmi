@@ -84,7 +84,9 @@ class FilterCluster:
 
 
 class FilterScore:
-    def __init__(self, min_score=0.1):
+    def __init__(self,
+                 min_score=0.1,
+                 ):
         self.min_score = min_score
 
     def __call__(self, events: Dict[int, EventInterface]):
