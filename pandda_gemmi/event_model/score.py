@@ -487,7 +487,7 @@ class ScoreCNNLigand:
             z_map_sample = sample_xmap(z_grid, sample_transform, sample_array_z_map)
             z_map_mean = np.mean(z_map_sample)
             z_map_std = np.std(z_map_sample)
-            image_z_map = (event_map_sample[np.newaxis, :] - z_map_mean) / z_map_std
+            image_z_map = (z_map_sample[np.newaxis, :] - z_map_mean) / z_map_std
 
             sample_array_model = np.copy(sample_array)
             model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
