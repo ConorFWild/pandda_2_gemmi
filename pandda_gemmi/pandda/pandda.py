@@ -83,7 +83,7 @@ class ProcessModel:
     def __init__(self,
                  minimum_z_cluster_size=5.0,
                  # minimum_event_score=0.17,
-                 minimum_event_score=0.05,
+                 minimum_event_score=0.1,
                  # minimum_event_score=0.03,
                  local_highest_score_radius=8.0
                  ):
