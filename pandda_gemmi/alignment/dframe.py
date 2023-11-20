@@ -1011,7 +1011,7 @@ class GridPartitioning(GridPartitioningInterface):
         # print(f"All points min/max: {np.min(point_position_array.points, axis=0)} : {np.max(point_position_array.points, axis=0)}")
 
         # point_position_nonsymmetry_mask = indexes < ca_point_position_array.positions.shape[0]
-        point_position_nonsymmetry_mask = (distances_sym > 2.0) & (distances_real < 8.0)
+        point_position_nonsymmetry_mask = (distances_sym > 1.0) & (distances_real < 10.0)
         points_nonsymmetry_masked = point_position_array.points[point_position_nonsymmetry_mask]
         points_nonsymmetry_masked_tuple = (
             points_nonsymmetry_masked[:, 0].flatten() - min_pos[0],
