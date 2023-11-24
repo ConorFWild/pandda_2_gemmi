@@ -153,7 +153,10 @@ def get_known_hits(known_hit_structures):
 def get_autobuilds(pandda_2_dir):
     processed_datasets_dir = pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
     autobuild_dir = pandda_2_dir / "autobuild"
+    autobuilds = {}
     for processed_dataset_dir in processed_datasets_dir.glob("*"):
+        dtag = processed_dataset_dir.name
+        autobuilds[dtag] = {}
         processed_dataset_yaml = processed_dataset_dir / "processed_dataset.yaml"
         with open(processed_dataset_yaml, 'r') as f:
             data = yaml.safe_load(f)
@@ -168,8 +171,23 @@ def get_autobuilds(pandda_2_dir):
                 if event_idx not in selected_model_events:
                     continue
 
-                autobuild_file = autobuild_dir / f"{}"
+                autobuild_file = event_info['Build Path']
+                autobuilds[dtag][(model, event_idx, )] = autobuild_file
 
+    return autobuilds
+
+
+def get_pandda_2_autobuilt_structures(autobuilds):
+    autobuilt_structures = {}
+    for dtag, dtag_builds in autobuilds.items():
+
+        autobuilt_structures[dtag] = {}
+        for build_key, build_path in dtag_builds.items():
+            autobuilt_structures[build_key] = gemmi.read_structure(build_path)
+
+    return autobuilt_structures
+
+def get_ligand_graphs(autobuilds):
 
 def match_ligands(spec: LigandMatchingSpec):
     # Get the known hits structures

@@ -63,7 +63,8 @@ def processed_dataset(
                     'Optimal Contour': float(model_events[event_idx].build.optimal_contour),
                     "RSCC": float(model_events[event_idx].build.rscc),
                     "Ligand Centroid": [float(x) for x in model_events[event_idx].build.centroid],
-                    "Build Path": str(model_events[event_idx].build.build_path)
+                    "Build Path": str(model_events[event_idx].build.build_path),
+                    "Ligand Key": str(model_events[event_idx].build.ligand_key)
                 }
                 for event_idx
                 in sorted(model_events)
