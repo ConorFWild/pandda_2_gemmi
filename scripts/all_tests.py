@@ -63,7 +63,7 @@ def get_closest_event(
     # Iterate over events
     distances = []
     for idx, row in event_table.iterrows():
-        pos = [event_table["x"], event_table['y'], event_table['z']]
+        pos = [row["x"], row['y'], row['z']]
         distance = get_closest_symmetry_pos(
             pos,
             ligand_centroid,
