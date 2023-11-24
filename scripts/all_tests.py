@@ -101,7 +101,7 @@ def get_known_hit_centroids(structures):
                             pos = atom.pos
                             poss.append([pos.x, pos.y, pos.z])
                         centroid = np.mean(poss, axis=0)
-                        centroids[f"{chain.name}_{res.seqid.num}"] = centroid
+                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = centroid
 
     return centroids
 
