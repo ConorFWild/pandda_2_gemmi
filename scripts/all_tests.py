@@ -90,7 +90,7 @@ def read_known_hit_dir(known_hits_dir):
 
 def get_known_hit_centroids(structures):
     centroids = {}
-    for structure_key, structure in structures:
+    for structure_key, structure in structures.items():
         centroids[structure_key] = {}
         for model in structure:
             for chain in model:
