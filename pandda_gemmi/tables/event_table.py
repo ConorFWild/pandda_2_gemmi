@@ -35,7 +35,7 @@ class EventTableRecord:
     exclude_from_characterisation: bool
 
     @staticmethod
-    def from_event(event_id, event: EventInterface, site_id):
+    def from_event(dataset: DatasetInterface, event_id, event: EventInterface, site_id):
         # centroid = np.mean(event.pos_array, axis=0)
         centroid = event.centroid
         return EventTableRecord(
@@ -54,9 +54,9 @@ class EventTableRecord:
             z_mean=0.0,
             z_peak=float(event.score),
             applied_b_factor_scaling=0.0,
-            high_resolution=0.0,
+            high_resolution=round(dataset.reflections.resolution(), 2),
             low_resolution=0.0,
-            r_free=0.0,
+            r_free=round(dataset.structure.rfree(), 2),
             r_work=0.0,
             analysed_resolution=0.0,
             map_uncertainty=0.0,
@@ -72,13 +72,13 @@ class EventTable:
     records: List[EventTableRecord]
 
     @staticmethod
-    def from_events(events: Dict[Tuple[str, int], EventInterface], ranking, sites):
+    def from_events(datasets: Dict[str, DatasetInterface], events: Dict[Tuple[str, int], EventInterface], ranking, sites):
         records = []
         for event_id in ranking:
             for _site_id, site in sites.items():
                 if event_id in site.event_ids:
                     site_id = _site_id
-            event_record = EventTableRecord.from_event(event_id, events[event_id], site_id)
+            event_record = EventTableRecord.from_event(datasets[event_id[0]], event_id, events[event_id], site_id)
             records.append(event_record)
 
         return EventTable(records)

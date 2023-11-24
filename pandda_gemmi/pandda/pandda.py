@@ -8,11 +8,7 @@ import numpy as np
 import gemmi
 
 from pandda_gemmi.interfaces import *
-
-from pandda_gemmi import serialize
-
 from pandda_gemmi.args import PanDDAArgs
-
 from pandda_gemmi.fs import PanDDAFS
 from pandda_gemmi.dataset import XRayDataset, StructureArray, Structure
 from pandda_gemmi.dmaps import (
@@ -23,7 +19,6 @@ from pandda_gemmi.dmaps import (
 )
 from pandda_gemmi.alignment import Alignment, DFrame
 from pandda_gemmi.processor import ProcessLocalRay, Partial
-
 from pandda_gemmi.comparators import (
     get_comparators,
     FilterRFree,
@@ -35,31 +30,31 @@ from pandda_gemmi.comparators import (
     FilterCompatibleStructures
 )
 from pandda_gemmi.event_model.event import EventBuild
-from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNN, CharacterizationNNAndFirst
+from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNNAndFirst
 from pandda_gemmi.event_model.filter_characterization_sets import filter_characterization_sets
 from pandda_gemmi.event_model.outlier import PointwiseNormal
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.event_model.score import get_model_map, ScoreCNNLigand
-from pandda_gemmi.event_model.filter import FilterSize, FilterScore, FilterLocallyHighestLargest, FilterLocallyHighestScoring, FilterSymmetryPosBuilds, FilterLocallyHighestBuildScoring
+from pandda_gemmi.event_model.filter import (
+    FilterSize,
+    FilterScore,
+    FilterSymmetryPosBuilds,
+    FilterLocallyHighestBuildScoring
+)
 from pandda_gemmi.event_model.select import select_model
 from pandda_gemmi.event_model.output import output_maps
 from pandda_gemmi.event_model.filter_selected_events import filter_selected_events
-
 from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
-
-from pandda_gemmi.autobuild import autobuild, autobuild_model_event, AutobuildResult
-from pandda_gemmi.autobuild.inbuilt import AutobuildInbuilt, AutobuildModelEventInbuilt, mask_dmap, get_conformers, autobuild_conformer
-from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildAndEventScore, MergeHighestBuildScore
-from pandda_gemmi.autobuild.preprocess_structure import AutobuildPreprocessStructure
-from pandda_gemmi.autobuild.preprocess_dmap import AutobuildPreprocessDMap
-
-from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighBuildScore, RankHighEventBuildScore
-
+from pandda_gemmi.autobuild import AutobuildResult
+from pandda_gemmi.autobuild.inbuilt import mask_dmap, get_conformers, autobuild_conformer
+from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildScore
+from pandda_gemmi.ranking import rank_events, RankHighEventScore
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
+from pandda_gemmi import serialize
 
 class GetDatasetsToProcess:
-    def __init__(self, filters=[]):
+    def __init__(self, filters=None):
         self.filters = filters
 
     def __call__(self,
@@ -67,9 +62,7 @@ class GetDatasetsToProcess:
                  datasets: Dict[str, DatasetInterface],
                  fs: PanDDAFSInterface
                  ):
-        # datasets_to_process = {}
         datasets_not_to_process = {}
-
         remaining_datasets = {_dtag: _dataset for _dtag, _dataset in datasets.items()}
         for _filter in self.filters:
             remaining_datasets = _filter(remaining_datasets)
@@ -77,14 +70,23 @@ class GetDatasetsToProcess:
                 if (dtag not in datasets_not_to_process) and (dtag not in remaining_datasets):
                     datasets_not_to_process[dtag] = _filter.description()
 
-        return {_k: remaining_datasets[_k] for _k in sorted(remaining_datasets)}, {_k: datasets_not_to_process[_k] for _k in sorted(datasets_not_to_process)}
+        sorted_remaining_datasets = {
+            _k: remaining_datasets[_k]
+            for _k
+            in sorted(remaining_datasets)
+        }
+        sorted_datasets_not_to_process = {
+            _k: datasets_not_to_process[_k]
+            for _k
+            in sorted(datasets_not_to_process)
+        }
+        return sorted_remaining_datasets, sorted_datasets_not_to_process
+
 
 class ProcessModel:
     def __init__(self,
                  minimum_z_cluster_size=5.0,
-                 # minimum_event_score=0.17,
                  minimum_event_score=0.1,
-                 # minimum_event_score=0.03,
                  local_highest_score_radius=8.0
                  ):
         self.minimum_z_cluster_size = minimum_z_cluster_size
@@ -106,24 +108,24 @@ class ProcessModel:
             homogenized_dataset_dmap_array,
             characterization_set_dmaps_array
         )
-
         mean_grid = reference_frame.unmask(SparseDMap(mean))
         z_grid = reference_frame.unmask(SparseDMap(z))
 
-        xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
+        # Get the median
+        median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
 
+        # unsparsify input maps
+        xmap_grid = reference_frame.unmask(SparseDMap(homogenized_dataset_dmap_array))
         raw_xmap_grid = gemmi.FloatGrid(*dataset_dmap_array.shape)
         raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
         raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
         raw_xmap_grid_array[:, :, :] = dataset_dmap_array[:, :, :]
-
-        median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
-
         model_grid = reference_frame.unmask(SparseDMap(model_map))
 
         # Get the initial events from clustering the Z map
         events, cutoff = ClusterDensityDBSCAN()(z, reference_frame)
 
+        # Handle the edge case of zero events
         if len(events) == 0:
             return None, None, None
 
@@ -144,9 +146,8 @@ class ProcessModel:
                        )
         time_finish_score_events = time.time()
 
-        # Filter the events after scoring based on their score and keeping only the locally highest scoring event
+        # Filter the events after scoring based on keeping only the locally highest scoring event
         num_events = len(events)
-
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
@@ -154,29 +155,14 @@ class ProcessModel:
             # FilterLocallyHighestScoring(self.local_highest_score_radius)
         ]:
             events = filter(events)
-
+        # TODO: Replace with logger printing
         print(f"CNN Filtered {num_events} down to {len(events)}")
-
-
-        # # Build the events
-        #
-        # ...
-        # # Update centroid from build
-        #
-        # # Filter events by builds
-        # for filter in [
-        #     # FilterScore(self.minimum_event_score),  # Filter events based on their score
-        #     # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
-        #     #                                                                # better scoring events
-        #     FilterLocallyHighestBuildScoring(self.local_highest_score_radius)
-        # ]:
-        #     events = filter(events)
-
 
         # Return None if there are no events after post-scoring filters
         if len(events) == 0:
             return None, None, None
 
+        # Renumber the events
         events = {j + 1: event for j, event in enumerate(events.values())}
 
         return events, mean, z
@@ -204,7 +190,6 @@ def pandda(args: PanDDAArgs):
     console.start_fs_model()
     fs: PanDDAFSInterface = PanDDAFS(Path(args.data_dirs), Path(args.out_dir), args.pdb_regex, args.mtz_regex)
     console.summarise_fs_model(fs)
-    fs_ref = processor.put(fs)
 
     # Get the method for scoring events
     score = ScoreCNNLigand()
@@ -236,7 +221,7 @@ def pandda(args: PanDDAArgs):
     )
 
     # Get the datasets to process
-    dataset_to_process, datasets_not_to_process = GetDatasetsToProcess(
+    datasets_to_process, datasets_not_to_process = GetDatasetsToProcess(
         [
             FilterRFree(args.max_rfree),
             FilterRange(args.dataset_range),
@@ -244,7 +229,7 @@ def pandda(args: PanDDAArgs):
             FilterOnlyDatasets(args.only_datasets)
         ]
     )(datasets, fs)
-    console.summarize_datasets_to_process(dataset_to_process, datasets_not_to_process)
+    console.summarize_datasets_to_process(datasets_to_process, datasets_not_to_process)
 
     # Process each dataset by identifying potential comparator datasets, constructing proposed statistical models,
     # calculating alignments of comparator datasets, locally aligning electron density, filtering statistical models
@@ -254,13 +239,13 @@ def pandda(args: PanDDAArgs):
     time_begin_process_datasets = time.time()
     console.start_process_shells()
     autobuilds = {}
-    for j, dtag in enumerate(dataset_to_process):
-
-        # Print basic information of the dataset to be processed
+    for j, dtag in enumerate(datasets_to_process):
 
         # Record the time that dataset processing begins
         time_begin_process_dataset = time.time()
 
+        # Handle the case in which the dataset has already been processed
+        # TODO: log properly
         events_yaml_path = fs.output.processed_datasets[dtag] / f"events.yaml"
         print(f"Checking for a event yaml at: {events_yaml_path}")
         if events_yaml_path.exists():
@@ -268,12 +253,10 @@ def pandda(args: PanDDAArgs):
             _events = serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml")
             for event_idx, event in _events.items():
                 pandda_events[(dtag, event_idx)] = event
-            # print(pandda_events)
             for event_idx, event in _events.items():
                 autobuilds[(dtag, event_idx)] = {
                     event.build.ligand_key: AutobuildResult(
                         {event.build.build_path: {'score': event.build.signal, 'centroid': event.build.centroid}},
-                        # event.build.log
                         None, None, None, None, None
                     )
                 }
@@ -318,7 +301,7 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             processing_res,
             j,
-            dataset_to_process,
+            datasets_to_process,
             time_begin_process_datasets
         )
 
@@ -338,6 +321,7 @@ def pandda(args: PanDDAArgs):
         )
         alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
         time_finish_get_alignments = time.time()
+        # TODO: Log properly
         print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
         # Get the reference frame and save it to the object store
@@ -345,6 +329,7 @@ def pandda(args: PanDDAArgs):
         reference_frame: DFrame = DFrame(dataset, processor)
         reference_frame_ref = processor.put(reference_frame)
         time_finish_get_frame = time.time()
+        # TODO: Log properly
         print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
         # Get the transforms to apply to the dataset before locally aligning and save them to the object store
@@ -373,15 +358,14 @@ def pandda(args: PanDDAArgs):
         )
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
+        # TODO: log properly
         print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
-        # Get the dataset dmap
+        # Get the dataset dmap, both processed and unprocessed
         dtag_index = np.argwhere(dtag_array == dtag)
-        # print(f"Dtag index: {dtag_index}")
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
-
         raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
         raw_xmap_array = np.array(raw_xmap_grid, copy=True)
 
@@ -395,20 +379,16 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             dmaps,
             reference_frame,
-            # CharacterizationGaussianMixture(
-            #     n_components=min(20, int(len(comparator_datasets) / 25)),
-            #     covariance_type="full",
-            # ),
             CharacterizationNNAndFirst()
         )
         time_finish_get_characterization_sets = time.time()
+        # TODO: Log properly
         print(
             f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
         # Filter the models which are clearly poor descriptions of the density
         # In theory this step could result in the exclusion of a ground state model which provided good contrast
         # for a ligand binding in one part of the protein but fit poorly to say a large disordered region
-
         models_to_process, model_scores, characterization_set_masks = filter_characterization_sets(
             comparator_datasets,
             characterization_sets,
@@ -418,13 +398,9 @@ def pandda(args: PanDDAArgs):
             PointwiseNormal(),
         )
 
-        # print(f"Models to process: {models_to_process}")
-        # serialize.models()
-
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
         time_begin_process_models = time.time()
-
         processed_models = {
             model_number: Partial(process_model).paramaterise(
                 dataset.ligand_files,
@@ -449,38 +425,38 @@ def pandda(args: PanDDAArgs):
                 model_zs[model_number] = result[2]
 
         time_finish_process_models = time.time()
+        # TODO: Log properly
         print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
 
         # Build the events
         time_begin_autobuild = time.time()
 
-        # Masked dtag array
+        # Get the Masked processed dtag dmap array and cache
         masked_dtag_array = mask_dmap(np.copy(dataset_dmap_array), dataset.structure.structure, reference_frame)
         masked_dtag_array_ref = processor.put(masked_dtag_array)
 
-        # Get the scoring grid
+        # Get the scoring grid for each model and cache
         masked_mean_arrays = {}
         masked_mean_array_refs = {}
         for model_number, model in model_events.items():
-            # for event_number, event in events.items():
             masked_mean_array = mask_dmap(np.copy(model_means[model_number]), dataset.structure.structure, reference_frame)
             masked_mean_arrays[model_number] = masked_mean_array
             masked_mean_array_refs[model_number] = processor.put(masked_mean_array)
 
-        # Unmasked dtag array
+        # Cache the unmasked dtag dmap array
         unmasked_dtag_array_ref = processor.put(dataset_dmap_array)
 
-        # Unmasked mean array
+        # Cache the unmasked mean dmap array
         unmasked_mean_array_refs = {}
         for model_number, model in model_events.items():
             unmasked_mean_array_refs[model_number] = processor.put(model_means[model_number])
 
-        # Z arrays
+        # Cache the model Z map arrays
         z_arrays = {}
         for model_number, model in model_events.items():
             z_arrays[model_number] = processor.put(model_zs[model_number])
 
-        # Generate conformers to score
+        # Generate conformers of the dataset ligands to score
         conformers = {}
         conformer_refs = {}
         for ligand_key in dataset.ligand_files:
@@ -499,12 +475,12 @@ def pandda(args: PanDDAArgs):
                         builds_to_perform.append(
                             (model_number, event_number, ligand_key, conformer_number)
                         )
-
-        print(builds_to_perform)
-
+        # Set up autobuilding output directory
         out_dir = fs.output.processed_datasets[dtag] / "autobuild"
         if not out_dir.exists():
             os.mkdir(out_dir)
+
+        # Perform autobuilds of events
         builds = processor.process_dict(
             {
                 _model_event_id: Partial(autobuild_conformer).paramaterise(
@@ -529,54 +505,11 @@ def pandda(args: PanDDAArgs):
             }
         )
         time_finish_autobuild = time.time()
+        # TODO: Log properly
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
-        # raise Exception
-
-        # events_to_process = {}
-        # for model_number, model_events in model_events.items():
-        #     for event_number, event in model_events.items():
-        #         events_to_process[(model_number, event_number)] = event
-        #
-        # event_autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]] = processor.process_dict(
-        #     {
-        #         _model_event_id: Partial(autobuild_model_event).paramaterise(
-        #             dtag,
-        #             _model_event_id,
-        #             dataset_refs[dtag],
-        #             events_to_process[_model_event_id],
-        #             dataset_dmap_array,
-        #             reference_frame_ref,
-        #             AutobuildPreprocessStructure(),
-        #             AutobuildPreprocessDMap(),
-        #             # Rhofit(cut=1.0),
-        #             AutobuildModelEventInbuilt(),
-        #             fs_ref
-        #         )
-        #         for _model_event_id
-        #         in events_to_process
-        #     }
-        # )
-        #
-        # # Select between autobuilds and update event for each event
-        # for event_id, autobuild_results in event_autobuilds.items():
-        #     event = events_to_process[event_id]
-        #     builds = {}
-        #     for ligand_key, autobuild_result in autobuild_results.items():
-        #         for build_path, result in autobuild_result.log_result_dict.items():
-        #             builds[(ligand_key, build_path)] = result['score']
-        #
-        #     selected_build_key = max(builds, key=lambda _key: -builds[_key])
-        #
-        #     event.build = EventBuild(
-        #         selected_build_key[1],
-        #         selected_build_key[0],
-        #         builds[selected_build_key],
-        #         event_autobuilds[event_id][selected_build_key[0]].log_result_dict[selected_build_key[1]]['centroid']
-        #     )
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
-            # event = events_to_process[event_id]
             for event_number, event in events.items():
 
                 event_builds = {}
@@ -584,9 +517,9 @@ def pandda(args: PanDDAArgs):
                     for conformer_number, conformer in ligand_conformers.items():
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
                         for build_path, result in build.items():
-                            # event_builds[(ligand_key, build_path, conformer_number)] = result['score']
+                            # TODO: Replace with an abstract method
                             event_builds[(ligand_key, build_path, conformer_number)] = result #+ event.score #* event.score
-
+                # TODO: Replace with an abstract method
                 # selected_build_key = max(event_builds, key=lambda _key: event_builds[_key]['local_signal'])
                 selected_build_key = max(
                     event_builds,
@@ -598,13 +531,10 @@ def pandda(args: PanDDAArgs):
                 event.build = EventBuild(
                     selected_build_key[1],
                     selected_build_key[0],
-                    # event_builds[selected_build_key]['local_signal'],
-                    # event_builds[selected_build_key]['signal'],
                     event_builds[selected_build_key]['signal'] / event_builds[selected_build_key]['noise'],
                     builds[(model_number,event_number,selected_build_key[0],selected_build_key[2])][selected_build_key[1]]['centroid'],
                     builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][selected_build_key[1]]['new_bdc'],
                     build_score=selected_build['score'],
-                    # rscc=,
                     noise=selected_build['noise'],
                     signal=selected_build['signal'],
                     num_contacts=selected_build['num_contacts'],
@@ -612,15 +542,8 @@ def pandda(args: PanDDAArgs):
                     optimal_contour=selected_build['optimal_contour'],
                     rscc=selected_build['local_signal']
                 )
-                # event.build = EventBuild(
-                #     None,
-                #     list(conformers.keys())[0],
-                #     event.score,
-                #     event.centroid
-                # )
 
-        # Update centroid from build
-        # for event_id, event in events_to_process.items():
+        # Update the event centroid and bdc from the selected build
         for model_number, events in model_events.items():
             for event_number, event in events.items():
                 old_centroid = [round(float(x), 2) for x in event.centroid]
@@ -629,20 +552,15 @@ def pandda(args: PanDDAArgs):
                 bdcs = [round(float(event.bdc), 2), round(float(event.build.bdc), 2)]
                 print(f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {Path(event.build.build_path).name}")
                 event.centroid = event.build.centroid
-                # event.score = event.build.score
                 event.bdc = event.build.bdc
 
-        # Seperate by model number
+        # Seperate updated model events by model number
         update_model_events = {}
-        # for (model_number, event_number), event in events_to_process.items():
         for model_number, events in model_events.items():
             for event_number, event in events.items():
                 if model_number not in update_model_events:
                     update_model_events[model_number] = {}
                 update_model_events[model_number][event_number] = event
-        print(f"Updated Model Events")
-        print(update_model_events)
-
 
         # Filter events by builds
         for model_number in update_model_events:
@@ -652,20 +570,18 @@ def pandda(args: PanDDAArgs):
             ]:
                 j_0 = len(update_model_events[model_number])
                 update_model_events[model_number] = filter(update_model_events[model_number])
+                # TODO: Log properly
                 print(f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of local filter")
 
-        # time_finish_autobuild = time.time()
-        # print(f"\t\tAutobuilt in {time_finish_autobuild-time_begin_autobuild}")
-
-
+        # Filter models by whether they have events and skip if no models remain
         model_events = {model_number: events for model_number, events in update_model_events.items() if len(events) > 0}
         if len(model_events) == 0:
+            # TODO: Log properly
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
             continue
 
         # Select a model based on the events it produced and get the associated events
         selected_model_num, selected_events = select_model(model_events)
-        # print(f"Selected model number: {selected_model_num}")
 
         # Filter the events to select those to output event maps for and to autobuild
         # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
@@ -698,9 +614,11 @@ def pandda(args: PanDDAArgs):
             model_means
         )
         time_finish_output_maps = time.time()
+        # TODO: Log properly
         print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
+        # TODO: Log properly
         print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
 
         # Serialize information on dataset processing to a human readable yaml file
@@ -734,6 +652,7 @@ def pandda(args: PanDDAArgs):
         )
 
     time_finish_process_datasets = time.time()
+    # TODO: Log properly
     print(
         f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
@@ -823,10 +742,10 @@ def pandda(args: PanDDAArgs):
     sites: Dict[int, Site] = get_sites(
         datasets,
         pandda_events,
-        dataset_to_process[
+        datasets_to_process[
             min(
-                dataset_to_process,
-                key=lambda _dtag: dataset_to_process[_dtag].reflections.resolution()
+                datasets_to_process,
+                key=lambda _dtag: datasets_to_process[_dtag].reflections.resolution()
             )
         ],
         # processor,
@@ -835,6 +754,7 @@ def pandda(args: PanDDAArgs):
         HeirarchicalSiteModel(t=args.max_site_distance_cutoff),
         # ResidueSiteModel()
     )
+    # TODO: Log properly
     print("Sites")
     for site_id, site in sites.items():
         print(f"{site_id} : {site.centroid} : {site.event_ids}")
@@ -851,6 +771,7 @@ def pandda(args: PanDDAArgs):
         print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")
 
     # Output the event and site tables
-    output_tables(pandda_events, ranking, sites, fs)
+    output_tables(datasets, pandda_events, ranking, sites, fs)
     time_pandda_finish = time.time()
+    # TODO: Log properly
     print(f"PanDDA ran in: {round(time_pandda_finish - time_pandda_begin, 2)} seconds!")
