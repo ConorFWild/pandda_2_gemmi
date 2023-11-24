@@ -177,7 +177,7 @@ def run_all_tests(test_spec_yaml_path):
     }
 
     # Setup output directorries
-    output_dir = ...
+    output_dir = Path('./test_output')
 
     # Perform tests, collate and output
 
