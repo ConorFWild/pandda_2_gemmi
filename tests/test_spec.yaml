@@ -1,4 +1,4 @@
 BAZ2BA: {
-  human_builds: "/dls/science/groups/i04-1/conor_dev/experiments/data/BAZ2BA",
-  pandda_2: "/dls/science/groups/i04-1/Downloads/pandda_BAZ2BA_all"
+  "Known Hits Dir": "/dls/science/groups/i04-1/conor_dev/experiments/data/BAZ2BA",
+  "PanDDA 2 Dir": "/dls/science/groups/i04-1/Downloads/pandda_BAZ2BA_all"
 }
