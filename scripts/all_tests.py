@@ -37,8 +37,8 @@ def get_closest_symmetry_pos(
         known_hit_structure
 ):
     # Contruct poss
-    pos_1 = gemmi.Position(*pos)
-    pos_2 = gemmi.Position(*ligand_centroid)
+    pos_1 = gemmi.Position(pos[0], pos[1], pos[2])
+    pos_2 = gemmi.Position(ligand_centroid[0], ligand_centroid[1], ligand_centroid[2])
 
     # Get closest sym pos
     distance = known_hit_structure.cell.find_nearest_image(
