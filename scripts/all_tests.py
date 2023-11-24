@@ -17,9 +17,9 @@ class EventMatchingSpec:
 
 
 @dataclasses.dataclass
-class RMSDMatchingSpec:
-    ...
-
+class LigandMatchingSpec:
+    pandda_2_dir: Path
+    known_hits_dir: Path
 
 @dataclasses.dataclass
 class EventRankingSpec:
@@ -37,8 +37,6 @@ def get_closest_symmetry_pos(
         known_hit_structure
 ):
     # Contruct poss
-    print(pos)
-    print(ligand_centroid)
     pos_1 = gemmi.Position(pos[0], pos[1], pos[2])
     pos_2 = gemmi.Position(ligand_centroid[0], ligand_centroid[1], ligand_centroid[2])
 
@@ -140,6 +138,83 @@ def match_events(spec: EventMatchingSpec):
 
     return df
 
+def get_known_hits(known_hit_structures):
+    centroids = {}
+    for structure_key, structure in known_hit_structures.items():
+        centroids[structure_key] = {}
+        for model in structure:
+            for chain in model:
+                for res in chain:
+                    if res.name in ["LIG", "XXX"]:
+                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
+
+    return centroids
+
+def get_autobuilds(pandda_2_dir):
+    processed_datasets_dir = pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+    autobuild_dir = pandda_2_dir / "autobuild"
+    for processed_dataset_dir in processed_datasets_dir.glob("*"):
+        processed_dataset_yaml = processed_dataset_dir / "processed_dataset.yaml"
+        with open(processed_dataset_yaml, 'r') as f:
+            data = yaml.safe_load(f)
+
+        selected_model = data['Selected Model']
+        selected_model_events = data['Selected Model Events']
+
+        for model, model_info in data['Models'].items():
+            if model != selected_model:
+                continue
+            for event_idx, event_info in model_info['Events'].items():
+                if event_idx not in selected_model_events:
+                    continue
+
+                autobuild_file = autobuild_dir / f"{}"
+
+
+def match_ligands(spec: LigandMatchingSpec):
+    # Get the known hits structures
+    known_hit_structures = read_known_hit_dir(spec.known_hits_dir)
+
+    # Get the known hits
+    known_hits = get_known_hits(known_hit_structures)
+
+    # Get the autobuild structures and their corresponding event info
+    autobuilds = get_autobuilds(spec.pandda_2_dir)
+    autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
+
+    # Get the corresponding cif files
+    ligand_graphs = get_ligand_graphs(autobuilds)
+
+    # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
+    records = []
+    for dtag, dtag_known_hits in known_hits.items():
+        ligand_graph = ligand_graphs[dtag]
+        for ligand_key, known_hit in dtag_known_hits.items():
+            # # Get the autobuilds for the dataset
+            dtag_autobuilds = autobuilt_structures[dtag]
+
+            for autobuild_key, autobuilt_structure in dtag_autobuilds.items():
+                # # Get the RMSD
+                rmsd = get_rmsd(
+                    known_hit,
+                    autobuilt_structure,
+                    known_hit_structures[dtag],
+                    ligand_graph
+                )
+                records.append(
+                    {
+                        "Dtag": dtag,
+                        "Ligand Key": ligand_key,
+                        "Autobuild Key": autobuild_key,
+                        "RMSD": rmsd
+                    }
+                )
+
+    # Get the table of rmsds
+    df = pd.DataFrame(records)
+
+    return df
+
 
 def perform_tests(
         test,
@@ -175,6 +250,14 @@ def run_all_tests(test_spec_yaml_path):
         for system
         in tests_spec
     }
+    match_ligands_old_test_specs = {
+        system: LigandMatchingSpec(
+            Path(tests_spec[system]['PanDDA 2 Dir']),
+            Path(tests_spec[system]['Known Hits Dir']),
+        )
+        for system
+        in tests_spec
+    }
 
     # Setup output directorries
     output_dir = Path('./test_output')
@@ -189,8 +272,14 @@ def run_all_tests(test_spec_yaml_path):
     )
 
     # # Event matching, known new
+    ...
 
     # # RMSD matching, old
+    perform_tests(
+        match_ligands,
+        match_ligands_old_test_specs,
+        output_dir
+    )
 
     # # RMSD Matching, new
 
