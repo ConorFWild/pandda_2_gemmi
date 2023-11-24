@@ -46,7 +46,7 @@ def get_closest_symmetry_pos(
     distance = known_hit_structure.cell.find_nearest_image(
         pos_1,
         pos_2,
-    ).distance
+    ).dist
 
     return distance
 
