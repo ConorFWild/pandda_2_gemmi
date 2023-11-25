@@ -328,8 +328,9 @@ def match_ligands(spec: LigandMatchingSpec):
                     records.append(
                         {
                             "Dtag": dtag,
+                            "Event IDX": autobuild_key[0],
+                            "Autobuild Key": autobuild_key[1],
                             "Ligand Key": ligand_key,
-                            "Autobuild Key": autobuild_key,
                             "RMSD": rmsd
                         }
                     )
