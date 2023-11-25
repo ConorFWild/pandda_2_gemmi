@@ -6,6 +6,8 @@ import yaml
 import numpy as np
 import pandas as pd
 import gemmi
+import networkx as nx
+import networkx.algorithms.isomorphism as iso
 
 from pandda_gemmi import constants
 
@@ -20,6 +22,7 @@ class EventMatchingSpec:
 class LigandMatchingSpec:
     pandda_2_dir: Path
     known_hits_dir: Path
+
 
 @dataclasses.dataclass
 class EventRankingSpec:
@@ -138,6 +141,7 @@ def match_events(spec: EventMatchingSpec):
 
     return df
 
+
 def get_known_hits(known_hit_structures):
     centroids = {}
     for structure_key, structure in known_hit_structures.items():
@@ -149,6 +153,7 @@ def get_known_hits(known_hit_structures):
                         centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
 
     return centroids
+
 
 def get_autobuilds(pandda_2_dir):
     processed_datasets_dir = pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
@@ -172,7 +177,10 @@ def get_autobuilds(pandda_2_dir):
                     continue
 
                 autobuild_file = event_info['Build Path']
-                autobuilds[dtag][(model, event_idx, )] = autobuild_file
+                autobuilds[dtag][(model, event_idx,)] = {
+                    "build_path": autobuild_file,
+                    "build_key": event_info['Ligand Key']
+                }
 
     return autobuilds
 
@@ -182,12 +190,83 @@ def get_pandda_2_autobuilt_structures(autobuilds):
     for dtag, dtag_builds in autobuilds.items():
 
         autobuilt_structures[dtag] = {}
-        for build_key, build_path in dtag_builds.items():
-            autobuilt_structures[build_key] = gemmi.read_structure(build_path)
+        for build_key, build_info in dtag_builds.items():
+            autobuilt_structures[build_key] = gemmi.read_structure(build_info["build_path"])
 
     return autobuilt_structures
 
-def get_ligand_graphs(autobuilds):
+
+def get_ligand_cif_graph_matches(cif_path):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(cif_path))
+
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        key = "data_comp_XXX"
+
+    # Find the relevant atoms loop
+    atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+    # atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.charge'))
+
+    # Find the bonds loop
+    bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+    bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
+    aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
+
+    # Construct the graph nodes
+    G = nx.Graph()
+
+    for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        G.add_node(atom_id, Z=atom_type)
+
+    # Construct the graph edges
+    for atom_id_1, atom_id_2 in zip(bond_1_id_loop, bond_2_id_loop):
+        G.add_edge(atom_id_1, atom_id_2)
+
+    # Get the isomorphisms
+    GM = iso.GraphMatcher(G, G, node_match=iso.categorical_node_match('Z', 0))
+
+    return [x for x in GM.isomorphisms_iter()]
+
+
+def get_ligand_graphs(autobuilds, pandda_2_dir):
+    ligand_graphs = {}
+    for dtag, dtag_builds in autobuilds.items():
+        ligand_graphs[dtag] = {}
+        for build_key, build_info in dtag_builds.items():
+            ligand_key = build_info["build_key"]
+            if ligand_key not in ligand_graphs[dtag]:
+                ligand_graphs[dtag][ligand_key] = get_ligand_cif_graph_matches(
+                    pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_LIGAND_FILES_DIR / f"{ligand_key}.cif"
+                )
+
+    return ligand_graphs
+
+
+def get_rmsd(
+        known_hit,
+        autobuilt_structure,
+        known_hit_structure,
+        ligand_graph
+):
+    # Iterate over each isorhpism, then get symmetric distance to the relevant atom
+    iso_distances = []
+    for isomorphism in ligand_graph:
+        distances = []
+        for atom in known_hit:
+            sym_clostst_dist = known_hit_structure.cell.find_nearest_image(
+                atom.pos,
+                autobuilt_structure[0][0][0][isomorphism[atom.name]][0].pos,
+            ).dist()
+            distances.append(sym_clostst_dist)
+        rmsd = np.sqrt(np.mean(np.square(distances)))
+        iso_distances.append(rmsd)
+    return min(iso_distances)
+
 
 def match_ligands(spec: LigandMatchingSpec):
     # Get the known hits structures
@@ -201,12 +280,12 @@ def match_ligands(spec: LigandMatchingSpec):
     autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
 
     # Get the corresponding cif files
-    ligand_graphs = get_ligand_graphs(autobuilds)
+    ligand_graph_matches = get_ligand_graphs(autobuilds, spec.pandda_2_dir)
 
     # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
     records = []
     for dtag, dtag_known_hits in known_hits.items():
-        ligand_graph = ligand_graphs[dtag]
+        ligand_graph = ligand_graph_matches[dtag]
         for ligand_key, known_hit in dtag_known_hits.items():
             # # Get the autobuilds for the dataset
             dtag_autobuilds = autobuilt_structures[dtag]
