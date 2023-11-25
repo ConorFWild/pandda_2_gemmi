@@ -261,9 +261,13 @@ def get_rmsd(
     for isomorphism in ligand_graph:
         distances = []
         for atom in known_hit:
+            model = autobuilt_structure[0]
+            chain = model[0]
+            res = chain[0]
+            autobuilt_atom = res[isomorphism[atom.name]][0]
             sym_clostst_dist = known_hit_structure.cell.find_nearest_image(
                 atom.pos,
-                autobuilt_structure[0][0][0][isomorphism[atom.name]][0].pos,
+                autobuilt_atom.pos,
             ).dist()
             distances.append(sym_clostst_dist)
         rmsd = np.sqrt(np.mean(np.square(distances)))
