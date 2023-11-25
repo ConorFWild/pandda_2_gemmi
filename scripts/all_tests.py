@@ -265,7 +265,10 @@ def get_rmsd(
             model = autobuilt_structure[0]
             chain = model[0]
             res = chain[0]
-            autobuilt_atom = res[isomorphism[atom.name]][0]
+            try:
+                autobuilt_atom = res[isomorphism[atom.name]][0]
+            except:
+                return None
             sym_clostst_dist = known_hit_structure.cell.find_nearest_image(
                 atom.pos,
                 autobuilt_atom.pos,
