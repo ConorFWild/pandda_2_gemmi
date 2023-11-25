@@ -315,6 +315,7 @@ def match_ligands(spec: LigandMatchingSpec):
                         "RMSD": rmsd
                     }
                 )
+    print(f"Got {len(records)} rmsds")
 
     # Get the table of rmsds
     df = pd.DataFrame(records)
