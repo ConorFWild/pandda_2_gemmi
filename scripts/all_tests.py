@@ -224,10 +224,16 @@ def get_ligand_cif_graph_matches(cif_path):
     G = nx.Graph()
 
     for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        if atom_type == "H":
+            continue
         G.add_node(atom_id, Z=atom_type)
 
     # Construct the graph edges
     for atom_id_1, atom_id_2 in zip(bond_1_id_loop, bond_2_id_loop):
+        if atom_id_1 not in G:
+            continue
+        if atom_id_2 not in G:
+            continue
         G.add_edge(atom_id_1, atom_id_2)
 
     # Get the isomorphisms
