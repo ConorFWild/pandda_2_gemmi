@@ -171,11 +171,11 @@ def get_autobuilds(pandda_2_dir):
             data = yaml.safe_load(f)
 
         selected_model = data['Summary']['Selected Model']
-        selected_model_events = data['Summary']['Selected Model Events']
+        # selected_model_events = data['Summary']['Selected Model Events']
 
         for model, model_info in data['Models'].items():
-            # if model != selected_model:
-            #     continue
+            if model != selected_model:
+                continue
             for event_idx, event_info in model_info['Events'].items():
                 # if event_idx not in selected_model_events:
                 #     continue
