@@ -286,7 +286,8 @@ def match_ligands(spec: LigandMatchingSpec):
     print(f"Got {len(autobuilds)} autobuilds")
     autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
     print(f"Got {len(autobuilt_structures)} autobuilt structures")
-    print([list(autobuilt_structures)[0]])
+    print(list(autobuilt_structures)[0])
+    print(autobuilt_structures)
 
     # Get the corresponding cif files
     ligand_graph_matches = get_ligand_graphs(autobuilds, spec.pandda_2_dir)
