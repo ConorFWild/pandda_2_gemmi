@@ -166,8 +166,8 @@ def get_autobuilds(pandda_2_dir):
         with open(processed_dataset_yaml, 'r') as f:
             data = yaml.safe_load(f)
 
-        selected_model = data['Selected Model']
-        selected_model_events = data['Selected Model Events']
+        selected_model = data['Summary']['Selected Model']
+        selected_model_events = data['Summary']['Selected Model Events']
 
         for model, model_info in data['Models'].items():
             if model != selected_model:
