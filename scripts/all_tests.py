@@ -295,10 +295,11 @@ def match_ligands(spec: LigandMatchingSpec):
     records = []
     for dtag, dtag_known_hits in known_hits.items():
         ligand_graph = ligand_graph_matches[dtag]
+        print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
+        dtag_autobuilds = autobuilt_structures[dtag]
+        print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
         for ligand_key, known_hit in dtag_known_hits.items():
             # # Get the autobuilds for the dataset
-            dtag_autobuilds = autobuilt_structures[dtag]
-            print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag")
             for autobuild_key, autobuilt_structure in dtag_autobuilds.items():
                 # # Get the RMSD
                 rmsd = get_rmsd(
