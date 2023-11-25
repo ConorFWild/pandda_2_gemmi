@@ -29,7 +29,6 @@ def processed_dataset(
 
     for model_num in sorted(characterization_sets):
 
-
         if model_num in models_to_process:
             is_processed = True
             model_events, z, mean = processed_models[model_num]
