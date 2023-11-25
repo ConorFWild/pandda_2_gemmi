@@ -289,6 +289,7 @@ def match_ligands(spec: LigandMatchingSpec):
 
     # Get the corresponding cif files
     ligand_graph_matches = get_ligand_graphs(autobuilds, spec.pandda_2_dir)
+    print(f"Got {len(ligand_graph_matches)} ligand graph matches")
 
     # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
     records = []
