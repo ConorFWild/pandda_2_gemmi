@@ -275,13 +275,17 @@ def get_rmsd(
 def match_ligands(spec: LigandMatchingSpec):
     # Get the known hits structures
     known_hit_structures = read_known_hit_dir(spec.known_hits_dir)
+    print(f"Got {len(known_hit_structures)} known hit structures")
 
     # Get the known hits
     known_hits = get_known_hits(known_hit_structures)
+    print(f"Got {len(known_hits)} known hits")
 
     # Get the autobuild structures and their corresponding event info
     autobuilds = get_autobuilds(spec.pandda_2_dir)
+    print(f"Got {len(autobuilds)} autobuilds")
     autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
+    print(f"Got {len(autobuilt_structures)} autobuilt structures")
 
     # Get the corresponding cif files
     ligand_graph_matches = get_ligand_graphs(autobuilds, spec.pandda_2_dir)
