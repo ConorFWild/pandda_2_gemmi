@@ -192,10 +192,9 @@ def get_autobuilds(pandda_2_dir):
 def get_pandda_2_autobuilt_structures(autobuilds):
     autobuilt_structures = {}
     for dtag, dtag_builds in autobuilds.items():
-
         autobuilt_structures[dtag] = {}
         for build_key, build_info in dtag_builds.items():
-            autobuilt_structures[build_key] = gemmi.read_structure(build_info["build_path"])
+            autobuilt_structures[dtag][build_key] = gemmi.read_structure(build_info["build_path"])
 
     return autobuilt_structures
 
