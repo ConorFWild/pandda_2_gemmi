@@ -299,28 +299,29 @@ def match_ligands(spec: LigandMatchingSpec):
     records = []
     for dtag, dtag_known_hits in known_hits.items():
         print(dtag)
-        ligand_graph = ligand_graph_matches[dtag]
+        ligand_graphs = ligand_graph_matches[dtag]
         print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
         dtag_autobuilds = autobuilt_structures[dtag]
         print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
-        for ligand_key, known_hit in dtag_known_hits.items():
+        for known_hit_key, known_hit in dtag_known_hits.items():
             # # Get the autobuilds for the dataset
             for autobuild_key, autobuilt_structure in dtag_autobuilds.items():
-                # # Get the RMSD
-                rmsd = get_rmsd(
-                    known_hit,
-                    autobuilt_structure,
-                    known_hit_structures[dtag],
-                    ligand_graph
-                )
-                records.append(
-                    {
-                        "Dtag": dtag,
-                        "Ligand Key": ligand_key,
-                        "Autobuild Key": autobuild_key,
-                        "RMSD": rmsd
-                    }
-                )
+                for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
+                    # # Get the RMSD
+                    rmsd = get_rmsd(
+                        known_hit,
+                        autobuilt_structure,
+                        known_hit_structures[dtag],
+                        ligand_graph_automorphisms
+                    )
+                    records.append(
+                        {
+                            "Dtag": dtag,
+                            "Ligand Key": ligand_key,
+                            "Autobuild Key": autobuild_key,
+                            "RMSD": rmsd
+                        }
+                    )
     print(f"Got {len(records)} rmsds")
 
     # Get the table of rmsds
