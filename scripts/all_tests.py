@@ -262,6 +262,8 @@ def get_rmsd(
         print(isomorphism)
         distances = []
         for atom in known_hit:
+            if atom.element.name == "H":
+                continue
             model = autobuilt_structure[0]
             chain = model[0]
             res = chain[0]
