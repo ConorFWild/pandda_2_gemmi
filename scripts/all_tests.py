@@ -259,6 +259,7 @@ def get_rmsd(
     # Iterate over each isorhpism, then get symmetric distance to the relevant atom
     iso_distances = []
     for isomorphism in ligand_graph:
+        print(isomorphism)
         distances = []
         for atom in known_hit:
             model = autobuilt_structure[0]
