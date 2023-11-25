@@ -282,6 +282,7 @@ def get_rmsd(
                 autobuilt_atom.pos,
             ).dist()
             distances.append(sym_clostst_dist)
+        print(distances)
         rmsd = np.sqrt(np.mean(np.square(distances)))
         iso_distances.append(rmsd)
     return min(iso_distances)
