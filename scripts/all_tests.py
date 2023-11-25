@@ -163,6 +163,10 @@ def get_autobuilds(pandda_2_dir):
         dtag = processed_dataset_dir.name
         autobuilds[dtag] = {}
         processed_dataset_yaml = processed_dataset_dir / "processed_dataset.yaml"
+
+        if not processed_dataset_yaml.exists():
+            continue
+
         with open(processed_dataset_yaml, 'r') as f:
             data = yaml.safe_load(f)
 
