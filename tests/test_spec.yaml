@@ -7,7 +7,7 @@ JMJD2DA: {
       "PanDDA 2 Dir": "/dls/science/groups/i04-1/Downloads/pandda_JMJD2DA_all"
 
     }
-Mpro: {
-      "Known Hits Dir": "/dls/science/groups/i04-1/conor_dev/experiments/data/Mpro",
-      "PanDDA 2 Dir": "/dls/labxchem/data/2020/lb18145-153/processing/analysis/20231109/pandda_all"
-}
+#Mpro: {
+#      "Known Hits Dir": "/dls/science/groups/i04-1/conor_dev/experiments/data/Mpro",
+#      "PanDDA 2 Dir": "/dls/labxchem/data/2020/lb18145-153/processing/analysis/20231109/pandda_all"
+#}
