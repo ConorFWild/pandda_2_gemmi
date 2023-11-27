@@ -183,7 +183,20 @@ def get_autobuilds(pandda_2_dir):
                 autobuild_file = event_info['Build Path']
                 autobuilds[dtag][(model, event_idx,)] = {
                     "build_path": autobuild_file,
-                    "build_key": event_info['Ligand Key']
+                    "build_key": event_info['Ligand Key'],
+                    'Score': event_info['Score'],
+                    'Size': event_info['Size'],
+                    'Local Strength': event_info['Local Strength'],
+                    'RSCC': event_info['RSCC'],
+                    'Signal': event_info['Signal'],
+                    'Noise': event_info['Noise'],
+                    'Signal/Noise': event_info['Signal'] / event_info['Noise'],
+                    'X_ligand': event_info['Ligand Centroid'][0],
+                    'Y_ligand': event_info['Ligand Centroid'][1],
+                    'Z_ligand': event_info['Ligand Centroid'][2],
+                    'X': event_info['Centroid'][0],
+                    'Y': event_info['Centroid'][1],
+                    'Z': event_info['Centroid'][2]
                 }
 
     return autobuilds
@@ -313,11 +326,15 @@ def match_ligands(spec: LigandMatchingSpec):
         print(dtag)
         ligand_graphs = ligand_graph_matches[dtag]
         print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
-        dtag_autobuilds = autobuilt_structures[dtag]
+        dtag_autobuilt_structures = autobuilt_structures[dtag]
+        print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
+        dtag_autobuilds = autobuilds[dtag]
         print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
+
         for known_hit_key, known_hit in dtag_known_hits.items():
             # # Get the autobuilds for the dataset
-            for autobuild_key, autobuilt_structure in dtag_autobuilds.items():
+            for autobuild_key, autobuilt_structure in dtag_autobuilt_structures.items():
+                autobuild = dtag_autobuilds[autobuild_key]
                 for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
                     # # Get the RMSD
                     rmsd = get_rmsd(
@@ -332,7 +349,20 @@ def match_ligands(spec: LigandMatchingSpec):
                             "Event IDX": autobuild_key[0],
                             "Autobuild Key": autobuild_key[1],
                             "Ligand Key": ligand_key,
-                            "RMSD": rmsd
+                            "RMSD": rmsd,
+                            'Score': autobuild['Score'],
+                            'Size': autobuild['Size'],
+                            'Local Strength': autobuild['Local Strength'],
+                            'RSCC': autobuild['RSCC'],
+                            'Signal': autobuild['Signal'],
+                            'Noise': autobuild['Noise'],
+                            'Signal/Noise': autobuild['Signal/Noise'],
+                            'X_ligand': autobuild['X_ligand'],
+                            'Y_ligand': autobuild['Y_ligand'],
+                            'Z_ligand': autobuild['Z_ligand'],
+                            'X': autobuild['X'],
+                            'Y': autobuild['Y'],
+                            'Z': autobuild['Z']
                         }
                     )
     print(f"Got {len(records)} rmsds")
