@@ -348,6 +348,7 @@ def match_ligands(spec: LigandMatchingSpec):
                             "Dtag": dtag,
                             "Model IDX": autobuild_key[0],
                             "Event IDX": autobuild_key[1],
+                            "Known Hit Key": known_hit_key,
                             # "Autobuild Key": autobuild_key[1],
                             "Ligand Key": ligand_key,
                             "RMSD": rmsd,
