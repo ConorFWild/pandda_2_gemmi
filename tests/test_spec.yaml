@@ -3,12 +3,11 @@ BAZ2BA: {
   "PanDDA 2 Dir": "/dls/science/groups/i04-1/Downloads/pandda_BAZ2BA_all"
 }
 JMJD2DA: {
-      human_builds: "/dls/science/groups/i04-1/conor_dev/experiments/data/JMJD2DA",
-      pandda_2: "/dls/science/groups/i04-1/Downloads/pandda_JMJD2DA_all"
+      "Known Hits Dir": "/dls/science/groups/i04-1/conor_dev/experiments/data/JMJD2DA",
+      "PanDDA 2 Dir": "/dls/science/groups/i04-1/Downloads/pandda_JMJD2DA_all"
 
     }
 Mpro: {
-      human_builds: "/dls/science/groups/i04-1/conor_dev/experiments/data/Mpro",
-      pandda_2: "/dls/labxchem/data/2020/lb18145-153/processing/analysis/20231109/pandda_all"
-
+      "Known Hits Dir": "/dls/science/groups/i04-1/conor_dev/experiments/data/Mpro",
+      "PanDDA 2 Dir": "/dls/labxchem/data/2020/lb18145-153/processing/analysis/20231109/pandda_all"
 }
