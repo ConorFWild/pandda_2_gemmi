@@ -8,8 +8,13 @@ import pandas as pd
 import gemmi
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+import torch
+
 
 from pandda_gemmi import constants
+from pandda_gemmi.cnn import resnet18
+from pandda_gemmi.event_model.score import get_sample_transform_from_event, sample_xmap
+from pandda_gemmi.dmaps import save_dmap, load_dmap
 
 
 @dataclasses.dataclass
@@ -174,8 +179,10 @@ def get_autobuilds(pandda_2_dir):
         # selected_model_events = data['Summary']['Selected Model Events']
 
         for model, model_info in data['Models'].items():
-            # if model != selected_model:
-            #     continue
+            if model == selected_model:
+                selected = True
+            else:
+                selected = False
             for event_idx, event_info in model_info['Events'].items():
                 # if event_idx not in selected_model_events:
                 #     continue
@@ -196,7 +203,9 @@ def get_autobuilds(pandda_2_dir):
                     'Z_ligand': event_info['Ligand Centroid'][2],
                     'X': event_info['Centroid'][0],
                     'Y': event_info['Centroid'][1],
-                    'Z': event_info['Centroid'][2]
+                    'Z': event_info['Centroid'][2],
+                    'Selected': selected,
+                    "BDC": event_info['BDC']
                 }
 
     return autobuilds
@@ -375,6 +384,53 @@ def match_ligands(spec: LigandMatchingSpec):
     return df
 
 
+def rank_events(spec: EventRankingSpec):
+    # Get the event table
+    event_table = pd.read_csv(spec.pandda_2_dir / constants.PANDDA_ANALYSES_DIR / constants.PANDDA_ANALYSE_EVENTS_FILE)
+
+    # Get known hits
+    known_hit_structures = read_known_hit_dir(spec.known_hits_dir)
+
+    # Get PanDDA 2 known hits and update
+    known_hit_structures.update(read_known_hit_dir(spec.pandda_2_known_hits_dir))
+
+    # Get the known hit ligand centroids
+    known_hit_centroids = get_known_hit_centroids(known_hit_structures)
+
+    # For each known hit, for each ligand, check the distance to the (symmetrically) closest event
+    records = []
+    for idx, row in event_table.iterrows():
+        dtag = row['dtag']
+        ligand_centroids = known_hit_centroids[dtag]
+        ligand_distances = {}
+        for ligand_key, ligand_centroid in ligand_centroids.items():
+            distance, event_row = get_closest_event(
+                event_table[event_table["dtag"] == dtag],
+                ligand_centroid,
+                known_hit_structures[dtag]
+            )
+            ligand_distances[ligand_key] = {
+                'Distance': distance,
+                'Event Row': event_row
+            }
+        closest_ligand_key = min(ligand_distances, key=lambda _key: ligand_key[_key]['Distance'])
+        closest_ligand_distance = ligand_distances[closest_ligand_key]
+
+        records.append(
+            {
+                "Dtag": dtag,
+                "Event IDX": row['event_idx'],
+                "Ligand Key": closest_ligand_key,
+                "Distance": closest_ligand_distance['Distance']
+            }
+        )
+
+    # Contruct the table
+    df = pd.DataFrame(records)
+
+    return df
+
+
 def perform_tests(
         test,
         test_specs,
@@ -396,6 +452,207 @@ def perform_tests(
         output_dir / f"{test.__name__}.csv"
     )
 
+def get_centroid(st):
+    poss = []
+
+    for model in st:
+        for chain in model:
+            for res in chain:
+                if res.name in ["LIG", "XXX"]:
+                    for atom in res:
+                        pos = atom.pos
+                        poss.append([pos.x, pos.y, pos.z])
+    centroid = np.mean(poss, axis=0)
+
+    return centroid
+
+def get_masked_dmap(dmap, res):
+    mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(dmap.unit_cell)
+
+    # Get the mask
+    for atom in res:
+        pos = atom.pos
+        mask.set_points_around(
+            pos,
+            radius=2.5,
+            value=1,
+        )
+
+    # Get the mask array
+    mask_array = np.array(mask, copy=False)
+
+    # Get the dmap array
+    dmap_array = np.array(dmap, copy=False)
+
+    # Mask the dmap array
+    dmap_array[mask_array == 0] = 0.0
+
+    return dmap
+
+def score_build(autobuilt_structure, event_map, model, dev):
+    # Get the masked event map
+    masked_event_map = get_masked_dmap(event_map, autobuilt_structure)
+
+    # Get the ligand centroid
+    centroid = get_centroid(autobuilt_structure)
+
+    sample_transform = get_sample_transform_from_event(
+        centroid,
+        0.5,
+        30
+    )
+
+    # Get the sample around the ligand centroid
+    sample_array = np.zeros((30,30,30),dtype=np.float32)
+    dmap_sample = sample_xmap(masked_event_map, sample_transform, sample_array)
+    dmap_mean = np.mean(dmap_sample)
+    dmap_std = np.std(dmap_sample)
+    image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
+    image = np.stack([image_dmap, ], axis=1)
+
+    # Score the sample
+    # Transfer to tensor
+    image_t = torch.from_numpy(image)
+
+    # Move tensors to device
+    image_c = image_t.to(dev)
+
+    model_annotation = model(image_c)
+
+    # Track score
+    model_annotations = model_annotation.to(torch.device("cpu")).detach().numpy()
+    max_score_index = np.argmax([annotation for annotation in model_annotations[:, 1]])
+    score = float(model_annotations[max_score_index, 1])
+
+    return score
+
+
+
+def load_model(model_path):
+    if torch.cuda.is_available():
+        dev = 'cuda:0'
+    else:
+        dev='cpu'
+    cnn = resnet18(num_classes=2, num_input=4)
+    # cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
+    cnn.load_state_dict(torch.load(model_path, map_location=dev))
+    cnn.to(dev)
+    cnn.eval()
+    return cnn.float(), dev
+
+def get_autobuild_event_map(
+                        dataset_map,
+                        mean_map,
+                        bdc
+                    ):
+
+    dataset_map_array = np.array(dataset_map, copy=False)
+    mean_map_array = np.array(mean_map, copy=False)
+
+    calc_event_map_array = (dataset_map_array - (bdc * mean_map_array)) / (1-bdc)
+
+    event_map = gemmi.FloatGrid(
+        dataset_map.nu, dataset_map.nv, dataset_map.nw
+    )
+    event_map_array = np.array(event_map, copy=False)
+    event_map_array[:, :, :] = calc_event_map_array[:, :, :]
+    event_map.set_unit_cell(dataset_map.unit_cell)
+
+    return event_map
+
+def calibrate_pr(spec):
+    # Load the model
+    model, dev = load_model(spec.model_path)
+
+    # Get the known hits structures
+    known_hit_structures = read_known_hit_dir(spec.known_hits_dir)
+    print(f"Got {len(known_hit_structures)} known hit structures")
+
+    # Get the known hits
+    known_hits = get_known_hits(known_hit_structures)
+    print(f"Got {len(known_hits)} known hits")
+
+    # Get the autobuild structures and their corresponding event info
+    autobuilds = get_autobuilds(spec.pandda_2_dir)
+    print(f"Got {len(autobuilds)} autobuilds")
+    autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
+    print(f"Got {len(autobuilt_structures)} autobuilt structures")
+
+    # Get the corresponding cif files
+    ligand_graph_matches = get_ligand_graphs(autobuilds, spec.pandda_2_dir)
+    print(f"Got {len(ligand_graph_matches)} ligand graph matches")
+
+    # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
+    records = []
+    for dtag, dtag_known_hits in known_hits.items():
+        print(dtag)
+        ligand_graphs = ligand_graph_matches[dtag]
+        print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
+        dtag_autobuilt_structures = autobuilt_structures[dtag]
+        print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
+        dtag_autobuilds = autobuilds[dtag]
+        print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
+
+        processed_dataset_dir = Path(spec.pandda_2_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR
+        dataset_dir = processed_dataset_dir / dtag
+        dataset_map = dataset_dir / "xmap.ccp4"
+        mean_map_path = dataset_dir / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag)
+
+        # Get the mean map
+        mean_map = load_dmap(mean_map_path)
+
+        # Get the xmap
+        dataset_map = load_dmap(dataset_map)
+
+        for known_hit_key, known_hit in dtag_known_hits.items():
+            # # Get the autobuilds for the dataset
+            for autobuild_key, autobuilt_structure in dtag_autobuilt_structures.items():
+                autobuild = dtag_autobuilds[autobuild_key]
+                if not autobuild['Selected']:
+                    continue
+                # Get the BDC
+                bdc = autobuild['BDC']
+                for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
+                    # # Get the RMSD
+                    rmsd = get_rmsd(
+                        known_hit,
+                        autobuilt_structure,
+                        known_hit_structures[dtag],
+                        ligand_graph_automorphisms
+                    )
+                    event_map = get_autobuild_event_map(
+                        dataset_map,
+                        mean_map,
+                        bdc
+                    )
+                    score = score_build(
+                        autobuilt_structure,
+                        event_map,
+                        model,
+                        dev
+                    )
+                    records.append(
+                        {
+                            "Dtag": dtag,
+                            "Model IDX": autobuild_key[0],
+                            "Event IDX": autobuild_key[1],
+                            "Known Hit Key": known_hit_key,
+                            "Ligand Key": ligand_key,
+                            "RMSD": rmsd,
+                            'New Score': score
+                        }
+                    )
+    print(f"Got {len(records)} rmsds")
+
+    # Get the table of rmsds
+    df = pd.DataFrame(records)
+
+    return df
+
+
+    ...
 
 def run_all_tests(test_spec_yaml_path):
     # Encode the test specification
@@ -417,6 +674,16 @@ def run_all_tests(test_spec_yaml_path):
         for system
         in tests_spec
     }
+    event_ranking_test_specs = {
+        system: EventRankingSpec(
+            Path(tests_spec[system]['PanDDA 2 Dir']),
+            Path(tests_spec[system]['Known Hits Dir']),
+            Path(tests_spec[system]['PanDDA 2 Hits Dir']),
+
+        )
+        for system
+        in tests_spec
+    }
 
     # Setup output directorries
     output_dir = Path('./test_output')
@@ -431,7 +698,11 @@ def run_all_tests(test_spec_yaml_path):
     )
 
     # # Event matching, known new
-    ...
+    perform_tests(
+        rank_events,
+        event_ranking_test_specs,
+        output_dir
+    )
 
     # # RMSD matching, old
     perform_tests(
@@ -447,7 +718,11 @@ def run_all_tests(test_spec_yaml_path):
     # # Event ranking, new
 
     # # Score PR calibration
-
+    perform_tests(
+        calibrate_pr,
+        calibrate_pr_test_specs,
+        output_dir
+    )
     ...
 
 
