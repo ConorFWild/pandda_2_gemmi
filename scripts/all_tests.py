@@ -36,7 +36,10 @@ class EventRankingSpec:
 
 @dataclasses.dataclass
 class PRCalibrationSpec:
-    ...
+    pandda_2_dir: Path
+    known_hits_dir: Path
+    model_path: Path
+
 
 
 def get_closest_symmetry_pos(
@@ -562,7 +565,7 @@ def get_autobuild_event_map(
 
     return event_map
 
-def calibrate_pr(spec):
+def calibrate_pr(spec: PRCalibrationSpec):
     # Load the model
     model, dev = load_model(spec.model_path)
 
@@ -674,12 +677,21 @@ def run_all_tests(test_spec_yaml_path):
         for system
         in tests_spec
     }
-    event_ranking_test_specs = {
-        system: EventRankingSpec(
+    # event_ranking_test_specs = {
+    #     system: EventRankingSpec(
+    #         Path(tests_spec[system]['PanDDA 2 Dir']),
+    #         Path(tests_spec[system]['Known Hits Dir']),
+    #         Path(tests_spec[system]['PanDDA 2 Hits Dir']),
+    #
+    #     )
+    #     for system
+    #     in tests_spec
+    # }
+    calibrate_pr_test_specs = {
+        system: PRCalibrationSpec(
             Path(tests_spec[system]['PanDDA 2 Dir']),
             Path(tests_spec[system]['Known Hits Dir']),
-            Path(tests_spec[system]['PanDDA 2 Hits Dir']),
-
+            Path('/dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_9/all_data_ligand2.pt')
         )
         for system
         in tests_spec
@@ -691,25 +703,25 @@ def run_all_tests(test_spec_yaml_path):
     # Perform tests, collate and output
 
     # # Event matching, old
-    perform_tests(
-        match_events,
-        match_events_old_test_specs,
-        output_dir
-    )
+    # perform_tests(
+    #     match_events,
+    #     match_events_old_test_specs,
+    #     output_dir
+    # )
 
     # # Event matching, known new
-    perform_tests(
-        rank_events,
-        event_ranking_test_specs,
-        output_dir
-    )
+    # perform_tests(
+    #     rank_events,
+    #     event_ranking_test_specs,
+    #     output_dir
+    # )
 
     # # RMSD matching, old
-    perform_tests(
-        match_ligands,
-        match_ligands_old_test_specs,
-        output_dir
-    )
+    # perform_tests(
+    #     match_ligands,
+    #     match_ligands_old_test_specs,
+    #     output_dir
+    # )
 
     # # RMSD Matching, new
 
