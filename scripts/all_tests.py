@@ -538,7 +538,7 @@ def load_model(model_path):
         dev = 'cuda:0'
     else:
         dev='cpu'
-    cnn = resnet18(num_classes=2, num_input=4)
+    cnn = resnet18(num_classes=2, num_input=1)
     # cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
     cnn.load_state_dict(torch.load(model_path, map_location=dev))
     cnn.to(dev)
