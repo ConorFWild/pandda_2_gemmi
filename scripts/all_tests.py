@@ -469,19 +469,22 @@ def get_centroid(st):
 
     return centroid
 
-def get_masked_dmap(dmap, res):
+def get_masked_dmap(dmap, st):
     mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
     mask.set_unit_cell(dmap.unit_cell)
 
     # Get the mask
-    for atom in res:
-        pos = atom.pos
-        mask.set_points_around(
-            pos,
-            radius=2.5,
-            value=1,
-        )
+    for model in st:
+        for chain in model:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    mask.set_points_around(
+                        pos,
+                        radius=2.5,
+                        value=1,
+                    )
 
     # Get the mask array
     mask_array = np.array(mask, copy=False)
