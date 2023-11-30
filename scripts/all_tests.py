@@ -290,7 +290,7 @@ def get_rmsd(
     # Iterate over each isorhpism, then get symmetric distance to the relevant atom
     iso_distances = []
     for isomorphism in ligand_graph:
-        print(isomorphism)
+        # print(isomorphism)
         distances = []
         for atom in known_hit:
             if atom.element.name == "H":
@@ -307,7 +307,7 @@ def get_rmsd(
                 autobuilt_atom.pos,
             ).dist()
             distances.append(sym_clostst_dist)
-        print(distances)
+        # print(distances)
         rmsd = np.sqrt(np.mean(np.square(distances)))
         iso_distances.append(rmsd)
     return min(iso_distances)
