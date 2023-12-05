@@ -497,7 +497,10 @@ def get_masked_dmap(dmap, st):
 
     return dmap
 
-def score_build(autobuilt_structure, event_map, model, dev):
+def score_build(autobuilt_structure, event_map,
+                z_map,
+                raw_xmap,
+                model, dev):
     # Get the masked event map
     masked_event_map = get_masked_dmap(event_map, autobuilt_structure)
 
@@ -512,11 +515,29 @@ def score_build(autobuilt_structure, event_map, model, dev):
 
     # Get the sample around the ligand centroid
     sample_array = np.zeros((30,30,30),dtype=np.float32)
+
+    # Event map sample
     dmap_sample = sample_xmap(masked_event_map, sample_transform, sample_array)
     dmap_mean = np.mean(dmap_sample)
     dmap_std = np.std(dmap_sample)
     image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
-    image = np.stack([image_dmap, ], axis=1)
+
+
+    # Zmap sample
+    masked_z_map = get_masked_dmap(z_map, autobuilt_structure)
+    zmap_sample = sample_xmap(masked_z_map, sample_transform, sample_array)
+    zmap_mean = np.mean(zmap_sample)
+    zmap_std = np.std(zmap_sample)
+    image_zmap = (zmap_sample[np.newaxis, :] - zmap_mean) / zmap_std
+
+    # Raw xmap sample
+    masked_xmap = get_masked_dmap(raw_xmap, autobuilt_structure)
+    xmap_sample = sample_xmap(masked_xmap, sample_transform, sample_array)
+    xmap_mean = np.mean(xmap_sample)
+    xmap_std = np.std(xmap_sample)
+    image_raw_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
+
+    image = np.stack([image_dmap, image_zmap, image_raw_xmap], axis=1)
 
     # Score the sample
     # Transfer to tensor
@@ -541,7 +562,7 @@ def load_model(model_path):
         dev = 'cuda:0'
     else:
         dev='cpu'
-    cnn = resnet18(num_classes=2, num_input=1)
+    cnn = resnet18(num_classes=2, num_input=3)
     # cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model.pt"
     cnn.load_state_dict(torch.load(model_path, map_location=dev))
     cnn.to(dev)
@@ -567,6 +588,25 @@ def get_autobuild_event_map(
     event_map.set_unit_cell(dataset_map.unit_cell)
 
     return event_map
+
+STRUCTURE_FACTORS = (
+    ('pdbx_FWT', 'pdbx_PHWT'),
+    ("FWT", "PHWT"),
+    ("2FOFCWT", "PH2FOFCWT"),
+    ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
+    ("2FOFCWT_fill", "PH2FOFCWT_fill",),
+    ("2FOFCWT", "PHI2FOFCWT"),
+)
+
+def load_xmap_from_mtz(path):
+    mtz = gemmi.read_mtz_file(str(path))
+    for f, phi in STRUCTURE_FACTORS:
+        try:
+            xmap = mtz.transform_f_phi_to_map(f, phi, sample_rate=3)
+            return xmap
+        except Exception as e:
+            continue
+    raise Exception()
 
 def calibrate_pr(spec: PRCalibrationSpec):
     # Load the model
@@ -609,6 +649,14 @@ def calibrate_pr(spec: PRCalibrationSpec):
         # Get the mean map
         mean_map = load_dmap(mean_map_path)
 
+        # Get the zmap
+        z_map_path = dataset_dir / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag)
+        z_map = load_dmap(z_map_path)
+
+        # Get the raw xmap
+        mtz_path = dataset_dir / constants.PANDDA_PDB_FILE.format(dtag=dtag)
+        raw_xmap = load_xmap_from_mtz(mtz_path)
+
         # Get the xmap
         dataset_map = load_dmap(dataset_map)
 
@@ -636,6 +684,8 @@ def calibrate_pr(spec: PRCalibrationSpec):
                     score = score_build(
                         autobuilt_structure,
                         event_map,
+                        z_map,
+                        raw_xmap,
                         model,
                         dev
                     )
