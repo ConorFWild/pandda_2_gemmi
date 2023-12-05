@@ -654,7 +654,7 @@ def calibrate_pr(spec: PRCalibrationSpec):
         z_map = load_dmap(z_map_path)
 
         # Get the raw xmap
-        mtz_path = dataset_dir / constants.PANDDA_PDB_FILE.format(dtag=dtag)
+        mtz_path = dataset_dir / constants.PANDDA_PDB_FILE.format(dtag)
         raw_xmap = load_xmap_from_mtz(mtz_path)
 
         # Get the xmap
