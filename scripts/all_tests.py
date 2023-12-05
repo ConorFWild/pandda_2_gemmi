@@ -521,7 +521,7 @@ def score_build(autobuilt_structure, event_map,
     dmap_mean = np.mean(dmap_sample)
     dmap_std = np.std(dmap_sample)
     if np.abs(dmap_std) < 0.0000001:
-        image_dmap = np.copy(sample_array)
+        image_dmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
 
@@ -531,7 +531,7 @@ def score_build(autobuilt_structure, event_map,
     zmap_mean = np.mean(zmap_sample)
     zmap_std = np.std(zmap_sample)
     if np.abs(zmap_std) < 0.0000001:
-        image_zmap = np.copy(sample_array)
+        image_zmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_zmap = (zmap_sample[np.newaxis, :] - zmap_mean) / zmap_std
 
@@ -541,7 +541,7 @@ def score_build(autobuilt_structure, event_map,
     xmap_mean = np.mean(xmap_sample)
     xmap_std = np.std(xmap_sample)
     if np.abs(xmap_std) < 0.0000001:
-        image_raw_xmap = np.copy(sample_array)
+        image_raw_xmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_raw_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
 
