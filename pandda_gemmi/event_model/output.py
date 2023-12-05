@@ -52,6 +52,7 @@ def output_maps(
     model_maps_dir = fs.output.processed_datasets[dtag] / 'model_maps'
     if not model_maps_dir.exists():
         os.mkdir(model_maps_dir)
+
     for model_id in model_means:
         mean_map_grid = reference_frame.unmask(SparseDMap(model_means[model_id]))
         mean_map_path = model_maps_dir / f'{model_id}_mean.ccp4'
