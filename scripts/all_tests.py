@@ -525,9 +525,6 @@ def score_build(autobuilt_structure, event_map,
     else:
         image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
 
-    image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
-
-
     # Zmap sample
     masked_z_map = get_masked_dmap(z_map, autobuilt_structure)
     zmap_sample = sample_xmap(masked_z_map, sample_transform, sample_array)
