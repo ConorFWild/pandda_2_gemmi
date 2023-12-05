@@ -611,7 +611,8 @@ def pandda(args: PanDDAArgs):
             reference_frame,
             processing_res,
             model_events,
-            model_means
+            model_means,
+            model_zs
         )
         time_finish_output_maps = time.time()
         # TODO: Log properly

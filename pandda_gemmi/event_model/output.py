@@ -34,6 +34,7 @@ def output_maps(
         res,
         all_events,
         model_means,
+        model_zs,
         all_maps=True
 ):
     zmap_raw_grid = reference_frame.unmask(SparseDMap(selected_z))
@@ -47,6 +48,18 @@ def output_maps(
 
     xmap_grid = reference_frame.unmask(SparseDMap(dtag_array))
     save_dmap(xmap_grid, fs.output.processed_datasets[dtag] / "xmap.ccp4")
+
+    model_maps_dir = fs.output.processed_datasets[dtag] / 'model_maps'
+    if not model_maps_dir.exists():
+        os.mkdir(model_maps_dir)
+    for model_id in model_means:
+        mean_map_grid = reference_frame.unmask(SparseDMap(model_means[model_id]))
+        mean_map_path = model_maps_dir / f'{model_id}_mean.ccp4'
+        save_dmap(mean_map_grid, mean_map_path)
+
+        z_map_grid = reference_frame.unmask(SparseDMap(model_zs[model_id]))
+        z_map_path = model_maps_dir / f'{model_id}_z.ccp4'
+        save_dmap(z_map_grid, z_map_path)
 
     # mean_inner_vals = selected_mean[reference_frame.mask.indicies_sparse_inner_atomic]
     # med = np.median(mean_inner_vals)
