@@ -488,6 +488,7 @@ def get_masked_dmap(dmap, st):
 
     # Get the mask array
     mask_array = np.array(mask, copy=False)
+    print(np.sum(mask_array))
 
     # Get the dmap array
     dmap_array = np.array(dmap, copy=False)
