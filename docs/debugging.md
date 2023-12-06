@@ -148,4 +148,15 @@ It is also important to consider whether binding is likely to be driven by cryst
 
 It is important to know your crystal system: symmetry atoms _may_ be a part of a biological assembly, for example at the interface between the two protein chains of a dimer in which only one chain is in the ASU. In this case forming interactions with the symmetry atoms is likely to be a positive sign rather than a warning sign.
 
-In `pandda.inspect`, the easiest way to determine this is by finding "Draw -> Cell and Symmetry" in the command bar and ensuring the "Master Switch" is "Yes". Then going to the command bar and selecting "Measures -> Environment Distances" and ensuring that "Show Residue Environment" is ticked will highlight likely bonds. 
+In `pandda.inspect`, the easiest way to determine this is by finding "Draw -> Cell and Symmetry" in the command bar and ensuring the "Master Switch" is "Yes". Then going to the command bar and selecting "Measures -> Environment Distances" and ensuring that "Show Residue Environment" is ticked will highlight likely bonds.
+
+Additional things to document:
+1. Highlight causes of datasets being thrown out, and where in the log to find that
+2. Highlight mask shell and how this can cut off density (given chains, not NCS ops)
+3. Throw too many events and how to change the number
+4. More things on how autobuilding works? Where it might go wrong (num poses, wrong selected ligand, expected performance)
+5. Info on how to get good results for datasets
+6. Running subsets (how to)
+7. PanDDA file structure
+8. Autobuilding multiple cifs (crudes)
+9. Default cutoffs / minimal defaults for running

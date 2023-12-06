@@ -517,7 +517,8 @@ def score_build(autobuilt_structure, event_map,
     sample_array = np.zeros((30,30,30),dtype=np.float32)
 
     # Event map sample
-    dmap_sample = sample_xmap(masked_event_map, sample_transform, sample_array)
+    dmap_sample_array = np.copy(sample_array)
+    dmap_sample = sample_xmap(masked_event_map, sample_transform, dmap_sample_array)
     dmap_mean = np.mean(dmap_sample)
     dmap_std = np.std(dmap_sample)
     if np.abs(dmap_std) < 0.0000001:
@@ -526,8 +527,9 @@ def score_build(autobuilt_structure, event_map,
         image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
 
     # Zmap sample
+    zmap_sample_array = np.copy(sample_array)
     masked_z_map = get_masked_dmap(z_map, autobuilt_structure)
-    zmap_sample = sample_xmap(masked_z_map, sample_transform, sample_array)
+    zmap_sample = sample_xmap(masked_z_map, sample_transform, zmap_sample_array)
     zmap_mean = np.mean(zmap_sample)
     zmap_std = np.std(zmap_sample)
     if np.abs(zmap_std) < 0.0000001:
@@ -536,8 +538,9 @@ def score_build(autobuilt_structure, event_map,
         image_zmap = (zmap_sample[np.newaxis, :] - zmap_mean) / zmap_std
 
     # Raw xmap sample
+    xmap_sample_array = np.copy(sample_array)
     masked_xmap = get_masked_dmap(raw_xmap, autobuilt_structure)
-    xmap_sample = sample_xmap(masked_xmap, sample_transform, sample_array)
+    xmap_sample = sample_xmap(masked_xmap, sample_transform, xmap_sample_array)
     xmap_mean = np.mean(xmap_sample)
     xmap_std = np.std(xmap_sample)
     if np.abs(xmap_std) < 0.0000001:
@@ -752,7 +755,7 @@ def run_all_tests(test_spec_yaml_path):
         system: PRCalibrationSpec(
             Path(tests_spec[system]['PanDDA 2 Dir']),
             Path(tests_spec[system]['Known Hits Dir']),
-            Path('/dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_9/all_data_ligand3.pt')
+            Path('/dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_9/all_data_ligand2.pt')
         )
         for system
         in tests_spec
