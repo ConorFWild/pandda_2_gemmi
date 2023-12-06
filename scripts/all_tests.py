@@ -534,7 +534,7 @@ def score_build(autobuilt_structure, event_map,
     zmap_mean = np.mean(zmap_sample)
     zmap_std = np.std(zmap_sample)
     if np.abs(zmap_std) < 0.0000001:
-        print(f"Warning! Bad ZMap Sample!")
+        print(f"Warning! Bad ZMap Sample! Mean: {zmap_mean} Std: {zmap_std}")
         image_zmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_zmap = (zmap_sample[np.newaxis, :] - zmap_mean) / zmap_std
