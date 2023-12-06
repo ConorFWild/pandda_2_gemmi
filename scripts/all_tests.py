@@ -494,7 +494,7 @@ def get_masked_dmap(dmap, st):
 
     # Mask the dmap array
     dmap_array[mask_array == 0] = 0.0
-    print(np.sum(mask_array))
+    print(np.sum(dmap_array))
 
 
     return dmap
