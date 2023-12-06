@@ -663,10 +663,9 @@ def calibrate_pr(spec: PRCalibrationSpec):
 
         processed_dataset_dir = Path(spec.pandda_2_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR
         dataset_dir = processed_dataset_dir / dtag
-        dataset_map = dataset_dir / "xmap.ccp4"
-        mean_map_path = dataset_dir / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag)
 
         # Get the mean map
+        mean_map_path = dataset_dir / constants.PANDDA_MEAN_MAP_FILE.format(dtag=dtag)
         mean_map = load_dmap(mean_map_path)
 
         # Get the zmap
@@ -678,6 +677,7 @@ def calibrate_pr(spec: PRCalibrationSpec):
         raw_xmap = load_xmap_from_mtz(mtz_path)
 
         # Get the xmap
+        dataset_map = dataset_dir / "xmap.ccp4"
         dataset_map = load_dmap(dataset_map)
 
         for known_hit_key, known_hit in dtag_known_hits.items():
@@ -704,8 +704,8 @@ def calibrate_pr(spec: PRCalibrationSpec):
                     score = score_build(
                         autobuilt_structure,
                         event_map,
-                        z_map,
-                        raw_xmap,
+                        z_map.clone(),
+                        raw_xmap.clone(),
                         model,
                         dev
                     )
