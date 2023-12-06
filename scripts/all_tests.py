@@ -644,6 +644,8 @@ def calibrate_pr(spec: PRCalibrationSpec):
     # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
     records = []
     for dtag, dtag_known_hits in known_hits.items():
+        if dtag != 'BAZ2BA-x481':
+            continue
         print(dtag)
         ligand_graphs = ligand_graph_matches[dtag]
         print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
