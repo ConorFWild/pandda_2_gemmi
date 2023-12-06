@@ -67,8 +67,8 @@ def get_sample_transform_from_event(centroid,
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
     average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
     event_centroid = [x for x in centroid]
-    print(f"Centroid: {event_centroid}")
-    print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+    # print(f"Centroid: {event_centroid}")
+    # print(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
 
     return transform
 
