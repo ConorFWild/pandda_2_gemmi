@@ -470,6 +470,10 @@ def get_centroid(st):
     return centroid
 
 def get_masked_dmap(dmap, st):
+    new_dmap = gemmi.FloatGrid(dmap.nu, dmap.nv, dmap.nw)
+    new_dmap.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    new_dmap.set_unit_cell(dmap.unit_cell)
+
     mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
     mask.set_unit_cell(dmap.unit_cell)
@@ -490,15 +494,17 @@ def get_masked_dmap(dmap, st):
     mask_array = np.array(mask, copy=False)
 
     # Get the dmap array
-    dmap_array = np.array(dmap, copy=False)
-    print(np.sum(dmap_array))
+    dmap_array = np.array(dmap, copy=True)
+    new_dmap_array = np.array(new_dmap, copy=False)
+    new_dmap_array[:,:,:] = dmap_array[:,:,:]
+    # print(np.sum(dmap_array))
 
     # Mask the dmap array
-    dmap_array[mask_array == 0] = 0.0
-    print(np.sum(dmap_array))
+    new_dmap_array[mask_array == 0] = 0.0
+    # print(np.sum(dmap_array))
 
 
-    return dmap
+    return new_dmap
 
 def score_build(autobuilt_structure,
                 event_map,
@@ -704,8 +710,8 @@ def calibrate_pr(spec: PRCalibrationSpec):
                     score = score_build(
                         autobuilt_structure,
                         event_map,
-                        z_map.clone(),
-                        raw_xmap.clone(),
+                        z_map,
+                        raw_xmap,
                         model,
                         dev
                     )
