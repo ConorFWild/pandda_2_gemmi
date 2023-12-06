@@ -491,6 +491,7 @@ def get_masked_dmap(dmap, st):
 
     # Get the dmap array
     dmap_array = np.array(dmap, copy=False)
+    print(np.sum(dmap_array))
 
     # Mask the dmap array
     dmap_array[mask_array == 0] = 0.0
@@ -499,7 +500,8 @@ def get_masked_dmap(dmap, st):
 
     return dmap
 
-def score_build(autobuilt_structure, event_map,
+def score_build(autobuilt_structure,
+                event_map,
                 z_map,
                 raw_xmap,
                 model, dev):
