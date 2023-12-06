@@ -522,7 +522,7 @@ def score_build(autobuilt_structure, event_map,
     dmap_mean = np.mean(dmap_sample)
     dmap_std = np.std(dmap_sample)
     if np.abs(dmap_std) < 0.0000001:
-        print(f"Warning! Bad Event Map Sample!")
+        print(f"Warning! Bad Event Map Sample!  Mean: {dmap_mean} Std: {dmap_std}")
         image_dmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_dmap = (dmap_sample[np.newaxis, :] - dmap_mean) / dmap_std
@@ -546,7 +546,7 @@ def score_build(autobuilt_structure, event_map,
     xmap_mean = np.mean(xmap_sample)
     xmap_std = np.std(xmap_sample)
     if np.abs(xmap_std) < 0.0000001:
-        print(f"Warning! Bad XMap Sample!")
+        print(f"Warning! Bad XMap Sample! Mean: {xmap_mean} Std: {xmap_std}")
         image_raw_xmap = np.copy(sample_array)[np.newaxis, :]
     else:
         image_raw_xmap = (xmap_sample[np.newaxis, :] - xmap_mean) / xmap_std
