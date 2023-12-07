@@ -48,7 +48,7 @@ from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
 from pandda_gemmi.autobuild import AutobuildResult
 from pandda_gemmi.autobuild.inbuilt import mask_dmap, get_conformers, autobuild_conformer
 from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildScore
-from pandda_gemmi.ranking import rank_events, RankHighEventScore
+from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighEventScoreBySite
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
@@ -763,8 +763,10 @@ def pandda(args: PanDDAArgs):
     # Rank the events for display in PanDDA inspect
     ranking = rank_events(
         pandda_events,
+        sites,
         autobuilds,
-        RankHighEventScore(),
+        RankHighEventScoreBySite(),
+        # RankHighEventScore(),
         # RankHighBuildScore()
         # RankHighEventBuildScore()
     )

@@ -228,3 +228,7 @@ class EventInterface(Protocol):
 class AutobuildInterface(Protocol):
     log_result_dict: Dict
     ...
+
+class SiteInterface(Protocol):
+    event_ids: List[Tuple[str, int]]
+    centroid: np.ndarray

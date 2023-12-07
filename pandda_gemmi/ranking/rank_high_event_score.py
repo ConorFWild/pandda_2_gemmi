@@ -5,6 +5,7 @@ class RankHighEventScore:
     def __call__(
             self,
             events: Dict[Tuple[str, int], EventInterface],
+            sites,
             autobuilds: Dict[Tuple[str, int], Dict[str, AutobuildInterface]],
     ):
         sorted_event_ids = []
