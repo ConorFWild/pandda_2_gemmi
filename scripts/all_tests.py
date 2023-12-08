@@ -686,15 +686,16 @@ def calibrate_pr(spec: PRCalibrationSpec):
         dataset_map = dataset_dir / "xmap.ccp4"
         dataset_map = load_dmap(dataset_map)
 
-        for known_hit_key, known_hit in dtag_known_hits.items():
             # # Get the autobuilds for the dataset
-            for autobuild_key, autobuilt_structure in dtag_autobuilt_structures.items():
-                autobuild = dtag_autobuilds[autobuild_key]
-                if not autobuild['Selected']:
-                    continue
-                # Get the BDC
-                bdc = autobuild['BDC']
-                for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
+        for autobuild_key, autobuilt_structure in dtag_autobuilt_structures.items():
+            autobuild = dtag_autobuilds[autobuild_key]
+            if not autobuild['Selected']:
+                continue
+            # Get the BDC
+            bdc = autobuild['BDC']
+            rmsds = {}
+            for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
+                for known_hit_key, known_hit in dtag_known_hits.items():
                     # # Get the RMSD
                     rmsd = get_rmsd(
                         known_hit,
@@ -715,8 +716,7 @@ def calibrate_pr(spec: PRCalibrationSpec):
                         model,
                         dev
                     )
-                    records.append(
-                        {
+                    rmsds[(ligand_key, known_hit_key)] = {
                             "Dtag": dtag,
                             "Model IDX": autobuild_key[0],
                             "Event IDX": autobuild_key[1],
@@ -725,7 +725,12 @@ def calibrate_pr(spec: PRCalibrationSpec):
                             "RMSD": rmsd,
                             'New Score': score
                         }
-                    )
+
+            selected_key = min(rmsds, key= lambda _key: rmsds[_key]['RMSD'])
+
+            records.append(
+                rmsds[selected_key]
+            )
     print(f"Got {len(records)} rmsds")
 
     # Get the table of rmsds

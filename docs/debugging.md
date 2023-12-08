@@ -2,11 +2,59 @@
 
 ## Minimum Requirements for Good PanDDA Performance
 
+PanDDA 2 is able to find low occupancy ligands by combining information from multiple crystallographic datasets. As such having a set of near-isomorphous crystal structures is required. 
+
+In particular, for good results the minimum requirements are:
+1. A minimum of 60 datasets in total
+2. For each binding site, at least 30 datasets that do not contain ligands bound there
+3. A relatively high resolution (in practice over 80% of hits found at XChem are discovered in crystal structures with a resolution better than ~2.1 Angstrom)
+
+Of course, every crystal system is different, and depending upon the exact data being analyzed, good results may be possible without meeting any or even all of these requirements. However, this will likely require manually specifying significant numbers of parameters and a strong understanding of both the crystal system and PanDDA methodology.
 
 ## The PanDDA Input Data File Structure
 
+PanDDA expects input data with the following structure:
+
+```text
+
+<Directory matching option --data_dirs>
+├── <Crystal Name 1>
+...
+├── <Crystal Name N>
+│   ├── compound
+│   │   ├── <ligand CIF file with same file stem as ligand PDB>
+│   │   ├── <ligand PDB file with same file stem as ligand CIF>
+│   ├── <PDB file matching option --pdb_regex>
+│   ├── <MTZ file mathcing option --mtz_regex>
+...
+
+```
+
+For example:
+
+```text
+
+model_building/
+├── D68EV3CPROA-x0001
+...
+├── D68EV3CPROA-x0110
+│   ├── compound
+│   │   ├── Z104924088.cif
+│   │   ├── Z104924088.pdb
+│   ├── dimple.mtz -> dimple/dimple/final.mtz
+│   ├── dimple.pdb -> dimple/dimple/final.pdb
+...
+
+```
+
 ## How to run subsets of data
 
+It is often useful to only analyze a subset of data, for example because new data has become available and is unlikely to improve old results, or because only some datasets are of interest.
+
+PanDDA 2 provides several options that allow users to do this:
+1. `--dataset_range`:
+2. `--exclude_from_z_map_analysis`:
+3. `--only_datasets`: 
 
 ## How to recover from Failed Runs
 
