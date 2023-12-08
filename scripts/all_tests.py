@@ -815,11 +815,11 @@ def run_all_tests(test_spec_yaml_path):
     # Perform tests, collate and output
 
     # # Event matching, old
-    perform_tests(
-        match_events,
-        match_events_old_test_specs,
-        output_dir
-    )
+    # perform_tests(
+    #     match_events,
+    #     match_events_old_test_specs,
+    #     output_dir
+    # )
 
     # # Event matching, known new
     # perform_tests(
