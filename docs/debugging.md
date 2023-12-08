@@ -2,14 +2,20 @@
 
 ## Minimum Requirements for Good PanDDA Performance
 
-PanDDA 2 is able to find low occupancy ligands by combining information from multiple crystallographic datasets. As such having a set of near-isomorphous crystal structures is required. 
+PanDDA 2 is able to find low occupancy ligands by combining information from multiple crystallographic datasets. As such having a set of near-homogenous crystal structures is required. Although sufficient homogeneity for good PanDDA 2 results varies, good guidelines are:
+
+1. The same spacegroup
+2. Unit cell parameters within ~10% of one another
+3. Structure RMSDs that are _generally_ less than 2A RMSD, although regions of local heterogeneity are generally well tolerated by the algorithm
+
+It is important to note that PanDDA 2 can automatically handle _multiple_ sets of near-homogenous crystal structures at the same time i.e. two groups of datasets that do not meet the above criteria. Indeed, there may be advantages to processing both groups at the same time as one set may provide a better contrast to ligand bound changed states in the other.
 
 In particular, for good results the minimum requirements are:
-1. A minimum of 60 datasets in total
-2. For each binding site, at least 30 datasets that do not contain ligands bound there
+1. A minimum of 60 near-homogenous datasets in total. 
+2. For each binding site, at least 30 datasets that do not contain ligands bound there. This is generally not possible to guarantee ahead of PanDDA analysis, however if the total number of datasets is greater than 100, with the typical fragment screen hit rates of ~15%, predominantly in a small number of hotspots, this is likely. This factor may also diagnose poor results from relatively screens.
 3. A relatively high resolution (in practice over 80% of hits found at XChem are discovered in crystal structures with a resolution better than ~2.1 Angstrom)
 
-Of course, every crystal system is different, and depending upon the exact data being analyzed, good results may be possible without meeting any or even all of these requirements. However, this will likely require manually specifying significant numbers of parameters and a strong understanding of both the crystal system and PanDDA methodology.
+Of course, every crystal system is different, and depending upon the exact data being analyzed, good results may be possible without meeting any or even all of these requirements. However, this will likely require manually specifying significant numbers of parameters and a strong understanding of both the crystal system and PanDDA methodology. In general, 200-300 datasets should be sufficient for very good results in even relatively heterogeneous systems.
 
 ## The PanDDA Input Data File Structure
 
@@ -49,12 +55,14 @@ model_building/
 
 ## How to run subsets of data
 
-It is often useful to only analyze a subset of data, for example because new data has become available and is unlikely to improve old results, or because only some datasets are of interest.
+It is often useful to only analyze a subset of data, for example because new data has become available and is unlikely to improve old results, or because only some datasets are of interest. It is important to note that none of these options prevent datasets being used to characterize ground state models, it only prevents events and autobuilds being generated for them.
 
 PanDDA 2 provides several options that allow users to do this:
-1. `--dataset_range`:
-2. `--exclude_from_z_map_analysis`:
-3. `--only_datasets`: 
+1. `--dataset_range`: Process only those datasets whose names (the name of the directory containing their data) end in numbers been the two bounds. An example might be `--dataset_range="100-200"`, which will process `BAZ2BA-x0102`, but not `BAZ2BA-x0097`.
+2. `--exclude_from_z_map_analysis`: Process only those datasets whose names do not occur in the list. For example, `--exclude_from_z_map_analysis="BAZ2BA-x102,BAZ2BA-x097"` will not process `BAZ2BA-x102`, but will process `BAZ2BA-x033`.
+3. `--only_datasets`: Only process those datasets whose names occur in the given string. For example, `--only_datasets="BAZ2BA-x088,BAZ2BA-x092"` will process `BAZ2BA-x088` but will not process `BAZ2BA-x105`.
+
+These options are not exclusive, and are applied in the above order, so if `--dataset_range="100-200"` and `--only_datasets="BAZ2BA-x157"` the **no** datasets will be processed.
 
 ## How to recover from Failed Runs
 
@@ -63,6 +71,29 @@ If PanDDA 2 has begun processing datasets but ends before it completes, for exam
 This is as simple as running the same PanDDA command that began the run again. The program will detect that processed datasets are present and then continue.
 
 A warning with this feature is that if the input data has changed, new datasets will be processed against the current data, not the original data. This could happen if, for example, new datasets have been collected.
+
+## How To Run PanDDA 2 Against Crude Soaks And Cocktails
+
+If you have a crude or other cocktail experiment in which multiple ligands have been soaked, then it is important to make sure PanDDA has data for all the ligands that may have bound.
+
+This requires no special configuration of PanDDA 2, which will automatically handle this case if it occurs, it just requires making sure that the data is available. For example, had multiple ligands been soaked against the example dataset given [above](#the-pandda-input-data-file-structure), it might look like this:
+
+```text
+
+model_building/
+├── D68EV3CPROA-x0001
+...
+├── D68EV3CPROA-x0110
+│   ├── compound
+│   │   ├── Z104924088.cif
+│   │   ├── Z104924088.pdb
+│   │   ├── some_other_ligand.cif
+│   │   ├── some_other_ligand.pdb
+│   ├── dimple.mtz -> dimple/dimple/final.mtz
+│   ├── dimple.pdb -> dimple/dimple/final.pdb
+...
+
+```
 
 ## How PanDDA 2 Characterizes Ground States
 
@@ -307,15 +338,12 @@ PanDDA 2 can sometimes fail to produce good autobuilds of clear events. While by
 
 1. If the ligand is very large or flexible, the number of conformations to sampled may be too low to get one close to the crystallographic conformation
 
+## Ligand Electron Density Is Partially Missing
+
+PanDDA masks the electron density around the chains contained in the supplied PDB files. While this is useful for a number of reasons, such as decreasing run times and limiting the number of spurious events, this can sometimes result in partial density for ligands which stick out into solvent.
+
+If this is observed the reccomended course of action is to collate all datasets which feature such ligands, and then rerun PanDDA in a new directory with the `--only_datasets` option set to the datasets containing these ligands and the `--outer_mask` option set to 9.0+(the distance in Angstron between the defined region of them map and the furthest ligand atom).
 
 
-Additional things to document:
-1. Highlight causes of datasets being thrown out, and where in the log to find that
-2. Highlight mask shell and how this can cut off density (given chains, not NCS ops)
-3. Throw too many events and how to change the number
-4. More things on how autobuilding works? Where it might go wrong (num poses, wrong selected ligand, expected performance)
-5. Info on how to get good results for datasets
-6. Running subsets (how to)
-7. PanDDA file structure
+
 8. Autobuilding multiple cifs (crudes)
-9. Default cutoffs / minimal defaults for running
