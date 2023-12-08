@@ -803,7 +803,7 @@ def run_all_tests(test_spec_yaml_path):
         system: PRCalibrationSpec(
             Path(tests_spec[system]['PanDDA 2 Dir']),
             Path(tests_spec[system]['Known Hits Dir']),
-            Path('/dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_9/all_data_ligand2.pt')
+            Path('/dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_11/all_data_ligand2.pt')
         )
         for system
         in tests_spec
