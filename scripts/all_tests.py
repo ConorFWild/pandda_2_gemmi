@@ -753,8 +753,10 @@ def calibrate_pr(spec: PRCalibrationSpec):
                             "RMSDClosestAtom": rmsd_closest_atom,
                             'Score': score
                         }
-
-            selected_key = min(rmsds, key= lambda _key: rmsds[_key]['RMSD'])
+            non_none_keys = [key for key in rmsds if rmsds[key]['RMSD'] is not None]
+            if len(non_none_keys) == 0:
+                continue
+            selected_key = min(non_none_keys, key= lambda _key: rmsds[_key]['RMSD'])
 
             records.append(
                 rmsds[selected_key]
