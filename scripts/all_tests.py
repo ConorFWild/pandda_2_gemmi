@@ -280,6 +280,28 @@ def get_ligand_graphs(autobuilds, pandda_2_dir):
 
     return ligand_graphs
 
+def get_rmsd_closest_atom(
+                        known_hit,
+                        autobuilt_structure,
+                        known_hit_structure,
+                    ):
+    # Iterate over each isorhpism, then get symmetric distance to the relevant atom
+    distances = []
+    for atom in known_hit:
+        if atom.element.name == "H":
+            continue
+        # Get closest autobuilt atom after symmetry
+        autobuilt_atom_distances = []
+        for autobuilt_atom in autobuilt_structure[0][0][0]:
+            sym_clostst_dist = known_hit_structure.cell.find_nearest_image(
+                atom.pos,
+                autobuilt_atom.pos,
+            ).dist()
+            autobuilt_atom_distances.append(sym_clostst_dist)
+        distances.append(min(autobuilt_atom_distances))
+    # print(distances)
+    rmsd = np.sqrt(np.mean(np.square(distances)))
+    return rmsd
 
 def get_rmsd(
         known_hit,
@@ -703,6 +725,11 @@ def calibrate_pr(spec: PRCalibrationSpec):
                         known_hit_structures[dtag],
                         ligand_graph_automorphisms
                     )
+                    rmsd_closest_atom = get_rmsd_closest_atom(
+                        known_hit,
+                        autobuilt_structure,
+                        known_hit_structures[dtag],
+                    )
                     event_map = get_autobuild_event_map(
                         dataset_map,
                         mean_map,
@@ -718,12 +745,13 @@ def calibrate_pr(spec: PRCalibrationSpec):
                     )
                     rmsds[(ligand_key, known_hit_key)] = {
                             "Dtag": dtag,
-                            "Model IDX": autobuild_key[0],
-                            "Event IDX": autobuild_key[1],
-                            "Known Hit Key": known_hit_key,
-                            "Ligand Key": ligand_key,
+                            "ModelIDX": autobuild_key[0],
+                            "EventIDX": autobuild_key[1],
+                            "KnownHitKey": known_hit_key,
+                            "LigandKey": ligand_key,
                             "RMSD": rmsd,
-                            'New Score': score
+                            "RMSDClosestAtom": rmsd_closest_atom,
+                            'Score': score
                         }
 
             selected_key = min(rmsds, key= lambda _key: rmsds[_key]['RMSD'])
