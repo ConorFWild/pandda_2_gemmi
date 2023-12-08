@@ -1,6 +1,14 @@
 # Debugging PanDDA 2
 
-## Recovering Failed Runs
+## Minimum Requirements for Good PanDDA Performance
+
+
+## The PanDDA Input Data File Structure
+
+## How to run subsets of data
+
+
+## How to recover from Failed Runs
 
 If PanDDA 2 has begun processing datasets but ends before it completes, for example because it was cancelled by a cluster scheduler, then it is possible to continue from the last dataset that completed processing.
 
@@ -149,6 +157,109 @@ It is also important to consider whether binding is likely to be driven by cryst
 It is important to know your crystal system: symmetry atoms _may_ be a part of a biological assembly, for example at the interface between the two protein chains of a dimer in which only one chain is in the ASU. In this case forming interactions with the symmetry atoms is likely to be a positive sign rather than a warning sign.
 
 In `pandda.inspect`, the easiest way to determine this is by finding "Draw -> Cell and Symmetry" in the command bar and ensuring the "Master Switch" is "Yes". Then going to the command bar and selecting "Measures -> Environment Distances" and ensuring that "Show Residue Environment" is ticked will highlight likely bonds.
+
+## Determining the reasons datasets were not analyzed or included in ground states
+
+PanDDA 2 will not analyse datasets for several reasons:
+1. The RFree is > 0.4
+2. The dataset were outside the range defined in the option `--dataset_range`
+3. The datasets were in the excluded datasets defined in the option `--exclude_from_z_map_analysis`
+4. The datasets were not in the datasets to be analysed defined in the option `--only_datasets`
+5. The datasets did not have a ligand file with a .cif and .pdb in the directory given by the option `--compound_dir`
+6. The datasets did not have a valid protein pdb or reflections mtz, given by the options `--pdb_regex` and `--mtz_regez` respectively
+7. The ligand cif contains a delocalized system that PanDDA 2 cannot handle
+
+
+```text
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                             Loading datasets...                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+...
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃ Dtag                 ┃ Resolution   ┃ Spacegroup  ┃ SMILES?  ┃ CIF?  ┃ PDB?  ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ D68EV3CPROA-x0059    │ 1.56         │ P 21 21 21  │ True     │ False │ False │
+│ D68EV3CPROA-x0060    │ 1.5          │ P 21 21 21  │ True     │ False │ False │
+│ D68EV3CPROA-x0061    │ 1.68         │ P 21 21 21  │ True     │ False │ False │
+│ D68EV3CPROA-x0062    │ 1.95         │ P 21 21 21  │ False    │ False │ False │
+│ D68EV3CPROA-x0063    │ 1.52         │ P 21 21 21  │ False    │ False │ False │
+
+```
+
+```text
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                       Building model of file system...                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+...
+NO PDBS IN DIR: /dls/science/groups/i04-1/conor_dev/baz2b_test/data/coot-backup WITH REGEX: *dimple.pdb
+NO MTZS IN DIR: /dls/science/groups/i04-1/conor_dev/baz2b_test/data/coot-backup WITH REGEX: *dimple.mtz
+
+```
+
+```text
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                             Loading datasets...                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+                              Unit Cell Statistics
+...
+─────────────────────────── Datasets not to Process ────────────────────────────
+    BAZ2BA-x425 : Filtered because in exclude set!
+...
+    BAZ2BA-x513 : Filtered because rfree > 0.4
+
+```
+
+A note on delocalized systems: PanDDA 2 uses RDKit to process ligands, which cannot handle non-atomatic delocalized systems such as sulfonates. Some cif building systems will mark these bonds correctly as delocalized, which will mean that PanDDA will not be able to kekulize them for processing. In order for PanDDA to process them you MUST ENSURE that delocalized systems are properly kekulized, which can be achieved by using a cif program such as GRADE.
+
+A good give-away that this has happened is that datasets within the screen that you expect to have cifs are missing them.
+```text
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                             Loading datasets...                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+...
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃ Dtag                 ┃ Resolution   ┃ Spacegroup  ┃ SMILES?  ┃ CIF?  ┃ PDB?  ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ D68EV3CPROA-x0059    │ 1.56         │ P 21 21 21  │ True     │ False │ False │
+...
+│ D68EV3CPROA-x1799    │ 1.47         │ P 21 21 21  │ False    │ False │ False │
+...
+```
+
+
+## Handeling very large numbers of spurious events
+
+Depending on your target, PanDDA 2 may produce very large numbers of events. Although PanDDA attempts to rank and classify these, in some scenarios it may be preferable to risk losing some hits with weaker evidence in order to make processing faster. 
+
+This can be achieved in several ways:
+1. Decrease the number of events processed using the option `--event_score_threshold`
+2. Change the max events per dataset using the option `--max_events_per_dataset`
+3. 
+
+## Addressing very long run times
+
+If PanDDA 2 is taking a very long time to run it may be for one of several reasons:
+1. Very large numbers of events have been detected
+2. The ligands soaked are very large and/or flexible
+3. The ASU is large and/or data is high resolution
+4. A small number of cores are used for processing
+5. There are many datasets
+6. There are multiple ligands per dataset (for example in a crude screen)
+
+If faster run times are necessary, then there are a few possible solutions:
+1. Use more cores, which can be controlled with the `--local_cpus` option
+2. Split up the PanDDA and run on multiple nodes, by launching several PanDDAs with different settings for the `--dataset_range` options, and then merging them with the script `scripts/merge_panddas.py`
+3. Increase the threshold for evidence to process an event using the option `--process_event_score_cutoff`
+4. Decrease the number of conformations tested using the option `--autobuild_max_num_conformations`
+5. Decrease the number of autobuild attempts using the option `--autobuild_max_tries`
+
+## PanDDA 2 fails to produce good autobuilds of clear events
+
+PanDDA 2 can sometimes fail to produce good autobuilds of clear events. While by far the most likely cause of this was a failure in selecting the best build, which is an area of active development, there are some other causes as well.
+
+1. If the ligand is very large or flexible, the number of conformations to sampled may be too low to get one close to the crystallographic conformation
+
+
 
 Additional things to document:
 1. Highlight causes of datasets being thrown out, and where in the log to find that
