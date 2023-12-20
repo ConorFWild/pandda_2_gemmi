@@ -34,6 +34,7 @@ def output_maps(
         res,
         all_events,
         model_means,
+        model_stds,
         model_zs,
         all_maps=True
 ):
@@ -57,6 +58,10 @@ def output_maps(
         mean_map_grid = reference_frame.unmask(SparseDMap(model_means[model_id]))
         mean_map_path = model_maps_dir / f'{model_id}_mean.ccp4'
         save_dmap(mean_map_grid, mean_map_path)
+
+        std_map_grid = reference_frame.unmask(SparseDMap(model_stds[model_id]))
+        std_map_path = model_maps_dir / f'{model_id}_sigma.ccp4'
+        save_dmap(std_map_grid, std_map_path)
 
         z_map_grid = reference_frame.unmask(SparseDMap(model_zs[model_id]))
         z_map_path = model_maps_dir / f'{model_id}_z.ccp4'

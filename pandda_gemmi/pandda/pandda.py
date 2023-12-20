@@ -165,7 +165,7 @@ class ProcessModel:
         # Renumber the events
         events = {j + 1: event for j, event in enumerate(events.values())}
 
-        return events, mean, z
+        return events, mean, z, std
 
 
 def pandda(args: PanDDAArgs):
@@ -418,11 +418,13 @@ def pandda(args: PanDDAArgs):
         model_events = {}
         model_means = {}
         model_zs = {}
+        model_stds = {}
         for model_number, result in processed_models.items():
             if result[0] is not None:
                 model_events[model_number] = result[0]
                 model_means[model_number] = result[1]
                 model_zs[model_number] = result[2]
+                model_stds[model_number] = result[3]
 
         time_finish_process_models = time.time()
         # TODO: Log properly
@@ -612,6 +614,7 @@ def pandda(args: PanDDAArgs):
             processing_res,
             model_events,
             model_means,
+            model_stds,
             model_zs
         )
         time_finish_output_maps = time.time()
