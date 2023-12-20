@@ -704,7 +704,7 @@ class PanDDAConsole:
         self.wrap_subtitle(f"Processed Model Results")
         # self.console.print(self.indent_text(f"Processed Model Results:"))
         for model_number, processed_model in processed_models.items():
-            events, z, mean = processed_models[model_number]
+            events, z, mean, std = processed_models[model_number]
             self.console.print(self.indent_text(f"Model Number: {model_number}"))
             if events:
                 self.console.print(self.indent_text(f"Number of events: {len(events)}", indent=8))
