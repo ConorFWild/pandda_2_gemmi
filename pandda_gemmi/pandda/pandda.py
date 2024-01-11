@@ -127,7 +127,7 @@ class ProcessModel:
 
         # Handle the edge case of zero events
         if len(events) == 0:
-            return None, None, None, None
+            return None, mean, z, std
 
         # Filter the events prior to scoring them based on their size
         for filter in [
@@ -137,7 +137,7 @@ class ProcessModel:
 
         # Return None if there are no events after pre-scoring filters
         if len(events) == 0:
-            return None, None, None, None
+            return None, mean, z, std
 
         # Score the events with some method such as the CNN
         time_begin_score_events = time.time()
@@ -160,7 +160,7 @@ class ProcessModel:
 
         # Return None if there are no events after post-scoring filters
         if len(events) == 0:
-            return None, None, None, None
+            return None, mean, z, std
 
         # Renumber the events
         events = {j + 1: event for j, event in enumerate(events.values())}
@@ -423,9 +423,9 @@ def pandda(args: PanDDAArgs):
         for model_number, result in processed_models.items():
             if result[0] is not None:
                 model_events[model_number] = result[0]
-                model_means[model_number] = result[1]
-                model_zs[model_number] = result[2]
-                model_stds[model_number] = result[3]
+            model_means[model_number] = result[1]
+            model_zs[model_number] = result[2]
+            model_stds[model_number] = result[3]
 
         time_finish_process_models = time.time()
         # TODO: Log properly
