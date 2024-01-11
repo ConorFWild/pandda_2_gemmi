@@ -396,6 +396,7 @@ def pandda(args: PanDDAArgs):
             dataset_dmap_array,
             reference_frame,
             PointwiseNormal(),
+            process_all=True
         )
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
