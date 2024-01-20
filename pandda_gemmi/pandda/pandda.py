@@ -27,7 +27,8 @@ from pandda_gemmi.comparators import (
     FilterOnlyDatasets,
     FilterSpaceGroup,
     FilterResolution,
-    FilterCompatibleStructures
+    FilterCompatibleStructures,
+    FilterResolutionLowerLimit
 )
 from pandda_gemmi.event_model.event import EventBuild
 from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNNAndFirst

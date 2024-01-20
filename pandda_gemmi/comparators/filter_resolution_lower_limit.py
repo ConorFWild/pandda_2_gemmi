@@ -1,6 +1,6 @@
 from ..interfaces import *
 
-class FilterRFree:
+class FilterResolutionLowerLimit:
     def __init__(self, max_rfree: float):
         self.max_rfree = max_rfree
 
