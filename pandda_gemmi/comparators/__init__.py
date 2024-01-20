@@ -6,3 +6,4 @@ from .filter_only_datasets import FilterOnlyDatasets
 from .filter_spacegroup import FilterSpaceGroup
 from .filter_resolution import FilterResolution
 from .filter_compatible_structures import FilterCompatibleStructures
+from .filter_resolution_lower_limit import FilterResolutionLowerLimit
