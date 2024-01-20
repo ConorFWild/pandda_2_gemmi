@@ -225,7 +225,7 @@ def pandda(args: PanDDAArgs):
     datasets_to_process, datasets_not_to_process = GetDatasetsToProcess(
         [
             FilterRFree(args.max_rfree),
-            FilterResolutionLowerLimit(args.high_res_limit_lower),
+            FilterResolutionLowerLimit(args.high_res_lower_limit),
             FilterRange(args.dataset_range),
             FilterExcludeFromAnalysis(args.exclude_from_z_map_analysis),
             FilterOnlyDatasets(args.only_datasets)
