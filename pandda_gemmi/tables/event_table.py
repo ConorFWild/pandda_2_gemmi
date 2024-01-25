@@ -58,7 +58,7 @@ class EventTableRecord:
             low_resolution=0.0,
             r_free=round(dataset.structure.rfree(), 2),
             r_work=0.0,
-            analysed_resolution=0.0,
+            analysed_resolution=round(dataset.reflections.resolution(), 2),
             map_uncertainty=0.0,
             analysed=False,
             interesting=False,
