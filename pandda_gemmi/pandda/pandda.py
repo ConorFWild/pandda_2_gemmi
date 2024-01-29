@@ -33,7 +33,7 @@ from pandda_gemmi.comparators import (
 from pandda_gemmi.event_model.event import EventBuild
 from pandda_gemmi.event_model.characterization import get_characterization_sets, CharacterizationNNAndFirst
 from pandda_gemmi.event_model.filter_characterization_sets import filter_characterization_sets
-from pandda_gemmi.event_model.outlier import PointwiseNormal
+from pandda_gemmi.event_model.outlier import PointwiseNormal, PointwiseMAD
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.event_model.score import get_model_map, ScoreCNNLigand
 from pandda_gemmi.event_model.filter import (
@@ -105,7 +105,7 @@ class ProcessModel:
         score,
 ):
         # Get the statical maps
-        mean, std, z = PointwiseNormal()(
+        mean, std, z = PointwiseMAD()(
             homogenized_dataset_dmap_array,
             characterization_set_dmaps_array
         )
@@ -397,7 +397,7 @@ def pandda(args: PanDDAArgs):
             dmaps,
             dataset_dmap_array,
             reference_frame,
-            PointwiseNormal(),
+            PointwiseMAD(),
             process_all=True
         )
 
