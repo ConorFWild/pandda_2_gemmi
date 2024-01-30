@@ -583,7 +583,7 @@ def pandda(args: PanDDAArgs):
         if len(model_events) == 0:
             # TODO: Log properly
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
-            selected_model_num = list(models_to_process)[0]
+            selected_model_num = models_to_process[0]
             selected_events = {}
             top_selected_model_events = {}
 
