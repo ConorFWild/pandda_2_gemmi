@@ -52,7 +52,7 @@ def filter_characterization_sets(
     models_to_process = []
     if process_all:
         for model_number in sorted(model_scores, key=lambda _model_number: model_scores[_model_number]):
-            if model_scores[model_number] < 0.2:
+            # if model_scores[model_number] < 0.2:
                 models_to_process.append(model_number)
     else:
         _l = 0
