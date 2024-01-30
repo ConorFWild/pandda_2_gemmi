@@ -583,14 +583,18 @@ def pandda(args: PanDDAArgs):
         if len(model_events) == 0:
             # TODO: Log properly
             print(f"NO EVENTS FOR DATASET {dtag}: SKIPPING REST OF PROCESSING!")
-            continue
+            selected_model_num = list(model_events.keys())[0]
+            selected_events = {}
+            top_selected_model_events = {}
 
-        # Select a model based on the events it produced and get the associated events
-        selected_model_num, selected_events = select_model(model_events)
+        else:
 
-        # Filter the events to select those to output event maps for and to autobuild
-        # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
-        top_selected_model_events = filter_selected_events(dtag, selected_events)
+            # Select a model based on the events it produced and get the associated events
+            selected_model_num, selected_events = select_model(model_events)
+
+            # Filter the events to select those to output event maps for and to autobuild
+            # This step can be dangerous in that events with high multiplity (for example due to NCS) could be filtered
+            top_selected_model_events = filter_selected_events(dtag, selected_events)
 
         for event_id, event in top_selected_model_events.items():
             pandda_events[event_id] = event
