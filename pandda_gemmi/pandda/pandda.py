@@ -400,7 +400,7 @@ def pandda(args: PanDDAArgs):
             PointwiseMAD(),
             process_all=True
         )
-        print(f"Models to process are {models_to_process} out of {[x for x in comparator_datasets]}")
+        print(f"Models to process are {models_to_process} out of {[x for x in characterization_sets]}")
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
