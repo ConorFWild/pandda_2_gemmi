@@ -1345,7 +1345,9 @@ def autobuild_conformer(
         structure,
         unmasked_dtag_array,
         unmasked_mean_array,
-        z_array
+        z_array,
+raw_xmap_sparse,
+score_build
                 ):
 
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
@@ -1354,12 +1356,15 @@ def autobuild_conformer(
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
     score_grid = normalize_z_array + normalize_event_map_array
     event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
+    z_grid = reference_frame.unmask(SparseDMap(z_array))
+    raw_xmap_grid = reference_frame.unmask(SparseDMap(raw_xmap_sparse))
 
     optimized_structure, score, centroid = score_conformer(
         centroid,
         conformer.structure,
         event_map_grid,
     )
+
 
     save_structure(
         Structure(None, optimized_structure),
@@ -1428,6 +1433,13 @@ def autobuild_conformer(
     noise_signal_vals[noise_signal_vals > 3] = 3.0
     signal_vals[signal_vals < 0] = 0.0
     signal_vals[signal_vals > 3] = 3.0
+
+    score = score_build(
+        optimized_structure,
+        corrected_event_map_grid,
+        z_grid,
+        raw_xmap_grid,
+    )
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {

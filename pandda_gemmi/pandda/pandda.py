@@ -195,6 +195,9 @@ def pandda(args: PanDDAArgs):
     # Get the method for scoring events
     score = ScoreCNNLigand()
 
+    # Get the method for scoring
+    score_build = ScoreCNNEventBuild()
+
     # Get the method for processing the statistical models
     process_model = ProcessModel()
 
@@ -369,6 +372,8 @@ def pandda(args: PanDDAArgs):
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
         raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
+        raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid)
+        raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
         raw_xmap_array = np.array(raw_xmap_grid, copy=True)
 
         # Get the masked grid of the structure
@@ -413,7 +418,8 @@ def pandda(args: PanDDAArgs):
                 dmaps[characterization_set_masks[model_number], :],
                 reference_frame,
                 reference_frame.mask_grid(model_grid).data,
-                score
+                score,
+                score_build
             )()
             for model_number
             in models_to_process
@@ -502,7 +508,9 @@ def pandda(args: PanDDAArgs):
                     dataset.structure,
                     unmasked_dtag_array_ref,
                     unmasked_mean_array_refs[_model_event_id[0]],
-                    z_arrays[_model_event_id[0]]
+                    z_arrays[_model_event_id[0]],
+                    raw_xmap_sparse_ref,
+                    score_build
                     # processing_res
                     # fs_ref,
                 )
