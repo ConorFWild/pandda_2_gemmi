@@ -85,13 +85,13 @@ def _get_transform_from_orientation_centroid(orientation, centroid):
     event_centre_transform.vec.fromlist(centroid)
 
     # Apply random translation
-    transform = event_centre_transform.combine(
-        rotation_transform.combine(
-            centre_grid_transform.combine(
-                initial_transform
-            )
-        )
-    )
+    # transform = event_centre_transform.combine(
+    #     rotation_transform.combine(
+    #         centre_grid_transform.combine(
+    #             initial_transform
+    #         )
+    #     )
+    # )
 
     transform = combine(
         event_centre_transform,
