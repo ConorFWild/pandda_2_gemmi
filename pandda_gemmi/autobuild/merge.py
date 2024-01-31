@@ -118,7 +118,7 @@ class MergeHighestBuildScore:
         # }
         highest_scoring_event_id = max(
             dtag_events,
-            key=lambda _event_id: dtag_events[_event_id].score,
+            key=lambda _event_id: dtag_events[_event_id].build.score,
         )
         highest_scoring_event_autobuilds = {
             _path: score_and_event_id[0]
