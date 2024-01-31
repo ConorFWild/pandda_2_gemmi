@@ -419,7 +419,7 @@ def pandda(args: PanDDAArgs):
                 reference_frame,
                 reference_frame.mask_grid(model_grid).data,
                 score,
-                score_build
+
             )()
             for model_number
             in models_to_process
