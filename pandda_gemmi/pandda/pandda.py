@@ -46,7 +46,7 @@ from pandda_gemmi.event_model.select import select_model
 from pandda_gemmi.event_model.output import output_maps
 from pandda_gemmi.event_model.filter_selected_events import filter_selected_events
 from pandda_gemmi.site_model import HeirarchicalSiteModel, Site, get_sites
-from pandda_gemmi.autobuild import AutobuildResult
+from pandda_gemmi.autobuild import AutobuildResult, ScoreCNNEventBuild
 from pandda_gemmi.autobuild.inbuilt import mask_dmap, get_conformers, autobuild_conformer
 from pandda_gemmi.autobuild.merge import merge_autobuilds, MergeHighestBuildScore
 from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighEventScoreBySite
