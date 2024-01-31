@@ -1346,8 +1346,8 @@ def autobuild_conformer(
         unmasked_dtag_array,
         unmasked_mean_array,
         z_array,
-raw_xmap_sparse,
-score_build
+    raw_xmap_sparse,
+    score_build
                 ):
 
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
