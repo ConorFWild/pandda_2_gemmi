@@ -375,9 +375,9 @@ def pandda(args: PanDDAArgs):
         raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid).data
         raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
         raw_xmap_array = np.array(raw_xmap_grid, copy=True)
-        raw_xmap_grid = reference_frame.unmask(
-            raw_xmap_sparse
-        )
+        # raw_xmap_grid = reference_frame.unmask(
+        #     raw_xmap_sparse
+        # )
 
         # Get the masked grid of the structure
         model_grid = get_model_map(dataset.structure.structure, xmap_grid)
