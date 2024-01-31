@@ -3,6 +3,9 @@ from ..interfaces import *
 def get_event_score(event):
     return (event.build.signal / event.build.noise) * event.local_strength
 
+def get_event_score(event):
+    return event.score
+
 class RankHighEventScoreBySite:
     def __call__(
             self,

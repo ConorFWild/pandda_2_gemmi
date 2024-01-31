@@ -106,20 +106,20 @@ class MergeHighestBuildScore:
             autobuilds: Dict[str, Tuple[float, Tuple[str,int]]],
             dtag_events: Dict[Tuple[str, int], EventInterface],
     ):
-        highest_scoring_event_id = max(
-            dtag_events,
-            key=lambda _event_id: (dtag_events[_event_id].build.signal / dtag_events[_event_id].build.noise) * dtag_events[_event_id].local_strength,
-        )
+        # highest_scoring_event_id = max(
+        #     dtag_events,
+        #     key=lambda _event_id: (dtag_events[_event_id].build.signal / dtag_events[_event_id].build.noise) * dtag_events[_event_id].local_strength,
+        # )
         # dtag_autobuilds = {
         #     event_idx: result
         #     for (dtag, event_idx), result
         #     in autobuilds.items()
         #     if dtag
         # }
-        # highest_scoring_event_id = max(
-        #     dtag_events,
-        #     key=lambda _event_id: dtag_events[_event_id].score,
-        # )
+        highest_scoring_event_id = max(
+            dtag_events,
+            key=lambda _event_id: dtag_events[_event_id].score,
+        )
         highest_scoring_event_autobuilds = {
             _path: score_and_event_id[0]
             for _path, score_and_event_id
