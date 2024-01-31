@@ -372,7 +372,7 @@ def pandda(args: PanDDAArgs):
         dataset_dmap_array = dmaps[dtag_index[0][0], :]
         xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
         raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
-        raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid)
+        raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid).data
         raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
         raw_xmap_array = np.array(raw_xmap_grid, copy=True)
         raw_xmap_grid = reference_frame.unmask(
