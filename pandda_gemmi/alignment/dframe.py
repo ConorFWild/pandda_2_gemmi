@@ -1215,7 +1215,7 @@ class GridMask(GridMaskInterface):
 
 
 def get_grid_from_dataset(dataset: DatasetInterface):
-    return dataset.reflections.transform_f_phi_to_map()
+    return dataset.reflections.transform_f_phi_to_map(sample_rate=3)
 
 
 class DFrame:
