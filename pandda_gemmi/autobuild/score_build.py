@@ -28,6 +28,23 @@ def _get_centroid_from_res(res):
     return np.mean(poss, axis=0)
 
 
+def combine(new_transform, old_transform):
+    new_transform_mat = new_transform.mat
+    new_transform_vec = new_transform.vec
+
+    old_transform_mat = old_transform.mat
+    old_transform_vec = old_transform.vec
+
+    combined_transform_mat = new_transform_mat.multiply(old_transform_mat)
+    combined_transform_vec = new_transform_vec + new_transform_mat.multiply(old_transform_vec)
+
+    combined_transform = gemmi.Transform()
+    combined_transform.vec = combined_transform_vec
+    combined_transform.mat = combined_transform_mat
+
+    return combined_transform
+
+
 def _get_transform_from_orientation_centroid(orientation, centroid):
     sample_distance: float = 0.5
     n: int = 30
@@ -75,6 +92,14 @@ def _get_transform_from_orientation_centroid(orientation, centroid):
             )
         )
     )
+
+    transform = combine(
+        event_centre_transform,
+        combine(
+            rotation_transform,
+            combine(
+                centre_grid_transform,
+                    initial_transform)))
     return transform
 
 
