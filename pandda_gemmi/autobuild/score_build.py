@@ -39,8 +39,8 @@ def combine(new_transform, old_transform):
     combined_transform_vec = new_transform_vec + new_transform_mat.multiply(old_transform_vec)
 
     combined_transform = gemmi.Transform()
-    combined_transform.vec = combined_transform_vec
-    combined_transform.mat = combined_transform_mat
+    combined_transform.vec.fromlist(combined_transform_vec.tolist())
+    combined_transform.mat.fromlist(combined_transform_mat.tolist())
 
     return combined_transform
 
