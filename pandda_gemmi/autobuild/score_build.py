@@ -2,9 +2,6 @@ import time
 
 import numpy as np
 import gemmi
-from scipy import optimize
-from scipy.spatial.transform import Rotation as R
-from numpy.random import default_rng
 
 from ..interfaces import *
 
@@ -13,11 +10,9 @@ import inspect
 
 import torch
 
-from .event import Event
 
 from pandda_gemmi.cnn import resnet
 from pandda_gemmi.cnn import resnet18
-from pandda_gemmi.dmaps import SparseDMap
 
 
 def _get_identity_matrix():
