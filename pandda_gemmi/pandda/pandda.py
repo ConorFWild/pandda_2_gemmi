@@ -197,6 +197,7 @@ def pandda(args: PanDDAArgs):
 
     # Get the method for scoring
     score_build = ScoreCNNEventBuild()
+    score_build_ref = processor.put(score_build)
 
     # Get the method for processing the statistical models
     process_model = ProcessModel()
@@ -513,7 +514,7 @@ def pandda(args: PanDDAArgs):
                     unmasked_mean_array_refs[_model_event_id[0]],
                     z_arrays[_model_event_id[0]],
                     raw_xmap_sparse_ref,
-                    score_build
+                    score_build_ref
                     # processing_res
                     # fs_ref,
                 )
