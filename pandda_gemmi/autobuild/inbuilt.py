@@ -1416,10 +1416,13 @@ def autobuild_conformer(
     )
     # noise_singal_z = ...
 
-    optimal_signal_contour = get_optimal_signal_contour(
-        signal_vals,
-        noise_signal_vals
-    )
+    try:
+        optimal_signal_contour = get_optimal_signal_contour(
+            signal_vals,
+            noise_signal_vals
+        )
+    except:
+        optimal_signal_contour = 1.0
 
     optimal_noise = np.sum(noise_signal_vals > optimal_signal_contour)
     optimal_signal = np.sum(signal_vals > optimal_signal_contour)
