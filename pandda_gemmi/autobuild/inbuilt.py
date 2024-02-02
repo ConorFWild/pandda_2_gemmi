@@ -1386,10 +1386,13 @@ def autobuild_conformer(
     )
     predicted_density_array = np.array(predicted_density, copy=False)
 
-    predicted_density_high_contour = get_predicted_density_high_contour(
-        predicted_density,
-        predicted_mask
-    )
+    try:
+        predicted_density_high_contour = get_predicted_density_high_contour(
+            predicted_density,
+            predicted_mask
+        )
+    except:
+        predicted_density_high_contour = 1.0
 
     corr, bdc = get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
