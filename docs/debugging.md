@@ -1,6 +1,6 @@
 # Debugging PanDDA 2
 
-## Minimum Requirements for Good PanDDA Performance
+## Minimum Requirements For Good PanDDA Performance
 
 PanDDA 2 is able to find low occupancy ligands by combining information from multiple crystallographic datasets. As such having a set of near-homogenous crystal structures is required. Although sufficient homogeneity for good PanDDA 2 results varies, good guidelines are:
 
@@ -53,7 +53,18 @@ model_building/
 
 ```
 
-## How to run subsets of data
+## Common Options And Their Uses
+
+- `--dataset_range`
+  - [How To Run Subsets Of Data](#how-to-run-subsets-of-data)
+- `--only_datasets`
+  - [How To Run Subsets Of Data](#how-to-run-subsets-of-data)
+- `--high_res_lower_limit`
+  - [How To Filter Poor Quality Data](#how-to-filter-poor-quality-data)
+- `--max_rfree`
+  - [How To Filter Poor Quality Data](#how-to-filter-poor-quality-data)
+
+## How To Run Subsets Of Data
 
 It is often useful to only analyze a subset of data, for example because new data has become available and is unlikely to improve old results, or because only some datasets are of interest. It is important to note that none of these options prevent datasets being used to characterize ground state models, it only prevents events and autobuilds being generated for them.
 
@@ -63,6 +74,14 @@ PanDDA 2 provides several options that allow users to do this:
 3. `--only_datasets`: Only process those datasets whose names occur in the given string. For example, `--only_datasets="BAZ2BA-x088,BAZ2BA-x092"` will process `BAZ2BA-x088` but will not process `BAZ2BA-x105`.
 
 These options are not exclusive, and are applied in the above order, so if `--dataset_range="100-200"` and `--only_datasets="BAZ2BA-x157"` the **no** datasets will be processed.
+
+## How To Filter Poor Quality Data
+
+Although the defaults for PanDDA are usually appropriate, sometimes it is necessary change the defaults on what constitues sufficiently good dataset to use in ground state characterization.
+
+The main options PanDDA 2 provides for this are:
+1. `--high_res_lower_limit`: Process only those datasets whose assigned high resolution limit is above this value. For example, `--high_res_lower_limit=3.0` will only process those datasets whose upper resolution limit is between 0.0 and 3.0.
+2. `--max_rfree`: Process only those datasets whose assigned rfree is below this value. For example, `--max_rfree=3.0` will only process those datasets whose rfree is between 0 and 3.0.
 
 ## How to recover from Failed Runs
 

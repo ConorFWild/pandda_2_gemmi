@@ -168,6 +168,22 @@ class ProcessModel:
 
         return events, mean, z, std
 
+# def score_builds(
+#             score_build,
+#             builds,
+#             raw_xmap_grid,
+#             dataset_dmap_array,
+#             model_means,
+#             model_zs
+#         ):
+#     for model_number, mean_map in model_means.items():
+#         model_z = model_zs[model_number]
+#         model_builds = {_build_id: build for _build_id, build in builds.items() if _build_id[0] == model_number}
+#
+#         # Get the model corrected event maps
+#
+#         #
+
 
 def pandda(args: PanDDAArgs):
     # Record time at which PanDDA processing begins
@@ -525,6 +541,15 @@ def pandda(args: PanDDAArgs):
         time_finish_autobuild = time.time()
         # TODO: Log properly
         print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
+
+        # build_scores = score_builds(
+        #     score_build,
+        #     builds,
+        #     raw_xmap_grid,
+        #     dataset_dmap_array,
+        #     model_means,
+        #     model_zs
+        # )
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():

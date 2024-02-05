@@ -1365,12 +1365,10 @@ def autobuild_conformer(
         event_map_grid,
     )
 
-
     save_structure(
         Structure(None, optimized_structure),
         out_dir / f"{conformer_id}.pdb",
     )
-
 
     xmap = reference_frame.unmask(masked_dtag_array)
 
