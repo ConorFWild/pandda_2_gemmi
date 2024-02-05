@@ -1440,7 +1440,10 @@ def autobuild_conformer(
 
     score = score_build(
         optimized_structure,
-        corrected_event_map_grid,
+        # corrected_event_map_grid,
+        reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+        reference_frame.unmask(SparseDMap(unmasked_mean_array)),
+        bdc,
         z_grid,
         raw_xmap_grid,
     )
