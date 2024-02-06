@@ -339,7 +339,7 @@ class ScoreCNNEventBuild:
                 axis=0,
             )[np.newaxis, :].astype(float)
 
-        print(f"image dtype: {image.dtype}")
+        print(f"image dtype: {image.dtype}, Image shape: {image.shape}")
 
         image_t = torch.from_numpy(image)
         image_c = image_t.to(self.dev)
