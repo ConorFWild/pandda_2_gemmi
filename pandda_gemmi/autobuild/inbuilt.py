@@ -1438,6 +1438,7 @@ def autobuild_conformer(
     signal_vals[signal_vals < 0] = 0.0
     signal_vals[signal_vals > 3] = 3.0
 
+    time_begin_scoring = time.time()
     score = score_build(
         optimized_structure,
         # corrected_event_map_grid,
@@ -1447,6 +1448,8 @@ def autobuild_conformer(
         z_grid,
         raw_xmap_grid,
     )
+    time_finish_scoring = time.time()
+    print(f"Scored in: {time_finish_scoring-time_begin_scoring}")
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
