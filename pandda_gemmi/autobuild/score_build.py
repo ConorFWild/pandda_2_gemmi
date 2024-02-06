@@ -348,7 +348,10 @@ class ScoreCNNEventBuild:
         else:
             dev = "cpu"
 
-        image_c = image.to(dev)
-        annotation = self.cnn(image_c)
+        image_t = torch.from_numpy(image)
+        image_c = image_t.to(dev)
+        model_annotation = self.cnn(image_c)
+
+        annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
 
         return float(annotation[0][1])
