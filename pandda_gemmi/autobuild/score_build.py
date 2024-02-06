@@ -343,7 +343,7 @@ class ScoreCNNEventBuild:
 
         image_t = torch.from_numpy(image)
         image_c = image_t.to(self.dev)
-        print(f"Image tensor dtype: {image_c.dtype}")π
+        print(f"Image tensor dtype: {image_c.dtype}, image tensor shape: {image_c.shape}")
 
         cnn = self.cnn.float()
 
