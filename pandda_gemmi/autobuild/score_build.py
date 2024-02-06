@@ -274,7 +274,7 @@ class ScoreCNNEventBuild:
         # Add model to device
         cnn.to(self.dev)
         cnn.eval()
-        self.cnn = cnn.float()
+        self.cnn = cnn#.float()
 
         self.n = n
 
@@ -336,7 +336,8 @@ class ScoreCNNEventBuild:
                     image_z_map * image_ligand_mask,
                     image_raw_xmap * image_ligand_mask,
                 ],
-                axis=0
+                axis=0,
+            dtype=np.double
             )[np.newaxis, :]
 
         # rprint(f"Image shape is: {image.shape}")
