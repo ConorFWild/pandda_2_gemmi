@@ -274,7 +274,7 @@ class ScoreCNNEventBuild:
         # Add model to device
         cnn.to(self.dev)
         cnn.eval()
-        self.cnn = cnn  # .float()
+        self.cnn = cnn.float()
 
         self.n = n
 
