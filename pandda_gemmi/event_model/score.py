@@ -489,9 +489,9 @@ class ScoreCNNLigand:
             z_map_std = np.std(z_map_sample)
             image_z_map = (z_map_sample[np.newaxis, :] - z_map_mean) / z_map_std
 
-            sample_array_model = np.copy(sample_array)
-            model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
-            image_model = model_sample[np.newaxis, :]
+            # sample_array_model = np.copy(sample_array)
+            # model_sample = sample_xmap(model_grid, sample_transform, sample_array_model)
+            # image_model = model_sample[np.newaxis, :]
             # print(f"Model: {np.mean(image_model)}")
             # print(f"Ligand: {np.mean(image_ligand)}")
 
