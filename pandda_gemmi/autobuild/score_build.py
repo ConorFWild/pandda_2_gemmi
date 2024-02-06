@@ -330,8 +330,7 @@ class ScoreCNNEventBuild:
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
         image_ligand_mask[image_ligand_mask > 0.9] = 1.0
 
-        image = torch.tensor(
-            np.stack(
+        image = np.stack(
                 [
                     ((image_dmap - (bdc*image_mean_map)) / (1-bdc)) * image_ligand_mask,
                     image_z_map * image_ligand_mask,
@@ -339,7 +338,7 @@ class ScoreCNNEventBuild:
                 ],
                 axis=0
             )[np.newaxis, :]
-        )
+
         # rprint(f"Image shape is: {image.shape}")
 
         # Get the device
