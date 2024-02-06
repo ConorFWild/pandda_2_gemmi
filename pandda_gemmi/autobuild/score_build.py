@@ -337,8 +337,7 @@ class ScoreCNNEventBuild:
                     image_raw_xmap * image_ligand_mask,
                 ],
                 axis=0,
-            dtype=np.double
-            )[np.newaxis, :]
+            )[np.newaxis, :].astype(np.double)
 
         print(f"image dtype: {image.dtype}")
 
