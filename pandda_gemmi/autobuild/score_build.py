@@ -343,11 +343,12 @@ class ScoreCNNEventBuild:
 
         image_t = torch.from_numpy(image)
         image_c = image_t.to(self.dev)
-        print(f"Image tensor dtype: {image_c.dtype}")
+        print(f"Image tensor dtype: {image_c.dtype}")π
 
         cnn = self.cnn.float()
 
         model_annotation = cnn(image_c)
+        print(f'Annotation shape: {model_annotation.shape}')
 
         annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
 
