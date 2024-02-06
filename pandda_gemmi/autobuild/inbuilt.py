@@ -1350,6 +1350,8 @@ def autobuild_conformer(
     score_build
                 ):
 
+    time_begin_autobuild = time.time()
+
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
     event_map_array = (masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)
     normalize_event_map_array = (event_map_array-np.mean(event_map_array) / np.std(event_map_array))
@@ -1449,7 +1451,6 @@ def autobuild_conformer(
         raw_xmap_grid,
     )
     time_finish_scoring = time.time()
-    print(f"Scored in: {time_finish_scoring-time_begin_scoring}")
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
@@ -1475,6 +1476,8 @@ def autobuild_conformer(
             # 'total_noise':
         }
     }
+    time_finish_autobuild = time.time()
+    print(f"Scored in: {time_finish_scoring-time_begin_scoring}")
 
     # Return results
     return log_result_dict

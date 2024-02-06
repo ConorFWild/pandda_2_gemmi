@@ -340,16 +340,16 @@ class ScoreCNNEventBuild:
             )[np.newaxis, :]
         image_float = image.astype(np.float32)
 
-        print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
+        # print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
 
         image_t = torch.from_numpy(image_float)
         image_c = image_t.to(self.dev)
-        print(f"Image tensor dtype: {image_c.dtype}, image tensor shape: {image_c.shape}")
+        # print(f"Image tensor dtype: {image_c.dtype}, image tensor shape: {image_c.shape}")
 
         cnn = self.cnn.float()
 
         model_annotation = cnn(image_c)
-        print(f'Annotation shape: {model_annotation.shape}')
+        # print(f'Annotation shape: {model_annotation.shape}')
 
         annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
 
