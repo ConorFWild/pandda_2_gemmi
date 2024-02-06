@@ -119,6 +119,22 @@ def get_ligand_mask(dmap, res):
 
     return mask
 
+def get_ligand_mask_float(dmap, res):
+    mask = gemmi.FloatGrid(dmap.nu, dmap.nv, dmap.nw)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(dmap.unit_cell)
+
+    # Get the mask
+    for atom in res:
+        pos = atom.pos
+        mask.set_points_around(
+            pos,
+            radius=2.5,
+            value=1.0,
+        )
+
+    return mask
+
 def get_masked_dmap(dmap, res):
     mask = get_ligand_mask(dmap, res)
 
@@ -304,7 +320,7 @@ class ScoreCNNEventBuild:
             transform,
             sample_array
         )
-        ligand_mask_grid = get_ligand_mask(xmap, res)
+        ligand_mask_grid = get_ligand_mask_float(xmap, res)
         image_ligand_mask = sample_xmap(
             ligand_mask_grid,
             # res,
