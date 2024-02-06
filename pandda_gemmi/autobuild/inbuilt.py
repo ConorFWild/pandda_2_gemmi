@@ -1481,7 +1481,7 @@ def autobuild_conformer(
         }
     }
     time_finish_autobuild = time.time()
-    print(f"Autobuilt: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring-time_begin_scoring, 2)}. Built: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Optimized BDC: {round((time_finish_optimize_bdc-time_begin_optimize_bdc))}")
+    print(f"Autobuilt: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring-time_begin_scoring, 2)}. Built: {round(time_finish_score_conf-time_begin_score_conf, 2)}. Optimized BDC: {round((time_finish_optimize_bdc-time_begin_optimize_bdc))}")
 
     # Return results
     return log_result_dict
