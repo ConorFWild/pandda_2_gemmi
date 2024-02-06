@@ -1361,11 +1361,13 @@ def autobuild_conformer(
     z_grid = reference_frame.unmask(SparseDMap(z_array))
     raw_xmap_grid = reference_frame.unmask(SparseDMap(raw_xmap_sparse))
 
+    time_begin_score_conf = time.time()
     optimized_structure, score, centroid = score_conformer(
         centroid,
         conformer.structure,
         event_map_grid,
     )
+    time_finish_score_conf = time.time()
 
     save_structure(
         Structure(None, optimized_structure),
@@ -1394,6 +1396,7 @@ def autobuild_conformer(
     except:
         predicted_density_high_contour = 1.0
 
+    time_begin_optimize_bdc = time.time()
     corr, bdc = get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
         predicted_density,
@@ -1403,6 +1406,7 @@ def autobuild_conformer(
         unmasked_mean_array,
         res, event_bdc
     )
+    time_finish_optimize_bdc = time.time()
 
     corrected_event_map_grid = reference_frame.unmask(SparseDMap((unmasked_dtag_array - (bdc*unmasked_mean_array)) / (1-bdc)))
     corrected_event_map_array = np.array(corrected_event_map_grid, copy=False)
@@ -1477,7 +1481,7 @@ def autobuild_conformer(
         }
     }
     time_finish_autobuild = time.time()
-    print(f"Autobuilt in: {time_finish_autobuild-time_begin_autobuild}. Scored in: {time_finish_scoring-time_begin_scoring}")
+    print(f"Autobuilt: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring-time_begin_scoring, 2)}. Built: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Optimized BDC: {round((time_finish_optimize_bdc-time_begin_optimize_bdc))}")
 
     # Return results
     return log_result_dict
