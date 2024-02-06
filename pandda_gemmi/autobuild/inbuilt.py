@@ -1477,7 +1477,7 @@ def autobuild_conformer(
         }
     }
     time_finish_autobuild = time.time()
-    print(f"Scored in: {time_finish_scoring-time_begin_scoring}")
+    print(f"Autobuilt in: {time_finish_autobuild-time_begin_autobuild}. Scored in: {time_finish_scoring-time_begin_scoring}")
 
     # Return results
     return log_result_dict
