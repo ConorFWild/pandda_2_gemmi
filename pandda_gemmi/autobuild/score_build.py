@@ -337,11 +337,12 @@ class ScoreCNNEventBuild:
                     image_raw_xmap * image_ligand_mask,
                 ],
                 axis=0,
-            )[np.newaxis, :].astype(float)
+            )[np.newaxis, :]
+        image_float = image.astype(np.float32)
 
-        print(f"image dtype: {image.dtype}, Image shape: {image.shape}")
+        print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
 
-        image_t = torch.from_numpy(image)
+        image_t = torch.from_numpy(image_float)
         image_c = image_t.to(self.dev)
         print(f"Image tensor dtype: {image_c.dtype}, image tensor shape: {image_c.shape}")
 
