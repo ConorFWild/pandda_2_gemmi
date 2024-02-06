@@ -484,9 +484,9 @@ def pandda(args: PanDDAArgs):
             unmasked_mean_array_refs[model_number] = processor.put(model_means[model_number])
 
         # Cache the model Z map arrays
-        z_arrays = {}
+        z_ref_arrays = {}
         for model_number, model in model_events.items():
-            z_arrays[model_number] = processor.put(model_zs[model_number])
+            z_ref_arrays[model_number] = processor.put(model_zs[model_number])
 
         # Generate conformers of the dataset ligands to score
         conformers = {}
@@ -529,7 +529,7 @@ def pandda(args: PanDDAArgs):
                     dataset.structure,
                     unmasked_dtag_array_ref,
                     unmasked_mean_array_refs[_model_event_id[0]],
-                    z_arrays[_model_event_id[0]],
+                    z_ref_arrays[_model_event_id[0]],
                     raw_xmap_sparse_ref,
                     score_build_ref
                     # processing_res
