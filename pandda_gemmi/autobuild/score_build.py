@@ -340,14 +340,6 @@ class ScoreCNNEventBuild:
             dtype=np.double
             )[np.newaxis, :]
 
-        # rprint(f"Image shape is: {image.shape}")
-
-        # Get the device
-        if torch.cuda.is_available():
-            dev = "cuda:0"
-        else:
-            dev = "cpu"
-
         print(f"image dtype: {image.dtype}")
 
         image_t = torch.from_numpy(image)

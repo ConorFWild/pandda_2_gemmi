@@ -513,6 +513,7 @@ def pandda(args: PanDDAArgs):
             os.mkdir(out_dir)
 
         # Perform autobuilds of events
+        print(f"Have {len(builds_to_perform)} builds to perform!")
         builds = processor.process_dict(
             {
                 _model_event_id: Partial(autobuild_conformer).paramaterise(
