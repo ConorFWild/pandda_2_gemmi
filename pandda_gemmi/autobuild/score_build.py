@@ -300,32 +300,32 @@ class ScoreCNNEventBuild:
             xmap,
             # res,
             transform,
-            sample_array
+            np.copy(sample_array)
         )
         image_mean_map = sample_xmap_and_scale(
             mean_map,
             # res,
             transform,
-            sample_array
+            np.copy(sample_array)
         )
         image_z_map = sample_xmap_and_scale(
             z_grid,
             # res,
             transform,
-            sample_array
+            np.copy(sample_array)
         )
         image_raw_xmap = sample_xmap_and_scale(
             raw_xmap_grid,
             # res,
             transform,
-            sample_array
+            np.copy(sample_array)
         )
         ligand_mask_grid = get_ligand_mask_float(xmap, res)
         image_ligand_mask = sample_xmap(
             ligand_mask_grid,
             # res,
             transform,
-            sample_array
+            np.copy(sample_array)
         )
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
         image_ligand_mask[image_ligand_mask > 0.9] = 1.0

@@ -332,7 +332,8 @@ def get_conformers(
         cids = AllChem.EmbedMultipleConfs(
             mol,
             numConfs=num_pose_samples,
-            pruneRmsThresh=pruning_threshold)
+            pruneRmsThresh=pruning_threshold,
+        )
 
         # Translate to structures
         fragment_structures = get_structures_from_mol(
