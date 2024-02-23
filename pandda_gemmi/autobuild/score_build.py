@@ -9,7 +9,7 @@ import os
 import inspect
 
 import torch
-
+import lightning as lt
 
 from pandda_gemmi.cnn import resnet
 from pandda_gemmi.cnn import resnet18, resnet10
@@ -257,6 +257,20 @@ def _make_ligand_masked_dmap_layer(
 #         return float(annotation[0][1])
 
 
+class LitBuildScoring(lt.LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.resnet = resnet10(num_classes=1, num_input=1).float()
+        # self.train_annotations = []
+        # self.test_annotations = []
+        # self.output = Path('./output/build_scoring_hdf5')
+
+    def forward(self, x):
+
+        return torch.exp(self.resnet(x))
+
+
+
 class ScoreCNNEventBuild:
     def __init__(self, n=30):
         # Get model
@@ -266,7 +280,8 @@ class ScoreCNNEventBuild:
             self.dev = "cpu"
 
         # Load the model
-        cnn = resnet18(num_classes=2, num_input=3)
+        # cnn = resnet18(num_classes=2, num_input=3)
+        cnn = LitBuildScoring()
 
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_event_build.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
