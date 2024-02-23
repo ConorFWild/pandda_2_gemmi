@@ -397,6 +397,8 @@ class ScoreCNNEventBuild:
             xmap,
             mean_map,
             bdc,
+            z_grid,
+            raw_xmap_grid,
     ):
         res = optimized_structure[0][0][0]
         rotation = _get_identity_matrix()
