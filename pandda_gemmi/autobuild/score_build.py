@@ -271,7 +271,7 @@ class LitBuildScoring(lt.LightningModule):
 
 
 
-class ScoreCNNEventBuild:
+class ScoreCNNEventBuildAllLayers:
     def __init__(self, n=30):
         # Get model
         if torch.cuda.is_available():
@@ -371,7 +371,7 @@ class ScoreCNNEventBuild:
         return float(annotation[0][1])
 
 
-class ScoreCNNEventBuildAllLayers:
+class ScoreCNNEventBuild:
     def __init__(self, n=30):
         # Get model
         if torch.cuda.is_available():
