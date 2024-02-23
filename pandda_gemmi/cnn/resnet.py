@@ -221,7 +221,8 @@ class ResNet(nn.Module):
         x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
         x = self.fc(x)
 
-        return self.act(x)
+        # return self.act(x)
+        return x
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
