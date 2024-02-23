@@ -9,6 +9,7 @@ import os
 import inspect
 
 import torch
+from torch.nn import functional as F
 import lightning as lt
 
 from pandda_gemmi.cnn import resnet
@@ -267,7 +268,7 @@ class LitBuildScoring(lt.LightningModule):
 
     def forward(self, x):
 
-        return torch.exp(self.resnet(x))
+        return 3 * F.sigmoid(self.resnet(x))
 
 
 
