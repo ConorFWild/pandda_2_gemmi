@@ -1,1 +1,1 @@
-from pandda_gemmi.cnn.resnet import resnet18
+from pandda_gemmi.cnn.resnet import resnet18, resnet10

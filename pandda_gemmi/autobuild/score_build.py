@@ -12,7 +12,7 @@ import torch
 
 
 from pandda_gemmi.cnn import resnet
-from pandda_gemmi.cnn import resnet18
+from pandda_gemmi.cnn import resnet18, resnet10
 
 
 def _get_identity_matrix():
@@ -354,3 +354,87 @@ class ScoreCNNEventBuild:
         annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
 
         return float(annotation[0][1])
+
+
+class ScoreCNNEventBuildAllLayers:
+    def __init__(self, n=30):
+        # Get model
+        if torch.cuda.is_available():
+            self.dev = "cuda:0"
+        else:
+            self.dev = "cpu"
+
+        # Load the model
+        cnn = resnet10(num_classes=1, num_input=1)
+
+        cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_event_build.pt"
+        cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev)['state_dict'])
+
+        # Add model to device
+        cnn.to(self.dev)
+        cnn.eval()
+        self.cnn = cnn#.float()
+
+        self.n = n
+
+    def __call__(
+            self,
+            optimized_structure,
+            xmap,
+            mean_map,
+            bdc,
+    ):
+        res = optimized_structure[0][0][0]
+        rotation = _get_identity_matrix()
+        centroid = _get_centroid_from_res(res)
+        transform = _get_transform_from_orientation_centroid(rotation, centroid)
+        sample_array = np.zeros(
+            (30, 30, 30),
+            dtype=np.float32,
+        )
+
+        image_dmap = sample_xmap_and_scale(
+            xmap,
+            # res,
+            transform,
+            np.copy(sample_array)
+        )
+        image_mean_map = sample_xmap_and_scale(
+            mean_map,
+            # res,
+            transform,
+            np.copy(sample_array)
+        )
+
+        ligand_mask_grid = get_ligand_mask_float(xmap, res)
+        image_ligand_mask = sample_xmap(
+            ligand_mask_grid,
+            # res,
+            transform,
+            np.copy(sample_array)
+        )
+        image_ligand_mask[image_ligand_mask < 0.9] = 0.0
+        image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
+
+        image = np.stack(
+                [
+                    ((image_dmap - (bdc*image_mean_map)) / (1-bdc)) * image_ligand_mask,
+                ],
+                axis=0,
+            )[np.newaxis, :]
+        image_float = image.astype(np.float32)
+
+        # print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
+
+        image_t = torch.from_numpy(image_float)
+        image_c = image_t.to(self.dev)
+        # print(f"Image tensor dtype: {image_c.dtype}, image tensor shape: {image_c.shape}")
+
+        cnn = self.cnn.float()
+
+        model_annotation = cnn(image_c)
+        # print(f'Annotation shape: {model_annotation.shape}')
+
+        annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
+
+        return 1-(float(annotation[0])/3)
