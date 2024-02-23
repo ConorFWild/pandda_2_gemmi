@@ -1451,7 +1451,7 @@ def autobuild_conformer(
         # corrected_event_map_grid,
         reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
         reference_frame.unmask(SparseDMap(unmasked_mean_array)),
-        bdc,
+        event_bdc,
         z_grid,
         raw_xmap_grid,
     )
