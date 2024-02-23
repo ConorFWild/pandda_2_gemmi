@@ -280,8 +280,7 @@ class ScoreCNNEventBuildAllLayers:
             self.dev = "cpu"
 
         # Load the model
-        # cnn = resnet18(num_classes=2, num_input=3)
-        cnn = LitBuildScoring()
+        cnn = resnet18(num_classes=2, num_input=3)
 
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_event_build.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev))
@@ -380,7 +379,7 @@ class ScoreCNNEventBuild:
             self.dev = "cpu"
 
         # Load the model
-        cnn = resnet10(num_classes=1, num_input=1)
+        cnn = LitBuildScoring()
 
         cnn_path = Path(os.path.dirname(inspect.getfile(resnet))) / "model_event_build.pt"
         cnn.load_state_dict(torch.load(cnn_path, map_location=self.dev)['state_dict'])
