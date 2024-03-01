@@ -100,7 +100,7 @@ def _get_transform_from_orientation_centroid(orientation, centroid):
             rotation_transform,
             combine(
                 centre_grid_transform,
-                    initial_transform)))
+                initial_transform)))
     return transform
 
 
@@ -120,6 +120,7 @@ def get_ligand_mask(dmap, res):
 
     return mask
 
+
 def get_ligand_mask_float(dmap, res):
     mask = gemmi.FloatGrid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
@@ -135,6 +136,7 @@ def get_ligand_mask_float(dmap, res):
         )
 
     return mask
+
 
 def get_masked_dmap(dmap, res):
     mask = get_ligand_mask(dmap, res)
@@ -166,6 +168,7 @@ def sample_xmap_and_scale(masked_dmap, sample_transform, sample_array):
         image_dmap = (image_initial - np.mean(image_initial)) / std
 
     return image_dmap
+
 
 def _make_ligand_masked_dmap_layer(
         dmap,
@@ -267,9 +270,7 @@ class LitBuildScoring(lt.LightningModule):
         # self.output = Path('./output/build_scoring_hdf5')
 
     def forward(self, x):
-
         return F.sigmoid(self.resnet(x))
-
 
 
 class ScoreCNNEventBuildAllLayers:
@@ -289,7 +290,7 @@ class ScoreCNNEventBuildAllLayers:
         # Add model to device
         cnn.to(self.dev)
         cnn.eval()
-        self.cnn = cnn#.float()
+        self.cnn = cnn  # .float()
 
         self.n = n
 
@@ -346,13 +347,13 @@ class ScoreCNNEventBuildAllLayers:
         image_ligand_mask[image_ligand_mask > 0.9] = 1.0
 
         image = np.stack(
-                [
-                    ((image_dmap - (bdc*image_mean_map)) / (1-bdc)) * image_ligand_mask,
-                    image_z_map * image_ligand_mask,
-                    image_raw_xmap * image_ligand_mask,
-                ],
-                axis=0,
-            )[np.newaxis, :]
+            [
+                ((image_dmap - (bdc * image_mean_map)) / (1 - bdc)) * image_ligand_mask,
+                image_z_map * image_ligand_mask,
+                image_raw_xmap * image_ligand_mask,
+            ],
+            axis=0,
+        )[np.newaxis, :]
         image_float = image.astype(np.float32)
 
         # print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
@@ -388,7 +389,7 @@ class ScoreCNNEventBuild:
         # Add model to device
         cnn.to(self.dev)
         cnn.eval()
-        self.cnn = cnn#.float()
+        self.cnn = cnn  # .float()
 
         self.n = n
 
@@ -434,11 +435,11 @@ class ScoreCNNEventBuild:
         image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
 
         image = np.stack(
-                [
-                    ((image_dmap - (bdc*image_mean_map)) / (1-bdc)) * image_ligand_mask,
-                ],
-                axis=0,
-            )[np.newaxis, :]
+            [
+                ((image_dmap - (bdc * image_mean_map)) / (1 - bdc)) * image_ligand_mask,
+            ],
+            axis=0,
+        )[np.newaxis, :]
         image_float = image.astype(np.float32)
 
         # print(f"image dtype: {image_float.dtype}, Image shape: {image_float.shape}")
