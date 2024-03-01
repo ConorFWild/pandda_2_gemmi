@@ -268,7 +268,7 @@ class LitBuildScoring(lt.LightningModule):
 
     def forward(self, x):
 
-        return 3 * F.sigmoid(self.resnet(x))
+        return F.sigmoid(self.resnet(x))
 
 
 
@@ -454,4 +454,4 @@ class ScoreCNNEventBuild:
 
         annotation = model_annotation.to(torch.device("cpu")).detach().numpy()
 
-        return 1-(float(annotation[0])/3)
+        return annotation[0]
