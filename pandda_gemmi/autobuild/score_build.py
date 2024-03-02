@@ -264,7 +264,7 @@ def _make_ligand_masked_dmap_layer(
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet10(num_classes=1, num_input=1).float()
+        self.resnet = resnet10(num_classes=1, num_input=2).float()
         # self.train_annotations = []
         # self.test_annotations = []
         # self.output = Path('./output/build_scoring_hdf5')
@@ -423,6 +423,12 @@ class ScoreCNNEventBuild:
             transform,
             np.copy(sample_array)
         )
+        image_raw_xmap = sample_xmap_and_scale(
+            raw_xmap_grid,
+            # res,
+            transform,
+            np.copy(sample_array)
+        )
 
         ligand_mask_grid = get_ligand_mask_float(xmap, res)
         image_ligand_mask = sample_xmap(
@@ -437,6 +443,7 @@ class ScoreCNNEventBuild:
         image = np.stack(
             [
                 ((image_dmap - (bdc * image_mean_map)) / (1 - bdc)) * image_ligand_mask,
+                image_raw_xmap * image_ligand_mask
             ],
             axis=0,
         )[np.newaxis, :]
