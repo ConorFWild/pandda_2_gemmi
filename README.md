@@ -2,6 +2,8 @@
 
 ## Acknowledgements
 
+## User Guide
+[User Guide](./docs/debugging.md)
 
 ## New in version 1.0.0
 
