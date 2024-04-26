@@ -200,7 +200,7 @@ class HeirarchicalSiteModel:
         sites = {}
         for j, cluster in enumerate(np.unique(clusters)):
             cluster_event_id_array = event_id_array[clusters == cluster]
-            sites[j] = Site(
+            sites[j+1] = Site(
                 [(str(event_id[0]), int(event_id[1])) for event_id in cluster_event_id_array],
                 np.mean(
                     centroid_array[clusters==cluster, :],
