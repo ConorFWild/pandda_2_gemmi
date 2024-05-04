@@ -22,9 +22,9 @@ def merge_build(dataset, selected_build_path, path):
                 seqid_nums.append(num)
 
             if len(seqid_nums) == 0:
-                min_ligand_seqid = 1
+                min_ligand_seqid = 100
             else:
-                min_ligand_seqid = max(seqid_nums) + 1
+                min_ligand_seqid = max(seqid_nums) + 100
 
             for model in ligand:
                 for chain in model:
