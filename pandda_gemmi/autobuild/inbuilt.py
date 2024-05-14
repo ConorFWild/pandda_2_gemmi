@@ -104,7 +104,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     try:
         cif['comp_LIG']
     except:
-        key = "data_comp_XXX"
+        key = "πcomp_XXX"
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
