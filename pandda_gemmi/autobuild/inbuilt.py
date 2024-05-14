@@ -261,9 +261,11 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
     cif = gemmi.cif.read(str(dataset_cif_path))
 
     # Find the relevant atoms loop
-    atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
+    try:
+        atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
     # print(f"Atom ID loop: {atom_id_loop}")
-
+    except:
+        atom_id_loop = list(cif['comp_XXX'].find_loop('_chem_comp_atom.atom_id'))
 
     fragment_structures = {}
     for i, conformer in enumerate(mol.GetConformers()):
