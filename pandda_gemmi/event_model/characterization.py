@@ -73,6 +73,10 @@ class CharacterizationNN:
 
         time_begin_fit = time.time()
         # # Transform the data to a reasonable size for a GMM
+        print(sparse_dmap_inner_array)
+        print(f"Array shape: {sparse_dmap_inner_array.shape}")
+        print(f"Number of Components: {min(100, min(sparse_dmap_inner_array.shape))}")
+
         pca = PCA(n_components=min(100, min(sparse_dmap_inner_array.shape)), svd_solver="randomized")
         transformed = pca.fit_transform(sparse_dmap_inner_array)
 
