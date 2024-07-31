@@ -70,12 +70,17 @@ conda activate pandda2
 conda install -c conda-forge -y fire numpy scipy joblib scikit-learn umap-learn bokeh dask dask-jobqueue hdbscan matplotlib rich seaborn rdkit openbabel mrcfile
 pip install ray
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
-cd pandda_2_gemmi
-pip install -e .
-cd _gemmi
-pip install .
-pip install numpy==1.21.0
+git checkout 0_1_0
+python -m pip install numpy scipy joblib scikit-learn umap-learn hdbscan matplotlib rich seaborn rdkit ray scikit-learn-intelex
+python -m pip install torch==1.13.1 --index-url https://download.pytorch.org/whl/cpu
+cd pandda_2_gemmi python -m pip install -e . 
+cd _gemmi python -m pip install .
 ```
+
+Followed by copying the two linked files at: 
+`https://drive.google.com/drive/folders/1NRHtZjFjbRIcc_58IPY4ORkZdDqn1XOW?usp=sharing`
+
+Into the folder: `pandda_2_gemmi/pandda_gemmi/cnn`
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
 
