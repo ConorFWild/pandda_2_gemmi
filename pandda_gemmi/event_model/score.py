@@ -394,10 +394,10 @@ def get_ligand_map_from_ligand_files(
 class ScoreCNNLigand:
     def __init__(self, n=30):
         # Get model
-        if torch.cuda.is_available():
-            self.dev = "cuda:0"
-        else:
-            self.dev = "cpu"
+        # if torch.cuda.is_available():
+        #     self.dev = "cuda:0"
+        # else:
+        self.dev = "cpu"
 
         # Load the model
         # cnn = resnet18(num_classes=2, num_input=4)
