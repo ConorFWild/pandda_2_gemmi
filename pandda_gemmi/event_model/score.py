@@ -397,6 +397,7 @@ class ScoreCNNLigand:
         # if torch.cuda.is_available():
         #     self.dev = "cuda:0"
         # else:
+
         self.dev = "cpu"
 
         # Load the model
