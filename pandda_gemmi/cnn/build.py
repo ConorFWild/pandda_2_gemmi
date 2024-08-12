@@ -32,7 +32,7 @@ def mask_xmap_ligand(autobuild: StructureI, xmap: GridI, radius=1.0) -> GridI:
 
 def get_sample_frame_from_build(autobuild: StructureI, sample_size, sample_spacing) -> SampleFrameI:
     centroid = get_structure_centroid(autobuild) - (0.5*sample_spacing*np.array(sample_size))
-    mat = np.eye(3)
+    mat = np.eye(3) * sample_spacing
     return SampleFrame(
         transform_from_arrays(centroid, mat),
         SAMPLE_SIZE
