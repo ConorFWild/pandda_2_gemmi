@@ -14,7 +14,7 @@ def test_BuildScorer():
     build_bad_path = data_dir / 'build_bad.pdb'
 
     # Get the build model
-    model = load_model_from_checkpoint(model_path, LitBuildScoring())
+    model = load_model_from_checkpoint(model_path, LitBuildScoring()).test()
 
     # Get the build scorer
     build_scorer = BuildScorer(model)
