@@ -3,6 +3,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 import lightning as lt
+from rich import print as rprint
+
 
 from .interfaces import *
 from .base import get_ligand_mask, iterate_atoms, grid_from_template, get_structure_centroid, transform_from_arrays, \
@@ -48,10 +50,11 @@ class LitBuildScoring(lt.LightningModule):
         )
 
     def forward(self, z, ):
+        rprint(z)
         z_encoding = self.z_encoder(z)
-
+        rprint(z_encoding)
         score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
-
+        rprint(score)
         return float(score[0][0])
 
 
