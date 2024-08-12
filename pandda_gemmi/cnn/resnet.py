@@ -129,12 +129,14 @@ class ResNet(nn.Module):
                  width_per_group=64,
                  replace_stride_with_dilation=None,
                  norm_layer=None,
-
+                 headless=False
                  ):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm3d
         self._norm_layer = norm_layer
+
+        self.headless = headless
 
         self.inplanes = 64
         self.dilation = 1
@@ -219,7 +221,8 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
         x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
-        x = self.fc(x)
+        if self.headless:
+            x = self.fc(x)
 
         # return self.act(x)
         return x
