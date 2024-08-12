@@ -69,8 +69,9 @@ class BuildScorer:
         # Get the sample frame
         sample_frame = get_sample_frame_from_build(autobuild)
         rprint(f'Sample Frame')
-        rprint(sample_frame)
-        rprint(sample_frame)
+        rprint(sample_frame.spacing)
+        rprint(sample_frame.transform.vec.tolist())
+        rprint(sample_frame.transform.mat.tolist())
 
         # Get the xmap sample
         xmap_sample = sample_frame(mask_xmap_ligand(autobuild, xmap), )
