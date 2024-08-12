@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torch import nn
 from torch.nn import functional as F
 import lightning as lt
@@ -80,11 +81,13 @@ class BuildScorer:
 
         # Run the model
         return self.model(
-            np.stack(
-                [
-                    zmap_sample,
-                    xmap_sample * ligand_mask_sample_bin,
-                    ligand_mask_sample
-                ]
+            torch.from_numpy(
+                np.stack(
+                    [
+                        zmap_sample,
+                        xmap_sample * ligand_mask_sample_bin,
+                        ligand_mask_sample
+                    ]
+                )
             )
         )
