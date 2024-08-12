@@ -82,7 +82,7 @@ def transform_from_arrays(vec: np.array, mat: np.array) -> TransformI:
 
 def load_model_from_checkpoint(path, model):
     # From https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
-    ckpt = torch.load(path)
+    ckpt = torch.load(path, map_location='cpu')
     pretrained_dict = ckpt['state_dict']
     model_dict = model.state_dict()
     # 1. filter out unnecessary keys
