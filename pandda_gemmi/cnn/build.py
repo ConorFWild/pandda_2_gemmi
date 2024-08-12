@@ -50,8 +50,11 @@ class LitBuildScoring(lt.LightningModule):
         )
 
     def forward(self, z, ):
+        rprint('########################  z   #############################')
         rprint(z)
         z_encoding = self.z_encoder(z)
+        rprint('########################  z_econding   #############################')
+
         rprint(z_encoding)
         score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         rprint(score)
