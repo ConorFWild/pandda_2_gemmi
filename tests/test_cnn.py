@@ -20,10 +20,10 @@ def test_BuildScorer():
     build_scorer = BuildScorer(model)
 
     # Get the xmap
-    xmap = gemmi.read_ccp4_map(str(xmap_path))
+    xmap = gemmi.read_ccp4_map(str(xmap_path)).grid
 
     # Get the zmap
-    zmap = gemmi.read_ccp4_map(str(zmap_path))
+    zmap = gemmi.read_ccp4_map(str(zmap_path)).grid
 
     # Get the good build path
     good_build = gemmi.read_structure(str(build_good_path))
