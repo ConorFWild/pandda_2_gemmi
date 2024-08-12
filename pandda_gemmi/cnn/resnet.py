@@ -221,7 +221,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
         x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
-        if self.headless:
+        if not self.headless:
             x = self.fc(x)
 
         # return self.act(x)
