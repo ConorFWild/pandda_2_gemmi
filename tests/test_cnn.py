@@ -39,9 +39,4 @@ def test_BuildScorer():
     bad_build_score = build_scorer(bad_build, zmap, xmap)
 
     # Assert the good score is better than bad one
-    rprint(f'Zmap')
-    rprint(zmap)
-    rprint(f'Xmap')
-    rprint(xmap)
     assert good_build_score > bad_build_score
-    rprint([good_build_score, bad_build_score])

@@ -50,13 +50,8 @@ class LitBuildScoring(lt.LightningModule):
         )
 
     def forward(self, z, ):
-        rprint('########################  z   #############################')
-        rprint(z)
         z_encoding = self.z_encoder(z)
-        rprint('########################  z_econding   #############################')
-        rprint(z_encoding)
         score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
-        rprint(score)
         return float(score[0][0])
 
 
@@ -68,10 +63,6 @@ class BuildScorer:
     def __call__(self, autobuild: StructureI, zmap: GridI, xmap: GridI, ) -> float:
         # Get the sample frame
         sample_frame = get_sample_frame_from_build(autobuild, SAMPLE_SIZE, SAMPLE_SPACING, )
-        rprint(f'Sample Frame')
-        rprint(sample_frame.spacing)
-        rprint(sample_frame.transform.vec.tolist())
-        rprint(sample_frame.transform.mat.tolist())
 
         # Get the xmap sample
         xmap_sample = sample_frame(mask_xmap_ligand(autobuild, xmap), )
