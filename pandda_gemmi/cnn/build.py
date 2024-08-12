@@ -9,7 +9,7 @@ from rich import print as rprint
 from .interfaces import *
 from .base import get_ligand_mask, iterate_atoms, grid_from_template, get_structure_centroid, transform_from_arrays, \
     SampleFrame
-from .constants import SAMPLE_SIZE
+from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
 
@@ -30,8 +30,8 @@ def mask_xmap_ligand(autobuild: StructureI, xmap: GridI, radius=1.0) -> GridI:
     return xmap
 
 
-def get_sample_frame_from_build(autobuild: StructureI) -> SampleFrameI:
-    centroid = get_structure_centroid(autobuild)
+def get_sample_frame_from_build(autobuild: StructureI, sample_size, sample_spacing) -> SampleFrameI:
+    centroid = get_structure_centroid(autobuild) - (0.5*sample_spacing*np.array(sample_size))
     mat = np.eye(3)
     return SampleFrame(
         transform_from_arrays(centroid, mat),
@@ -67,7 +67,7 @@ class BuildScorer:
 
     def __call__(self, autobuild: StructureI, zmap: GridI, xmap: GridI, ) -> float:
         # Get the sample frame
-        sample_frame = get_sample_frame_from_build(autobuild)
+        sample_frame = get_sample_frame_from_build(autobuild, SAMPLE_SIZE, SAMPLE_SPACING, )
         rprint(f'Sample Frame')
         rprint(sample_frame.spacing)
         rprint(sample_frame.transform.vec.tolist())
