@@ -88,6 +88,6 @@ class BuildScorer:
                         xmap_sample * ligand_mask_sample_bin,
                         ligand_mask_sample
                     ]
-                )
+                )[np.newaxis,:]
             )
         )
