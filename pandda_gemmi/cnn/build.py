@@ -52,7 +52,7 @@ class LitBuildScoring(lt.LightningModule):
 
         score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
 
-        return score
+        return float(score[0][0])
 
 
 class BuildScorer:
