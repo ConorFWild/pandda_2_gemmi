@@ -44,3 +44,4 @@ def test_BuildScorer():
     rprint(f'Xmap')
     rprint(xmap)
     assert good_build_score > bad_build_score
+    rprint([good_build_score, bad_build_score])
