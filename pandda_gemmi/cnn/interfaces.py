@@ -76,5 +76,8 @@ class GridI(Protocol):
 
 
 class SampleFrameI(Protocol):
+    transform: TransformI
+    spacing: typing.Tuple[int, int, int]
+
     def __call__(self, grid: GridI, scale=False) -> np.array:
         ...

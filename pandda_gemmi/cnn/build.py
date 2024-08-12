@@ -70,6 +70,7 @@ class BuildScorer:
         sample_frame = get_sample_frame_from_build(autobuild)
         rprint(f'Sample Frame')
         rprint(sample_frame)
+        rprint(sample_frame)
 
         # Get the xmap sample
         xmap_sample = sample_frame(mask_xmap_ligand(autobuild, xmap), )
