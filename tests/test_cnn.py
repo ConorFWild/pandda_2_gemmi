@@ -4,6 +4,9 @@ import gemmi
 
 from pandda_gemmi.cnn import BuildScorer, LitBuildScoring, load_model_from_checkpoint
 
+from rich.traceback import install
+install(show_locals=True)
+
 
 def test_BuildScorer():
     data_dir = Path('data')
