@@ -1,13 +1,22 @@
 import numpy as np
 import gemmi
+from torch import nn
+from torch.nn import functional as F
+import lightning as lt
 
 from .interfaces import *
 from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask
 from .constants import SAMPLE_SIZE
+from .resnet import resnet10
 
 
 def get_sample_frame_from_event(event: EventI) -> SampleFrameI:
     return SampleFrame(transform_from_arrays(event.centroid, np.eye(3)), SAMPLE_SIZE)
+
+
+class Event(EventI):
+    def __init__(self, centroid: np.array):
+        self.centroid = centroid
 
 
 def mask_xmap_radial(xmap: GridI, x: float, y: float, z: float, radius: float = 5.5) -> GridI:
@@ -27,26 +36,15 @@ def mask_xmap_radial(xmap: GridI, x: float, y: float, z: float, radius: float = 
 
 
 class LitEventScoring(lt.LightningModule):
-    def __init__(self, output_dir):
+    def __init__(self, ):
         super().__init__()
-        self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
-        self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
-        self.mol_decoder = SimpleConvolutionalDecoder()
-        self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
-        self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
-        self.mol_to_weight = nn.Linear(512, 512)
-        self.bn = nn.BatchNorm1d(512)
         self.fc = nn.Sequential(
-            nn.Linear(512,2),
+            nn.Linear(512, 2),
         )
-        self.train_annotations = []
-        self.test_annotations = []
 
-        self.output = output_dir
-
-    def forward(self, x, z, m, d):
+    def forward(self, z, m, ):
         mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
 
@@ -54,7 +52,8 @@ class LitEventScoring(lt.LightningModule):
 
         score = F.softmax(self.fc(full_encoding))
 
-        return score
+        return float(score[0][0])
+
 
 class EventScorer:
 

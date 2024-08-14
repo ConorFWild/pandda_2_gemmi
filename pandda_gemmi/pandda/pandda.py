@@ -209,7 +209,7 @@ def pandda(args: PanDDAArgs):
     console.summarise_fs_model(fs)
 
     # Get the method for scoring events
-    score = ScoreCNNLigand()
+    score_event = ScoreCNNLigand()
 
     # Get the method for scoring
     score_build = ScoreCNNEventBuild()
