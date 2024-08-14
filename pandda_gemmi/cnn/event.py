@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import gemmi
 import torch
@@ -65,16 +67,23 @@ class EventScorer:
         # Get the sample frame
         sample_frame = get_sample_frame_from_event(event)
 
-        # Get the xmap sample
+        # Cut the xmap
         x, y, z = event.centroid
-        xmap_sample = sample_frame(mask_xmap_radial(xmap, x, y, z), )
+        cut_xmap = mask_xmap_radial(xmap, x, y, z)
+
+        # Get the xmap sample
+        xmap_sample = sample_frame(cut_xmap, )
 
         # Get the zmap sample
         zmap_sample = sample_frame(zmap)
 
         # Get the ligand mask sample
+        begin_mask = time.time()
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
         ligand_mask_sample = sample_frame(ligand_mask)
+        finish_mask = time.time()
+        print(f'{finish_mask-begin_mask}')
+
 
         # Get the ligand mask
         ligand_mask_sample_bin = np.copy(ligand_mask_sample)

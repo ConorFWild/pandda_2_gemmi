@@ -142,9 +142,20 @@ class ProcessModel:
 
         # Score the events with some method such as the CNN
         time_begin_score_events = time.time()
-        events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
-                       median, reference_frame, homogenized_dataset_dmap_array, mean
-                       )
+        # events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
+        #                median, reference_frame, homogenized_dataset_dmap_array, mean
+        #                )
+        for lid, ligand_data in ligand_files.items():
+            confs = get_conformers(ligand_data)
+
+            for event_id, event in events.items():
+                event.score = score(
+                    event,
+                    confs[0],
+                    z_grid,
+                    xmap_grid
+                )
+
         time_finish_score_events = time.time()
 
         # Filter the events after scoring based on keeping only the locally highest scoring event
@@ -438,8 +449,7 @@ def pandda(args: PanDDAArgs):
                 dmaps[characterization_set_masks[model_number], :],
                 reference_frame,
                 reference_frame.mask_grid(model_grid).data,
-                score,
-
+                score_event,
             )()
             for model_number
             in models_to_process
