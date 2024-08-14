@@ -88,12 +88,11 @@ class EventScorer:
                     [
                         zmap_sample,
                         xmap_sample,
-
-                    ]
+                    ][np.newaxis,:]
                 )),
             torch.from_numpy(np.stack(
                 [
                     ligand_mask_sample
-                ]
+                ][np.newaxis,:]
             ))
         )
