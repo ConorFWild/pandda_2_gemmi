@@ -63,10 +63,10 @@ def test_EventScorer():
     zmap = gemmi.read_ccp4_map(str(zmap_path)).grid
 
     # Get the good build path
-    good_event = Event(np.array(13.56, 42.74, 31.44))
+    good_event = Event(np.array([13.56, 42.74, 31.44]))
 
     # Get the bad build path
-    bad_event = Event(np.array(20.05, 46.52, 20.25))
+    bad_event = Event(np.array([20.05, 46.52, 20.25]))
 
     # Get a ligand conf
     conf = get_conformers(LigandFiles(ligand_path, None, None))[0]
