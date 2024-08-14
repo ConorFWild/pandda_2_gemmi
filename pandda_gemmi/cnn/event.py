@@ -1,5 +1,6 @@
 import numpy as np
 import gemmi
+import torch
 from torch import nn
 from torch.nn import functional as F
 import lightning as lt
@@ -82,16 +83,17 @@ class EventScorer:
 
         # Run the model
         return self.model(
-            np.stack(
-                [
-                    zmap_sample,
-                    xmap_sample,
+            torch.from_numpy(
+                np.stack(
+                    [
+                        zmap_sample,
+                        xmap_sample,
 
-                ]
-            ),
-            np.stack(
+                    ]
+                )),
+            torch.from_numpy(np.stack(
                 [
                     ligand_mask_sample
                 ]
-            )
+            ))
         )
