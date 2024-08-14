@@ -1448,15 +1448,21 @@ def autobuild_conformer(
     signal_vals[signal_vals > 3] = 3.0
 
     time_begin_scoring = time.time()
+    # score = score_build(
+    #     optimized_structure,
+    #     # corrected_event_map_grid,
+    #     reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+    #     reference_frame.unmask(SparseDMap(unmasked_mean_array)),
+    #     # bdc,
+    #     event_bdc,
+    #     z_grid,
+    #     raw_xmap_grid,
+    # )
+
     score = score_build(
         optimized_structure,
-        # corrected_event_map_grid,
         reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
-        reference_frame.unmask(SparseDMap(unmasked_mean_array)),
-        # bdc,
-        event_bdc,
-        z_grid,
-        raw_xmap_grid,
+        z_grid
     )
     time_finish_scoring = time.time()
 
