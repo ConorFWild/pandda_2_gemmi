@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from rich import print as rprint
@@ -72,7 +73,10 @@ def test_EventScorer():
     conf = get_conformers(LigandFiles(ligand_path, None, None))[0]
 
     # Run the scorer on the good build
+    begin_scoring = time.time()
     good_event_score = event_scorer(good_event, conf, zmap, xmap)
+    finish_scoring = time.time()
+    print(f'{finish_scoring-begin_scoring}')
 
     # Run the scorer on the bad build
     bad_event_score = event_scorer(bad_event, conf, zmap, xmap)
