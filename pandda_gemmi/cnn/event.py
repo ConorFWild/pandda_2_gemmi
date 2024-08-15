@@ -13,8 +13,14 @@ from .constants import SAMPLE_SIZE
 from .resnet import resnet10
 
 
-def get_sample_frame_from_event(event: EventI) -> SampleFrameI:
-    return SampleFrame(transform_from_arrays(event.centroid, np.eye(3)), SAMPLE_SIZE)
+def get_sample_frame_from_event(event: EventI, sample_size, sample_spacing) -> SampleFrameI:
+    return SampleFrame(
+        transform_from_arrays(
+            event.centroid - (0.5*sample_spacing*np.array(sample_size)),
+            np.eye(3) * sample_spacing,
+        ),
+        SAMPLE_SIZE,
+    )
 
 
 class Event(EventI):
@@ -68,6 +74,8 @@ class EventScorer:
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
         # Get the sample frame
         sample_frame = get_sample_frame_from_event(event)
+        print(f'\t\t{sample_frame.transform.vec.tolist()}')
+        print(f'\t\t{sample_frame.transform.mat.tolist()}')
 
         # Cut the xmap
         x, y, z = event.centroid
