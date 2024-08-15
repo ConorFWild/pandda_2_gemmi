@@ -55,7 +55,7 @@ from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighEventS
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
-from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring
+from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, set_structure_mean
 
 
 class GetDatasetsToProcess:
@@ -150,6 +150,7 @@ class ProcessModel:
         #                )
         for lid, ligand_data in ligand_files.items():
             confs = get_conformers(ligand_data)
+            conf = set_structure_mean(confs[0], event.centroid)
             for event_id, event in events.items():
                 event_score = score(
                     event,
