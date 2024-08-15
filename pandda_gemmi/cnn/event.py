@@ -9,7 +9,7 @@ import lightning as lt
 
 from .interfaces import *
 from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask
-from .constants import SAMPLE_SIZE
+from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
 
@@ -73,7 +73,7 @@ class EventScorer:
 
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
         # Get the sample frame
-        sample_frame = get_sample_frame_from_event(event)
+        sample_frame = get_sample_frame_from_event(event, SAMPLE_SIZE, SAMPLE_SPACING)
         print(f'\t\t{sample_frame.transform.vec.tolist()}')
         print(f'\t\t{sample_frame.transform.mat.tolist()}')
 
