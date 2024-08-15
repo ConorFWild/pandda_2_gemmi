@@ -1464,6 +1464,9 @@ def autobuild_conformer(
         reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
         z_grid
     )
+    x,y,z = centroid
+    print(f'\t\t{round(x, 2)},{round(y)},{round(z)} : {score}')
+
     time_finish_scoring = time.time()
 
     log_result_dict = {
