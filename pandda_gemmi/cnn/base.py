@@ -106,3 +106,5 @@ def set_structure_mean(st, centroid):
             (inital_pos.z - st_centroid[2]) + centroid[2],
         )
 
+
+    return st
