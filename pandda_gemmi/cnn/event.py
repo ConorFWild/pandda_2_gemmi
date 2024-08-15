@@ -55,7 +55,7 @@ class LitEventScoring(lt.LightningModule):
 
         score = F.softmax(self.fc(full_encoding))
 
-        return float(score[0][0])
+        return float(score[0][1])
 
 
 class EventScorer:
