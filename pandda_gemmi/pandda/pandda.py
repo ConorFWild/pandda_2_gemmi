@@ -157,6 +157,8 @@ class ProcessModel:
                     z_grid,
                     xmap_grid
                 )
+                x,y,z, = event.centroid
+                print(f'\t({x}, {y}, {z}): {round(score, 5)}')
 
         time_finish_score_events = time.time()
 
