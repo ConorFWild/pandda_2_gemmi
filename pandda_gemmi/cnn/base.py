@@ -35,8 +35,6 @@ def iterate_atoms(structure: StructureI, hs: bool = False) -> typing.Iterable[At
                     yield atom
 
 
-
-
 def grid_from_template(template: GridI) -> GridI:
     mask = gemmi.FloatGrid(template.nu, template.nv, template.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
@@ -95,10 +93,13 @@ def load_model_from_checkpoint(path, model):
     model.load_state_dict(pretrained_dict)
     return model
 
+
 def set_structure_mean(st, centroid):
     st_centroid = get_structure_centroid(st)
 
-    for atom in iterate_atoms(st):
+    st_clone = st.clone()
+
+    for atom in iterate_atoms(st_clone):
         inital_pos = atom.pos
         atom.pos = gemmi.Position(
             (inital_pos.x - st_centroid[0]) + centroid[0],
@@ -106,5 +107,4 @@ def set_structure_mean(st, centroid):
             (inital_pos.z - st_centroid[2]) + centroid[2],
         )
 
-
-    return st
+    return st_clone

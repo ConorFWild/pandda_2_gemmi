@@ -150,8 +150,8 @@ class ProcessModel:
         #                )
         for lid, ligand_data in ligand_files.items():
             confs = get_conformers(ligand_data)
-            conf = set_structure_mean(confs[0], event.centroid)
             for event_id, event in events.items():
+                conf = set_structure_mean(confs[0], event.centroid)
                 event_score = score(
                     event,
                     confs[0],
