@@ -225,7 +225,7 @@ def pandda(args: PanDDAArgs):
     # Get the method for scoring events
     score_event_model = load_model_from_checkpoint(
         Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_build.ckpt",
-        LitBuildScoring(),
+        LitEventScoring(),
     )
     score_event = EventScorer(score_event_model)
 
