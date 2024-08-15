@@ -151,14 +151,15 @@ class ProcessModel:
         for lid, ligand_data in ligand_files.items():
             confs = get_conformers(ligand_data)
             for event_id, event in events.items():
-                event.score = score(
+                event_score = score(
                     event,
                     confs[0],
                     z_grid,
                     xmap_grid
                 )
+                event.score = event_score
                 x,y,z, = event.centroid
-                print(f'\t({x}, {y}, {z}): {round(event.score, 5)}')
+                print(f'\t({x}, {y}, {z}): {round(event_score, 5)}')
 
         time_finish_score_events = time.time()
 
