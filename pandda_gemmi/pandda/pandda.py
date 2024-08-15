@@ -223,15 +223,15 @@ def pandda(args: PanDDAArgs):
     console.summarise_fs_model(fs)
 
     # Get the method for scoring events
-    score_build_model = load_model_from_checkpoint(
-        Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt",
+    score_event_model = load_model_from_checkpoint(
+        Path(os.path.dirname(inspect.getfile(LitEventScoring()))) / "model_build.ckpt",
         LitBuildScoring,
     )
-    score_event = BuildScorer(score_build_model)
+    score_event = EventScorer(score_event_model)
 
     # Get the method for scoring
     score_build_model = load_model_from_checkpoint(
-        Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt",
+        Path(os.path.dirname(inspect.getfile(LitBuildScoring()))) / "model_build.ckpt",
         LitBuildScoring,
     )
     score_build = BuildScorer(score_build_model)
