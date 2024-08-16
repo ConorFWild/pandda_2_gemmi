@@ -65,7 +65,8 @@ class BuildScorer:
         sample_frame = get_sample_frame_from_build(autobuild, SAMPLE_SIZE, SAMPLE_SPACING, )
 
         # Get the xmap sample
-        xmap_sample = sample_frame(mask_xmap_ligand(autobuild, xmap), )
+        # masked_xmap = mask_xmap_ligand(autobuild, xmap)
+        xmap_sample = sample_frame(xmap, )
 
         # Get the zmap sample
         zmap_sample = sample_frame(zmap)
