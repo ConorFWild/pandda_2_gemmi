@@ -162,8 +162,8 @@ class HeirarchicalSiteModel:
 
         if len(events) == 1:
             return {0: Site(
-                list(events.keys())[0],
-                np.mean(list(events.values())[0].pos_array, axis=1)
+                list(events.keys()),
+                np.mean(list(events.values())[0].pos_array, axis=0)
             )}
 
         # Find the residue environment of each event (chain and residue number)
