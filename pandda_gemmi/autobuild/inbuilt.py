@@ -1356,6 +1356,8 @@ def autobuild_conformer(
     time_begin_autobuild = time.time()
 
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
+    print(f'z map stats: {np.min(z_array)} {np.max(z_array)} {np.median(z_array)}')
+
     event_map_array = (masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)
     normalize_event_map_array = (event_map_array-np.mean(event_map_array) / np.std(event_map_array))
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
