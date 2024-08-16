@@ -42,7 +42,8 @@ def output_maps(
     # save_dmap(zmap_raw_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_RAW_MAP_FILE.format(dtag=dtag))
     print(f'z map stats: {np.min(selected_z)} {np.max(selected_z)} {np.median(selected_z)}')
 
-    zmap_grid = reference_frame.unmask(SparseDMap((selected_z - np.mean(selected_z)) / np.std(selected_z)))
+    rescaled_z = (selected_z - np.mean(selected_z)) / np.std(selected_z)
+    zmap_grid = reference_frame.unmask(SparseDMap(rescaled_z))
     save_dmap(zmap_grid, fs.output.processed_datasets[dtag] / constants.PANDDA_Z_MAP_FILE.format(dtag=dtag))
 
     mean_grid = reference_frame.unmask(SparseDMap(selected_mean))
