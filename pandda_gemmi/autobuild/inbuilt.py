@@ -1465,7 +1465,7 @@ def autobuild_conformer(
         z_grid
     )
     x,y,z = centroid
-    print(f'\t\t{round(x, 2)},{round(y)},{round(z)} : {score}')
+    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
 
     time_finish_scoring = time.time()
 

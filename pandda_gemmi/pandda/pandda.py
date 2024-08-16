@@ -112,6 +112,8 @@ class ProcessModel:
             homogenized_dataset_dmap_array,
             characterization_set_dmaps_array
         )
+        print(f'{np.min(z)} {np.max(z)} {np.median(z)}')
+
         mean_grid = reference_frame.unmask(SparseDMap(mean))
         z_grid = reference_frame.unmask(SparseDMap(z))
 
@@ -182,6 +184,8 @@ class ProcessModel:
 
         # Renumber the events
         events = {j + 1: event for j, event in enumerate(events.values())}
+
+        print(f'{np.min(z)} {np.max(z)} {np.median(z)}')
 
         return events, mean, z, std
 
@@ -479,6 +483,7 @@ def pandda(args: PanDDAArgs):
                 model_events[model_number] = result[0]
             model_means[model_number] = result[1]
             model_zs[model_number] = result[2]
+            print(f'{np.min(result[2])} {np.max(result[2])} {np.median(result[2])}')
             model_stds[model_number] = result[3]
 
         time_finish_process_models = time.time()
@@ -685,6 +690,8 @@ def pandda(args: PanDDAArgs):
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
+        print(f'{np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])}')
+
         output_maps(
             dtag,
             fs,
