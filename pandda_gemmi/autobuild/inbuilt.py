@@ -1197,6 +1197,7 @@ def get_local_signal_dencalc_optimize_bdc(
     #     # tol=0.1
     # )
 
+    print(f'Correlations')
     print(get_correlation(0.0, masked_xmap_vals,
             masked_mean_map_vals,
             masked_calc_vals,))
