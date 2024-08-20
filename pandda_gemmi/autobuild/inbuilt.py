@@ -1059,6 +1059,7 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     double_masked_calc_vals = masked_calc_vals[event_map_vals != 0]
 
     if masked_event_map_vals.size == 0:
+        print(f'No overlap between event map vals != 0 and masked event map vals!')
         return 1.0
 
     # corr = np.corrcoef(
@@ -1185,6 +1186,9 @@ def get_local_signal_dencalc_optimize_bdc(
     masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
     masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
     masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
+    print(f'masked_xmap_vals: {masked_xmap_vals}')
+    print(f'masked_mean_map_vals: {masked_mean_map_vals}')
+    print(f'masked_calc_vals: {masked_calc_vals}')
 
     # res = optimize.minimize(
     #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
