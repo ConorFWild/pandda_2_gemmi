@@ -692,7 +692,7 @@ def pandda(args: PanDDAArgs):
         time_begin_output_maps = time.time()
         print(f'z map stats: {np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])} {np.sum(np.isnan(model_zs[selected_model_num]))}')
 
-        for event in top_selected_model_events:
+        for event in top_selected_model_events.values():
             print(f'{event.bdc} : {event.build.bdc}')
         output_maps(
             dtag,
