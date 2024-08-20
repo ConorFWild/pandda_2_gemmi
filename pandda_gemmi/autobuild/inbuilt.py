@@ -1059,7 +1059,7 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     double_masked_calc_vals = masked_calc_vals[event_map_vals != 0]
 
     if masked_event_map_vals.size == 0:
-        print(f'No overlap between event map vals != 0 and masked event map vals!')
+        # print(f'No overlap between event map vals != 0 and masked event map vals!')
         return 1.0
 
     # corr = np.corrcoef(
@@ -1083,7 +1083,7 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     )
 
     corr = nominator / denominator
-    print(f'BDC: {round(_bdc, 2)} : Correlation: {corr}')
+    # print(f'BDC: {round(_bdc, 2)} : Correlation: {corr}')
     return 1-corr
 
 def get_predicted_mask(
