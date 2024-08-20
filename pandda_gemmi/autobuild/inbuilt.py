@@ -1083,7 +1083,7 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     )
 
     corr = nominator / denominator
-    print(f'Correlation: {corr}')
+    print(f'BDC: {round(_bdc, 2)} : Correlation: {corr}')
     return 1-corr
 
 def get_predicted_mask(
