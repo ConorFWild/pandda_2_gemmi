@@ -65,6 +65,23 @@ class LitEventScoring(lt.LightningModule):
 
         return float(score[0][1])
 
+def _get_ed_mask_float( radius=5.5):
+    mask = gemmi.FloatGrid(32,32,32)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(gemmi.UnitCell(16.0,16.0,16.0,90.0,90.0,90.0))
+
+    # Get the mask
+    # for atom in res:
+    pos = gemmi.Position(8.0, 8.0, 8.0)  # *
+    mask.set_points_around(
+        pos,
+        radius=radius,
+        value=1.0,
+    )
+
+    mask_np = np.array(mask, copy=True)
+
+    return mask_np
 
 class EventScorer:
 
@@ -80,12 +97,14 @@ class EventScorer:
 
         # Cut the xmap
         x, y, z = event.centroid
-        cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
-        xmap_array = np.array(cut_xmap)
-        print(f'Cut xmap sum: {np.sum(xmap_array)} {np.min(xmap_array)} {np.max(xmap_array)} {np.mean(xmap_array)} {np.std(xmap_array)}')
+        # cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
+        # xmap_array = np.array(cut_xmap)
+        # print(f'Cut xmap sum: {np.sum(xmap_array)} {np.min(xmap_array)} {np.max(xmap_array)} {np.mean(xmap_array)} {np.std(xmap_array)}')
+
+        mask = _get_ed_mask_float()
 
         # Get the xmap sample
-        xmap_sample = sample_frame(cut_xmap, scale=True)
+        xmap_sample = sample_frame(xmap, scale=True)
         print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)} {np.mean(xmap_sample)} {np.std(xmap_sample)}')
 
 
@@ -109,7 +128,7 @@ class EventScorer:
         map_array = np.stack(
                     [
                         zmap_sample,
-                        xmap_sample,
+                        xmap_sample * mask,
                     ]
                 )[np.newaxis,:]
         mol_array = np.stack(
