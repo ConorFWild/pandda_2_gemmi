@@ -86,13 +86,19 @@ class EventScorer:
 
         # Get the xmap sample
         xmap_sample = sample_frame(cut_xmap, scale=True)
+        print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)}')
+
 
         # Get the zmap sample
         zmap_sample = sample_frame(zmap, scale=True)
+        print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)}')
+
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
+        print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)}')
+
 
         # Get the ligand mask
         # ligand_mask_sample_bin = np.copy(ligand_mask_sample)
