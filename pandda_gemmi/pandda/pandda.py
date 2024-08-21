@@ -157,8 +157,8 @@ class ProcessModel:
                 event_score = score(
                     event,
                     conf,
-                    z_grid,
-                    xmap_grid
+                    z_grid.clone(),
+                    xmap_grid.clone()
                 )
                 event.score = event_score
                 _x,_y,_z, = event.centroid
