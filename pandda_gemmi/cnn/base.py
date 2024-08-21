@@ -58,6 +58,14 @@ def get_ligand_mask(ligand: StructureI, template: GridI, radius=1.0) -> GridI:
 
     return mask
 
+def copy_map(xmap:GridI):
+    new_xmap = grid_from_template(xmap)
+    xmap_array = np.array(xmap, copy=False)
+    new_xmap_array = np.array(new_xmap, copy=False)
+
+    new_xmap_array[:,:,:] = xmap_array[:,:,:]
+    return new_xmap
+
 
 def get_structure_array(st: StructureI):
     poss = []

@@ -55,7 +55,7 @@ from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighEventS
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
-from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, set_structure_mean
+from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, set_structure_mean, copy_map
 
 
 class GetDatasetsToProcess:
@@ -157,8 +157,8 @@ class ProcessModel:
                 event_score = score(
                     event,
                     conf,
-                    z_grid.clone(),
-                    xmap_grid.clone()
+                    copy_map(z_grid),
+                    copy_map(xmap_grid)
                 )
                 event.score = event_score
                 _x,_y,_z, = event.centroid
