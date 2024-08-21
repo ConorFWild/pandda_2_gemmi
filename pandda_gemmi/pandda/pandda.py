@@ -158,7 +158,7 @@ class ProcessModel:
                     event,
                     conf,
                     z_grid,
-                    xmap_grid
+                    raw_xmap_grid
                 )
                 event.score = event_score
                 _x,_y,_z, = event.centroid
