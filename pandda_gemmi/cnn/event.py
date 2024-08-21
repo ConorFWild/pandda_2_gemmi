@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import lightning as lt
 
 from .interfaces import *
-from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask
+from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array
 from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
@@ -76,6 +76,7 @@ class EventScorer:
         sample_frame = get_sample_frame_from_event(event, SAMPLE_SIZE, SAMPLE_SPACING)
         print(f'\t\t{sample_frame.transform.vec.tolist()}')
         print(f'\t\t{sample_frame.transform.mat.tolist()}')
+        print(get_structure_array(ligand_conformation))
 
         # Cut the xmap
         x, y, z = event.centroid
