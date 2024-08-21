@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import lightning as lt
 
 from .interfaces import *
-from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array
+from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array, copy_map
 from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
@@ -80,7 +80,7 @@ class EventScorer:
 
         # Cut the xmap
         x, y, z = event.centroid
-        cut_xmap = mask_xmap_radial(xmap, x, y, z)
+        cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
 
         # Get the xmap sample
         xmap_sample = sample_frame(cut_xmap, scale=True)
