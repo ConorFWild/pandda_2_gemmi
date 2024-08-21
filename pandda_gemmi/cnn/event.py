@@ -81,6 +81,7 @@ class EventScorer:
         # Cut the xmap
         x, y, z = event.centroid
         cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
+        print(f'Cut xmap sum: {np.sum(np.array(cut_xmap))}')
 
         # Get the xmap sample
         xmap_sample = sample_frame(cut_xmap, scale=True)
