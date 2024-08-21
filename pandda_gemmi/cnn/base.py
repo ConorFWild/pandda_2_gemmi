@@ -20,8 +20,10 @@ class SampleFrame(SampleFrameI):
             std = np.std(arr)
             if np.abs(std) > 0.0000001:
                 narr = (arr - np.mean(arr)) / std
+            return narr
+        else:
+            return arr
 
-        return narr
 
 
 def iterate_atoms(structure: StructureI, hs: bool = False) -> typing.Iterable[AtomI]:
