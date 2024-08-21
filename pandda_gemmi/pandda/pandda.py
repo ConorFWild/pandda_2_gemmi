@@ -115,7 +115,7 @@ class ProcessModel:
         print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
 
         mean_grid = reference_frame.unmask(SparseDMap(mean))
-        z_grid = reference_frame.unmask(SparseDMap(z))
+        z_grid = reference_frame.unmask(SparseDMap((z-np.mean(z)) / np.std(z)))
 
         # Get the median
         median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
