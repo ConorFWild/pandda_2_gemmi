@@ -14,8 +14,8 @@ class SampleFrame(SampleFrameI):
 
     def __call__(self, grid: GridI, scale=False) -> np.array:
         arr = np.zeros(self.spacing, dtype=np.float32)
-        grid.interpolate_values(arr, self.transform)
         narr = np.copy(arr)
+        grid.interpolate_values(arr, self.transform)
         if scale:
             std = np.std(arr)
             if np.abs(std) > 0.0000001:

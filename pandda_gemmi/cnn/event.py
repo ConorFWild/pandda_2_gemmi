@@ -82,22 +82,22 @@ class EventScorer:
         x, y, z = event.centroid
         cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
         xmap_array = np.array(cut_xmap)
-        print(f'Cut xmap sum: {np.sum(xmap_array)} {np.min(xmap_array)} {np.max(xmap_array)}')
+        print(f'Cut xmap sum: {np.sum(xmap_array)} {np.min(xmap_array)} {np.max(xmap_array)} {np.mean(xmap_array)} {np.std(xmap_array)}')
 
         # Get the xmap sample
         xmap_sample = sample_frame(cut_xmap, scale=True)
-        print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)}')
+        print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)} {np.mean(xmap_sample)} {np.std(xmap_sample)}')
 
 
         # Get the zmap sample
         zmap_sample = sample_frame(zmap, scale=True)
-        print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)}')
+        print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)} {np.mean(zmap_sample)} {np.std(zmap_sample)}')
 
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
-        print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)}')
+        print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)} {np.mean(ligand_mask_sample)} {np.std(ligand_mask_sample)}')
 
 
         # Get the ligand mask
