@@ -156,7 +156,7 @@ class ProcessModel:
                 conf = set_structure_mean(confs[0], event.centroid)
                 event_score = score(
                     event,
-                    confs[0],
+                    conf,
                     z_grid,
                     xmap_grid
                 )
