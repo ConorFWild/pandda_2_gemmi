@@ -82,32 +82,34 @@ class EventScorer:
         cut_xmap = mask_xmap_radial(xmap, x, y, z)
 
         # Get the xmap sample
-        xmap_sample = sample_frame(cut_xmap, )
+        xmap_sample = sample_frame(cut_xmap, scale=True)
 
         # Get the zmap sample
-        zmap_sample = sample_frame(zmap)
+        zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
-        ligand_mask_sample = sample_frame(ligand_mask)
+        ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
         # Get the ligand mask
-        ligand_mask_sample_bin = np.copy(ligand_mask_sample)
-        ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
-        ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
+        # ligand_mask_sample_bin = np.copy(ligand_mask_sample)
+        # ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
+        # ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
 
         # Run the model
-        return self.model(
-            torch.from_numpy(
-                np.stack(
+        map_array = np.stack(
                     [
                         zmap_sample,
                         xmap_sample,
                     ]
-                )[np.newaxis,:]),
-            torch.from_numpy(np.stack(
+                )[np.newaxis,:]
+        mol_array = np.stack(
                 [
                     ligand_mask_sample
                 ]
-            )[np.newaxis,:])
+            )[np.newaxis,:]
+        return self.model(
+            torch.from_numpy(map_array
+                ),
+            torch.from_numpy(mol_array)
         )

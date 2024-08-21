@@ -66,14 +66,14 @@ class BuildScorer:
 
         # Get the xmap sample
         # masked_xmap = mask_xmap_ligand(autobuild, xmap)
-        xmap_sample = sample_frame(xmap, )
+        xmap_sample = sample_frame(xmap, scale=True)
 
         # Get the zmap sample
-        zmap_sample = sample_frame(zmap)
+        zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(autobuild, zmap)
-        ligand_mask_sample = sample_frame(ligand_mask)
+        ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
         # Get the ligand mask
         ligand_mask_sample_bin = np.copy(ligand_mask_sample)
