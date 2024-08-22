@@ -1477,8 +1477,8 @@ def autobuild_conformer(
     score = score_build(
         optimized_structure,
         # reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+        z_grid,
         raw_xmap_grid,
-        z_grid
     )
     x,y,z = centroid
     print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
