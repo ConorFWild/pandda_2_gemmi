@@ -72,13 +72,17 @@ class BuildScorer:
         zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
-        ligand_mask = get_ligand_mask(autobuild, zmap)
+        ligand_mask = get_ligand_mask(autobuild, zmap, radius=2.0)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
         # Get the ligand mask
         ligand_mask_sample_bin = np.copy(ligand_mask_sample)
         ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
         ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
+
+        # Get the ligand map sample
+        ligand_map = get_ligand_mask(autobuild, zmap)
+        ligand_map_sample = sample_frame(ligand_map, scale=False)
 
         # Run the model
         return self.model(
@@ -87,7 +91,7 @@ class BuildScorer:
                     [
                         zmap_sample,
                         xmap_sample * ligand_mask_sample_bin,
-                        ligand_mask_sample
+                        ligand_map_sample
                     ]
                 )[np.newaxis,:]
             )

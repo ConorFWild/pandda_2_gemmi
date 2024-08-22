@@ -91,9 +91,9 @@ class EventScorer:
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
         # Get the sample frame
         sample_frame = get_sample_frame_from_event(event, SAMPLE_SIZE, SAMPLE_SPACING)
-        print(f'\t\t{sample_frame.transform.vec.tolist()}')
-        print(f'\t\t{sample_frame.transform.mat.tolist()}')
-        print(get_structure_array(ligand_conformation))
+        # print(f'\t\t{sample_frame.transform.vec.tolist()}')
+        # print(f'\t\t{sample_frame.transform.mat.tolist()}')
+        # print(get_structure_array(ligand_conformation))
 
         # Cut the xmap
         x, y, z = event.centroid
@@ -105,18 +105,18 @@ class EventScorer:
 
         # Get the xmap sample
         xmap_sample = sample_frame(xmap, scale=True)
-        print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)} {np.mean(xmap_sample)} {np.std(xmap_sample)}')
+        # print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)} {np.mean(xmap_sample)} {np.std(xmap_sample)}')
 
 
         # Get the zmap sample
         zmap_sample = sample_frame(zmap, scale=True)
-        print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)} {np.mean(zmap_sample)} {np.std(zmap_sample)}')
+        # print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)} {np.mean(zmap_sample)} {np.std(zmap_sample)}')
 
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
-        print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)} {np.mean(ligand_mask_sample)} {np.std(ligand_mask_sample)}')
+        # print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)} {np.mean(ligand_mask_sample)} {np.std(ligand_mask_sample)}')
 
 
         # Get the ligand mask
@@ -137,7 +137,6 @@ class EventScorer:
                 ]
             )[np.newaxis,:]
         return self.model(
-            torch.from_numpy(map_array
-                ),
+            torch.from_numpy(map_array),
             torch.from_numpy(mol_array)
         )
