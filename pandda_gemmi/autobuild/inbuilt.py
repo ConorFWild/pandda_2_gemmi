@@ -1376,7 +1376,7 @@ def autobuild_conformer(
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
     score_grid = normalize_z_array + normalize_event_map_array
     event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
-    z_grid = reference_frame.unmask(SparseDMap(z_array))
+    z_grid = reference_frame.unmask(SparseDMap(normalize_z_array))
     raw_xmap_grid = reference_frame.unmask(SparseDMap(raw_xmap_sparse))
 
     time_begin_score_conf = time.time()
@@ -1476,7 +1476,8 @@ def autobuild_conformer(
 
     score = score_build(
         optimized_structure,
-        reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+        # reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+        raw_xmap_grid,
         z_grid
     )
     x,y,z = centroid
