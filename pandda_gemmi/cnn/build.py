@@ -72,6 +72,7 @@ class BuildScorer:
         zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
+
         ligand_mask = get_ligand_mask(autobuild, zmap, radius=2.0)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
