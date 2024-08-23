@@ -583,27 +583,28 @@ def pandda(args: PanDDAArgs):
         #     model_zs
         # )
 
-        for build_key, build in builds.items():
-            model_number, event_number, ligand_key, conformer_number = build_key
-            print([x for x in build.keys()])
-            dmaps = {
-                'zmap': build['arr'][0],
-                'xmap': build['arr'][1],
-                'mask': build['arr'][2],
-            }
-            for name, dmap in dmaps.items():
-                grid = gemmi.FloatGrid(32, 32, 32)
-                uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
+        for build_key, result in builds.items():
+            for path, build in result.items():
+                model_number, event_number, ligand_key, conformer_number = build_key
+                print([x for x in build.keys()])
+                dmaps = {
+                    'zmap': build['arr'][0],
+                    'xmap': build['arr'][1],
+                    'mask': build['arr'][2],
+                }
+                for name, dmap in dmaps.items():
+                    grid = gemmi.FloatGrid(32, 32, 32)
+                    uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
 
-                # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
-                grid.set_unit_cell(uc)
+                    # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
+                    grid.set_unit_cell(uc)
 
-                grid_array = np.array(grid, copy=False)
-                grid_array[:, :, :] = dmap[:, :, :]
-                ccp4 = gemmi.Ccp4Map()
-                ccp4.grid = grid
-                ccp4.update_ccp4_header()
-                ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] / 'model_maps' / f'{name}_{model_number}_{event_number}_{ligand_key}_{conformer_number}.ccp4'))
+                    grid_array = np.array(grid, copy=False)
+                    grid_array[:, :, :] = dmap[:, :, :]
+                    ccp4 = gemmi.Ccp4Map()
+                    ccp4.grid = grid
+                    ccp4.update_ccp4_header()
+                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] / 'model_maps' / f'{name}_{model_number}_{event_number}_{ligand_key}_{conformer_number}.ccp4'))
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
