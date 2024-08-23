@@ -588,9 +588,9 @@ def pandda(args: PanDDAArgs):
                 model_number, event_number, ligand_key, conformer_number = build_key
                 print([x for x in build.keys()])
                 dmaps = {
-                    'zmap': build['arr'][0],
-                    'xmap': build['arr'][1],
-                    'mask': build['arr'][2],
+                    'zmap': build['arr'][0][0],
+                    'xmap': build['arr'][0][1],
+                    'mask': build['arr'][0][2],
                 }
                 for name, dmap in dmaps.items():
                     grid = gemmi.FloatGrid(32, 32, 32)
