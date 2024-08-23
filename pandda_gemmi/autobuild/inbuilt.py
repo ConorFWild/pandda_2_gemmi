@@ -680,7 +680,8 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
 
 
     # Score the conformor
-    score = np.median(vals) - np.median(negative_vals)
+    q = np.quantile(vals, 0.15)
+    score = np.sum(negative_vals > q) / negative_vals.size
 
     return float(-score)
 
