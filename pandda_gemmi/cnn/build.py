@@ -31,10 +31,10 @@ def mask_xmap_ligand(autobuild: StructureI, xmap: GridI, radius=1.0) -> GridI:
 
 
 def get_sample_frame_from_build(autobuild: StructureI, sample_size, sample_spacing) -> SampleFrameI:
-    centroid = get_structure_centroid(autobuild) - (0.5*sample_spacing*np.array(sample_size))
+    vec = get_structure_centroid(autobuild) - (0.5*sample_spacing*np.array(sample_size))
     mat = np.eye(3) * sample_spacing
     return SampleFrame(
-        transform_from_arrays(centroid, mat),
+        transform_from_arrays(vec, mat),
         SAMPLE_SIZE
     )
 
@@ -72,7 +72,6 @@ class BuildScorer:
         zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
-
         ligand_mask = get_ligand_mask(autobuild, zmap, radius=2.0)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
@@ -85,15 +84,24 @@ class BuildScorer:
         ligand_map = get_ligand_mask(autobuild, zmap)
         ligand_map_sample = sample_frame(ligand_map, scale=False)
 
+
         # Run the model
-        return self.model(
-            torch.from_numpy(
-                np.stack(
+        arr = np.stack(
                     [
                         zmap_sample,
                         xmap_sample * ligand_mask_sample_bin,
                         ligand_map_sample
                     ]
                 )[np.newaxis,:]
+
+        print(
+            f'Build Score Zmap: {round(np.min(arr[0][0]), 3)} {round(np.median(arr[0][0]), 3)} {round(np.max(arr[0][0]), 3)} {round(np.sum(arr[0][0]), 3)}\n'
+            f'Build Score xmap: {round(np.min(arr[0][1]), 3)} {round(np.median(arr[0][1]), 3)} {round(np.max(arr[0][1]), 3)} {round(np.sum(arr[0][1]), 3)}\n'
+            f'Build Score mask: {round(np.min(arr[0][2]), 3)} {round(np.median(arr[0][2]), 3)} {round(np.max(arr[0][2]), 3)} {round(np.sum(arr[0][2]), 3)}\n'
+
+        )
+        return self.model(
+            torch.from_numpy(
+                arr
             )
         )
