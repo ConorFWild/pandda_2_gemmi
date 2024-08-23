@@ -662,8 +662,8 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
 
     vals = get_interpolated_values_c(grid, transformed_structure_array, n)
 
-    vals[vals > 2.5] = 2.5
-    # vals[vals < 0.0] = 0.0
+    vals[vals > 2.0] = 2.0
+    vals[vals < -2.0] = -2.0
 
     # Negative structure
     transformed_negative_structure_array = transform_structure_array(
@@ -674,7 +674,9 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
 
     negative_vals = get_interpolated_values_c(grid, transformed_negative_structure_array, n)
 
-    negative_vals[negative_vals < -2.5] = -2.5
+    negative_vals[negative_vals < -2.0] = -2.0
+    negative_vals[negative_vals > 2.0] = 2.0
+
 
     # Score the conformor
     score = np.sum(vals) - np.sum(negative_vals)
