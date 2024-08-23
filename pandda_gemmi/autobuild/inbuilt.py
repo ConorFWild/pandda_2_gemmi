@@ -671,6 +671,7 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
         np.array([x_2, y_2, z_2]),
         rotation_matrix
     )
+    n = transformed_negative_structure_array.shape[0]
 
     negative_vals = get_interpolated_values_c(grid, transformed_negative_structure_array, n)
 
