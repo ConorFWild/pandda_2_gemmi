@@ -19,7 +19,6 @@ from ..dataset.structure import save_structure, load_structure, Structure
 from .autobuild import AutobuildResult
 
 
-
 def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
     smiles_path = dataset_smiles_path
 
@@ -31,6 +30,7 @@ def get_fragment_mol_from_dataset_smiles_path(dataset_smiles_path: Path):
     m: Chem.Mol = Chem.MolFromSmiles(smiles_string)
 
     return m
+
 
 bond_type_cif_to_rdkit = {
     'single': Chem.rdchem.BondType.SINGLE,
@@ -44,6 +44,7 @@ bond_type_cif_to_rdkit = {
     'deloc': Chem.rdchem.BondType.SINGLE
 
 }
+
 
 # def handle_deloc(edited_mol):
 #
@@ -113,11 +114,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     if not atom_charge_loop:
         atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
-            atom_charge_loop = [0]*len(atom_id_loop)
+            atom_charge_loop = [0] * len(atom_id_loop)
 
     aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
     if not aromatic_atom_loop:
-        aromatic_atom_loop = [None]*len(atom_id_loop)
+        aromatic_atom_loop = [None] * len(atom_id_loop)
 
     # Get the mapping
     id_to_idx = {}
@@ -138,11 +139,12 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
     aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
     if not aromatic_bond_loop:
-        aromatic_bond_loop = [None]*len(bond_1_id_loop)
+        aromatic_bond_loop = [None] * len(bond_1_id_loop)
 
     try:
         # Iteratively add the relevant bonds
-        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_bond_loop):
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop,
+                                                                 aromatic_bond_loop):
             bond_type = bond_type_cif_to_rdkit[bond_type]
             if aromatic:
                 if aromatic == "y":
@@ -171,7 +173,6 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     ba2 = bond.GetEndAtomIdx()
     #     print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
     # print(Chem.MolToMolBlock(edited_mol))
-
 
     # HANDLE SULFONATES
     # forward_mol = Chem.ReplaceSubstructs(
@@ -211,11 +212,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     sulfonate["O3"] for sulfonate in sulfonates.values()
     # ]
     # print(f"Atom idxs to charge: {atoms_to_charge}")
-    bonds_to_double =[
-        (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
-    ] + [
-        (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
-    ]
+    bonds_to_double = [
+                          (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
+                      ] + [
+                          (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
+                      ]
     print(f"Bonds to double: {bonds_to_double}")
 
     # Replace the bonds and update O3's charge
@@ -345,7 +346,6 @@ def get_conformers(
         )
 
         return fragment_structures
-
 
     # if ligand_files.ligand_smiles is not None:
     #     # print(f"\t\t\tGetting conformers from: {ligand_files.ligand_smiles}")
@@ -480,9 +480,9 @@ def get_probe_structure(
             atom = verticies[atom_index]
             pos = atom.pos
             for dx, dy, dz in itertools.product(
-                [-0.4, 0.4],
-                [-0.4, 0.4],
-                [-0.4, 0.4],
+                    [-0.4, 0.4],
+                    [-0.4, 0.4],
+                    [-0.4, 0.4],
             ):
                 virtual_atom = gemmi.Atom()
                 new_pos = gemmi.Position(
@@ -695,7 +695,7 @@ def score_conformer(
         # )
         # print(res)
         time_finish_evolve = time.time()
-        total_evolve_time += (time_finish_evolve-time_begin_evolve)
+        total_evolve_time += (time_finish_evolve - time_begin_evolve)
         # print(f"\t\t\t\t\tFinished Optimizing round {j}")
 
         scores.append(res.fun)
@@ -780,6 +780,7 @@ def get_score_grid(dmap, st, event: EventInterface):
 
     return dmap
 
+
 def mask_dmap(dmap_array, st, reference_frame):
     dmap = reference_frame.unmask(SparseDMap(dmap_array))
     # Get a mask of the protein
@@ -808,8 +809,6 @@ def mask_dmap(dmap_array, st, reference_frame):
     structure_mask_indicies = np.nonzero(inner_mask_grid_array)
     # print(f"Mask indicies size: {inner_mask_grid_array[0].size}")
     dmap_array[structure_mask_indicies] = 0.0
-
-
 
     return SparseDMap.from_xmap(dmap, reference_frame).data
 
@@ -981,12 +980,13 @@ class AutobuildInbuilt:
             out_dir
         )
 
+
 def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     # Get the electron density of the optimized structure
     optimized_structure.cell = event_map_grid.unit_cell
     optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
-    dencalc.d_min = res#*2
+    dencalc.d_min = res  # *2
     dencalc.rate = 2.0
     # initial_dencalc_grid = gemmi.FloatGrid(event_map_grid.nu, event_map_grid.nv, event_map_grid.nw)
     # initial_dencalc_grid.spacegroup = gemmi.find_spacegroup_by_name("P 1")
@@ -1011,7 +1011,7 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
             for residue in chain:
                 # if residue.name in constants.RESIDUE_NAMES:
                 for atom in residue:
-                    if atom.element.name=="H":
+                    if atom.element.name == "H":
                         continue
                     pos = atom.pos
                     inner_mask_grid.set_points_around(pos,
@@ -1041,20 +1041,20 @@ def get_local_signal_dencalc(optimized_structure, event_map_grid, res, ):
     corr = np.corrcoef(
         np.concatenate(
             (
-                masked_event_map_vals.reshape(-1,1),
+                masked_event_map_vals.reshape(-1, 1),
                 masked_calc_vals.reshape(-1, 1)
             ),
             axis=1,
         )
-    )[0,1]
+    )[0, 1]
 
     num_atoms = np.log(num_atoms)
 
-    return corr #* num_atoms
+    return corr  # * num_atoms
+
 
 def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals):
-
-    event_map_vals = (masked_xmap_vals - (_bdc*masked_mean_map_vals)) / (1-_bdc)
+    event_map_vals = (masked_xmap_vals - (_bdc * masked_mean_map_vals)) / (1 - _bdc)
     masked_event_map_vals = event_map_vals[event_map_vals != 0]
     double_masked_calc_vals = masked_calc_vals[event_map_vals != 0]
 
@@ -1076,15 +1076,16 @@ def get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_va
     event_map_mean = np.mean(masked_event_map_vals)
     calc_map_mean = np.mean(double_masked_calc_vals)
     delta_event_map = masked_event_map_vals - event_map_mean
-    delta_calc_map = double_masked_calc_vals-calc_map_mean
-    nominator = np.sum(delta_event_map*delta_calc_map)
+    delta_calc_map = double_masked_calc_vals - calc_map_mean
+    nominator = np.sum(delta_event_map * delta_calc_map)
     denominator = np.sqrt(
-        np.sum(np.square(delta_event_map))*np.sum(np.square(delta_calc_map))
+        np.sum(np.square(delta_event_map)) * np.sum(np.square(delta_calc_map))
     )
 
     corr = nominator / denominator
     # print(f'BDC: {round(_bdc, 2)} : Correlation: {corr}')
-    return 1-corr
+    return 1 - corr
+
 
 def get_predicted_mask(
         optimized_structure,
@@ -1127,9 +1128,10 @@ def get_predicted_mask(
 
     return inner_mask_grid
 
+
 def get_predicted_density(
-    optimized_structure,
-    xmap
+        optimized_structure,
+        xmap
 ):
     # Get the electron density of the optimized structure
     optimized_structure.cell = xmap.unit_cell
@@ -1146,14 +1148,15 @@ def get_predicted_density(
 
     return calc_grid
 
+
 def get_predicted_density_high_contour(
         predicted_density,
         predicted_mask
-    ):
+):
     predicted_density_array = np.array(predicted_density, copy=False)
     predicted_mask_array = np.array(predicted_mask, copy=False)
 
-    predicted_high_vals = predicted_density_array[predicted_mask_array >3]
+    predicted_high_vals = predicted_density_array[predicted_mask_array > 3]
 
     contour = np.quantile(
         predicted_high_vals,
@@ -1161,6 +1164,7 @@ def get_predicted_density_high_contour(
     )
 
     return contour
+
 
 def get_local_signal_dencalc_optimize_bdc(
         optimized_structure,
@@ -1199,8 +1203,8 @@ def get_local_signal_dencalc_optimize_bdc(
 
     print(f'Correlations')
     print(get_correlation(0.0, masked_xmap_vals,
-            masked_mean_map_vals,
-            masked_calc_vals,))
+                          masked_mean_map_vals,
+                          masked_calc_vals, ))
     print(get_correlation(0.5, masked_xmap_vals,
                           masked_mean_map_vals,
                           masked_calc_vals, ))
@@ -1232,13 +1236,14 @@ def get_local_signal_dencalc_optimize_bdc(
 
     # num_atoms = np.log(num_atoms)
     bdc = res.x
-    corr = 1-res.fun
+    corr = 1 - res.fun
 
     # masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
 
     print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
 
-    return corr, bdc #* num_atoms
+    return corr, bdc  # * num_atoms
+
 
 def get_local_signal(optimized_structure, event_map_grid):
     event_map_grid_array = np.array(event_map_grid, copy=False)
@@ -1285,7 +1290,7 @@ def get_local_signal(optimized_structure, event_map_grid):
     outer_mean = np.mean(outer_mask)
     outer_std = np.std(outer_mean)
     # background = np.mean(outer_mask)
-    background = outer_mean + (2*outer_std)
+    background = outer_mean + (2 * outer_std)
 
     # high_non_core = np.sum(outer_mask > background)
     # low_non_core = np.sum(outer_mask <= background)
@@ -1304,31 +1309,34 @@ def get_local_signal(optimized_structure, event_map_grid):
     # return np.sum(vals_pos-np.mean(vals_neg)) #- np.sum(vals_neg)
     return score
 
+
 def get_signal(
         xmap_array,
         xmap_mask
 ):
     return xmap_array[xmap_mask]
 
+
 def get_optimal_signal_contour(
         signal_vals,
         noise_signal_vals
-    ):
+):
     diffs = {}
     for val in np.linspace(
-        np.min(signal_vals),
-        np.max(signal_vals),
-        num=100
+            np.min(signal_vals),
+            np.max(signal_vals),
+            num=100
     ):
         difference = int(np.sum(signal_vals > val) - np.sum(noise_signal_vals > val))
         diffs[float(val)] = difference
 
     return max(diffs, key=lambda _key: diffs[_key])
 
+
 def get_contacts(
         optimized_structure,
         st
-    ):
+):
     ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
 
     contacts = []
@@ -1362,17 +1370,16 @@ def autobuild_conformer(
         unmasked_dtag_array,
         unmasked_mean_array,
         z_array,
-    raw_xmap_sparse,
-    score_build
-                ):
-
+        raw_xmap_sparse,
+        score_build
+):
     time_begin_autobuild = time.time()
 
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
     print(f'z map stats: {np.min(z_array)} {np.max(z_array)} {np.median(z_array)}')
 
-    event_map_array = (masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)
-    normalize_event_map_array = (event_map_array-np.mean(event_map_array) / np.std(event_map_array))
+    event_map_array = (masked_dtag_array - (event_bdc * masked_mean_array)) / (1 - event_bdc)
+    normalize_event_map_array = (event_map_array - np.mean(event_map_array) / np.std(event_map_array))
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
     score_grid = normalize_z_array + normalize_event_map_array
     event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
@@ -1426,7 +1433,8 @@ def autobuild_conformer(
     )
     time_finish_optimize_bdc = time.time()
 
-    corrected_event_map_grid = reference_frame.unmask(SparseDMap((unmasked_dtag_array - (bdc*unmasked_mean_array)) / (1-bdc)))
+    corrected_event_map_grid = reference_frame.unmask(
+        SparseDMap((unmasked_dtag_array - (bdc * unmasked_mean_array)) / (1 - bdc)))
     corrected_event_map_array = np.array(corrected_event_map_grid, copy=False)
 
     signal_vals = get_signal(
@@ -1457,7 +1465,7 @@ def autobuild_conformer(
         structure.structure
     )
 
-    noise_signal_vals[noise_signal_vals <0] = 0.0
+    noise_signal_vals[noise_signal_vals < 0] = 0.0
     noise_signal_vals[noise_signal_vals > 3] = 3.0
     signal_vals[signal_vals < 0] = 0.0
     signal_vals[signal_vals > 3] = 3.0
@@ -1480,39 +1488,40 @@ def autobuild_conformer(
         z_grid,
         raw_xmap_grid,
     )
-    x,y,z = centroid
+    x, y, z = centroid
     print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
 
     time_finish_scoring = time.time()
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
-        'score': float(score),
-        'centroid': centroid,
-        # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
-        # 'local_signal': get_local_signal_dencalc(
-        #     optimized_structure,
-        #     event_map_grid,
-        #     res,
-        # )
-        'local_signal': float(corr),
-        'new_bdc': float(bdc),
-        # 'new_bdc': float(event_bdc),
+            'score': float(score),
+            'centroid': centroid,
+            # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
+            # 'local_signal': get_local_signal_dencalc(
+            #     optimized_structure,
+            #     event_map_grid,
+            #     res,
+            # )
+            'local_signal': float(corr),
+            'new_bdc': float(bdc),
+            # 'new_bdc': float(event_bdc),
             # 'noise': float(noise_signal),
-        # 'signal': float(signal),
-        # 'noise': float(np.abs(np.median(noise_signal_vals))),
-        # 'signal': float(np.abs(np.median(signal_vals))),
+            # 'signal': float(signal),
+            # 'noise': float(np.abs(np.median(noise_signal_vals))),
+            # 'signal': float(np.abs(np.median(signal_vals))),
             'noise': float(np.abs(np.sum(noise_signal_vals))),
             'signal': float(np.abs(np.sum(signal_vals))),
-        'num_points': int(np.sum(predicted_density_array > predicted_density_high_contour)),
+            'num_points': int(np.sum(predicted_density_array > predicted_density_high_contour)),
             'optimal_contour': float(optimal_signal_contour),
-        'num_contacts': int(num_contacts),
+            'num_contacts': int(num_contacts),
             'arr': arr
             # 'total_noise':
         }
     }
     time_finish_autobuild = time.time()
-    print(f"Autobuilt: {round(time_finish_autobuild-time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring-time_begin_scoring, 2)}. Built: {round(time_finish_score_conf-time_begin_score_conf, 2)}. Optimized BDC: {round((time_finish_optimize_bdc-time_begin_optimize_bdc))}")
+    print(
+        f"Autobuilt: {round(time_finish_autobuild - time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring - time_begin_scoring, 2)}. Built: {round(time_finish_score_conf - time_begin_score_conf, 2)}. Optimized BDC: {round((time_finish_optimize_bdc - time_begin_optimize_bdc))}")
 
     # Return results
     return log_result_dict
@@ -1581,7 +1590,7 @@ class AutobuildModelEventInbuilt:
 
         log_result_dict = {
             str(out_dir / f"{conformer_id}.pdb"): {'score': score,
-            'centroid': centroid,}
+                                                   'centroid': centroid, }
             for conformer_id, (optimized_structure, score, centroid)
             in conformer_scores.items()
         }
