@@ -604,7 +604,7 @@ def pandda(args: PanDDAArgs):
                     ccp4 = gemmi.Ccp4Map()
                     ccp4.grid = grid
                     ccp4.update_ccp4_header()
-                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] / 'model_maps' / f'{name}_{model_number}_{event_number}_{ligand_key}_{conformer_number}.ccp4'))
+                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] / 'model_maps' / f'{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
