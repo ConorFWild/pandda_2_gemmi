@@ -505,8 +505,64 @@ def get_probe_structure(
                         residue.add_atom(virtual_atom)
     # print(f"Number of real atoms: {len(verticies)}")
     # print(f"Number of virtual atoms: {len(edges)}")
+
     return structure_clone
 
+def get_negative_probe_structure(
+        structure,
+        structure_array
+):
+    structure_clone = structure.clone()
+    del structure_clone[0]
+    model: gemmi.Model = gemmi.Model(f"0")
+    structure_clone.add_model(model)
+    chain: gemmi.Chain = gemmi.Chain(f"A")
+    structure_clone[0].add_chain(chain)
+    residue: gemmi.Residue = gemmi.Residue()
+    residue.name = "LIG"
+    residue.seqid = gemmi.SeqId(1, ' ')
+    structure_clone[0][0].add_residue(residue)
+
+
+    neighbourhood_probe_atoms = []
+    for model in structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    # print(atom_1.element.name)
+                    if atom.element.name != "H":
+                        pos = atom.pos
+                        for dx, dy, dz in itertools.product(
+                                [-1.5, 1.5],
+                                [-1.5, 1.5],
+                                [-1.5, 1.5],
+                        ):
+                            deltas = structure_array - np.array([pos.x+dx, pos.y+dy, pos.z+dz]).reshape((1, 3))
+                            dists = np.linalg.norm(deltas, axis=1)
+                            if np.any(dists < 1.4):
+                                continue
+
+                            virtual_atom = gemmi.Atom()
+                            new_pos = gemmi.Position(
+                                pos.x + dx,
+                                pos.y + dy,
+                                pos.z + dz,
+
+                            )
+                            atom_symbol: str = "C"
+                            virtual_atom.name = atom_symbol
+                            gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
+                            virtual_atom.element = gemmi_element
+                            virtual_atom.pos = new_pos
+                            neighbourhood_probe_atoms.append(virtual_atom)
+
+    for model in structure_clone:
+        for chain in model:
+            for residue in chain:
+                for virtual_atom in neighbourhood_probe_atoms:
+                    residue.add_atom(virtual_atom)
+
+    return structure_clone
 
 def transform_structure_array(
         structure_array,
@@ -578,6 +634,53 @@ def score_fit_nonquant_array(structure_array, grid, distance, params):
 
     return float(-score)
 
+def score_fit_diff_array(structure_array, negative_structure_array, grid, distance, params):
+    x, y, z, rx, ry, rz = params
+
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
+
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True,
+    )
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+
+    transformed_structure_array = transform_structure_array(
+        structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+
+    n = transformed_structure_array.shape[0]
+
+    vals = get_interpolated_values_c(grid, transformed_structure_array, n)
+
+    vals[vals > 2.5] = 2.5
+    # vals[vals < 0.0] = 0.0
+
+    # Negative structure
+    transformed_negative_structure_array = transform_structure_array(
+        negative_structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+
+    negative_vals = get_interpolated_values_c(grid, transformed_negative_structure_array, n)
+
+    negative_vals[negative_vals < -2.5] = -2.5
+
+    # Score the conformor
+    score = np.sum(vals) - np.sum(negative_vals)
+
+    return float(-score)
+
 
 def transform_structure(structure, translation, rotation_matrix):
     mean_x, mean_y, mean_z = get_structure_mean(structure)
@@ -621,12 +724,9 @@ def score_conformer(
     )
 
     # Get the probe structure
-    probe_structure = get_probe_structure(
-        centered_structure,
-        neighbourhood_probes=True
-    )
+    probe_structure = get_probe_structure(centered_structure)
 
-    # Optimise
+    # Get structure array
     structure_positions = []
 
     for model in probe_structure:
@@ -639,6 +739,26 @@ def score_conformer(
 
     structure_array = np.array(structure_positions, dtype=np.float32)
 
+    # Get the negative probe
+    negative_probe_structure = get_negative_probe_structure(
+        centered_structure,
+        structure_array
+    )
+
+    negative_structure_positions = []
+    for model in negative_probe_structure:
+        for chain in model:
+            for residue in chain:
+                for atom in residue:
+                    if atom.element.name != "H":
+                        pos = atom.pos
+                        negative_structure_positions.append([pos.x, pos.y, pos.z])
+    negative_structure_array = np.array(negative_structure_positions, dtype=np.float32)
+
+    # Optimise
+
+
+
     scores = []
     optimised_structures = []
 
@@ -648,8 +768,15 @@ def score_conformer(
         # print(f"\t\t\t\tOptimizing round {j}")
         time_begin_evolve = time.time()
         res = optimize.differential_evolution(
-            lambda params: score_fit_nonquant_array(
+            # lambda params: score_fit_nonquant_array(
+            #     structure_array,
+            #     zmap_grid,
+            #     1.0,
+            #     params
+            # ),
+            lambda params: score_fit_diff_array(
                 structure_array,
+                negative_structure_array,
                 zmap_grid,
                 1.0,
                 params
