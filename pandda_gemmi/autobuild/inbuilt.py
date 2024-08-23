@@ -1474,7 +1474,7 @@ def autobuild_conformer(
     #     raw_xmap_grid,
     # )
 
-    score = score_build(
+    score, arr = score_build(
         optimized_structure,
         # reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
         z_grid,
@@ -1507,6 +1507,7 @@ def autobuild_conformer(
         'num_points': int(np.sum(predicted_density_array > predicted_density_high_contour)),
             'optimal_contour': float(optimal_signal_contour),
         'num_contacts': int(num_contacts),
+            'arr': arr
             # 'total_noise':
         }
     }

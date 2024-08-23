@@ -104,4 +104,4 @@ class BuildScorer:
             torch.from_numpy(
                 arr
             )
-        )
+        ), arr
