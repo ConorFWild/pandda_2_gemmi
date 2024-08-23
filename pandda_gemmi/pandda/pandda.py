@@ -585,6 +585,7 @@ def pandda(args: PanDDAArgs):
 
         for build_key, build in builds.items():
             model_number, event_number, ligand_key, conformer_number = build_key
+            print([x for x in build.keys()])
             dmaps = {
                 'zmap': build['arr'][0],
                 'xmap': build['arr'][1],
