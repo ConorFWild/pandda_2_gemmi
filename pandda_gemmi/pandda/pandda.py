@@ -422,6 +422,7 @@ def pandda(args: PanDDAArgs):
         raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid).data
         raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
         raw_xmap_array = np.array(raw_xmap_grid, copy=True)
+        raw_xmap_array_ref = processor.put(raw_xmap_array)
         # raw_xmap_grid = reference_frame.unmask(
         #     raw_xmap_sparse
         # )
@@ -562,7 +563,8 @@ def pandda(args: PanDDAArgs):
                     unmasked_mean_array_refs[_model_event_id[0]],
                     z_ref_arrays[_model_event_id[0]],
                     raw_xmap_sparse_ref,
-                    score_build_ref
+                    score_build_ref,
+                    raw_xmap_array_ref
                     # processing_res
                     # fs_ref,
                 )
