@@ -777,6 +777,9 @@ def score_conformer(
         centroid_cart,
         conformer,
         zmap_grid,
+            score_build,
+            z_grid,
+            raw_xmap_grid,
         event_fit_num_trys=6,
 ):
     centered_structure = center_structure(
@@ -889,7 +892,7 @@ def score_conformer(
         total_evolve_time += (time_finish_evolve - time_begin_evolve)
         # print(f"\t\t\t\t\tFinished Optimizing round {j}")
 
-        scores.append(res.fun)
+
 
         # Get optimised fit
         x, y, z, rx, ry, rz = res.x
@@ -909,6 +912,16 @@ def score_conformer(
             rotation_matrix
         )
         optimised_structures.append(optimised_structure)
+
+        score, arr = score_build(
+            optimised_structure,
+            # reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
+            z_grid,
+            raw_xmap_grid,
+        )
+
+        # scores.append(res.fun)
+        scores.append(-score)
 
         centroid = get_structure_mean(optimised_structure)
         print(f'Optimization {j} Score {round(float(res.fun), 3)} Centroid {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}')
@@ -1596,6 +1609,9 @@ def autobuild_conformer(
         centroid,
         conformer.structure,
         event_map_grid,
+        score_build,
+        z_grid,
+        raw_xmap_grid,
     )
     time_finish_score_conf = time.time()
 
@@ -1687,20 +1703,15 @@ def autobuild_conformer(
     #     raw_xmap_grid,
     # )
 
-    score, arr = score_build(
-        optimized_structure,
-        # reference_frame.unmask(SparseDMap(unmasked_dtag_array)),
-        z_grid,
-        raw_xmap_grid,
-    )
+
     x, y, z = centroid
-    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
+    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {-score}')
 
     time_finish_scoring = time.time()
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
-            'score': float(score),
+            'score': float(-score),
             'centroid': centroid,
             # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
             # 'local_signal': get_local_signal_dencalc(
