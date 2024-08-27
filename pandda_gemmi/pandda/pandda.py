@@ -613,7 +613,7 @@ def pandda(args: PanDDAArgs):
         for model_number, events in model_events.items():
             for event_number, event in events.items():
 
-                event_builds = {_build_id: _builds for _build_id, _builds in builds.items()}
+                event_builds = {}
                 for ligand_key, ligand_conformers in conformers.items():
                     for conformer_number, conformer in ligand_conformers.items():
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
