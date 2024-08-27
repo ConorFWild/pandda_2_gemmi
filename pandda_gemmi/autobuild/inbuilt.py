@@ -1504,7 +1504,7 @@ def autobuild_conformer(
         z_array,
         raw_xmap_sparse,
         score_build,
-raw_xmap_array_ref
+        raw_xmap_array_ref
 ):
     time_begin_autobuild = time.time()
 
@@ -1514,14 +1514,16 @@ raw_xmap_array_ref
     event_map_array = (masked_dtag_array - (event_bdc * masked_mean_array)) / (1 - event_bdc)
     normalize_event_map_array = (event_map_array - np.mean(event_map_array) / np.std(event_map_array))
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
-    score_grid = normalize_z_array + normalize_event_map_array
-    event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
+
     z_grid = reference_frame.unmask(SparseDMap(normalize_z_array))
     # raw_xmap_grid = reference_frame.unmask(SparseDMap(raw_xmap_sparse))
     raw_xmap_grid = gemmi.FloatGrid(*raw_xmap_array_ref.shape)
     raw_xmap_grid.set_unit_cell(z_grid.unit_cell)
     raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
     raw_xmap_grid_array[:, :, :] = raw_xmap_array_ref[:, :, :]
+
+    score_grid = normalize_z_array + (0.5*masked_dtag_array)
+    event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
 
     time_begin_score_conf = time.time()
     optimized_structure, score, centroid = score_conformer(
