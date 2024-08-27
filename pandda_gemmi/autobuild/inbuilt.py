@@ -934,7 +934,7 @@ def score_conformer(
     best_score_fit_score = scores[best_score_index]
     best_optimised_structure = optimised_structures[best_score_index]
 
-    return best_optimised_structure, float(best_score_fit_score), get_structure_mean(best_optimised_structure)
+    return best_optimised_structure, float(-best_score_fit_score), get_structure_mean(best_optimised_structure)
 
 
 def get_score_grid(dmap, st, event: EventInterface):
@@ -1705,13 +1705,13 @@ def autobuild_conformer(
 
 
     x, y, z = centroid
-    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {-score}')
+    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
 
     time_finish_scoring = time.time()
 
     log_result_dict = {
         str(out_dir / f"{conformer_id}.pdb"): {
-            'score': float(-score),
+            'score': float(score),
             'centroid': centroid,
             # 'local_signal': get_local_signal(optimized_structure, event_map_grid)
             # 'local_signal': get_local_signal_dencalc(
