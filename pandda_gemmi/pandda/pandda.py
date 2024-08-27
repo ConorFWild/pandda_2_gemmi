@@ -608,11 +608,12 @@ def pandda(args: PanDDAArgs):
                     ccp4.update_ccp4_header()
                     ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] /  f'{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
 
+
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
             for event_number, event in events.items():
 
-                event_builds = {}
+                event_builds = {_build_id: _builds for _build_id, _builds in builds.items()}
                 for ligand_key, ligand_conformers in conformers.items():
                     for conformer_number, conformer in ligand_conformers.items():
                         build = builds[(model_number, event_number, ligand_key, conformer_number)]
@@ -638,10 +639,12 @@ def pandda(args: PanDDAArgs):
                     selected_build_key[0],
                     selected_build['score'],
                     # event_builds[selected_build_key]['signal'] / event_builds[selected_build_key]['noise'],
-                    builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][
-                        selected_build_key[1]]['centroid'],
-                    builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][
-                        selected_build_key[1]]['new_bdc'],
+                    # builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][
+                    #     selected_build_key[1]]['centroid'],
+                    # builds[(model_number, event_number, selected_build_key[0], selected_build_key[2])][
+                    #     selected_build_key[1]]['new_bdc'],
+                    selected_build['centroid'],
+                    selected_build['new_bdc'],
                     build_score=selected_build['score'],
                     noise=selected_build['noise'],
                     signal=selected_build['signal'],

@@ -680,6 +680,8 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
 
 
     # Score the conformor
+    # Score on the percentage of outer mask values beneath the 15th percentile of inner mask values,
+    # and penalize for the fraction of inner mask vals less than 0
     q = np.quantile(vals, 0.15)
     # q_neg = np.quantile(vals, 0.85)
     score = (np.sum(negative_vals <= q) / negative_vals.size) - (np.sum(vals <= 0.0) / vals.size) #* (np.sum(positive_vals))
