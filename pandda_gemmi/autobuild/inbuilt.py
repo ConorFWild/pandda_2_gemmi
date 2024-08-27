@@ -1522,7 +1522,7 @@ def autobuild_conformer(
     raw_xmap_grid_array = np.array(raw_xmap_grid, copy=False)
     raw_xmap_grid_array[:, :, :] = raw_xmap_array_ref[:, :, :]
 
-    score_grid = normalize_z_array + (0.1*masked_dtag_array)
+    score_grid = normalize_z_array #+ (0.1*masked_dtag_array)
     event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
 
     time_begin_score_conf = time.time()
