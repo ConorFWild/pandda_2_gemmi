@@ -684,7 +684,61 @@ def score_fit_diff_array(structure_array, negative_structure_array, grid, distan
     # and penalize for the fraction of inner mask vals less than 0
     q = np.quantile(vals, 0.15)
     # q_neg = np.quantile(vals, 0.85)
-    score = (np.sum(negative_vals <= q) / negative_vals.size) - (np.sum(vals <= 0.0) / vals.size) #* (np.sum(positive_vals))
+    score = (np.sum(negative_vals <= q) / negative_vals.size) - (np.sum(vals <0.0) / vals.size) #* (np.sum(positive_vals))
+
+    return float(-score)
+
+def score_fit_mask_diff_array(structure_array, negative_structure_array, grid, distance, params):
+    x, y, z, rx, ry, rz = params
+
+    x_2 = distance * x
+    y_2 = distance * y
+    z_2 = distance * z
+
+    rotation = spsp.transform.Rotation.from_euler(
+        "xyz",
+        [
+            rx * 360,
+            ry * 360,
+            rz * 360,
+        ],
+        degrees=True,
+    )
+    rotation_matrix: np.ndarray = rotation.as_matrix()
+
+    transformed_structure_array = transform_structure_array(
+        structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+
+    n = transformed_structure_array.shape[0]
+
+    vals = get_interpolated_values_c(grid, transformed_structure_array, n)
+
+    vals[vals > 2.0] = 2.0
+    vals[vals < -2.0] = -2.0
+
+    # Negative structure
+    transformed_negative_structure_array = transform_structure_array(
+        negative_structure_array,
+        np.array([x_2, y_2, z_2]),
+        rotation_matrix
+    )
+    n = transformed_negative_structure_array.shape[0]
+
+    negative_vals = get_interpolated_values_c(grid, transformed_negative_structure_array, n)
+
+    negative_vals[negative_vals < -2.0] = -2.0
+    negative_vals[negative_vals > 2.0] = 2.0
+
+
+    # Score the conformor
+    # Score on the percentage of outer mask values beneath the 15th percentile of inner mask values,
+    # and penalize for the fraction of inner mask vals less than 0
+    q = np.quantile(vals, 0.5)
+    # q_neg = np.quantile(vals, 0.85)
+    score = (np.sum(negative_vals <= q) / negative_vals.size) - (np.sum(vals <0.5) / vals.size) #* (np.sum(positive_vals))
 
     return float(-score)
 
@@ -781,7 +835,7 @@ def score_conformer(
             #     1.0,
             #     params
             # ),
-            lambda params: score_fit_diff_array(
+            lambda params: score_fit_mask_diff_array(
                 structure_array,
                 negative_structure_array,
                 zmap_grid,
