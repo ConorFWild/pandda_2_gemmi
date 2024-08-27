@@ -816,6 +816,9 @@ def score_conformer(
                         negative_structure_positions.append([pos.x, pos.y, pos.z])
     negative_structure_array = np.array(negative_structure_positions, dtype=np.float32)
 
+    print(f'Probe shape: {structure_array.shape} {np.mean(structure_array, axis=0)}')
+    print(f'Negative Probe shape: {negative_structure_array.shape} {np.mean(negative_structure_array, axis=0)}')
+
     # Optimise
 
 
