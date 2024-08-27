@@ -852,6 +852,9 @@ def score_conformer(
             rotation_matrix
         )
         optimised_structures.append(optimised_structure)
+
+        centroid = get_structure_mean(optimised_structure)
+        print(f'Optimization {j} Score {round(float(res.fun), 3)} Centroid {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}')
     time_finish_score = time.time()
     # print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
