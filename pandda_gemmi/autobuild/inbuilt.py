@@ -738,7 +738,7 @@ def score_fit_mask_diff_array(structure_array, negative_structure_array, grid, d
     # and penalize for the fraction of inner mask vals less than 0
     q = np.quantile(vals, 0.5)
     # q_neg = np.quantile(vals, 0.85)
-    score = (np.sum(negative_vals <= q) / negative_vals.size) - (np.sum(vals <0.5) / vals.size) #* (np.sum(positive_vals))
+    score = ((np.sum(vals >= 0.5) / vals.size) - (np.sum(negative_vals >= 0.5) / negative_vals.size)) - (np.sum(vals <0.5) / vals.size) #* (np.sum(positive_vals))
 
     return float(-score)
 
