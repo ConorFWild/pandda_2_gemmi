@@ -1514,7 +1514,7 @@ def autobuild_conformer(
     event_map_array = (masked_dtag_array - (event_bdc * masked_mean_array)) / (1 - event_bdc)
     normalize_event_map_array = (event_map_array - np.mean(event_map_array) / np.std(event_map_array))
     normalize_z_array = (z_array - np.mean(z_array)) / np.std(z_array)
-    normalize_xmap = (raw_xmap_array_ref - np.mean(raw_xmap_array_ref)) / np.std(raw_xmap_array_ref)
+    normalize_xmap = (masked_dtag_array - np.mean(masked_dtag_array)) / np.std(masked_dtag_array)
 
     z_grid = reference_frame.unmask(SparseDMap(normalize_z_array))
     # raw_xmap_grid = reference_frame.unmask(SparseDMap(raw_xmap_sparse))
