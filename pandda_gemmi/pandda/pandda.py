@@ -483,6 +483,9 @@ def pandda(args: PanDDAArgs):
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
         time_begin_process_models = time.time()
+        model_maps_dir = fs.output.processed_datasets[dtag] / 'model_maps'
+        if not model_maps_dir.exists():
+            os.mkdir(model_maps_dir)
         processed_models = {
             model_number: Partial(process_model).paramaterise(
                 dataset.ligand_files,
