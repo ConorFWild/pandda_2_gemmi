@@ -106,6 +106,9 @@ class ProcessModel:
                  reference_frame,
                  model_map,
                  score,
+                 fs,
+                 model_number,
+                 dtag
                  ):
         # Get the statical maps
         mean, std, z = PointwiseMAD()(
@@ -153,7 +156,7 @@ class ProcessModel:
         for lid, ligand_data in ligand_files.items():
             confs = get_conformers(ligand_data)
             for event_id, event in events.items():
-                conf = set_structure_mean(confs[0], event.centroid)
+                conf, map_array, mol_array = set_structure_mean(confs[0], event.centroid)
                 event_score = score(
                     event,
                     conf,
@@ -164,7 +167,26 @@ class ProcessModel:
                 _x,_y,_z, = event.centroid
                 print(f'\t({_x}, {_y}, {_z}): {round(event_score, 5)}')
 
-        time_finish_score_events = time.time()
+                dmaps = {
+                    'zmap': map_array[0][0],
+                    'xmap': map_array[0][1],
+                    'mask': mol_array[0][0],
+                }
+                for name, dmap in dmaps.items():
+                    grid = gemmi.FloatGrid(32, 32, 32)
+                    uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
+
+                    # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
+                    grid.set_unit_cell(uc)
+
+                    grid_array = np.array(grid, copy=False)
+                    grid_array[:, :, :] = dmap[:, :, :]
+                    ccp4 = gemmi.Ccp4Map()
+                    ccp4.grid = grid
+                    ccp4.update_ccp4_header()
+                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] /  f'{model_number}_{event_id}_{lid}_{name}.ccp4'))
+
+            time_finish_score_events = time.time()
 
         # Filter the events after scoring based on keeping only the locally highest scoring event
         num_events = len(events)
@@ -470,6 +492,9 @@ def pandda(args: PanDDAArgs):
                 reference_frame,
                 reference_frame.mask_grid(model_grid).data,
                 score_event,
+                fs,
+                model_number,
+                dtag
             )()
             for model_number
             in models_to_process
@@ -684,7 +709,7 @@ def pandda(args: PanDDAArgs):
                 update_model_events[model_number] = filter(update_model_events[model_number])
                 # TODO: Log properly
                 print(
-                    f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of local filter")
+                    f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of filter {filter}")
 
         # Filter models by whether they have events and skip if no models remain
         model_events = {model_number: events for model_number, events in update_model_events.items() if len(events) > 0}

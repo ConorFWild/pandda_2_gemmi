@@ -139,4 +139,4 @@ class EventScorer:
         return self.model(
             torch.from_numpy(map_array),
             torch.from_numpy(mol_array)
-        )
+        ), map_array, mol_array
