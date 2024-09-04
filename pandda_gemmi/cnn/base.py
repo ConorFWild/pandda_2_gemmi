@@ -51,6 +51,8 @@ def get_ligand_mask(ligand: StructureI, template: GridI, radius=1.0) -> GridI:
 
     # Get the mask
     for atom in iterate_atoms(ligand, ):
+        if atom.element.name == 'H':
+            continue
         pos = atom.pos
         mask.set_points_around(
             pos,
