@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import lightning as lt
 
 from .interfaces import *
-from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array, copy_map
+from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array, copy_map, _get_ed_mask_float
 from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
@@ -65,23 +65,7 @@ class LitEventScoring(lt.LightningModule):
 
         return float(score[0][1])
 
-def _get_ed_mask_float( radius=7.5):
-    mask = gemmi.FloatGrid(32,32,32)
-    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
-    mask.set_unit_cell(gemmi.UnitCell(16.0,16.0,16.0,90.0,90.0,90.0))
 
-    # Get the mask
-    # for atom in res:
-    pos = gemmi.Position(8.0, 8.0, 8.0)  # *
-    mask.set_points_around(
-        pos,
-        radius=radius,
-        value=1.0,
-    )
-
-    mask_np = np.array(mask, copy=True)
-
-    return mask_np
 
 class EventScorer:
 

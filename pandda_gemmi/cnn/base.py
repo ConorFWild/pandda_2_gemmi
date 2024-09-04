@@ -118,3 +118,22 @@ def set_structure_mean(st, centroid):
         )
 
     return st_clone
+
+
+def _get_ed_mask_float( radius=7.5):
+    mask = gemmi.FloatGrid(32,32,32)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(gemmi.UnitCell(16.0,16.0,16.0,90.0,90.0,90.0))
+
+    # Get the mask
+    # for atom in res:
+    pos = gemmi.Position(8.0, 8.0, 8.0)  # *
+    mask.set_points_around(
+        pos,
+        radius=radius,
+        value=1.0,
+    )
+
+    mask_np = np.array(mask, copy=True)
+
+    return mask_np

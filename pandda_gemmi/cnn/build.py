@@ -8,7 +8,7 @@ from rich import print as rprint
 
 from .interfaces import *
 from .base import get_ligand_mask, iterate_atoms, grid_from_template, get_structure_centroid, transform_from_arrays, \
-    SampleFrame
+    SampleFrame, _get_ed_mask_float
 from .constants import SAMPLE_SIZE, SAMPLE_SPACING
 from .resnet import resnet10
 
@@ -72,17 +72,18 @@ class BuildScorer:
         zmap_sample = sample_frame(zmap, scale=True)
 
         # Get the ligand mask sample
-        ligand_mask = get_ligand_mask(autobuild, zmap, radius=2.0)
+        ligand_mask = get_ligand_mask(autobuild, zmap, radius=1.0)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
         # Get the ligand mask
-        ligand_mask_sample_bin = np.copy(ligand_mask_sample)
-        ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
-        ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
-
-        # Get the ligand map sample
-        ligand_map = get_ligand_mask(autobuild, zmap)
-        ligand_map_sample = sample_frame(ligand_map, scale=False)
+        # ligand_mask_sample_bin = np.copy(ligand_mask_sample)
+        # ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
+        # ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
+        #
+        # # Get the ligand map sample
+        # ligand_map = get_ligand_mask(autobuild, zmap)
+        # ligand_map_sample = sample_frame(ligand_map, scale=False)
+        ligand_mask_sample_bin = _get_ed_mask_float()
 
 
         # Run the model
@@ -90,7 +91,7 @@ class BuildScorer:
                     [
                         zmap_sample,
                         xmap_sample * ligand_mask_sample_bin,
-                        ligand_map_sample
+                        ligand_mask_sample
                     ]
                 )[np.newaxis,:]
 
