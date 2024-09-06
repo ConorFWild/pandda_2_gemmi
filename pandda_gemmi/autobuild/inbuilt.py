@@ -934,7 +934,7 @@ def score_conformer(
     best_score_fit_score = scores[best_score_index]
     best_optimised_structure = optimised_structures[best_score_index]
 
-    return best_optimised_structure, float(-best_score_fit_score), get_structure_mean(best_optimised_structure)
+    return best_optimised_structure, float(-best_score_fit_score), get_structure_mean(best_optimised_structure), arr
 
 
 def get_score_grid(dmap, st, event: EventInterface):
@@ -1605,7 +1605,7 @@ def autobuild_conformer(
     event_map_grid = reference_frame.unmask(SparseDMap(score_grid))
 
     time_begin_score_conf = time.time()
-    optimized_structure, score, centroid = score_conformer(
+    optimized_structure, score, centroid, arr = score_conformer(
         centroid,
         conformer.structure,
         event_map_grid,
@@ -1731,7 +1731,7 @@ def autobuild_conformer(
             'num_points': int(np.sum(predicted_density_array > predicted_density_high_contour)),
             'optimal_contour': float(optimal_signal_contour),
             'num_contacts': int(num_contacts),
-            # 'arr': arr
+            'arr': arr
             # 'total_noise':
         }
     }
