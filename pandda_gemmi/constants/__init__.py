@@ -83,7 +83,7 @@ ARGS_MTZ_REGEX_DEFAULT = "*dimple.mtz"
 ARGS_LIGAND_CIF_REGEX = "--ligand_cif_regex"
 ARGS_LIGAND_CIF_REGEX_HELP = "A grep pattern matching the restraints associated with each ligand that might be bound " \
                              "in the crystal."
-ARGS_LIGAND_CIF_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]cif"
+ARGS_LIGAND_CIF_REGEX_DEFAULT = "[0-9a-zA-Z-_]+[.]cif"
 
 ARGS_LIGAND_SMILES_REGEX = "--ligand_smiles_regex"
 ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated with each ligand that may be bound in " \
