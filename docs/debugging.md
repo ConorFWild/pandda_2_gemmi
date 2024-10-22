@@ -63,6 +63,8 @@ model_building/
   - [How To Filter Poor Quality Data](#how-to-filter-poor-quality-data)
 - `--max_rfree`
   - [How To Filter Poor Quality Data](#how-to-filter-poor-quality-data)
+- `--autobuild=False` 
+  - To disable the autobuild
 
 ## How To Run Subsets Of Data
 
