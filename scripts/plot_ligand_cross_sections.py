@@ -159,6 +159,7 @@ def plot_cross_section(
     ccp4.setup(0.0)
     xmap = ccp4.grid
     if norm:
+        print(f'Norming!')
         xmap_array = np.array(xmap, copy=False)
         xmap_array_nonzero = xmap_array[xmap_array!=0.0]
         std = np.std(xmap_array_nonzero)
