@@ -163,7 +163,7 @@ def plot_cross_section(
         xmap_array_nonzero = xmap_array[xmap_array!=0.0]
         std = np.std(xmap_array_nonzero)
         mean = np.mean(xmap_array_nonzero)
-        xmap_array = (xmap_array.copy() - mean) / std
+        xmap_array[:,:,:] = (xmap_array.copy()[:,:,:] - mean) / std
 
     # Plot crossection through each ligand residue
     for resid, lig in iterate_ligands(st):
