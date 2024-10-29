@@ -51,7 +51,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     for u, v in itertools.product(range(nx), range(ny)):
         sample_pos = lower_3d + ligand_plane_frame.inverse_transform(np.array([[u * rate, v * rate]]))
         print(sample_pos)
-        sample = xmap.interpolate_value(gemmi.Position(sample_pos[0], sample_pos[1], sample_pos[2]))
+        sample = xmap.interpolate_value(gemmi.Position(sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]))
         samples[u, v] = sample
 
     # Sample lig
