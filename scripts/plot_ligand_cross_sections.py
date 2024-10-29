@@ -43,12 +43,12 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
 
     # Get the lower coord in 3d
     mean_2d = np.mean(ligand_plane_pos_array, axis=0)
-    print(f'Mean 2d: {mean_2d}')
-    print(ligand_plane_frame.inverse_transform(mean_2d))
-    print(ligand_plane_frame.mean_)
+    # print(f'Mean 2d: {mean_2d}')
+    # print(ligand_plane_frame.inverse_transform(mean_2d))
+    # print(ligand_plane_frame.mean_)
     lower_rel_2d = lower - mean_2d
     lower_3d = ligand_plane_frame.inverse_transform(lower_rel_2d)
-    print(lower_3d)
+    # print(lower_3d)
 
     # Sample xmap
     samples = np.zeros((nx, ny))
@@ -59,34 +59,34 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
         grid_poss.append([(u-(nx/2)) * rate, (v-(ny/2))*rate])
         sample_poss.append([sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]])
         sample = xmap.interpolate_value(gemmi.Position(sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]))
-        print([[u, v], sample_pos, sample])
+        # print([[u, v], sample_pos, sample])
         samples[u, v] = sample
 
     # Sample lig
     samples_lig = (ligand_plane_pos_array/rate) + np.array([nx/2, ny/2]).reshape(1,-1)
 
-    print('Range ligand 2d')
-    print(np.min(np.array(ligand_plane_pos_array), axis=0))
-    print(np.max(np.array(ligand_plane_pos_array), axis=0))
-
-    print('Range grid 2d')
-    print(np.min(np.array(grid_poss), axis=0))
-    print(np.max(np.array(grid_poss), axis=0))
-
-    print('Range ligand 3d')
-    print(np.min(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
-    print(np.max(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
-
-    print(f'Range grid 3d')
-    print(np.min(np.array(sample_poss), axis=0))
-    print(np.max(np.array(sample_poss), axis=0))
-
-    print('range ligand 2d grid')
-    print(np.min(np.array(samples_lig), axis=0))
-    print(np.max(np.array(samples_lig), axis=0))
-
-    print('range 2d grid')
-    print([nx, ny])
+    # print('Range ligand 2d')
+    # print(np.min(np.array(ligand_plane_pos_array), axis=0))
+    # print(np.max(np.array(ligand_plane_pos_array), axis=0))
+    #
+    # print('Range grid 2d')
+    # print(np.min(np.array(grid_poss), axis=0))
+    # print(np.max(np.array(grid_poss), axis=0))
+    #
+    # print('Range ligand 3d')
+    # print(np.min(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
+    # print(np.max(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
+    #
+    # print(f'Range grid 3d')
+    # print(np.min(np.array(sample_poss), axis=0))
+    # print(np.max(np.array(sample_poss), axis=0))
+    #
+    # print('range ligand 2d grid')
+    # print(np.min(np.array(samples_lig), axis=0))
+    # print(np.max(np.array(samples_lig), axis=0))
+    #
+    # print('range 2d grid')
+    # print([nx, ny])
 
 
     return samples, samples_lig# * np.array([[nx, ny]]) * rate
@@ -153,7 +153,7 @@ def plot_cross_section(
 
     # Plot crossection through each ligand residue
     for resid, lig in iterate_ligands(st):
-        plot_ligand_cross_section(lig, xmap, Path(output_dir) / f'{resid}.png')
+        plot_ligand_cross_section(lig, xmap, Path(output_dir) / f'{resid}_{Path(map_path).stem}.png')
     ...
 
 
