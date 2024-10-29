@@ -96,7 +96,7 @@ def iterate_ligands(st):
         for chain in model:
             for res in chain:
                 if res.name == 'LIG':
-                    yield res
+                    yield f"{chain.name}_{res.seqid.num}", res
 
 
 def plot_cross_section(
