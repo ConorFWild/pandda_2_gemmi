@@ -6,7 +6,7 @@ import fire
 import gemmi
 import numpy as np
 from sklearn.decomposition import PCA
-from matplotilib import pyplot as plt
+from matplotlib import pyplot as plt
 
 
 def get_ligand_pos_array(lig):
