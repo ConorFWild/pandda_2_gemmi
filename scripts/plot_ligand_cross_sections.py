@@ -73,6 +73,10 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     print(np.min(np.array(grid_poss), axis=0))
     print(np.max(np.array(grid_poss), axis=0))
 
+    print('Range ligand 3d')
+    print(np.min(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
+    print(np.max(np.array(ligand_plane_frame.inverse_transform(ligand_plane_pos_array)), axis=0))
+
     print(f'Range grid 3d')
     print(np.min(np.array(sample_poss), axis=0))
     print(np.max(np.array(sample_poss), axis=0))
