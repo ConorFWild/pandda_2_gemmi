@@ -44,6 +44,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     # Get the lower coord in 3d
     mean_2d = np.mean(ligand_plane_pos_array, axis=0)
     print(f'Mean 2d: {mean_2d}')
+    print(ligand_plane_frame.inverse_transform(mean_2d))
     lower_rel_2d = lower - mean_2d
     lower_3d = ligand_plane_frame.inverse_transform(lower_rel_2d)
     print(lower_3d)
