@@ -94,18 +94,17 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
 def plot_contours(
         samples_xmap,
         samples_lig,
-        output_path
+        output_path,
+        vmax=0.1
 ):
-    print(samples_lig)
-    print(samples_xmap)
     fig, ax = plt.subplots()
-    im = ax.imshow(samples_xmap.T, origin='lower', vmin=0.0, vmax=0.2, )
+    im = ax.imshow(samples_xmap.T, origin='lower', vmin=0.0, vmax=vmax, )
     fig.colorbar(im)
     ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1], )
     plt.savefig(output_path)
 
 
-def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_output_path):
+def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_output_path, vmax=0.1):
     # Get ligand pos array
     pos_array = get_ligand_pos_array(lig)
 
@@ -122,7 +121,8 @@ def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_o
     plot_contours(
         samples_xmap,
         samples_lig,
-        fig_output_path
+        fig_output_path,
+        vmax
     )
 
     # Save arrays
@@ -143,7 +143,8 @@ def iterate_ligands(st):
 def plot_cross_section(
         st_path,
         map_path,
-        output_dir
+        output_dir,
+        vmax
 ):
     # Make output dir
     if not Path(output_dir).exists():
@@ -165,6 +166,7 @@ def plot_cross_section(
             Path(output_dir) / f'{resid}_{Path(map_path).stem}.png',
             Path(output_dir) / f'{resid}_{Path(map_path).stem}_lig.npz',
             Path(output_dir) / f'{resid}_{Path(map_path).stem}_map.npz',
+            vmax=vmax
         )
     ...
 
