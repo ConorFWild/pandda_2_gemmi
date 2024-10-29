@@ -43,6 +43,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
 
     # Get the lower coord in 3d
     mean_2d = np.mean(ligand_plane_pos_array, axis=0)
+    print(f'Mean 2d: {mean_2d}')
     lower_rel_2d = lower - mean_2d
     lower_3d = ligand_plane_frame.inverse_transform(lower_rel_2d)
     print(lower_3d)
@@ -52,7 +53,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     for u, v in itertools.product(range(nx), range(ny)):
         sample_pos = lower_3d + ligand_plane_frame.inverse_transform(np.array([[u * rate, v * rate]]))
         sample = xmap.interpolate_value(gemmi.Position(sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]))
-        print([sample_pos, sample])
+        print([[u, v], sample_pos, sample])
         exit()
         samples[u, v] = sample
 
