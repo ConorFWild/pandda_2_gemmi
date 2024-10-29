@@ -104,7 +104,7 @@ def plot_contours(
     plt.savefig(output_path)
 
 
-def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_output_path, vmax=0.1):
+def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_output_path, vmax=0.1, ):
     # Get ligand pos array
     pos_array = get_ligand_pos_array(lig)
 
@@ -144,7 +144,8 @@ def plot_cross_section(
         st_path,
         map_path,
         output_dir,
-        vmax
+        vmax=0.1,
+        norm=False
 ):
     # Make output dir
     if not Path(output_dir).exists():
@@ -157,6 +158,12 @@ def plot_cross_section(
     ccp4 = gemmi.read_ccp4_map(map_path)
     ccp4.setup(0.0)
     xmap = ccp4.grid
+    if norm:
+        xmap_array = np.array(xmap, copy=False)
+        xmap_array_nonzero = xmap_array[xmap_array!=0.0]
+        std = np.std(xmap_array_nonzero)
+        mean = np.mean(xmap_array_nonzero)
+        xmap_array = (xmap_array - mean) / std
 
     # Plot crossection through each ligand residue
     for resid, lig in iterate_ligands(st):
