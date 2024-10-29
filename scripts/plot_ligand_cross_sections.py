@@ -66,7 +66,7 @@ def plot_contours(
 ):
     fig, ax = plt.subplots()
     ax.imshow(samples_xmap)
-    ax.scatter(x=samples_lig[0, :], y=samples_lig[1, :])
+    ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1])
     plt.savefig(output_path)
 
 
