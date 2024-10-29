@@ -85,6 +85,10 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     print(np.min(np.array(samples_lig), axis=0))
     print(np.max(np.array(samples_lig), axis=0))
 
+    print('range 2d grid')
+    print([nx, ny])
+
+
     return samples, samples_lig# * np.array([[nx, ny]]) * rate
 
 
