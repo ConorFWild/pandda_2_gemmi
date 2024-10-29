@@ -163,8 +163,8 @@ def plot_cross_section(
             lig,
             xmap,
             Path(output_dir) / f'{resid}_{Path(map_path).stem}.png',
-            Path(output_dir) / f'{resid}_{Path(map_path).stem}_lig.png',
-            Path(output_dir) / f'{resid}_{Path(map_path).stem}_map.png',
+            Path(output_dir) / f'{resid}_{Path(map_path).stem}_lig.npz',
+            Path(output_dir) / f'{resid}_{Path(map_path).stem}_map.npz',
         )
     ...
 
