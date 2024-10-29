@@ -56,7 +56,6 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
         sample_pos = ligand_plane_frame.inverse_transform(np.array([[(u-(nx/2)) * rate, (v-(ny/2)) * rate]]))
         sample = xmap.interpolate_value(gemmi.Position(sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]))
         print([[u, v], sample_pos, sample])
-        exit()
         samples[u, v] = sample
 
     # Sample lig
