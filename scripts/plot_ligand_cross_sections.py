@@ -56,7 +56,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     # Sample lig
     samples_lig = (ligand_plane_pos_array - lower)
 
-    return samples, samples_lig
+    return samples, samples_lig * np.array([[nx, ny]])
 
 
 def plot_contours(
