@@ -31,7 +31,7 @@ def get_ligand_pos_in_ligand_plane(pos_array, ligand_plane_frame):
     return ligand_plane_frame.transform(pos_array)
 
 
-def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border=2.0, rate=0.1):
+def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border=5.0, rate=0.1):
     # Get the grid boundaries around the ligand in its plane frame
     lower = np.min(ligand_plane_pos_array, axis=0) - border
     initial_upper = np.max(ligand_plane_pos_array, axis=0) + border
