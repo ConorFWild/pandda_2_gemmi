@@ -111,7 +111,7 @@ def plot_cross_section(
     st = gemmi.read_structure(st_path)
 
     # Get map
-    ccp4 = gemmi.read_map(map_path)
+    ccp4 = gemmi.read_ccp4_map(map_path)
     ccp4.setup(0.0)
     xmap = ccp4.grid
 
