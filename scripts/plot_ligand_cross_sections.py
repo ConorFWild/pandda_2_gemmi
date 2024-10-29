@@ -63,7 +63,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
         samples[u, v] = sample
 
     # Sample lig
-    samples_lig = (ligand_plane_pos_array - lower)
+    samples_lig = (ligand_plane_pos_array/rate) + np.array([nx/2, ny/2]).reshape(-1,1)
 
     print('Range ligand 2d')
     print(np.min(np.array(ligand_plane_pos_array), axis=0))
@@ -81,7 +81,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     print(np.min(np.array(sample_poss), axis=0))
     print(np.max(np.array(sample_poss), axis=0))
 
-    return samples, samples_lig * np.array([[nx, ny]]) * rate
+    return samples, samples_lig# * np.array([[nx, ny]]) * rate
 
 
 def plot_contours(
