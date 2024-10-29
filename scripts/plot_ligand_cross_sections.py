@@ -105,7 +105,8 @@ def plot_cross_section(
         output_dir
 ):
     # Make output dir
-    os.mkdir(output_dir, exists_ok=True)
+    if not Path(output_dir).exists():
+        os.mkdir(output_dir, )
 
     # Get structure
     st = gemmi.read_structure(st_path)
