@@ -35,7 +35,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     # Get the grid boundaries around the ligand in its plane frame
     lower = np.min(ligand_plane_pos_array, axis=0) - border
     initial_upper = np.max(ligand_plane_pos_array, axis=0) + border
-    upper = lower + (np.round((initial_upper - lower)/rate, )*rate)
+    upper = lower + (np.round((initial_upper - lower) / rate, ) * rate)
 
     # Get the grid coordinates
     nx = int((upper[0] - lower[0]) / rate)
@@ -55,15 +55,15 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     sample_poss = []
     grid_poss = []
     for u, v in itertools.product(range(nx), range(ny)):
-        sample_pos = ligand_plane_frame.inverse_transform(np.array([[(u-(nx/2)) * rate, (v-(ny/2)) * rate]]))
-        grid_poss.append([(u-(nx/2)) * rate, (v-(ny/2))*rate])
+        sample_pos = ligand_plane_frame.inverse_transform(np.array([[(u - (nx / 2)) * rate, (v - (ny / 2)) * rate]]))
+        grid_poss.append([(u - (nx / 2)) * rate, (v - (ny / 2)) * rate])
         sample_poss.append([sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]])
         sample = xmap.interpolate_value(gemmi.Position(sample_pos[0][0], sample_pos[0][1], sample_pos[0][2]))
         # print([[u, v], sample_pos, sample])
         samples[u, v] = sample
 
     # Sample lig
-    samples_lig = (ligand_plane_pos_array/rate) + np.array([nx/2, ny/2]).reshape(1,-1)
+    samples_lig = (ligand_plane_pos_array / rate) + np.array([nx / 2, ny / 2]).reshape(1, -1)
 
     # print('Range ligand 2d')
     # print(np.min(np.array(ligand_plane_pos_array), axis=0))
@@ -88,8 +88,7 @@ def sample_ligand_plane(ligand_plane_frame, ligand_plane_pos_array, xmap, border
     # print('range 2d grid')
     # print([nx, ny])
 
-
-    return samples, samples_lig# * np.array([[nx, ny]]) * rate
+    return samples, samples_lig  # * np.array([[nx, ny]]) * rate
 
 
 def plot_contours(
@@ -100,8 +99,9 @@ def plot_contours(
     print(samples_lig)
     print(samples_xmap)
     fig, ax = plt.subplots()
-    ax.imshow(samples_xmap.T, origin='lower')
-    ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1], vmin=0.0, vmax=3.0)
+    ax.imshow(samples_xmap.T, origin='lower', vmin=0.0, vmax=3.0, )
+    fig.colorbar()
+    ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1], )
     plt.savefig(output_path)
 
 
