@@ -105,7 +105,7 @@ def plot_contours(
     plt.savefig(output_path)
 
 
-def plot_ligand_cross_section(lig, xmap, output_path):
+def plot_ligand_cross_section(lig, xmap, fig_output_path, lig_output_path, map_output_path):
     # Get ligand pos array
     pos_array = get_ligand_pos_array(lig)
 
@@ -122,8 +122,14 @@ def plot_ligand_cross_section(lig, xmap, output_path):
     plot_contours(
         samples_xmap,
         samples_lig,
-        output_path
+        fig_output_path
     )
+
+    # Save arrays
+    with open(lig_output_path, 'wb') as f:
+        np.save(f, samples_lig)
+    with open(map_output_path, 'wb') as f:
+        np.save(f, samples_xmap)
 
 
 def iterate_ligands(st):
@@ -153,7 +159,13 @@ def plot_cross_section(
 
     # Plot crossection through each ligand residue
     for resid, lig in iterate_ligands(st):
-        plot_ligand_cross_section(lig, xmap, Path(output_dir) / f'{resid}_{Path(map_path).stem}.png')
+        plot_ligand_cross_section(
+            lig,
+            xmap,
+            Path(output_dir) / f'{resid}_{Path(map_path).stem}.png',
+            Path(output_dir) / f'{resid}_{Path(map_path).stem}_lig.png',
+            Path(output_dir) / f'{resid}_{Path(map_path).stem}_map.png',
+        )
     ...
 
 
