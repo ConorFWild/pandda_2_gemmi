@@ -100,7 +100,7 @@ def plot_contours(
     fig, ax = plt.subplots()
     im = ax.imshow(samples_xmap.T, origin='lower', vmin=0.0, vmax=vmax, )
     fig.colorbar(im)
-    ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1], )
+    ax.scatter(x=samples_lig[:, 0], y=samples_lig[:, 1], c='red')
     ax.get_xaxis().set_ticks([])
     ax.get_yaxis().set_ticks([])
     plt.savefig(output_path)
