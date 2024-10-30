@@ -325,7 +325,9 @@ def pandda(args: PanDDAArgs):
     autobuilds = {}
 
     # Get the datasets with modelled ligands in the source PanDDA
+    print('Getting ligands!!')
     inspect_table = pd.read_csv(args.source_pandda / 'analyses' / 'pandda_inspect_events.csv')
+    print(f'Read csv...')
     ligand_models = {}
     for _idx, _row in inspect_table.iterrows():
         if _row['Ligand Confidence'] != 'High':
@@ -342,9 +344,12 @@ def pandda(args: PanDDAArgs):
                     if (chain.name == 'LIG') or (chain.name == 'XXX'):
                         ligand_models[dtag] = res
 
-    for j, dtag in enumerate(datasets_to_process):
 
+    print('Processing Datasets!')
+    for j, dtag in enumerate(datasets_to_process):
+        print(f'Processing {dtag}')
         if dtag not in ligand_models:
+            print(f'\tSkipping {dtag}')
             continue
 
         # Record the time that dataset processing begins
