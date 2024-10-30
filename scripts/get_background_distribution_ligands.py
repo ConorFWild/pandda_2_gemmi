@@ -519,7 +519,7 @@ def pandda(args: PanDDAArgs):
 
         # Get the model maps
         print(characterization_set_masks)
-        characterization_set_dmaps_array = dmaps[characterization_set_masks[0], :]
+        characterization_set_dmaps_array = dmaps[characterization_set_masks[1], :]
 
         # Get the mean and STD
         mean, std, z = PointwiseNormal()(
@@ -539,7 +539,7 @@ def pandda(args: PanDDAArgs):
 
         # Sample atom positions in ground state maps
         samples = {}
-        for characterization_dtag, ground_state_dmap_array in zip(characterization_set_dmaps_array, characterization_sets[0]):
+        for characterization_dtag, ground_state_dmap_array in zip(characterization_set_dmaps_array, characterization_sets[1]):
             ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
 
             samples[characterization_dtag] = {}
