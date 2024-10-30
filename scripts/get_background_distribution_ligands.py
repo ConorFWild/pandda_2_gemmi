@@ -338,6 +338,7 @@ def pandda(args: PanDDAArgs):
         modelled_structure_path = dataset_dir / 'modelled_structures' / constants.PANDDA_EVENT_MODEL.format(dtag)
 
         modelled_structure = gemmi.read_structure(str(modelled_structure_path))
+        print(modelled_structure_path)
 
         for model in modelled_structure:
             for chain in model:
