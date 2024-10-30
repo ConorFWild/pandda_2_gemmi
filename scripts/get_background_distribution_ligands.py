@@ -12,8 +12,11 @@ import numpy as np
 import gemmi
 from statsmodels.stats.diagnostic import lilliefors
 import diptest
+import yaml
+import pandas as pd
 
 from pandda_gemmi.interfaces import *
+from pandda_gemmi import constants
 from pandda_gemmi.args import PanDDAArgs
 from pandda_gemmi.fs import PanDDAFS
 from pandda_gemmi.dataset import XRayDataset, StructureArray
@@ -321,194 +324,229 @@ def pandda(args: PanDDAArgs):
     console.start_process_shells()
     autobuilds = {}
 
-    j = 0
-    dtag = min(datasets_to_process, key=lambda _dtag: datasets_to_process[_dtag].reflections.resolution())
+    # Get the datasets with modelled ligands in the source PanDDA
+    inspect_table = pd.read_csv(args.source_pandda / 'analyses' / 'pandda_inspect_events.csv')
+    ligand_models = {}
+    for _idx, _row in inspect_table.iterrows():
+        if _row['Ligand Confidence'] != 'High':
+            continue
+        dtag = _row['dtag']
+        dataset_dir = args.source_pandda / 'processed_datasets' / dtag
+        modelled_structure_path = dataset_dir / 'modelled_structures' / constants.PANDDA_EVENT_MODEL.format(dtag)
 
-    # Record the time that dataset processing begins
-    time_begin_process_dataset = time.time()
+        modelled_structure = gemmi.read_structure(str(modelled_structure_path))
 
-    # Handle the case in which the dataset has already been processed
-    # TODO: log properly
-    events_yaml_path = fs.output.processed_datasets[dtag] / f"events.yaml"
-    print(f"Checking for a event yaml at: {events_yaml_path}")
-    if events_yaml_path.exists():
-        print(f"Already have events for dataset! Skipping!")
-        _events = serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml")
-        for event_idx, event in _events.items():
-            pandda_events[(dtag, event_idx)] = event
-        for event_idx, event in _events.items():
-            autobuilds[(dtag, event_idx)] = {
-                event.build.ligand_key: AutobuildResult(
-                    {event.build.build_path: {'score': event.build.signal, 'centroid': event.build.centroid}},
-                    None, None, None, None, None
-                )
-            }
-        return
+        for model in modelled_structure:
+            for chain in model:
+                for res in chain:
+                    if (chain.name == 'LIG') or (chain.name == 'XXX'):
+                        ligand_models[dtag] = res
 
-    # Get the dataset
-    dataset = datasets[dtag]
+    for j, dtag in enumerate(datasets_to_process):
 
-    # Skip processing the dataset if there is no ligand data
-    if len([_key for _key in dataset.ligand_files if dataset.ligand_files[_key].ligand_cif]) == 0:
-        console.no_ligand_data()
-        return
+        if dtag not in ligand_models:
+            continue
 
-    # Get the resolution of the dataset
-    dataset_res = dataset.reflections.resolution()
+        # Record the time that dataset processing begins
+        time_begin_process_dataset = time.time()
 
-    # Get the comparator datasets: these are filtered for reasonable data quality, space group compatability,
-    # compatability of structural models and similar resolution
-    comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
-        datasets,
-        [
-            FilterRFree(args.max_rfree),
-            FilterSpaceGroup(dataset),
-            FilterCompatibleStructures(dataset),
-            FilterResolution(dataset_res, args.max_shell_datasets, 100, args.high_res_buffer)]
-    )
+        # Handle the case in which the dataset has already been processed
+        # TODO: log properly
+        events_yaml_path = fs.output.processed_datasets[dtag] / f"events.yaml"
+        print(f"Checking for a event yaml at: {events_yaml_path}")
+        if events_yaml_path.exists():
+            print(f"Already have events for dataset! Skipping!")
+            _events = serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml")
+            for event_idx, event in _events.items():
+                pandda_events[(dtag, event_idx)] = event
+            for event_idx, event in _events.items():
+                autobuilds[(dtag, event_idx)] = {
+                    event.build.ligand_key: AutobuildResult(
+                        {event.build.build_path: {'score': event.build.signal, 'centroid': event.build.centroid}},
+                        None, None, None, None, None
+                    )
+                }
+            return
 
-    # Ensure the dataset itself is included in comparators
-    if dtag not in comparator_datasets:
-        comparator_datasets[dtag] = dataset
+        # Get the dataset
+        dataset = datasets[dtag]
 
-    # Get the resolution to process the dataset at
-    processing_res = max(
-        [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
-    )
+        # Skip processing the dataset if there is no ligand data
+        if len([_key for _key in dataset.ligand_files if dataset.ligand_files[_key].ligand_cif]) == 0:
+            console.no_ligand_data()
+            return
 
-    # Print basic information about the processing to be done of the dataset
-    console.begin_dataset_processing(
-        dtag,
-        dataset,
-        dataset_res,
-        comparator_datasets,
-        processing_res,
-        j,
-        datasets_to_process,
-        time_begin_process_datasets
-    )
+        # Get the resolution of the dataset
+        dataset_res = dataset.reflections.resolution()
 
-    # Skip if there are insufficient comparators in order to characterize a statistical model
-    if len(comparator_datasets) < args.min_characterisation_datasets:
-        console.insufficient_comparators(comparator_datasets)
-        return
+        # Get the comparator datasets: these are filtered for reasonable data quality, space group compatability,
+        # compatability of structural models and similar resolution
+        comparator_datasets: Dict[str, DatasetInterface] = get_comparators(
+            datasets,
+            [
+                FilterRFree(args.max_rfree),
+                FilterSpaceGroup(dataset),
+                FilterCompatibleStructures(dataset),
+                FilterResolution(dataset_res, args.max_shell_datasets, 100, args.high_res_buffer)]
+        )
 
-    # Get the alignments, and save them to the object store
-    time_begin_get_alignments = time.time()
-    alignments: Dict[str, AlignmentInterface] = processor.process_dict(
-        {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
-            _dtag,
-            structure_array_refs[_dtag],
-            structure_array_refs[dtag],
-        ) for _dtag in comparator_datasets}
-    )
-    alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
-    time_finish_get_alignments = time.time()
-    # TODO: Log properly
-    print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
+        # Ensure the dataset itself is included in comparators
+        if dtag not in comparator_datasets:
+            comparator_datasets[dtag] = dataset
 
-    # Get the reference frame and save it to the object store
-    time_begin_get_frame = time.time()
-    reference_frame: DFrame = DFrame(dataset, processor)
-    reference_frame_ref = processor.put(reference_frame)
-    time_finish_get_frame = time.time()
-    # TODO: Log properly
-    print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
+        # Get the resolution to process the dataset at
+        processing_res = max(
+            [_dataset.reflections.resolution() for _dataset in comparator_datasets.values()]
+        )
 
-    # Get the transforms to apply to the dataset before locally aligning and save them to the object store
-    transforms = [
-        TruncateReflections(
+        # Print basic information about the processing to be done of the dataset
+        console.begin_dataset_processing(
+            dtag,
+            dataset,
+            dataset_res,
             comparator_datasets,
             processing_res,
-        ),
-        SmoothReflections(dataset)
-    ]
-    transforms_ref = processor.put(transforms)
+            j,
+            datasets_to_process,
+            time_begin_process_datasets
+        )
 
-    # Load the locally aligned density maps and construct an array of them
-    time_begin_get_dmaps = time.time()
-    dmaps_dict = processor.process_dict(
-        {
-            _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
-                dataset_refs[_dtag],
-                alignment_refs[_dtag],
-                transforms_ref,
-                reference_frame_ref
-            )
-            for _dtag
-            in comparator_datasets
-        }
-    )
-    dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
-    time_finish_get_dmaps = time.time()
-    # TODO: log properly
-    print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
-    dtag_array = np.array([_dtag for _dtag in comparator_datasets])
+        # Skip if there are insufficient comparators in order to characterize a statistical model
+        if len(comparator_datasets) < args.min_characterisation_datasets:
+            console.insufficient_comparators(comparator_datasets)
+            return
 
-    # Get the dataset dmap, both processed and unprocessed
-    dtag_index = np.argwhere(dtag_array == dtag)
-    dataset_dmap_array = dmaps[dtag_index[0][0], :]
-    xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
-    raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
-    raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid).data
-    raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
-    raw_xmap_array = np.array(raw_xmap_grid, copy=True)
-    raw_xmap_array_ref = processor.put(raw_xmap_array)
-    # raw_xmap_grid = reference_frame.unmask(
-    #     raw_xmap_sparse
-    # )
+        # Get the alignments, and save them to the object store
+        time_begin_get_alignments = time.time()
+        alignments: Dict[str, AlignmentInterface] = processor.process_dict(
+            {_dtag: Partial(Alignment.from_structure_arrays).paramaterise(
+                _dtag,
+                structure_array_refs[_dtag],
+                structure_array_refs[dtag],
+            ) for _dtag in comparator_datasets}
+        )
+        alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
+        time_finish_get_alignments = time.time()
+        # TODO: Log properly
+        print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
-    # Get the masked grid of the structure
-    model_grid = get_model_map(dataset.structure.structure, xmap_grid)
+        # Get the reference frame and save it to the object store
+        time_begin_get_frame = time.time()
+        reference_frame: DFrame = DFrame(dataset, processor)
+        reference_frame_ref = processor.put(reference_frame)
+        time_finish_get_frame = time.time()
+        # TODO: Log properly
+        print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
-    # Get the Comparator sets that define the models to try
-    time_begin_get_characterization_sets = time.time()
-    characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
-        dtag,
-        comparator_datasets,
-        dmaps,
-        reference_frame,
-        CharacterizationFirst()
-    )
-    time_finish_get_characterization_sets = time.time()
-    # TODO: Log properly
-    print(
-        f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
+        # Get the transforms to apply to the dataset before locally aligning and save them to the object store
+        transforms = [
+            TruncateReflections(
+                comparator_datasets,
+                processing_res,
+            ),
+            SmoothReflections(dataset)
+        ]
+        transforms_ref = processor.put(transforms)
 
-    models_to_process, model_scores, characterization_set_masks = filter_characterization_sets(
-        comparator_datasets,
-        characterization_sets,
-        dmaps,
-        dataset_dmap_array,
-        reference_frame,
-        PointwiseMAD(),
-        process_all=True
-    )
+        # Load the locally aligned density maps and construct an array of them
+        time_begin_get_dmaps = time.time()
+        dmaps_dict = processor.process_dict(
+            {
+                _dtag: Partial(SparseDMapStream.parallel_load).paramaterise(
+                    dataset_refs[_dtag],
+                    alignment_refs[_dtag],
+                    transforms_ref,
+                    reference_frame_ref
+                )
+                for _dtag
+                in comparator_datasets
+            }
+        )
+        dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
+        time_finish_get_dmaps = time.time()
+        # TODO: log properly
+        print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
+        dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
-    # Get the model maps
-    characterization_set_dmaps_array = dmaps[characterization_set_masks[0], :]
+        # Get the dataset dmap, both processed and unprocessed
+        dtag_index = np.argwhere(dtag_array == dtag)
+        dataset_dmap_array = dmaps[dtag_index[0][0], :]
+        xmap_grid = reference_frame.unmask(SparseDMap(dataset_dmap_array))
+        raw_xmap_grid = dataset.reflections.transform_f_phi_to_map(sample_rate=3)
+        raw_xmap_sparse = reference_frame.mask_grid(raw_xmap_grid).data
+        raw_xmap_sparse_ref = processor.put(raw_xmap_sparse)
+        raw_xmap_array = np.array(raw_xmap_grid, copy=True)
+        raw_xmap_array_ref = processor.put(raw_xmap_array)
+        # raw_xmap_grid = reference_frame.unmask(
+        #     raw_xmap_sparse
+        # )
 
-    # Get the mean and STD
-    mean, std, z = PointwiseNormal()(
-        dataset_dmap_array,
-        characterization_set_dmaps_array
-    )
-    print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
+        # Get the masked grid of the structure
+        model_grid = get_model_map(dataset.structure.structure, xmap_grid)
 
-    mean_grid = reference_frame.unmask(SparseDMap(mean))
-    z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
+        # Get the Comparator sets that define the models to try
+        time_begin_get_characterization_sets = time.time()
+        characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
+            dtag,
+            comparator_datasets,
+            dmaps,
+            reference_frame,
+            CharacterizationFirst()
+        )
+        time_finish_get_characterization_sets = time.time()
+        # TODO: Log properly
+        print(
+            f"\t\tGot characterization sets in: {round(time_finish_get_characterization_sets - time_begin_get_characterization_sets, 2)}")
 
-    # Get the lilliefors map
-    lilliefors_map = get_lilliefors_map(characterization_set_dmaps_array)
+        models_to_process, model_scores, characterization_set_masks = filter_characterization_sets(
+            comparator_datasets,
+            characterization_sets,
+            dmaps,
+            dataset_dmap_array,
+            reference_frame,
+            PointwiseMAD(),
+            process_all=True
+        )
 
-    # Dip map
-    dip_map = get_dip_map(characterization_set_dmaps_array)
+        # Get the model maps
+        characterization_set_dmaps_array = dmaps[characterization_set_masks[0], :]
 
-    # Delete other content and save
-    shutil.rmtree(args.out_dir)
-    os.mkdir(args.out_dir)
-    np.save(lilliefors_map, Path(args.out_dir) / 'lilliefors.npy')
-    np.save(dip_map, Path(args.out_dir) / 'dip.npy')
+        # Get the mean and STD
+        mean, std, z = PointwiseNormal()(
+            dataset_dmap_array,
+            characterization_set_dmaps_array
+        )
+        print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
+
+        mean_grid = reference_frame.unmask(SparseDMap(mean))
+        z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
+
+        # Get the lilliefors map
+        lilliefors_map = get_lilliefors_map(characterization_set_dmaps_array)
+
+        # Dip map
+        dip_map = get_dip_map(characterization_set_dmaps_array)
+
+        # Sample atom positions in ground state maps
+        samples = {}
+        for characterization_dtag, ground_state_dmap_array in zip(characterization_set_dmaps_array, characterization_sets[0]):
+            ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
+
+            samples[characterization_dtag] = {}
+            for atom in ligand_models[dtag]:
+                pos = atom.pos
+                val = ground_state_dmap.interpolate_value(pos)
+                samples[characterization_dtag][atom.name] = val
+
+        # Delete other content and save
+        shutil.rmtree(args.out_dir)
+        os.mkdir(args.out_dir)
+        with open(Path(args.out_dir) / f'{dtag}_lilliefors.npy', 'wb') as f:
+            np.save(f, lilliefors_map, )
+        with open(Path(args.out_dir) / f'{dtag}_dip.npy', 'wb') as f:
+            np.save(f, dip_map, )
+        with open(Path(args.out_dir) / f'{dtag}_samples.yaml', 'w') as f:
+            yaml.dump(samples, f)
 
 
 if __name__ == '__main__':
