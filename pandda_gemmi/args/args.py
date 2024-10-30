@@ -653,7 +653,7 @@ class PanDDAArgs:
         # )
 
         parser.add_argument(
-            "source_pandda",
+            "--source_pandda",
             type=Path,
             default=None,
             help=constants.ARGS_RANK_METHOD_HELP,
