@@ -341,9 +341,11 @@ def pandda(args: PanDDAArgs):
         for model in modelled_structure:
             for chain in model:
                 for res in chain:
-                    if (chain.name == 'LIG') or (chain.name == 'XXX'):
+                    if chain.name in ['LIG', 'XXX']:
                         ligand_models[dtag] = res
 
+    print('Got ligands')
+    print(ligand_models)
 
     print('Processing Datasets!')
     for j, dtag in enumerate(datasets_to_process):
