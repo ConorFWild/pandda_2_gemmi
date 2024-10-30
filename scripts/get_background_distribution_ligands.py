@@ -555,6 +555,7 @@ def pandda(args: PanDDAArgs):
         with open(Path(args.out_dir) / f'{dtag}_samples.yaml', 'w') as f:
             yaml.dump(samples, f)
 
+    print(f'Finished!')
 
 if __name__ == '__main__':
     # Parse Command Line Arguments
