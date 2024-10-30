@@ -518,6 +518,7 @@ def pandda(args: PanDDAArgs):
         )
 
         # Get the model maps
+        print(characterization_set_masks)
         characterization_set_dmaps_array = dmaps[characterization_set_masks[0], :]
 
         # Get the mean and STD
