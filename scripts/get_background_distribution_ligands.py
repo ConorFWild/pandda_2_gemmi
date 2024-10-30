@@ -330,6 +330,7 @@ def pandda(args: PanDDAArgs):
     print(f'Read csv...')
     ligand_models = {}
     for _idx, _row in inspect_table.iterrows():
+        print(_row['Ligand Confidence'])
         if _row['Ligand Confidence'] != 'High':
             continue
         dtag = _row['dtag']
