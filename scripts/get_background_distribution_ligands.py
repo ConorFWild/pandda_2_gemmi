@@ -17,6 +17,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.transforms import Bbox
+import scipy
 
 
 from pandda_gemmi.interfaces import *
@@ -95,6 +96,8 @@ def plot_samples(samples, path):
         col = j % n_figs
         ax = axs[row, col]
         # print([row, col])
+        sns.lineplot(x=scipy.stats.norm.ppf(np.linspace(0.01, 0.99, num=100), loc=means[atom], scale=stds[atom]),
+                     y=np.linspace(0.01, 0.99, num=100), )
         sns.ecdfplot(table[table['atom'] == atom], ax=ax)
 
         ax.set_title(atom)
