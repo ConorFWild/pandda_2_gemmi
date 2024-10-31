@@ -585,8 +585,7 @@ def pandda(args: PanDDAArgs):
         # Sample atom positions in ground state maps
         print('Calculating samples...')
         samples = {}
-        dataset_dir = Path(args.out_dir) / dtag
-        os.mkdir(dataset_dir)
+
         for characterization_dtag, ground_state_dmap_array in zip(characterization_sets[1], characterization_set_dmaps_array, ):
             ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
 
@@ -599,7 +598,9 @@ def pandda(args: PanDDAArgs):
                 samples[characterization_dtag][atom.name] = val
 
         # Delete other content and save
-
+        dataset_dir = Path(args.out_dir) / dtag
+        if not dataset_dir.exists():
+            os.mkdir(dataset_dir)
         with open(dataset_dir / f'lilliefors.npy', 'wb') as f:
             np.save(f, lilliefors_map, )
         with open(dataset_dir / f'dip.npy', 'wb') as f:
