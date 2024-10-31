@@ -226,15 +226,15 @@ def get_lilliefors_map(characterization_set_dmaps_array):
 
 
 def get_dip_map(characterization_set_dmaps_array):
-    n, nx, ny, nz = characterization_set_dmaps_array.shape
+    n_datasets, n_datapoints = characterization_set_dmaps_array.shape
 
-    dip_map = np.zeros(nx, ny, nz)
+    dip_map = np.zeros(n_datapoints)
 
-    for x, y, z in itertools.product(range(nx), range(ny), range(nz)):
-        ps = characterization_set_dmaps_array[:, x, y, z].flatten()
+    for n in range(n_datapoints):
+        ps = characterization_set_dmaps_array[:, n].flatten()
         if np.any(ps > 0):
             dval, pval = diptest.diptest(ps)
-            dip_map[x, y, z] = pval
+            dip_map[n] = pval
 
     return dip_map
 
