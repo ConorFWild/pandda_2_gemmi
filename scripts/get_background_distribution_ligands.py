@@ -14,6 +14,8 @@ from statsmodels.stats.diagnostic import lilliefors
 import diptest
 import yaml
 import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 
 from pandda_gemmi.interfaces import *
 from pandda_gemmi import constants
@@ -55,6 +57,42 @@ from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
 from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, \
     set_structure_mean
+
+
+def plot_samples(samples, path):
+    table = pd.DataFrame(
+        [{'dtag': dtag, 'atom': atom_id, 'val': val} for dtag, atom_samples in samples.items() for atom_id, val in
+         atom_samples.items()])
+
+    grouped = table.groupby(by='atom')
+    means = grouped['val'].mean()
+    stds = grouped['val'].std()
+    indexed_table = table.set_index(['dtag', 'atom'])
+    indexed_table.loc[:, 'val'] = (table.set_index(['dtag', 'atom'])['val'] - means) / stds
+    atoms = table.atom.unique()
+    n_figs = int(np.ceil(np.sqrt(atoms.size)))
+
+    fig, axs = plt.subplots(n_figs, n_figs, figsize=(n_figs * 3, n_figs * 3))
+
+    for j, atom in enumerate(atoms):
+        row = j // n_figs
+        col = j % n_figs
+        ax = axs[row, col]
+        # print([row, col])
+        sns.ecdfplot(table[table['atom'] == atom], ax=ax)
+
+        ax.set_title(atom)
+        ax.set(ylabel=None)
+        ax.set_xticks([])
+        ax.get_legend().remove()
+
+    for k in range(atoms.size, int(np.square(n_figs))):
+        row = k // n_figs
+        col = k % n_figs
+        axs[row, col].set_visible(False)
+
+    plt.savefig(path)
+    plt.close()
 
 
 class GetDatasetsToProcess:
@@ -563,6 +601,10 @@ def pandda(args: PanDDAArgs):
             np.save(f, dip_map, )
         with open(Path(args.out_dir) / f'{dtag}_samples.yaml', 'w') as f:
             yaml.dump(samples, f)
+
+        # Plot samples
+        plot_samples(samples, Path(args.out_dir) / f'{dtag}_samples.png')
+
     shutil.rmtree(args.out_dir / 'processed_datasets')
     shutil.rmtree(args.out_dir / 'analyses')
     # os.mkdir(args.out_dir)
