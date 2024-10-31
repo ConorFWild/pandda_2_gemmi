@@ -540,7 +540,7 @@ def pandda(args: PanDDAArgs):
 
         # Sample atom positions in ground state maps
         samples = {}
-        for characterization_dtag, ground_state_dmap_array in zip(characterization_set_dmaps_array, characterization_sets[1]):
+        for characterization_dtag, ground_state_dmap_array in zip(characterization_sets[1], characterization_set_dmaps_array, ):
             ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
 
             samples[characterization_dtag] = {}
