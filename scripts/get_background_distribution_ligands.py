@@ -103,6 +103,8 @@ def plot_samples(samples, path):
         ax.get_legend().remove()
 
         extent = full_extent(ax).transformed(fig.dpi_scale_trans.inverted())
+        fig.tight_layout()
+
         fig.savefig(path / f'{atom}.png', bbox_inches=extent.expanded(1.15, 1.15))
 
     for k in range(atoms.size, int(np.square(n_figs))):
@@ -110,6 +112,7 @@ def plot_samples(samples, path):
         col = k % n_figs
         axs[row, col].set_visible(False)
 
+    fig.tight_layout()
     plt.savefig(path / 'all.png')
     plt.close()
 
