@@ -101,7 +101,7 @@ def plot_samples(samples, path):
         ax.set_xticks([])
         ax.get_legend().remove()
 
-        extent = ax.full_extent().transformed(fig.dpi_scale_trans.inverted())
+        extent = full_extent(ax).transformed(fig.dpi_scale_trans.inverted())
         fig.savefig(path / f'{atom}.png', bbox_inches=extent.expanded(1.15, 1.15))
 
     for k in range(atoms.size, int(np.square(n_figs))):
