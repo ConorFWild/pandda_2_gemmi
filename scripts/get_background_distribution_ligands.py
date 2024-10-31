@@ -86,12 +86,15 @@ def plot_samples(samples, path):
         ax.set_xticks([])
         ax.get_legend().remove()
 
+        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        fig.savefig(f'{atom}.png', bbox_inches=extent)
+
     for k in range(atoms.size, int(np.square(n_figs))):
         row = k // n_figs
         col = k % n_figs
         axs[row, col].set_visible(False)
 
-    plt.savefig(path)
+    plt.savefig(path / 'all.png')
     plt.close()
 
 
@@ -582,6 +585,8 @@ def pandda(args: PanDDAArgs):
         # Sample atom positions in ground state maps
         print('Calculating samples...')
         samples = {}
+        dataset_dir = Path(args.out_dir) / dtag
+        os.mkdir(dataset_dir)
         for characterization_dtag, ground_state_dmap_array in zip(characterization_sets[1], characterization_set_dmaps_array, ):
             ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
 
@@ -595,15 +600,15 @@ def pandda(args: PanDDAArgs):
 
         # Delete other content and save
 
-        with open(Path(args.out_dir) / f'{dtag}_lilliefors.npy', 'wb') as f:
+        with open(dataset_dir / f'lilliefors.npy', 'wb') as f:
             np.save(f, lilliefors_map, )
-        with open(Path(args.out_dir) / f'{dtag}_dip.npy', 'wb') as f:
+        with open(dataset_dir / f'dip.npy', 'wb') as f:
             np.save(f, dip_map, )
-        with open(Path(args.out_dir) / f'{dtag}_samples.yaml', 'w') as f:
+        with open(dataset_dir / f'samples.yaml', 'w') as f:
             yaml.dump(samples, f)
 
         # Plot samples
-        plot_samples(samples, Path(args.out_dir) / f'{dtag}_samples.png')
+        plot_samples(samples, dataset_dir)
 
     shutil.rmtree(args.out_dir / 'processed_datasets')
     shutil.rmtree(args.out_dir / 'analyses')
