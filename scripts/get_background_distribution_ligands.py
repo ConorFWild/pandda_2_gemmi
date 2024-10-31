@@ -213,14 +213,14 @@ class ProcessModel:
 
 
 def get_lilliefors_map(characterization_set_dmaps_array):
-    n, nx, ny, nz = characterization_set_dmaps_array.shape
+    n_datasets, n_datapoints = characterization_set_dmaps_array.shape
 
-    lilliefors_map = np.zeros(nx, ny, nz)
+    lilliefors_map = np.zeros(n_datapoints)
 
-    for x, y, z in itertools.product(range(nx), range(ny), range(nz)):
-        ps = characterization_set_dmaps_array[:, x, y, z].flatten()
+    for n in range(n_datapoints):
+        ps = characterization_set_dmaps_array[:, n].flatten()
         if np.any(ps > 0):
-            lilliefors_map[x, y, z] = lilliefors(ps)
+            lilliefors_map[n] = lilliefors(ps)
 
     return lilliefors_map
 
