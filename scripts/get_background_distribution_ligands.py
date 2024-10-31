@@ -351,8 +351,7 @@ def pandda(args: PanDDAArgs):
     print(ligand_models)
 
     print('Processing Datasets!')
-    shutil.rmtree(args.out_dir)
-    os.mkdir(args.out_dir)
+
     for j, dtag in enumerate(datasets_to_process):
         print(f'Processing {dtag}')
         if dtag not in ligand_models:
@@ -562,7 +561,9 @@ def pandda(args: PanDDAArgs):
             np.save(f, dip_map, )
         with open(Path(args.out_dir) / f'{dtag}_samples.yaml', 'w') as f:
             yaml.dump(samples, f)
-
+    shutil.rmtree(args.out_dir / 'processed_datasets')
+    shutil.rmtree(args.out_dir / 'analyses')
+    os.mkdir(args.out_dir)
     print(f'Finished!')
 
 if __name__ == '__main__':
