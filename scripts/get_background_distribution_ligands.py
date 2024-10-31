@@ -533,12 +533,15 @@ def pandda(args: PanDDAArgs):
         z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
 
         # Get the lilliefors map
+        print('Calculating lilliefors statistics...')
         lilliefors_map = get_lilliefors_map(characterization_set_dmaps_array)
 
         # Dip map
+        print('Calculating dip statistics...')
         dip_map = get_dip_map(characterization_set_dmaps_array)
 
         # Sample atom positions in ground state maps
+        print('Calculating samples...')
         samples = {}
         for characterization_dtag, ground_state_dmap_array in zip(characterization_sets[1], characterization_set_dmaps_array, ):
             ground_state_dmap = reference_frame.unmask(SparseDMap(ground_state_dmap_array))
