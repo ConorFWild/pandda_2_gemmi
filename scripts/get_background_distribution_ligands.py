@@ -16,6 +16,8 @@ import yaml
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
+from matplotlib.transforms import Bbox
+
 
 from pandda_gemmi.interfaces import *
 from pandda_gemmi import constants
@@ -59,6 +61,19 @@ from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventSc
     set_structure_mean
 
 
+def full_extent(ax, pad=0.0):
+    """Get the full extent of an axes, including axes labels, tick labels, and
+    titles."""
+    # For text objects, we need to draw the figure first, otherwise the extents
+    # are undefined.
+    ax.figure.canvas.draw()
+    items = ax.get_xticklabels() + ax.get_yticklabels()
+#    items += [ax, ax.title, ax.xaxis.label, ax.yaxis.label]
+    items += [ax, ax.title]
+    bbox = Bbox.union([item.get_window_extent() for item in items])
+
+    return bbox.expanded(1.0 + pad, 1.0 + pad)
+
 def plot_samples(samples, path):
     table = pd.DataFrame(
         [{'dtag': dtag, 'atom': atom_id, 'val': val} for dtag, atom_samples in samples.items() for atom_id, val in
@@ -86,7 +101,7 @@ def plot_samples(samples, path):
         ax.set_xticks([])
         ax.get_legend().remove()
 
-        extent = ax.get_tightbbox(fig.canvas.renderer).transformed(fig.dpi_scale_trans.inverted())
+        extent = ax.full_extent().transformed(fig.dpi_scale_trans.inverted())
         fig.savefig(path / f'{atom}.png', bbox_inches=extent.expanded(1.15, 1.15))
 
     for k in range(atoms.size, int(np.square(n_figs))):
