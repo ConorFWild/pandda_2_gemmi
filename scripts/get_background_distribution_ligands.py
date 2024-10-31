@@ -549,6 +549,8 @@ def pandda(args: PanDDAArgs):
 
             samples[characterization_dtag] = {}
             for atom in ligand_models[dtag]:
+                if atom.element.name == "H":
+                    continue
                 pos = atom.pos
                 val = ground_state_dmap.interpolate_value(pos)
                 samples[characterization_dtag][atom.name] = val
