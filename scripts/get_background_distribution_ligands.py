@@ -565,7 +565,7 @@ def pandda(args: PanDDAArgs):
             yaml.dump(samples, f)
     shutil.rmtree(args.out_dir / 'processed_datasets')
     shutil.rmtree(args.out_dir / 'analyses')
-    os.mkdir(args.out_dir)
+    # os.mkdir(args.out_dir)
     print(f'Finished!')
 
 if __name__ == '__main__':
