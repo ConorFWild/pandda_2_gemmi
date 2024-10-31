@@ -351,6 +351,8 @@ def pandda(args: PanDDAArgs):
     print(ligand_models)
 
     print('Processing Datasets!')
+    shutil.rmtree(args.out_dir)
+    os.mkdir(args.out_dir)
     for j, dtag in enumerate(datasets_to_process):
         print(f'Processing {dtag}')
         if dtag not in ligand_models:
@@ -553,8 +555,7 @@ def pandda(args: PanDDAArgs):
                 samples[characterization_dtag][atom.name] = val
 
         # Delete other content and save
-        shutil.rmtree(args.out_dir)
-        os.mkdir(args.out_dir)
+
         with open(Path(args.out_dir) / f'{dtag}_lilliefors.npy', 'wb') as f:
             np.save(f, lilliefors_map, )
         with open(Path(args.out_dir) / f'{dtag}_dip.npy', 'wb') as f:
