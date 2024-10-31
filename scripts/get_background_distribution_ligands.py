@@ -97,7 +97,7 @@ def plot_samples(samples, path):
         ax = axs[row, col]
         # print([row, col])
         sns.lineplot(x=scipy.stats.norm.ppf(np.linspace(0.01, 0.99, num=100), loc=means[atom], scale=stds[atom]),
-                     y=np.linspace(0.01, 0.99, num=100), )
+                     y=np.linspace(0.01, 0.99, num=100), ax=ax)
         sns.ecdfplot(table[table['atom'] == atom], ax=ax)
 
         ax.set_title(atom)
