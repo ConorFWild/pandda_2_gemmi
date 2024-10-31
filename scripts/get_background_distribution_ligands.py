@@ -88,6 +88,7 @@ def plot_samples(samples, path):
     n_figs = int(np.ceil(np.sqrt(atoms.size)))
 
     fig, axs = plt.subplots(n_figs, n_figs, figsize=(n_figs * 3, n_figs * 3))
+    fig.tight_layout()
 
     for j, atom in enumerate(atoms):
         row = j // n_figs
