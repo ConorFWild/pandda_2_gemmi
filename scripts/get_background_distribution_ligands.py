@@ -220,7 +220,8 @@ def get_lilliefors_map(characterization_set_dmaps_array):
     for n in range(n_datapoints):
         ps = characterization_set_dmaps_array[:, n].flatten()
         if np.any(ps > 0):
-            lilliefors_map[n] = lilliefors(ps)
+            stat, pval = lilliefors(ps)
+            lilliefors_map[n] = pval
 
     return lilliefors_map
 
