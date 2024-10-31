@@ -87,7 +87,7 @@ def plot_samples(samples, path):
         ax.get_legend().remove()
 
         extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig(f'{atom}.png', bbox_inches=extent)
+        fig.savefig(path / f'{atom}.png', bbox_inches=extent.expanded(1.15, 1.15))
 
     for k in range(atoms.size, int(np.square(n_figs))):
         row = k // n_figs
