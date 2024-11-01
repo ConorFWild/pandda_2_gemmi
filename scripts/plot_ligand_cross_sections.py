@@ -138,7 +138,7 @@ def iterate_ligands(st):
     for model in st:
         for chain in model:
             for res in chain:
-                if res.name == 'LIG':
+                if res.name in ['LIG', "XXX"]:
                     yield f"{chain.name}_{res.seqid.num}", res
 
 
