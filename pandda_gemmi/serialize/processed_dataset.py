@@ -29,6 +29,11 @@ def processed_dataset(
     dic["Models"] = {}
 
     for model_num in sorted(characterization_sets):
+        meta = {
+            'Number of Initial Events': 0,
+            'Number of Size Filtered Events': 0,
+            'Number of Score Filtered Events': 0
+        }
 
         if model_num in models_to_process:
             is_processed = True
@@ -39,11 +44,6 @@ def processed_dataset(
         else:
             is_processed = False
             model_events = {}
-            meta = {
-            'Number of Initial Events': 0,
-            'Number of Size Filtered Events': 0,
-            'Number of Score Filtered Events': 0
-            }
 
 
         # inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
