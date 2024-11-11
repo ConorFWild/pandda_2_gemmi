@@ -32,13 +32,19 @@ def processed_dataset(
 
         if model_num in models_to_process:
             is_processed = True
-            model_events, z, mean, std = processed_models[model_num]
+            model_events, z, mean, std, model_metas = processed_models[model_num]
             if model_events is None:
                 model_events = {}
 
         else:
             is_processed = False
             model_events = {}
+            model_metas = {
+            'Number of Initial Events': 0,
+            'Number of Size Filtered Events': 0,
+            'Number of Score Filtered Events': 0
+            }
+
 
         # inner_mask_zmap = z[reference_frame.mask.indicies_sparse_inner_atomic]
         # percentage_z_2: float = float(np.sum(np.abs(inner_mask_zmap) > 2)) / inner_mask_zmap.size
