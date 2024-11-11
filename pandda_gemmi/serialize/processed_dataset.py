@@ -32,14 +32,14 @@ def processed_dataset(
 
         if model_num in models_to_process:
             is_processed = True
-            model_events, z, mean, std, model_metas = processed_models[model_num]
+            model_events, z, mean, std, meta = processed_models[model_num]
             if model_events is None:
                 model_events = {}
 
         else:
             is_processed = False
             model_events = {}
-            model_metas = {
+            meta = {
             'Number of Initial Events': 0,
             'Number of Size Filtered Events': 0,
             'Number of Score Filtered Events': 0
@@ -53,9 +53,9 @@ def processed_dataset(
             "Processed?": is_processed,
             "Characterization Datasets": [x for x in characterization_sets[model_num]],
             "Model Score": round(model_scores[model_num], 2),
-            'Number of Initial Events': model_metas['Number of Initial Events'],
-            'Number of Size Filtered Events': model_metas['Number of Size Filtered Events'],
-            'Number of Score Filtered Events':model_metas['Number of Score Filtered Events'],
+            'Number of Initial Events': meta['Number of Initial Events'],
+            'Number of Size Filtered Events': meta['Number of Size Filtered Events'],
+            'Number of Score Filtered Events':meta['Number of Score Filtered Events'],
             "Events": {
                 event_idx: {
                     "Score": model_events[event_idx].score,
