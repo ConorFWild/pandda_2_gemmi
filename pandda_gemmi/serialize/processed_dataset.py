@@ -53,9 +53,9 @@ def processed_dataset(
             "Processed?": is_processed,
             "Characterization Datasets": [x for x in characterization_sets[model_num]],
             "Model Score": round(model_scores[model_num], 2),
-            'Number of Initial Events': model_metas[model_num]['Number of Initial Events'],
-            'Number of Size Filtered Events': model_metas[model_num]['Number of Size Filtered Events'],
-            'Number of Score Filtered Events':model_metas[model_num]['Number of Score Filtered Events'],
+            'Number of Initial Events': model_metas['Number of Initial Events'],
+            'Number of Size Filtered Events': model_metas['Number of Size Filtered Events'],
+            'Number of Score Filtered Events':model_metas['Number of Score Filtered Events'],
             "Events": {
                 event_idx: {
                     "Score": model_events[event_idx].score,
