@@ -133,6 +133,7 @@ class ProcessModel:
 
         # Get the initial events from clustering the Z map
         events, cutoff = ClusterDensityDBSCAN()(z, reference_frame)
+        num_initial_events = len(events)
 
         # Handle the edge case of zero events
         if len(events) == 0:
@@ -143,6 +144,7 @@ class ProcessModel:
             FilterSize(reference_frame, min_size=self.minimum_z_cluster_size),
         ]:
             events = filter(events)
+        num_size_filtered_events = len(events)
 
         # Return None if there are no events after pre-scoring filters
         if len(events) == 0:
@@ -199,6 +201,7 @@ class ProcessModel:
             events = filter(events)
         # TODO: Replace with logger printing
         print(f"CNN Filtered {num_events} down to {len(events)}")
+        num_score_filtered_events = len(events)
 
         # Return None if there are no events after post-scoring filters
         if len(events) == 0:
@@ -209,7 +212,13 @@ class ProcessModel:
 
         print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
 
-        return events, mean, z, std
+        meta = {
+            'Number of Initial Events': num_initial_events,
+            'Number of Size Filtered Events': num_size_filtered_events,
+            'Number of Score Filtered Events': num_score_filtered_events
+        }
+
+        return events, mean, z, std, meta
 
 
 # def score_builds(
@@ -507,6 +516,7 @@ def pandda(args: PanDDAArgs):
         model_means = {}
         model_zs = {}
         model_stds = {}
+        model_metas = {}
         for model_number, result in processed_models.items():
             if result[0] is not None:
                 model_events[model_number] = result[0]
@@ -514,6 +524,7 @@ def pandda(args: PanDDAArgs):
             model_zs[model_number] = result[2]
             print(f'z map stats: {np.min(result[2])} {np.max(result[2])} {np.median(result[2])}')
             model_stds[model_number] = result[3]
+            model_metas[model_number] = result[4]
 
         time_finish_process_models = time.time()
         # TODO: Log properly
@@ -783,6 +794,7 @@ def pandda(args: PanDDAArgs):
             selected_model_num,
             top_selected_model_events,
             reference_frame,
+            model_metas,
             fs.output.processed_datasets[dtag] / f"processed_dataset.yaml"
         )
         serialize.serialize_events(
