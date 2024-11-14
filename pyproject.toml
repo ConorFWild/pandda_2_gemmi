@@ -27,6 +27,7 @@ dependencies = [
     "bokeh",
     "dask",
     "dask-jobqueue",
+    "gdown",
     "torch==1.13.1",
     "pytorch-lightning"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
