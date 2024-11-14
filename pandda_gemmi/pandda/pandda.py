@@ -3,6 +3,7 @@ import time
 import inspect
 
 from sklearnex import patch_sklearn
+import gdown
 
 patch_sklearn()
 
@@ -262,15 +263,23 @@ def pandda(args: PanDDAArgs):
     console.summarise_fs_model(fs)
 
     # Get the method for scoring events
+    event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt"
+    if not event_model_path:
+        gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
+                       event_model_path)
     score_event_model = load_model_from_checkpoint(
-        Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt",
+        event_model_path,
         LitEventScoring(),
     ).eval()
     score_event = EventScorer(score_event_model)
 
     # Get the method for scoring
+    build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
+    if not build_model_path:
+        gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
+                       build_model_path)
     score_build_model = load_model_from_checkpoint(
-        Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt",
+        build_model_path,
         LitBuildScoring(),
     ).eval()
     score_build = BuildScorer(score_build_model)
