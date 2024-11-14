@@ -268,7 +268,7 @@ def pandda(args: PanDDAArgs):
     event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt"
     if not event_model_path.exists():
         print(f'No event model at {event_model_path}. Downloading event model...')
-        with open(event_model_path, 'w') as f:
+        with open(event_model_path, 'wb') as f:
             gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
                            f)
     score_event_model = load_model_from_checkpoint(
@@ -281,7 +281,7 @@ def pandda(args: PanDDAArgs):
     build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
     if not build_model_path.exists():
         print(f'No build model at {build_model_path}.Downloading build model...')
-        with open(build_model_path, 'w') as f:
+        with open(build_model_path, 'wb') as f:
             gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
                            f
                            )
