@@ -68,8 +68,6 @@ Then:
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi 
 git checkout 0_1_0
-#python -m pip install numpy scipy joblib scikit-learn umap-learn hdbscan matplotlib rich seaborn rdkit ray scikit-learn-intelex fire bokeh dask dask-jobqueue
-#python -m pip install torch==1.13.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -e . 
 python -m pip install ./_gemmi
 ```
