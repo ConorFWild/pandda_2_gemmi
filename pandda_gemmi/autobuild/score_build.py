@@ -10,7 +10,9 @@ import inspect
 
 import torch
 from torch.nn import functional as F
-import lightning as lt
+#import lightning as lt
+import pytorch_lightning as lt
+
 
 from pandda_gemmi.cnn import resnet
 from pandda_gemmi.cnn import resnet18, resnet10
