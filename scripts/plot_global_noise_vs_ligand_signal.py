@@ -96,7 +96,7 @@ def _mask_map_around_protein(xmap, st):
                     )
     xmap_arr = np.array(xmap)
     outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
-    return xmap_arr[outer_mask_array]
+    return xmap_arr[outer_mask_array > 0]
 
 
 def _get_model(dataset_dir):
