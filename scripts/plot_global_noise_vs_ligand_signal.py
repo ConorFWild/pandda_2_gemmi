@@ -36,7 +36,7 @@ def _robust_std_estimate(masked_xmap):
     normal = rng.standard_normal(size=masked_xmap.size)
     masked_xmap_sorted = np.sort(masked_xmap)
     normal_sorted = np.sort(normal)
-    std, mean = np.polyfit(normal_sorted, masked_xmap_sorted, )
+    std, mean = np.polyfit(normal_sorted, masked_xmap_sorted, deg=1)
 
     return std
 
