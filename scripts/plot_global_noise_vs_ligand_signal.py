@@ -93,6 +93,8 @@ def _mask_map_around_protein(xmap, st):
                     continue
 
                 for atom in residue:
+                    if atom.element.name == 'H':
+                        continue
                     pos = atom.pos
                     outer_mask.set_points_around(
                         pos,
