@@ -52,7 +52,7 @@ def _get_ligand_samples(xmap, st):
                             xmap.interpolate_value(atom.pos)
                         )
 
-    return samples
+    return np.array(samples)
 
 
 def _get_delta_map(xmap_1, xmap_2):
