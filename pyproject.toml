@@ -11,7 +11,22 @@ classifiers = [
 ]
 description = "Tools to generate data suitable for loading into Fragalysis"
 dependencies = [
-
+    "numpy",
+    "scipy",
+    "joblib",
+    "scikit-learn",
+    "umap-learn",
+    "hdbscan",
+    "matplotlib",
+    "rich",
+    "seaborn",
+    "rdkit",
+    "ray",
+    "scikit-learn-intelex",
+    "fire",
+    "bokeh",
+    "dask",
+    "dask-jobqueue",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
