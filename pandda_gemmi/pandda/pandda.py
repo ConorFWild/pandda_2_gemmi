@@ -269,7 +269,7 @@ def pandda(args: PanDDAArgs):
     if not event_model_path.exists():
         print(f'No event model at {event_model_path}. Downloading event model...')
         with open(event_model_path, 'wb') as f:
-            gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
+            gdown.download('https://drive.google.com/file/d/1E2mFJCcu9n8FxBk7x9vzkaWUHKF9Ztl4/view?usp=sharing',
                            f)
     score_event_model = load_model_from_checkpoint(
         event_model_path,
