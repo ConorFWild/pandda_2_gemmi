@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 # import lightning as lt
-import pytorch_lightning as pl
+import pytorch_lightning as lt
 
 from .interfaces import *
 from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array, copy_map, _get_ed_mask_float
