@@ -54,6 +54,8 @@ def _get_ligand_samples(xmap, st):
             for res in chain:
                 if res.name in ['LIG', 'XXX']:
                     for atom in res:
+                        if atom.element.name == 'H':
+                            continue
                         samples.append(
                             xmap.interpolate_value(atom.pos)
                         )
