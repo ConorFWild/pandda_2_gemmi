@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import lightning as lt
+# import lightning as lt
+import pytorch_lightning as pl
 from rich import print as rprint
 
 
