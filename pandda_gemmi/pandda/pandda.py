@@ -56,7 +56,8 @@ from pandda_gemmi.ranking import rank_events, RankHighEventScore, RankHighEventS
 from pandda_gemmi.tables import output_tables
 from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
-from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, set_structure_mean
+from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, \
+    set_structure_mean
 
 
 class GetDatasetsToProcess:
@@ -119,7 +120,7 @@ class ProcessModel:
         print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
 
         mean_grid = reference_frame.unmask(SparseDMap(mean))
-        z_grid = reference_frame.unmask(SparseDMap((z-np.mean(z)) / np.std(z)))
+        z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
 
         # Get the median
         median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
@@ -160,14 +161,14 @@ class ProcessModel:
             confs = get_conformers(ligand_data)
             for event_id, event in events.items():
                 conf = set_structure_mean(confs[0], event.centroid)
-                event_score, map_array, mol_array  = score(
+                event_score, map_array, mol_array = score(
                     event,
                     conf,
                     z_grid,
                     raw_xmap_grid
                 )
                 event.score = event_score
-                _x,_y,_z, = event.centroid
+                _x, _y, _z, = event.centroid
                 print(f'\t {model_number}_{event_id}_{lid}: ({_x}, {_y}, {_z}): {round(event_score, 5)}')
 
                 dmaps = {
@@ -187,7 +188,8 @@ class ProcessModel:
                     ccp4 = gemmi.Ccp4Map()
                     ccp4.grid = grid
                     ccp4.update_ccp4_header()
-                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] /  f'{model_number}_{event_id}_{lid}_{name}.ccp4'))
+                    ccp4.write_ccp4_map(
+                        str(fs.output.processed_datasets[dtag] / f'{model_number}_{event_id}_{lid}_{name}.ccp4'))
 
             time_finish_score_events = time.time()
 
@@ -266,8 +268,9 @@ def pandda(args: PanDDAArgs):
     event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt"
     if not event_model_path.exists():
         print(f'No event model at {event_model_path}. Downloading event model...')
-        gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
-                       event_model_path)
+        with open(event_model_path, 'wb') as f:
+            gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
+                           f)
     score_event_model = load_model_from_checkpoint(
         event_model_path,
         LitEventScoring(),
@@ -278,8 +281,10 @@ def pandda(args: PanDDAArgs):
     build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
     if not build_model_path.exists():
         print(f'No build model at {build_model_path}.Downloading build model...')
-        gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
-                       build_model_path)
+        with open(build_model_path, 'wb') as f:
+            gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
+                           f
+                           )
     score_build_model = load_model_from_checkpoint(
         build_model_path,
         LitBuildScoring(),
@@ -656,8 +661,8 @@ def pandda(args: PanDDAArgs):
                     ccp4 = gemmi.Ccp4Map()
                     ccp4.grid = grid
                     ccp4.update_ccp4_header()
-                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[dtag] /  f'build_map_{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
-
+                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[
+                                                dtag] / f'build_map_{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
@@ -768,7 +773,8 @@ def pandda(args: PanDDAArgs):
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
-        print(f'z map stats: {np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])} {np.sum(np.isnan(model_zs[selected_model_num]))}')
+        print(
+            f'z map stats: {np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])} {np.sum(np.isnan(model_zs[selected_model_num]))}')
 
         for event in top_selected_model_events.values():
             print(f'{event.bdc} : {event.build.bdc}')
