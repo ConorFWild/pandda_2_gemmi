@@ -27,6 +27,7 @@ dependencies = [
     "bokeh",
     "dask",
     "dask-jobqueue",
+    "torch==1.13.1 @ https://download.pytorch.org/whl/cpu"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
