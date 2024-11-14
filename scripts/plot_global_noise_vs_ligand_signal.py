@@ -87,14 +87,13 @@ def _mask_map_around_protein(xmap, st):
                     continue
 
                 for atom in residue:
-                    yield atom
-    for atom in st.protein_atoms():
-        pos = atom.pos
-        outer_mask.set_points_around(
-            pos,
-            radius=6.0,
-            value=1,
-        )
+
+                    pos = atom.pos
+                    outer_mask.set_points_around(
+                        pos,
+                        radius=6.0,
+                        value=1,
+                    )
     xmap_arr = np.array(xmap)
     outer_mask_array = np.array(outer_mask, copy=False, dtype=np.int8)
     return xmap_arr[outer_mask_array]
