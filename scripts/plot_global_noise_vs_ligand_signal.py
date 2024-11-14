@@ -17,9 +17,11 @@ def _save(std,
           masked_difference_map,
           output_dir):
     dtype = np.dtype(
-        ('robust_std', 'f4',),
-        ('ligand_samples', 'f4', (ligand_samples.size,)),
-        ('masked_difference_map', 'f4', (masked_difference_map.size,))
+        [
+            ('robust_std', 'f4',),
+            ('ligand_samples', 'f4', (ligand_samples.size,)),
+            ('masked_difference_map', 'f4', (masked_difference_map.size,))
+        ]
     )
     arr = np.array([std, ligand_samples, masked_difference_map], dtype=dtype)
     with open(output_dir, 'wb') as f:
@@ -87,7 +89,6 @@ def _mask_map_around_protein(xmap, st):
                     continue
 
                 for atom in residue:
-
                     pos = atom.pos
                     outer_mask.set_points_around(
                         pos,
@@ -100,10 +101,11 @@ def _mask_map_around_protein(xmap, st):
 
 
 def _get_model(dataset_dir):
-    path = dataset_dir /  constants.PANDDA_MODELLED_STRUCTURES_DIR / constants.PANDDA_EVENT_MODEL.format(
+    path = dataset_dir / constants.PANDDA_MODELLED_STRUCTURES_DIR / constants.PANDDA_EVENT_MODEL.format(
         dataset_dir.name)
     st = gemmi.read_structure(str(path))
     return st
+
 
 def _get_pandda_mean_map(dataset_dir):
     model_maps = dataset_dir / 'model_maps'
