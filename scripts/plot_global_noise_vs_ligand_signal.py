@@ -101,7 +101,7 @@ def _mask_map_around_protein(xmap, st):
 
 
 def _get_model(dataset_dir):
-    path = dataset_dir / 'modelled_structures' / constants.PANDDA_MODELLED_STRUCTURES_DIR / constants.PANDDA_EVENT_MODEL.format(
+    path = dataset_dir /  constants.PANDDA_MODELLED_STRUCTURES_DIR / constants.PANDDA_EVENT_MODEL.format(
         dataset_dir.name)
     st = gemmi.read_structure(str(path))
     return st
