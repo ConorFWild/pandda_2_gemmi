@@ -23,6 +23,10 @@ def _save(std,
             ('masked_difference_map', 'f4', (masked_difference_map.size,))
         ]
     )
+    print(masked_difference_map)
+    print(ligand_samples)
+    print(std)
+
     arr = np.array([std, ligand_samples, masked_difference_map], dtype=dtype)
     with open(output_dir, 'wb') as f:
         np.save(f, arr)
