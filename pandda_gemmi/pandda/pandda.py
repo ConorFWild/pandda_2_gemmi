@@ -494,7 +494,7 @@ def pandda(args: PanDDAArgs):
             dataset_dmap_array,
             reference_frame,
             PointwiseMAD(),
-            process_all=True
+            process_all=False
         )
         print(f"Models to process are {models_to_process} out of {[x for x in characterization_sets]}")
 
