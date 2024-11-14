@@ -269,8 +269,10 @@ def pandda(args: PanDDAArgs):
     if not event_model_path.exists():
         print(f'No event model at {event_model_path}. Downloading event model...')
         with open(event_model_path, 'wb') as f:
-            gdown.download('https://drive.google.com/file/d/1E2mFJCcu9n8FxBk7x9vzkaWUHKF9Ztl4/view?usp=sharing',
-                           f)
+            # gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
+            #                f)
+            gdown.download(id='1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV',
+                           output=f)
     score_event_model = load_model_from_checkpoint(
         event_model_path,
         LitEventScoring(),
@@ -282,9 +284,11 @@ def pandda(args: PanDDAArgs):
     if not build_model_path.exists():
         print(f'No build model at {build_model_path}.Downloading build model...')
         with open(build_model_path, 'wb') as f:
-            gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
-                           f
-                           )
+            # gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
+            #                f
+            #                )
+            gdown.download(id='17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR',
+                           output=f)
     score_build_model = load_model_from_checkpoint(
         build_model_path,
         LitBuildScoring(),
