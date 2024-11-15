@@ -1,0 +1,66 @@
+name: numpy-dev
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.9 #need to pin to avoid issues with builds
+  - cython>=3.0
+  - compilers
+#  - openblas
+#  - nomkl
+  - setuptools=59.2.0
+  - ninja
+  - pkg-config
+  - meson-python
+  - pip
+  - spin
+  - ccache
+  - gemmi
+  - ray-all
+  - fire
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - joblib
+  - scikit-learn
+  - umap-learn
+  - bokeh
+  - matplotlib
+  - rich
+  - seaborn
+  - rdkit
+  - openbabel
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.7
+  # For testing
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - hypothesis
+  - pytest-order
+  # For type annotations
+  - typing_extensions>=4.2.0  # needed for python < 3.10
+  - mypy=1.4.1
+  # For building docs
+  - sphinx>=4.5.0
+  - sphinx-design
+  - numpydoc=1.4.0
+  - ipython
+  - pydata-sphinx-theme=0.13.3
+  - doxygen
+  # NOTE: breathe 4.33.0 collides with sphinx.ext.graphviz
+  - breathe>4.33.0
+  # For linting
+  - pycodestyle=2.7.0
+  - gitpython
+  # Used in some tests
+  - cffi
+  - pytz
+  # Pip
+  - pip:
+#    - "https://github.com/ConorFWild/pandda_2_gemmi/archive/refs/heads/0_1_0.zip"
+    - "git+https://github.com/ConorFWild/_gemmi.git"

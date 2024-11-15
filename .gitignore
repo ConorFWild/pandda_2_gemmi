@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Binaries
+*.pt
+*.gz
+
 # C extensions
 *.so
 
@@ -129,3 +133,7 @@ dmypy.json
 .idea/workspace.xml
 .idea/workspace.xml
 *.xml
+
+
+# data
+data

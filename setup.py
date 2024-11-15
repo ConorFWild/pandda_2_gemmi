@@ -29,7 +29,7 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=requirements(),
     scripts=[
-        "pandda_gemmi/pandda_rhofit.sh",
-        "pandda_gemmi/pandda_2.sh",
+        "scripts/pandda_rhofit.sh",
+        "scripts/pandda_2.sh",
     ]
 )

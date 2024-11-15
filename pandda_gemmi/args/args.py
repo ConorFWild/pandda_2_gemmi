@@ -5,7 +5,7 @@ from pathlib import Path
 from distutils.util import strtobool
 
 from pandda_gemmi import constants
-from pandda_gemmi.analyse_interface import *
+from pandda_gemmi.interfaces import *
 
 
 @dataclasses.dataclass()
@@ -23,14 +23,15 @@ class PanDDAArgs:
     reference_comparability_filters: List[str] = constants.ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT
     low_memory: bool = False
     ground_state_datasets: Optional[List[str]] = None
-    exclude_from_z_map_analysis: Optional[List[str]] = None
-    exclude_from_characterisation: Optional[List[str]] = None
-    only_datasets: Optional[List[str]] = None
+    exclude_from_z_map_analysis: Optional[str] = None
+    exclude_from_characterisation: Optional[str] = None
+    only_datasets: Optional[str] = None
     ignore_datasets: Optional[List[str]] = None
     dynamic_res_limits: bool = True
     high_res_upper_limit: float = 1.0
     high_res_lower_limit: float = 4.0
     high_res_increment: float = 0.05
+    high_res_buffer: float = 0.1
     max_shell_datasets: int = 60
     min_characterisation_datasets: int = constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT
     structure_factors: Optional[Tuple[str, str]] = None
@@ -39,6 +40,7 @@ class PanDDAArgs:
     sample_rate: float = 3.0
     max_rmsd_to_reference: float = 1.5
     max_rfree: float = 0.4
+    dataset_range: str = "0-99999"
     max_wilson_plot_z_score: float = 1.5
     same_space_group_only: bool = False
     similar_models_only: bool = False
@@ -46,7 +48,7 @@ class PanDDAArgs:
     grid_spacing: float = 0.5
     padding: float = 3.0
     density_scaling: bool = True
-    outer_mask: float = 8.0
+    outer_mask: float = constants.ARGS_OUTER_MASK_DEFAULT
     inner_mask: float = 2.0
     inner_mask_symmetry: float = 2.0
     contour_level: float = 2.5
@@ -76,8 +78,8 @@ class PanDDAArgs:
     distributed_scheduler: str = "SGE"
     distributed_queue: str = "medium.q"
     distributed_project: str = "labxchem"
-    distributed_num_workers: int = 12
-    distributed_cores_per_worker: int = 12
+    distributed_num_workers: int = constants.ARGS_DISTRIBUTED_NUM_WORKERS_DEFAULT
+    distributed_cores_per_worker: int = constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_DEFAULT
     distributed_mem_per_core: int = constants.ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT
     distributed_resource_spec: str = f"m_mem_free={constants.ARGS_DISTRIBUTED_MEM_PER_CORE_DEFAULT}G"
     distributed_tmp: str = "/tmp"
@@ -90,7 +92,10 @@ class PanDDAArgs:
     rhofit_coord: bool = False
     cif_strategy: str = constants.ARGS_CIF_STRATEGY_DEFAULT
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
-    debug: Debug = Debug.DEFAULT
+    rescore_event_method: str = constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT
+    source_pandda: Path = None
+    # debug: Debug = Debug.DEFAULT
+
 
     @staticmethod
     def parse_only_datasets(string):
@@ -191,6 +196,11 @@ class PanDDAArgs:
             default=False,
             help=constants.ARGS_LOW_MEMORY_HELP,
         )
+        parser.add_argument(
+            constants.ARGS_RESCORE_EVENT_METHOD,
+            default=constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT,
+            help=constants.ARGS_RESCORE_EVENT_METHOD_HELP
+        )
 
         # Distribution
         parser.add_argument(
@@ -214,13 +224,13 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_NUM_WORKERS,
             type=int,
-            default=12,
+            default=constants.ARGS_DISTRIBUTED_NUM_WORKERS_DEFAULT,
             help=constants.ARGS_DISTRIBUTED_NUM_WORKERS_HELP,
         )
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_CORES_PER_WORKER,
             type=int,
-            default=12,
+            default=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_DEFAULT,
             help=constants.ARGS_DISTRIBUTED_CORES_PER_WORKER_HELP,
         )
         parser.add_argument(
@@ -247,6 +257,8 @@ class PanDDAArgs:
             default='["--exclusive", ]',
             help=constants.ARGS_JOB_EXTRA_HELP,
         )
+
+
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_WALLTIME,
             type=str,
@@ -275,13 +287,13 @@ class PanDDAArgs:
         )
         parser.add_argument(
             constants.ARGS_EXCLUDE_FROM_Z_MAP_ANALYSIS,
-            type=list,
+            # type=list,
             default=None,
             help=constants.ARGS_EXCLUDE_FROM_Z_MAP_ANALYSIS_HELP,
         )
         parser.add_argument(
             constants.ARGS_EXCLUDE_FROM_CHARACTERISATION,
-            type=list,
+            # type=list,
             default=None,
             help=constants.ARGS_EXCLUDE_FROM_CHARACTERISATION_HELP,
         )
@@ -309,6 +321,13 @@ class PanDDAArgs:
             default=0.4,
             help=constants.ARGS_MAX_RFREE_HELP,
         )
+        parser.add_argument(
+            constants.ARGS_DATASET_RANGE,
+            type=str,
+            default='0-99999',
+            help=constants.ARGS_DATASET_RANGE_HELP,
+        )
+
         parser.add_argument(
             constants.ARGS_MAX_WILSON_PLOT_Z_SCORE,
             type=float,
@@ -417,6 +436,12 @@ class PanDDAArgs:
             help=constants.ARGS_MAX_SHELL_DATASETS_HELP,
         )
         parser.add_argument(
+            constants.ARGS_HIGH_RES_BUFFER,
+            type=float,
+            default=0.1,
+            help=constants.ARGS_HIGH_RES_BUFFER_HELP,
+        )
+        parser.add_argument(
             constants.ARGS_MIN_CHARACTERISATION_DATASETS,
             type=int,
             default=constants.ARGS_MIN_CHARACTERISATION_DATASETS_DEFAULT,
@@ -484,7 +509,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_OUTER_MASK,
             type=float,
-            default=8.0,
+            default=constants.ARGS_OUTER_MASK_DEFAULT,
             help=constants.ARGS_OUTER_MASK_HELP,
         )
         parser.add_argument(
@@ -548,7 +573,7 @@ class PanDDAArgs:
         parser.add_argument(
             constants.ARGS_MAX_SITE_DISTANCE_CUTOFF,
             type=float,
-            default=1.732,
+            default=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT,
             help=constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP,
         )
 
@@ -613,23 +638,30 @@ class PanDDAArgs:
         )
 
         # Debug
-        def debug_mapping(integer):
-            for debug_level in Debug:
-                if integer == debug_level:
-                    return debug_level
+        # def debug_mapping(integer):
+        #     for debug_level in Debug:
+        #         if integer == debug_level:
+        #             return debug_level
+        #
+        #     raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
 
-            raise Exception(f"Debug level should be an integer or a string onvertible to an integer. Got {integer}")
+        # parser.add_argument(
+        #     constants.ARGS_DEBUG,
+        #     type=lambda x: debug_mapping(int(x)),
+        #     default=Debug.DEFAULT,
+        #     help=constants.ARGS_DEBUG_HELP,
+        # )
 
         parser.add_argument(
-            constants.ARGS_DEBUG,
-            type=lambda x: debug_mapping(int(x)),
-            default=Debug.DEFAULT,
-            help=constants.ARGS_DEBUG_HELP,
+            "--source_pandda",
+            type=Path,
+            default=None,
+            help=constants.ARGS_RANK_METHOD_HELP,
         )
 
         args = parser.parse_args()
 
-        only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
+        # only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
 
         return PanDDAArgs(
             data_dirs=args.data_dirs,
@@ -642,16 +674,18 @@ class PanDDAArgs:
             ligand_smiles_regex=args.ligand_smiles_regex,
             statmaps=args.statmaps,
             low_memory=args.low_memory,
+            rescore_event_method=args.rescore_event_method,
             ground_state_datasets=args.ground_state_datasets,
             exclude_from_z_map_analysis=args.exclude_from_z_map_analysis,
             exclude_from_characterisation=args.exclude_from_characterisation,
-            only_datasets=only_datasets,
+            only_datasets=args.only_datasets,
             ignore_datasets=args.ignore_datasets,
             dynamic_res_limits=args.dynamic_res_limits,
             high_res_upper_limit=args.high_res_upper_limit,
             high_res_lower_limit=args.high_res_lower_limit,
             high_res_increment=args.high_res_increment,
             max_shell_datasets=args.max_shell_datasets,
+            high_res_buffer=args.high_res_buffer,
             min_characterisation_datasets=args.min_characterisation_datasets,
             structure_factors=args.structure_factors,
             all_data_are_valid_values=args.all_data_are_valid_values,
@@ -659,6 +693,7 @@ class PanDDAArgs:
             sample_rate=args.sample_rate,
             max_rmsd_to_reference=args.max_rmsd_to_reference,
             max_rfree=args.max_rfree,
+            dataset_range=args.dataset_range,
             max_wilson_plot_z_score=args.max_wilson_plot_z_score,
             same_space_group_only=args.same_space_group_only,
             similar_models_only=args.similar_models_only,
@@ -710,5 +745,6 @@ class PanDDAArgs:
             rhofit_coord=args.rhofit_coord,
             cif_strategy=args.cif_strategy,
             rank_method=args.rank_method,
-            debug=args.debug,
+            source_pandda=args.source_pandda
+            # debug=args.debug,
         )
