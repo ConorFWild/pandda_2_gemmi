@@ -67,15 +67,13 @@ Then:
 ```bash
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi 
-git checkout 0_1_0
 python -m pip install -e . 
-python -m pip install ./_gemmi
+python -m pip install ./_gemmi  # Install the custom version of gemmi
+                                # This step will likely be removed in
+                                # Future versions
 ```
 
-Followed by copying the two linked files at: 
-`https://drive.google.com/drive/folders/1NRHtZjFjbRIcc_58IPY4ORkZdDqn1XOW?usp=sharing`
-
-Into the folder: `pandda_2_gemmi/pandda_gemmi/cnn`
+The first time you run PanDDA 2 it will try to download two models of approximately 1GB total.
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
 
@@ -110,8 +108,7 @@ data_dirs
 The recommended way to run PanDDA 2 is:
 
 ```bash
-conda activate pandda2
-python /path/to/analyse.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
+python scripts/pandda.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
 ```
 
 After PanDDA 2 has finished running, then results can be inspected with pandda.inspect as per PanDDA 1 (https://pandda.bitbucket.io/).
