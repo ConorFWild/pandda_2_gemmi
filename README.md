@@ -44,9 +44,6 @@ If you uncertain about the correctness of the results, then a GitHub issue is ap
 
 ## Running PanDDA 2
 
-PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit).
-
-
 Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following:
 
 1. Install ccp4/7.0.067 and PanDDA 2
