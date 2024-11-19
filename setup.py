@@ -30,6 +30,6 @@ setuptools.setup(
     install_requires=requirements(),
     scripts=[
         "scripts/pandda_rhofit.sh",
-        "scripts/pandda2.analyse.sh",
+        "scripts/pandda2.analyse",
     ]
 )
