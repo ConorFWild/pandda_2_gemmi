@@ -292,6 +292,7 @@ class PointPositionArray(PointPositionArrayInterface):
                 f'Dataset had zero protein atoms in structure'
                 f'Structure came from path: {st.path}'
                 f'{atom_list}'
+                f'{positions}'
             )
 
         spacing = np.array([grid.nu, grid.nv, grid.nw])
