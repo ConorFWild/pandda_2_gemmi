@@ -278,6 +278,21 @@ class PointPositionArray(PointPositionArrayInterface):
 
         pos_array = np.array(positions)
 
+        # Debug for if protein atoms fails
+        if len(pos_array) == 0:
+            atom_list = []
+            for model in st.structure:
+                for chain in model:
+                    for res in chain:
+                        for atom in res:
+                            atom_list.append([res.name, atom.name])
+
+            raise Exception(
+                f'Dataset had zero protein atoms in structure'
+                f'Structure came from path: {st.path}'
+                f'{atom_list}'
+            )
+
         spacing = np.array([grid.nu, grid.nv, grid.nw])
         fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
 
