@@ -53,6 +53,7 @@ class ResidueID:
 
 def is_protein_residue(residue):
     for atom in residue:
+        print([atom.name.upper(), "CA" in atom.name.upper()])
         if "CA" in atom.name.upper():
             return True
 
