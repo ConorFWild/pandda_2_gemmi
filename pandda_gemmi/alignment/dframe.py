@@ -289,9 +289,9 @@ class PointPositionArray(PointPositionArrayInterface):
                             atom_list[res.name].append(atom.name)
 
             raise Exception(
-                f'Dataset had zero protein atoms in structure'
-                f'Structure came from path: {st.path}'
-                f'{atom_list}'
+                f'Dataset had zero protein atoms in structure\n'
+                f'Structure came from path: {st.path}\n'
+                f'{atom_list}\n'
                 f'{positions}'
             )
 
