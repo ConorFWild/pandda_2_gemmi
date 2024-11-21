@@ -285,7 +285,6 @@ class PointPositionArray(PointPositionArrayInterface):
             for model in st.structure:
                 for chain in model:
                     for res in chain:
-                        print(is_protein_residue(res))
                         atom_list[res.name] = []
                         for atom in res:
                             atom_list[res.name].append(atom.name)
