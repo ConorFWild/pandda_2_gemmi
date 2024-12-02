@@ -115,7 +115,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                 else:
                     ligand_keys[stem] = LigandFiles(file_path, None, None)
             else:
-                print(f'Ligand name: {name} fails cif check! Skipping!')
+                print(f'Ligand name: {name} fails cif check!')
 
         elif re.match(ligand_smiles_regex, name):
             if check_smiles_file(file_path):
@@ -124,7 +124,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                 else:
                     ligand_keys[stem] = LigandFiles(None, file_path, None)
             else:
-                print(f'Ligand name: {name} fails smiles check! Skipping!')
+                print(f'Ligand name: {name} fails smiles check!')
         elif re.match(ligand_pdb_regex, name):
             if check_pdb_file(file_path):
                 if stem in ligand_keys:
@@ -132,7 +132,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                 else:
                     ligand_keys[stem] = LigandFiles(None, None, file_path)
             else:
-                print(f'Ligand name: {name} fails pdb check! Skipping!')
+                print(f'Ligand name: {name} fails pdb check!')
 
         else:
             print(f'Ligand name: {name} matches no known ligand file type!')
