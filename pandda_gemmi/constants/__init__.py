@@ -103,7 +103,7 @@ ARGS_REFERENCE_COMPARABILITY_FILTERS_DEFAULT = ("dissimilar_models", "large_gaps
 ARGS_LIGAND_PDB_REGEX = "--ligand_pdb_regex"
 ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with each ligand that may be " \
                              "bound in the crystal."
-ARGS_LIGAND_PDB_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]pdb"
+ARGS_LIGAND_PDB_REGEX_DEFAULT = "[0-9a-zA-Z-_]+[.]pdb"
 
 ARGS_LIGAND_DIR_REGEX = "--ligand_dir_regex"
 ARGS_LIGAND_DIR_REGEX_HELP = "A grep pattern matching a directory in each crystal directory in the directory given by --data_dirs. If this is given, then other cif regexs will only be searched for inside this directory, if it can be found."
