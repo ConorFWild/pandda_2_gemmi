@@ -88,7 +88,7 @@ ARGS_LIGAND_CIF_REGEX_DEFAULT = "[0-9a-zA-Z-_]+[.]cif"
 ARGS_LIGAND_SMILES_REGEX = "--ligand_smiles_regex"
 ARGS_LIGAND_SMILES_REGEX_HELP = "A grep pattern matching the smiles associated with each ligand that may be bound in " \
                                 "the crystal."
-ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-]+[.]smiles"
+ARGS_LIGAND_SMILES_REGEX_DEFAULT = "[0-9a-zA-Z-_]+[.]smiles"
 
 ARGS_DATA_QUALITY_FILTERS = "--data_quality_filters"
 ARGS_DATA_QUALITY_FILTERS_HELP = "A comma seperated list of filters to apply. May include \"structure_factors\", " \
