@@ -4,7 +4,7 @@
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 # Get the path to pandda 2
-PANDDA_2_ANALYSE="$SCRIPT_DIR/pandda_gemmi/analyse.py"
+PANDDA_2_ANALYSE="$SCRIPT_DIR/pandda.py"
 
 # Run
 python3.9 "$PANDDA_2_ANALYSE" "$@"

@@ -780,7 +780,9 @@ def score_conformer(
             score_build,
             z_grid,
             raw_xmap_grid,
-        event_fit_num_trys=6,
+        #event_fit_num_trys=6,
+        event_fit_num_trys=12,
+
 ):
     centered_structure = center_structure(
         conformer,

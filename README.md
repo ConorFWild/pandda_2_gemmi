@@ -44,9 +44,6 @@ If you uncertain about the correctness of the results, then a GitHub issue is ap
 
 ## Running PanDDA 2
 
-PanDDA 2 supports the autobuilding of events and ranking them by autobuildability. All one needs to do is ensure that BUSTER is set up in their path (and hence ana_pdbmaps and rhofit).
-
-
 Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following:
 
 1. Install ccp4/7.0.067 and PanDDA 2
@@ -108,6 +105,12 @@ data_dirs
 The recommended way to run PanDDA 2 is:
 
 ```bash
+pandda2.analyse --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
+```
+
+OR
+
+```bash
 python scripts/pandda.py --data_dirs=<data directories> --out_dir=<output directory> --pdb_regex=<pdb regex> --mtz_regex=<mtz regex> --local_cpus=<your number of cpus>
 ```
 
@@ -118,13 +121,13 @@ Refer to sections 8, 9 and 10 of the PanDDA tutorial.
 
 One important difference is that PanDDA 2 returns events ranked by score rather than by score per site. This means that 
 
-### 5. Picking Fragment Hits
-
-### 6. Exporting Results for Refinement
+### 5. Exporting Results for Refinement
 
 Refer to sections 11, 12 and 13 of the PanDDA tutorial.
 
 ## PanDDA 2 Usage FAQ
+
+Additional information can be found [here](docs/debugging.md).
 
 ### PanDDA 2 has returned an enourmous number of events
 This is working as intended: PanDDA 2 is designed re return significantly more events than PanDDA 1, but to rank them better. 
@@ -185,7 +188,6 @@ Therefore, the highest scoring autobuild by RSCC from any event in each dataset 
 
 This has the effect that users may open apparently good hit density with no autobuild present, if another hit which is better fit by the autobuilding is present in the same dataset.
 
-# 
 
 
 

@@ -87,7 +87,7 @@ class Structure(StructureInterface):
     def protein_atoms(self):
         for model in self.structure:
             for chain in model:
-                for residue in chain.get_polymer().first_conformer():
+                for residue in chain:#"#.get_polymer().first_conformer():
 
                     if not is_protein_residue(residue):
                         continue
