@@ -171,25 +171,25 @@ class ProcessModel:
                 _x, _y, _z, = event.centroid
                 print(f'\t {model_number}_{event_id}_{lid}: ({_x}, {_y}, {_z}): {round(event_score, 5)}')
 
-                dmaps = {
-                    'zmap': map_array[0][0],
-                    'xmap': map_array[0][1],
-                    'mask': mol_array[0][0],
-                }
-                for name, dmap in dmaps.items():
-                    grid = gemmi.FloatGrid(32, 32, 32)
-                    uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
-
-                    # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
-                    grid.set_unit_cell(uc)
-
-                    grid_array = np.array(grid, copy=False)
-                    grid_array[:, :, :] = dmap[:, :, :]
-                    ccp4 = gemmi.Ccp4Map()
-                    ccp4.grid = grid
-                    ccp4.update_ccp4_header()
-                    ccp4.write_ccp4_map(
-                        str(fs.output.processed_datasets[dtag] / f'{model_number}_{event_id}_{lid}_{name}.ccp4'))
+                # dmaps = {
+                #     'zmap': map_array[0][0],
+                #     'xmap': map_array[0][1],
+                #     'mask': mol_array[0][0],
+                # }
+                # for name, dmap in dmaps.items():
+                #     grid = gemmi.FloatGrid(32, 32, 32)
+                #     uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
+                #
+                #     # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
+                #     grid.set_unit_cell(uc)
+                #
+                #     grid_array = np.array(grid, copy=False)
+                #     grid_array[:, :, :] = dmap[:, :, :]
+                #     ccp4 = gemmi.Ccp4Map()
+                #     ccp4.grid = grid
+                #     ccp4.update_ccp4_header()
+                #     ccp4.write_ccp4_map(
+                #         str(fs.output.processed_datasets[dtag] / f'{model_number}_{event_id}_{lid}_{name}.ccp4'))
 
             time_finish_score_events = time.time()
 
@@ -653,20 +653,20 @@ def pandda(args: PanDDAArgs):
                     'xmap': build['arr'][0][1],
                     'mask': build['arr'][0][2],
                 }
-                for name, dmap in dmaps.items():
-                    grid = gemmi.FloatGrid(32, 32, 32)
-                    uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
-
-                    # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
-                    grid.set_unit_cell(uc)
-
-                    grid_array = np.array(grid, copy=False)
-                    grid_array[:, :, :] = dmap[:, :, :]
-                    ccp4 = gemmi.Ccp4Map()
-                    ccp4.grid = grid
-                    ccp4.update_ccp4_header()
-                    ccp4.write_ccp4_map(str(fs.output.processed_datasets[
-                                                dtag] / f'build_map_{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
+                # for name, dmap in dmaps.items():
+                #     grid = gemmi.FloatGrid(32, 32, 32)
+                #     uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
+                #
+                #     # uc = gemmi.UnitCell(8.0, 8.0, 8.0, 90.0, 90.0, 90.0)
+                #     grid.set_unit_cell(uc)
+                #
+                #     grid_array = np.array(grid, copy=False)
+                #     grid_array[:, :, :] = dmap[:, :, :]
+                #     ccp4 = gemmi.Ccp4Map()
+                #     ccp4.grid = grid
+                #     ccp4.update_ccp4_header()
+                #     ccp4.write_ccp4_map(str(fs.output.processed_datasets[
+                #                                 dtag] / f'build_map_{model_number}_{event_number}_{ligand_key}_{conformer_number}_{name}.ccp4'))
 
         # Select between autobuilds and update event for each event
         for model_number, events in model_events.items():
