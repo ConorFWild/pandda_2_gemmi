@@ -58,6 +58,7 @@ class PanDDAArgs:
     clustering_cutoff: float = 1.5
     cluster_cutoff_distance_multiplier: float = 1.0
     event_score: str = constants.ARGS_EVENT_SCORE_DEFAULT
+    max_events_per_dataset: int = 3
     max_site_distance_cutoff: float = constants.ARGS_MAX_SITE_DISTANCE_CUTOFF_DEFAULT
     min_bdc: float = constants.ARGS_MIN_BDC_DEFAULT
     max_bdc: float = constants.ARGS_MAX_BDC_DEFAULT
@@ -568,7 +569,12 @@ class PanDDAArgs:
             default=constants.ARGS_EVENT_SCORE_DEFAULT,
             help=constants.ARGS_EVENT_SCORE_HELP,
         )
-
+        parser.add_argument(
+            constants.ARGS_MAX_EVENTS_PER_DATASET,
+            type=str,
+            default=constants.ARGS_MAX_EVENTS_PER_DATASET_DEFAULT,
+            help=constants.ARGS_MAX_EVENTS_PER_DATASET_HELP,
+        )
         # Site finding options
         parser.add_argument(
             constants.ARGS_MAX_SITE_DISTANCE_CUTOFF,
@@ -711,6 +717,7 @@ class PanDDAArgs:
             clustering_cutoff=args.clustering_cutoff,
             cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
             event_score=args.event_score,
+            max_events_per_dataset=args.max_events_per_dataset,
             max_site_distance_cutoff=args.max_site_distance_cutoff,
             min_bdc=args.min_bdc,
             max_bdc=args.max_bdc,

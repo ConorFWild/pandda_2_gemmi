@@ -272,6 +272,9 @@ ARGS_CLUSTER_CUTOFF_DISTANCE_MULTIPLIER_HELP = "A float which gives what multipl
 ARGS_EVENT_SCORE = "--event_score"
 ARGS_EVENT_SCORE_HELP = "Method to score events: either inbuilt or size"
 ARGS_EVENT_SCORE_DEFAULT = "inbuilt"
+ARGS_MAX_EVENTS_PER_DATASET = 'max_events_per_dataset'
+ARGS_MAX_EVENTS_PER_DATASET_DEFAULT = 3
+ARGS_MAX_EVENTS_PER_DATASET_HELP = 'The maximum number of events to return per dataset'
 ARGS_MAX_SITE_DISTANCE_CUTOFF = "--max_site_distance_cutoff"
 ARGS_MAX_SITE_DISTANCE_CUTOFF_HELP = "The maximum distance between events for them to be considered for inclusion in " \
                                      "the same site"

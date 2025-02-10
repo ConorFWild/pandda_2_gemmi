@@ -91,6 +91,8 @@ This is as simple as running the same PanDDA command that began the run again. T
 
 A warning with this feature is that if the input data has changed, new datasets will be processed against the current data, not the original data. This could happen if, for example, new datasets have been collected.
 
+(Diamond users can rerun pandda2 targeting the same directory as the failed run through XChemExplorer as if they were running a new PanDDA there).
+
 ## How To Run PanDDA 2 Against Crude Soaks And Cocktails
 
 If you have a crude or other cocktail experiment in which multiple ligands have been soaked, then it is important to make sure PanDDA has data for all the ligands that may have bound.
@@ -255,6 +257,8 @@ It is also important to consider whether binding is likely to be driven by cryst
 It is important to know your crystal system: symmetry atoms _may_ be a part of a biological assembly, for example at the interface between the two protein chains of a dimer in which only one chain is in the ASU. In this case forming interactions with the symmetry atoms is likely to be a positive sign rather than a warning sign.
 
 In `pandda.inspect`, the easiest way to determine this is by finding "Draw -> Cell and Symmetry" in the command bar and ensuring the "Master Switch" is "Yes". Then going to the command bar and selecting "Measures -> Environment Distances" and ensuring that "Show Residue Environment" is ticked will highlight likely bonds.
+
+
 
 ## Determining the reasons datasets were not analyzed or included in ground states
 
