@@ -907,7 +907,7 @@ class GridPartitioning(GridPartitioningInterface):
         # Construct the partition
         partitions = {
             ResidueID(
-                ca_point_position_array.models[index],
+                int(ca_point_position_array.models[index]),
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
@@ -1151,7 +1151,7 @@ class GridPartitioning(GridPartitioningInterface):
         # Construct the partition
         partitions = {
             ResidueID(
-                ca_point_position_array.models[index],
+                int(ca_point_position_array.models[index]),
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(

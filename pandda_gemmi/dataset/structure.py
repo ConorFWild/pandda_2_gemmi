@@ -30,13 +30,13 @@ class StructurePython:
 
 @dataclasses.dataclass()
 class ResidueID:
-    model: str
+    model: int
     chain: str
     number: str
 
     @staticmethod
     def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
-        return ResidueID(model.num,
+        return ResidueID(int(model.num),
                          chain.name,
                          str(res.seqid.num),
                          )

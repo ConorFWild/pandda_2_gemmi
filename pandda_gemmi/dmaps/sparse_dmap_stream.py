@@ -122,20 +122,20 @@ class SparseDMapStream:
         transforms, com_ref, com_mov = alignment.get_transforms()
         # print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
         # print(f"Transforms: {[key for key in transforms]}")
-        try:
-            transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
-            com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
-            com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
+        # try:
+        transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
+        com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
+        com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
 
-            points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
-                           dframe.partitioning.partitions]
-            positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
-                              dframe.partitioning.partitions]
-        except Exception as e:
-            print(e)
-            transforms, com_ref, com_mov = alignment.get_transforms()
-            print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
-            print(f"Transforms: {[key for key in transforms]}")
+        points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
+                       dframe.partitioning.partitions]
+        positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
+                          dframe.partitioning.partitions]
+        # except Exception as e:
+        #     print(e)
+        #     transforms, com_ref, com_mov = alignment.get_transforms()
+        #     print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
+        #     print(f"Transforms: {[key for key in transforms]}")
 
         # transforms, com_ref, com_mov = alignment.get_transforms()
         # transform_list = [transforms[residue_id] for residue_id in transforms]
