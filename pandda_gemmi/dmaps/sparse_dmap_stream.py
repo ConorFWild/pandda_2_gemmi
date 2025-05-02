@@ -127,9 +127,9 @@ class SparseDMapStream:
             com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
             com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
 
-            points_list = [np.copy(dframe.partitioning.partitions[residue_id].points, dtype=np.int32) for residue_id in
+            points_list = [dframe.partitioning.partitions[residue_id].points.astype(np.int32) for residue_id in
                            dframe.partitioning.partitions]
-            positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions, dtype=np.float32) for residue_id in
+            positions_list = [dframe.partitioning.partitions[residue_id].positions.astype(np.float32) for residue_id in
                               dframe.partitioning.partitions]
         except Exception as e:
             print(e)
