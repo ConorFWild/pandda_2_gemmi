@@ -51,7 +51,7 @@ class PointPositionArray(PointPositionArrayInterface):
 
     @staticmethod
     def orthogonalize_fractional_array(fractional_array, grid):
-        orthogonalization_matrix = np.array(grid.unit_cell.orthogonalization_matrix.tolist())
+        orthogonalization_matrix = np.array(grid.unit_cell.orth.mat.tolist())
         orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
 
         return orthogonal_array
@@ -268,7 +268,7 @@ class PointPositionArray(PointPositionArrayInterface):
         positions = []
 
         point_orthogonalization_matrix = np.matmul(
-            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+            np.array(grid.unit_cell.orth.mat.tolist()),
             np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
         )
 
