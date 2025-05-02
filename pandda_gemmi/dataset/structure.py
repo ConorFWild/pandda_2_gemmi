@@ -36,7 +36,7 @@ class ResidueID:
 
     @staticmethod
     def from_residue_chain(model: gemmi.Model, chain: gemmi.Chain, res: gemmi.Residue):
-        return ResidueID(model.name,
+        return ResidueID(model.num,
                          chain.name,
                          str(res.seqid.num),
                          )
@@ -158,7 +158,7 @@ class StructureArray(StructureArrayInterface):
                 for residue in chain.first_conformer():
                     for atom in residue:
                         print(dir(model))
-                        models.append(model.name)
+                        models.append(model.num)
                         chains.append(chain.name)
                         seq_ids.append(str(residue.seqid.num))
                         insertions.append(residue.seqid.icode)
