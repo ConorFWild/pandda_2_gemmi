@@ -157,7 +157,6 @@ class StructureArray(StructureArrayInterface):
             for chain in model:
                 for residue in chain.first_conformer():
                     for atom in residue:
-                        print(dir(model))
                         models.append(model.num)
                         chains.append(chain.name)
                         seq_ids.append(str(residue.seqid.num))
