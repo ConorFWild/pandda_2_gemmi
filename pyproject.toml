@@ -22,19 +22,22 @@ dependencies = [
     "seaborn",
     "rdkit",
     "ray",
-    "scikit-learn-intelex",
     "fire",
     "bokeh",
     "dask",
     "dask-jobqueue",
     "gdown",
     "torch==1.13.1",
-    "pytorch-lightning"
+    "pytorch-lightning",
+#    "gemmi@git+https://github.com/ConorFWild/gemmi.git#egg=flexible_interpolation"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
 requires-python = ">=3.9"
+
+[project.optional-dependencies]
+intel = ["scikit-learn-intelex",]
 
 [tool.pytest.ini_options]
 addopts = "-x"
