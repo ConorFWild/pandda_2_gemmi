@@ -47,7 +47,7 @@ def get_rmsd_real_space(scale, reference_values, y, r, grid_mask, original_refle
         new_reflections.add_column(column.label, column.type)
 
     # Update
-    new_reflections.set_data(original_reflections_table.to_numpy())
+    new_reflections.set_data(original_reflections_table.to_numpy().astype(np.float32))
 
     # Update resolution
     new_reflections.update_reso()
@@ -221,7 +221,7 @@ class SmoothReflections:
             new_reflections.add_column(column.label, column.type)
 
         # Update
-        new_reflections.set_data(original_reflections_table.to_numpy())
+        new_reflections.set_data(original_reflections_table.to_numpy().astype(np.float32))
 
         # Update resolution
         new_reflections.update_reso()
@@ -343,7 +343,7 @@ class SmoothReflections:
             new_reflections.add_column(column.label, column.type)
 
         # Update
-        new_reflections.set_data(original_reflections_table.to_numpy())
+        new_reflections.set_data(original_reflections_table.to_numpy().astype(np.float32))
 
         # Update resolution
         new_reflections.update_reso()

@@ -116,7 +116,7 @@ def grid_to_mtz(grid, data):
     mtz.add_dataset('unknown')
     mtz.add_column('FWT', 'F')
     mtz.add_column('PHWT', 'P')
-    mtz.set_data(data)
+    mtz.set_data(data.astype(np.float32))
 
     return mtz
 
