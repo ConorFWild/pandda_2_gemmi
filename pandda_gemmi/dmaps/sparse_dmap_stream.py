@@ -154,9 +154,8 @@ class SparseDMapStream:
         # print(com_reference_list)
 
         begin_interpolate = time.time()
-        gemmi.interpolate_points_multiple(
+        aligned_xmap.interpolate_grid_flexible(
             xmap,
-            aligned_xmap,
             points_list,
             positions_list,
             transform_list,

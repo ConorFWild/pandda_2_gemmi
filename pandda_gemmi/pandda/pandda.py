@@ -1,11 +1,13 @@
 import os
 import time
 import inspect
+try:
+    from sklearnex import patch_sklearn
+    patch_sklearn()
+except ImportError:
+    print('No sklearn-express available!')
 
-from sklearnex import patch_sklearn
 import gdown
-
-patch_sklearn()
 
 import numpy as np
 import gemmi

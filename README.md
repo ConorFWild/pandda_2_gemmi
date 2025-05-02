@@ -59,13 +59,24 @@ First of all you will need to install `ccp4/7.0.067`. This is in order to access
 
 Once you have installed CCP4, it is recommended that you install PanDDA 2 in its own python 3.9 anaconda environment. If you do not have an Anaconda environment you can install one by following the instructions at https://www.anaconda.com/products/distribution#linux. 
 
+With Anaconda an environment can be setup like so:
+
+```bash
+conda create -n pandda2 python=3.9
+conda install llvm python-devtools # If building gemmi from source
+```
+
 Then:
 
 ```bash
 git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi 
 python -m pip install -e . 
-python -m pip install ./_gemmi  # Install the custom version of gemmi
+
+git clone https://github.com/ConorFWild/gemmi.git
+cd gemmi
+git checkout flexible_interpolation
+python -m pip install .  # Install the custom version of gemmi
                                 # This step will likely be removed in
                                 # Future versions
 ```

@@ -588,8 +588,7 @@ def get_interpolated_values_c(
     vals = np.zeros(n, dtype=np.float32)
 
     # vals_list = \
-    gemmi.interpolate_pos_array(
-        grid,
+    grid.interpolate_position_array(
         transformed_structure_array.astype(np.float32),
         vals
     )
