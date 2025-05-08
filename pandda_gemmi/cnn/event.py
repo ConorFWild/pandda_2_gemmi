@@ -143,15 +143,16 @@ class EventScorer:
                     [
                         zmap_sample * high_z_mask,
                         xmap_sample * high_z_mask,
-                    ]
+                    ],
+            dtype=np.float32
                 )[np.newaxis,:]
         mol_array = np.stack(
                 [
                     ligand_mask_sample
-                ]
+                ],
+            dtype=np.float32
             )[np.newaxis,:]
-        print(torch.from_numpy(map_array).dtype)
-        print(torch.from_numpy(map_array).dtype)
+
         return self.model.eval().float()(
             torch.from_numpy(map_array),
             torch.from_numpy(mol_array)
