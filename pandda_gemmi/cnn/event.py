@@ -109,7 +109,7 @@ class LitEventScoring(lt.LightningModule):
 class EventScorer:
 
     def __init__(self, model, config):
-        self.model = model
+        self.model = model.float().eval()
         self.config = config
 
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
@@ -150,7 +150,7 @@ class EventScorer:
                     ligand_mask_sample
                 ]
             )[np.newaxis,:]
-        return self.model.float().eval()(
+        return self.model(
             torch.from_numpy(map_array),
             torch.from_numpy(mol_array)
         ), map_array, mol_array
