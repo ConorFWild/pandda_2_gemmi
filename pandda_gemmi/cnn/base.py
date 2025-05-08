@@ -96,6 +96,7 @@ def load_model_from_checkpoint(path, model):
     # From https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
     ckpt = torch.load(path, map_location='cpu')
     pretrained_dict = ckpt['state_dict']
+    print(ckpt)
     model_dict = model.state_dict()
     # 1. filter out unnecessary keys
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
