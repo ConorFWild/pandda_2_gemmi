@@ -94,7 +94,7 @@ class LitBuildScoring(lt.LightningModule):
 class BuildScorer:
 
     def __init__(self, model, config):
-        self.model = model
+        self.model = model.eval().float()
         self.config = config
 
     def __call__(self, autobuild: StructureI, zmap: GridI, xmap: GridI, ) -> float:
@@ -141,4 +141,4 @@ class BuildScorer:
             torch.from_numpy(
                 arr
             )
-        ), arr
+        ).detach().numpy(), arr
