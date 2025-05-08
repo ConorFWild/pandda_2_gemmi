@@ -298,7 +298,7 @@ def pandda(args: PanDDAArgs):
             gdown.download(id='17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR',
                            output=f)
     with open(build_config_path, 'r') as f:
-        build_model_config = yaml.safe_load(build_config_path)
+        build_model_config = yaml.safe_load(f)
     score_build_model = load_model_from_checkpoint(
         build_model_path,
         LitBuildScoring(build_model_config),
