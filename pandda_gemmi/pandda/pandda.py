@@ -282,7 +282,7 @@ def pandda(args: PanDDAArgs):
     score_event_model = load_model_from_checkpoint(
         event_model_path,
         LitEventScoring(event_model_config),
-    ).eval()
+    ).float().eval()
     score_event = EventScorer(score_event_model, event_model_config)
 
     # Get the method for scoring
@@ -302,7 +302,7 @@ def pandda(args: PanDDAArgs):
     score_build_model = load_model_from_checkpoint(
         build_model_path,
         LitBuildScoring(build_model_config),
-    ).eval()
+    ).float().eval()
     score_build = BuildScorer(score_build_model, build_model_config)
     score_build_ref = processor.put(score_build)
 
