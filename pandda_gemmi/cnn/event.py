@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+from skimage.segmentation import expand_labels
 import gemmi
 import torch
 from torch import nn
@@ -11,7 +12,7 @@ import pytorch_lightning as lt
 from .interfaces import *
 from .base import transform_from_arrays, SampleFrame, grid_from_template, get_ligand_mask, get_structure_array, copy_map, _get_ed_mask_float
 from .constants import SAMPLE_SIZE, SAMPLE_SPACING
-from .resnet import resnet10
+from .resnet import resnet10, _resnet, BasicBlock
 
 
 def get_sample_frame_from_event(event: EventI, sample_size, sample_spacing) -> SampleFrameI:
@@ -45,75 +46,103 @@ def mask_xmap_radial(xmap: GridI, x: float, y: float, z: float, radius: float = 
     return xmap
 
 
+# class LitEventScoring(lt.LightningModule):
+#     def __init__(self, ):
+#         super().__init__()
+#         self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
+#         self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
+#         self.fc = nn.Sequential(
+#             nn.Linear(512, 2),
+#         )
+#
+#     def forward(self, z, m, ):
+#         mol_encoding = self.mol_encoder(m)
+#         z_encoding = self.z_encoder(z)
+#
+#         full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+#
+#         score = F.softmax(self.fc(full_encoding))
+#
+#         print(score)
+#
+#         return float(score[0][1])
+
+
 class LitEventScoring(lt.LightningModule):
-    def __init__(self, ):
+    def __init__(self, config):
         super().__init__()
-        self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
-        self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
+
+        self.z_encoder = _resnet(
+            'resnet10',
+            BasicBlock,
+            [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
+            False, False,
+            num_classes=3, num_input=2, headless=True, drop_rate=config['drop_rate'], config=config).float()
+        self.mol_encoder = _resnet(
+            'resnet10',
+            BasicBlock,
+            [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
+            False, False,
+            num_classes=2, num_input=1, headless=True, drop_rate=config['drop_rate'], config=config).float()
+
         self.fc = nn.Sequential(
-            nn.Linear(512, 2),
+            nn.Linear(config['planes_5'] , 3),
+
         )
+        self.train_annotations = []
+        self.test_annotations = []
+
+        # self.output = output_dir
+        self.lr = config['lr']
+        self.wd = config['wd']
+        self.batch_size = config['batch_size']
 
     def forward(self, z, m, ):
         mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
-
-        full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
-
+        full_encoding = z_encoding * mol_encoding
         score = F.softmax(self.fc(full_encoding))
 
-        print(score)
-
-        return float(score[0][1])
-
+        return score
 
 
 class EventScorer:
 
-    def __init__(self, model):
+    def __init__(self, model, config):
         self.model = model
+        self.config = config
 
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
         # Get the sample frame
-        sample_frame = get_sample_frame_from_event(event, SAMPLE_SIZE, SAMPLE_SPACING)
-        # print(f'\t\t{sample_frame.transform.vec.tolist()}')
-        # print(f'\t\t{sample_frame.transform.mat.tolist()}')
-        # print(get_structure_array(ligand_conformation))
+        sample_frame = get_sample_frame_from_event(
+            event,
+            self.config['sample_size'],
+            self.config['sample_spacing']
+        )
 
         # Cut the xmap
-        x, y, z = event.centroid
-        # cut_xmap = mask_xmap_radial(copy_map(xmap), x, y, z)
-        # xmap_array = np.array(cut_xmap)
-        # print(f'Cut xmap sum: {np.sum(xmap_array)} {np.min(xmap_array)} {np.max(xmap_array)} {np.mean(xmap_array)} {np.std(xmap_array)}')
-
-        mask = _get_ed_mask_float()
+        # mask = _get_ed_mask_float()
 
         # Get the xmap sample
-        xmap_sample = sample_frame(xmap, scale=True)
-        # print(f'Xmap sample: {np.sum(xmap_sample)} {np.min(xmap_sample)} {np.max(xmap_sample)} {np.mean(xmap_sample)} {np.std(xmap_sample)}')
-
+        xmap_sample = sample_frame(xmap, scale=False)
 
         # Get the zmap sample
-        zmap_sample = sample_frame(zmap, scale=True)
-        # print(f'zmap_sample: {np.sum(zmap_sample)} {np.min(zmap_sample)} {np.max(zmap_sample)} {np.mean(zmap_sample)} {np.std(zmap_sample)}')
-
+        zmap_sample = sample_frame(zmap, scale=False)
 
         # Get the ligand mask sample
         ligand_mask = get_ligand_mask(ligand_conformation, zmap)
         ligand_mask_sample = sample_frame(ligand_mask, scale=False)
-        # print(f'ligand_mask_sample: {np.sum(ligand_mask_sample)} {np.min(ligand_mask_sample)} {np.max(ligand_mask_sample)} {np.mean(ligand_mask_sample)} {np.std(ligand_mask_sample)}')
 
-
-        # Get the ligand mask
-        # ligand_mask_sample_bin = np.copy(ligand_mask_sample)
-        # ligand_mask_sample_bin[ligand_mask_sample_bin <= 0.0] = 0.0
-        # ligand_mask_sample_bin[ligand_mask_sample_bin > 0.0] = 1.0
+        #
+        high_z_mask = (zmap_sample > self.config['z_cutoff']).astype(int)
+        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.config['z_mask_radius'] / 0.5)
+        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
         # Run the model
         map_array = np.stack(
                     [
-                        zmap_sample,
-                        xmap_sample * mask,
+                        zmap_sample * high_z_mask,
+                        xmap_sample * high_z_mask,
                     ]
                 )[np.newaxis,:]
         mol_array = np.stack(

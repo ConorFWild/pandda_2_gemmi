@@ -8,6 +8,7 @@ except ImportError:
     print('No sklearn-express available!')
 
 import gdown
+import yaml
 
 import numpy as np
 import gemmi
@@ -268,6 +269,7 @@ def pandda(args: PanDDAArgs):
 
     # Get the method for scoring events
     event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt"
+    event_config_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event_config.yaml"
     if not event_model_path.exists():
         print(f'No event model at {event_model_path}. Downloading event model...')
         with open(event_model_path, 'wb') as f:
@@ -275,14 +277,18 @@ def pandda(args: PanDDAArgs):
             #                f)
             gdown.download(id='1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV',
                            output=f)
+    with open(event_config_path, 'r') as f:
+        event_model_config = yaml.safe_load(f)
     score_event_model = load_model_from_checkpoint(
         event_model_path,
-        LitEventScoring(),
+        LitEventScoring(event_model_config),
     ).eval()
-    score_event = EventScorer(score_event_model)
+    score_event = EventScorer(score_event_model, event_model_config)
 
     # Get the method for scoring
     build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
+    build_config_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build_config.yaml"
+
     if not build_model_path.exists():
         print(f'No build model at {build_model_path}.Downloading build model...')
         with open(build_model_path, 'wb') as f:
@@ -291,11 +297,13 @@ def pandda(args: PanDDAArgs):
             #                )
             gdown.download(id='17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR',
                            output=f)
+    with open(build_config_path, 'r') as f:
+        build_model_config = yaml.safe_load(build_config_path)
     score_build_model = load_model_from_checkpoint(
         build_model_path,
-        LitBuildScoring(),
+        LitBuildScoring(build_model_config),
     ).eval()
-    score_build = BuildScorer(score_build_model)
+    score_build = BuildScorer(score_build_model, build_model_config)
     score_build_ref = processor.put(score_build)
 
     # Get the method for processing the statistical models
