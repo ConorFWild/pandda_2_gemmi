@@ -150,6 +150,8 @@ class EventScorer:
                     ligand_mask_sample
                 ]
             )[np.newaxis,:]
+        print(torch.from_numpy(map_array).dtype)
+        print(torch.from_numpy(map_array).dtype)
         return self.model.eval().float()(
             torch.from_numpy(map_array),
             torch.from_numpy(mol_array)
