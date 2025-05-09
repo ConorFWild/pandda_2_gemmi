@@ -131,12 +131,12 @@ class BuildScorer:
                     ]
                 )[np.newaxis,:]
 
-        print(
-            f'Build Score Zmap: {round(np.min(arr[0][0]), 3)} {round(np.median(arr[0][0]), 3)} {round(np.max(arr[0][0]), 3)} {round(np.sum(arr[0][0]), 3)}\n'
-            f'Build Score xmap: {round(np.min(arr[0][1]), 3)} {round(np.median(arr[0][1]), 3)} {round(np.max(arr[0][1]), 3)} {round(np.sum(arr[0][1]), 3)}\n'
-            f'Build Score mask: {round(np.min(arr[0][2]), 3)} {round(np.median(arr[0][2]), 3)} {round(np.max(arr[0][2]), 3)} {round(np.sum(arr[0][2]), 3)}\n'
-
-        )
+        # print(
+        #     f'Build Score Zmap: {round(np.min(arr[0][0]), 3)} {round(np.median(arr[0][0]), 3)} {round(np.max(arr[0][0]), 3)} {round(np.sum(arr[0][0]), 3)}\n'
+        #     f'Build Score xmap: {round(np.min(arr[0][1]), 3)} {round(np.median(arr[0][1]), 3)} {round(np.max(arr[0][1]), 3)} {round(np.sum(arr[0][1]), 3)}\n'
+        #     f'Build Score mask: {round(np.min(arr[0][2]), 3)} {round(np.median(arr[0][2]), 3)} {round(np.max(arr[0][2]), 3)} {round(np.sum(arr[0][2]), 3)}\n'
+        #
+        # )
         return self.model(
             torch.from_numpy(
                 arr

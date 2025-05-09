@@ -186,7 +186,6 @@ class HeirarchicalSiteModel:
                 in centroids.values()
             ]
         )
-        print(centroid_array)
         clusters = fclusterdata(
             centroid_array,
             t=self.t,

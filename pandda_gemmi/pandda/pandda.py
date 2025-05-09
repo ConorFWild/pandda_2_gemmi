@@ -120,7 +120,6 @@ class ProcessModel:
             homogenized_dataset_dmap_array,
             characterization_set_dmaps_array
         )
-        print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
 
         mean_grid = reference_frame.unmask(SparseDMap(mean))
         z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
@@ -172,7 +171,7 @@ class ProcessModel:
                 )
                 event.score = event_score
                 _x, _y, _z, = event.centroid
-                print(f'\t {model_number}_{event_id}_{lid}: ({_x}, {_y}, {_z}): {round(event_score, 5)}')
+                # print(f'\t {model_number}_{event_id}_{lid}: ({_x}, {_y}, {_z}): {round(event_score, 5)}')
 
                 # dmaps = {
                 #     'zmap': map_array[0][0],
@@ -206,7 +205,6 @@ class ProcessModel:
         ]:
             events = filter(events)
         # TODO: Replace with logger printing
-        print(f"CNN Filtered {num_events} down to {len(events)}")
         num_score_filtered_events = len(events)
 
         # Return None if there are no events after post-scoring filters

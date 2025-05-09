@@ -30,13 +30,11 @@ class SparseDMapStream:
         for transform in self.transforms:
             dataset = transform(dataset)
         finish_transform = time.time()
-        print(f"\tTransform: {finish_transform-begin_transform}")
 
 
         begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
         finish_fft = time.time()
-        print(f"\tFFT: {finish_fft-begin_fft}")
 
         aligned_xmap = SparseDMapStream.align_xmap(xmap, self.dframe, alignment)
 
