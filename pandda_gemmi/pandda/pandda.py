@@ -171,7 +171,6 @@ class ProcessModel:
                     raw_xmap_grid
                 )
                 event.score = event_score
-                print(event.score)
                 _x, _y, _z, = event.centroid
                 print(f'\t {model_number}_{event_id}_{lid}: ({_x}, {_y}, {_z}): {round(event_score, 5)}')
 
