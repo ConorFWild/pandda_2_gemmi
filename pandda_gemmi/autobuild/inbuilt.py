@@ -206,7 +206,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
                         on += 1
                 # elif on == 3:
                 #     sulfonates[sfn]["O3"] = atom_idx
-    print(f"Matches to sulfonates: {matches}")
+    # print(f"Matches to sulfonates: {matches}")
 
     # atoms_to_charge = [
     #     sulfonate["O3"] for sulfonate in sulfonates.values()
@@ -217,7 +217,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
                       ] + [
                           (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
                       ]
-    print(f"Bonds to double: {bonds_to_double}")
+    # print(f"Bonds to double: {bonds_to_double}")
 
     # Replace the bonds and update O3's charge
     new_editable_mol = Chem.EditableMol(Chem.Mol())
@@ -820,8 +820,8 @@ def score_conformer(
                         negative_structure_positions.append([pos.x, pos.y, pos.z])
     negative_structure_array = np.array(negative_structure_positions, dtype=np.float32)
 
-    print(f'Probe shape: {structure_array.shape} {np.mean(structure_array, axis=0)}')
-    print(f'Negative Probe shape: {negative_structure_array.shape} {np.mean(negative_structure_array, axis=0)}')
+    # print(f'Probe shape: {structure_array.shape} {np.mean(structure_array, axis=0)}')
+    # print(f'Negative Probe shape: {negative_structure_array.shape} {np.mean(negative_structure_array, axis=0)}')
 
     # Optimise
 
@@ -925,7 +925,7 @@ def score_conformer(
         scores.append(-score)
 
         centroid = get_structure_mean(optimised_structure)
-        print(f'Optimization {j} Score {round(float(res.fun), 3)} Centroid {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}')
+        # print(f'Optimization {j} Score {round(float(res.fun), 3)} Centroid {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}')
     time_finish_score = time.time()
     # print(f"\t\t\tScored conformer in {time_finish_score-time_begin_score} seconds, of which {total_evolve_time} evolving!")
 
@@ -1398,9 +1398,9 @@ def get_local_signal_dencalc_optimize_bdc(
     masked_xmap_vals = xmap_array[inner_mask_grid_array >= 2]
     masked_mean_map_vals = mean_map_array[inner_mask_grid_array >= 2]
     masked_calc_vals = calc_grid_array[inner_mask_grid_array >= 2]
-    print(f'masked_xmap_vals: {masked_xmap_vals}')
-    print(f'masked_mean_map_vals: {masked_mean_map_vals}')
-    print(f'masked_calc_vals: {masked_calc_vals}')
+    # print(f'masked_xmap_vals: {masked_xmap_vals}')
+    # print(f'masked_mean_map_vals: {masked_mean_map_vals}')
+    # print(f'masked_calc_vals: {masked_calc_vals}')
 
     # res = optimize.minimize(
     #     lambda _bdc: get_correlation(_bdc, masked_xmap_vals, masked_mean_map_vals, masked_calc_vals),
@@ -1409,13 +1409,13 @@ def get_local_signal_dencalc_optimize_bdc(
     #     # tol=0.1
     # )
 
-    print(f'Correlations')
-    print(get_correlation(0.0, masked_xmap_vals,
-                          masked_mean_map_vals,
-                          masked_calc_vals, ))
-    print(get_correlation(0.5, masked_xmap_vals,
-                          masked_mean_map_vals,
-                          masked_calc_vals, ))
+    # print(f'Correlations')
+    # print(get_correlation(0.0, masked_xmap_vals,
+    #                       masked_mean_map_vals,
+    #                       masked_calc_vals, ))
+    # print(get_correlation(0.5, masked_xmap_vals,
+    #                       masked_mean_map_vals,
+    #                       masked_calc_vals, ))
 
     res = optimize.differential_evolution(
         lambda _bdc: get_correlation(
@@ -1448,7 +1448,7 @@ def get_local_signal_dencalc_optimize_bdc(
 
     # masked_event_map_vals = (masked_xmap_vals - (bdc * masked_mean_map_vals)) / (1 - bdc)
 
-    print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
+    # print(f"Refined to bdc: {bdc} and correlation: {corr} on set of size: {masked_xmap_vals.size}")
 
     return corr, bdc  # * num_atoms
 
@@ -1585,7 +1585,7 @@ def autobuild_conformer(
     time_begin_autobuild = time.time()
 
     # event_map_grid = reference_frame.unmask(SparseDMap((masked_dtag_array - (event_bdc*masked_mean_array)) / (1-event_bdc)))
-    print(f'z map stats: {np.min(z_array)} {np.max(z_array)} {np.median(z_array)}')
+    # print(f'z map stats: {np.min(z_array)} {np.max(z_array)} {np.median(z_array)}')
 
     event_map_array = (masked_dtag_array - (event_bdc * masked_mean_array)) / (1 - event_bdc)
     normalize_event_map_array = (event_map_array - np.mean(event_map_array) / np.std(event_map_array))
@@ -1706,7 +1706,7 @@ def autobuild_conformer(
 
 
     x, y, z = centroid
-    print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
+    # print(f'\t\t{round(x, 2)},{round(y, 2)},{round(z, 2)} : {score}')
 
     time_finish_scoring = time.time()
 
@@ -1737,8 +1737,8 @@ def autobuild_conformer(
         }
     }
     time_finish_autobuild = time.time()
-    print(
-        f"Autobuilt: {round(time_finish_autobuild - time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring - time_begin_scoring, 2)}. Built: {round(time_finish_score_conf - time_begin_score_conf, 2)}. Optimized BDC: {round((time_finish_optimize_bdc - time_begin_optimize_bdc))}")
+    # print(
+    #     f"Autobuilt: {round(time_finish_autobuild - time_begin_autobuild, 2)}. Scored: {round(time_finish_scoring - time_begin_scoring, 2)}. Built: {round(time_finish_score_conf - time_begin_score_conf, 2)}. Optimized BDC: {round((time_finish_optimize_bdc - time_begin_optimize_bdc))}")
 
     # Return results
     return log_result_dict
