@@ -214,7 +214,7 @@ class ProcessModel:
         # Renumber the events
         events = {j + 1: event for j, event in enumerate(events.values())}
 
-        print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
+        # print(f'z map stats: {np.min(z)} {np.max(z)} {np.median(z)} {np.sum(np.isnan(z))}')
 
         meta = {
             'Number of Initial Events': num_initial_events,
@@ -433,7 +433,7 @@ def pandda(args: PanDDAArgs):
         alignment_refs = {_dtag: processor.put(alignments[_dtag]) for _dtag in comparator_datasets}
         time_finish_get_alignments = time.time()
         # TODO: Log properly
-        print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
+        # print(f"\t\tGot alignments in: {round(time_finish_get_alignments - time_begin_get_alignments, 2)}")
 
         # Get the reference frame and save it to the object store
         time_begin_get_frame = time.time()
@@ -441,7 +441,7 @@ def pandda(args: PanDDAArgs):
         reference_frame_ref = processor.put(reference_frame)
         time_finish_get_frame = time.time()
         # TODO: Log properly
-        print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
+        # print(f"\t\tGot reference frame in: {round(time_finish_get_frame - time_begin_get_frame, 2)}")
 
         # Get the transforms to apply to the dataset before locally aligning and save them to the object store
         transforms = [
@@ -470,7 +470,7 @@ def pandda(args: PanDDAArgs):
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         time_finish_get_dmaps = time.time()
         # TODO: log properly
-        print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
+        # print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
         dtag_array = np.array([_dtag for _dtag in comparator_datasets])
 
         # Get the dataset dmap, both processed and unprocessed
@@ -515,7 +515,7 @@ def pandda(args: PanDDAArgs):
             PointwiseMAD(),
             process_all=False
         )
-        print(f"Models to process are {models_to_process} out of {[x for x in characterization_sets]}")
+        # print(f"Models to process are {models_to_process} out of {[x for x in characterization_sets]}")
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
@@ -550,13 +550,13 @@ def pandda(args: PanDDAArgs):
                 model_events[model_number] = result[0]
             model_means[model_number] = result[1]
             model_zs[model_number] = result[2]
-            print(f'z map stats: {np.min(result[2])} {np.max(result[2])} {np.median(result[2])}')
+            # print(f'z map stats: {np.min(result[2])} {np.max(result[2])} {np.median(result[2])}')
             model_stds[model_number] = result[3]
             model_metas[model_number] = result[4]
 
         time_finish_process_models = time.time()
         # TODO: Log properly
-        print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
+        # print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
 
         # Build the events
         time_begin_autobuild = time.time()
@@ -612,7 +612,7 @@ def pandda(args: PanDDAArgs):
             os.mkdir(out_dir)
 
         # Perform autobuilds of events
-        print(f"Have {len(builds_to_perform)} builds to perform!")
+        # print(f"Have {len(builds_to_perform)} builds to perform!")
         builds = processor.process_dict(
             {
                 _model_event_id: Partial(autobuild_conformer).paramaterise(
@@ -641,7 +641,7 @@ def pandda(args: PanDDAArgs):
         )
         time_finish_autobuild = time.time()
         # TODO: Log properly
-        print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
+        # print(f"\t\tAutobuilt in {time_finish_autobuild - time_begin_autobuild}")
 
         # build_scores = score_builds(
         #     score_build,
@@ -655,7 +655,7 @@ def pandda(args: PanDDAArgs):
         for build_key, result in builds.items():
             for path, build in result.items():
                 model_number, event_number, ligand_key, conformer_number = build_key
-                print([x for x in build.keys()])
+                # print([x for x in build.keys()])
                 dmaps = {
                     'zmap': build['arr'][0][0],
                     'xmap': build['arr'][0][1],
@@ -728,8 +728,8 @@ def pandda(args: PanDDAArgs):
                 new_centroid = [round(float(x), 2) for x in event.build.centroid]
                 scores = [round(float(event.score), 2), round(float(event.build.score), 2)]
                 bdcs = [round(float(event.bdc), 2), round(float(event.build.bdc), 2)]
-                print(
-                    f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {Path(event.build.build_path).name}")
+                # print(
+                #     f"{model_number} : {event_number} : {old_centroid} : {new_centroid} : {scores} : {bdcs} : {Path(event.build.build_path).name}")
                 event.centroid = event.build.centroid
                 event.bdc = event.build.bdc
 
@@ -750,8 +750,8 @@ def pandda(args: PanDDAArgs):
                 j_0 = len(update_model_events[model_number])
                 update_model_events[model_number] = filter(update_model_events[model_number])
                 # TODO: Log properly
-                print(
-                    f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of filter {filter}")
+                # print(
+                #     f"\t\t\tModel {model_number} when from {j_0} to {len(update_model_events[model_number])} events of filter {filter}")
 
         # Filter models by whether they have events and skip if no models remain
         model_events = {model_number: events for model_number, events in update_model_events.items() if len(events) > 0}
@@ -785,11 +785,11 @@ def pandda(args: PanDDAArgs):
 
         # Output event maps and model maps
         time_begin_output_maps = time.time()
-        print(
-            f'z map stats: {np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])} {np.sum(np.isnan(model_zs[selected_model_num]))}')
+        # print(
+        #     f'z map stats: {np.min(model_zs[selected_model_num])} {np.max(model_zs[selected_model_num])} {np.median(model_zs[selected_model_num])} {np.sum(np.isnan(model_zs[selected_model_num]))}')
 
-        for event in top_selected_model_events.values():
-            print(f'{event.bdc} : {event.build.bdc}')
+        # for event in top_selected_model_events.values():
+        #     print(f'{event.bdc} : {event.build.bdc}')
         output_maps(
             dtag,
             fs,
@@ -806,11 +806,11 @@ def pandda(args: PanDDAArgs):
         )
         time_finish_output_maps = time.time()
         # TODO: Log properly
-        print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
+        # print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
 
         time_finish_process_dataset = time.time()
         # TODO: Log properly
-        print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
+        # print(f"\tProcessed dataset in {round(time_finish_process_dataset - time_begin_process_dataset, 2)}")
 
         # Serialize information on dataset processing to a human readable yaml file
         serialize.processed_dataset(
@@ -845,8 +845,8 @@ def pandda(args: PanDDAArgs):
 
     time_finish_process_datasets = time.time()
     # TODO: Log properly
-    print(
-        f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
+    # print(
+    #     f"Processed {len(datasets)} datasets in {round(time_finish_process_datasets - time_begin_process_datasets, 2)}")
 
     # Autobuild the best scoring event for each dataset
     console.start_autobuilding()
@@ -947,9 +947,9 @@ def pandda(args: PanDDAArgs):
         # ResidueSiteModel()
     )
     # TODO: Log properly
-    print("Sites")
-    for site_id, site in sites.items():
-        print(f"{site_id} : {site.centroid} : {site.event_ids}")
+    # print("Sites")
+    # for site_id, site in sites.items():
+    #     print(f"{site_id} : {site.centroid} : {site.event_ids}")
 
     # Rank the events for display in PanDDA inspect
     ranking = rank_events(
@@ -961,8 +961,8 @@ def pandda(args: PanDDAArgs):
         # RankHighBuildScore()
         # RankHighEventBuildScore()
     )
-    for event_id in ranking:
-        print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")
+    # for event_id in ranking:
+    #     print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")
 
     # Output the event and site tables
     output_tables(datasets, pandda_events, ranking, sites, fs)
