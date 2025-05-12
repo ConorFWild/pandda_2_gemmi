@@ -46,7 +46,7 @@ If you uncertain about the correctness of the results, then a GitHub issue is ap
 
 Once you have installed PanDDA 2 in a conda environment, it can be run from that enviroment with autobuilding and automated ground state identification with the following:
 
-1. Install ccp4/7.0.067 and PanDDA 2
+1. A. Install ccp4/7.0.067 and PanDDA 2 OR B. Install PanDDA 2 and PanDDA 2 Inspect (beta)
 2. Prepare your data for PanDDA 2
 3. Run `pandda2.analyse` on your data to generate event maps
 4. Run `pandda.inspect` to identify and complete fragment bound models
@@ -54,8 +54,6 @@ Once you have installed PanDDA 2 in a conda environment, it can be run from that
 6. Run `pandda.export` to prepare your results for refinement
 
 ## 1. Installation
-
-First of all you will need to install `ccp4/7.0.067`. This is in order to access the functionality of `pandda.inspect` and `pandda.export`, which do not function correctly in more recent versions.
 
 Once you have installed CCP4, it is recommended that you install PanDDA 2 in its own python 3.9 anaconda environment. If you do not have an Anaconda environment you can install one by following the instructions at https://www.anaconda.com/products/distribution#linux. 
 
@@ -85,9 +83,20 @@ The first time you run PanDDA 2 it will try to download two models of approximat
 
 Installing PanDDA 2 this way will add various scripts to your path, but only while you are in this anaconda environment.
 
+Then:
+
+### 1.A. Install CCP4
+
+You will need to install `ccp4/7.0.067`. This is in order to access the functionality of `pandda.inspect` and `pandda.export`, which do not function correctly in more recent versions.
+
+### 1.B. Install PanDDA 2 Inspect (beta)
+
+There is now a modern Moorhen based `pandda.inspect`, which can be installed by following the instructions at:
+https://github.com/ConorFWild/PanDDA2Inspect
+
 ## 2. Preparing Data for PanDDA 2
 
-The recommended pipeline with which to prepare PanDDA 2 input data is Dimple, which you can read more about at: https://ccp4.github.io/dimple/. The reccomended program for generating restraints is AceDRG (CCP4) or Grade (Global Phasing Ltd.).
+The recommended pipeline with which to prepare PanDDA 2 input data is Dimple, which you can read more about at: https://ccp4.github.io/dimple/. The reccomended program for generating restraints is Grade (Global Phasing Ltd.), or AceDRG (CCP4) if you do not have access to Grade.
 
 The input directory for PanDDA must have the following format:
 

@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 import inspect
 try:
@@ -256,6 +257,7 @@ def pandda(args: PanDDAArgs):
 
     # Get the processor to handle the dispatch of functions to multiple cores and the cache of parallel
     # processed objects
+    # TODO: uses ray not mulyiprocessing_spawn
     console.start_initialise_multiprocessor()
     processor: ProcessorInterface = ProcessLocalRay(args.local_cpus)
     console.print_initialized_local_processor(args)
@@ -804,6 +806,14 @@ def pandda(args: PanDDAArgs):
             model_stds,
             model_zs
         )
+
+        # Canonicalize paths to best autobuild for each event
+        for event_id, event in top_selected_model_events.items():
+            shutil.copy(
+                event.build.build_path,
+                fs.output.processed_datasets[dtag] / f'{dtag}_event_{str(event_id[1])}_best_autobuild.pdb'
+            )
+
         time_finish_output_maps = time.time()
         # TODO: Log properly
         # print(f"\t\tOutput maps in: {round(time_finish_output_maps - time_begin_output_maps, 2)}")
