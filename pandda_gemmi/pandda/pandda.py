@@ -270,13 +270,17 @@ def pandda(args: PanDDAArgs):
     # Get the method for scoring events
     event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event.ckpt"
     event_config_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event_config.yaml"
-    if not event_model_path.exists():
+    if not (event_model_path.exists() & event_config_path.exists()):
         print(f'No event model at {event_model_path}. Downloading event model...')
         with open(event_model_path, 'wb') as f:
             # gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
             #                f)
             gdown.download(id='1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV',
                            output=f)
+        with open(event_config_path, 'wb') as f:
+            gdown.download(id='1qyPqPylOguzXmt6XSFaXCKrnvb8gZ8E2',
+                           output=f)
+
     with open(event_config_path, 'r') as f:
         event_model_config = yaml.safe_load(f)
     score_event_model = load_model_from_checkpoint(
@@ -289,13 +293,16 @@ def pandda(args: PanDDAArgs):
     build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
     build_config_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build_config.yaml"
 
-    if not build_model_path.exists():
+    if not (build_model_path.exists() & build_config_path.exists()):
         print(f'No build model at {build_model_path}.Downloading build model...')
         with open(build_model_path, 'wb') as f:
             # gdown.download('https://drive.google.com/file/d/17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR/view?usp=sharing',
             #                f
             #                )
             gdown.download(id='17ow_rxuEvi0LitMP_jTWGMSDt-FfJCkR',
+                           output=f)
+        with open(build_config_path, 'wb') as f:
+            gdown.download(id='1HEXHZ6kfh92lQoWBHalGbUJ-iCsOIkFo',
                            output=f)
     with open(build_config_path, 'r') as f:
         build_model_config = yaml.safe_load(f)

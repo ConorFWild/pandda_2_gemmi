@@ -1,6 +1,58 @@
-# Debugging PanDDA 2
+# PanDDA 2 User Guide
 
-## Minimum Requirements For Good PanDDA Performance
+ - [How PanDDA 2 Works](#how-pandda-2-works)
+ - [Using PanDDA 2](#using-pandda-2)
+ - [FAQ And Debugging](#faqs-and-debugging)
+
+
+### How PanDDA 2 Works
+
+PanDDA 2 differs from PanDDA 1 in two major ways: 
+
+1. Firstly, it attempts to identify which sets of datasets should be used to produce a statistical model which has the optimal contrast (to each test dataset individually). This allows it to handle subtle heterogeneity between datasets. 
+
+2. Secondly it attempts to autobuild the events returned, and then rank the events based on the quality of the model of the fragment that could be constructed. This allows improved rankings of events.
+
+### How PanDDA 2 Characterizes Ground States
+
+PanDDA 2 differs significantly from PanDDA 1 in how it detects outlying density. 
+
+ - **PanDDA 1**: Establishes the expected electron density around a single reference protein model from the first N datasets above a set of resolution cutoffs
+
+ - **PanDDA 2**: Establishes several difference possibilities for the expected electron density around each dataset based on a several sets of similar datasets above the resolution of that dataset
+
+The difference in how the ground state is determined has significant concequences:
+1. PanDDA 2 generates FAR more events, at least before filters, because it evaluates multiple statistical models, some of which will generate more events than PanDDA 1's statistical model because they describe the density poorly.
+2. PanDDA 2 able to detect extremely weak binding and handle hetrogenous crystal systems, but also means that it is reliant on good filtering of events in order to run quickly and present a reasonable amount of data to the user.
+3. It does not make sense to talk of a "reference" dataset in PanDDA 2: each dataset is effectively its own reference, in PanDDA 1 terminology.
+
+
+### Statistical Model Selection
+
+Currently PanDDA 2 only chooses one ground state to progress to event map generation and autobuilding. This is done by fitting several conformations of the expected fragment into each event from each statistical by differential evolution. 
+
+The ground state which has the best fragment fit is then selected for progression to event map generation and autobuilding.
+
+### Autobuilding
+
+PanDDA 2 autobuilds the events of each dataset. This is done with a custom method that uses differential evolution to fit multiple conformations of the fragment to outlying density.
+
+### Autobuild Selection
+
+Current limitations with the interaction between `pandda.inspect` and PanDDA 2 mean that it is only possible to show one autobuild in the GUI. 
+
+Therefore, the highest scoring autobuild by build score from any event in each dataset is selected and included in the initial model `pandda.inspect` shows the user. 
+
+This has the effect that users may open apparently good hit density with no autobuild present, if another hit which is better fit by the autobuilding is present in the same dataset.
+
+
+
+
+
+
+## Using PanDDA 2
+
+### Minimum Requirements For Good PanDDA Performance
 
 PanDDA 2 is able to find low occupancy ligands by combining information from multiple crystallographic datasets. As such having a set of near-homogenous crystal structures is required. Although sufficient homogeneity for good PanDDA 2 results varies, good guidelines are:
 
@@ -15,9 +67,9 @@ In particular, for good results the minimum requirements are:
 2. For each binding site, at least 30 datasets that do not contain ligands bound there. This is generally not possible to guarantee ahead of PanDDA analysis, however if the total number of datasets is greater than 100, with the typical fragment screen hit rates of ~15%, predominantly in a small number of hotspots, this is likely. This factor may also diagnose poor results from relatively screens.
 3. A relatively high resolution (in practice over 80% of hits found at XChem are discovered in crystal structures with a resolution better than ~2.1 Angstrom)
 
-Of course, every crystal system is different, and depending upon the exact data being analyzed, good results may be possible without meeting any or even all of these requirements. However, this will likely require manually specifying significant numbers of parameters and a strong understanding of both the crystal system and PanDDA methodology. In general, 200-300 datasets should be sufficient for very good results in even relatively heterogeneous systems.
+Of course, every crystal system is different, and depending upon the exact data being analyzed, good results may be possible without meeting any or even all of these requirements. However, this will likely require manually specifying significant numbers of parameters and a strong understanding of both the crystal system and PanDDA methodology. In general, 200-300 datasets should be sufficient for very good results in even relatively heterogeneous systems with default settings.
 
-## The PanDDA Input Data File Structure
+### The PanDDA Input Data File Structure
 
 PanDDA expects input data with the following structure:
 
@@ -25,6 +77,7 @@ PanDDA expects input data with the following structure:
 
 <Directory matching option --data_dirs>
 ├── <Crystal Name 1>
+│   ├── ...
 ...
 ├── <Crystal Name N>
 │   ├── compound
@@ -39,9 +92,11 @@ PanDDA expects input data with the following structure:
 For example:
 
 ```text
+{using --pdb_regex="dimple.pdb" --mtz_regex="dimple.mtz"}
 
 model_building/
 ├── D68EV3CPROA-x0001
+│   ├── ...
 ...
 ├── D68EV3CPROA-x0110
 │   ├── compound
@@ -53,7 +108,9 @@ model_building/
 
 ```
 
-## Common Options And Their Uses
+### Common Options And Their Uses
+
+PanDDA 2 has a number of common command line options that may be of interest to users. Here are the most common with links to how to use them.
 
 - `--dataset_range`
   - [How To Run Subsets Of Data](#how-to-run-subsets-of-data)
@@ -64,7 +121,7 @@ model_building/
 - `--max_rfree`
   - [How To Filter Poor Quality Data](#how-to-filter-poor-quality-data)
 
-## How To Run Subsets Of Data
+### How To Run Subsets Of Data
 
 It is often useful to only analyze a subset of data, for example because new data has become available and is unlikely to improve old results, or because only some datasets are of interest. It is important to note that none of these options prevent datasets being used to characterize ground state models, it only prevents events and autobuilds being generated for them.
 
@@ -75,7 +132,7 @@ PanDDA 2 provides several options that allow users to do this:
 
 These options are not exclusive, and are applied in the above order, so if `--dataset_range="100-200"` and `--only_datasets="BAZ2BA-x157"` the **no** datasets will be processed.
 
-## How To Filter Poor Quality Data
+### How To Filter Poor Quality Data
 
 Although the defaults for PanDDA are usually appropriate, sometimes it is necessary change the defaults on what constitues sufficiently good dataset to use in ground state characterization.
 
@@ -83,7 +140,7 @@ The main options PanDDA 2 provides for this are:
 1. `--high_res_lower_limit`: Process only those datasets whose assigned high resolution limit is above this value. For example, `--high_res_lower_limit=3.0` will only process those datasets whose upper resolution limit is between 0.0 and 3.0.
 2. `--max_rfree`: Process only those datasets whose assigned rfree is below this value. For example, `--max_rfree=3.0` will only process those datasets whose rfree is between 0 and 3.0.
 
-## How to recover from Failed Runs
+### How to recover from Failed Runs
 
 If PanDDA 2 has begun processing datasets but ends before it completes, for example because it was cancelled by a cluster scheduler, then it is possible to continue from the last dataset that completed processing.
 
@@ -93,7 +150,7 @@ A warning with this feature is that if the input data has changed, new datasets 
 
 (Diamond users can rerun pandda2 targeting the same directory as the failed run through XChemExplorer as if they were running a new PanDDA there).
 
-## How To Run PanDDA 2 Against Crude Soaks And Cocktails
+### How To Run PanDDA 2 Against Crude Soaks And Cocktails
 
 If you have a crude or other cocktail experiment in which multiple ligands have been soaked, then it is important to make sure PanDDA has data for all the ligands that may have bound.
 
@@ -116,20 +173,9 @@ model_building/
 
 ```
 
-## How PanDDA 2 Characterizes Ground States
 
-PanDDA 2 differs significantly from PanDDA 1 in how it detects outlying density. 
 
- - **PanDDA 1**: Establishes the expected electron density around a single reference protein model from the first N datasets above a set of resolution cutoffs
-
- - **PanDDA 2**: Establishes several difference possibilities for the expected electron density around each dataset based on a several sets of similar datasets above the resolution of that dataset
-
-The difference in how the ground state is determined has significant concequences:
-1. PanDDA 2 generates FAR more events, at least before filters, because it evaluates multiple statistical models, some of which will generate more events than PanDDA 1's statistical model because they describe the density poorly.
-2. PanDDA 2 able to detect extremely weak binding and handle hetrogenous crystal systems, but also means that it is reliant on good filtering of events in order to run quickly and present a reasonable amount of data to the user.
-3. It does not make sense to talk of a "reference" dataset in PanDDA 2: each dataset is effectively its own reference, in PanDDA 1 terminology
-
-## Discovering Which Datasets Were Used to Characterize the Ground State
+### Discovering Which Datasets Were Used to Characterize the Ground State
 
 The information on which datasets were used to characterize the statistical model from which the Z-map, events and event maps can be helpful in determining whether sensible ground state models were used or explaining anomalies in Z-maps or mean maps. This information can be found in two places:
 
@@ -245,22 +291,17 @@ Models:
 
 ```
 
-## Interpreting PanDDA 2 Event Maps and Z-Maps
+### Interpreting PanDDA 2 Event Maps and Z-Maps
 
-It is important to explore the fit of ligands at multiple contours in PanDDA Event Maps and Z-maps in order to determine whether the evidence for binding is robust. Electron Densities in PanDDA event maps in particular are unlikely to mean the same thing as they would in a conventional 2Fo-Fc map due to the rescaling of features in the event map calculation, and hence the quality of the fit is best determined by how well the expected shape of the ligand is reproduced at contour for which this is is best reproduced rather than pre-defining some level which represents significance. 
+It is important to explore the fit of ligands at multiple contours in PanDDA Event Maps and Z-maps in order to determine whether the evidence for binding is robust. Electron Densities in PanDDA event maps in particular are unlikely to mean the same thing as they would in a conventional 2Fo-Fc map due to the rescaling of features in the event map calculation, and hence the quality of the fit is best determined by how well the expected "shape"/"topology"" of the ligand is reproduced at contour for which this is is best reproduced rather than pre-defining some level which represents significance. 
 
-1.2V
-0.8V
-
-It is also important to consider whether binding is likely to be driven by crystal packing. While to some extent this is an art, because fragments which form small numbers of interactions with symmetry artefacts have proven useful in medicinal chemsity, a feeling for whether fragments are likely to pose a risk of being crystallographic artefacts can be established by looking at the relative number of interactions formed with artefact atoms versus non-artefact atoms.
+It is also important to consider whether binding is likely to be driven by crystal packing. While to some extent this is an art, because fragments which form small numbers of interactions with symmetry artefacts have proven useful in medicinal chemsity, a feeling for whether fragments are likely to pose a risk of being crystallographic artefacts can be established by looking at the relative number of interactions formed with artefact atoms versus non-artefact atoms. Ideally there should be zero interactions with crystallographic artefacts.
 
 It is important to know your crystal system: symmetry atoms _may_ be a part of a biological assembly, for example at the interface between the two protein chains of a dimer in which only one chain is in the ASU. In this case forming interactions with the symmetry atoms is likely to be a positive sign rather than a warning sign.
 
 In `pandda.inspect`, the easiest way to determine this is by finding "Draw -> Cell and Symmetry" in the command bar and ensuring the "Master Switch" is "Yes". Then going to the command bar and selecting "Measures -> Environment Distances" and ensuring that "Show Residue Environment" is ticked will highlight likely bonds.
 
-
-
-## Determining the reasons datasets were not analyzed or included in ground states
+### Determining the reasons datasets were not analyzed or included in ground states
 
 PanDDA 2 will not analyse datasets for several reasons:
 1. The RFree is > 0.4
@@ -328,17 +369,51 @@ A good give-away that this has happened is that datasets within the screen that 
 ...
 ```
 
+## FAQs and Debugging
 
-## Handeling very large numbers of spurious events
+
+### PanDDA 2 has returned an enourmous number of events
+This is working as intended: PanDDA 2 is designed re return significantly more events than PanDDA 1, but to rank them better. 
+
+Events are ordered within each site by their build score, so if necessary one can stop analysing each site after several non-hits have been observed.
+
+### The event map doesn't resemble the protein
+
+This is to be expected if the event map's event does not is not a fragment or actual meaningful change: in such cases the event map is effectively random and should be ignored. An example of this is shown below:
+
+![low_ranking_event](https://github.com/ConorFWild/pandda_2_gemmi/raw/0_1_0/imgs/low_ranking_event.png)
+
+
+If there is clearly a fragment present but the event map's quality seems low for the protein: this is typically due to a poorly characterized ground state model and such event maps can be used as normal: i.e. can be built into. An example can be seen below:
+
+### An event's density looks like the soaked fragment but it has not been autobuilt
+
+There are two possibilities. The first is that autobuilding the event has failed, typically because the outlying Z-values form a small blob.
+
+The second possibility is that the event has been autobuilt, but PanDDA prefers another event in the protein to merge into the model shown in `pandda.inspect`. This is because in the current version of PanDDA inspect only one autobuild can be chosen to display for any dataset, regarless of how many events it has. PanDDA does occasionally chose a poor autobuild over a good one, so it is important in such cases to manually build the good density and then check that if PanDDA has placed a fragment it too is in a sensible place.
+
+### Many datasets don't seem to have any event maps
+
+It is important to check the PanDDA logs to make sure that datasets you are interested in have not been filtered from consideration. See [here](#determining-the-reasons-datasets-were-not-analyzed-or-included-in-ground-states).
+
+### An event has been autobuilt but incorrectly
+
+Autobuilding PanDDA events is not perfect and the method can sometimes fail. If you see an event in `pandda.inspect` that appears to resemble the fragment but the autobuild is poor, the advice is to correct the autobuild and save the new model.
+
+PanDDA 2 can sometimes fail to produce good autobuilds of clear events. While by far the most likely cause of this was a failure in selecting the best build, which is an area of active development, there are some other causes as well:
+
+1. If the ligand is very large or flexible, the number of conformations to sampled may be too low to get one close to the crystallographic conformation
+2. There is unusual Z-map density at or near the ligand
+
+### Handeling very large numbers of spurious events
 
 Depending on your target, PanDDA 2 may produce very large numbers of events. Although PanDDA attempts to rank and classify these, in some scenarios it may be preferable to risk losing some hits with weaker evidence in order to make processing faster. 
 
 This can be achieved in several ways:
 1. Decrease the number of events processed using the option `--event_score_threshold`
 2. Change the max events per dataset using the option `--max_events_per_dataset`
-3. 
 
-## Addressing very long run times
+### Addressing very long run times
 
 If PanDDA 2 is taking a very long time to run it may be for one of several reasons:
 1. Very large numbers of events have been detected
@@ -355,18 +430,13 @@ If faster run times are necessary, then there are a few possible solutions:
 4. Decrease the number of conformations tested using the option `--autobuild_max_num_conformations`
 5. Decrease the number of autobuild attempts using the option `--autobuild_max_tries`
 
-## PanDDA 2 fails to produce good autobuilds of clear events
+### A PanDDA job was cancelled
 
-PanDDA 2 can sometimes fail to produce good autobuilds of clear events. While by far the most likely cause of this was a failure in selecting the best build, which is an area of active development, there are some other causes as well.
+If a long-running PanDDA job was cancelled, for example by the cluster or a machine failure, it can be easily resumed from where it left off. See [here](#how-to-recover-from-failed-runs).
 
-1. If the ligand is very large or flexible, the number of conformations to sampled may be too low to get one close to the crystallographic conformation
-
-## Ligand Electron Density Is Partially Missing
+### Ligand Electron Density Is Partially Missing
 
 PanDDA masks the electron density around the chains contained in the supplied PDB files. While this is useful for a number of reasons, such as decreasing run times and limiting the number of spurious events, this can sometimes result in partial density for ligands which stick out into solvent.
 
 If this is observed the reccomended course of action is to collate all datasets which feature such ligands, and then rerun PanDDA in a new directory with the `--only_datasets` option set to the datasets containing these ligands and the `--outer_mask` option set to 9.0+(the distance in Angstron between the defined region of them map and the furthest ligand atom).
 
-
-
-8. Autobuilding multiple cifs (crudes)
