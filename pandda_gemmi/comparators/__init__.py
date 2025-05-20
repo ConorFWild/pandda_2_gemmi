@@ -7,3 +7,4 @@ from .filter_spacegroup import FilterSpaceGroup
 from .filter_resolution import FilterResolution
 from .filter_compatible_structures import FilterCompatibleStructures
 from .filter_resolution_lower_limit import FilterResolutionLowerLimit
+from .filter_no_ligand_data import FilterNoLigandData

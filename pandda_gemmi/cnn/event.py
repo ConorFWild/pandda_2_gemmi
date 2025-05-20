@@ -129,20 +129,24 @@ class EventScorer:
         # Get the zmap sample
         zmap_sample = sample_frame(zmap, scale=False)
 
-        # Get the ligand mask sample
-        ligand_mask = get_ligand_mask(ligand_conformation, zmap)
-        ligand_mask_sample = sample_frame(ligand_mask, scale=False)
+        if self.config['ligand']:
+            # Get the ligand mask sample
+            ligand_mask = get_ligand_mask(ligand_conformation, zmap)
+            ligand_mask_sample = sample_frame(ligand_mask, scale=False)
 
-        #
-        high_z_mask = (zmap_sample > self.config['z_cutoff']).astype(int)
-        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.config['z_mask_radius'] / 0.5)
-        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
+            #
+            _density_mask = (zmap_sample > self.config['z_cutoff']).astype(int)
+            density_mask = expand_labels(_density_mask, distance=self.config['z_mask_radius'] / 0.5)
+            density_mask[density_mask != 1] = 0
+        else:
+            ligand_mask_sample = np.zeros(sample_frame.spacing, np.float32)
+            density_mask = _get_ed_mask_float(self.config['x_map_radius'])
 
         # Run the model
         map_array = np.stack(
                     [
-                        zmap_sample * high_z_mask,
-                        xmap_sample * high_z_mask,
+                        zmap_sample * density_mask,
+                        xmap_sample * density_mask,
                     ],
             dtype=np.float32
                 )[np.newaxis,:]

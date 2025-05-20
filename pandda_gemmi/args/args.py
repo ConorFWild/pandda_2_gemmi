@@ -14,6 +14,7 @@ class PanDDAArgs:
     out_dir: Path
     pdb_regex: str = constants.ARGS_PDB_REGEX_DEFAULT
     mtz_regex: str = constants.ARGS_MTZ_REGEX_DEFAULT
+    use_ligand_data: bool = True
     ligand_dir_regex: str = "compound"
     ligand_cif_regex: str = constants.ARGS_LIGAND_CIF_REGEX_DEFAULT
     ligand_pdb_regex: str = constants.ARGS_LIGAND_PDB_REGEX_DEFAULT
@@ -152,6 +153,12 @@ class PanDDAArgs:
             type=str,
             default=constants.ARGS_LIGAND_PDB_REGEX_DEFAULT,
             help=constants.ARGS_LIGAND_PDB_REGEX_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_USE_LIGAND_DATA,
+            type=lambda x: bool(strtobool(x)),
+            default=constants.ARGS_USE_LIGAND_DATA_DEFAULT,
+            help=constants.ARGS_USE_LIGAND_DATA_HELP,
         )
         parser.add_argument(
             constants.ARGS_LIGAND_DIR_REGEX,
@@ -674,6 +681,7 @@ class PanDDAArgs:
             out_dir=args.out_dir,
             pdb_regex=args.pdb_regex,
             mtz_regex=args.mtz_regex,
+            use_ligand_data=args.use_ligand_data,
             ligand_dir_regex=args.ligand_dir_regex,
             ligand_cif_regex=args.ligand_cif_regex,
             ligand_pdb_regex=args.ligand_pdb_regex,
