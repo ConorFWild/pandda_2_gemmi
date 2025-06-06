@@ -888,11 +888,12 @@ def pandda(args: PanDDAArgs):
         )
 
         # Canonicalize paths to best autobuild for each event
-        for event_id, event in top_selected_model_events.items():
-            shutil.copy(
-                event.build.build_path,
-                fs.output.processed_datasets[dtag] / f'{dtag}_event_{str(event_id[1])}_best_autobuild.pdb'
-            )
+        if args.use_ligand_data:
+            for event_id, event in top_selected_model_events.items():
+                shutil.copy(
+                    event.build.build_path,
+                    fs.output.processed_datasets[dtag] / f'{dtag}_event_{str(event_id[1])}_best_autobuild.pdb'
+                )
 
         time_finish_output_maps = time.time()
         # TODO: Log properly
