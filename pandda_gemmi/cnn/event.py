@@ -144,7 +144,7 @@ class EventScorer:
             density_mask[density_mask != 1] = 0
         else:
             ligand_mask_sample = np.zeros(sample_frame.spacing, np.float32)
-            density_mask = _get_ed_mask_float(self.config['x_map_radius'])
+            density_mask = _get_ed_mask_float(self.config['xmap_radius'])
 
         # Run the model
         map_array = np.stack(
