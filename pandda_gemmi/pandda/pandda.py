@@ -346,15 +346,13 @@ def pandda(args: PanDDAArgs):
         if not (event_model_path.exists() & event_config_path.exists()):
             print(f'No event model at {event_model_path}. Downloading event model...')
             with open(event_model_path, 'wb') as f:
-                # gdown.download('https://drive.google.com/file/d/1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV/view?usp=sharing',
-                #                f)
-                gdown.download(id='1b58MUIJdIYyYHr-UhASVCvIWtIgrLYtV',
+                gdown.download(id='1ccUM3g6RKluxwz8hofqmXEH2iymMvjyy',
                                output=f)
             with open(event_config_path, 'wb') as f:
-                gdown.download(id='1qyPqPylOguzXmt6XSFaXCKrnvb8gZ8E2',
+                gdown.download(id='1jMNGHEZsSxKzsCPxCvAhD7IyF2LbYl7V',
                                output=f)
             with open(event_score_quantiles_path, 'wb') as f:
-                gdown.download(id='15RnkrGtEmFvtBvIlwfaUE1QfQrD2npnu', output=f)
+                gdown.download(id='1kHtBtLgGBuSBO8Mrf9pn7kjokL6fRMP6', output=f)
 
         with open(event_config_path, 'r') as f:
             event_model_config = yaml.safe_load(f)

@@ -96,10 +96,14 @@ class LitEventScoring(lt.LightningModule):
         self.lr = config['lr']
         self.wd = config['wd']
         self.batch_size = config['batch_size']
+        self.ligand = config['ligand']
 
     def forward(self, z, m, ):
-        mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
+        if self.ligand:
+            mol_encoding = self.mol_encoder(m)
+        else:
+            mol_encoding = torch.ones(z_encoding.size())
         full_encoding = z_encoding * mol_encoding
         score = F.softmax(self.fc(full_encoding))
 
