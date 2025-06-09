@@ -20,7 +20,7 @@ def get_hit_in_site_probabilities(pandda_events, ranking, sites, event_score_qua
             event_probabilities = [_get_event_probability(_event_score, event_score_quantiles) for _event_score in
                                    event_scores]
             if len(event_probabilities) != 0:
-                hit_in_site_probabilities[event_id] = np.prod(
+                hit_in_site_probabilities[event_id] = 1-np.prod(
                     [1 - _event_probability for _event_probability in event_probabilities])
             else:
                 hit_in_site_probabilities[event_id] = 0.0
