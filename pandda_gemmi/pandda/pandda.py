@@ -14,6 +14,7 @@ import gdown
 import yaml
 
 import numpy as np
+import pandas as pd
 import gemmi
 
 from pandda_gemmi.interfaces import *
@@ -67,6 +68,8 @@ from pandda_gemmi.pandda_logging import PanDDAConsole
 from pandda_gemmi import serialize
 from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventScoring, BuildScorer, LitBuildScoring, \
     set_structure_mean
+
+from pandda_gemmi.metrics import get_hit_in_site_probabilities
 
 
 class GetDatasetsToProcess:
@@ -337,6 +340,7 @@ def pandda(args: PanDDAArgs):
         ).float().eval()
         score_build = BuildScorer(score_build_model, build_model_config)
         score_build_ref = processor.put(score_build)
+        event_score_quantiles = pd.read_csv(event_score_quantiles_path)
     else:  # use_ligand_data=False
         event_model_path = Path(os.path.dirname(inspect.getfile(LitEventScoring))) / "model_event_no_ligand.ckpt"
         event_config_path = Path(
@@ -361,6 +365,7 @@ def pandda(args: PanDDAArgs):
             LitEventScoring(event_model_config),
         ).float().eval()
         score_event = EventScorer(score_event_model, event_model_config)
+        event_score_quantiles = pd.read_csv(event_score_quantiles_path)
 
     # Get the method for processing the statistical models
     process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'])
@@ -1056,8 +1061,12 @@ def pandda(args: PanDDAArgs):
     # for event_id in ranking:
     #     print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")
 
+    # Probabilities
+    # Calculate the cumulative probability that a hit remains in the site using the event score quantile table
+    hit_in_site_probabilities = get_hit_in_site_probabilities(pandda_events, ranking, sites, event_score_quantiles)
+
     # Output the event and site tables
-    output_tables(datasets, pandda_events, ranking, sites, fs)
+    output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabilities, fs)
     time_pandda_finish = time.time()
     # TODO: Log properly
     print(f"PanDDA ran in: {round(time_pandda_finish - time_pandda_begin, 2)} seconds!")
