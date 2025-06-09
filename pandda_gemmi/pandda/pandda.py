@@ -618,7 +618,7 @@ def pandda(args: PanDDAArgs):
         # TODO: Log properly
         # print(f"\t\tProcessed all models in: {round(time_finish_process_models - time_begin_process_models, 2)}")
 
-        if args.use_ligand_data:
+        if args.use_ligand_data & args.autobuild:
             # Build the events
             time_begin_autobuild = time.time()
 
@@ -893,7 +893,7 @@ def pandda(args: PanDDAArgs):
         )
 
         # Canonicalize paths to best autobuild for each event
-        if args.use_ligand_data:
+        if args.use_ligand_data & args.autobuild:
             for event_id, event in top_selected_model_events.items():
                 shutil.copy(
                     event.build.build_path,
@@ -1002,7 +1002,7 @@ def pandda(args: PanDDAArgs):
         # console.summarise_autobuilding(autobuild_results)
 
         # Merge the autobuilds into PanDDA output models
-        if args.use_ligand_data:
+        if args.use_ligand_data & args.autobuild:
             merged_build_scores = merge_autobuilds(
                 datasets,
                 pandda_events,
