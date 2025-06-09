@@ -349,7 +349,7 @@ def pandda(args: PanDDAArgs):
                 gdown.download(id='1ccUM3g6RKluxwz8hofqmXEH2iymMvjyy',
                                output=f)
             with open(event_config_path, 'wb') as f:
-                gdown.download(id='1jMNGHEZsSxKzsCPxCvAhD7IyF2LbYl7V',
+                gdown.download(id='1c_QyEjFD5DtYlbU-Gh1o79gkbtdSrkDl',
                                output=f)
             with open(event_score_quantiles_path, 'wb') as f:
                 gdown.download(id='1kHtBtLgGBuSBO8Mrf9pn7kjokL6fRMP6', output=f)
