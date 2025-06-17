@@ -22,7 +22,7 @@ def plot_aligned_density_projection(
             embedding[:, 0],
             embedding[:, 1],
             c=[sns.color_palette()[x] for x in characterization_set_masks[model_number]],
-            s=mpl.rcParams['lines.markersize']*2
+            # s=mpl.rcParams['lines.markersize']*2
         )
         plt.gca().set_aspect('equal', 'datalim')
         plt.title(f'UMAP projection of model {model_number}', fontsize=24)
