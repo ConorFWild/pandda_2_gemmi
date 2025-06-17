@@ -1,5 +1,6 @@
 import numpy as np
 import umap
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.decomposition import PCA
@@ -20,7 +21,9 @@ def plot_aligned_density_projection(
         plt.scatter(
             embedding[:, 0],
             embedding[:, 1],
-            c=[sns.color_palette()[x] for x in characterization_set_masks[model_number]])
+            c=[sns.color_palette()[x] for x in characterization_set_masks[model_number]],
+            s=mpl.rcParams['lines.markersize']*2
+        )
         plt.gca().set_aspect('equal', 'datalim')
         plt.title(f'UMAP projection of model {model_number}', fontsize=24)
         plt.savefig(output_dir / f'model_{model_number}_umap_embedding.png')
