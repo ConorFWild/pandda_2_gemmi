@@ -11,7 +11,7 @@ def plot_aligned_density_projection(
         characterization_set_masks,
         output_dir
 ):
-    pca = PCA(n_components=200)
+    pca = PCA(n_components=min(200, len(dmaps)))
     pca_embedding = pca.fit_transform(dmaps)
 
     reducer = umap.UMAP()
