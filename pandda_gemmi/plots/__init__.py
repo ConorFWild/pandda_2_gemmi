@@ -22,5 +22,6 @@ def plot_aligned_density_projection(
             embedding[:, 1],
             c=[sns.color_palette()[x] for x in characterization_set_masks[model_number]])
         plt.gca().set_aspect('equal', 'datalim')
-        plt.title(f'UMAP projection of model {model_number}', fontsize=24);
+        plt.title(f'UMAP projection of model {model_number}', fontsize=24)
         plt.savefig(output_dir / f'model_{model_number}_umap_embedding.png')
+        plt.clear()
