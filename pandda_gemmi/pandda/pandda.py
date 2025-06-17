@@ -70,6 +70,7 @@ from pandda_gemmi.cnn import load_model_from_checkpoint, EventScorer, LitEventSc
     set_structure_mean
 
 from pandda_gemmi.metrics import get_hit_in_site_probabilities
+from pandda_gemmi.plots import plot_aligned_density_projection
 
 
 class GetDatasetsToProcess:
@@ -576,6 +577,17 @@ def pandda(args: PanDDAArgs):
             process_all=False
         )
         # print(f"Models to process are {models_to_process} out of {[x for x in characterization_sets]}")
+
+        # Plot the projections
+        umap_plot_out_dir = fs.output.processed_datasets[dtag] / "model_umap"
+        if not umap_plot_out_dir.exists():
+            os.mkdir(umap_plot_out_dir)
+        plot_aligned_density_projection(
+            dmaps,
+            models_to_process,
+            characterization_set_masks,
+            umap_plot_out_dir
+        )
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
