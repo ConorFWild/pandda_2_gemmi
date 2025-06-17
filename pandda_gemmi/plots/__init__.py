@@ -24,4 +24,4 @@ def plot_aligned_density_projection(
         plt.gca().set_aspect('equal', 'datalim')
         plt.title(f'UMAP projection of model {model_number}', fontsize=24)
         plt.savefig(output_dir / f'model_{model_number}_umap_embedding.png')
-        plt.clear()
+        plt.clf()
