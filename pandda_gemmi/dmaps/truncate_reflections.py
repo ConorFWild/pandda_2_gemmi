@@ -165,7 +165,7 @@ def truncate_reflections(reflections, index=None):
     # print(new_data)
 
     # Update
-    new_reflections.set_data(new_data)
+    new_reflections.set_data(new_data.astype(np.float32))
 
     # Update resolution
     new_reflections.update_reso()
@@ -216,7 +216,7 @@ def truncate_resolution(reflections, resolution: float):
                          )
 
     # Update
-    new_reflections.set_data(new_data)
+    new_reflections.set_data(new_data.astype(np.float32))
 
     # Update resolution
     new_reflections.update_reso()

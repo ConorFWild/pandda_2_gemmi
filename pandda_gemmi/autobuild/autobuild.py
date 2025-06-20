@@ -84,7 +84,7 @@ def calculate_rscc(
     cov = (np.sum((masked_xmap_values-xmap_mean)*(masked_predicted_values-predicted_mean)))*(1/masked_xmap_values.size)
 
     rscc = cov / np.sqrt(np.var(masked_xmap_values)*np.var(masked_predicted_values))
-    print(f"RSCC: {rscc}")
+    # print(f"RSCC: {rscc}")
 
     return rscc
 

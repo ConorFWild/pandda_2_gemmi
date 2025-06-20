@@ -27,7 +27,7 @@ class AutobuildPreprocessStructure:
         new_structure = gemmi.Structure()
 
         for model_i, model in enumerate(pdb):
-            new_model = gemmi.Model(model.name)
+            new_model = gemmi.Model(model.num)
             new_structure.add_model(new_model, pos=-1)
 
             for chain_i, chain in enumerate(model):

@@ -16,7 +16,7 @@ dependencies:
   - pip
   - spin
   - ccache
-  - gemmi
+#  - gemmi
   - ray-all
   - fire
   - numpy
@@ -63,4 +63,5 @@ dependencies:
   # Pip
   - pip:
 #    - "https://github.com/ConorFWild/pandda_2_gemmi/archive/refs/heads/0_1_0.zip"
-    - "git+https://github.com/ConorFWild/_gemmi.git"
+#    - "git+https://github.com/ConorFWild/_gemmi.git"
+    - "git+https://github.com/ConorFWild/gemmi.git@flexible_interpolation"

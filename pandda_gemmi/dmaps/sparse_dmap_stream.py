@@ -30,13 +30,11 @@ class SparseDMapStream:
         for transform in self.transforms:
             dataset = transform(dataset)
         finish_transform = time.time()
-        print(f"\tTransform: {finish_transform-begin_transform}")
 
 
         begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
         finish_fft = time.time()
-        print(f"\tFFT: {finish_fft-begin_fft}")
 
         aligned_xmap = SparseDMapStream.align_xmap(xmap, self.dframe, alignment)
 
@@ -127,15 +125,16 @@ class SparseDMapStream:
             com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
             com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
 
-            points_list = [np.copy(dframe.partitioning.partitions[residue_id].points) for residue_id in
+            points_list = [dframe.partitioning.partitions[residue_id].points.astype(np.int32) for residue_id in
                            dframe.partitioning.partitions]
-            positions_list = [np.copy(dframe.partitioning.partitions[residue_id].positions) for residue_id in
+            positions_list = [dframe.partitioning.partitions[residue_id].positions.astype(np.float32) for residue_id in
                               dframe.partitioning.partitions]
         except Exception as e:
             print(e)
             transforms, com_ref, com_mov = alignment.get_transforms()
             print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
             print(f"Transforms: {[key for key in transforms]}")
+            raise e
 
         # transforms, com_ref, com_mov = alignment.get_transforms()
         # transform_list = [transforms[residue_id] for residue_id in transforms]
@@ -154,9 +153,8 @@ class SparseDMapStream:
         # print(com_reference_list)
 
         begin_interpolate = time.time()
-        gemmi.interpolate_points_multiple(
+        aligned_xmap.interpolate_grid_flexible(
             xmap,
-            aligned_xmap,
             points_list,
             positions_list,
             transform_list,

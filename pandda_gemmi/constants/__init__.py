@@ -105,6 +105,10 @@ ARGS_LIGAND_PDB_REGEX_HELP = "A grep pattern matching the pdb associated with ea
                              "bound in the crystal."
 ARGS_LIGAND_PDB_REGEX_DEFAULT = "[0-9a-zA-Z-_]+[.]pdb"
 
+ARGS_USE_LIGAND_DATA = "--use_ligand_data"
+ARGS_USE_LIGAND_DATA_HELP = "Whether or not to use ligand information to help find events"
+ARGS_USE_LIGAND_DATA_DEFAULT = True
+
 ARGS_LIGAND_DIR_REGEX = "--ligand_dir_regex"
 ARGS_LIGAND_DIR_REGEX_HELP = "A grep pattern matching a directory in each crystal directory in the directory given by --data_dirs. If this is given, then other cif regexs will only be searched for inside this directory, if it can be found."
 ARGS_LIGAND_DIR_REGEX_DEFAULT = "compound"

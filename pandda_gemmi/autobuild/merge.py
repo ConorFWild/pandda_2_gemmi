@@ -63,7 +63,7 @@ def merge_autobuilds(
                 if autobuild_result:
 
                     if autobuild_result.log_result_dict:
-                        print(f"\t\t\t{autobuild_result.log_result_dict}")
+                        # print(f"\t\t\t{autobuild_result.log_result_dict}")
 
                         for build_path, result in autobuild_result.log_result_dict.items():
                             score = result['score']
@@ -126,7 +126,7 @@ class MergeHighestBuildScore:
             in autobuilds.items()
             if highest_scoring_event_id[1] == score_and_event_id[1][1]
         }
-        print(highest_scoring_event_autobuilds)
+        # print(highest_scoring_event_autobuilds)
         return max(
             highest_scoring_event_autobuilds,
             key=lambda _path: highest_scoring_event_autobuilds[_path],
@@ -148,7 +148,7 @@ class MergeHighestBuildAndEventScore:
             in autobuilds.items()
             if highest_scoring_event_id[1] == score_and_event_id[1][1]
         }
-        print(highest_scoring_event_autobuilds)
+        # print(highest_scoring_event_autobuilds)
         return max(
             highest_scoring_event_autobuilds,
             key=lambda _path: -highest_scoring_event_autobuilds[_path],

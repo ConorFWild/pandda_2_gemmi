@@ -34,7 +34,7 @@ class Transform:
 
     def get_transform(self):
         transform = gemmi.Transform()
-        transform.vec.fromlist( self.vec.tolist())
+        transform.vec.fromlist(self.vec.tolist())
         transform.mat.fromlist(self.mat.tolist())
         return transform
 
@@ -124,10 +124,12 @@ class Alignment:
         com_ref = {}
         com_mov = {}
 
-
         for _j in range(self.resid.shape[0]):
-
-            residue_id = ResidueID(*self.resid[_j])
+            residue_id = ResidueID(
+                int(self.resid[_j][0]),
+                self.resid[_j][1],
+                self.resid[_j][2],
+            )
             transform = gemmi.Transform()
             transform.vec.fromlist(self.vec[_j].tolist())
             transform.mat.fromlist(self.mat[_j].tolist())
@@ -172,17 +174,17 @@ class Alignment:
         reference_structure_cas = reference_structure.mask(np.array(ca_mask))
 
         # Iterate protein atoms, then pull out their atoms, and search them
-        ref_ids= np.hstack([
-            reference_structure_cas.models.reshape((-1,1)),
-            reference_structure_cas.chains.reshape((-1,1)),
-            reference_structure_cas.seq_ids.reshape((-1,1))
+        ref_ids = np.hstack([
+            reference_structure_cas.models.reshape((-1, 1)),
+            reference_structure_cas.chains.reshape((-1, 1)),
+            reference_structure_cas.seq_ids.reshape((-1, 1))
         ])
         mov_ids = np.hstack([
-            moving_structure_cas.models.reshape((-1,1)),
-            moving_structure_cas.chains.reshape((-1,1)),
-            moving_structure_cas.seq_ids.reshape((-1,1))
+            moving_structure_cas.models.reshape((-1, 1)),
+            moving_structure_cas.chains.reshape((-1, 1)),
+            moving_structure_cas.seq_ids.reshape((-1, 1))
         ])
-        ids=np.concatenate([ref_ids, mov_ids])
+        ids = np.concatenate([ref_ids, mov_ids])
 
         unique, indicies, counts = np.unique(ids, return_inverse=True, return_counts=True, axis=0)
         count_array = counts[indicies]
@@ -194,9 +196,9 @@ class Alignment:
         reference_atom_array = reference_structure_cas.positions[ref_pos_mask]
         moving_atom_array = moving_structure_cas.positions[mov_pos_mask]
 
-
         if (reference_atom_array.shape[0] == 0) or (moving_atom_array.shape[0] == 0):
-            raise Exception(f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
+            raise Exception(
+                f"{_dtag} Reference atom array shape {reference_atom_array.shape} moving atom array {moving_atom_array.shape}")
 
         # Other kdtree
         reference_tree = spatial.KDTree(reference_atom_array)
@@ -211,16 +213,17 @@ class Alignment:
             # other selection
             time_begin_ball = time.time()
             reference_indexes = reference_tree.query_ball_point(
-                reference_structure_cas.positions[_j,:].flatten(),
+                reference_structure_cas.positions[_j, :].flatten(),
                 marker_atom_search_radius,
             )
             time_finish_ball = time.time()
-            time_ball_query = time_ball_query + (time_finish_ball-time_begin_ball)
+            time_ball_query = time_ball_query + (time_finish_ball - time_begin_ball)
             reference_selection = reference_atom_array[reference_indexes]
             moving_selection = moving_atom_array[reference_indexes]
 
             if moving_selection.shape[0] == 0:
-                raise Exception(f"{_dtag} Moving selection shape: {moving_selection.shape[0]} Reference selection shape: {reference_selection.shape[0]}")
+                raise Exception(
+                    f"{_dtag} Moving selection shape: {moving_selection.shape[0]} Reference selection shape: {reference_selection.shape[0]}")
             else:
                 time_begin_super = time.time()
                 ref_ids_mask.append(True)
@@ -230,16 +233,15 @@ class Alignment:
                         reference_selection,
                         com_moving=np.mean(moving_selection, axis=0),
                         com_reference=np.mean(reference_selection, axis=0),
-                )
+                    )
                 )
                 time_finish_super = time.time()
-                time_super = time_super + (time_finish_super-time_begin_super)
+                time_super = time_super + (time_finish_super - time_begin_super)
 
         resid = ref_ids
         vec = np.stack([transform.vec for transform in transforms])
         mat = np.stack([transform.mat for transform in transforms])
         com_reference = np.stack([transform.com_reference for transform in transforms])
         com_mov = np.stack([transform.com_moving for transform in transforms])
-
 
         return cls(resid, vec, mat, com_reference, com_mov)

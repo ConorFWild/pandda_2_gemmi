@@ -136,7 +136,7 @@ def drop_columns(reflections, f, phi):
                          )
 
     # Update
-    new_reflections.set_data(new_data)
+    new_reflections.set_data(new_data.astype(np.float32))
 
     # Update resolution
     new_reflections.update_reso()
@@ -193,7 +193,7 @@ class MtzPython:
         for column in self.columns:
             mtz.add_column(column.label, column.column_type, dataset_id=column.dataset_id)
 
-        mtz.set_data(self.array)
+        mtz.set_data(self.array.astype(np.float32))
 
         mtz.update_reso()
 
@@ -267,7 +267,7 @@ class Reflections(ReflectionsInterface):
                 continue
             mtz.add_column(column.label, column.type, dataset_id=column.dataset_id)
 
-        mtz.set_data(data)
+        mtz.set_data(data.astype(np.float32))
 
         mtz.update_reso()
 

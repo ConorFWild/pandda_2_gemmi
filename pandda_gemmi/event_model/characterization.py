@@ -3,9 +3,14 @@ import time
 import numpy as np
 
 # from sklearn.decomposition import PCA, IncrementalPCA
-from sklearnex.decomposition import PCA
-from sklearn import mixture
-from sklearn.neighbors import NearestNeighbors
+try:
+    from sklearnex.decomposition import PCA
+    from sklearn import mixture
+    from sklearn.neighbors import NearestNeighbors
+except ImportError:
+    from sklearn.decomposition import PCA
+    from sklearn import mixture
+    from sklearn.neighbors import NearestNeighbors
 
 from ..interfaces import *
 

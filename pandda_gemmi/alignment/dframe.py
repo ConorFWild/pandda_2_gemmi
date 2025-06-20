@@ -51,14 +51,14 @@ class PointPositionArray(PointPositionArrayInterface):
 
     @staticmethod
     def orthogonalize_fractional_array(fractional_array, grid):
-        orthogonalization_matrix = np.array(grid.unit_cell.orthogonalization_matrix.tolist())
+        orthogonalization_matrix = np.array(grid.unit_cell.orth.mat.tolist())
         orthogonal_array = np.matmul(orthogonalization_matrix, fractional_array.T).T
 
         return orthogonal_array
 
     @staticmethod
     def fractionalize_orthogonal_array(fractional_array, grid):
-        fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
+        fractionalization_matrix = np.array(grid.unit_cell.frac.mat.tolist())
         fractional_array = np.matmul(fractionalization_matrix, fractional_array.T).T
 
         return fractional_array
@@ -268,7 +268,7 @@ class PointPositionArray(PointPositionArrayInterface):
         positions = []
 
         point_orthogonalization_matrix = np.matmul(
-            np.array(grid.unit_cell.orthogonalization_matrix.tolist()),
+            np.array(grid.unit_cell.orth.mat.tolist()),
             np.diag((1 / grid.nu, 1 / grid.nv, 1 / grid.nw,))
         )
 
@@ -297,7 +297,7 @@ class PointPositionArray(PointPositionArrayInterface):
             )
 
         spacing = np.array([grid.nu, grid.nv, grid.nw])
-        fractionalization_matrix = np.array(grid.unit_cell.fractionalization_matrix.tolist())
+        fractionalization_matrix = np.array(grid.unit_cell.frac.mat.tolist())
 
         pos_max = np.max(pos_array, axis=0) + radius
         pos_min = np.min(pos_array, axis=0) - radius
@@ -907,7 +907,7 @@ class GridPartitioning(GridPartitioningInterface):
         # Construct the partition
         partitions = {
             ResidueID(
-                ca_point_position_array.models[index],
+                int(ca_point_position_array.models[index]),
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(
@@ -1151,7 +1151,7 @@ class GridPartitioning(GridPartitioningInterface):
         # Construct the partition
         partitions = {
             ResidueID(
-                ca_point_position_array.models[index],
+                int(ca_point_position_array.models[index]),
                 ca_point_position_array.chains[index],
                 ca_point_position_array.seq_ids[index],
             ): PointPositionArray(

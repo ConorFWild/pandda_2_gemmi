@@ -129,16 +129,15 @@ class ResNet(nn.Module):
                  width_per_group=64,
                  replace_stride_with_dilation=None,
                  norm_layer=None,
-                 headless=False
+                 headless=False,
+                 drop_rate=0.5,
+                 config={}
                  ):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm3d
         self._norm_layer = norm_layer
-
-        self.headless = headless
-
-        self.inplanes = 64
+        self.inplanes = config['planes_1']
         self.dilation = 1
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
@@ -149,22 +148,25 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv3d(num_input, self.inplanes, kernel_size=7, stride=2, padding=3,
+        self.headless = headless
+        self.conv1 = nn.Conv3d(num_input, config['planes_1'], kernel_size=7, stride=2, padding=3,
                                bias=False)
-        self.bn1 = norm_layer(self.inplanes)
+        self.bn1 = norm_layer(config['planes_1'])
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+        self.drop1 = nn.Dropout(p=config['drop_1'])
+        self.layer1 = self._make_layer(block, config['planes_2'], layers[0])
+        self.drop2 = nn.Dropout(p=config['drop_2'])
+        self.layer2 = self._make_layer(block, config['planes_3'], layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+        self.drop3 = nn.Dropout(p=config['drop_3'])
+        self.layer3 = self._make_layer(block, config['planes_4'], layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+        self.drop4 = nn.Dropout(p=config['drop_4'])
+        self.layer4 = self._make_layer(block, config['planes_5'], layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
+        self.drop5 = nn.Dropout(p=config['drop_5'])
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
-
-        self.act = nn.Softmax()
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -212,20 +214,25 @@ class ResNet(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
+        x = self.drop1(x)
 
         x = self.layer1(x)
+        x = self.drop2(x)
         x = self.layer2(x)
+        x = self.drop3(x)
         x = self.layer3(x)
+        x = self.drop4(x)
         x = self.layer4(x)
+        x = self.drop5(x)
 
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
-        x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
+        x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
         if not self.headless:
             x = self.fc(x)
 
-        # return self.act(x)
         return x
+
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
