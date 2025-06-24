@@ -163,9 +163,6 @@ class SparseDMapStream:
             points_list,
             positions_list,
             transform_list,
-            # com_moving_list,
-            # com_reference_list,
-            # 12
         )
         finish_interpolate = time.time()
         # print(f"\tInterpolation: {finish_interpolate-begin_interpolate}")
