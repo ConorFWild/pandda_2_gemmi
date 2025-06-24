@@ -121,9 +121,14 @@ class SparseDMapStream:
         # print(f"Partitions: {[key for key in dframe.partitioning.partitions]}")
         # print(f"Transforms: {[key for key in transforms]}")
         try:
-            transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
             com_moving_list = [com_mov[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
             com_reference_list = [com_ref[residue_id].tolist() for residue_id in dframe.partitioning.partitions ]
+            transform_list = [transforms[residue_id] for residue_id in dframe.partitioning.partitions ]
+            for transform, com_m, com_r in zip(transform_list, com_moving_list, com_reference_list):
+                transform.vec.fromlist(
+                (gemmi.Vec3(*com_m) - transform.mat.multiply(gemmi.Vec3(*com_r))
+                 ).tolist()
+            )
 
             points_list = [dframe.partitioning.partitions[residue_id].points.astype(np.int32) for residue_id in
                            dframe.partitioning.partitions]
@@ -158,8 +163,8 @@ class SparseDMapStream:
             points_list,
             positions_list,
             transform_list,
-            com_moving_list,
-            com_reference_list,
+            # com_moving_list,
+            # com_reference_list,
             # 12
         )
         finish_interpolate = time.time()

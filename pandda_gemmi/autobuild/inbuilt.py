@@ -589,7 +589,7 @@ def get_interpolated_values_c(
 
     # vals_list = \
     grid.interpolate_position_array(
-        transformed_structure_array.astype(np.float32),
+        transformed_structure_array.astype(np.float64),
         vals
     )
     # print(f"Vals list: {vals_list}")
@@ -1348,7 +1348,9 @@ def get_predicted_density(
     # dencalc.d_min = res#*2
     # dencalc.rate = 2.0
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    dencalc.initialize_grid_to_size(xmap.nu, xmap.nv, xmap.nw)
+    # dencalc.initialize_grid_to_size(xmap.nu, xmap.nv, xmap.nw)
+    dencalc.grid.set_size(xmap.nu, xmap.nv, xmap.nw)
+
     dencalc.add_model_density_to_grid(optimized_structure[0])
     # dencalc.put_model_density_on_grid(optimized_structure[0])
     calc_grid = dencalc.grid
