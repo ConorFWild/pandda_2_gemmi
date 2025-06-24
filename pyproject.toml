@@ -29,6 +29,7 @@ dependencies = [
     "gdown",
     "torch==1.13.1",
     "pytorch-lightning",
+    'scikit-image'
 #    "gemmi@git+https://github.com/ConorFWild/gemmi.git#egg=flexible_interpolation"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
