@@ -14,8 +14,8 @@ def serialize_events(
     dic = {
 
         event_idx: {
-            "Score": selected_model_events[event_idx].score,
-            "BDC": selected_model_events[event_idx].bdc,
+            "Score": float(selected_model_events[event_idx].score),
+            "BDC": float(selected_model_events[event_idx].bdc),
             "Position Array": selected_model_events[event_idx].pos_array.tolist(),
             "Point Array": selected_model_events[event_idx].point_array.tolist(),
             "Size": float(selected_model_events[event_idx].size),
