@@ -158,8 +158,7 @@ class SparseDMapStream:
         # print(com_reference_list)
 
         begin_interpolate = time.time()
-        aligned_xmap.interpolate_grid_flexible(
-            xmap,
+        aligned_xmap = xmap.interpolate_grid_flexible(
             points_list,
             positions_list,
             transform_list,
