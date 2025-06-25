@@ -585,12 +585,12 @@ def get_interpolated_values_c(
         transformed_structure_array,
         n,
 ):
-    vals = np.zeros(n, dtype=np.float32)
+    # vals = np.zeros(n, dtype=np.float32)
 
     # vals_list = \
-    grid.interpolate_position_array(
+    vals = grid.interpolate_position_array(
         transformed_structure_array.astype(np.float64),
-        vals
+
     )
     # print(f"Vals list: {vals_list}")
     # print(f"Vals: {vals}")
