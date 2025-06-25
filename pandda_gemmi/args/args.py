@@ -96,6 +96,7 @@ class PanDDAArgs:
     rank_method: str = constants.ARGS_RANK_METHOD_DEFAULT
     rescore_event_method: str = constants.ARGS_RESCORE_EVENT_METHOD_DEFAULT
     source_pandda: Path = None
+    debug: bool = False
     # debug: Debug = Debug.DEFAULT
 
 
@@ -672,6 +673,13 @@ class PanDDAArgs:
             help=constants.ARGS_RANK_METHOD_HELP,
         )
 
+        parser.add_argument(
+            constants.ARGS_DEBUG,
+            type=lambda x: bool(strtobool(x)),
+            default=False,
+            help=constants.ARGS_DEBUG_HELP,
+        )
+
         args = parser.parse_args()
 
         # only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
@@ -760,6 +768,6 @@ class PanDDAArgs:
             rhofit_coord=args.rhofit_coord,
             cif_strategy=args.cif_strategy,
             rank_method=args.rank_method,
-            source_pandda=args.source_pandda
-            # debug=args.debug,
+            source_pandda=args.source_pandda,
+            debug=args.debug,
         )

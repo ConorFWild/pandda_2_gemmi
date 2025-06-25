@@ -89,7 +89,7 @@ class ClusterDensityDBSCAN:
     #
     #     return events
 
-    def __call__(self, z, reference_frame):
+    def __call__(self, z, reference_frame, debug=False):
 
         z_grid = reference_frame.unmask(SparseDMap(z))
 
@@ -241,4 +241,4 @@ class ClusterDensityDBSCAN:
             # print(f"Local strength: {}")
 
 
-        return events, cutoff
+        return events, {"cutoff": cutoff, "high_z_all_points_mask": high_z_all_points_mask, "eps": eps}

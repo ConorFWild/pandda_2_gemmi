@@ -108,12 +108,14 @@ class ProcessModel:
                  minimum_z_cluster_size=5.0,
                  minimum_event_score=0.15,
                  local_highest_score_radius=8.0,
-                 use_ligand_data=True
+                 use_ligand_data=True,
+                 debug=False
                  ):
         self.minimum_z_cluster_size = minimum_z_cluster_size
         self.minimum_event_score = minimum_event_score
         self.local_highest_score_radius = local_highest_score_radius
         self.use_ligand_data = use_ligand_data
+        self.debug=debug
 
     def __call__(self,  # *args, **kwargs
                  ligand_files,
@@ -148,8 +150,11 @@ class ProcessModel:
         model_grid = reference_frame.unmask(SparseDMap(model_map))
 
         # Get the initial events from clustering the Z map
-        events, cutoff = ClusterDensityDBSCAN()(z, reference_frame)
+        events, cluster_metadata = ClusterDensityDBSCAN()(z, reference_frame)
+        cutoff, high_z_all_points_mask, eps = cluster_metadata.values()
         num_initial_events = len(events)
+        if self.debug:
+            print(f'model {model_number}: Z map cutoff: {round(cutoff, 2)} results in {num_initial_events} events from {np.sum(high_z_all_points_mask)} high z points')
 
         # Handle the edge case of zero events
         if len(events) == 0:
@@ -369,7 +374,7 @@ def pandda(args: PanDDAArgs):
         event_score_quantiles = pd.read_csv(event_score_quantiles_path)
 
     # Get the method for processing the statistical models
-    process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'])
+    process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'], debug=args.debug)
 
     # Load the structures and reflections from the datasets found in the file system, and create references to these
     # dataset objects and the arrays of their structures in the multiprocessing cache
