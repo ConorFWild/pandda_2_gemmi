@@ -154,7 +154,7 @@ class EventScorer:
             x_mean = round(np.mean(zmap_sample), 2)
             x_std = round(np.mean(zmap_sample), 2)
             m_num = np.sum(density_mask)
-            print(f'\t\tEvent {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}: z: {round(z_mean, 2)} {round(z_std, 2)}: x: {round(x_mean, 2)} {round(x_std, 2)}; mask {m_num}')
+            print(f'\tEvent {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}: z: {round(z_mean, 2)} {round(z_std, 2)}: x: {round(x_mean, 2)} {round(x_std, 2)}; mask {m_num}')
         # Run the model
         map_array = np.stack(
                     [
