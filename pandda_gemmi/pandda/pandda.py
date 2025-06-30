@@ -169,7 +169,7 @@ class ProcessModel:
         size_range = (min([_event.pos_array.shape[0] for _event in events.values()]), max([_event.pos_array.shape[0] for _event in events.values()]))
 
         if self.debug:
-            print(f'model {model_number}: size filtering results in {num_size_filtered_events} with volume element {reference_frame.get_grid().unit_cell.volume / reference_frame.get_grid().point_count} and size range {size_range}')
+            print(f'model {model_number}: size filtering results in {num_size_filtered_events} with volume element {round(reference_frame.get_grid().unit_cell.volume / reference_frame.get_grid().point_count,2)} and size range {size_range}')
 
         # Return None if there are no events after pre-scoring filters
         if len(events) == 0:
@@ -231,7 +231,7 @@ class ProcessModel:
 
         # Filter the events after scoring based on keeping only the locally highest scoring event
         num_events = len(events)
-        score_range = (min([_event.score for _event in events.values()]), max([_event.score for _event in events.values()]))
+        score_range = (round(min([_event.score for _event in events.values()]), 2), round(max([_event.score for _event in events.values()]),2))
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
