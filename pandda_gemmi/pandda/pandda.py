@@ -383,6 +383,7 @@ def pandda(args: PanDDAArgs):
         event_score_quantiles = pd.read_csv(event_score_quantiles_path)
     if args.debug:
         print(f'Using ligand?: {score_event.model.ligand} / {score_event.model.ligand is True}')
+        print(f'Score model path: {event_model_path}')
 
 
     # Get the method for processing the statistical models
