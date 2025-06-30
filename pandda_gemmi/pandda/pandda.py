@@ -231,7 +231,7 @@ class ProcessModel:
 
         # Filter the events after scoring based on keeping only the locally highest scoring event
         num_events = len(events)
-        score_range = (min([_event.bdc for _event in events.values()]), max([_event.bdc for _event in events.values()]))
+        score_range = (min([_event.score for _event in events.values()]), max([_event.score for _event in events.values()]))
         for filter in [
             FilterScore(self.minimum_event_score),  # Filter events based on their score
             # FilterLocallyHighestLargest(self.local_highest_score_radius),  # Filter events that are close to other,
@@ -243,7 +243,7 @@ class ProcessModel:
         num_score_filtered_events = len(events)
 
         if self.debug:
-            print(f'model {model_number}: size filtering results in {num_score_filtered_events} with cutoff {self.minimum_event_score} and score range {score_range}')
+            print(f'model {model_number}: score filtering results in {num_score_filtered_events} with cutoff {self.minimum_event_score} and score range {score_range}')
 
 
         # Return None if there are no events after post-scoring filters
@@ -381,6 +381,9 @@ def pandda(args: PanDDAArgs):
         ).float().eval()
         score_event = EventScorer(score_event_model, event_model_config)
         event_score_quantiles = pd.read_csv(event_score_quantiles_path)
+    if args.debug:
+        print(f'Using ligand?: {score_event.model.ligand} / {score_event.model.ligand is True}')
+
 
     # Get the method for processing the statistical models
     process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'], debug=args.debug)

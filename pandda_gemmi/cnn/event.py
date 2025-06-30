@@ -100,7 +100,7 @@ class LitEventScoring(lt.LightningModule):
 
     def forward(self, z, m, ):
         z_encoding = self.z_encoder(z)
-        if self.ligand:
+        if self.ligand is True:
             mol_encoding = self.mol_encoder(m)
         else:
             mol_encoding = torch.ones(z_encoding.size())
