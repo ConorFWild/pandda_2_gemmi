@@ -330,7 +330,7 @@ def pandda(args: PanDDAArgs):
             event_model_path,
             LitEventScoring(event_model_config),
         ).float().eval()
-        score_event = EventScorer(score_event_model, event_model_config)
+        score_event = EventScorer(score_event_model, event_model_config, debug=args.debug)
 
         # Get the method for scoring
         build_model_path = Path(os.path.dirname(inspect.getfile(LitBuildScoring))) / "model_build.ckpt"
@@ -379,7 +379,7 @@ def pandda(args: PanDDAArgs):
             event_model_path,
             LitEventScoring(event_model_config),
         ).float().eval()
-        score_event = EventScorer(score_event_model, event_model_config)
+        score_event = EventScorer(score_event_model, event_model_config, debug=args.debug)
         event_score_quantiles = pd.read_csv(event_score_quantiles_path)
     if args.debug:
         print(f'Using ligand?: {score_event.model.ligand} / {score_event.model.ligand is True}')

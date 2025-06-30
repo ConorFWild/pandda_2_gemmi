@@ -112,9 +112,10 @@ class LitEventScoring(lt.LightningModule):
 
 class EventScorer:
 
-    def __init__(self, model, config):
+    def __init__(self, model, config, debug=False):
         self.model = model.eval().float()
         self.config = config
+        self.debug=debug
 
     def __call__(self, event: EventI, ligand_conformation: StructureI, zmap: GridI, xmap: GridI) -> float:
         # Get the sample frame
@@ -146,6 +147,14 @@ class EventScorer:
             ligand_mask_sample = np.zeros(sample_frame.spacing, np.float32)
             density_mask = _get_ed_mask_float(self.config['xmap_radius'])
 
+        if self.debug is True:
+            centroid = event.centroid
+            z_mean = np.mean(zmap_sample)
+            z_std = np.mean(zmap_sample)
+            x_mean = np.mean(zmap_sample)
+            x_std = np.mean(zmap_sample)
+            m_num = np.sum(density_mask)
+            print(f'\t\tEvent {round(centroid[0], 2)} {round(centroid[1], 2)} {round(centroid[2], 2)}: z: {round(z_mean, 2)} {round(z_std, 2)}: x: {round(x_mean, 2)} {round(x_std, 2)}; mask {m_num}')
         # Run the model
         map_array = np.stack(
                     [
