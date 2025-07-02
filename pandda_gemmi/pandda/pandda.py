@@ -392,7 +392,7 @@ def pandda(args: PanDDAArgs):
 
 
     # Get the method for processing the statistical models
-    process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'], debug=args.debug)
+    process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'], use_ligand_data=args.use_ligand_data, debug=args.debug)
 
     # Load the structures and reflections from the datasets found in the file system, and create references to these
     # dataset objects and the arrays of their structures in the multiprocessing cache
