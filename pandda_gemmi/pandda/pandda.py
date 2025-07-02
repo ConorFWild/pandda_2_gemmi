@@ -223,7 +223,6 @@ class ProcessModel:
                 time_finish_score_events = time.time()
         else:
             for event_id, event in events.items():
-                print(f'Scoring {event_id}')
                 event_score, map_array, mol_array = score(
                     event,
                     None,
