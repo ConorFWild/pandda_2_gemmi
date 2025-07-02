@@ -183,6 +183,7 @@ class ProcessModel:
         # events = score(ligand_files, events, xmap_grid, raw_xmap_grid, mean_grid, z_grid, model_grid,
         #                median, reference_frame, homogenized_dataset_dmap_array, mean
         #                )
+        print(f'{self.use_ligand_data} {type(self.use_ligand_data)} {self.use_ligand_data == True}')
         if self.use_ligand_data:
             for lid, ligand_data in ligand_files.items():
                 confs = get_conformers(ligand_data)
@@ -222,6 +223,7 @@ class ProcessModel:
                 time_finish_score_events = time.time()
         else:
             for event_id, event in events.items():
+                print(f'Scoring {event_id}')
                 event_score, map_array, mol_array = score(
                     event,
                     None,
