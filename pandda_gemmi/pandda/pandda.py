@@ -603,12 +603,16 @@ def pandda(args: PanDDAArgs):
         umap_plot_out_dir = fs.output.processed_datasets[dtag] / "model_umap"
         if not umap_plot_out_dir.exists():
             os.mkdir(umap_plot_out_dir)
-        plot_aligned_density_projection(
-            dmaps,
-            models_to_process,
-            characterization_set_masks,
-            umap_plot_out_dir
-        )
+        try:
+            plot_aligned_density_projection(
+                dmaps,
+                models_to_process,
+                characterization_set_masks,
+                umap_plot_out_dir
+            )
+        except Exception as e:
+            print('UMAP Failed. This is probably due to numba versioning.')
+            print(e)
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
         # filtering those events and returning those events and unpacking them
