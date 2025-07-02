@@ -166,9 +166,12 @@ class ProcessModel:
         ]:
             events = filter(events)
         num_size_filtered_events = len(events)
-        size_range = (min([_event.pos_array.shape[0] for _event in events.values()]), max([_event.pos_array.shape[0] for _event in events.values()]))
 
-        if self.debug:
+
+        if self.debug & (num_size_filtered_events > 0):
+            size_range = (min([_event.pos_array.shape[0] for _event in events.values()]),
+                          max([_event.pos_array.shape[0] for _event in events.values()]))
+
             print(f'model {model_number}: size filtering results in {num_size_filtered_events} with volume element {round(reference_frame.get_grid().unit_cell.volume / reference_frame.get_grid().point_count,2)} and size range {size_range}')
 
         # Return None if there are no events after pre-scoring filters
