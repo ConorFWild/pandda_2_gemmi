@@ -147,7 +147,7 @@ class EventScorer:
             ligand_mask_sample = np.zeros(sample_frame.spacing, np.float32)
             density_mask = _get_ed_mask_float(self.config['xmap_radius'])
 
-        if self.debug is True:
+        if self.debug:
             centroid = event.centroid
             z_mean = round(float(np.mean(zmap_sample)), 2)
             z_std = round(float(np.std(zmap_sample)), 2)
