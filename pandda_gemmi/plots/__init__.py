@@ -1,5 +1,6 @@
 import numpy as np
 import umap
+from sklearn.manifold import TSNE
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -10,12 +11,16 @@ def plot_aligned_density_projection(
         dmaps,
         models_to_process,
         characterization_set_masks,
-        output_dir
+        output_dir,
+        projection='umap'
 ):
     pca = PCA(n_components=min(200, len(dmaps)))
     pca_embedding = pca.fit_transform(dmaps)
 
-    reducer = umap.UMAP()
+    if projection =='umap':
+        reducer = umap.UMAP()
+    else:
+        reducer = TSNE()
     embedding = reducer.fit_transform(pca_embedding)
     for model_number in models_to_process:
         plt.scatter(

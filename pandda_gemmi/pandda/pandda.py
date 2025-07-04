@@ -613,6 +613,13 @@ def pandda(args: PanDDAArgs):
             )
         except Exception as e:
             print('UMAP Failed. This is probably due to numba versioning.')
+            plot_aligned_density_projection(
+                dmaps,
+                models_to_process,
+                characterization_set_masks,
+                umap_plot_out_dir,
+                projection='tsne'
+            )
             print(e)
 
         # Process the models: calculating statistical maps; using them to locate events; filtering, scoring and re-
