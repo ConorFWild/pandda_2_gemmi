@@ -2,14 +2,16 @@ from ..interfaces import *
 
 
 class FilterCompatibleStructures:
-    def __init__(self, dataset, similarity=100.0):
+    def __init__(self, dataset, similarity=100.0, debug=False):
         self.dataset = dataset
         self.similarity = similarity
         self.resids = set(resid for resid in self.dataset.structure.protein_residue_ids())
+        self.debug = debug
 
 
     def get_compatible(self, dataset):
         dataset_resids = set([resid for resid in dataset.structure.protein_residue_ids()])
+        print(f'{len(dataset_resids.intersection(self.resids))} / {len(self.resids)}')
         if len(dataset_resids.intersection(self.resids)) != len(self.resids):
             return False
         else:
