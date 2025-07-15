@@ -592,8 +592,8 @@ def pandda(args: PanDDAArgs):
             dmaps[np.array([k == dtag for k in dmaps_dict]),:],
             reference_frame,
             CharacterizationNNAndFirst(
-                n_neighbours=args.min_characterisation_datasets-1,
-                min_size=args.min_characterisation_datasets-1,
+                n_neighbours=args.min_characterisation_datasets-2,
+                min_size=args.min_characterisation_datasets-2,
             )
         )
         time_finish_get_characterization_sets = time.time()
