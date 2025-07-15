@@ -405,6 +405,7 @@ def pandda(args: PanDDAArgs):
             dataset_dir.input_pdb_file,
             dataset_dir.input_mtz_file,
             dataset_dir.input_ligands,
+            dataset_dir.dtag
         )
         for dataset_dir
         in fs.input.dataset_dirs.values()
@@ -548,7 +549,8 @@ def pandda(args: PanDDAArgs):
                     dataset_refs[_dtag],
                     alignment_refs[_dtag],
                     transforms_ref,
-                    reference_frame_ref
+                    reference_frame_ref,
+                    args.debug
                 )
                 for _dtag
                 in comparator_datasets
@@ -556,6 +558,7 @@ def pandda(args: PanDDAArgs):
         )
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
         if args.debug:
+            print('Aligned dmap stats')
             for _dtag, _dmap in dmaps_dict.items():
                 arr = _dmap.data
                 print(f'{dtag} stats: min {np.min(arr)} max {np.max(arr)} mean {np.mean(arr)}')

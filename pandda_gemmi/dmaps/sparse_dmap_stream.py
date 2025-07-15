@@ -14,12 +14,14 @@ class SparseDMapStream:
                  reference_frame: DFrameInterface,
                  alignments: Dict[str, AlignmentInterface],
                  # cache: Path,
-                 transforms
+                 transforms,
+                 debug = False
                  ):
         self.datasets = datasets
         self.dframe = reference_frame
         self.alignments = alignments
         self.transforms = transforms
+        self.debug = debug
         ...
 
     def load(self, dtag: str):
@@ -41,7 +43,7 @@ class SparseDMapStream:
         return aligned_xmap
 
     @staticmethod
-    def parallel_load(dataset, alignment, transforms, dframe):
+    def parallel_load(dataset, alignment, transforms, dframe, debug=False):
 
         begin = time.time()
 
@@ -53,6 +55,10 @@ class SparseDMapStream:
 
         begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
+        if debug:
+            arr = np.array(xmap)
+            print(f'{dataset.name} raw xmap stats: min {np.min(arr)} max {np.max(arr)} mean {np.mean(arr)}')
+
         finish_fft = time.time()
         # print(f"\tFFT: {finish_fft - begin_fft}")
 
