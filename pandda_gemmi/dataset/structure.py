@@ -129,7 +129,10 @@ class Structure(StructureInterface):
         self.path = path
 
     def rfree(self):
-        return float(self.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0])
+        try:
+            return float(self.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_free")[0])
+        except:
+            return 0.0
 
     def rwork(self):
         return float(self.structure.make_mmcif_document()[0].find_loop("_refine.ls_R_factor_R_work")[0])
