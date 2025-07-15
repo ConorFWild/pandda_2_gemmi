@@ -137,6 +137,10 @@ class ProcessModel:
 
         mean_grid = reference_frame.unmask(SparseDMap(mean))
         z_grid = reference_frame.unmask(SparseDMap((z - np.mean(z)) / np.std(z)))
+        if self.debug:
+            print(f'model {model_number} xmap stats: min {np.min(homogenized_dataset_dmap_array)} max {np.max(homogenized_dataset_dmap_array)} mean {np.mean(homogenized_dataset_dmap_array)}')
+            print(f'model {model_number} mean stats: min {np.min(mean)} max {np.max(mean)} mean {np.mean(mean)}')
+            print(f'model {model_number} z stats: min {np.min(z)} max {np.max(z)} mean {np.mean(z)}')
 
         # Get the median
         protein_density_median = np.median(mean[reference_frame.mask.indicies_sparse_inner_atomic])
