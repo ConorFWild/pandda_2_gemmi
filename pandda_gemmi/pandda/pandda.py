@@ -589,7 +589,7 @@ def pandda(args: PanDDAArgs):
         characterization_sets: Dict[int, Dict[str, DatasetInterface]] = get_characterization_sets(
             dtag,
             {k: v for k, v in comparator_datasets.items() if k != dtag},
-            dmaps[np.array([k == dtag for k in dmaps_dict]),:],
+            dmaps[np.array([k != dtag for k in dmaps_dict]),:],
             reference_frame,
             CharacterizationNNAndFirst(
                 n_neighbours=args.min_characterisation_datasets-2,
