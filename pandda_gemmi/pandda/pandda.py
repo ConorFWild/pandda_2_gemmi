@@ -140,6 +140,7 @@ class ProcessModel:
         if self.debug:
             print(f'model {model_number} xmap stats: min {np.min(homogenized_dataset_dmap_array)} max {np.max(homogenized_dataset_dmap_array)} mean {np.mean(homogenized_dataset_dmap_array)}')
             print(f'model {model_number} mean stats: min {np.min(mean)} max {np.max(mean)} mean {np.mean(mean)}')
+            print(f'model {model_number} std stats: min {np.min(std)} max {np.max(std)} mean {np.mean(std)}')
             print(f'model {model_number} z stats: min {np.min(z)} max {np.max(z)} mean {np.mean(z)}')
 
         # Get the median
