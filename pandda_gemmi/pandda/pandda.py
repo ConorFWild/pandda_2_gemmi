@@ -579,7 +579,10 @@ def pandda(args: PanDDAArgs):
             comparator_datasets,
             dmaps,
             reference_frame,
-            CharacterizationNNAndFirst()
+            CharacterizationNNAndFirst(
+                n_neighbours=args.min_characterisation_datasets-1,
+                min_size=args.min_characterisation_datasets-1,
+            )
         )
         time_finish_get_characterization_sets = time.time()
         # TODO: Log properly

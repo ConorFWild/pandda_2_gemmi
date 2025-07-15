@@ -178,8 +178,8 @@ class CharacterizationFirst:
 
 
 class CharacterizationNNAndFirst:
-    def __init__(self, n_neighbours=25, ):
-        self.characterize_nn = CharacterizationNN(n_neighbours=25)
+    def __init__(self, n_neighbours=25, min_size=15 ):
+        self.characterize_nn = CharacterizationNN(n_neighbours=25, min_size=15)
         self.characterize_first = CharacterizationFirst()
 
     def __call__(self, dtag_array, dmaps, reference_frame):
