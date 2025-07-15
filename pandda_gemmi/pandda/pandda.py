@@ -555,6 +555,10 @@ def pandda(args: PanDDAArgs):
             }
         )
         dmaps = np.vstack([_dmap.data.reshape((1, -1)) for _dtag, _dmap in dmaps_dict.items()])
+        if args.debug:
+            for _dtag, _dmap in dmaps_dict.items():
+                arr = _dmap.data
+                print(f'{dtag} stats: min {np.min(arr)} max {np.max(arr)} mean {np.mean(arr)}')
         time_finish_get_dmaps = time.time()
         # TODO: log properly
         # print(f"\t\tGot dmaps in: {round(time_finish_get_dmaps - time_begin_get_dmaps, 2)}")
@@ -635,6 +639,7 @@ def pandda(args: PanDDAArgs):
         model_maps_dir = fs.output.processed_datasets[dtag] / 'model_maps'
         if not model_maps_dir.exists():
             os.mkdir(model_maps_dir)
+
         processed_models = {
             model_number: Partial(process_model).paramaterise(
                 dataset.ligand_files,
