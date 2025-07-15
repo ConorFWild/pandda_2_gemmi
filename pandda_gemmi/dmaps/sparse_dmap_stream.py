@@ -56,6 +56,7 @@ class SparseDMapStream:
         begin_fft = time.time()
         xmap = dataset.reflections.transform_f_phi_to_map()
         if debug:
+            print(np.array(dataset.reflections.reflections))
             arr = np.array(xmap)
             print(f'{dataset.name} raw xmap stats: min {np.min(arr)} max {np.max(arr)} mean {np.mean(arr)}')
 

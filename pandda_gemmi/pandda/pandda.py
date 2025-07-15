@@ -405,7 +405,7 @@ def pandda(args: PanDDAArgs):
             dataset_dir.input_pdb_file,
             dataset_dir.input_mtz_file,
             dataset_dir.input_ligands,
-            dataset_dir.dtag
+            name=dataset_dir.dtag
         )
         for dataset_dir
         in fs.input.dataset_dirs.values()
