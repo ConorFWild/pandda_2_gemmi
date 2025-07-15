@@ -20,7 +20,7 @@ def plot_aligned_density_projection(
     if projection =='umap':
         reducer = umap.UMAP()
     else:
-        reducer = TSNE()
+        reducer = TSNE(perplexity=len(dmaps)-1)
     embedding = reducer.fit_transform(pca_embedding)
     for model_number in models_to_process:
         plt.scatter(
