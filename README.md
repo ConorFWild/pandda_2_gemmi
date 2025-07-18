@@ -71,12 +71,7 @@ git clone https://github.com/ConorFWild/pandda_2_gemmi.git
 cd pandda_2_gemmi 
 python -m pip install -e . 
 
-git clone https://github.com/ConorFWild/gemmi.git
-cd gemmi
-git checkout flexible_interpolation
-python -m pip install .  # Install the custom version of gemmi
-                         # This step will likely be removed in
-                         # Future versions
+git 
 ```
 
 The first time you run PanDDA 2 it will try to download two models of approximately 1GB total.
