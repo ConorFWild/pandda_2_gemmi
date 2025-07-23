@@ -44,11 +44,18 @@ if __name__ == '__main__':
                             datasets}
 
     # Get the method for processing the statistical models
-    process_model = ProcessModel(minimum_event_score=event_model_config['minimum_event_score'],
-                                 use_ligand_data=args.use_ligand_data, debug=args.debug)
+    process_model = ProcessModel(
+        minimum_event_score=event_model_config['minimum_event_score'],
+        use_ligand_data=args.use_ligand_data,
+        debug=args.debug,
+    )
 
     # Process the PanDDA
-    j = datasets_to_process.index(args.dtag)
+    j = 0
+    if args.dtag in datasets_to_process:
+        j = [_dtag for _dtag in datasets_to_process].index(args.dtag)
+    else:
+        exit()
     time_begin_process_datasets = time.time()
     process_dataset(
         args.dtag,
