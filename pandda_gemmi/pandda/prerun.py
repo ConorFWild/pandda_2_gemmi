@@ -90,4 +90,4 @@ def prerun(args, console, processor):
     datasets_to_process, datasets_not_to_process = GetDatasetsToProcess(dataset_filters)(datasets, fs)
     console.summarize_datasets_to_process(datasets_to_process, datasets_not_to_process)
 
-    return
+    return fs, datasets, datasets_to_process
