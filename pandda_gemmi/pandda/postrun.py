@@ -82,7 +82,7 @@ def postrun(
                 key=lambda _dtag: datasets_to_process[_dtag].reflections.resolution()
             )
         ],
-        HeirarchicalSiteModel(t=args.max_site_distance_cutoff),
+        HeirarchicalSiteModel(t=args.max_site_distance_cutoff, debug=args.debug),
         existing_events,
         existing_sites
     )
