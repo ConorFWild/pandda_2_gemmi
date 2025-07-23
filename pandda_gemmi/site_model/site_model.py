@@ -258,7 +258,7 @@ class HeirarchicalSiteModel:
 
         # Then add new sites for any events that haven't already been explained.
         # Construct the sites
-        for cluster in enumerate(np.unique(clusters)):
+        for cluster in np.unique(clusters):
             cluster_event_id_array = event_id_array[clusters == cluster]
 
             # Get new, unallocated events
