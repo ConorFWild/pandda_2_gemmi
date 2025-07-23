@@ -37,6 +37,9 @@ if __name__ == '__main__':
     score_event, score_build, event_model_config, event_score_quantiles = get_scoring_models(args)
 
     # Load known events and autobuilds
+    if args.debug:
+        print('Processed Datasets')
+        print(fs.output.processed_datasets)
     pandda_events = {}
     autobuilds = {}
     for _dtag in datasets:
