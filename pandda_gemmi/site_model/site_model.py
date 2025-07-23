@@ -84,8 +84,9 @@ from .site import Site
 
 class HeirarchicalSiteModel:
 
-    def __init__(self, t=8.0):
+    def __init__(self, t=8.0, debug=False):
         self.t = t
+        self.debug = debug
 
     def get_event_environment(
             self,
@@ -248,6 +249,12 @@ class HeirarchicalSiteModel:
                 # Allocate new events that have been used
                 for _event_id in new_overlapping_events:
                     allocated_events.append(_event_id)
+
+        if self.debug:
+            print('event_id_array')
+            print(event_id_array)
+            print('clusters')
+            print(clusters)
 
         # Then add new sites for any events that haven't already been explained.
         # Construct the sites
