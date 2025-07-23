@@ -81,12 +81,15 @@ def merge_autobuilds(
         )
         # print(f"\tSlected build path: {selected_build_path}")
         model_building_dir = fs.output.processed_datasets[dtag] / constants.PANDDA_MODELLED_STRUCTURES_DIR
-        merge_build(
-            dataset,
-            selected_build_path,
-            model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag),
-            # fs.output.processed_datasets[dtag] / constants.PANDDA_MERGED_MODEL.format(dtag),
-        )
+        model_file = model_building_dir / constants.PANDDA_EVENT_MODEL.format(dtag)
+
+        if not model_file.exists():
+            merge_build(
+                dataset,
+                selected_build_path,
+                model_file,
+                # fs.output.processed_datasets[dtag] / constants.PANDDA_MERGED_MODEL.format(dtag),
+            )
 
         merged_build_scores[dtag] = all_autobuilds[selected_build_path][0]
 

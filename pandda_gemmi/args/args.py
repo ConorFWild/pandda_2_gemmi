@@ -7,11 +7,8 @@ from distutils.util import strtobool
 from pandda_gemmi import constants
 from pandda_gemmi.interfaces import *
 
-
 @dataclasses.dataclass()
-class PanDDAArgs:
-    data_dirs: Path
-    out_dir: Path
+class PanDDAKWArgs:
     pdb_regex: str = constants.ARGS_PDB_REGEX_DEFAULT
     mtz_regex: str = constants.ARGS_MTZ_REGEX_DEFAULT
     use_ligand_data: bool = True
@@ -99,7 +96,6 @@ class PanDDAArgs:
     debug: bool = False
     # debug: Debug = Debug.DEFAULT
 
-
     @staticmethod
     def parse_only_datasets(string):
         if string:
@@ -108,23 +104,9 @@ class PanDDAArgs:
             return None
 
     @staticmethod
-    def from_command_line():
-        parser = argparse.ArgumentParser(
-            description=constants.ARGS_DESCRIPTION,
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
-
+    def add_parser_arguments(parser):
         # IO
-        parser.add_argument(
-            constants.ARGS_DATA_DIRS,
-            type=Path,
-            help=constants.ARGS_DATA_DIRS_HELP,
-        )
-        parser.add_argument(
-            constants.ARGS_OUT_DIR,
-            type=Path,
-            help=constants.ARGS_OUT_DIR_HELP,
-        )
+
         parser.add_argument(
             constants.ARGS_PDB_REGEX,
             type=str,
@@ -266,7 +248,6 @@ class PanDDAArgs:
             default='["--exclusive", ]',
             help=constants.ARGS_JOB_EXTRA_HELP,
         )
-
 
         parser.add_argument(
             constants.ARGS_DISTRIBUTED_WALLTIME,
@@ -680,13 +661,173 @@ class PanDDAArgs:
             help=constants.ARGS_DEBUG_HELP,
         )
 
-        args = parser.parse_args()
+@dataclasses.dataclass()
+class PanDDAPArgs():
+    data_dirs: Path
+    out_dir: Path
 
-        # only_datasets = PanDDAArgs.parse_only_datasets(args.only_datasets)
+    @staticmethod
+    def add_parser_arguments(parser):
+        parser.add_argument(
+            constants.ARGS_DATA_DIRS,
+            type=Path,
+            help=constants.ARGS_DATA_DIRS_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_OUT_DIR,
+            type=Path,
+            help=constants.ARGS_OUT_DIR_HELP,
+        )
+
+
+@dataclasses.dataclass()
+class PanDDAArgs(PanDDAKWArgs, PanDDAPArgs):
+
+
+
+    @staticmethod
+    def from_command_line():
+        parser = argparse.ArgumentParser(
+            description=constants.ARGS_DESCRIPTION,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+
+        PanDDAPArgs.add_parser_arguments(parser)
+        PanDDAKWArgs.add_parser_arguments(parser)
+
+        args = parser.parse_args()
 
         return PanDDAArgs(
             data_dirs=args.data_dirs,
             out_dir=args.out_dir,
+            pdb_regex=args.pdb_regex,
+            mtz_regex=args.mtz_regex,
+            use_ligand_data=args.use_ligand_data,
+            ligand_dir_regex=args.ligand_dir_regex,
+            ligand_cif_regex=args.ligand_cif_regex,
+            ligand_pdb_regex=args.ligand_pdb_regex,
+            ligand_smiles_regex=args.ligand_smiles_regex,
+            statmaps=args.statmaps,
+            low_memory=args.low_memory,
+            rescore_event_method=args.rescore_event_method,
+            ground_state_datasets=args.ground_state_datasets,
+            exclude_from_z_map_analysis=args.exclude_from_z_map_analysis,
+            exclude_from_characterisation=args.exclude_from_characterisation,
+            only_datasets=args.only_datasets,
+            ignore_datasets=args.ignore_datasets,
+            dynamic_res_limits=args.dynamic_res_limits,
+            high_res_upper_limit=args.high_res_upper_limit,
+            high_res_lower_limit=args.high_res_lower_limit,
+            high_res_increment=args.high_res_increment,
+            max_shell_datasets=args.max_shell_datasets,
+            high_res_buffer=args.high_res_buffer,
+            min_characterisation_datasets=args.min_characterisation_datasets,
+            structure_factors=args.structure_factors,
+            all_data_are_valid_values=args.all_data_are_valid_values,
+            low_resolution_completeness=args.low_resolution_completeness,
+            sample_rate=args.sample_rate,
+            max_rmsd_to_reference=args.max_rmsd_to_reference,
+            max_rfree=args.max_rfree,
+            dataset_range=args.dataset_range,
+            max_wilson_plot_z_score=args.max_wilson_plot_z_score,
+            same_space_group_only=args.same_space_group_only,
+            similar_models_only=args.similar_models_only,
+            resolution_factor=args.resolution_factor,
+            grid_spacing=args.grid_spacing,
+            padding=args.padding,
+            density_scaling=args.density_scaling,
+            outer_mask=args.outer_mask,
+            inner_mask=args.inner_mask,
+            inner_mask_symmetry=args.inner_mask_symmetry,
+            contour_level=args.contour_level,
+            negative_values=args.negative_values,
+            min_blob_volume=args.min_blob_volume,
+            min_blob_z_peak=args.min_blob_z_peak,
+            clustering_cutoff=args.clustering_cutoff,
+            cluster_cutoff_distance_multiplier=args.cluster_cutoff_distance_multiplier,
+            event_score=args.event_score,
+            max_events_per_dataset=args.max_events_per_dataset,
+            max_site_distance_cutoff=args.max_site_distance_cutoff,
+            min_bdc=args.min_bdc,
+            max_bdc=args.max_bdc,
+            increment=args.increment,
+            output_multiplier=args.output_multiplier,
+            comparison_strategy=args.comparison_strategy,
+            comparison_res_cutoff=args.comparison_res_cutoff,
+            comparison_min_comparators=args.comparison_min_comparators,
+            comparison_max_comparators=args.comparison_max_comparators,
+            known_apos=args.known_apos,
+            exclude_local=args.exclude_local,
+            cluster_selection=args.cluster_selection,
+            local_processing=args.local_processing,
+            local_cpus=args.local_cpus,
+            global_processing=args.global_processing,
+            memory_availability=args.memory_availability,
+            job_params_file=args.job_params_file,
+            distributed_scheduler=args.distributed_scheduler,
+            distributed_queue=args.distributed_queue,
+            distributed_project=args.distributed_project,
+            distributed_num_workers=args.distributed_num_workers,
+            distributed_cores_per_worker=args.distributed_cores_per_worker,
+            distributed_mem_per_core=args.distributed_mem_per_core,
+            distributed_resource_spec=args.distributed_resource_spec,
+            distributed_tmp=args.distributed_tmp,
+            distributed_job_extra=args.job_extra,
+            distributed_walltime=args.distributed_walltime,
+            distributed_watcher=args.distributed_watcher,
+            distributed_slurm_partition=args.distributed_slurm_partition,
+            autobuild=args.autobuild,
+            autobuild_strategy=args.autobuild_strategy,
+            rhofit_coord=args.rhofit_coord,
+            cif_strategy=args.cif_strategy,
+            rank_method=args.rank_method,
+            source_pandda=args.source_pandda,
+            debug=args.debug,
+        )
+
+@dataclasses.dataclass()
+class PanDDAProcessDatasetPArgs():
+    data_dirs: Path
+    out_dir: Path
+    dtag: str
+
+    @staticmethod
+    def add_parser_arguments(parser):
+        parser.add_argument(
+            constants.ARGS_DATA_DIRS,
+            type=Path,
+            help=constants.ARGS_DATA_DIRS_HELP,
+        )
+        parser.add_argument(
+            constants.ARGS_OUT_DIR,
+            type=Path,
+            help=constants.ARGS_OUT_DIR_HELP,
+        )
+        parser.add_argument(
+            '--dtag',
+            type=str,
+            help='The dataset to process',
+        )
+
+@dataclasses.dataclass()
+class PanDDAProcessDatasetArgs(PanDDAKWArgs, PanDDAProcessDatasetPArgs):
+
+    @staticmethod
+    def from_command_line():
+        parser = argparse.ArgumentParser(
+            description=constants.ARGS_DESCRIPTION,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+
+        PanDDAPArgs.add_parser_arguments(parser)
+        PanDDAKWArgs.add_parser_arguments(parser)
+
+        args = parser.parse_args()
+
+        return PanDDAProcessDatasetArgs(
+            data_dirs=args.data_dirs,
+            out_dir=args.out_dir,
+            dtag=dtag,
             pdb_regex=args.pdb_regex,
             mtz_regex=args.mtz_regex,
             use_ligand_data=args.use_ligand_data,

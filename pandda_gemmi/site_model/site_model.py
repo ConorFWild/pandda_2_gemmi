@@ -153,7 +153,9 @@ class HeirarchicalSiteModel:
     def __call__(self,
                  datasets: Dict[str, DatasetInterface],
                  events: Dict[Tuple[str, int], EventInterface],
-                 ref_dataset
+                 ref_dataset,
+                 existing_events,
+                 existing_sites
                  ):
 
         # Handle edge cases
@@ -192,20 +194,83 @@ class HeirarchicalSiteModel:
             criterion="distance",
             method="centroid"
             # method="complete"
-
         )
 
-        # Construct the sites
-        sites = {}
+        # Get the event sites
+        event_sites = {}
         for j, cluster in enumerate(np.unique(clusters)):
             cluster_event_id_array = event_id_array[clusters == cluster]
-            sites[j+1] = Site(
-                [(str(event_id[0]), int(event_id[1])) for event_id in cluster_event_id_array],
-                np.mean(
-                    centroid_array[clusters==cluster, :],
-                    axis=0,
-                ).flatten(),
-            )
+            for event_id in cluster_event_id_array:
+                event_sites[(str(event_id[0]), int(event_id[1]))] = j
+
+        sites = {}
+
+        # If there are existing sites, first construct these clusters, including any new datasets
+        # that cluster with old ones. Keep any known events in their sites regardless of new clustering.
+        allocated_events = []
+        if existing_sites:
+            allocated_events = [
+                (_row['dtag'], int(_row['event_idx']))
+                 for _row
+                 in existing_events.values()
+            ]
+            for site_idx, site_info in existing_sites.items():
+                # Get known events in this site
+                known_site_events = [
+                    (_row['dtag'], int(_row['event_idx'])
+                     for _row
+                     in existing_events.values()
+                     if _row['site_idx'] == site_idx)
+                ]
+
+                # Get any new datasets that cluster with these (and aren't in a known site)
+                known_site_events_new_sites = set(
+                    [
+                        new_site_idx
+                        for event_id, new_site_idx
+                        in event_sites.items()
+                        if event_id in known_site_events
+                    ]
+                )
+                new_overlapping_events = [
+                    new_event_id
+                    for new_event_id, new_site_idx
+                    in event_sites.items()
+                    if (new_site_idx in known_site_events_new_sites) & (new_event_id not in existing_events) & (new_event_id not in allocated_events)
+                ]
+
+                sites[site_idx] = Site(
+                    known_site_events + new_overlapping_events,
+                    site_info['centroid'],
+                    site_info['Name'],
+                    site_info['Comment']
+                )
+                # Allocate new events that have been used
+                for _event_id in new_overlapping_events:
+                    allocated_events.append(_event_id)
+
+        # Then add new sites for any events that haven't already been explained.
+        # Construct the sites
+        for cluster in enumerate(np.unique(clusters)):
+            cluster_event_id_array = event_id_array[clusters == cluster]
+
+            # Get new, unallocated events
+            new_site_events = [
+                (str(event_id[0]), int(event_id[1]))
+                for event_id
+                in cluster_event_id_array
+                if (str(event_id[0]), int(event_id[1])) not in allocated_events
+            ]
+
+            if len(new_site_events) != 0:
+
+                sites[len(sites)+1] = Site(
+                    new_site_events,
+                    np.mean(
+                        centroid_array[clusters==cluster, :],
+                        axis=0,
+                    ).flatten(),
+                )
 
         return sites
 

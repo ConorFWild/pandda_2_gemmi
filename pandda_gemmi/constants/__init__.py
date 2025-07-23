@@ -30,6 +30,8 @@ PANDDA_LIGAND_PDB_FILE = "ligand.pdb"
 PANDDA_LIGAND_SMILES_FILE = "ligand.smiles"
 
 PANDDA_INSPECT_EVENTS_PATH = "pandda_inspect_events.csv"
+PANDDA_INSPECT_SITES_PATH = "pandda_inspect_sites.csv"
+
 PANDDA_Z_MAP_FILE = "{dtag}-z_map.native.ccp4"
 PANDDA_Z_RAW_MAP_FILE = "{dtag}-z_raw_map.native.ccp4"
 PANDDA_EVENT_MAP_FILE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"

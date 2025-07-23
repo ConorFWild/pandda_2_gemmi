@@ -2,7 +2,8 @@ from ..interfaces import *
 
 
 class EventBuild(EventBuildInterface):
-    def __init__(self, build_path, ligand_key, score, centroid, bdc, build_score=0.0, noise=0.0, signal=0.0, num_contacts=0,
+    def __init__(self, build_path, ligand_key, score, centroid, bdc, build_score=0.0, noise=0.0, signal=0.0,
+                 num_contacts=0,
                  num_points=0,
                  optimal_contour=0.0,
                  rscc=0.0
@@ -22,7 +23,13 @@ class EventBuild(EventBuildInterface):
 
 
 class Event(EventInterface):
-    def __init__(self, pos_array, point_array, size, centroid, score=0.0, bdc=0.0, build=None, local_strength=0.0):
+    def __init__(self, pos_array, point_array, size, centroid, score=0.0, bdc=0.0, build=None, local_strength=0.0,
+                 interesting=False,
+                 ligand_placed=False,
+                 ligand_confidence='Low',
+                 comment='',
+                 viewed=False
+                 ):
         self.pos_array = pos_array
         self.point_array = point_array
         self.size = size
@@ -31,3 +38,8 @@ class Event(EventInterface):
         self.bdc = bdc
         self.build = build
         self.local_strength = local_strength
+        self.interesting: bool = interesting
+        self.ligand_placed: bool = ligand_placed
+        self.ligand_confidence: str = ligand_confidence
+        self.comment: str = comment
+        self.viewed: bool = viewed

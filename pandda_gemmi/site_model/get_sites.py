@@ -4,11 +4,16 @@ def get_sites(
 ref_dataset,
         # processor,
         # structure_array_refs,
-        site_model):
+        site_model,
+        existing_events,
+        existing_sites
+):
     sites = site_model(
         datasets,
         event,
-        ref_dataset
+        ref_dataset,
+        existing_events,
+        existing_sites
         # processor,
         # structure_array_refs,
     )

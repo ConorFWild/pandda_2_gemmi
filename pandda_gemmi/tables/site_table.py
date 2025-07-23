@@ -108,3 +108,53 @@ def get_site_table_from_events(events, initial_sites, cutoff: float):
         records.append(site_record)
 
     return SiteTable(records)
+
+
+
+@dataclasses.dataclass()
+class InspectSiteTableRecord:
+    site_idx: int
+    centroid: Tuple[float, float, float]
+    Name: str
+    Comment: str
+
+    @staticmethod
+    def from_site_id(site_id, centroid: np.ndarray, Name=None, Comment=None):
+        return InspectSiteTableRecord(
+            site_idx=site_id,
+            centroid=(centroid[0], centroid[1], centroid[2],),
+            Name=Name,
+            Comment=Comment
+        )
+
+
+@dataclasses.dataclass()
+class InspectSiteTable:
+    site_record_list: List[InspectSiteTableRecord]
+
+    def __iter__(self):
+        for record in self.site_record_list:
+            yield record
+
+    @classmethod
+    def from_sites(cls, sites):
+        records = []
+        for site_id, site in sites.items():
+            # site = sites[site_id]
+            centroid = site.centroid
+            site_record = InspectSiteTableRecord.from_site_id(site_id, centroid, site.name, site.comment)
+            records.append(site_record)
+
+        return cls(records)
+
+    def save(self, path: Path):
+        records = []
+        for site_record in self.site_record_list:
+            site_record_dict = dataclasses.asdict(site_record)
+            records.append(site_record_dict)
+
+        table = pd.DataFrame(records)
+
+        table.to_csv(str(path))
+
+

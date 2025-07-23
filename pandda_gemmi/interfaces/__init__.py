@@ -223,6 +223,11 @@ class EventInterface(Protocol):
     score: float
     bdc: float
     build: EventBuildInterface
+    interesting: bool
+    ligand_placed: bool
+    ligand_confidence: str
+    comment: str
+    viewed: bool
 
 
 class AutobuildInterface(Protocol):
