@@ -217,10 +217,10 @@ class HeirarchicalSiteModel:
             for site_idx, site_info in existing_sites.items():
                 # Get known events in this site
                 known_site_events = [
-                    (_row['dtag'], int(_row['event_idx'])
+                    (_row['dtag'], int(_row['event_idx']))
                      for _row
                      in existing_events.values()
-                     if _row['site_idx'] == site_idx)
+                     if _row['site_idx'] == site_idx
                 ]
 
                 # Get any new datasets that cluster with these (and aren't in a known site)
