@@ -819,7 +819,7 @@ class PanDDAProcessDatasetArgs(PanDDAKWArgs, PanDDAProcessDatasetPArgs):
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
 
-        PanDDAPArgs.add_parser_arguments(parser)
+        PanDDAProcessDatasetPArgs.add_parser_arguments(parser)
         PanDDAKWArgs.add_parser_arguments(parser)
 
         args = parser.parse_args()
@@ -827,7 +827,7 @@ class PanDDAProcessDatasetArgs(PanDDAKWArgs, PanDDAProcessDatasetPArgs):
         return PanDDAProcessDatasetArgs(
             data_dirs=args.data_dirs,
             out_dir=args.out_dir,
-            dtag=dtag,
+            dtag=args.dtag,
             pdb_regex=args.pdb_regex,
             mtz_regex=args.mtz_regex,
             use_ligand_data=args.use_ligand_data,
