@@ -55,20 +55,21 @@ def check_smiles_file(path):
         return False
 
 
-def get_input_pdb_file(path, pdb_regex):
+def get_input_pdb_file(path, pdb_regex, check_input):
     input_pdb_files = [pdb_path for pdb_path in path.glob(pdb_regex)]
     if len(input_pdb_files) == 0:
         input_pdb_file = None
         print(f"NO PDBS IN DIR: {path} WITH REGEX: {pdb_regex}")
     else:
         input_pdb_file: Path = input_pdb_files[0]
-        if not check_pdb_file(input_pdb_file):
-            print(f"CHECK FAILURE: {input_pdb_file}")
-            input_pdb_file = None
+        if check_input:
+            if not check_pdb_file(input_pdb_file):
+                print(f"CHECK FAILURE: {input_pdb_file}")
+                input_pdb_file = None
     return input_pdb_file
 
 
-def get_input_mtz_file(path, mtz_regex):
+def get_input_mtz_file(path, mtz_regex, check_input):
     input_mtz_files = [mtz_path for mtz_path in path.glob(mtz_regex)]
     if len(input_mtz_files) == 0:
         input_mtz_file = None
@@ -76,9 +77,10 @@ def get_input_mtz_file(path, mtz_regex):
 
     else:
         input_mtz_file: Path = input_mtz_files[0]
-        if not check_mtz_file(input_mtz_file):
-            print(f"CHECK FAILURE: {input_mtz_file}")
-            input_mtz_file = None
+        if check_input:
+            if not check_mtz_file(input_mtz_file):
+                print(f"CHECK FAILURE: {input_mtz_file}")
+                input_mtz_file = None
     return input_mtz_file
 
 
@@ -89,7 +91,7 @@ class LigandFiles:
         self.ligand_pdb = ligand_pdb
 
 
-def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, ):
+def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, check_input):
     ligand_keys = {}
     for file_path in path.glob("*"):
         name = file_path.name
@@ -109,7 +111,10 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
             continue
 
         if re.match(ligand_cif_regex, name):
-            if check_cif_file(file_path):
+            checked = True
+            if check_input:
+                checked = check_cif_file(file_path)
+            if checked:
                 if stem in ligand_keys:
                     ligand_keys[stem].ligand_cif = file_path
                 else:
@@ -118,7 +123,10 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
                 print(f'Ligand name: {name} fails cif check!')
 
         elif re.match(ligand_smiles_regex, name):
-            if check_smiles_file(file_path):
+            checked = True
+            if check_input:
+                checked = check_smiles_file(file_path)
+            if checked:
                 if stem in ligand_keys:
                     ligand_keys[stem].ligand_smiles = file_path
                 else:
@@ -126,7 +134,10 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
             else:
                 print(f'Ligand name: {name} fails smiles check!')
         elif re.match(ligand_pdb_regex, name):
-            if check_pdb_file(file_path):
+            checked = True
+            if check_input:
+                checked = check_pdb_file(file_path)
+            if checked:
                 if stem in ligand_keys:
                     ligand_keys[stem].ligand_pdb = file_path
                 else:
@@ -141,7 +152,7 @@ def parse_dir_ligands(path: Path, ligand_cif_regex, ligand_smiles_regex, ligand_
     return ligand_keys
 
 
-def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, ):
+def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, check_input):
     # path_ligands = parse_dir_ligands(path, ligand_cif_regex, ligand_smiles_regex, ligand_pdb_regex, )
     path_ligands = {}
     for ligand_dir_path in path.glob("*"):
@@ -154,6 +165,7 @@ def get_input_ligands(path: Path, ligand_dir_regex, ligand_cif_regex, ligand_smi
                 ligand_cif_regex,
                 ligand_smiles_regex,
                 ligand_pdb_regex,
+                check_input
             )
             # print(f"Matched ligand dir with {len(ligand_dir_ligands)} ligands!!")
             # path_ligands.update(ligand_dir_ligands)
@@ -175,6 +187,7 @@ class DatasetDir:
     def __init__(
             self,
             path: Path,
+            output_dir: Path,
             pdb_regex: str = constants.ARGS_PDB_REGEX_DEFAULT,
             mtz_regex: str = constants.ARGS_MTZ_REGEX_DEFAULT,
             ligand_dir_regex: str = constants.ARGS_LIGAND_DIR_REGEX_DEFAULT,
@@ -185,11 +198,16 @@ class DatasetDir:
         # Get the dtag
         self.dtag = path.name
 
+        # Decide whether to do checks based on whether dataset has been accepted
+        check_input=True
+        if (output_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / self.dtag).exists():
+            check_input = False
+
         # Get pdb
-        self.input_pdb_file = get_input_pdb_file(path, pdb_regex)
+        self.input_pdb_file = get_input_pdb_file(path, pdb_regex,check_input)
 
         # Get mtz
-        self.input_mtz_file = get_input_mtz_file(path, mtz_regex)
+        self.input_mtz_file = get_input_mtz_file(path, mtz_regex, check_input)
 
         # Get the ligands
         self.input_ligands = get_input_ligands(
@@ -198,6 +216,7 @@ class DatasetDir:
             ligand_cif_regex,
             ligand_smiles_regex,
             ligand_pdb_regex,
+            check_input
         )
 
         self.path = path
@@ -207,6 +226,7 @@ class PanDDAInput:
     def __init__(
             self,
             input_dir: Path,
+            output_dir: Path,
             pdb_regex: str = constants.ARGS_PDB_REGEX_DEFAULT,
             mtz_regex: str = constants.ARGS_MTZ_REGEX_DEFAULT,
             ligand_dir_regex: str = constants.ARGS_LIGAND_DIR_REGEX_DEFAULT,
@@ -221,6 +241,7 @@ class PanDDAInput:
             in [
                 DatasetDir(
                     path,
+                    output_dir,
                     pdb_regex,
                     mtz_regex,
                     ligand_dir_regex,
