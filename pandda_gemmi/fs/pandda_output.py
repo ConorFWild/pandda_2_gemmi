@@ -36,12 +36,13 @@ class PanDDAOutput(PanDDAOutputInterface):
         self.processed_datasets = {}
         for dtag, dataset_dir in pandda_input.dataset_dirs.items():
             processed_dataset_dir = self.processed_datasets_dir / dtag
+            self.processed_datasets[dtag] = processed_dataset_dir
+
             if processed_dataset_dir.exists():
                 print(f'Already copied data for {dtag}!')
                 continue
 
             try_make(processed_dataset_dir)
-            self.processed_datasets[dtag] = processed_dataset_dir
 
             model_building_dir = processed_dataset_dir / constants.PANDDA_MODELLED_STRUCTURES_DIR
             try_make(model_building_dir)
