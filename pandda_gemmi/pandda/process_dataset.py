@@ -75,7 +75,10 @@ from pandda_gemmi.plots import plot_aligned_density_projection
 def read_dataset(fs, dtag):
     pandda_events = {}
     autobuilds = {}
-    _events = serialize.unserialize_events(fs.output.processed_datasets[dtag] / f"events.yaml")
+    processed_dataset_path = fs.output.processed_datasets[dtag] / f"events.yaml"
+    if not processed_dataset_path.exists():
+        return {}, {}
+    _events = serialize.unserialize_events(processed_dataset_path)
     for event_idx, event in _events.items():
         pandda_events[(dtag, event_idx)] = event
     for event_idx, event in _events.items():
