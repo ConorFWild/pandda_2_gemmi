@@ -16,7 +16,7 @@ def output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabili
         site_table = InspectSiteTable.from_sites(sites)
         site_table.save(fs.output.analyses_dir / constants.PANDDA_INSPECT_SITES_PATH)
 
-        for _event_id, _row in pandda_events.items():
+        for _event_id, _row in existing_events.items():
             if _event_id in pandda_events:
                 pandda_events[_event_id].interesting = _row['Interesting']
                 pandda_events[_event_id].ligand_placed = _row['Ligand Placed']
