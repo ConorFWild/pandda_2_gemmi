@@ -42,10 +42,10 @@ def postrun(
     if inspect_table_file.exists():
         inspect_events_table = pd.read_csv(inspect_table_file)
         inspect_sites_table = pd.read_csv(inspect_sites_file)
-        existing_events = {(_row['dtag'], int(_row['event_idx'])): _row for _row in inspect_events_table.iterrows()}
+        existing_events = {(_row['dtag'], int(_row['event_idx'])): _row for _idx, _row in inspect_events_table.iterrows()}
         existing_sites = {
             _row['site_idx']: _row
-            for _row
+            for _idx, _row
             in inspect_sites_table.iterrows()
         }
     else:
@@ -99,7 +99,9 @@ def postrun(
         RankHighEventScoreBySite(),
     )
     # for event_id in ranking:
-    #     print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}")
+    #     print(f"{event_id} : {round(pandda_events[event_id].build.score, 2)}"    if args.debug:
+    #         print('Processed Datasets')
+    #         print(fs.output.processed_datasets))
 
     # Probabilities
     # Calculate the cumulative probability that a hit remains in the site using the event score quantile table

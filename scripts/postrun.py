@@ -47,6 +47,10 @@ if __name__ == '__main__':
         pandda_events.update(new_events)
         autobuilds.update(new_autobuilds)
 
+    if args.debug:
+        print('Events')
+        for event_idx, event in pandda_events.items():
+            print(event_idx)
     # Process the PanDDA
     time_pandda_begin = time.time()
     postrun(
