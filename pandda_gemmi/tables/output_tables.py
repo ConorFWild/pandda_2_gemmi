@@ -5,7 +5,7 @@ from .event_table import EventTable, InspectEventTable
 
 
 def output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabilities, fs, existing_events,
-                  existing_sites, debug):
+                  existing_sites, debug=False):
     site_table = SiteTable.from_sites(sites)
     site_table.save(fs.output.analyses_dir / constants.PANDDA_ANALYSE_SITES_FILE)
 

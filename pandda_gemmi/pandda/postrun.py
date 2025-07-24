@@ -108,7 +108,7 @@ def postrun(
     hit_in_site_probabilities = get_hit_in_site_probabilities(pandda_events, ranking, sites, event_score_quantiles)
 
     # Output the event and site tables
-    output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabilities, fs, existing_events, existing_sites)
+    output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabilities, fs, existing_events, existing_sites, args.debug)
     time_pandda_finish = time.time()
     # TODO: Log properly
     print(f"PanDDA ran in: {round(time_pandda_finish - time_pandda_begin, 2)} seconds!")
