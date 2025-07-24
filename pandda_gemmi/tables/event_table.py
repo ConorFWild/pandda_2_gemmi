@@ -91,6 +91,9 @@ class EventTable:
         for record in self.records:
             event_dict = dataclasses.asdict(record)
             event_dict["1-BDC"] = round(1 - event_dict["bdc"], 2)
+            event_dict["x"] = round(event_dict['x'], 3)
+            event_dict["y"] = round(event_dict['y'], 3)
+            event_dict["z"] = round(event_dict['z'], 3)
             records.append(event_dict)
         table = pd.DataFrame(records)
         table.to_csv(str(path))
@@ -227,16 +230,19 @@ class InspectEventTable:
             for _site_id, site in sites.items():
                 if event_id in site.event_ids:
                     site_id = _site_id
-            event_record = EventTableRecord.from_event(datasets[event_id[0]], event_id, events[event_id], site_id, hit_in_site_probabilities[event_id])
+            event_record = InspectEventTableRecord.from_event(datasets[event_id[0]], event_id, events[event_id], site_id, hit_in_site_probabilities[event_id])
             records.append(event_record)
 
-        return EventTable(records)
+        return InspectEventTable(records)
 
     def save(self, path: Path):
         records = []
         for record in self.records:
             event_dict = dataclasses.asdict(record)
             event_dict["1-BDC"] = round(1 - event_dict["bdc"], 2)
+            event_dict["x"] = round(event_dict['x'], 3)
+            event_dict["y"] = round(event_dict['y'], 3)
+            event_dict["z"] = round(event_dict['z'], 3)
             event_dict["Interesting"] = event_dict['interesting']
             event_dict["Ligand Placed"] = event_dict['ligand_placed']
             event_dict["Ligand Confidence"]= event_dict['ligand_confidence']
