@@ -5,7 +5,7 @@ from .event_table import EventTable, InspectEventTable
 
 
 def output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabilities, fs, existing_events,
-                  existing_sites):
+                  existing_sites, debug):
     site_table = SiteTable.from_sites(sites)
     site_table.save(fs.output.analyses_dir / constants.PANDDA_ANALYSE_SITES_FILE)
 
@@ -17,7 +17,11 @@ def output_tables(datasets, pandda_events, ranking, sites, hit_in_site_probabili
         site_table.save(fs.output.analyses_dir / constants.PANDDA_INSPECT_SITES_PATH)
 
         for _event_id, _row in existing_events.items():
+            if debug:
+                print(f'Checkign: {_event_id}')
             if _event_id in pandda_events:
+                if debug:
+                    print(f'\tUpdating: {_event_id}')
                 pandda_events[_event_id].interesting = _row['Interesting']
                 pandda_events[_event_id].ligand_placed = _row['Ligand Placed']
                 pandda_events[_event_id].ligand_confidence = _row['Ligand Confidence']
