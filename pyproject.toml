@@ -29,7 +29,7 @@ dependencies = [
     "gdown",
     "torch==1.13.1",
     "pytorch-lightning",
-    'scikit-image'
+    'scikit-image',
     'gemmi'
 #    "gemmi@git+https://github.com/ConorFWild/gemmi.git#egg=flexible_interpolation"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
