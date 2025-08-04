@@ -3,12 +3,12 @@ import shutil
 import time
 import inspect
 
-try:
-    from sklearnex import patch_sklearn
-
-    patch_sklearn()
-except ImportError:
-    print('No sklearn-express available!')
+# try:
+#     from sklearnex import patch_sklearn
+#
+#     patch_sklearn()
+# except ImportError:
+#     print('No sklearn-express available!')
 
 import gdown
 import yaml
